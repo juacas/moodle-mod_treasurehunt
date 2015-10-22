@@ -1,0 +1,18 @@
+.ui-button .ui-button-text {
+    display: inline-block; width:20%;
+}
+/*Si no se me pone un background-image posterior*/
+#map button{
+	background-image: none;
+}
+#controlPanel{margin-left: 12%;}
+#map_global{float:right; width:88%; position: relative;overflow: hidden;padding-bottom: 54%; }
+#map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
+/*Selectable y sortable*/
+div#riddleListPanel{position: relative;float:left; width: 12%; overflow-y:auto;padding-bottom: 54%;}
+ul#riddleList { width: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0;}
+ul#riddleList li {position:relative; padding: 1em; border: 2px solid gray; list-style: none; padding-left: 42px; }
+ul#riddleList li .handle { background: #f8f8f8; position: absolute; left: 0; top: 0; bottom: 0; padding:8px; }
+div.modifyRiddle{position: absolute; right: 0; top: 0; bottom: 0; padding:2px; }
+.ui-selecting { background: #eee; }
+.ui-selected { background: rgba(22,145,190,0.2); }
