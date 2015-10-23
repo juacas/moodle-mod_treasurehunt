@@ -41,3 +41,4 @@ $string['pluginname'] = 'Scavenger Hunt';
 $string['question_scavengerhunt'] = 'This works?';
 $string['hello'] = 'Hello';
 $string['welcome'] = 'Welcome to my module scavenger hunt, I hope you enjoy';
+$string['riddle_editor'] = 'Descripción of riddle';

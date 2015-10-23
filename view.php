@@ -33,17 +33,12 @@ require_once (dirname(__FILE__).'/gisconverter.php');
 require_once ($CFG->libdir.'/formslib.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
-$n  = optional_param('n', 0, PARAM_INT);  // ... scavengerhunt instance ID - it should be named as the first character of the module.
 
 if ($id) {
     $cm         = get_coursemodule_from_id('scavengerhunt', $id, 0, false, MUST_EXIST);
     $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
     $scavengerhunt  = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
-} else if ($n) {
-    $scavengerhunt  = $DB->get_record('scavengerhunt', array('id' => $n), '*', MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $scavengerhunt->course), '*', MUST_EXIST);
-    $cm         = get_coursemodule_from_instance('scavengerhunt', $scavengerhunt->id, $course->id, false, MUST_EXIST);
-} else {
+}  else {
     error('You must specify a course_module ID or an instance ID');
 }
 /*Esto lo utilizo para comprobar las geometrÃƒÂ­as 
