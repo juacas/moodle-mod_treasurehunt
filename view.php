@@ -29,7 +29,6 @@
 
 require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
-require_once (dirname(__FILE__).'/gisconverter.php');
 require_once ($CFG->libdir.'/formslib.php');
 
 $id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
@@ -41,15 +40,7 @@ if ($id) {
 }  else {
     error('You must specify a course_module ID or an instance ID');
 }
-/*Esto lo utilizo para comprobar las geometrÃƒÂ­as 
-$var = $DB->get_record('scavengerhunt', array('id' => 1), 'id,name,astext(geom) as WKT', MUST_EXIST);
-$decoder = new gisconverter\WKT();
-$var2= $decoder->geomFromText($var->wkt);
-$var3= $var2->toGeoJSON();
-print_object($var3);
-print_object($var);
-print_r($DB->get_dbfamily());
-die();*/
+
 require_login($course, true, $cm);
 
 $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
@@ -76,7 +67,7 @@ $PAGE->set_pagelayout('standard');
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');
-$PAGE->requires->js_call_amd('mod_scavengerhunt/init','init');
+$PAGE->requires->js_call_amd('mod_scavengerhunt/init','init',array($id,$cm->instance));
 $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 
 // Output starts here.
@@ -93,6 +84,8 @@ echo $OUTPUT->box(null, null, 'riddleListPanel');
 echo $OUTPUT->container_start(null, 'map_global');
 echo $OUTPUT->box(null, null, 'map');
 echo $OUTPUT->container_end();
+echo $OUTPUT->box(null, null, 'roadListPanel');
+
 
 
 

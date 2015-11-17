@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -24,15 +25,35 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->dirroot/mod/scavengerhunt/lib.php");
+require_once (dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
+       
+
+        //Cargo las clases necesarias de un objeto GeoJSON
+        spl_autoload_register(array('GeoJSON', 'autoload'));
 /*
  * Does something really useful with the passed things
  *
  * @param array $things
  * @return object
- *function scavengerhunt_do_something_useful(array $things) {
+ * function scavengerhunt_do_something_useful(array $things) {
  *    return new stdClass();
- *}
+ * }
  */
+function geojson_to_wkt($text) {
+    $WKT = new WKT();
+    return $WKT->write($text);
+}
+function wkt_to_geojson ($text) {
+    $WKT = new WKT();
+    return $WKT->read($text);
+}
+function geojson_to_object($text){
+    $GeoJSON = new GeoJSON();
+    return $GeoJSON->load($text);
+}
+function object_to_geojson($text){
+    $GeoJSON = new GeoJSON();
+    return $GeoJSON->dump($text);
+}

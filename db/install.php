@@ -40,6 +40,7 @@ function xmldb_scavengerhunt_install() {
     {
         //switch($DB->get_dbfamily() o get_dbvendor()) ... Y pongo según la base de datos que sea
         //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
+        //Method on moodle/lib/dml/database_native_moodle_database
         $DB->change_database_structure('ALTER TABLE mdl_scavengerhunt_riddle ADD geom MULTIPOLYGON NOT NULL');
         //Create points
         $DB->change_database_structure('ALTER TABLE mdl_current_scavengerhunt ADD locations POINT NOT NULL');
