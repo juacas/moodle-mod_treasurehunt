@@ -47,7 +47,7 @@ function install_geometry_columns() {
     }
 
     $dbman = $DB->get_manager();
-    $table1 = new xmldb_table('current_scavengerhunt');
+    $table1 = new xmldb_table('scavengerhunt_current');
     $table2 = new xmldb_table('scavengerhunt_riddle');
     //Compruebo si existe la base de datos con la tabla
     if ($dbman->table_exists($table1) && $dbman->table_exists($table2)) {
@@ -66,8 +66,8 @@ function install_geometry_columns() {
                         $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom geometry(MULTIPOLYGON,4326) NOT NULL');
                     }
                     // Create points
-                    if (!$dbman->field_exists('current_scavengerhunt', 'locations')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'current_scavengerhunt ADD locations geometry(POINT,4326) NOT NULL');
+                    if (!$dbman->field_exists('scavengerhunt_current', 'locations')) {
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_current ADD locations geometry(POINT,4326) NOT NULL');
                     }
                 } catch (ddl_change_structure_exception $ex) {
                     set_config('geometrysupport', false, 'mod_scavengerhunt');
@@ -77,9 +77,9 @@ function install_geometry_columns() {
                 break;
             case 'mysql':
                 //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                $DB->change_database_structure('ALTER TABLE mdl_scavengerhunt_riddle ADD geom MULTIPOLYGON NOT NULL');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom MULTIPOLYGON NOT NULL');
                 //Create points
-                $DB->change_database_structure('ALTER TABLE mdl_current_scavengerhunt ADD locations POINT NOT NULL');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_current ADD locations POINT NOT NULL');
                 break;
             default:
                 set_config('geometrysupport', false, 'mod_scavengerhunt');

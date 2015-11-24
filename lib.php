@@ -80,9 +80,14 @@ function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_m
     $scavengerhunt->timecreated = time();
 
     // You may have to add extra stuff in here.
-
+    
     $scavengerhunt->id = $DB->insert_record('scavengerhunt', $scavengerhunt);
-
+    //Insert default road
+    $recordRoad = new stdClass();
+    $recordRoad->name = get_string('default_road', 'scavengerhunt');
+    $recordRoad->scavengerhunt_id = $scavengerhunt->id;
+    $DB->insert_record('scavengerhunt_roads',$recordRoad);
+    
     scavengerhunt_grade_item_update($scavengerhunt);
 
     return $scavengerhunt->id;
@@ -134,6 +139,7 @@ function scavengerhunt_delete_instance($id) {
     // Delete any dependent records here.
 
     $DB->delete_records('scavengerhunt', array('id' => $scavengerhunt->id));
+    $DB->delete_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
 
     scavengerhunt_grade_item_delete($scavengerhunt);
 

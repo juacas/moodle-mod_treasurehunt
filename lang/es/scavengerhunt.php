@@ -42,5 +42,9 @@ $string['question_scavengerhunt'] = '¿Esto funciona?';
 $string['hello'] = 'Hola';
 $string['welcome'] = 'Bienvenido a mi módulo de caza del tesoro, espero que lo disfrutes';
 $string['riddle_editor'] = 'Descripción de la pista';
+$string['default_road'] = 'Camino 1';
+$string['insert_road'] = 'Insertar nuevo camino';
+$string['insert_riddle'] = 'Insertar nueva pista';
+
 
 

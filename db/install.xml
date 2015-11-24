@@ -58,7 +58,7 @@
         <INDEX NAME="num_riddle" UNIQUE="false" FIELDS="num_riddle"/>
       </INDEXES>
     </TABLE>
-    <TABLE NAME="current_scavengerhunt" COMMENT="This table saves information on each attempt by a user to solve a riddle.">
+    <TABLE NAME="scavengerhunt_current" COMMENT="This table saves information on each attempt by a user to solve a riddle.">
       <FIELDS>
         <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
         <FIELD NAME="road_id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Identifying the road created"/>

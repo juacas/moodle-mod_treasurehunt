@@ -1,6 +1,6 @@
 // OpenLayers 3. See http://openlayers.org/
 // License: https://raw.githubusercontent.com/openlayers/ol3/master/LICENSE.md
-// Version: v3.11.1
+// Version: v3.11.2
 
 (function (root, factory) {
   if (typeof exports === "object") {
@@ -51675,7 +51675,7 @@ ol.style.IconImage_ = function(image, src, size, crossOrigin, imageState) {
    */
   this.image_ = !image ? new Image() : image;
 
-  if (crossOrigin) {
+  if (crossOrigin !== null) {
     this.image_.crossOrigin = crossOrigin;
   }
 
@@ -107954,7 +107954,7 @@ ol.Image = function(extent, resolution, pixelRatio, attributions, src,
    * @type {Image}
    */
   this.image_ = new Image();
-  if (crossOrigin) {
+  if (crossOrigin !== null) {
     this.image_.crossOrigin = crossOrigin;
   }
 
@@ -108131,7 +108131,7 @@ ol.ImageTile = function(tileCoord, state, src, crossOrigin, tileLoadFunction) {
    * @type {Image}
    */
   this.image_ = new Image();
-  if (crossOrigin) {
+  if (crossOrigin !== null) {
     this.image_.crossOrigin = crossOrigin;
   }
 
@@ -112898,7 +112898,7 @@ ol.interaction.Select.handleEvent = function(mapBrowserEvent) {
          * @param {ol.layer.Layer} layer Layer.
          */
         function(feature, layer) {
-          if (layer && this.filter_(feature, layer)) {
+          if (!layer || this.filter_(feature, layer)) {
             selected.push(feature);
             this.addFeatureLayerAssociation_(feature, layer);
             return !this.multi_;
@@ -117949,7 +117949,7 @@ ol.source.TileArcGISRest.prototype.getRequestUrl_ =
         pixelRatio, projection, params) {
 
   var urls = this.urls;
-  if (urls.length === 0) {
+  if (!urls) {
     return undefined;
   }
 
@@ -118889,7 +118889,7 @@ ol.source.TileWMS.prototype.getRequestUrl_ =
         pixelRatio, projection, params) {
 
   var urls = this.urls;
-  if (urls.length === 0) {
+  if (!urls) {
     return undefined;
   }
 
@@ -118975,9 +118975,11 @@ ol.source.TileWMS.prototype.resetCoordKeyPrefix_ = function() {
   var i = 0;
   var res = [];
 
-  var j, jj;
-  for (j = 0, jj = this.urls.length; j < jj; ++j) {
-    res[i++] = this.urls[j];
+  if (this.urls) {
+    var j, jj;
+    for (j = 0, jj = this.urls.length; j < jj; ++j) {
+      res[i++] = this.urls[j];
+    }
   }
 
   var key;
