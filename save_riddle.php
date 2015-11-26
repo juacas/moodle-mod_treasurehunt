@@ -31,14 +31,9 @@ if (!empty($id)) {
     $url->param('id', $id);
 }
 $PAGE->set_url($url);
-
 $returnurl = 'view.php?id=' . $cm->id;
 
-//Cargo las clases necesarias de un objeto GeoJSON
-spl_autoload_register(array('GeoJSON', 'autoload'));
-
 if ($id) { // if entry is specified
- 
     $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
     $parms = array('id'=>$id);
     if (!$entry = $DB->get_record_sql($sql, $parms)) {
@@ -50,8 +45,7 @@ if (!$newFeature && !$id) {
     //Compruebo que existe el json
     $json = required_param('json', PARAM_RAW);
     //Lo convierto a un objeto php
-    $geojson = new GeoJSON();
-    $features = $geojson->load($json);
+    $features = geojson_to_object($json);
     //Recorro las features
     while ($current = $features->current()) {
         if ($current->getProperty('idRiddle') === -1) {
@@ -60,8 +54,7 @@ if (!$newFeature && !$id) {
             $entry->cmid = $cmid;
             $entry->geom = geojson_to_wkt($geojson->dump($current));
             $entry->num_riddle = $current->getProperty('numRiddle');
-            $entry->road_id = 1;
-            //$entry->road_id = $current->getProperty('idRoad'); 
+            $entry->road_id = $current->getProperty('idRoad'); 
             $entry->newFeature = 1;
             $newFeature = 1;
         } else {
@@ -126,59 +119,5 @@ if ($newFeature || $id) {
     //Se acabó
 }
 
-function insertFeatureBD(stdClass $entry) {
-    GLOBAL $DB;
-    $timenow = time();
-    $idRiddle = $entry->id;
-    $name = $entry->name;
-    $road_id = $entry->road_id;
-    $num_riddle = $entry->num_riddle;
-    $description = $entry->description;
-    $descriptionformat = $entry->descriptionformat;
-    $descriptiontrust = $entry->descriptiontrust;
-    $timecreated = $timenow;
-    $timemodified = $timenow;
-    $question_id = $entry->question_id;
-    $geometryWKT = $entry->geom;
-    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
-            . 'timecreated, timemodified, question_id, geom) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),GeomFromText((?)))';
-    $parms = array($idRiddle, $name, $road_id, $num_riddle, $description,
-        $descriptionformat, $descriptiontrust, $timecreated, $timemodified, $question_id, $geometryWKT);
-    $id = $DB->execute($sql,$parms);
-    //Como no tengo nada para saber el id, tengo que hacer otra consulta
-    $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
-            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
-    $parms = array($name, $road_id, $num_riddle, $description, $descriptionformat,
-        $descriptiontrust, $timecreated, $timemodified);
-    //Como nos devuelve un objeto lo convierto en una variable
-    $result = $DB->get_record_sql($sql, $parms);
-    $id = $result->id;
-    return $id;
-}
 
-function updateEntryBD(stdClass $entry) {
-    GLOBAL $DB;
-    $name = $entry->name;
-    $description = $entry->description;
-    $descriptionformat = $entry->descriptionformat;
-    $descriptiontrust = $entry->descriptiontrust;
-    $timemodified = time();
-    $question_id = $entry->question_id;
-    $idRiddle = $entry->id;
-    $sql = 'UPDATE mdl_scavengerhunt_riddle SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),question_id=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
-    $parms = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $question_id, $idRiddle);
-    $DB->execute($sql, $parms);
-}
-
-function updateFeatureBD(Feature $feature) {
-    GLOBAL $DB;
-    $geojson = new GeoJSON();
-    $numRiddle = $feature->getProperty('numRiddle');
-    $geometryWKT = geojson_to_wkt($geojson->dump($feature));
-    $timemodified = time();
-    $idRiddle = $feature->getProperty('idRiddle');
-    $sql = 'UPDATE mdl_scavengerhunt_riddle SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
-    $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
-    $DB->execute($sql, $parms);
-}
 

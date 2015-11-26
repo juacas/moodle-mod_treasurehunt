@@ -129,7 +129,7 @@ class mod_scavengerhunt_external_savestage extends external_api {
             array_push($featureArray, $feature);
         }
         //Recojo todos los caminos
-        $roads_sql = 'SELECT id, name FROM mdl_scavengerhunt_roads AS roads where scavengerhunt_id = ?';
+        $roads_sql = 'SELECT id, name FROM mdl_scavengerhunt_roads AS roads where scavengerhunt_id = ? ORDER BY id DESC';
         $roads_result = $DB->get_records_sql($roads_sql, $params);
         $featureCollection = new FeatureCollection($featureArray);
         $geojson = object_to_geojson($featureCollection);

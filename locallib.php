@@ -57,3 +57,64 @@ function object_to_geojson($text){
     $GeoJSON = new GeoJSON();
     return $GeoJSON->dump($text);
 }
+
+
+function insertFeatureBD(stdClass $entry) {
+    GLOBAL $DB;
+    $timenow = time();
+    $idRiddle = $entry->id;
+    $name = $entry->name;
+    $road_id = $entry->road_id;
+    $num_riddle = $entry->num_riddle;
+    $description = $entry->description;
+    $descriptionformat = $entry->descriptionformat;
+    $descriptiontrust = $entry->descriptiontrust;
+    $timecreated = $timenow;
+    $timemodified = $timenow;
+    $question_id = $entry->question_id;
+    $geometryWKT = $entry->geom;
+    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
+            . 'timecreated, timemodified, question_id, geom) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),GeomFromText((?)))';
+    $parms = array($idRiddle, $name, $road_id, $num_riddle, $description,
+        $descriptionformat, $descriptiontrust, $timecreated, $timemodified, $question_id, $geometryWKT);
+    $id = $DB->execute($sql,$parms);
+    //Como no tengo nada para saber el id, tengo que hacer otra consulta
+    $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
+            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
+    $parms = array($name, $road_id, $num_riddle, $description, $descriptionformat,
+        $descriptiontrust, $timecreated, $timemodified);
+    //Como nos devuelve un objeto lo convierto en una variable
+    $result = $DB->get_record_sql($sql, $parms);
+    $id = $result->id;
+    return $id;
+}
+
+function updateEntryBD(stdClass $entry) {
+    GLOBAL $DB;
+    $name = $entry->name;
+    $description = $entry->description;
+    $descriptionformat = $entry->descriptionformat;
+    $descriptiontrust = $entry->descriptiontrust;
+    $timemodified = time();
+    $question_id = $entry->question_id;
+    $idRiddle = $entry->id;
+    $sql = 'UPDATE mdl_scavengerhunt_riddle SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),question_id=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
+    $parms = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $question_id, $idRiddle);
+    $DB->execute($sql, $parms);
+}
+
+function updateFeatureBD(Feature $feature) {
+    GLOBAL $DB;
+    $geojson = new GeoJSON();
+    $numRiddle = $feature->getProperty('numRiddle');
+    $geometryWKT = geojson_to_wkt($geojson->dump($feature));
+    $timemodified = time();
+    $idRiddle = $feature->getProperty('idRiddle');
+    $sql = 'UPDATE mdl_scavengerhunt_riddle SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
+    $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
+    $DB->execute($sql, $parms);
+}
+
+function deleteEntryBD(){
+    
+}

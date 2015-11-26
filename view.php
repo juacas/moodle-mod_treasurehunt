@@ -80,7 +80,9 @@ if ($scavengerhunt->intro) {
 echo $OUTPUT->heading('Nada');
 //echo $OUTPUT->render_from_template('mod_scavengerhunt/recipe',null);
 echo $OUTPUT->box(null, null, 'controlPanel');
+echo $OUTPUT->container_start(null, 'riddleListPanel_global');
 echo $OUTPUT->box(null, null, 'riddleListPanel');
+echo $OUTPUT->container_end();
 echo $OUTPUT->container_start(null, 'map_global');
 echo $OUTPUT->box(null, null, 'map');
 echo $OUTPUT->container_end();
