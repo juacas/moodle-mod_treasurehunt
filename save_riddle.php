@@ -48,11 +48,11 @@ if (!$newFeature && !$id) {
     $features = geojson_to_object($json);
     //Recorro las features
     while ($current = $features->current()) {
-        if ($current->getProperty('idRiddle') === -1) {
+        if ($current->getId() === -1) {
             $entry = new stdClass();
             $entry->id = null;
             $entry->cmid = $cmid;
-            $entry->geom = geojson_to_wkt($geojson->dump($current));
+            $entry->geom = geojson_to_wkt($current->getGeometry());
             $entry->num_riddle = $current->getProperty('numRiddle');
             $entry->road_id = $current->getProperty('idRoad'); 
             $entry->newFeature = 1;

@@ -28,10 +28,10 @@
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->dirroot/mod/scavengerhunt/lib.php");
 require_once (dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
-       
 
-        //Cargo las clases necesarias de un objeto GeoJSON
-        spl_autoload_register(array('GeoJSON', 'autoload'));
+
+//Cargo las clases necesarias de un objeto GeoJSON
+spl_autoload_register(array('GeoJSON', 'autoload'));
 /*
  * Does something really useful with the passed things
  *
@@ -41,23 +41,26 @@ require_once (dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
  *    return new stdClass();
  * }
  */
+
 function geojson_to_wkt($text) {
     $WKT = new WKT();
     return $WKT->write($text);
 }
-function wkt_to_geojson ($text) {
+
+function wkt_to_geojson($text) {
     $WKT = new WKT();
     return $WKT->read($text);
 }
-function geojson_to_object($text){
+
+function geojson_to_object($text) {
     $GeoJSON = new GeoJSON();
     return $GeoJSON->load($text);
 }
-function object_to_geojson($text){
+
+function object_to_geojson($text) {
     $GeoJSON = new GeoJSON();
     return $GeoJSON->dump($text);
 }
-
 
 function insertFeatureBD(stdClass $entry) {
     GLOBAL $DB;
@@ -69,20 +72,18 @@ function insertFeatureBD(stdClass $entry) {
     $description = $entry->description;
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
-    $timecreated = $timenow;
-    $timemodified = $timenow;
     $question_id = $entry->question_id;
     $geometryWKT = $entry->geom;
     $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
             . 'timecreated, timemodified, question_id, geom) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),GeomFromText((?)))';
     $parms = array($idRiddle, $name, $road_id, $num_riddle, $description,
-        $descriptionformat, $descriptiontrust, $timecreated, $timemodified, $question_id, $geometryWKT);
-    $id = $DB->execute($sql,$parms);
+        $descriptionformat, $descriptiontrust, $timenow, $timenow, $question_id, $geometryWKT);
+    $DB->execute($sql, $parms);
     //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
             . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
     $parms = array($name, $road_id, $num_riddle, $description, $descriptionformat,
-        $descriptiontrust, $timecreated, $timemodified);
+        $descriptiontrust, $timenow, $timenow);
     //Como nos devuelve un objeto lo convierto en una variable
     $result = $DB->get_record_sql($sql, $parms);
     $id = $result->id;
@@ -107,14 +108,30 @@ function updateFeatureBD(Feature $feature) {
     GLOBAL $DB;
     $geojson = new GeoJSON();
     $numRiddle = $feature->getProperty('numRiddle');
-    $geometryWKT = geojson_to_wkt($geojson->dump($feature));
+    $geometryWKT = geojson_to_wkt($feature->getGeometry());
     $timemodified = time();
-    $idRiddle = $feature->getProperty('idRiddle');
+    $idRiddle = $feature->getId();
     $sql = 'UPDATE mdl_scavengerhunt_riddle SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
 }
 
-function deleteEntryBD(){
+function deleteEntryBD() {
     
+}
+
+function insertRoadBD(stdClass $entry) {
+    GLOBAL $DB;
+    $timenow = time();
+    $entry->timecreated = $timenow;
+    $entry->timemodified = $timenow;
+    $id = $DB->insert_record('scavengerhunt_roads', $entry);
+    return $id;
+}
+
+function updateRoadBD(stdClass $entry) {
+    GLOBAL $DB;
+    $timenow = time();
+    $entry->timemodified = $timenow;
+    $DB->update_record('scavengerhunt_roads', $entry, $bulk=false);
 }
