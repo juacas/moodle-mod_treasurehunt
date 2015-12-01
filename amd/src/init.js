@@ -40,11 +40,14 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             }, {
                 key: 'insert_road',
                 component: 'scavengerhunt'
+            }, {
+                key: 'empty_ridle',
+                component: 'scavengerhunt'
             }];
             str.get_strings(ajaxStrings).done(function(data) {
                 /** Global var ***************************************************************
                  */
-                var stage = new Object(); // new array
+                var stage;
                 var dirtyStage = new ol.source.Vector({
                     projection: 'EPSG:3857'
                 });
@@ -56,9 +59,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var idRoad = -1;
                 var idRiddle = -1;
                 var selectedFeatures;
+                var selectedRiddleFeatures = new Object();
                 var idNewFeature = 1;
                 var Strings = getKeyValue(ajaxStrings, data);
-                /**Initialize stage******************************************************
+
+
+                /**Initialize stage and selectedRiddleFeatures******************************************************
                  */
                 stage = {
                     "roads": {
@@ -68,6 +74,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
                     }
                 };
+
 
                 function getKeyValue(key, value) {
                     var object = new Object();
@@ -80,7 +87,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                  */
                 $('<span id="edition"/>').appendTo($("#controlPanel"));
                 $('<input type="radio" name="controlPanel" id="radio1" value="add" checked>').appendTo($("#edition"));
-                $("<label>").attr('for', "radio1").text('AÃ±adir').appendTo($("#edition"));
+                $("<label>").attr('for', "radio1").text('AÃƒÂ±adir').appendTo($("#edition"));
                 $('<input type="radio" name="controlPanel" id="radio2" value="modify">').appendTo($("#edition"));
                 $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
                 $('<button id="removeFeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlPanel"));
@@ -121,7 +128,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     revert: true,
                     cursor: "move",
                     axis: 'y',
-
                     start: function(event, ui) {
                         var start_pos = ui.item.index();
                         ui.item.data('start_pos', start_pos);
@@ -153,7 +159,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     if ($($item).hasClass("ui-selected")) {
                         numRiddle = newVal;
                     }
-                    relocateNumRiddle(parseInt($($item).attr('idRiddle')), newVal, dirtyStage, originalStage, vector);
+                    relocateNumRiddle(parseInt($($item).attr('idRiddle')), newVal, parseInt($($item).attr('idRoad')), dirtyStage, originalStage, vector);
                 }
 
                 //Creo el roadListPanel
@@ -224,7 +230,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             width: 3.5
                         })
                     }),
-                    zIndex: 9999
+                    zIndex: 'Infinity'
                 });
                 var vectorDraw = new ol.layer.Vector({
                     source: new ol.source.Vector({
@@ -288,9 +294,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         //Activo el boton de guardar segun se haya modificado algo o no
                         this.modify.on('modifyend', function(e) {
                             $('#saveRiddle').button("option", "disabled", false);
-                            e.features.setProperties({
-                                'dirty': true
-                            });
                             debugger;
                             modifyFeatureToDirtySource(e.features, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                             dirty = true;
@@ -332,7 +335,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     width: 2
                                 })
                             }),
-                            zIndex: 9999
+                            zIndex: 'Infinity'
                         })
                     }),
                     setEvents: function() {
@@ -343,9 +346,9 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             e.feature.setProperties({
                                 'idRoad': idRoad,
                                 'idRiddle': idRiddle,
-                                'numRiddle': numRiddle,
-                                'selected': true
+                                'numRiddle': numRiddle
                             });
+                            selectedRiddleFeatures[idNewFeature] = true;
                             e.feature.setId(idNewFeature);
                             idNewFeature++;
                             //Agrego la nueva feature a su correspondiente vector de poligonos
@@ -403,9 +406,15 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var feature = dirtySource.getFeatureById(idRiddle);
                     if (feature) {
                         feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
-                        feature.setProperties({
-                            'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
-                        });
+                        if (feature.get('idFeaturesPolygons') === 'empty') {
+                            feature.setProperties({
+                                'idFeaturesPolygons': dirtyFeature.getId()
+                            });
+                        } else {
+                            feature.setProperties({
+                                'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
+                            });
+                        }
                     } else {
                         if (idRiddle !== -1) {
                             feature = originalSource.getFeatureById(idRiddle).clone();
@@ -420,7 +429,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                 'idRoad': dirtyFeature.get('idRoad'),
                                 'numRiddle': dirtyFeature.get('numRiddle')
                             });
-                            //Si ya he instartado un -1 no deberÃ­a dejar insertar mÃ¡s en otros caminos
+                            //Si ya he instartado un -1 no deberia dejar insertar mas en otros caminos
                         }
                         feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
                         feature.setId(idRiddle);
@@ -482,16 +491,16 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                 'idFeaturesPolygons': idFeaturesPolygons.join()
                             });
                         } else {
-                            dirtySource.removeFeature(feature);
+                            feature.setProperties({
+                                'idFeaturesPolygons': 'empty'
+                            });
                         }
 
                     });
                 }
 
                 function styleFunction(feature) {
-
                     // get the incomeLevel from the feature properties
-                    var selected = feature.get('selected');
                     var numRiddle = feature.get('numRiddle');
                     if (!isNaN(numRiddle)) {
                         selectedRiddleStyle.getText().setText('' + numRiddle);
@@ -499,7 +508,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     }
                     // if there is no level or its one we don't recognize,
                     // return the default style (in an array!)
-                    if (selected) {
+                    if (selectedRiddleFeatures[feature.getId()]) {
                         return [selectedRiddleStyle];
                     }
                     // check the cache and create a new style for the income
@@ -536,6 +545,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     source: new ol.source.Vector({
                                         projection: 'EPSG:3857'
                                     }),
+                                    updateWhileAnimating: true,
                                     style: styleFunction
                                 });
                                 stage["roads"][road].vector = vector;
@@ -585,12 +595,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         //Selecciono el primer camino y recojo el numRiddle 
                         for (var road in stage["roads"]) {
                             if (stage["roads"].hasOwnProperty(road)) {
-                                selectRoad(idRoad, stage["roads"][road].vector, map, selectedFeatures);
+                                idRoad = road;
+                                selectRoad(road, stage["roads"][road].vector, map, selectedFeatures);
                                 break;
                             }
                         }
                         /*selectRoad(stage[1].id, vector);
-                    idRoad = stage[1].id;*/
+                         idRoad = stage[1].id;*/
 
                     }).fail(function(ex) {
                         console.log(ex);
@@ -623,7 +634,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 function makeRoadLisPanel(idRoad, name) {
                     //Si no existe lo agrego
                     if ($('#roadList li[idRoad="' + idRoad + '"]').length < 1) {
-                        $('<li idRoad="' + idRoad + '"/>').text(name).appendTo($("#roadList")).addClass("ui-corner-all");
+                        $('<li idRoad="' + idRoad + '"/>').text(name).appendTo($("#roadList")).addClass("ui-corner-all").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");;
                     }
                 }
                 //Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no
@@ -638,7 +649,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 function deactivateEdition() {
                     var radioButton = $("#edition").find("input:radio");
-                    radioButton.attr('checked',false).button("refresh");
+                    radioButton.attr('checked', false).button("refresh");
                     radioButton.button("option", "disabled", true);
                     Draw.setActive(false);
                     Modify.setActive(false);
@@ -668,6 +679,14 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
 
                 function selectRoad(idRoad, vectorOfPolygons, map, selectedFeatures) {
+
+                    //Limpio todas las features seleccionadas,oculto todos los li y solo muestro los que tengan el idRoad 
+                    //selectRiddleFeatures(vectorOfPolygons, null, selectedFeatures);
+                    $("#riddleList li").removeClass("ui-selected").hide();
+                    $("#riddleList li[idRoad='" + idRoad + "']").show();
+                    //Si no esta marcado el li road lo marco
+                    $("#roadList li[idRoad='" + idRoad + "']").addClass("ui-selected");
+                    //Dejo visible solo el vector con el idRoad
                     map.getLayers().forEach(function(layer) {
                         if (layer instanceof ol.layer.Vector) {
                             layer.setVisible(false);
@@ -677,42 +696,39 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     if (vectorOfPolygons.getSource().getFeatures().length > 0) {
                         flyTo(map, vectorOfPolygons);
                     }
-                    //Limpio todas las features seleccionadas
-                    selectedFeatures.clear();
-                    //Oculto todos y solo muestro los que tengan el idRoad
-                    $("#riddleList li").hide();
-                    $("#riddleList li[idRoad='" + idRoad + "']").show();
                 }
 
                 //Revisar funcion por si se puede mejorar, tipo coger los ids de originalStage o dirtyStage y marcarlos como selected
-                function selectRiddleFeatures(vectorOfPolygons, selected, selectedFeatures) {
+                function selectRiddleFeatures(vectorOfPolygons, selected, selectedFeatures, dirtySource, originalSource) {
                     var vectorSelected = new ol.layer.Vector({
                         source: new ol.source.Vector({
                             projection: 'EPSG:3857'
                         })
                     });
-                    //Selecciono las features de la pista seleccionada
-                    vectorOfPolygons.getSource().forEachFeature(function(feature) {
-                        var idRiddle = feature.get('idRiddle');
-                        if (idRiddle === selected) {
-                            feature.setProperties({
-                                'selected': true
-                            });
-                            vectorSelected.getSource().addFeature(feature);
-                        } else {
-                            feature.setProperties({
-                                'selected': false
-                            });
+                    selectedRiddleFeatures = new Object();
+                    var feature = dirtySource.getFeatureById(selected);
+                    if (!feature) {
+                        feature = originalSource.getFeatureById(selected);
+                        if (!feature) {
+                            return;
                         }
-                    });
+                    } else {
+                        if (feature.get('idFeaturesPolygons') === 'empty') {
+                            return;
+                        }
+                    }
+                    //Agrego a mi objecto que almacena los poligonos seleccionados y tambien agrego al vector al que se le aplica la animacion
+                    var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
+                    for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
+                        vectorSelected.getSource().addFeature(vectorOfPolygons.getSource().getFeatureById(idFeaturesPolygons[i]).clone());
+                        selectedRiddleFeatures[idFeaturesPolygons[i]] = true;
+                    }
                     //Deselecciono cualquier feature anterior
                     selectedFeatures.clear();
                     //Coloco el mapa en la posicion de las pistas seleccionadas si la pista contiene alguna feature y 
                     //postergando el tiempo para que seleccione la nueva feature.
                     if (vectorSelected.getSource().getFeatures().length) {
-                        setTimeout(function() {
                             flyTo(map, vectorSelected);
-                        }, 10);
                     }
                 }
 
@@ -741,7 +757,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                 'dirty': true
                             });
                         }
-                        //AÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â±ado el polÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â­gono clonado y cambiado de projecciÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â³n
                         mpoly.appendPolygon(feature.getGeometry());
                     });
 
@@ -758,25 +773,34 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     return features;
                 }
 
-                function relocateNumRiddle(idRiddle, numRiddle, dirtySource, originalSource, vector) {
+                function relocateNumRiddle(idRiddle, numRiddle, idRoad, dirtySource, originalSource, vector) {
                     var feature = dirtySource.getFeatureById(idRiddle);
                     var idFeaturesPolygons;
                     if (!feature) {
-                        if (idRiddle == -1) {
-                            return;
+                        //Si he movido una nueva pista vacía la creo y la dejo como vacía
+                        if (idRiddle === -1) {
+                            feature = new ol.Feature(new ol.geom.MultiPolygon(new Array()));
+                            feature.setProperties({
+                                'idFeaturesPolygons': 'empty',
+                                'idRoad': idRoad
+                            });
+                        } else {
+                            feature = originalSource.getFeatureById(idRiddle).clone();
                         }
-                        feature = originalSource.getFeatureById(idRiddle).clone();
                         feature.setId(idRiddle);
                         dirtySource.addFeature(feature);
                     }
                     feature.setProperties({
                         'numRiddle': numRiddle
                     });
-                    idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
-                    for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
-                        vector.getSource().getFeatureById(idFeaturesPolygons[i]).setProperties({
-                            'numRiddle': numRiddle
-                        });;
+                    if (feature.get('idFeaturesPolygons') !== 'empty') {
+                        idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
+                        for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
+                            vector.getSource().getFeatureById(idFeaturesPolygons[i]).setProperties({
+                                'numRiddle': numRiddle
+                            });
+
+                        }
                     }
                 }
 
@@ -787,7 +811,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
 
                 $("#removeFeature").on('click', function() {
-                    notification.confirm('Â¿Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
+                    notification.confirm('Ã‚Â¿Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
                         removeFeatureToDirtySource(selectedFeatures, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                         removeFeatures(selectedFeatures, stage["roads"][idRoad].vector);
                     });
@@ -797,6 +821,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     dirty = true;
                 });
                 $("#saveRiddle").on('click', function() {
+                    debugger;
                     var result = $("#select_result").empty();
                     var geoJSON = new ol.format.GeoJSON();
                     var mygeoJSON = geoJSON.writeFeatures(dirtyStage.getFeatures(), {
@@ -813,13 +838,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         $("#myform").submit();
                     } //Si no existe envio un json con un ajax para actualizar los datos.
                     else {
-
+                        //Funcion que comprueba si en el orden está incrustada Insert new riddle
                     }
 
                 });
                 $("#riddleList").on('click', '.ui-icon-trash', function() {
                     debugger;
-                    notification.confirm('ÃƒÆ’Ã†â€™ÃƒÂ¢Ã¢â€šÂ¬Ã…Â¡ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿EstÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s seguro?', 'Si la eliminas ya no podrÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡s recuperarla', 'Confirmar', 'Cancelar', function() {
+                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
                         removeFeatures(selectedFeatures, stage["roads"][idRoad].vector);
                     });
                 });
@@ -828,7 +853,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var idRiddle = $(this).parents('li').attr('idRiddle');
                     debugger;
                     if (dirty) {
-                        notification.confirm('ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¿Desea continuar?', 'Hay cambios sin guardar, si continua se perderÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡n', 'Confirmar', 'Cancelar', function(idRiddle) {
+                        notification.confirm('Desea continuar?', 'Hay cambios sin guardar, si continua se perderan', 'Confirmar', 'Cancelar', function(idRiddle) {
                             debugger;
                             editFormEntry(idRiddle);
 
@@ -863,12 +888,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     idRiddle = parseInt($(this).attr('idriddle'));
                     result.append(" #" + idRiddle);
                     //Borro la anterior seleccion de features y busco las del mismo tipo
-                    selectRiddleFeatures(stage["roads"][idRoad].vector, idRiddle, selectedFeatures);
+                    selectRiddleFeatures(stage["roads"][idRoad].vector, idRiddle, selectedFeatures, dirtyStage, originalStage);
                     activateEdition();
                 });
 
 
                 $("#roadList").on('click', 'li', function(e) {
+                    debugger;
                     if ($(e.target).is('.handle , .ui-icon')) {
                         e.preventDefault();
                         return;
@@ -876,6 +902,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
                     //Selecciono el idRiddle de mi atributo custom
                     var result = $("#select_result").empty();
+                    selectedRiddleFeatures = new Object();
+                    //Si estoy dentro del camino no desativo la edición
                     if (idRoad === $(this).attr('idRoad')) {
                         selectRoad(idRoad, stage["roads"][idRoad].vector, map, selectedFeatures);
                     } else {
@@ -885,8 +913,22 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     }
                     result.append(" #" + idRoad);
                 });
-
-
+                //Utilizada para guardar el valor original del nombre del camino
+                var oriVal;
+                var cache;
+                $("#roadList").on('click', '.ui-icon-pencil', function() {
+                    debugger;
+                    var $li = $(this).parents("li");
+                    oriVal = $li.text();
+                    cache = $li.children();
+                    $li.text("");
+                    $("<input type='text'>").val(oriVal).appendTo($li).focus();
+                });
+                $("#roadList").on('focusout', 'li > input', function() {
+                    var $this = $(this);
+                    $this.parent().text($this.val() || oriVal).append(cache);
+                    $this.remove();
+                });
             }).fail(function(e) {
                 console.log(e);
             });

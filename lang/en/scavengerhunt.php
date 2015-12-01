@@ -45,3 +45,4 @@ $string['riddle_editor'] = 'Description of riddle';
 $string['default_road'] = 'Road 1';
 $string['insert_road'] = 'Insert new road';
 $string['insert_riddle'] = 'Insert new riddle';
+$string['empty_ridle'] = 'There are empty riddles, if you continue they be removed and the remaining riddles relocate in order';
