@@ -62,7 +62,7 @@ function object_to_geojson($text) {
     return $GeoJSON->dump($text);
 }
 
-function insertFeatureBD(stdClass $entry) {
+function insertRiddleBD(stdClass $entry) {
     GLOBAL $DB;
     $timenow = time();
     $idRiddle = $entry->id;
@@ -89,7 +89,32 @@ function insertFeatureBD(stdClass $entry) {
     $id = $result->id;
     return $id;
 }
-
+function insertEntryBD(stdClass $entry) {
+    GLOBAL $DB;
+    $timenow = time();
+    $idRiddle = $entry->id;
+    $name = $entry->name;
+    $road_id = $entry->road_id;
+    $num_riddle = $entry->num_riddle;
+    $description = $entry->description;
+    $descriptionformat = $entry->descriptionformat;
+    $descriptiontrust = $entry->descriptiontrust;
+    $question_id = $entry->question_id;
+    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
+            . 'timecreated, timemodified, question_id) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?))';
+    $params = array($idRiddle, $name, $road_id, $num_riddle, $description,
+        $descriptionformat, $descriptiontrust, $timenow, $timenow, $question_id);
+    $DB->execute($sql, $params);
+    //Como no tengo nada para saber el id, tengo que hacer otra consulta
+    $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
+            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
+    $params = array($name, $road_id, $num_riddle, $description, $descriptionformat,
+        $descriptiontrust, $timenow, $timenow);
+    //Como nos devuelve un objeto lo convierto en una variable
+    $result = $DB->get_record_sql($sql, $params);
+    $id = $result->id;
+    return $id;
+}
 function updateEntryBD(stdClass $entry) {
     GLOBAL $DB;
     $name = $entry->name;
@@ -104,7 +129,7 @@ function updateEntryBD(stdClass $entry) {
     $DB->execute($sql, $parms);
 }
 
-function updateFeatureBD(Feature $feature) {
+function updateRiddleBD(Feature $feature) {
     GLOBAL $DB;
     $numRiddle = $feature->getProperty('numRiddle');
     $geometryWKT = geojson_to_wkt($feature->getGeometry());

@@ -95,7 +95,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 $('<button id="saveRiddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlPanel"));
                 $('<button id="addRiddle"/>').text('Riddle').prependTo($("#controlPanel"));
                 $("#radio1").button({
-                   text: false,
+                    text: false,
                     icons: {
                         primary: "ui-icon-plusthick"
                     }
@@ -129,7 +129,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 $('<span/>').text('Has seleccionado').appendTo($("#controlPanel"));
                 $('<span id="select_result"/>').text(' nada').appendTo($("#controlPanel"));
                 $('<ul id="riddleList"/>').appendTo($("#riddleListPanel"));
-            
+
                 //Lo cargo como un sortable
                 $("#riddleList").sortable({
                     handle: ".handle",
@@ -154,12 +154,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             for (var i = start_pos; i <= end_pos; i++) {
                                 relocateRiddleList($listitems, $listlength, i, dirtyStage, originalStage, stage["roads"][idRoad].vector);
                             }
-                        } else{
+                        } else {
                             for (var i = end_pos; i <= start_pos; i++) {
                                 relocateRiddleList($listitems, $listlength, i, dirtyStage, originalStage, stage["roads"][idRoad].vector);
                             }
                         }
                         $('#saveRiddle').button("option", "disabled", false);
+                        dirty = true;
                     }
                 });
 
@@ -421,37 +422,24 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var feature = dirtySource.getFeatureById(idRiddle);
                     if (feature) {
                         feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
-                        if (feature.get('idFeaturesPolygons') === 'empty') {
-                            feature.setProperties({
-                                'idFeaturesPolygons': ''+ dirtyFeature.getId()
-                            });
-                        } else {
-                            feature.setProperties({
-                                'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
-                            });
-                        }
                     } else {
-                        if (idRiddle !== -1) {
-                            feature = originalSource.getFeatureById(idRiddle).clone();
-                            feature.setProperties({
-                                'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
-                            });
-                            feature.setId(idRiddle);
-                            //Desactivo la creacion de nuevas pistas en el resto de caminos
-                        } else {
-                            feature = new ol.Feature(new ol.geom.MultiPolygon());
-                            feature.setProperties({
-                                'idFeaturesPolygons': '' + dirtyFeature.getId(),
-                                'idRoad': dirtyFeature.get('idRoad'),
-                                'numRiddle': dirtyFeature.get('numRiddle')
-                            });
-                            //Si ya he instartado un -1 no deberia dejar insertar mas en otros caminos
-                        }
-                        feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
+                        feature = originalSource.getFeatureById(idRiddle).clone();
                         feature.setId(idRiddle);
-                        dirtySource.addFeature(feature);
                     }
+                    if (feature.get('idFeaturesPolygons') === 'empty') {
+                        feature.setProperties({
+                            'idFeaturesPolygons': '' + dirtyFeature.getId()
+                        });
+                    } else {
+                        feature.setProperties({
+                            'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
+                        });
+                    }
+                    feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
+                    feature.setId(idRiddle);
+                    dirtySource.addFeature(feature);
                 }
+
 
                 function modifyFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
@@ -573,10 +561,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
-                        numRiddle = originalStage.getFeatures().length;
-                        originalStage.forEachFeature(function(feature) {
+
+                        originalStage.getFeatures().forEach(function(feature) {
+                            if (feature.getGeometry() === null) {
+                                feature.setGeometry(new ol.geom.MultiPolygon([]));
+                            }
                             var polygons = feature.getGeometry().getPolygons();
-                            var idNewFeatures;
+                            var idNewFeatures = 'empty';
                             var idRiddle = feature.getId();
                             var idRoad = feature.get('idRoad');
                             var numRiddle = feature.get('numRiddle');
@@ -602,13 +593,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             });
                             makeRiddleListPanel(idRiddle, idRoad, numRiddle, name);
                         });
-                        //agrego las pistas iniciales a cada camino con su numRiddle correspondiente
-                        for (var road in stage["roads"]) {
-                            if (stage["roads"].hasOwnProperty(road)) {
-                                makeRiddleListPanel(-1, road, null, Strings.insert_riddle);
-                            }
-                        }
-                        //Selecciono el primer camino y recojo el numRiddle 
+                        //Selecciono el primer camino 
                         for (var road in stage["roads"]) {
                             if (stage["roads"].hasOwnProperty(road)) {
                                 idRoad = road;
@@ -616,8 +601,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                 break;
                             }
                         }
-                        /*selectRoad(stage[1].id, vector);
-                         idRoad = stage[1].id;*/
 
                     }).fail(function(ex) {
                         console.log(ex);
@@ -636,15 +619,9 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
 
                 function makeRiddleListPanel(idRiddle, idRoad, numRiddle, name) {
-
-                    
-                    if (idRiddle !== -1) {
+                    if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
                         $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').text(name).appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");
-                    } else {
-                        numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
-                        $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').text(name).prependTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>");
                     }
-
                 }
 
                 function makeRoadLisPanel(idRoad, name) {
@@ -721,6 +698,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             projection: 'EPSG:3857'
                         })
                     });
+                    debugger;
                     selectedRiddleFeatures = new Object();
                     var feature = dirtySource.getFeatureById(selected);
                     if (!feature) {
@@ -730,12 +708,11 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             vectorOfPolygons.changed();
                             return;
                         }
-                    } else {
-                        if (feature.get('idFeaturesPolygons') === 'empty') {
-                            //Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente
-                            vectorOfPolygons.changed();
-                            return;
-                        }
+                    }
+                    if (feature.get('idFeaturesPolygons') === 'empty') {
+                        //Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente
+                        vectorOfPolygons.changed();
+                        return;
                     }
                     //Agrego a mi objecto que almacena los poligonos seleccionados y tambien agrego al vector al que se le aplica la animacion
                     var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
@@ -757,16 +734,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var feature = dirtySource.getFeatureById(idRiddle);
                     var idFeaturesPolygons;
                     if (!feature) {
-                        //Si he movido una nueva pista vacía la creo y la dejo como vacía
-                        if (idRiddle === -1) {
-                            feature = new ol.Feature(new ol.geom.MultiPolygon(new Array()));
-                            feature.setProperties({
-                                'idFeaturesPolygons': 'empty',
-                                'idRoad': idRoad
-                            });
-                        } else {
-                            feature = originalSource.getFeatureById(idRiddle).clone();
-                        }
+                        feature = originalSource.getFeatureById(idRiddle).clone();
                         feature.setId(idRiddle);
                         dirtySource.addFeature(feature);
                     }
@@ -790,7 +758,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     window.location.href = url;
                 }
 
-                function deleteRiddles(idRiddles) {
+                function deleteRiddles(idRiddles, dirtySource, originalSource, vectorOfPolygons) {
                     var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_deletestage',
                         args: {
@@ -799,13 +767,48 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     }]);
                     json[0].done(function(response) {
                         console.log(response);
+                        idRiddles.forEach(function(value) {
+                            var idRiddle = value.idRiddle;
+                            var idFeaturesPolygons = false;
+                            var polygonFeature;
+                            var feature = dirtySource.getFeatureById(idRiddle);
+                            //Elimino el li
+                            $('#riddleList li[idRiddle="' + idRiddle + '"]').remove();
+                            //Elimino la feature de dirtySource si la tuviese y todos los poligonos del vector de poligonos
+                            if (!feature) {
+                                feature = originalSource.getFeatureById(idRiddle);
+                                if (feature.get('idFeaturesPolygons') !== 'empty') {
+                                    idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
+                                }
+                            } else {
+                                if (feature.get('idFeaturesPolygons') !== 'empty') {
+                                    idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
+                                }
+                                dirtySource.removeFeature(feature);
+                            }
+                            if (idFeaturesPolygons) {
+                                for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
+                                    polygonFeature = vectorOfPolygons.getSource().getFeatureById(idFeaturesPolygons[i]);
+                                    vectorOfPolygons.getSource().removeFeature(polygonFeature);
+                                }
+                            }
+
+                        });
+
+
                     }).fail(function(ex) {
                         console.log(ex);
                     });
                 }
+                $("#addRiddle").on('click', function() {
+                    var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
+                    var url = "save_riddle.php?cmid=" + idModule + "&road_id=" + idRoad + "&num_riddle=" + numRiddle;
+                    $('<form id=myform method="POST"/>').attr('action', url).appendTo('#controlPanel');
+                    $("#myform").submit();
+                });
 
                 $("#removeFeature").on('click', function() {
-                    notification.confirm('Ã‚Â¿Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
+                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
                         removeFeatureToDirtySource(selectedFeatures, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                         removeFeatures(selectedFeatures, stage["roads"][idRoad].vector);
                     });
@@ -830,19 +833,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
 
                     });
-                    //Recoloco las features 
-
-                    //Si existe una nueva pista redirecciono para hacer el formulario
-                    if (dirtyStage.getFeatureById(-1)) {
-                        var url = "save_riddle.php?cmid=" + idModule;
-                        $('<form id=myform method="POST"/>').attr('action', url).appendTo('#controlPanel');
-                        $('<input type="hidden" name="json"/>').val(mygeoJSON).appendTo('#myform');
-                        $("#myform").submit();
-                    } //Si no existe envio un json con un ajax para actualizar los datos.
-                    else {
-                        //Funcion que comprueba si en el orden está incrustada Insert new riddle
-                    }
-
                 });
                 $("#riddleList").on('click', '.ui-icon-trash', function() {
                     var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
@@ -850,7 +840,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         var idRiddles = [{
                             idRiddle: idRiddle
                         }];
-                        deleteRiddles(idRiddles);
+                        deleteRiddles(idRiddles, dirtyStage, originalStage, stage["roads"][idRoad].vector);
                     });
                 });
                 $("#riddleList").on('click', '.ui-icon-pencil', function() {
@@ -858,7 +848,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
                     debugger;
                     if (dirty) {
-                        notification.confirm('Desea continuar?', 'Hay cambios sin guardar, si continua se perderan', 'Confirmar', 'Cancelar', function() {
+                        notification.confirm('Desea guardar?', 'Hay cambios sin guardar, si continua se perderan', 'Confirmar', 'Cancelar', function() {
                             debugger;
                             editFormEntry(idRiddle);
 
