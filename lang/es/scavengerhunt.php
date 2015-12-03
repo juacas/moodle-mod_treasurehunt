@@ -46,6 +46,7 @@ $string['default_road'] = 'Camino 1';
 $string['insert_road'] = 'Insertar nuevo camino';
 $string['insert_riddle'] = 'Insertar nueva pista';
 $string['empty_ridle'] = 'Hay pistas vacias, si continúa se eliminarán y las pistas restantes se recolocarán en orden';
+$string['confirm_delete_riddle'] = 'Se eliminaron las pistas correctamente';
 
 
 

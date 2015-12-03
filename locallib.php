@@ -106,7 +106,6 @@ function updateEntryBD(stdClass $entry) {
 
 function updateFeatureBD(Feature $feature) {
     GLOBAL $DB;
-    $geojson = new GeoJSON();
     $numRiddle = $feature->getProperty('numRiddle');
     $geometryWKT = geojson_to_wkt($feature->getGeometry());
     $timemodified = time();
@@ -116,8 +115,12 @@ function updateFeatureBD(Feature $feature) {
     $DB->execute($sql, $parms);
 }
 
-function deleteEntryBD() {
-    
+function deleteEntryBD($id) {
+    GLOBAL $DB;
+    $table = 'scavengerhunt_riddle';
+    $select = 'id = ?';
+    $params = array($id);
+    $DB->delete_records_select($table, $select,$params);
 }
 
 function insertRoadBD(stdClass $entry) {

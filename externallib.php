@@ -46,7 +46,7 @@ class mod_scavengerhunt_external_fetchstage extends external_api {
      * @return array of newly created groups
      */
     public static function fetchstage($idStage) { //Don't forget to set it as static
-        global $CFG, $DB;
+        global $DB;
 
         $params = self::validate_parameters(self::fetchstage_parameters(), array('idStage' => $idStage));
         //Recojo todas las features
@@ -95,7 +95,7 @@ class mod_scavengerhunt_external_savestage extends external_api {
         return new external_function_parameters(
                 array(
             'idStage' => new external_value(PARAM_INT, 'id of stage'),
-            'GeoJSON' => new external_value(PARAM_RAW, 'GeoJSON with all features')      
+            'GeoJSON' => new external_value(PARAM_RAW, 'GeoJSON with all features')
                 )
         );
     }
@@ -112,10 +112,10 @@ class mod_scavengerhunt_external_savestage extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function savestage($idStage,$GeoJSON) { //Don't forget to set it as static
-        global $CFG, $DB;
+    public static function savestage($idStage, $GeoJSON) { //Don't forget to set it as static
+        global $DB;
 
-        $params = self::validate_parameters(self::fetchstage_parameters(), array('idStage' => $idStage));
+        $params = self::validate_parameters(self::savestage_parameters(), array('idStage' => $idStage));
         //Recojo todas las features
         $features_sql = 'SELECT riddle.name, riddle.id, road_id, num_riddle,astext(geom)as geometry FROM mdl_scavengerhunt_riddle AS riddle'
                 . ' inner join mdl_scavengerhunt_roads AS roads on riddle.road_id = roads.id WHERE scavengerhunt_id = ? ORDER BY num_riddle DESC';
@@ -141,6 +141,7 @@ class mod_scavengerhunt_external_savestage extends external_api {
     }
 
 }
+
 class mod_scavengerhunt_external_deletestage extends external_api {
 
     /**
@@ -160,16 +161,19 @@ class mod_scavengerhunt_external_deletestage extends external_api {
     public static function deletestage_parameters() {
         return new external_function_parameters(
                 array(
-            'idStage' => new external_value(PARAM_INT, 'id of stage'),
-            'GeoJSON' => new external_value(PARAM_RAW, 'GeoJSON with all features')      
-                )
-        );
+            'idRiddles' => new external_multiple_structure(
+                    new external_single_structure(
+                    array(
+                'idRiddle' => new external_value(PARAM_RAW, 'collection id riddles in JSON format'),
+                    )
+                    )
+        )));
     }
 
     public static function deletestage_returns() {
         return new external_single_structure(
                 array(
-            'json' => new external_value(PARAM_RAW, 'geojson with all features of the stage'),
+            'json' => new external_value(PARAM_RAW, ''),
         ));
     }
 
@@ -178,32 +182,17 @@ class mod_scavengerhunt_external_deletestage extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function deletestage($idStage,$GeoJSON) { //Don't forget to set it as static
-        global $CFG, $DB;
-
-        $params = self::validate_parameters(self::fetchstage_parameters(), array('idStage' => $idStage));
-        //Recojo todas las features
-        $features_sql = 'SELECT riddle.name, riddle.id, road_id, num_riddle,astext(geom)as geometry FROM mdl_scavengerhunt_riddle AS riddle'
-                . ' inner join mdl_scavengerhunt_roads AS roads on riddle.road_id = roads.id WHERE scavengerhunt_id = ? ORDER BY num_riddle DESC';
-        $features_result = $DB->get_records_sql($features_sql, $params);
-        $featureArray = array();
-        foreach ($features_result as $value) {
-            $multipolygon = wkt_to_geojson($value->geometry);
-            $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idStage);
-            $feature = new Feature(intval($value->id), $multipolygon, $attr);
-            array_push($featureArray, $feature);
+    public static function deletestage($idRiddles) { //Don't forget to set it as static
+        $params = self::validate_parameters(self::deletestage_parameters(), array('idRiddles' => $idRiddles));
+        foreach ($params as $column) {
+            foreach ($column as $riddle) {
+                foreach ($riddle as $value) {
+                    deleteEntryBD($value);
+                }
+            }
         }
-        //Recojo todos los caminos
-        $roads_sql = 'SELECT id, name FROM mdl_scavengerhunt_roads AS roads where scavengerhunt_id = ? ORDER BY id DESC';
-        $roads_result = $DB->get_records_sql($roads_sql, $params);
-        $featureCollection = new FeatureCollection($featureArray);
-        $geojson = object_to_geojson($featureCollection);
-        foreach ($roads_result as &$value) {
-            $value->id = intval($value->id);
-        }
-        $roadsjson = json_encode($roads_result);
-        $fetchstage_returns = array($geojson, $roadsjson);
-        return $fetchstage_returns;
+        $json = get_string('confirm_delete_riddle', 'scavengerhunt');
+        return $json;
     }
 
 }

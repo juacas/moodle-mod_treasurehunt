@@ -62,10 +62,7 @@ if (!$newFeature && !$id) {
         }
         $features->next();
     }
-} else {
-    //Debería hacer algo pero no he plateado bien el flujo? 
-}
-
+} 
 if ($newFeature || $id) {
 
     if (!isset($entry)) {
@@ -87,8 +84,6 @@ if ($newFeature || $id) {
 // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
     } else if ($entry = $mform->get_data()) {
-
-
         //Actualizamos los campos
         $entry->name = trim($entry->name);
         $entry->description = '';          // updated later
@@ -115,9 +110,7 @@ if ($newFeature || $id) {
     echo $OUTPUT->heading("A heading here");
     $mform->display();
     echo $OUTPUT->footer();
-} else {
-    //Se acabó
-}
+} 
 
 
 

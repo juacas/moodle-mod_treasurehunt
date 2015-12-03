@@ -63,7 +63,7 @@ function install_geometry_columns() {
                     }
                     // Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
                     if (!$dbman->field_exists('scavengerhunt_riddle', 'geom')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom geometry(MULTIPOLYGON,4326) NOT NULL');
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom geometry(MULTIPOLYGON,4326)');
                     }
                     // Create points
                     if (!$dbman->field_exists('scavengerhunt_current', 'locations')) {
@@ -77,7 +77,7 @@ function install_geometry_columns() {
                 break;
             case 'mysql':
                 //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom MULTIPOLYGON NOT NULL');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddle ADD geom MULTIPOLYGON');
                 //Create points
                 $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_current ADD locations POINT NOT NULL');
                 break;

@@ -2,7 +2,7 @@
 
 $services = array(
       'scavengerservices' => array(                                                //the name of the web service
-          'functions' => array ('mod_scavengerhunt_fetchstage'), //web service functions of this service
+          'functions' => array ('mod_scavengerhunt_fetchstage','mod_scavengerhunt_savestage','mod_scavengerhunt_deletestage'), //web service functions of this service
           'requiredcapability' => '',                //if set, the web service user need this capability to access 
                                                                               //any function of this service. For example: 'some/capability:specified'                 
           'restrictedusers' =>0,                                             //if enabled, the Moodle administrator must link some user to this service
