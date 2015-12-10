@@ -144,7 +144,7 @@ function deleteEntryBD($id) {
     GLOBAL $DB;
     $table = 'scavengerhunt_riddle';
     $select = 'id = ?';
-    $params = array($id);
+    $params = array($id);  
     $DB->delete_records_select($table, $select,$params);
 }
 

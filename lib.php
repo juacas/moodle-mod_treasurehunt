@@ -76,8 +76,8 @@ function scavengerhunt_supports($feature) {
  */
 function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_mod_form $mform = null) {
     global $DB;
-
-    $scavengerhunt->timecreated = time();
+    $timenow = time();
+    $scavengerhunt->timecreated = $timenow; 
 
     // You may have to add extra stuff in here.
     
@@ -86,6 +86,7 @@ function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_m
     $recordRoad = new stdClass();
     $recordRoad->name = get_string('default_road', 'scavengerhunt');
     $recordRoad->scavengerhunt_id = $scavengerhunt->id;
+    $recordRoad->timecreated = $timenow;
     $DB->insert_record('scavengerhunt_roads',$recordRoad);
     
     scavengerhunt_grade_item_update($scavengerhunt);

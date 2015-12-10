@@ -45,5 +45,5 @@ $string['riddle_editor'] = 'Description of riddle';
 $string['default_road'] = 'Road 1';
 $string['insert_road'] = 'Insert new road';
 $string['insert_riddle'] = 'Insert new riddle';
-$string['empty_ridle'] = 'There are empty riddles, if you continue they be removed and the remaining riddles relocate in order';
+$string['empty_ridle'] = 'The riddle has not associated geometry. You must enter one for road can be made';
 $string['confirm_delete_riddle'] = 'The riddle(s) were removed successfully';
