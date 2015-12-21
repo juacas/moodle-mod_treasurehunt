@@ -21,30 +21,30 @@ require.config({
         openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
         selectpart: 'openlayers/selectpart',
-        turf: 'turf/turf'
+        turf: 'turf/turf',
     }
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax'], function($, notification, str, ol, jqui, ajax) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax'], function ($, notification, str, ol, jqui, ajax) {
 
 
     var init = {
-        init: function(idModule, idStage) {
+        init: function (idModule, idStage) {
 
 
             //Lo primero recojo todas las cadenas que voy a necesitar con una llamada ajax
             var ajaxStrings = [{
-                key: 'insert_riddle',
-                component: 'scavengerhunt'
-            }, {
-                key: 'insert_road',
-                component: 'scavengerhunt'
-            }, {
-                key: 'empty_ridle',
-                component: 'scavengerhunt'
-            }];
-            str.get_strings(ajaxStrings).done(function(data) {
+                    key: 'insert_riddle',
+                    component: 'scavengerhunt'
+                }, {
+                    key: 'insert_road',
+                    component: 'scavengerhunt'
+                }, {
+                    key: 'empty_ridle',
+                    component: 'scavengerhunt'
+                }];
+            str.get_strings(ajaxStrings).done(function (data) {
                 /** Global var ***************************************************************
                  */
                 var stage = {
@@ -64,7 +64,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var selectedRiddleFeatures = new Object();
                 var idNewFeature = 1;
                 var Strings = getKeyValue(ajaxStrings, data);
-
+                //Utilizada para guardar el valor original del nombre del camino
+                var oriVal
 
                 /**Initialize stage and selectedRiddleFeatures******************************************************
                  */
@@ -80,16 +81,16 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
                 /**Load the control pane, riddle and road list ***************************************************
                  */
-                //$("#controlPanel").addClass('ui-widget-header ui-corner-all');
+                $("#controlPanel").addClass('ui-widget-header ui-corner-all');
                 $('<span id="edition"/>').appendTo($("#controlPanel"));
                 $('<input type="radio" name="controlPanel" id="radio1" value="add">').appendTo($("#edition"));
-                $("<label>").attr('for', "radio1").text('AÃ±adir').appendTo($("#edition"));
+                $("<label>").attr('for', "radio1").text('AÃƒÆ’Ã‚Â±adir').appendTo($("#edition"));
                 $('<input type="radio" name="controlPanel" id="radio2" value="modify">').appendTo($("#edition"));
                 $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
                 $('<button id="saveRiddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlPanel"));
                 $('<button id="removeFeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlPanel"));
                 $('<button id="addRiddle"/>').text('Riddle').prependTo($("#controlPanel"));
-                $('<button id="addRoad"/>').text('Road').prependTo($("#roadListPanel"));
+                $('<button id="addRoad"/>').text('Road').prependTo($("#controlPanel"));
                 $("#radio1").button({
                     text: false,
                     icons: {
@@ -135,12 +136,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     revert: true,
                     cursor: "n-resize",
                     axis: 'y',
-                    start: function(event, ui) {
+                    start: function (event, ui) {
                         var idRoad = ui.item.attr('idRoad');
                         var start_pos = ui.item.index('li[idRoad="' + idRoad + '"]');
                         ui.item.data('start_pos', start_pos);
                     },
-                    update: function(event, ui) {
+                    update: function (event, ui) {
                         var start_pos = ui.item.data('start_pos');
                         var idRoad = ui.item.attr('idRoad');
                         var end_pos = ui.item.index('li[idRoad="' + idRoad + '"]');
@@ -179,7 +180,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 //Creo el roadListPanel
                 $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
-
                 /** Get style, vectors, map and interactions ***************************************************************
                  */
                 var defaultRiddleStyle = new ol.style.Style({
@@ -253,9 +253,9 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 var map = new ol.Map({
                     layers: [
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM()
-                    }), vectorDraw],
+                        new ol.layer.Tile({
+                            source: new ol.source.OSM()
+                        }), vectorDraw],
                     renderer: 'canvas',
                     target: 'map',
                     view: new ol.View({
@@ -266,16 +266,16 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
 
                 var Modify = {
-                    init: function() {
+                    init: function () {
                         this.select = new ol.interaction.Select({
                             //Si una feature puede ser seleccionada o no
-                            filter: function(feature) {
+                            filter: function (feature) {
                                 if (selectedRiddleFeatures[feature.getId()]) {
                                     return true;
                                 }
                                 return false;
                             },
-                            style: function(feature) {
+                            style: function (feature) {
                                 var fill = new ol.style.Fill({
                                     color: 'rgba(255,255,255,0.4)'
                                 });
@@ -284,28 +284,28 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     width: 2
                                 });
                                 var styles = [
-                                new ol.style.Style({
-                                    image: new ol.style.Circle({
+                                    new ol.style.Style({
+                                        image: new ol.style.Circle({
+                                            fill: fill,
+                                            stroke: stroke,
+                                            radius: 5
+                                        }),
                                         fill: fill,
                                         stroke: stroke,
-                                        radius: 5
-                                    }),
-                                    fill: fill,
-                                    stroke: stroke,
-                                    text: new ol.style.Text({
-                                        text: '' + feature.get('numRiddle'),
-                                        textAlign: 'center',
-                                        scale: 1.3,
-                                        fill: new ol.style.Fill({
-                                            color: '#fff'
+                                        text: new ol.style.Text({
+                                            text: '' + feature.get('numRiddle'),
+                                            textAlign: 'center',
+                                            scale: 1.3,
+                                            fill: new ol.style.Fill({
+                                                color: '#fff'
+                                            }),
+                                            stroke: new ol.style.Stroke({
+                                                color: '#3399CC',
+                                                width: 3.5
+                                            })
                                         }),
-                                        stroke: new ol.style.Stroke({
-                                            color: '#3399CC',
-                                            width: 3.5
-                                        })
-                                    }),
-                                    zIndex: 'Infinity'
-                                })];
+                                        zIndex: 'Infinity'
+                                    })];
                                 return styles;
 
                             }
@@ -326,34 +326,38 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     })
                                 })
                             }),
-                            deleteCondition: function(event) {
+                            deleteCondition: function (event) {
                                 return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
                             }
                         });
                         map.addInteraction(this.modify);
                         this.setEvents();
                     },
-                    setEvents: function() {
+                    setEvents: function () {
                         //Elimino la seleccion de features cuando cambia a off
                         selectedFeatures = this.select.getFeatures();
-                        this.select.on('change:active', function() {
+                        this.select.on('change:active', function () {
                             if (!this.getActive()) {
                                 selectedFeatures.clear();
+                                setActivateRemoveBotton(selectedFeatures);
                             }
                         });
                         //Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no
-                        this.select.on('select', function() {
+                        this.select.on('select', function () {
                             setActivateRemoveBotton(selectedFeatures);
                         });
                         //Activo el boton de guardar segun se haya modificado algo o no
-                        this.modify.on('modifyend', function(e) {
+                        this.modify.on('modifyend', function (e) {
                             $('#saveRiddle').button("option", "disabled", false);
                             debugger;
                             modifyFeatureToDirtySource(e.features, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                             dirty = true;
                         });
                     },
-                    setActive: function(active) {
+                    getActive: function () {
+                        return (this.select.getActive() && this.modify.getActive()) ? true : false;
+                    },
+                    setActive: function (active) {
                         this.select.setActive(active);
                         this.modify.setActive(active);
                     }
@@ -362,7 +366,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
                 var Draw = {
-                    init: function() {
+                    init: function () {
                         map.addInteraction(this.Polygon);
                         this.Polygon.setActive(false);
                         this.setEvents();
@@ -370,7 +374,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     Polygon: new ol.interaction.Draw({
                         source: vectorDraw.getSource(),
                         type: /** @type {ol.geom.GeometryType} */
-                        ('Polygon'),
+                                ('Polygon'),
                         style: new ol.style.Style({
                             fill: new ol.style.Fill({
                                 color: 'rgba(0, 0, 0, 0.05)'
@@ -392,10 +396,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             zIndex: 'Infinity'
                         })
                     }),
-                    setEvents: function() {
+                    setEvents: function () {
                         //Fijo el riddle al que pertenecen y activo el boton de guardar 
                         //segun se haya modificado algo o no
-                        this.Polygon.on('drawend', function(e) {
+                        this.Polygon.on('drawend', function (e) {
 
                             e.feature.setProperties({
                                 'idRoad': idRoad,
@@ -416,10 +420,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             dirty = true;
                         });
                     },
-                    getActive: function() {
+                    getActive: function () {
                         return this.activeType ? this[this.activeType].getActive() : false;
                     },
-                    setActive: function(active) {
+                    setActive: function (active) {
                         if (active) {
                             this.activeType && this[this.activeType].setActive(false);
                             this.Polygon.setActive(true);
@@ -428,9 +432,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             this.activeType && this[this.activeType].setActive(false);
                             this.activeType = null;
                         }
+                        map.getTargetElement().style.cursor = active ? 'none' : '';
                     }
                 };
-                $(document).keyup(function(e) {
+                $(document).keyup(function (e) {
                     //Si pulso la tecla esc dejo de dibujar
                     if (e.keyCode === 27) // esc
                     {
@@ -485,7 +490,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 function modifyFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
-                    dirtyFeatures.forEach(function(dirtyFeature) {
+                    dirtyFeatures.forEach(function (dirtyFeature) {
                         debugger;
                         var idRiddle = dirtyFeature.get('idRiddle');
                         var feature = dirtySource.getFeatureById(idRiddle);
@@ -508,7 +513,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 function removeFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
-                    dirtyFeatures.forEach(function(dirtyFeature) {
+                    dirtyFeatures.forEach(function (dirtyFeature) {
                         debugger;
                         var idRiddle = dirtyFeature.get('idRiddle');
                         var feature = dirtySource.getFeatureById(idRiddle);
@@ -571,16 +576,19 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 function fetchFeatures() {
                     var geojson = ajax.call([{
-                        methodname: 'mod_scavengerhunt_fetchstage',
-                        args: {
-                            idStage: idStage
-                        }
-                    }]);
-                    geojson[0].done(function(response) {
+                            methodname: 'mod_scavengerhunt_fetch_scavengerhunt',
+                            args: {
+                                idStage: idStage,
+                                idModule: idModule
+                            }
+                        }]);
+                    geojson[0].done(function (response) {
                         console.log('json: ' + response);
                         var vector;
+                        var geoJSONFeatures = response[0];
+                        var jsonRoads = response[1];
                         var geoJSON = new ol.format.GeoJSON();
-                        var roads = JSON.parse(response[1]);
+                        var roads = JSON.parse(jsonRoads);
                         if (roads.constructor !== Array) {
                             $.extend(stage["roads"], roads);
                         }
@@ -600,12 +608,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             }
                         }
                         //Add stage features to source originalStage
-                        originalStage.addFeatures(geoJSON.readFeatures(response[0], {
+                        originalStage.addFeatures(geoJSON.readFeatures(geoJSONFeatures, {
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
 
-                        originalStage.getFeatures().forEach(function(feature) {
+                        originalStage.getFeatures().forEach(function (feature) {
                             if (feature.getGeometry() === null) {
                                 feature.setGeometry(new ol.geom.MultiPolygon([]));
                             }
@@ -651,7 +659,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             }
                         }
 
-                    }).fail(function(ex) {
+                    }).fail(function (ex) {
                         console.log(ex);
                     });
                 }
@@ -660,7 +668,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 /** Panel functions ***************************************************************
                  */
                 function removeFeatures(selectedFeatures, vector) {
-                    selectedFeatures.forEach(function(feature) {
+                    selectedFeatures.forEach(function (feature) {
                         vector.getSource().removeFeature(feature);
                     });
                     selectedFeatures.clear();
@@ -669,7 +677,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 function makeRiddleListPanel(idRiddle, idRoad, numRiddle, name, description) {
                     if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
-                        $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '" title="' + description + '"/>').text(name).appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");
+                        $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info' title='<h1>Description:</h1>" + description + "'></span></div>");
                     } else {
                         console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                     }
@@ -678,13 +686,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 function makeRoadLisPanel(idRoad, name) {
                     //Si no existe lo agrego
                     if ($('#roadList li[idRoad="' + idRoad + '"]').length < 1) {
-                        $('<li idRoad="' + idRoad + '"/>').text(name).appendTo($("#roadList")).addClass("ui-corner-all").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");;
+                        $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList")).addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");
                     }
                 }
 
                 function sortList() {
                     //Ordeno la lista 
-                    $('#riddleList li').sort(function(a, b) {
+                    $('#riddleList li').sort(function (a, b) {
                         var contentA = parseInt($(a).attr('numRiddle'));
                         var contentB = parseInt($(b).attr('numRiddle'));
                         return (contentA < contentB) ? 1 : (contentA > contentB) ? -1 : 0;
@@ -698,11 +706,25 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 function notEmptyRiddle(idRiddle) {
                     $('#riddleList li[idRiddle="' + idRiddle + '"]').find(".ui-icon-alert").remove();
                 }
+
+                /** TOOLTIPS **/
                 $("#riddleList").tooltip({
                     track: true,
-                    items: '.ui-icon-alert'
+                    items: '.ui-icon-alert, .ui-icon-info',
+                    position: {
+                        my: "left+15 center",
+                        at: "right center"
+                    },
+                    content: function () {
+                        return $(this).prop('title');
+                    }
                 });
-
+                $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
+                    position: {
+                        my: "left+15 center",
+                        at: "right center"
+                    }
+                });
                 //Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no
                 function setActivateRemoveBotton(selectedFeatures) {
                     if (selectedFeatures.getLength() > 0) {
@@ -733,7 +755,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var pan = ol.animation.pan({
                         duration: duration,
                         source: /** @type {ol.Coordinate} */
-                        (view.getCenter()),
+                                (view.getCenter()),
                     });
                     var zoom = ol.animation.zoom({
                         duration: duration,
@@ -753,7 +775,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     //Si no esta marcado el li road lo marco
                     $("#roadList li[idRoad='" + idRoad + "']").addClass("ui-selected");
                     //Dejo visible solo el vector con el idRoad
-                    map.getLayers().forEach(function(layer) {
+                    map.getLayers().forEach(function (layer) {
                         if (layer instanceof ol.layer.Vector) {
                             layer.setVisible(false);
                         }
@@ -827,25 +849,69 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
                 function editFormEntry(idRiddle, idModule) {
-                    var url = 'save_riddle.php?cmid=' + idModule + '&id=' + idRiddle;
+                    var url = 'edit.php?cmid=' + idModule + '&id=' + idRiddle;
                     window.location.href = url;
                 }
 
                 function newFormEntry(numRiddle, idRoad, idModule) {
-                    var url = "save_riddle.php?cmid=" + idModule + "&road_id=" + idRoad + "&num_riddle=" + numRiddle;
+                    var url = "edit.php?cmid=" + idModule + "&road_id=" + idRoad + "&num_riddle=" + numRiddle;
                     window.location.href = url;
+                }
+
+                function addRoad(idStage) {
+                    var json = ajax.call([{
+                            methodname: 'mod_scavengerhunt_add_road',
+                            args: {
+                                nameRoad: '',
+                                idScavengerhunt: idStage
+                            }
+                        }]);
+                    json[0].done(function (response) {
+                        console.log(response);
+                        var idRoad = response[0];
+                        var nameRoad = response[1];
+                        debugger;
+                        var vector = new ol.layer.Vector({
+                            source: new ol.source.Vector({
+                                projection: 'EPSG:3857'
+                            }),
+                            updateWhileAnimating: true,
+                            style: styleFunction
+                        });
+                        var road = {};
+                        road[idRoad] = {'id': idRoad, 'name': nameRoad, 'vector': vector};
+                        $.extend(stage["roads"], road);
+                        map.addLayer(vector);
+                        makeRoadLisPanel(idRoad, nameRoad);
+                    }).fail(function (ex) {
+                        console.log(ex);
+                    });
+                }
+                function updateRoad(idRoad, nameRoad) {
+                    var json = ajax.call([{
+                            methodname: 'mod_scavengerhunt_update_roads',
+                            args: {
+                                nameRoad: nameRoad,
+                                idRoad: idRoad
+                            }
+                        }]);
+                    json[0].done(function (response) {
+                        console.log(response);
+                    }).fail(function (ex) {
+                        console.log(ex);
+                    });
                 }
 
                 function deleteRiddles(idRiddles, dirtySource, originalSource, vectorOfPolygons) {
                     var json = ajax.call([{
-                        methodname: 'mod_scavengerhunt_deletestage',
-                        args: {
-                            idRiddles: idRiddles
-                        }
-                    }]);
-                    json[0].done(function(response) {
+                            methodname: 'mod_scavengerhunt_delete_riddles',
+                            args: {
+                                idRiddles: idRiddles
+                            }
+                        }]);
+                    json[0].done(function (response) {
                         console.log(response);
-                        idRiddles.forEach(function(value) {
+                        idRiddles.forEach(function (value) {
                             var idRiddle = value.idRiddle;
                             var idFeaturesPolygons = false;
                             var polygonFeature;
@@ -886,7 +952,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         $("#saveRiddle").button("option", "disabled", true);
                         dirty = false;
 
-                    }).fail(function(ex) {
+                    }).fail(function (ex) {
                         console.log(ex);
                     });
                 }
@@ -898,45 +964,41 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         'featureProjection': "EPSG:3857"
                     });
                     var json = ajax.call([{
-                        methodname: 'mod_scavengerhunt_savestage',
-                        args: {
-                            GeoJSON: geoJSON
-                        }
-                    }]);
-                    json[0].done(function(response) {
+                            methodname: 'mod_scavengerhunt_update_riddles',
+                            args: {
+                                GeoJSON: geoJSON
+                            }
+                        }]);
+                    json[0].done(function (response) {
                         console.log(response);
                         var originalFeature;
-                        debugger;
                         //Paso las features "sucias" al objeto con las features originales
-                        dirtySource.forEachFeature(function(feature) {
+                        dirtySource.forEachFeature(function (feature) {
                             originalFeature = originalSource.getFeatureById(feature.getId());
                             originalFeature.setProperties(feature.getProperties());
                             originalFeature.setGeometry(feature.getGeometry());
                         });
                         //Limpio mi objeto que guarda las features sucias
                         dirtySource.clear();
-                    }).fail(function(ex) {
+                    }).fail(function (ex) {
                         console.log(ex);
                     });
                 }
-                $("#addRiddle").on('click', function() {
+                $("#addRiddle").on('click', function () {
                     var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
-                    //Si está sucio guardo el escenario
+                    //Si estÃƒÂ¡ sucio guardo el escenario
                     if (dirty) {
                         saveRiddles(dirtyStage, originalStage);
                     }
                     newFormEntry(numRiddle, idRoad, idModule);
 
                 });
-                $("#addRoad").on('click', function() {
-                    var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
-                    var url = "save_riddle.php?cmid=" + idModule + "&road_id=" + idRoad + "&num_riddle=" + numRiddle;
-                    $('<form id=myform method="POST"/>').attr('action', url).appendTo('#controlPanel');
-                    $("#myform").submit();
+                $("#addRoad").on('click', function () {
+                    addRoad(idStage);
                 });
 
-                $("#removeFeature").on('click', function() {
-                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
+                $("#removeFeature").on('click', function () {
+                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function () {
                         removeFeatureToDirtySource(selectedFeatures, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                         removeFeatures(selectedFeatures, stage["roads"][idRoad].vector);
                     });
@@ -945,33 +1007,33 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     $('#saveRiddle').button("option", "disabled", false);
                     dirty = true;
                 });
-                $("#saveRiddle").on('click', function() {
+                $("#saveRiddle").on('click', function () {
                     saveRiddles(dirtyStage, originalStage);
                     $(this).button("option", "disabled", true);
                     dirty = false;
                 });
-                $("#riddleList").on('click', '.ui-icon-trash', function() {
+                $("#riddleList").on('click', '.ui-icon-trash', function () {
                     var $this_li = $(this).parents('li');
-                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function() {
+                    notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function () {
                         var idRiddle = parseInt($this_li.attr('idRiddle'));
                         var idRiddles = [{
-                            idRiddle: idRiddle
-                        }];
+                                idRiddle: idRiddle
+                            }];
                         deleteRiddles(idRiddles, dirtyStage, originalStage, stage["roads"][idRoad].vector);
 
                     });
                 });
-                $("#riddleList").on('click', '.ui-icon-pencil', function() {
+                $("#riddleList").on('click', '.ui-icon-pencil', function () {
                     //Busco el idRiddle del li que contiene la papelera seleccionada
                     var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
-                    //Si está sucio guardo el escenario
+                    //Si estÃƒÂ¡ sucio guardo el escenario
                     if (dirty) {
                         saveRiddles(dirtyStage, originalStage);
                     }
                     editFormEntry(idRiddle, idModule);
 
                 });
-                $("input[name=controlPanel]:radio").on('change', function() {
+                $("input[name=controlPanel]:radio").on('change', function () {
                     var selected = $("input[type='radio'][name='controlPanel']:checked");
                     var value = selected.val();
                     if (value === 'add') {
@@ -985,7 +1047,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         Modify.setActive(false);
                     }
                 });
-                $("#riddleList").on('click', 'li', function(e) {
+                $("#riddleList").on('click', 'li', function (e) {
                     if ($(e.target).is('.handle , .ui-icon , .sortable-number')) {
                         e.preventDefault();
                         return;
@@ -1002,7 +1064,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
 
 
-                $("#roadList").on('click', 'li', function(e) {
+                $("#roadList").on('click', 'li', function (e) {
                     if ($(e.target).is('.handle , .ui-icon')) {
                         e.preventDefault();
                         return;
@@ -1017,37 +1079,49 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     selectRoad(idRoad, stage["roads"][idRoad].vector, map, selectedFeatures);
                     deactivateEdition();
                 });
-                //Utilizada para guardar el valor original del nombre del camino
-                var oriVal;
-                var cache;
-                $("#roadList").on('click', '.ui-icon-pencil', function() {
+                $("#roadList").on('click', '.ui-icon-pencil', function () {
                     debugger;
-                    var $li = $(this).parents("li");
-                    oriVal = $li.text();
-                    cache = $li.children();
-                    $li.text("");
-                    $("<input type='text'>").val(oriVal).appendTo($li).focus();
+                    var $div = $(this).parents("li").children(".nameRoad");
+                    oriVal = $div.text();
+                    $div.text("");
+                    $("<input type='text' id='modRoadName'>").val(oriVal).appendTo($div).focus();
                 });
-                $("#roadList").on('focusout', 'li > input', function() {
+                $("#roadList").on('focusout', 'li .nameRoad > input', function () {
                     var $this = $(this);
-                    $this.parent().text($this.val() || oriVal).append(cache);
+                    debugger;
+                    var idRoad = $this.parents('li').attr('idRoad');
+                    var nameRoad = $this.val();
+                    if (nameRoad !== oriVal && nameRoad !== '') {
+                        updateRoad(idRoad, nameRoad);
+                    }
+                    $this.parent().text(nameRoad || oriVal);
                     $this.remove();
+
+
                 });
 
-                map.on('pointermove', function(evt) {                   
-                    if (evt.dragging) {
+                map.on('pointermove', function (evt) {
+                    if (evt.dragging || Draw.getActive() || !Modify.getActive()) {
                         return;
                     }
                     var pixel = map.getEventPixel(evt.originalEvent);
-                    var hit = map.forEachFeatureAtPixel(pixel, function(feature, layer) {
+                    var hit = map.forEachFeatureAtPixel(pixel, function (feature, layer) {
                         if (selectedRiddleFeatures[feature.getId()]) {
-                                    return true;
+                            var selected = false;
+                            selectedFeatures.forEach(function (featureSelected) {
+                                if (feature === featureSelected) {
+                                    selected = true;
                                 }
-                                return false;
+                            });
+                            return selected ? false : true;
+                        }
+                        return false;
                     });
                     map.getTargetElement().style.cursor = hit ? 'pointer' : '';
                 });
-            }).fail(function(e) {
+
+
+            }).fail(function (e) {
                 console.log(e);
             });
 

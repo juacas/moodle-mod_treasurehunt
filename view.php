@@ -31,15 +31,10 @@ require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
 require_once(dirname(__FILE__).'/lib.php');
 require_once ($CFG->libdir.'/formslib.php');
 
-$id = optional_param('id', 0, PARAM_INT); // Course_module ID, or
-
-if ($id) {
-    $cm         = get_coursemodule_from_id('scavengerhunt', $id, 0, false, MUST_EXIST);
-    $course     = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $scavengerhunt  = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
-}  else {
-    error('You must specify a course_module ID or an instance ID');
-}
+ 
+$id = required_param('id', PARAM_INT);
+list ($course, $cm) = get_course_and_cm_from_cmid($id, 'scavengerhunt');
+$scavengerhunt  = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
@@ -79,6 +74,7 @@ if ($scavengerhunt->intro) {
 // Replace the following lines with you own code.
 echo $OUTPUT->heading('Nada');
 //echo $OUTPUT->render_from_template('mod_scavengerhunt/recipe',null);
+echo $OUTPUT->container_start(null, 'scavengerhunt_editor');
 echo $OUTPUT->box(null, null, 'controlPanel');
 echo $OUTPUT->container_start(null, 'riddleListPanel_global');
 echo $OUTPUT->box(null, null, 'riddleListPanel');
@@ -87,6 +83,7 @@ echo $OUTPUT->container_start(null, 'map_global');
 echo $OUTPUT->box(null, null, 'map');
 echo $OUTPUT->container_end();
 echo $OUTPUT->box(null, null, 'roadListPanel');
+echo $OUTPUT->container_end();
 
 
 

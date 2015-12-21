@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,6 +29,7 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+require_once $CFG->libdir . '/filelib.php';
 
 defined('MOODLE_INTERNAL') || die();
 
@@ -48,7 +50,7 @@ define('WIDGET_ULTIMATE_ANSWER', 42);
  */
 function scavengerhunt_supports($feature) {
 
-    switch($feature) {
+    switch ($feature) {
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_SHOW_DESCRIPTION:
@@ -77,18 +79,13 @@ function scavengerhunt_supports($feature) {
 function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_mod_form $mform = null) {
     global $DB;
     $timenow = time();
-    $scavengerhunt->timecreated = $timenow; 
+    $scavengerhunt->timecreated = $timenow;
 
     // You may have to add extra stuff in here.
-    
+
     $scavengerhunt->id = $DB->insert_record('scavengerhunt', $scavengerhunt);
     //Insert default road
-    $recordRoad = new stdClass();
-    $recordRoad->name = get_string('default_road', 'scavengerhunt');
-    $recordRoad->scavengerhunt_id = $scavengerhunt->id;
-    $recordRoad->timecreated = $timenow;
-    $DB->insert_record('scavengerhunt_roads',$recordRoad);
-    
+    addDefaultRoad($scavengerhunt->id);
     scavengerhunt_grade_item_update($scavengerhunt);
 
     return $scavengerhunt->id;
@@ -133,15 +130,18 @@ function scavengerhunt_update_instance(stdClass $scavengerhunt, mod_scavengerhun
 function scavengerhunt_delete_instance($id) {
     global $DB;
 
-    if (! $scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $id))) {
+    if (!$scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $id))) {
         return false;
     }
 
     // Delete any dependent records here.
 
     $DB->delete_records('scavengerhunt', array('id' => $scavengerhunt->id));
+    $roads_ids = $DB->get_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
+    foreach ($roads_ids as $road) {
+        $DB->delete_records_select('scavengerhunt_riddle', 'road_id = ?', array($road->id));
+    }
     $DB->delete_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
-
     scavengerhunt_grade_item_delete($scavengerhunt);
 
     return true;
@@ -181,6 +181,7 @@ function scavengerhunt_user_outline($course, $user, $mod, $scavengerhunt) {
  * @param stdClass $scavengerhunt the module instance record
  */
 function scavengerhunt_user_complete($course, $user, $mod, $scavengerhunt) {
+    
 }
 
 /**
@@ -213,7 +214,8 @@ function scavengerhunt_print_recent_activity($course, $viewfullnames, $timestart
  * @param int $userid check for a particular user's activity only, defaults to 0 (all users)
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
-function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid=0, $groupid=0) {
+function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
+    
 }
 
 /**
@@ -226,6 +228,7 @@ function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart
  * @param bool $viewfullnames display users' full names
  */
 function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
+    
 }
 
 /**
@@ -238,7 +241,7 @@ function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, 
  *
  * @return boolean
  */
-function scavengerhunt_cron () {
+function scavengerhunt_cron() {
     return true;
 }
 
@@ -303,9 +306,9 @@ function scavengerhunt_scale_used_anywhere($scaleid) {
  * @param bool $reset reset grades in the gradebook
  * @return void
  */
-function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset=false) {
+function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset = false) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     $item = array();
     $item['itemname'] = clean_param($scavengerhunt->name, PARAM_NOTAGS);
@@ -313,11 +316,11 @@ function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset=false) 
 
     if ($scavengerhunt->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
-        $item['grademax']  = $scavengerhunt->grade;
-        $item['grademin']  = 0;
+        $item['grademax'] = $scavengerhunt->grade;
+        $item['grademin'] = 0;
     } else if ($scavengerhunt->grade < 0) {
         $item['gradetype'] = GRADE_TYPE_SCALE;
-        $item['scaleid']   = -$scavengerhunt->grade;
+        $item['scaleid'] = -$scavengerhunt->grade;
     } else {
         $item['gradetype'] = GRADE_TYPE_NONE;
     }
@@ -326,8 +329,7 @@ function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset=false) 
         $item['reset'] = true;
     }
 
-    grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt',
-            $scavengerhunt->id, 0, null, $item);
+    grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt', $scavengerhunt->id, 0, null, $item);
 }
 
 /**
@@ -338,10 +340,9 @@ function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset=false) 
  */
 function scavengerhunt_grade_item_delete($scavengerhunt) {
     global $CFG;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt',
-            $scavengerhunt->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt', $scavengerhunt->id, 0, null, array('deleted' => 1));
 }
 
 /**
@@ -354,7 +355,7 @@ function scavengerhunt_grade_item_delete($scavengerhunt) {
  */
 function scavengerhunt_update_grades(stdClass $scavengerhunt, $userid = 0) {
     global $CFG, $DB;
-    require_once($CFG->libdir.'/gradelib.php');
+    require_once($CFG->libdir . '/gradelib.php');
 
     // Populate array of grade objects indexed by userid.
     $grades = array();
@@ -414,7 +415,7 @@ function scavengerhunt_get_file_info($browser, $areas, $course, $cm, $context, $
  * @param bool $forcedownload whether or not force download
  * @param array $options additional options affecting the file serving
  */
-function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options=array()) {
+function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -423,7 +424,19 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
 
     require_login($course, true, $cm);
 
-    send_file_not_found();
+    if ($filearea === 'description') {
+        $fs = get_file_storage();
+        $relativepath = implode('/', $args);
+        $fullpath = "/$context->id/mod_scavengerhunt/$filearea/$relativepath";
+        if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+            send_file_not_found();
+        }
+
+        // finally send the file
+        send_stored_file($file, null, 0, $forcedownload, $options);
+    } else {
+        send_file_not_found();
+    }
 }
 
 /* Navigation API */
@@ -451,6 +464,45 @@ function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $cour
  * @param settings_navigation $settingsnav complete settings navigation tree
  * @param navigation_node $scavengerhuntnode scavengerhunt administration node
  */
-function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode=null) {
+function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode = null) {
     // TODO Delete this function and its docblock, or implement it.
+}
+
+function insertRoadBD($idScavengerhunt, $nameRoad) {
+    GLOBAL $DB;
+    $road = new stdClass();
+    $road->name = $nameRoad;
+    $road->scavengerhunt_id = $idScavengerhunt;
+    $road->timecreated = time();
+    $road->timemodified = 0;
+    $id = $DB->insert_record('scavengerhunt_roads', $road);
+    return $id;
+}
+
+function updateRoadBD($idRoad, $nameRoad) {
+    GLOBAL $DB;
+    $road = new stdClass();
+    $road->id = $idRoad;
+    $road->name = $nameRoad;
+    $road->timemodified = time();
+    $DB->update_record('scavengerhunt_roads', $road, $bulk = false);
+}
+
+function deleteRoadBD($idRoad) {
+    GLOBAL $DB;
+    $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
+    $DB->delete_records_select('scavengerhunt_riddle', 'road_id = ?', array($idRoad));
+}
+
+function getTotalRoads($idScavengerhunt) {
+    GLOBAL $DB;
+    $number = $DB->count_records('scavengerhunt_roads', array('scavengerhunt_id' => $idScavengerhunt));
+    return $number;
+}
+
+function addDefaultRoad($idScavengerhunt) {
+    $numberRoads = getTotalRoads($idScavengerhunt) + 1;
+    $nameRoad = get_string('default_road', 'scavengerhunt', $numberRoads);
+    $idRoad = insertRoadBD($idScavengerhunt, $nameRoad);
+    return array($idRoad, $nameRoad);
 }

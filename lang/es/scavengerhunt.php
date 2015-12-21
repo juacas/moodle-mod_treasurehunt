@@ -42,11 +42,13 @@ $string['question_scavengerhunt'] = '¿Esto funciona?';
 $string['hello'] = 'Hola';
 $string['welcome'] = 'Bienvenido a mi módulo de caza del tesoro, espero que lo disfrutes';
 $string['riddle_editor'] = 'Descripción de la pista';
-$string['default_road'] = 'Camino 1';
+$string['default_road'] = 'Camino {$a}';
 $string['insert_road'] = 'Insertar nuevo camino';
 $string['insert_riddle'] = 'Insertar nueva pista';
 $string['confirm_delete_riddle'] = 'Se eliminaron las pistas correctamente';
 $string['empty_ridle'] = 'La pista no tiene ninguna geometría asociada. Debe introducir una para que el camino se pueda realizar';
-
+$string['eventriddleupdated'] = 'La pista ha sido actualizada';
+$string['eventriddlecreated'] = 'La pista ha sido creada';
+$string['eventriddledeleted'] = 'La pista ha sido eliminada';
 
 

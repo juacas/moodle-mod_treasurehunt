@@ -1,7 +1,7 @@
 <?php
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/riddle_form.php');
+require_once(dirname(__FILE__) . '/edit_form.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 
 global $COURSE, $PAGE, $CFG;
@@ -25,12 +25,12 @@ if ($cmid) {
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/scavengerhunt/save_riddle.php', array('cmid' => $cmid));
+$url = new moodle_url('/mod/scavengerhunt/edit.php', array('cmid' => $cmid));
 if (!empty($id)) {
     $url->param('id', $id);
 }
 $PAGE->set_url($url);
-$returnurl = 'view.php?id=' . $cm->id;
+$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
 
 if ($id) { // if entry is specified
     $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
@@ -48,8 +48,8 @@ if ($id) { // if entry is specified
 $entry->cmid = $cmid;
 $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
 $descriptionoptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-    'subdirs' => false);
-$entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'entry', $entry->id);
+    'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
+$entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
 
 $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions)); //name of the form you defined in file above.
@@ -69,15 +69,31 @@ if ($mform->is_cancelled()) {
     $entry->question_id = null;
     if (empty($entry->id)) {
         $entry->id = insertEntryBD($entry);
+        $isnewentry              = true;
+    }else{
+        $isnewentry              = false;
     }
     // This branch is where you process validated data.
     // Do stuff ...
     // Typically you finish up by redirecting to somewhere where the user
     // can see what they did.
     // save and relink embedded images and save attachments
-    $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'entry', $entry->id);
+    $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
+
     // store the updated value values
     updateEntryBD($entry);
+    // Trigger event and update completion (if entry was created).
+    $eventparams = array(
+        'context' => $context,
+        'objectid' => $entry->id,
+        'other' => array('name' => $entry->name)
+    );
+    if ($isnewentry) {
+        $event = \mod_scavengerhunt\event\riddle_created::create($eventparams);
+    } else {
+        $event = \mod_scavengerhunt\event\riddle_updated::create($eventparams);
+    }
+    $event->trigger();
     redirect($returnurl);
 }
 $PAGE->set_title('Caza del tesoro');

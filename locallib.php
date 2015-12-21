@@ -76,19 +76,20 @@ function insertRiddleBD(stdClass $entry) {
     $geometryWKT = $entry->geom;
     $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
             . 'timecreated, timemodified, question_id, geom) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),GeomFromText((?)))';
-    $parms = array($idRiddle, $name, $road_id, $num_riddle, $description,
+    $params = array($idRiddle, $name, $road_id, $num_riddle, $description,
         $descriptionformat, $descriptiontrust, $timenow, $timenow, $question_id, $geometryWKT);
-    $DB->execute($sql, $parms);
+    $DB->execute($sql, $params);
     //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
             . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
-    $parms = array($name, $road_id, $num_riddle, $description, $descriptionformat,
+    $params = array($name, $road_id, $num_riddle, $description, $descriptionformat,
         $descriptiontrust, $timenow, $timenow);
     //Como nos devuelve un objeto lo convierto en una variable
-    $result = $DB->get_record_sql($sql, $parms);
+    $result = $DB->get_record_sql($sql, $params);
     $id = $result->id;
     return $id;
 }
+
 function insertEntryBD(stdClass $entry) {
     GLOBAL $DB;
     $timenow = time();
@@ -115,6 +116,7 @@ function insertEntryBD(stdClass $entry) {
     $id = $result->id;
     return $id;
 }
+
 function updateEntryBD(stdClass $entry) {
     GLOBAL $DB;
     $name = $entry->name;
@@ -144,22 +146,9 @@ function deleteEntryBD($id) {
     GLOBAL $DB;
     $table = 'scavengerhunt_riddle';
     $select = 'id = ?';
-    $params = array($id);  
-    $DB->delete_records_select($table, $select,$params);
+    $params = array($id);
+    $DB->delete_records_select($table, $select, $params);
 }
 
-function insertRoadBD(stdClass $entry) {
-    GLOBAL $DB;
-    $timenow = time();
-    $entry->timecreated = $timenow;
-    $entry->timemodified = $timenow;
-    $id = $DB->insert_record('scavengerhunt_roads', $entry);
-    return $id;
-}
 
-function updateRoadBD(stdClass $entry) {
-    GLOBAL $DB;
-    $timenow = time();
-    $entry->timemodified = $timenow;
-    $DB->update_record('scavengerhunt_roads', $entry, $bulk=false);
-}
+
