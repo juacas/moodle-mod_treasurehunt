@@ -82,7 +82,9 @@ echo $OUTPUT->container_end();
 echo $OUTPUT->container_start(null, 'map_global');
 echo $OUTPUT->box(null, null, 'map');
 echo $OUTPUT->container_end();
+echo $OUTPUT->container_start(null, 'roadListPanel_global');
 echo $OUTPUT->box(null, null, 'roadListPanel');
+echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 
 

@@ -47,32 +47,8 @@ class mod_scavengerhunt_external_fetch_scavengerhunt extends external_api {
      * @return array of newly created groups
      */
     public static function fetch_scavengerhunt($idStage, $idModule) { //Don't forget to set it as static
-        global $DB;
-
         self::validate_parameters(self::fetch_scavengerhunt_parameters(), array('idStage' => $idStage, 'idModule' => $idModule));
-        //Recojo todas las features
-        $riddles_sql = 'SELECT riddle.id, riddle.name, riddle.description, road_id, num_riddle,astext(geom) as geometry FROM {scavengerhunt_riddle} AS riddle'
-                . ' inner join {scavengerhunt_roads} AS roads on riddle.road_id = roads.id WHERE scavengerhunt_id = ? ORDER BY num_riddle DESC';
-        $riddles_result = $DB->get_records_sql($riddles_sql, array($idStage));
-        $riddlesArray = array();
-        $context = context_module::instance($idModule);
-        foreach ($riddles_result as $value) {
-            $multipolygon = wkt_to_geojson($value->geometry);
-            $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
-            $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idStage, 'description' => $description);
-            $feature = new Feature(intval($value->id), $multipolygon, $attr);
-            array_push($riddlesArray, $feature);
-        }
-        $featureCollection = new FeatureCollection($riddlesArray);
-        $geojson = object_to_geojson($featureCollection);
-        //Recojo todos los caminos
-        $roads_sql = 'SELECT id, name FROM {scavengerhunt_roads} AS roads where scavengerhunt_id = ?';
-        $roads_result = $DB->get_records_sql($roads_sql, array($idStage));
-        foreach ($roads_result as &$value) {
-            $value->id = intval($value->id);
-        }
-        $roadsjson = json_encode($roads_result);
-        $fetchstage_returns = array($geojson, $roadsjson);
+        $fetchstage_returns = getScavengerhunt($idStage,$idModule);
         return $fetchstage_returns;
     }
 
@@ -316,8 +292,8 @@ class mod_scavengerhunt_external_delete_road extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function delete_road($idRiddles) { //Don't forget to set it as static
-        self::validate_parameters(self::delete_road_parameters(), array('idRiddles' => $idRiddles));
+    public static function delete_road($idRoad) { //Don't forget to set it as static
+        self::validate_parameters(self::delete_road_parameters(), array('idRoad' => $idRoad));
             deleteRoadBD($idRoad);
         return 'Eliminado';
     }

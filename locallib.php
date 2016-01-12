@@ -62,33 +62,7 @@ function object_to_geojson($text) {
     return $GeoJSON->dump($text);
 }
 
-function insertRiddleBD(stdClass $entry) {
-    GLOBAL $DB;
-    $timenow = time();
-    $idRiddle = $entry->id;
-    $name = $entry->name;
-    $road_id = $entry->road_id;
-    $num_riddle = $entry->num_riddle;
-    $description = $entry->description;
-    $descriptionformat = $entry->descriptionformat;
-    $descriptiontrust = $entry->descriptiontrust;
-    $question_id = $entry->question_id;
-    $geometryWKT = $entry->geom;
-    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
-            . 'timecreated, timemodified, question_id, geom) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),GeomFromText((?)))';
-    $params = array($idRiddle, $name, $road_id, $num_riddle, $description,
-        $descriptionformat, $descriptiontrust, $timenow, $timenow, $question_id, $geometryWKT);
-    $DB->execute($sql, $params);
-    //Como no tengo nada para saber el id, tengo que hacer otra consulta
-    $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
-            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
-    $params = array($name, $road_id, $num_riddle, $description, $descriptionformat,
-        $descriptiontrust, $timenow, $timenow);
-    //Como nos devuelve un objeto lo convierto en una variable
-    $result = $DB->get_record_sql($sql, $params);
-    $id = $result->id;
-    return $id;
-}
+
 
 function insertEntryBD(stdClass $entry) {
     GLOBAL $DB;
@@ -144,11 +118,41 @@ function updateRiddleBD(Feature $feature) {
 
 function deleteEntryBD($id) {
     GLOBAL $DB;
+    $riddle_sql = 'SELECT num_riddle,road_id FROM {scavengerhunt_riddle} WHERE id = ?';
+    $riddle_result = $DB->get_records_sql($riddle_sql, array($id));
     $table = 'scavengerhunt_riddle';
     $select = 'id = ?';
     $params = array($id);
     $DB->delete_records_select($table, $select, $params);
+    $sql = 'UPDATE mdl_scavengerhunt_riddle SET num_riddle = num_riddle - 1 WHERE road_id = (?) AND num_riddle > (?)';
+    $parms = array($riddle_result->num_riddle,$riddle_result->road_id);
+    $DB->execute($sql, $parms);
 }
 
-
-
+function getScavengerhunt($idStage,$idModule) {
+    global $DB;
+    //Recojo todas las features
+    $riddles_sql = 'SELECT riddle.id, riddle.name, riddle.description, road_id, num_riddle,astext(geom) as geometry FROM {scavengerhunt_riddle} AS riddle'
+            . ' inner join {scavengerhunt_roads} AS roads on riddle.road_id = roads.id WHERE scavengerhunt_id = ? ORDER BY num_riddle DESC';
+    $riddles_result = $DB->get_records_sql($riddles_sql, array($idStage));
+    $riddlesArray = array();
+    $context = context_module::instance($idModule);
+    foreach ($riddles_result as $value) {
+        $multipolygon = wkt_to_geojson($value->geometry);
+        $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
+        $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idStage, 'description' => $description);
+        $feature = new Feature(intval($value->id), $multipolygon, $attr);
+        array_push($riddlesArray, $feature);
+    }
+    $featureCollection = new FeatureCollection($riddlesArray);
+    $geojson = object_to_geojson($featureCollection);
+    //Recojo todos los caminos
+    $roads_sql = 'SELECT id, name FROM {scavengerhunt_roads} AS roads where scavengerhunt_id = ?';
+    $roads_result = $DB->get_records_sql($roads_sql, array($idStage));
+    foreach ($roads_result as &$value) {
+        $value->id = intval($value->id);
+    }
+    $roadsjson = json_encode($roads_result);
+    $fetchstage_returns = array($geojson, $roadsjson);
+    return $fetchstage_returns;
+}

@@ -19,14 +19,12 @@ require.config({
     },
     paths: {
         openlayers: 'openlayers/ol-debug',
-        geocoderjs: 'geocoder/geocoder',
-        selectpart: 'openlayers/selectpart',
-        turf: 'turf/turf',
+        geocoderjs: 'geocoder/geocoder'
     }
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax'], function ($, notification, str, ol, jqui, ajax) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs'], function ($, notification, str, ol, jqui, ajax, GeocoderJS) {
 
 
     var init = {
@@ -65,8 +63,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var idNewFeature = 1;
                 var Strings = getKeyValue(ajaxStrings, data);
                 //Utilizada para guardar el valor original del nombre del camino
-                var oriVal
-
+                var oriVal;
+                var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
                 /**Initialize stage and selectedRiddleFeatures******************************************************
                  */
 
@@ -84,11 +82,14 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 $("#controlPanel").addClass('ui-widget-header ui-corner-all');
                 $('<span id="edition"/>').appendTo($("#controlPanel"));
                 $('<input type="radio" name="controlPanel" id="radio1" value="add">').appendTo($("#edition"));
-                $("<label>").attr('for', "radio1").text('AÃƒÆ’Ã‚Â±adir').appendTo($("#edition"));
+                $("<label>").attr('for', "radio1").text('AÃƒÂ±adir').appendTo($("#edition"));
                 $('<input type="radio" name="controlPanel" id="radio2" value="modify">').appendTo($("#edition"));
                 $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
                 $('<button id="saveRiddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlPanel"));
                 $('<button id="removeFeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlPanel"));
+                $('<div id="searchContainer">').appendTo($("#controlPanel"));
+                $('<input id="searchAddress" type="search" placeholder="Enter a Location" class="clearable"/>').appendTo($("#searchContainer"));
+                $('<span id="searchIcon" class="ui-icon  ui-icon-search"></span>').appendTo($("#searchContainer"));
                 $('<button id="addRiddle"/>').text('Riddle').prependTo($("#controlPanel"));
                 $('<button id="addRoad"/>').text('Road').prependTo($("#controlPanel"));
                 $("#radio1").button({
@@ -117,13 +118,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
                 $("#addRiddle").button({
                     icons: {
-                        primary: " ui-icon-circle-plus"
+                        primary: "ui-icon-circle-plus"
                     }
                 });
                 $("#addRoad").button({
                     icons: {
-                        primary: " ui-icon-circle-plus"
-                    },
+                        primary: "ui-icon-circle-plus"
+                    }
                 });
                 //Lo cargo como un buttonset
                 $("#edition").buttonset();
@@ -654,7 +655,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         for (var road in stage["roads"]) {
                             if (stage["roads"].hasOwnProperty(road)) {
                                 idRoad = road;
-                                selectRoad(road, stage["roads"][road].vector, map, selectedFeatures);
+                                selectRoad(road, stage["roads"][road].vector, map);
                                 break;
                             }
                         }
@@ -686,7 +687,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 function makeRoadLisPanel(idRoad, name) {
                     //Si no existe lo agrego
                     if ($('#roadList li[idRoad="' + idRoad + '"]').length < 1) {
-                        $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList")).addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");
+                        $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList")).addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>").append("<div class='modifyRoad'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span></div>");
                     }
                 }
 
@@ -747,10 +748,9 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     $("#edition").find("input:radio").button("option", "disabled", false);
                 }
 
-                function flyTo(map, vectorSelected) {
+                function flyTo(map, extent) {
                     var duration = 500;
                     var view = map.getView();
-                    var extent = vectorSelected.getSource().getExtent();
                     var size = map.getSize();
                     var pan = ol.animation.pan({
                         duration: duration,
@@ -765,8 +765,24 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     map.beforeRender(pan, zoom);
                     view.fit(extent, size);
                 }
+                function flyToPoint(map, point) {
+                    var duration = 500;
+                    var view = map.getView();
+                    var pan = ol.animation.pan({
+                        duration: duration,
+                        source: /** @type {ol.Coordinate} */
+                                (view.getCenter()),
+                    });
+                    var zoom = ol.animation.zoom({
+                        duration: duration,
+                        resolution: view.getResolution(),
+                    });
 
-                function selectRoad(idRoad, vectorOfPolygons, map, selectedFeatures) {
+                    map.beforeRender(pan, zoom);
+                    view.setCenter(point);
+                }
+
+                function selectRoad(idRoad, vectorOfPolygons, map) {
 
                     //Limpio todas las features seleccionadas,oculto todos los li y solo muestro los que tengan el idRoad 
                     //selectRiddleFeatures(vectorOfPolygons, null, selectedFeatures);
@@ -782,7 +798,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     });
                     vectorOfPolygons.setVisible(true);
                     if (vectorOfPolygons.getSource().getFeatures().length > 0) {
-                        flyTo(map, vectorOfPolygons);
+                        flyTo(map, vectorOfPolygons.getSource().getExtent());
                     }
                 }
 
@@ -820,7 +836,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     //Coloco el mapa en la posicion de las pistas seleccionadas si la pista contiene alguna feature y 
                     //postergando el tiempo para que seleccione la nueva feature.
                     if (vectorSelected.getSource().getFeatures().length) {
-                        flyTo(map, vectorSelected);
+                        flyTo(map, vectorSelected.getSource().getExtent());
                     }
                 }
 
@@ -870,7 +886,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         console.log(response);
                         var idRoad = response[0];
                         var nameRoad = response[1];
-                        debugger;
                         var vector = new ol.layer.Vector({
                             source: new ol.source.Vector({
                                 projection: 'EPSG:3857'
@@ -889,7 +904,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
                 function updateRoad(idRoad, nameRoad) {
                     var json = ajax.call([{
-                            methodname: 'mod_scavengerhunt_update_roads',
+                            methodname: 'mod_scavengerhunt_update_road',
                             args: {
                                 nameRoad: nameRoad,
                                 idRoad: idRoad
@@ -897,6 +912,44 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }]);
                     json[0].done(function (response) {
                         console.log(response);
+                    }).fail(function (ex) {
+                        console.log(ex);
+                    });
+                }
+                function deleteRoad(idRoad, dirtySource, originalSource) {
+                    var json = ajax.call([{
+                            methodname: 'mod_scavengerhunt_delete_road',
+                            args: {
+                                idRoad: idRoad
+                            }
+                        }]);
+                    json[0].done(function (response) {
+                        console.log(response);
+                        var lis = $('#riddleList li[idRoad="' + idRoad + '"]');
+                        var li = $('#roadList li[idRoad="' + idRoad + '"]');
+                        //Elimino el li del roadList
+                        li.remove();
+                        //Elimino todos los li del riddleList
+                        lis.remove();
+                        //Elimino la feature de dirtySource si la tuviese, del originalSource y elimino el camino del stage y la capa del mapa
+                        map.removeLayer(stage["roads"][idRoad].vector);
+                        delete stage["roads"][idRoad];
+                        var features = originalSource.getFeatures();
+                        for (var i = 0; i < features.length; i++) {
+                            if (idRoad === features[i].get('idRoad'))
+                            {
+                                var dirtyFeature = dirtySource.getFeatureById(features[i].getId());
+                                if (dirtyFeature) {
+                                    dirtySource.removeFeature(dirtyFeature);
+                                }
+                                originalSource.removeFeature(features[i]);
+                            }
+                        }
+                        deactivateEdition();
+                        /*//Guardo el escenario
+                         saveRiddles(dirtySource, originalSource);
+                         $("#saveRiddle").button("option", "disabled", true);
+                         dirty = false;*/
                     }).fail(function (ex) {
                         console.log(ex);
                     });
@@ -933,6 +986,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                 if (feature.get('idFeaturesPolygons') !== 'empty') {
                                     idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                                 }
+                                originalSource.removeFeature(feature);
                             } else {
                                 if (feature.get('idFeaturesPolygons') !== 'empty') {
                                     idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
@@ -947,10 +1001,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             }
 
                         });
-                        //Guardo el escenario
-                        saveRiddles(dirtySource, originalSource);
-                        $("#saveRiddle").button("option", "disabled", true);
-                        dirty = false;
+                        /*//Guardo el escenario
+                         saveRiddles(dirtySource, originalSource);
+                         $("#saveRiddle").button("option", "disabled", true);
+                         dirty = false;*/
 
                     }).fail(function (ex) {
                         console.log(ex);
@@ -984,9 +1038,51 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         console.log(ex);
                     });
                 }
+
+                $("#searchAddress").autocomplete({
+                    minLength: 4,
+                    source: function (request, response) {
+                        var term = request.term;
+                        openStreetMapGeocoder.geocode(term, function (data) {
+                            if (!data[0]) {
+                                response();
+                                return;
+                            }
+                            var total = new Array();
+                            for (var i = 0, l = data.length; i < l; i++) {
+                                var latitude;
+                                var longitude;
+                                latitude = data[i].getLatitude();
+                                longitude = data[i].getLongitude();
+                                var result = {"value": data[i].totalName, "latitude": latitude, "longitude": longitude, "boundingbox": data[i].boundingbox};
+                                total[i] = result;
+                            }
+                            response(total);
+                        });
+                    },
+                    select: function (event, ui) {
+                        if (ui.item.boundingbox) {
+                            var extend = new Array();
+                            extend[0] = parseFloat(ui.item.boundingbox[2]);
+                            extend[1] = parseFloat(ui.item.boundingbox[0]);
+                            extend[2] = parseFloat(ui.item.boundingbox[3]);
+                            extend[3] = parseFloat(ui.item.boundingbox[1]);
+                            extend = ol.proj.transformExtent(extend, 'EPSG:4326', 'EPSG:3857');
+                            flyTo(map, extend);
+                        } else {
+                            var point = ol.proj.fromLonLat([ui.item.longitude, ui.item.latitude]);
+                            flyToPoint(map, point);
+                        }
+                    },
+                    autoFocus: true,
+                    position: { my: "left top", at: "left bottom", collision: "fit"}
+                }).on("click", function () {
+                    $(this).autocomplete("search", $(this).value);
+                });
+                ;
                 $("#addRiddle").on('click', function () {
                     var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
-                    //Si estÃƒÂ¡ sucio guardo el escenario
+                    //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                     if (dirty) {
                         saveRiddles(dirtyStage, originalStage);
                     }
@@ -1026,7 +1122,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 $("#riddleList").on('click', '.ui-icon-pencil', function () {
                     //Busco el idRiddle del li que contiene la papelera seleccionada
                     var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
-                    //Si estÃƒÂ¡ sucio guardo el escenario
+                    //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                     if (dirty) {
                         saveRiddles(dirtyStage, originalStage);
                     }
@@ -1076,19 +1172,20 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     //Paro de dibujar si cambio de camino
                     Draw.Polygon.abortDrawing_();
                     idRoad = $(this).attr('idRoad');
-                    selectRoad(idRoad, stage["roads"][idRoad].vector, map, selectedFeatures);
+                    selectRoad(idRoad, stage["roads"][idRoad].vector, map);
                     deactivateEdition();
                 });
                 $("#roadList").on('click', '.ui-icon-pencil', function () {
-                    debugger;
+                    //debugger;
                     var $div = $(this).parents("li").children(".nameRoad");
+                    var width = $div.width();
                     oriVal = $div.text();
                     $div.text("");
-                    $("<input type='text' id='modRoadName'>").val(oriVal).appendTo($div).focus();
+                    $("<input type='text' id='modRoadName'>").val(oriVal).width(width).appendTo($div).focus();
                 });
                 $("#roadList").on('focusout', 'li .nameRoad > input', function () {
                     var $this = $(this);
-                    debugger;
+                    //debugger;
                     var idRoad = $this.parents('li').attr('idRoad');
                     var nameRoad = $this.val();
                     if (nameRoad !== oriVal && nameRoad !== '') {
@@ -1096,8 +1193,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     }
                     $this.parent().text(nameRoad || oriVal);
                     $this.remove();
-
-
+                });
+                $("#roadList").on('click', '.ui-icon-trash', function () {
+                    var $this_li = $(this).parents('li');
+                    notification.confirm('Estas seguro?', 'Si la eliminas se eliminaran todas las pitas asociadas y ya no podras recuperarlas', 'Confirmar', 'Cancelar', function () {
+                        var idRoad = parseInt($this_li.attr('idRoad'));
+                        deleteRoad(idRoad, dirtyStage, originalStage);
+                    });
                 });
 
                 map.on('pointermove', function (evt) {
@@ -1118,6 +1220,19 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         return false;
                     });
                     map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                });
+                // /////
+                // CLEARABLE INPUT
+                function tog(v) {
+                    return v ? 'addClass' : 'removeClass';
+                }
+                $(document).on('input', '.clearable', function () {
+                    $(this)[tog(this.value)]('x');
+                }).on('mousemove', '.x', function (e) {
+                    $(this)[tog(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onX');
+                }).on('touchstart click', '.onX', function (ev) {
+                    ev.preventDefault();
+                    $(this).removeClass('x onX').val('').change().autocomplete( "close" );
                 });
 
 
