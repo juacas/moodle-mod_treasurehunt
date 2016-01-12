@@ -38,6 +38,10 @@ $scavengerhunt  = $DB->get_record('scavengerhunt', array('id' => $cm->instance),
 
 require_login($course, true, $cm);
 
+$context = context_module::instance($cm->id);
+
+require_capability('mod/scavengerhunt:view', $context);
+
 $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
     'objectid' => $PAGE->cm->instance,
     'context' => $PAGE->context,
@@ -82,7 +86,9 @@ echo $OUTPUT->container_end();
 echo $OUTPUT->container_start(null, 'map_global');
 echo $OUTPUT->box(null, null, 'map');
 echo $OUTPUT->container_end();
+echo $OUTPUT->container_start(null, 'roadListPanel_global');
 echo $OUTPUT->box(null, null, 'roadListPanel');
+echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 
 

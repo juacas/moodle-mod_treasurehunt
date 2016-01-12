@@ -50,5 +50,8 @@ $string['empty_ridle'] = 'La pista no tiene ninguna geometría asociada. Debe in
 $string['eventriddleupdated'] = 'La pista ha sido actualizada';
 $string['eventriddlecreated'] = 'La pista ha sido creada';
 $string['eventriddledeleted'] = 'La pista ha sido eliminada';
-
+$string['scavengerhunt:managescavenger'] = 'Administrar Caza del tesoro';
+$string['scavengerhunt:view'] = 'Ver la caza del tesoro';
+$string['scavengerhunt:addinstance'] = 'Añadir nueva caza del tesoro';
+$string['scavengerhuntislocked'] = 'Alguien está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 

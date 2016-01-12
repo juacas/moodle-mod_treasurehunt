@@ -50,3 +50,8 @@ $string['confirm_delete_riddle'] = 'The riddle(s) were removed successfully';
 $string['eventriddleupdated'] = 'Riddle has been updated';
 $string['eventriddlecreated'] = 'Riddle has been created';
 $string['eventriddledeleted'] = 'Riddle has been deleted';
+$string['scavengerhunt:managescavenger'] = 'Manage scavengerhunt';
+$string['scavengerhunt:view'] = 'View scavengerhunt';
+$string['scavengerhunt:addinstance'] = 'Add a new scavengerhunt';
+$string['scavengerhuntislocked'] = 'Someone is editing this scavengerhunt right now. Try to edit it in a few minutes.';
+

@@ -142,6 +142,7 @@ function scavengerhunt_delete_instance($id) {
         $DB->delete_records_select('scavengerhunt_riddle', 'road_id = ?', array($road->id));
     }
     $DB->delete_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
+    $DB->delete_records('scavengerhunt_locks', array('scavengerhunt_id' => $scavengerhunt->id));
     scavengerhunt_grade_item_delete($scavengerhunt);
 
     return true;
@@ -471,6 +472,9 @@ function scavengerhunt_extend_settings_navigation(settings_navigation $settingsn
 function insertRoadBD($idScavengerhunt, $nameRoad) {
     GLOBAL $DB;
     $road = new stdClass();
+    if (empty($nameRoad)) {
+        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
+    }
     $road->name = $nameRoad;
     $road->scavengerhunt_id = $idScavengerhunt;
     $road->timecreated = time();
@@ -481,6 +485,9 @@ function insertRoadBD($idScavengerhunt, $nameRoad) {
 
 function updateRoadBD($idRoad, $nameRoad) {
     GLOBAL $DB;
+    if (empty($nameRoad)) {
+        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
+    }
     $road = new stdClass();
     $road->id = $idRoad;
     $road->name = $nameRoad;

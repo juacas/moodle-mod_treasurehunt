@@ -12,23 +12,55 @@
 #map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
 /*Selectable y sortable*/
 div#riddleListPanel_global{position: relative;float:left; width: 12%;overflow: hidden; overflow-y:auto;padding-bottom: 54%;}
-div#roadListPanel{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
+div#roadListPanel_global{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
 div#riddleListPanel { width: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0;}
+div#roadListPanel{width: 88%; position: absolute;margin-left:12%;overflow-x:auto;top:0;left:0; display:block}
 ul#riddleList {width: 100%; position: relative; top:0;left:0;bottom: 0;margin:0;padding-right: 0;}
-ul#roadList {width: 88%; position: absolute;margin-left:12%;overflow-x:auto;white-space:nowrap;top:0;left:0;}
+ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0; display:table}
 ul#riddleList li,ul#roadList li{position:relative; border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                                 -moz-box-sizing: border-box;    /* Firefox, other Gecko */
                                 box-sizing: border-box;         /* Opera/IE 8+ */}
 ul#riddleList li {width: 100%;display:table;table-layout: fixed;}
-ul#roadList li {display: table; table-layout: auto;}
+ul#roadList li {display: table-cell;}
 div.handle {background: #f8f8f8; position: relative; width: 18%; cursor:n-resize; display:table-cell;vertical-align: middle}
-div.modifyRiddle{position: relative; width: 11%;  display:table-cell;vertical-align: middle; text-align: center;}
-div.nameRiddle, div.nameRoad{position: relative; width: 70%; display:table-cell; text-align: center;vertical-align: middle}
-div.nameRoad{width: 50%;padding-top:12%;padding-bottom: 12%}
-input#modRoadName{width: 100%;}
+div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20%;}
+div.nameRiddle, div.nameRoad{position: relative; display:table-cell; text-align: center;vertical-align: middle}
+div.nameRoad{}
+input#modRoadName{text-align: center;}
 .ui-selecting { background: #eee; }
 .ui-selected { background: rgba(22,145,190,0.2); }
 .sortable-number { font-weight: bold;}
 .ui-icon-alert {cursor:help;}
 .ui-icon-trash, .ui-icon-pencil {cursor:pointer;}
+.ui-autocomplete-loading {
+    background: white url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
+}
+/** Usado para meter el icono dentro del input**/
+#searchContainer {
+    display: inline-block;
+    position:relative;
+    padding:0;
+    margin-left: 1%;
+}
+#searchAddress {
+    margin:0;
+    padding-left: 30px;
+}
+#searchIcon {
+    position:absolute;
+    bottom:8px;
+    left:9px;
+    width:15px;
+}
+/**usado para mostrar la x dentro de la búsqueda **/
+.clearable{
+    background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
+    border: 1px solid #999;
+    padding: 3px 18px 3px 4px; /* Use the same right padding (18) in jQ! */
+    border-radius: 3px;
+    transition: background 0.4s;
+}
+.clearable.x  { background-position: right 5px center; }
+.clearable.onX{ cursor: pointer; }
+.clearable::-ms-clear {display: none; width:0; height:0;}

@@ -15,13 +15,9 @@ $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
 
 
-if ($cmid) {
-    $cm = get_coursemodule_from_id('scavengerhunt', $cmid, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
-} else {
-    print_error('invalidcoursemodule');
-}
+list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'scavengerhunt');
+$scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
+
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
@@ -32,76 +28,82 @@ if (!empty($id)) {
 $PAGE->set_url($url);
 $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
 
-if ($id) { // if entry is specified
-    $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
-    $parms = array('id' => $id);
-    if (!$entry = $DB->get_record_sql($sql, $parms)) {
-        print_error('invalidentry');
+if (!$lock = isLockScavengerhunt($cm->instance)) {
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance));
+
+    if ($id) { // if entry is specified
+        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
+        $parms = array('id' => $id);
+        if (!$entry = $DB->get_record_sql($sql, $parms)) {
+            print_error('invalidentry');
+        }
+    } else { // new entry
+        $entry = new stdClass();
+        $entry->id = null;
+        $entry->road_id = required_param('road_id', PARAM_INT);
+        $entry->num_riddle = required_param('num_riddle', PARAM_INT);
     }
-} else { // new entry
-    $entry = new stdClass();
-    $entry->id = null;
-    $entry->road_id = required_param('road_id', PARAM_INT); 
-    $entry->num_riddle = required_param('num_riddle', PARAM_INT); 
-
-}
-$entry->cmid = $cmid;
-$maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
-$descriptionoptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-    'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
-$entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
+    $entry->cmid = $cmid;
+    $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
+    $descriptionoptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
+        'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
+    $entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
 
-$mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions)); //name of the form you defined in file above.
+    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions)); //name of the form you defined in file above.
 
-if ($mform->is_cancelled()) {
+    if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
 // here you tell php what to do if your user presses cancel
 // probably a redirect is called for!
 // PLEASE NOTE: is_cancelled() should be called before get_data().
-    redirect($returnurl);
-} else if ($entry = $mform->get_data()) {
-    //Actualizamos los campos
-    $entry->name = trim($entry->name);
-    $entry->description = '';          // updated later
-    $entry->descriptionformat = FORMAT_HTML; // updated later
-    $entry->descriptiontrust = 0;           // updated later
-    $entry->question_id = null;
-    if (empty($entry->id)) {
-        $entry->id = insertEntryBD($entry);
-        $isnewentry              = true;
-    }else{
-        $isnewentry              = false;
-    }
-    // This branch is where you process validated data.
-    // Do stuff ...
-    // Typically you finish up by redirecting to somewhere where the user
-    // can see what they did.
-    // save and relink embedded images and save attachments
-    $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
+        redirect($returnurl);
+    } else if ($entry = $mform->get_data()) {
+        //Actualizamos los campos
+        $entry->name = trim($entry->name);
+        $entry->description = '';          // updated later
+        $entry->descriptionformat = FORMAT_HTML; // updated later
+        $entry->descriptiontrust = 0;           // updated later
+        $entry->question_id = null;
+        if (empty($entry->id)) {
+            $entry->id = insertEntryBD($entry);
+            $isnewentry = true;
+        } else {
+            $isnewentry = false;
+        }
+        // This branch is where you process validated data.
+        // Do stuff ...
+        // Typically you finish up by redirecting to somewhere where the user
+        // can see what they did.
+        // save and relink embedded images and save attachments
+        $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
-    // store the updated value values
-    updateEntryBD($entry);
-    // Trigger event and update completion (if entry was created).
-    $eventparams = array(
-        'context' => $context,
-        'objectid' => $entry->id,
-        'other' => array('name' => $entry->name)
-    );
-    if ($isnewentry) {
-        $event = \mod_scavengerhunt\event\riddle_created::create($eventparams);
-    } else {
-        $event = \mod_scavengerhunt\event\riddle_updated::create($eventparams);
+        // store the updated value values
+        updateEntryBD($entry);
+        // Trigger event and update completion (if entry was created).
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $entry->id,
+            'other' => array('name' => $entry->name)
+        );
+        if ($isnewentry) {
+            $event = \mod_scavengerhunt\event\riddle_created::create($eventparams);
+        } else {
+            $event = \mod_scavengerhunt\event\riddle_updated::create($eventparams);
+        }
+        $event->trigger();
+        redirect($returnurl);
     }
-    $event->trigger();
-    redirect($returnurl);
 }
-$PAGE->set_title('Caza del tesoro');
-$PAGE->set_heading('Prueba');
+$PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 echo $OUTPUT->heading("A heading here");
-$mform->display();
+if ($lock) {
+    echo $OUTPUT->box(get_string('scavengerhuntislocked', 'scavengerhunt'), 'generalbox boxwidthnormal boxaligncenter');
+} else {
+    $mform->display();
+}
 echo $OUTPUT->footer();
 
 
