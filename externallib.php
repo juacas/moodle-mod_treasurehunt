@@ -59,7 +59,7 @@ class mod_scavengerhunt_external_fetch_scavengerhunt extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:getscavengerhunt', $context);
         list($scavengerhunt['riddles'], $scavengerhunt['roads']) = getScavengerhunt($idScavengerhunt, $context);
-        $status = 'La caza del tesoro se ha cargado con Ã©xito';
+        $status = 'La caza del tesoro se ha cargado con éxito';
 
         $result = array();
         $result['scavengerhunt'] = $scavengerhunt;
@@ -122,7 +122,7 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
                 updateRiddleBD($feature);
             }
             $transaction->allow_commit();
-            $status = 'La actualizaciÃ³n de las pistas se ha realizado con Ã©xito';
+            $status = 'La actualización de las pistas se ha realizado con éxito';
         } catch (Exception $e) {
             $transaction->rollback($e);
         }
@@ -179,7 +179,7 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         deleteEntryBD($idRiddle);
-        $status = 'La eliminaciÃ³n de la pista se ha realizado con Ã©xito';
+        $status = 'La eliminación de la pista se ha realizado con éxito';
 
         $result = array();
         $result['status'] = $status;
@@ -245,7 +245,7 @@ class mod_scavengerhunt_external_add_road extends external_api {
         }
         $road['id'] = $id;
         $road['name'] = $nameRoad;
-        $status = 'El nuevo camino se ha generado con Ã©xito';
+        $status = 'El nuevo camino se ha generado con éxito';
 
         $result = array();
         $result['road'] = $road;
@@ -301,7 +301,7 @@ class mod_scavengerhunt_external_update_road extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         updateRoadBD($idRoad, $nameRoad);
-        $status = 'El camino se ha actualizado con Ã©xito';
+        $status = 'El camino se ha actualizado con éxito';
 
         $result = array();
         $result['status'] = $status;
@@ -355,7 +355,7 @@ class mod_scavengerhunt_external_delete_road extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         deleteRoadBD($idRoad);
-        $status = 'El camino se ha eliminado con Ã©xito';
+        $status = 'El camino se ha eliminado con éxito';
 
         $result = array();
         $result['status'] = $status;
