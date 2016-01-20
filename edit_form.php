@@ -74,8 +74,6 @@ class riddle_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'road_id');
         $mform->setType('road_id', PARAM_INT);
-        $mform->addElement('hidden', 'num_riddle');
-        $mform->setType('num_riddle', PARAM_INT);
         
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);

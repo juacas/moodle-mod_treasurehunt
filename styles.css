@@ -1,22 +1,22 @@
 #edition label {
-    display: inline-block; margin: 0; width: 5%; 
+    display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
 /*Si no se me pone un background-image posterior*/
 #map button{
     background-image: none;
 }
-#addRiddle, #addRoad{width: 10%; margin:0; margin-left: 1%;margin-right:1%;}
-#saveRiddle,#removeFeature {margin:0;margin-left: 1%; }
-#controlPanel{margin:0}
-#map_global{float:right; width:88%; position: relative;overflow: hidden;padding-bottom: 54%; }
+#addRiddle, #addRoad{margin:0 auto; margin-left: 1%;margin-right:1%;}
+#saveRiddle,#removeFeature {margin:0 auto;margin-left: 1%; }
+#controlPanel{margin:0 auto}
+#map_global{position: relative;overflow: hidden;padding-bottom: 54%; }
 #map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
 /*Selectable y sortable*/
-div#riddleListPanel_global{position: relative;float:left; width: 12%;overflow: hidden; overflow-y:auto;padding-bottom: 54%;}
+div#riddleListPanel_global{position: relative;float:left;width: 100px;overflow: hidden; overflow-y:auto;padding-bottom: 54%;}
 div#roadListPanel_global{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
-div#riddleListPanel { width: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0;}
-div#roadListPanel{width: 88%; position: absolute;margin-left:12%;overflow-x:auto;top:0;left:0; display:block}
-ul#riddleList {width: 100%; position: relative; top:0;left:0;bottom: 0;margin:0;padding-right: 0;}
-ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0; display:table}
+div#riddleListPanel { width: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto;}
+div#roadListPanel{width: 100%; position: absolute;overflow-x:auto;top:0;left:0; display:block}
+ul#riddleList {/*width: 100%;*/ position: relative; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
+ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
 ul#riddleList li,ul#roadList li{position:relative; border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                                 -moz-box-sizing: border-box;    /* Firefox, other Gecko */
@@ -25,7 +25,7 @@ ul#riddleList li {width: 100%;display:table;table-layout: fixed;}
 ul#roadList li {display: table-cell;}
 div.handle {background: #f8f8f8; position: relative; width: 18%; cursor:n-resize; display:table-cell;vertical-align: middle}
 div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20%;}
-div.nameRiddle, div.nameRoad{position: relative; display:table-cell; text-align: center;vertical-align: middle}
+div.nameRiddle, div.nameRoad{position: relative; display:table-cell; text-align: center;vertical-align: middle;word-wrap: break-word;}
 div.nameRoad{}
 input#modRoadName{text-align: center;}
 .ui-selecting { background: #eee; }
@@ -44,7 +44,7 @@ input#modRoadName{text-align: center;}
     margin-left: 1%;
 }
 #searchAddress {
-    margin:0;
+    margin:0 auto;
     padding-left: 30px;
 }
 #searchIcon {

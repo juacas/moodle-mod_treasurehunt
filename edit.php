@@ -26,6 +26,9 @@ if (!empty($id)) {
     $url->param('id', $id);
 }
 $PAGE->set_url($url);
+
+require_capability('mod/scavengerhunt:managescavenger', $context);
+
 $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
 
 if (!$lock = isLockScavengerhunt($cm->instance)) {
@@ -41,7 +44,7 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
         $entry = new stdClass();
         $entry->id = null;
         $entry->road_id = required_param('road_id', PARAM_INT);
-        $entry->num_riddle = required_param('num_riddle', PARAM_INT);
+        $entry->num_riddle = optional_param('num_riddle', null, PARAM_INT);
     }
     $entry->cmid = $cmid;
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
@@ -98,7 +101,7 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
-echo $OUTPUT->heading("A heading here");
+echo $OUTPUT->heading(format_string($scavengerhunt->name));
 if ($lock) {
     echo $OUTPUT->box(get_string('scavengerhuntislocked', 'scavengerhunt'), 'generalbox boxwidthnormal boxaligncenter');
 } else {

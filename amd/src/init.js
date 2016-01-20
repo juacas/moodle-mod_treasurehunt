@@ -19,13 +19,12 @@ require.config({
     },
     paths: {
         openlayers: 'openlayers/ol-debug',
-        geocoderjs: 'geocoder/geocoder',
-        renewlock : '../amd/src/renewlock'
+        geocoderjs: 'geocoder/geocoder'
     }
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs','renewlock'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, rl) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs'], function ($, notification, str, ol, jqui, ajax, GeocoderJS) {
 
 
     var init = {
@@ -67,7 +66,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
                 /**Initialize stage and selectedRiddleFeatures******************************************************
                  */
-                rl.renewLockScavengerhunt(idScavengerhunt);
 
                 function getKeyValue(key, value) {
                     var object = new Object();
@@ -168,7 +166,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     var newVal;
                     var $item = $($listitems).get([i]);
                     var idRoad = $($item).attr('idRoad');
-                    newVal = Math.abs($($item).index('li[idRoad="' + idRoad + '"]') - $listlength) - 1;
+                    newVal = Math.abs($($item).index('li[idRoad="' + idRoad + '"]') - $listlength);
                     $($item).attr('numRiddle', newVal);
                     $($item).find('.sortable-number').text(newVal);
                     //Si esta seleccionado cambiamos el valor de numRiddle
@@ -180,6 +178,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                 //Creo el roadListPanel
                 $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
+
                 /** Get style, vectors, map and interactions ***************************************************************
                  */
                 var defaultRiddleStyle = new ol.style.Style({
@@ -875,8 +874,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     window.location.href = url;
                 }
 
-                function newFormEntry(numRiddle, idRoad, idModule) {
-                    var url = "edit.php?cmid=" + idModule + "&road_id=" + idRoad + "&num_riddle=" + numRiddle;
+                function newFormEntry(idRoad, idModule) {
+                    var url = "edit.php?cmid=" + idModule + "&road_id=" + idRoad;
                     window.location.href = url;
                 }
 
@@ -1103,7 +1102,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     if (dirty) {
                         saveRiddles(dirtyStage, originalStage, idScavengerhunt);
                     }
-                    newFormEntry(numRiddle, idRoad, idModule);
+                    newFormEntry(idRoad, idModule);
 
                 });
                 $("#addRoad").on('click', function () {

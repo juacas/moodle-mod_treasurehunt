@@ -65,24 +65,28 @@ function object_to_geojson($text) {
 function insertEntryBD(stdClass $entry) {
     GLOBAL $DB;
     $timenow = time();
-    $idRiddle = $entry->id;
     $name = $entry->name;
     $road_id = $entry->road_id;
-    $num_riddle = $entry->num_riddle;
     $description = $entry->description;
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
     $question_id = $entry->question_id;
-    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (id, name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
-            . 'timecreated, timemodified, question_id) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?))';
-    $params = array($idRiddle, $name, $road_id, $num_riddle, $description,
-        $descriptionformat, $descriptiontrust, $timenow, $timenow, $question_id);
+    if (isset($entry->num_riddle)) {
+        $num_riddle = $entry->num_riddle;
+    } else {
+        $num_riddle = $DB->get_record_sql('SELECT count(id) + 1 as num_riddle FROM mdl_scavengerhunt_riddle where road_id = (?)', array($road_id));
+        $num_riddle = $num_riddle->num_riddle;
+    }
+    $sql = 'INSERT INTO mdl_scavengerhunt_riddle (name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
+            . 'timecreated, question_id) VALUES ((?),(?),(?),(?),(?),(?),(?),(?))';
+    $params = array($name, $road_id, $num_riddle, $description,
+        $descriptionformat, $descriptiontrust, $timenow, $question_id);
     $DB->execute($sql, $params);
 //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddle  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
-            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ? AND timemodified = ?';
+            . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ?';
     $params = array($name, $road_id, $num_riddle, $description, $descriptionformat,
-        $descriptiontrust, $timenow, $timenow);
+        $descriptiontrust, $timenow);
 //Como nos devuelve un objeto lo convierto en una variable
     $result = $DB->get_record_sql($sql, $params);
     $id = $result->id;
@@ -117,7 +121,7 @@ function updateRiddleBD(Feature $feature) {
 function deleteEntryBD($id) {
     GLOBAL $DB;
     $riddle_sql = 'SELECT num_riddle,road_id FROM {scavengerhunt_riddle} WHERE id = ?';
-    $riddle_result = $DB->get_records_sql($riddle_sql, array($id));
+    $riddle_result = $DB->get_record_sql($riddle_sql, array($id));
     $table = 'scavengerhunt_riddle';
     $select = 'id = ?';
     $params = array($id);
@@ -156,7 +160,7 @@ function getScavengerhunt($idScavengerhunt, $context) {
 
 function renewLockScavengerhunt($idScavengerhunt) {
     global $DB, $USER;
-    
+
     $table = 'scavengerhunt_locks';
     $userid = $USER->id;
     $params = array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid);

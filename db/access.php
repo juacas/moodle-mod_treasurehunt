@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -43,7 +44,6 @@
  * @copyright  2015 Adrian
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 // Modify capabilities as needed and remove this comment.
@@ -58,7 +58,6 @@ $capabilities = array(
         ),
         'clonepermissionsfrom' => 'moodle/course:manageactivities'
     ),
-
     'mod/scavengerhunt:view' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
@@ -70,7 +69,6 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-
     'mod/scavengerhunt:submit' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
@@ -79,8 +77,7 @@ $capabilities = array(
             'student' => CAP_ALLOW
         )
     ),
-     'mod/scavengerhunt:managescavenger' => array(
-
+    'mod/scavengerhunt:managescavenger' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -89,7 +86,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-     'mod/scavengerhunt:getscavengerhunt' => array(
+    'mod/scavengerhunt:getscavengerhunt' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
@@ -98,5 +95,40 @@ $capabilities = array(
             'teacher' => CAP_ALLOW
         )
     ),
-
+    'mod/scavengerhunt:editroad' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW
+        )
+    ),
+    'mod/scavengerhunt:editriddle' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW
+        )
+    ),
+        'mod/scavengerhunt:addriddle' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW
+        )
+    ),
+        'mod/scavengerhunt:addriddle' => array(
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'archetypes' => array(
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW
+        )
+    ),
 );
