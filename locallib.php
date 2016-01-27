@@ -30,6 +30,7 @@ require_once("$CFG->dirroot/mod/scavengerhunt/lib.php");
 require_once (dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
 
 
+
 //Cargo las clases necesarias de un objeto GeoJSON
 spl_autoload_register(array('GeoJSON', 'autoload'));
 /*
@@ -42,15 +43,15 @@ spl_autoload_register(array('GeoJSON', 'autoload'));
  * }
  */
 
-function geojson_to_wkt($text) {
-    $WKT = new WKT();
-    return $WKT->write($text);
-}
+ function object_to_wkt($text) {
+  $WKT = new WKT();
+  return $WKT->write($text);
+  }
 
-function wkt_to_geojson($text) {
-    $WKT = new WKT();
-    return $WKT->read($text);
-}
+  function wkt_to_object($text) {
+  $WKT = new WKT();
+  return $WKT->read($text);
+  } 
 
 function geojson_to_object($text) {
     $GeoJSON = new GeoJSON();
@@ -61,6 +62,8 @@ function object_to_geojson($text) {
     $GeoJSON = new GeoJSON();
     return $GeoJSON->dump($text);
 }
+
+/* ------------------------------------------------------------------------------ */
 
 function insertEntryBD(stdClass $entry) {
     GLOBAL $DB;
@@ -110,7 +113,7 @@ function updateEntryBD(stdClass $entry) {
 function updateRiddleBD(Feature $feature) {
     GLOBAL $DB;
     $numRiddle = $feature->getProperty('numRiddle');
-    $geometryWKT = geojson_to_wkt($feature->getGeometry());
+    $geometryWKT = object_to_wkt($feature->getGeometry());
     $timemodified = time();
     $idRiddle = $feature->getId();
     $sql = 'UPDATE mdl_scavengerhunt_riddle SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddle.id = (?)';
@@ -139,13 +142,15 @@ function getScavengerhunt($idScavengerhunt, $context) {
     $riddles_result = $DB->get_records_sql($riddles_sql, array($idScavengerhunt));
     $riddlesArray = array();
     foreach ($riddles_result as $value) {
-        $multipolygon = wkt_to_geojson($value->geometry);
+        $multipolygon = wkt_to_object($value->geometry);
         $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
         $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idScavengerhunt, 'description' => $description);
         $feature = new Feature(intval($value->id), $multipolygon, $attr);
         array_push($riddlesArray, $feature);
     }
     $featureCollection = new FeatureCollection($riddlesArray);
+    /*prueba*/
+//    $intersect = $riddlesArray[0]->getGeometry()->intersects($riddlesArray[1]->getGeometry());
     $geojson = object_to_geojson($featureCollection);
 //Recojo todos los caminos
     $roads_sql = 'SELECT id, name FROM {scavengerhunt_roads} AS roads where scavengerhunt_id = ?';
@@ -164,24 +169,39 @@ function renewLockScavengerhunt($idScavengerhunt) {
     $table = 'scavengerhunt_locks';
     $userid = $USER->id;
     $params = array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid);
-    $time = time() + 30;
+    $time = time() + 120;
     $lock = $DB->get_record($table, $params);
 
     if (!empty($lock)) {
         $DB->update_record($table, array('id' => $lock->id, 'lockedat' => $time));
+        return $lock->id;
     } else {
-        $DB->insert_record($table, array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid, 'lockedat' => $time));
+        return $DB->insert_record($table, array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid, 'lockedat' => $time));
     }
 }
 
 function isLockScavengerhunt($idScavengerhunt) {
     global $DB, $USER;
-    $sql = "scavengerhunt_id = ? AND lockedat > ? AND user_id != ?";
+    deleteOldLocks($idScavengerhunt);
+    $select = "scavengerhunt_id = ? AND lockedat > ? AND user_id != ?";
     $params = array($idScavengerhunt, time(), $USER->id);
-    return $DB->record_exists_select('scavengerhunt_locks', $sql, $params);
+    return $DB->record_exists_select('scavengerhunt_locks', $select, $params);
 }
 
-function deleteOldLocks() {
+function idLockIsValid($idLock) {
     global $DB;
-    $DB->delete_records_select('scavengerhunt_locks', "lockedat < ?", array(time() - 3600));
+    return $DB->record_exists_select('scavengerhunt_locks', "id = ?", array($idLock));
+}
+
+function deleteOldLocks($idScavengerhunt) {
+    global $DB;
+    $DB->delete_records_select('scavengerhunt_locks', "lockedat < ? AND scavengerhunt_id = ? ", array(time(), $idScavengerhunt));
+}
+
+function checkLock($idScavengerhunt, $idLock) {
+    if (!isLockScavengerhunt($idScavengerhunt) && idLockIsValid($idLock)) {
+        return true;
+    } else {
+        return false;
+    }
 }

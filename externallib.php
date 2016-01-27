@@ -39,7 +39,10 @@ class mod_scavengerhunt_external_fetch_scavengerhunt extends external_api {
                     array(
                 'riddles' => new external_value(PARAM_RAW, 'geojson with all riddles of the scavengerhunt'),
                 'roads' => new external_value(PARAM_RAW, 'json with all roads of the stage'))),
-            'status' => new external_value(PARAM_RAW, 'status of fetch scavengerhunt')
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
                 )
         );
     }
@@ -53,13 +56,15 @@ class mod_scavengerhunt_external_fetch_scavengerhunt extends external_api {
         self::validate_parameters(self::fetch_scavengerhunt_parameters(), array('idScavengerhunt' => $idScavengerhunt));
 
         $scavengerhunt = array();
+        $status = array();
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:getscavengerhunt', $context);
         list($scavengerhunt['riddles'], $scavengerhunt['roads']) = getScavengerhunt($idScavengerhunt, $context);
-        $status = 'La caza del tesoro se ha cargado con éxito';
+        $status['code'] = 0;
+        $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
 
         $result = array();
         $result['scavengerhunt'] = $scavengerhunt;
@@ -89,7 +94,8 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
         return new external_function_parameters(
                 array(
             'riddles' => new external_value(PARAM_RAW, 'GeoJSON with all riddles to update'),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -97,7 +103,10 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
     public static function update_riddles_returns() {
         return new external_single_structure(
                 array(
-            'status' => new external_value(PARAM_RAW, 'status of update riddle'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
         ));
     }
 
@@ -106,25 +115,34 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function update_riddles($riddles, $idScavengerhunt) { //Don't forget to set it as static
+    public static function update_riddles($riddles, $idScavengerhunt, $idLock) { //Don't forget to set it as static
         global $DB;
-        self::validate_parameters(self::update_riddles_parameters(), array('riddles' => $riddles, 'idScavengerhunt' => $idScavengerhunt));
+        self::validate_parameters(self::update_riddles_parameters(), array('riddles' => $riddles, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
+        require_capability('mod/scavengerhunt:editriddle', $context);
         $features = geojson_to_object($riddles);
-        try {
-            $transaction = $DB->start_delegated_transaction();
-            foreach ($features as $feature) {
-                updateRiddleBD($feature);
+        if (checkLock($idScavengerhunt, $idLock)) {
+            try {
+                $transaction = $DB->start_delegated_transaction();
+                foreach ($features as $feature) {
+                    updateRiddleBD($feature);
+                }
+                $transaction->allow_commit();
+                $status['code'] = 0;
+                $status['msg'] = 'La actualización de las pistas se ha realizado con éxito';
+            } catch (Exception $e) {
+                $transaction->rollback($e);
+                $status['code'] = 1;
+                $status['msg'] = $e;
             }
-            $transaction->allow_commit();
-            $status = 'La actualización de las pistas se ha realizado con éxito';
-        } catch (Exception $e) {
-            $transaction->rollback($e);
+        } else {
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
         $result = array();
         $result['status'] = $status;
@@ -153,7 +171,8 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
         return new external_function_parameters(
                 array(
             'idRiddle' => new external_value(PARAM_RAW, 'id of riddle'),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -161,7 +180,10 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
     public static function delete_riddle_returns() {
         return new external_single_structure(
                 array(
-            'status' => new external_value(PARAM_RAW, 'status of delete riddle'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
         ));
     }
 
@@ -170,16 +192,23 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function delete_riddle($idRiddle, $idScavengerhunt) { //Don't forget to set it as static
-        self::validate_parameters(self::delete_riddle_parameters(), array('idRiddle' => $idRiddle, 'idScavengerhunt' => $idScavengerhunt));
+    public static function delete_riddle($idRiddle, $idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::delete_riddle_parameters(), array('idRiddle' => $idRiddle, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        deleteEntryBD($idRiddle);
-        $status = 'La eliminación de la pista se ha realizado con éxito';
+        require_capability('mod/scavengerhunt:editriddle', $context);
+        if (checkLock($idScavengerhunt, $idLock)) {
+            deleteEntryBD($idRiddle);
+            $status['code'] = 0;
+            $status['msg'] = 'La eliminación de la pista se ha realizado con éxito';
+        } else {
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+        }
 
         $result = array();
         $result['status'] = $status;
@@ -208,7 +237,8 @@ class mod_scavengerhunt_external_add_road extends external_api {
         return new external_function_parameters(
                 array(
             'nameRoad' => new external_value(PARAM_RAW, 'collection id riddles in JSON format', VALUE_OPTIONAL),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -220,7 +250,10 @@ class mod_scavengerhunt_external_add_road extends external_api {
                     array(
                 'id' => new external_value(PARAM_INT, 'id of road'),
                 'name' => new external_value(PARAM_RAW, 'name of road'))),
-            'status' => new external_value(PARAM_RAW, 'status of add new road'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
         ));
     }
 
@@ -229,8 +262,8 @@ class mod_scavengerhunt_external_add_road extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function add_road($nameRoad, $idScavengerhunt) { //Don't forget to set it as static
-        self::validate_parameters(self::add_road_parameters(), array('nameRoad' => $nameRoad, 'idScavengerhunt' => $idScavengerhunt));
+    public static function add_road($nameRoad, $idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::add_road_parameters(), array('nameRoad' => $nameRoad, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 
         $road = array();
 
@@ -238,15 +271,21 @@ class mod_scavengerhunt_external_add_road extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        if (!$nameRoad) {
-            list($id, $nameRoad) = addDefaultRoad($idScavengerhunt);
+        require_capability('mod/scavengerhunt:addroad', $context);
+        if (checkLock($idScavengerhunt, $idLock)) {
+            if (!$nameRoad) {
+                list($id, $nameRoad) = addDefaultRoad($idScavengerhunt);
+            } else {
+                $id = insertRoadBD($idScavengerhunt, $nameRoad);
+            }
+            $road['id'] = $id;
+            $road['name'] = $nameRoad;
+            $status['code'] = 0;
+            $status['msg'] = 'El nuevo camino se ha generado con éxito';
         } else {
-            $id = insertRoadBD($idScavengerhunt, $nameRoad);
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
-        $road['id'] = $id;
-        $road['name'] = $nameRoad;
-        $status = 'El nuevo camino se ha generado con éxito';
-
         $result = array();
         $result['road'] = $road;
         $result['status'] = $status;
@@ -276,7 +315,8 @@ class mod_scavengerhunt_external_update_road extends external_api {
                 array(
             'nameRoad' => new external_value(PARAM_RAW, 'new name for road'),
             'idRoad' => new external_value(PARAM_INT, 'id of road'),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -284,7 +324,10 @@ class mod_scavengerhunt_external_update_road extends external_api {
     public static function update_road_returns() {
         return new external_single_structure(
                 array(
-            'status' => new external_value(PARAM_RAW, 'status of update road'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
         ));
     }
 
@@ -293,15 +336,22 @@ class mod_scavengerhunt_external_update_road extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function update_road($nameRoad, $idRoad, $idScavengerhunt) { //Don't forget to set it as static
-        self::validate_parameters(self::update_road_parameters(), array('nameRoad' => $nameRoad, 'idRoad' => $idRoad, 'idScavengerhunt' => $idScavengerhunt));
+    public static function update_road($nameRoad, $idRoad, $idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::update_road_parameters(), array('nameRoad' => $nameRoad, 'idRoad' => $idRoad, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        updateRoadBD($idRoad, $nameRoad);
-        $status = 'El camino se ha actualizado con éxito';
+        require_capability('mod/scavengerhunt:editroad', $context);
+        if (checkLock($idScavengerhunt, $idLock)) {
+            updateRoadBD($idRoad, $nameRoad);
+            $status['code'] = 0;
+            $status['msg'] = 'El camino se ha actualizado con éxito';
+        } else {
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+        }
 
         $result = array();
         $result['status'] = $status;
@@ -330,7 +380,8 @@ class mod_scavengerhunt_external_delete_road extends external_api {
         return new external_function_parameters(
                 array(
             'idRoad' => new external_value(PARAM_INT, 'id of road'),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -338,7 +389,10 @@ class mod_scavengerhunt_external_delete_road extends external_api {
     public static function delete_road_returns() {
         return new external_single_structure(
                 array(
-            'status' => new external_value(PARAM_RAW, 'status of delete road'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
         ));
     }
 
@@ -347,15 +401,22 @@ class mod_scavengerhunt_external_delete_road extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function delete_road($idRoad, $idScavengerhunt) { //Don't forget to set it as static
-        self::validate_parameters(self::delete_road_parameters(), array('idRoad' => $idRoad, 'idScavengerhunt' => $idScavengerhunt));
+    public static function delete_road($idRoad, $idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::delete_road_parameters(), array('idRoad' => $idRoad, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        deleteRoadBD($idRoad);
-        $status = 'El camino se ha eliminado con éxito';
+        require_capability('mod/scavengerhunt:editroad', $context);
+        if (checkLock($idScavengerhunt, $idLock)) {
+            deleteRoadBD($idRoad);
+            $status['code'] = 0;
+            $status['msg'] = 'El camino se ha eliminado con éxito';
+        } else {
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+        }
 
         $result = array();
         $result['status'] = $status;
@@ -383,7 +444,8 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
     public static function renew_lock_parameters() {
         return new external_function_parameters(
                 array(
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt')
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock')
                 )
         );
     }
@@ -391,8 +453,13 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
     public static function renew_lock_returns() {
         return new external_single_structure(
                 array(
-            'status' => new external_value(PARAM_RAW, 'status of renew lock'),
-        ));
+            'idLock' => new external_value(PARAM_INT, 'id of lock'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
+                )
+        );
     }
 
     /**
@@ -400,21 +467,24 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function renew_lock($idScavengerhunt) { //Don't forget to set it as static
-        self::validate_parameters(self::renew_lock_parameters(), array('idScavengerhunt' => $idScavengerhunt));
+    public static function renew_lock($idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::renew_lock_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        if (!isLockScavengerhunt($idScavengerhunt)) {
-            renewLockScavengerhunt($idScavengerhunt);
-            $status = 'Se ha renovado con exito';
+        if (checkLock($idScavengerhunt, $idLock)) {
+            $idLock = renewLockScavengerhunt($idScavengerhunt);
+            $status['code'] = 0;
+            $status['msg'] = 'Se ha renovado el bloqueo con exito';
         } else {
-            $status = 'Ya hay alguien editando esta caza del tesoro';
+            $status['code'] = 1;
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
         $result = array();
         $result['status'] = $status;
+        $result['idLock'] = $idLock;
         return $result;
     }
 

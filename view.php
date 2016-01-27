@@ -67,11 +67,14 @@ $PAGE->set_pagelayout('standard');
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
 if (!$lock = isLockScavengerhunt($cm->instance)) {
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance));
+    //Get strings for init js
+    $strings = get_strings(array('insert_riddle','insert_road','empty_ridle'),'scavengerhunt');
+    $idLock = renewLockScavengerhunt($cm->instance);
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance,$idLock));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/init', 'init', array($id, $cm->instance));
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/init', 'init', array($id, $cm->instance,$strings,$idLock));
     $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 }
 // Output starts here.

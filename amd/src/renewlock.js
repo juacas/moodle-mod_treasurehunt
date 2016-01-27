@@ -4,15 +4,16 @@
  * and open the template in the editor.
  */
 
-define(['jquery', 'core/notification', 'core/str', 'core/ajax'], function ($, notification, str, ajax) {
+define(['jquery', 'core/notification','core/ajax'], function ($, notification, ajax) {
 
     var repeat;
     var renewLock = {
-        renewLockAjax: function (idScavengerhunt) {
+        renewLockAjax: function (idScavengerhunt,idLock) {
             var json = ajax.call([{
                     methodname: 'mod_scavengerhunt_renew_lock',
                     args: {
-                        idScavengerhunt: idScavengerhunt
+                        idScavengerhunt: idScavengerhunt,
+                        idLock: idLock
                     }
                 }]);
             json[0].done(function (response) {
@@ -25,13 +26,16 @@ define(['jquery', 'core/notification', 'core/str', 'core/ajax'], function ($, no
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
-        renewLockScavengerhunt: function (idScavengerhunt) {
-            renewLock.renewLockAjax(idScavengerhunt);
-            repeat = setInterval(renewLock.renewLockAjax, 15000, idScavengerhunt);
+        renewLockScavengerhunt: function (idScavengerhunt,idLock) {
+            repeat = setInterval(renewLock.renewLockAjax, 90000, idScavengerhunt,idLock);
         },
         stopRenewLockScavengerhunt: function () {
             clearInterval(repeat);
+        },
+        getIdLock: function () {
+            return idLock;
         }
+        
     };
     return renewLock;
 });

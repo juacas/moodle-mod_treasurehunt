@@ -122,7 +122,7 @@ $capabilities = array(
             'teacher' => CAP_ALLOW
         )
     ),
-        'mod/scavengerhunt:addriddle' => array(
+        'mod/scavengerhunt:addroad' => array(
         'captype' => 'read',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(

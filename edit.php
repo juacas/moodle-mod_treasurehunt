@@ -28,11 +28,13 @@ if (!empty($id)) {
 $PAGE->set_url($url);
 
 require_capability('mod/scavengerhunt:managescavenger', $context);
+require_capability('mod/scavengerhunt:addriddle', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
 
 if (!$lock = isLockScavengerhunt($cm->instance)) {
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance));
+    $idLock=renewLockScavengerhunt($cm->instance);
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance,$idLock));
 
     if ($id) { // if entry is specified
         $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';

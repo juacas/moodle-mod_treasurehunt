@@ -71,7 +71,7 @@ class WKT
     {
       case self::POINT:
         $coords = $this->pregExplode('spaces', $str);
-        return new Point((float)$coords[0], (float)$coords[1]);
+        return new Point((float)$coords[0],(float)$coords[1]);
 
       case self::MULTIPOINT:
         foreach (explode(',', trim($str)) as $point)
