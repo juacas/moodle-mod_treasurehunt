@@ -75,7 +75,7 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
     $PAGE->requires->js_call_amd('mod_scavengerhunt/jquery-ui-touch-punch', 'jquerytp');
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/init', 'init', array($id, $cm->instance, $strings, $idLock));
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/edit', 'editScavengerhunt', array($id, $cm->instance, $strings, $idLock));
     $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 }
 // Output starts here.

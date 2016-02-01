@@ -28,7 +28,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
     var init = {
-        init: function (idModule, idScavengerhunt, strings, idLock) {
+        editScavengerhunt: function (idModule, idScavengerhunt, strings, idLock) {
             /** Global var ***************************************************************
              */
             var stage = {
@@ -119,9 +119,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 cursor: "n-resize",
                 axis: 'y',
                 items: "li:not(:hidden)",
-                create: function () {
-                    $(this).height($(this).height());
-                },
                 start: function (event, ui) {
                     var idRoad = ui.item.attr('idRoad');
                     var start_pos = ui.item.index('li[idRoad="' + idRoad + '"]');
@@ -667,7 +664,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
             function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description) {
                 if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
-                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info' title='<h1>Description:</h1>" + description + "'></span></div>");
+                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info'>" + description + "</span></div>");
                 } else {
                     console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                 }
@@ -721,18 +718,22 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 $('#riddleList li[idRiddle="' + idRiddle + '"]').find(".ui-icon-alert").remove();
             }
 
-            /** TOOLTIPS **/
-            $("#riddleList").tooltip({
-                track: true,
-                items: '.ui-icon-alert, .ui-icon-info',
-                position: {
-                    my: "left+15 center",
-                    at: "right center"
-                },
-                content: function () {
-                    return $(this).prop('title');
-                }
-            });
+            /** TOOLTIPS 
+             $("#riddleList").tooltip({
+             track: true,
+             items: '.ui-icon-alert, .ui-icon-info',
+             position: {
+             my: "left+15 center",
+             at: "right center"
+             },
+             content: function () {
+             return $(this).prop('title');
+             }
+             });**/
+            $(".ui-icon-info").each(function(){ $(this).dialog({
+                autoOpen: false,
+                title: 'Description'
+            }); });
             $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
                 position: {
                     my: "left+15 center",
@@ -1159,6 +1160,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             $("#saveRiddle").on('click', function () {
                 saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
             });
+            $("#riddleList").on('click', '.ui-icon-info', function () {
+                debugger;
+                $(this).dialog("open");
+            });
             $("#riddleList").on('click', '.ui-icon-trash', function () {
                 var $this_li = $(this).parents('li');
                 notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function () {
@@ -1194,7 +1199,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#riddleList").on('click', 'li', function (e) {
                 if ($(e.target).is('.handle , .ui-icon , .sortable-number')) {
-                    debugger;
                     e.preventDefault();
                     return;
                 }

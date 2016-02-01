@@ -30,7 +30,7 @@ $PAGE->set_url($url);
 require_capability('mod/scavengerhunt:managescavenger', $context);
 require_capability('mod/scavengerhunt:addriddle', $context);
 
-$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
+$returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
 if (!$lock = isLockScavengerhunt($cm->instance)) {
     $idLock = renewLockScavengerhunt($cm->instance);
@@ -104,6 +104,7 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 if ($lock) {
+    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
     notice(get_string('scavengerhuntislocked', 'scavengerhunt'), $returnurl);
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
