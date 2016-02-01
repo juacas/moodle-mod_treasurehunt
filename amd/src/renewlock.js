@@ -7,8 +7,10 @@
 define(['jquery', 'core/notification','core/ajax'], function ($, notification, ajax) {
 
     var repeat;
+    var idLockScavenger;
     var renewLock = {
         renewLockAjax: function (idScavengerhunt,idLock) {
+            idLockScavenger = idLock;
             var json = ajax.call([{
                     methodname: 'mod_scavengerhunt_renew_lock',
                     args: {
@@ -33,7 +35,7 @@ define(['jquery', 'core/notification','core/ajax'], function ($, notification, a
             clearInterval(repeat);
         },
         getIdLock: function () {
-            return idLock;
+            return idLockScavenger;
         }
         
     };

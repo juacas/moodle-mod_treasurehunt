@@ -11,13 +11,13 @@
 #map_global{position: relative;overflow: hidden;padding-bottom: 54%; }
 #map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
 /*Selectable y sortable*/
-div#riddleListPanel_global{position: relative;float:left;width: 100px;overflow: hidden; overflow-y:auto;padding-bottom: 54%;}
+div#riddleListPanel_global{position: static;float:left;width: 100px;overflow: auto; padding-bottom: 54%;}
 div#roadListPanel_global{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
-div#riddleListPanel { width: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto;}
+div#riddleListPanel { width: 100%; position: static; top:0;left:0;bottom: 0;margin:0 auto;}
 div#roadListPanel{width: 100%; position: absolute;overflow-x:auto;top:0;left:0; display:block}
-ul#riddleList {/*width: 100%;*/ position: relative; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
+ul#riddleList {/*width: 100%;*/ position: static; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
 ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
-ul#riddleList li,ul#roadList li{position:relative; border: 2px solid gray; list-style: none; cursor:default;  
+ul#riddleList li,ul#roadList li{position:static; border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                                 -moz-box-sizing: border-box;    /* Firefox, other Gecko */
                                 box-sizing: border-box;         /* Opera/IE 8+ */}

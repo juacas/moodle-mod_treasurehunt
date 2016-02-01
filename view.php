@@ -41,8 +41,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 require_capability('mod/scavengerhunt:view', $context);
-require_capability('mod/scavengerhunt:getscavengerhunt', $context);
-require_capability('mod/scavengerhunt:managescavenger', $context);
+
 
 
 $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
@@ -66,40 +65,20 @@ $PAGE->set_pagelayout('standard');
  * $PAGE->set_focuscontrol('some-html-id');
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
-if (!$lock = isLockScavengerhunt($cm->instance)) {
-    //Get strings for init js
-    $strings = get_strings(array('insert_riddle','insert_road','empty_ridle'),'scavengerhunt');
-    $idLock = renewLockScavengerhunt($cm->instance);
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance,$idLock));
-    $PAGE->requires->jquery();
-    $PAGE->requires->jquery_plugin('ui');
-    $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/init', 'init', array($id, $cm->instance,$strings,$idLock));
-    $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
-}
+
 // Output starts here.
 echo $OUTPUT->header();
 // Replace the following lines with you own code.
-if ($lock) {
-    echo $OUTPUT->box(get_string('scavengerhuntislocked', 'scavengerhunt'), 'generalbox boxwidthnormal boxaligncenter');
-} else {
-    echo $OUTPUT->heading(format_string($scavengerhunt->name));
-    // Conditions to show the intro can change to look for own settings or whatever.
-    if ($scavengerhunt->intro) {
-        echo $OUTPUT->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
-    }
-    echo $OUTPUT->container_start(null, 'scavengerhunt_editor');
-    echo $OUTPUT->box(null, null, 'controlPanel');
-    echo $OUTPUT->container_start(null, 'riddleListPanel_global');
-    echo $OUTPUT->box(null, null, 'riddleListPanel');
-    echo $OUTPUT->container_end();
-    echo $OUTPUT->container_start(null, 'map_global');
-    echo $OUTPUT->box(null, null, 'map');
-    echo $OUTPUT->container_end();
-    echo $OUTPUT->container_start(null, 'roadListPanel_global');
-    echo $OUTPUT->box(null, null, 'roadListPanel');
-    echo $OUTPUT->container_end();
-    echo $OUTPUT->container_end();
+
+echo $OUTPUT->heading(format_string($scavengerhunt->name));
+// Conditions to show the intro can change to look for own settings or whatever.
+if ($scavengerhunt->intro) {
+    echo $OUTPUT->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
 }
+if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
+        has_capability('mod/scavengerhunt:managescavenger', $context)) {
+
+}
+
 // Finish the page.
 echo $OUTPUT->footer();

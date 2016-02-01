@@ -445,7 +445,7 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'idLock' => new external_value(PARAM_INT, 'id of lock')
+            'idLock' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL)
                 )
         );
     }
@@ -474,13 +474,24 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        if (checkLock($idScavengerhunt, $idLock)) {
-            $idLock = renewLockScavengerhunt($idScavengerhunt);
-            $status['code'] = 0;
-            $status['msg'] = 'Se ha renovado el bloqueo con exito';
+        if (isset($idLock)) {
+            if (checkLock($idScavengerhunt, $idLock)) {
+                $idLock = renewLockScavengerhunt($idScavengerhunt);
+                $status['code'] = 0;
+                $status['msg'] = 'Se ha renovado el bloqueo con exito';
+            } else {
+                $status['code'] = 1;
+                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            }
         } else {
-            $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            if (!isLockScavengerhunt($idScavengerhunt)) {
+                $idLock = renewLockScavengerhunt($idScavengerhunt);
+                $status['code'] = 0;
+                $status['msg'] = 'Se ha creado el bloqueo con exito';
+            } else {
+                $status['code'] = 1;
+                $status['msg'] = 'La caza del tesoro está siendo editada';
+            }
         }
         $result = array();
         $result['status'] = $status;

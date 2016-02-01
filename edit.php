@@ -1,116 +1,107 @@
 <?php
 
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Prints a particular instance of scavengerhunt
+ *
+ * You can have a rather longer description of the file as well,
+ * if you like, and it can span multiple lines.
+ *
+ * @package    mod_scavengerhunt
+ * @copyright  2015 Your Name
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+// Replace scavengerhunt with the name of your module and remove this line.
+
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/edit_form.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
-
-global $COURSE, $PAGE, $CFG;
-// You will process some page parameters at the top here and get the info about
-// what instance of your module and what course you're in etc. Make sure you
-// include hidden variable in your forms which have their defaults set in set_data
-// which pass these variables from page to page.
-// Setup $PAGE here.
-// Print the page header.
-$cmid = required_param('cmid', PARAM_INT); // Course_module ID
-$id = optional_param('id', 0, PARAM_INT);           // EntryID
+require_once ($CFG->libdir . '/formslib.php');
 
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'scavengerhunt');
+$id = required_param('id', PARAM_INT);
+list ($course, $cm) = get_course_and_cm_from_cmid($id, 'scavengerhunt');
 $scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
+
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/scavengerhunt/edit.php', array('cmid' => $cmid));
-if (!empty($id)) {
-    $url->param('id', $id);
-}
-$PAGE->set_url($url);
-
+require_capability('mod/scavengerhunt:view', $context);
+require_capability('mod/scavengerhunt:getscavengerhunt', $context);
 require_capability('mod/scavengerhunt:managescavenger', $context);
-require_capability('mod/scavengerhunt:addriddle', $context);
 
-$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
+//Poner evento de edicion o algo asi
+/*$event = \mod_scavengerhunt\event\course_module_viewed::create(array(
+            'objectid' => $PAGE->cm->instance,
+            'context' => $PAGE->context,
+        ));
+$event->add_record_snapshot('course', $PAGE->course);
+$event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
+$event->trigger();*/
 
-if (!$lock = isLockScavengerhunt($cm->instance)) {
-    $idLock=renewLockScavengerhunt($cm->instance);
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance,$idLock));
+// Print the page header.
 
-    if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
-        $parms = array('id' => $id);
-        if (!$entry = $DB->get_record_sql($sql, $parms)) {
-            print_error('invalidentry');
-        }
-    } else { // new entry
-        $entry = new stdClass();
-        $entry->id = null;
-        $entry->road_id = required_param('road_id', PARAM_INT);
-        $entry->num_riddle = optional_param('num_riddle', null, PARAM_INT);
-    }
-    $entry->cmid = $cmid;
-    $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
-    $descriptionoptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-        'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
-    $entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
-
-
-    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions)); //name of the form you defined in file above.
-
-    if ($mform->is_cancelled()) {
-// You need this section if you have a cancel button on your form
-// here you tell php what to do if your user presses cancel
-// probably a redirect is called for!
-// PLEASE NOTE: is_cancelled() should be called before get_data().
-        redirect($returnurl);
-    } else if ($entry = $mform->get_data()) {
-        //Actualizamos los campos
-        $entry->name = trim($entry->name);
-        $entry->description = '';          // updated later
-        $entry->descriptionformat = FORMAT_HTML; // updated later
-        $entry->descriptiontrust = 0;           // updated later
-        $entry->question_id = null;
-        if (empty($entry->id)) {
-            $entry->id = insertEntryBD($entry);
-            $isnewentry = true;
-        } else {
-            $isnewentry = false;
-        }
-        // This branch is where you process validated data.
-        // Do stuff ...
-        // Typically you finish up by redirecting to somewhere where the user
-        // can see what they did.
-        // save and relink embedded images and save attachments
-        $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
-
-        // store the updated value values
-        updateEntryBD($entry);
-        // Trigger event and update completion (if entry was created).
-        $eventparams = array(
-            'context' => $context,
-            'objectid' => $entry->id,
-            'other' => array('name' => $entry->name)
-        );
-        if ($isnewentry) {
-            $event = \mod_scavengerhunt\event\riddle_created::create($eventparams);
-        } else {
-            $event = \mod_scavengerhunt\event\riddle_updated::create($eventparams);
-        }
-        $event->trigger();
-        redirect($returnurl);
-    }
-}
+$PAGE->set_url('/mod/scavengerhunt/edit.php', array('id' => $cm->id));
+$PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
-echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($scavengerhunt->name));
-if ($lock) {
-    echo $OUTPUT->box(get_string('scavengerhuntislocked', 'scavengerhunt'), 'generalbox boxwidthnormal boxaligncenter');
-} else {
-    $mform->display();
+
+/*
+ * Other things you may want to set - remove if not needed.
+ * $PAGE->set_cacheable(false);
+ * $PAGE->set_focuscontrol('some-html-id');
+ * $PAGE->add_body_class('scavengerhunt-'.$somevar);
+ */
+if (!$lock = isLockScavengerhunt($cm->instance)) {
+    //Get strings for init js
+    $strings = get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'scavengerhunt');
+    $idLock = renewLockScavengerhunt($cm->instance);
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
+    $PAGE->requires->jquery();
+    $PAGE->requires->jquery_plugin('ui');
+    $PAGE->requires->jquery_plugin('ui-css');
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/jquery-ui-touch-punch', 'jquerytp');
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/init', 'init', array($id, $cm->instance, $strings, $idLock));
+    $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 }
+// Output starts here.
+echo $OUTPUT->header();
+// Replace the following lines with you own code.
+if ($lock) {
+    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $id));
+    notice(get_string('scavengerhuntislocked', 'scavengerhunt'),$returnurl);
+} else {
+    echo $OUTPUT->heading(format_string($scavengerhunt->name));
+    // Conditions to show the intro can change to look for own settings or whatever.
+    if ($scavengerhunt->intro) {
+        echo $OUTPUT->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
+    }
+    echo $OUTPUT->container_start(null, 'scavengerhunt_editor');
+    echo $OUTPUT->box(null, null, 'controlPanel');
+    echo $OUTPUT->container_start(null, 'riddleListPanel_global');
+    echo $OUTPUT->box(null, null, 'riddleListPanel');
+    echo $OUTPUT->container_end();
+    echo $OUTPUT->container_start(null, 'map_global');
+    echo $OUTPUT->box(null, null, 'map');
+    echo $OUTPUT->container_end();
+    echo $OUTPUT->container_start(null, 'roadListPanel_global');
+    echo $OUTPUT->box(null, null, 'roadListPanel');
+    echo $OUTPUT->container_end();
+    echo $OUTPUT->container_end();
+}
+// Finish the page.
 echo $OUTPUT->footer();
-
-
-
-

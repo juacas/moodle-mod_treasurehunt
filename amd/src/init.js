@@ -15,20 +15,16 @@ require.config({
     shim: {
         openlayers: {
             exports: 'OpenLayers'
-        },
-        touchpunch: {
-            exports: 'jQuery'
         }
     },
     paths: {
         openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
-        touchpunch: 'jquery-touch/jUI-Touch-Punch'
     }
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'touchpunch'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, touchpunch) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs'], function ($, notification, str, ol, jqui, ajax, GeocoderJS) {
 
 
     var init = {
@@ -114,9 +110,18 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             //Lo cargo como un sortable
             $("#riddleList").sortable({
                 handle: ".handle",
+                tolerance: "pointer",
                 revert: true,
+                zIndex: 9999,
+                opacity: 0.5,
+                forcePlaceholderSize: true,
+                cursorAt: {top: -7},
                 cursor: "n-resize",
                 axis: 'y',
+                items: "li:not(:hidden)",
+                create: function () {
+                    $(this).height($(this).height());
+                },
                 start: function (event, ui) {
                     var idRoad = ui.item.attr('idRoad');
                     var start_pos = ui.item.index('li[idRoad="' + idRoad + '"]');
@@ -144,7 +149,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     dirty = true;
                 }
             });
-
             function relocateRiddleList($listitems, $listlength, i, dirtyStage, originalStage, vector) {
                 var newVal;
                 var $item = $($listitems).get([i]);
@@ -880,16 +884,16 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
             function editFormEntry(idRiddle, idModule) {
-                var url = 'edit.php?cmid=' + idModule + '&id=' + idRiddle;
+                var url = 'editRiddle.php?cmid=' + idModule + '&id=' + idRiddle;
                 window.location.href = url;
             }
 
             function newFormEntry(idRoad, idModule) {
-                var url = "edit.php?cmid=" + idModule + "&road_id=" + idRoad;
+                var url = "editRiddle.php?cmid=" + idModule + "&road_id=" + idRoad;
                 window.location.href = url;
             }
 
-            function addRoad(idScavengerhunt,idLock) {
+            function addRoad(idScavengerhunt, idLock) {
                 var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_add_road',
                         args: {
@@ -923,7 +927,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     notification.alert('Error', error.message, 'Continue');
                 });
             }
-            function updateRoad(idRoad, nameRoad, $road, idScavengerhunt,idLock) {
+            function updateRoad(idRoad, nameRoad, $road, idScavengerhunt, idLock) {
                 var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_update_road',
                         args: {
@@ -946,7 +950,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
             }
 
-            function deleteRoad(idRoad, dirtySource, originalSource, idScavengerhunt,idLock) {
+            function deleteRoad(idRoad, dirtySource, originalSource, idScavengerhunt, idLock) {
                 var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_delete_road',
                         args: {
@@ -988,7 +992,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
             }
 
-            function deleteRiddle(idRiddle, dirtySource, originalSource, vectorOfPolygons, idScavengerhunt,idLock) {
+            function deleteRiddle(idRiddle, dirtySource, originalSource, vectorOfPolygons, idScavengerhunt, idLock) {
                 var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_delete_riddle',
                         args: {
@@ -1130,14 +1134,14 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
                 //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {
-                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormEntry, [idRoad, idModule],idLock);
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormEntry, [idRoad, idModule], idLock);
                 } else {
                     newFormEntry(idRoad, idModule);
                 }
 
             });
             $("#addRoad").on('click', function () {
-                addRoad(idScavengerhunt,idLock);
+                addRoad(idScavengerhunt, idLock);
             });
 
             $("#removeFeature").on('click', function () {
@@ -1153,13 +1157,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 });
             });
             $("#saveRiddle").on('click', function () {
-                saveRiddles(dirtyStage, originalStage, idScavengerhunt,null,null,idLock);
+                saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
             });
             $("#riddleList").on('click', '.ui-icon-trash', function () {
                 var $this_li = $(this).parents('li');
                 notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function () {
                     var idRiddle = parseInt($this_li.attr('idRiddle'));
-                    deleteRiddle(idRiddle, dirtyStage, originalStage, stage["roads"][idRoad].vector, idScavengerhunt,idLock);
+                    deleteRiddle(idRiddle, dirtyStage, originalStage, stage["roads"][idRoad].vector, idScavengerhunt, idLock);
 
                 });
             });
@@ -1168,7 +1172,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
                 //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {
-                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormEntry, [idRiddle, idModule],idLock);
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormEntry, [idRiddle, idModule], idLock);
                 } else {
                     editFormEntry(idRiddle, idModule);
                 }
@@ -1190,6 +1194,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#riddleList").on('click', 'li', function (e) {
                 if ($(e.target).is('.handle , .ui-icon , .sortable-number')) {
+                    debugger;
                     e.preventDefault();
                     return;
                 }
@@ -1232,7 +1237,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var idRoad = $this.parents('li').attr('idRoad');
                 var nameRoad = $this.val();
                 if (nameRoad !== oriVal && nameRoad !== '') {
-                    updateRoad(idRoad, nameRoad, $this.parent(), idScavengerhunt,idLock);
+                    updateRoad(idRoad, nameRoad, $this.parent(), idScavengerhunt, idLock);
                 }
                 $this.parent().text(oriVal);
                 $this.remove();
@@ -1241,7 +1246,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 var $this_li = $(this).parents('li');
                 notification.confirm('Estas seguro?', 'Si la eliminas se eliminaran todas las pitas asociadas y ya no podras recuperarlas', 'Confirmar', 'Cancelar', function () {
                     var idRoad = parseInt($this_li.attr('idRoad'));
-                    deleteRoad(idRoad, dirtyStage, originalStage, idScavengerhunt,idLock);
+                    deleteRoad(idRoad, dirtyStage, originalStage, idScavengerhunt, idLock);
                 });
             });
 
@@ -1299,5 +1304,4 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
         } // End of function init
     }; // End of init var
     return init;
-
 });
