@@ -56,6 +56,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             /**Load the control pane, riddle and road list ***************************************************
              */
             $("#controlPanel").addClass('ui-widget-header ui-corner-all');
+            $("#riddleListPanel_global").addClass('.ui-widget-content ui-corner-all');
             $('<span id="edition"/>').appendTo($("#controlPanel"));
             $('<input type="radio" name="controlPanel" id="radio1" value="add">').appendTo($("#edition"));
             $("<label>").attr('for', "radio1").text('AÃƒÂ±adir').appendTo($("#edition"));
@@ -111,7 +112,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             $("#riddleList").sortable({
                 handle: ".handle",
                 tolerance: "pointer",
-                revert: true,
                 zIndex: 9999,
                 opacity: 0.5,
                 forcePlaceholderSize: true,
@@ -119,10 +119,23 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 cursor: "n-resize",
                 axis: 'y',
                 items: "li:not(:hidden)",
+                helper: "clone",
                 start: function (event, ui) {
                     var idRoad = ui.item.attr('idRoad');
                     var start_pos = ui.item.index('li[idRoad="' + idRoad + '"]');
                     ui.item.data('start_pos', start_pos);
+                    //set max scrollTop for sortable scrolling
+                    var scrollParent = $(this).data("ui-sortable").scrollParent;
+                    var maxScrollTop = scrollParent[0].scrollHeight - scrollParent[0].clientHeight - ui.helper.height();
+                    $(this).data('maxScrollTop', maxScrollTop);
+                },
+                sort: function (e, ui) {
+                    //check if scrolling is out of boundaries
+                    var scrollParent = $(this).data("ui-sortable").scrollParent,
+                            maxScrollTop = $(this).data('maxScrollTop');
+                    if (scrollParent.scrollTop() > maxScrollTop) {
+                        scrollParent.scrollTop(maxScrollTop);
+                    }
                 },
                 update: function (event, ui) {
                     var start_pos = ui.item.data('start_pos');
@@ -162,6 +175,20 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
             //Creo el roadListPanel
             $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
+            //Añado los handle custom
+            $('<div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" id="segrip"/>').appendTo($("#riddleListPanel_global"));
+            $('<div class="ui-resizable-handle ui-resizable-e" id="egrip"/>').appendTo($("#riddleListPanel_global"));
+            //Creo el resizable
+            $("#riddleListPanel_global").resizable({
+                handles: {'se': $('#segrip'),
+                    'e': $('#egrip')}, //*/
+                /*  handles: 'se',//*/
+                resize: function (event, ui) {
+                    ui.size.height = ui.originalSize.height;
+                }
+            });
+
+
 
             /** Get style, vectors, map and interactions ***************************************************************
              */
@@ -664,7 +691,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
             function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description) {
                 if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
-                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info'>" + description + "</span></div>");
+                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info' data-id='#dialog" + idRiddle + "'> <div id='dialog" + idRiddle + "' title='" + name + "'>" + description + "</div></span></div>");
+                    $('#dialog' + idRiddle).dialog({
+                        autoOpen: false,
+                    });
                 } else {
                     console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                 }
@@ -730,10 +760,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
              return $(this).prop('title');
              }
              });**/
-            $(".ui-icon-info").each(function(){ $(this).dialog({
-                autoOpen: false,
-                title: 'Description'
-            }); });
+
             $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
                 position: {
                     my: "left+15 center",
@@ -1162,7 +1189,11 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#riddleList").on('click', '.ui-icon-info', function () {
                 debugger;
-                $(this).dialog("open");
+                var id = $(this).data('id');
+                //open dialogue
+                $(id).dialog("open");
+                //remove focus from the buttons
+                $('.ui-dialog :button').blur();
             });
             $("#riddleList").on('click', '.ui-icon-trash', function () {
                 var $this_li = $(this).parents('li');
@@ -1183,7 +1214,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }
 
             });
-            $("input[name=controlPanel]:radio").on('change', function () {
+            $("input[name=controlPanel]:radio").on('click', function () {
+                if ($(this).attr('previousValue') === 'true') {
+                    $(this).attr('checked', false).button("refresh");
+                } else {
+                    $("input[name=controlPanel]:radio").attr('previousValue', false);
+                }
+                $(this).attr('previousValue', $(this).is(':checked'));
                 var selected = $("input[type='radio'][name='controlPanel']:checked");
                 var value = selected.val();
                 if (value === 'add') {

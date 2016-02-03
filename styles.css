@@ -1,3 +1,7 @@
+html, body
+{
+    height: 100%;
+}
 #edition label {
     display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
@@ -11,28 +15,27 @@
 #map_global{position: relative;overflow: hidden;padding-bottom: 54%; }
 #map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
 /*Selectable y sortable*/
-div#riddleListPanel_global{position: static;float:left;width: 100px;overflow: auto; padding-bottom: 54%;}
+div#riddleListPanel_global{position: relative;float:left;width: 150px; padding-bottom: 54%;}
 div#roadListPanel_global{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
-div#riddleListPanel { width: 100%; position: static; top:0;left:0;bottom: 0;margin:0 auto;}
+div#riddleListPanel { width: 100%; height: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto; overflow-x: hidden;overflow-y:auto;}
 div#roadListPanel{width: 100%; position: absolute;overflow-x:auto;top:0;left:0; display:block}
-ul#riddleList {/*width: 100%;*/ position: static; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
+ul#riddleList {width: 100%; position: static; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
 ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
-ul#riddleList li,ul#roadList li{position:static; border: 2px solid gray; list-style: none; cursor:default;  
+ul#riddleList li,ul#roadList li{border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                                 -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-                                box-sizing: border-box;         /* Opera/IE 8+ */}
+                                box-sizing: border-box;         /* Opera/IE 8+ */
+}   
 ul#riddleList li {width: 100%;display:table;table-layout: fixed;}
 ul#roadList li {display: table-cell;}
-div.handle {background: #f8f8f8; position: relative; width: 18%; cursor:n-resize; display:table-cell;vertical-align: middle}
-div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20%;}
-div.nameRiddle, div.nameRoad{position: relative; display:table-cell; text-align: center;vertical-align: middle;word-wrap: break-word;}
-div.nameRoad{}
+div.handle {background: #f8f8f8; position: relative; width: 20px; cursor:n-resize; display:table-cell;vertical-align: middle}
+div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20px}
+div.nameRiddle, div.nameRoad{position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
 input#modRoadName{text-align: center;}
 .ui-selecting { background: #eee; }
 .ui-selected { background: rgba(22,145,190,0.2); }
 .sortable-number { font-weight: bold;}
-.ui-icon-alert {cursor:help;}
-.ui-icon-trash, .ui-icon-pencil {cursor:pointer;}
+.ui-icon-trash, .ui-icon-pencil,.ui-icon-alert,.ui-icon-info  {cursor:pointer;}
 .ui-autocomplete-loading {
     background: white url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
 }
@@ -53,7 +56,7 @@ input#modRoadName{text-align: center;}
     left:9px;
     width:15px;
 }
-/**usado para mostrar la x dentro de la búsqueda **/
+/**usado para mostrar la x dentro de la bÃƒÆ’Ã‚Âºsqueda **/
 .clearable{
     background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
     border: 1px solid #999;
@@ -64,3 +67,12 @@ input#modRoadName{text-align: center;}
 .clearable.x  { background-position: right 5px center; }
 .clearable.onX{ cursor: pointer; }
 .clearable::-ms-clear {display: none; width:0; height:0;}
+/* Usado para el resizable**/
+#segrip{
+    bottom: -16px;
+    cursor:w-resize;
+    z-index: 90;
+}
+#egrip{
+    z-index: 90;
+}
