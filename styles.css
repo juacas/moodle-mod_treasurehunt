@@ -35,6 +35,17 @@ input#modRoadName{text-align: center;}
 .ui-selecting { background: #eee; }
 .ui-selected { background: rgba(22,145,190,0.2); }
 .sortable-number { font-weight: bold;}
+.riddle_valid { 
+    box-shadow: 0 0 10px #5cd053;
+    border-color: #28921f;
+    border-width: 15px;
+}
+.riddle_invalid { 
+    box-shadow: 0 0 10px #d45252;
+    border-color: #b03535;
+    border-width: 15px;
+
+}
 .ui-icon-trash, .ui-icon-pencil,.ui-icon-alert,.ui-icon-info  {cursor:pointer;}
 .ui-autocomplete-loading {
     background: white url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
@@ -56,7 +67,7 @@ input#modRoadName{text-align: center;}
     left:9px;
     width:15px;
 }
-/**usado para mostrar la x dentro de la bÃƒÆ’Ã‚Âºsqueda **/
+/**usado para mostrar la x dentro de la bÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºsqueda **/
 .clearable{
     background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
     border: 1px solid #999;

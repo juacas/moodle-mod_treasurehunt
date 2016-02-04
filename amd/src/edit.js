@@ -691,7 +691,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
             function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description) {
                 if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
-                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info' data-id='#dialog" + idRiddle + "'> <div id='dialog" + idRiddle + "' title='" + name + "'>" + description + "</div></span></div>");
+                    $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>').appendTo($("#riddleList")).addClass("ui-corner-all").prepend("<div class='handle riddle_valid'><span class='ui-icon ui-icon-arrowthick-2-n-s'></span><span class='sortable-number'>" + numRiddle + "</span></div>").append("<div class='nameRiddle'>" + name + "</div>").append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span><span class='ui-icon ui-icon-pencil'></span><span class='ui-icon ui-icon-info' data-id='#dialog" + idRiddle + "'> <div id='dialog" + idRiddle + "' title='" + name + "'>" + description + "</div></span></div>");
                     $('#dialog' + idRiddle).dialog({
                         autoOpen: false,
                     });
@@ -741,11 +741,15 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             }
 
             function emptyRiddle(idRiddle) {
-                $('#riddleList li[idRiddle="' + idRiddle + '"]').children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert'  title='" + strings.empty_ridle + "'></span>");
+                var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
+                $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
+                $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert riddle_invalid'  title='" + strings.empty_ridle + "'></span>");
             }
 
             function notEmptyRiddle(idRiddle) {
-                $('#riddleList li[idRiddle="' + idRiddle + '"]').find(".ui-icon-alert").remove();
+                var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
+                $riddle.children(".handle").addClass('riddle_valid').removeClass('riddle_invalid');
+                $riddle.find(".ui-icon-alert").remove();
             }
 
             /** TOOLTIPS 
