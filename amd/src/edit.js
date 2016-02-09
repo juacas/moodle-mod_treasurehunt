@@ -24,7 +24,7 @@ require.config({
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs'], function ($, notification, str, ol, jqui, ajax, GeocoderJS) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates) {
 
 
     var init = {
@@ -158,7 +158,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     activateSaveButton();
                     dirty = true;
                 }
-            });
+            }).disableSelection();
             function relocateRiddleList($listitems, $listlength, i, dirtyStage, originalStage, vector) {
                 var newVal;
                 var $item = $($listitems).get([i]);
@@ -176,18 +176,39 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             //Creo el roadListPanel
             $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
             //Añado los handle custom
-            $('<div class="ui-resizable-handle ui-resizable-se ui-icon ui-icon-gripsmall-diagonal-se" id="segrip"/>').appendTo($("#riddleListPanel_global"));
-            $('<div class="ui-resizable-handle ui-resizable-e" id="egrip"/>').appendTo($("#riddleListPanel_global"));
-            //Creo el resizable
-            $("#riddleListPanel_global").resizable({
-                handles: {'se': $('#segrip'),
-                    'e': $('#egrip')}, //*/
-                /*  handles: 'se',//*/
-                resize: function (event, ui) {
-                    ui.size.height = ui.originalSize.height;
-                }
-            });
+            //$('<button class="ui-resizable-handle " id="egrip">mierda</button>').appendTo($("#riddleListPanel_global")); 
 
+            /*Set control
+             * 
+             * @type edit_L27.ol.style.Style
+             */
+            window.app = {};
+            var app = window.app;
+
+            /**
+             * @constructor
+             * @extends {ol.control.Control}
+             * @param {Object=} opt_options Control options.
+             */
+            app.generateResizableControl = function (opt_options) {
+                var options = opt_options || {};
+
+                var span = document.createElement('span');
+                span.innerHTML = '<>';
+                span.className = 'ui-resizable-handle';
+                span.id = 'egrip';
+
+                var element = document.createElement('div');
+                element.className = 'ol-unselectable ol-control';
+                element.id = 'egrip-container';
+                element.appendChild(span);
+
+                ol.control.Control.call(this, {
+                    element: element,
+                    target: options.target
+                });
+            };
+            ol.inherits(app.generateResizableControl, ol.control.Control);
 
 
             /** Get style, vectors, map and interactions ***************************************************************
@@ -272,8 +293,19 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     center: new ol.proj.transform([-4.715354, 41.654618], 'EPSG:4326', 'EPSG:3857'),
                     zoom: 12,
                     minZoom: 2
-                })
+                }),
+                controls: ol.control.defaults().extend([
+                    new app.generateResizableControl()
+                ]),
             });
+            //Creo el resizable
+            $("#riddleListPanel_global").resizable({
+                handles: {'e': $('#egrip')},
+                resize: function (event, ui) {
+                    ui.size.height = ui.originalSize.height;
+                }
+            });
+
 
             var Modify = {
                 init: function () {
@@ -743,7 +775,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             function emptyRiddle(idRiddle) {
                 var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
                 $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
-                $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert riddle_invalid'  title='" + strings.empty_ridle + "'></span>");
+                $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert'  title='" + strings.empty_ridle + "'></span>");
             }
 
             function notEmptyRiddle(idRiddle) {
@@ -763,14 +795,14 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
              content: function () {
              return $(this).prop('title');
              }
+             });
+             
+             $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
+             position: {
+             my: "left+15 center",
+             at: "right center"
+             }
              });**/
-
-            $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
-                position: {
-                    my: "left+15 center",
-                    at: "right center"
-                }
-            });
             function activateDeleteButton() {
                 $('#removeFeature').button("option", "disabled", false);
 
@@ -916,12 +948,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
             function editFormEntry(idRiddle, idModule) {
-                var url = 'editRiddle.php?cmid=' + idModule + '&id=' + idRiddle;
+                var url = 'editriddle.php?cmid=' + idModule + '&id=' + idRiddle;
                 window.location.href = url;
             }
 
             function newFormEntry(idRoad, idModule) {
-                var url = "editRiddle.php?cmid=" + idModule + "&road_id=" + idRoad;
+                var url = "editriddle.php?cmid=" + idModule + "&road_id=" + idRoad;
                 window.location.href = url;
             }
 

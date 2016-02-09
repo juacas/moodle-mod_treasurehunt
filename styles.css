@@ -2,6 +2,9 @@ html, body
 {
     height: 100%;
 }
+#scavengerhunt_editor{
+    width: 100%;
+}
 #edition label {
     display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
@@ -15,11 +18,10 @@ html, body
 #map_global{position: relative;overflow: hidden;padding-bottom: 54%; }
 #map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
 /*Selectable y sortable*/
-div#riddleListPanel_global{position: relative;float:left;width: 150px; padding-bottom: 54%;}
-div#roadListPanel_global{position: relative;clear: both; cursor:default;overflow: hidden; width: 100%;display: block;padding-bottom: 12%}
+div#riddleListPanel_global{position: relative;float:left;width: 150px; padding-bottom: 54%; max-width: 60%; min-width: 100px;}
 div#riddleListPanel { width: 100%; height: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto; overflow-x: hidden;overflow-y:auto;}
-div#roadListPanel{width: 100%; position: absolute;overflow-x:auto;top:0;left:0; display:block}
-ul#riddleList {width: 100%; position: static; top:0;left:0;bottom: 0;margin:0 auto;padding-right: 0;}
+div#roadListPanel{width: 100%; position: static;overflow-x:auto; overflow-y: hidden; top:0;left:0; display:block;cursor:default;clear: both;}
+ul#riddleList {width: 100%; position: static; margin:0 auto;}
 ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
 ul#riddleList li,ul#roadList li{border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
@@ -79,11 +81,31 @@ input#modRoadName{text-align: center;}
 .clearable.onX{ cursor: pointer; }
 .clearable::-ms-clear {display: none; width:0; height:0;}
 /* Usado para el resizable**/
-#segrip{
-    bottom: -16px;
-    cursor:w-resize;
-    z-index: 90;
-}
 #egrip{
+    position:static;
+    display: block;
+    margin: 1px;
+    padding: 0;
+    color: white;
+    font-size: 1.14em;
+    font-weight: bold;
+    text-decoration: none;
+    text-align: center;
+    height: 1.375em;
+    width: 1.375em;
+    background-color: rgba(0,60,136,0.5);
+    border: none;
+    border-radius: 2px;
+}
+#egrip:hover,#egrip:focus{
+    text-decoration: none;
+    background-color: rgba(0,60,136,0.7);
+}
+#egrip-container{
+    position: absolute;
+    top: 65px;
+    left: .5em;
+    cursor:pointer;
     z-index: 90;
 }
+

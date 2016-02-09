@@ -1,7 +1,7 @@
 <?php
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/editRiddle_form.php');
+require_once(dirname(__FILE__) . '/editriddle_form.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 
 global $COURSE, $PAGE, $CFG;
@@ -21,7 +21,7 @@ $scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/scavengerhunt/editRiddle.php', array('cmid' => $cmid));
+$url = new moodle_url('/mod/scavengerhunt/editriddle.php', array('cmid' => $cmid));
 if (!empty($id)) {
     $url->param('id', $id);
 }

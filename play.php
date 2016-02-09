@@ -32,7 +32,6 @@ require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 require_once ($CFG->libdir . '/formslib.php');
 
 
-
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'scavengerhunt');
 $scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -42,24 +41,35 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 require_capability('mod/scavengerhunt:view', $context);
+require_capability('mod/scavengerhunt:getscavengerhunt', $context);
+require_capability('mod/scavengerhunt:managescavenger', $context);
 
-
-
-$event = \mod_scavengerhunt\event\course_module_viewed::create(array(
-            'objectid' => $PAGE->cm->instance,
-            'context' => $PAGE->context,
-        ));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
-$event->trigger();
+//Poner evento de edicion o algo asi
+/* $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
+  'objectid' => $PAGE->cm->instance,
+  'context' => $PAGE->context,
+  ));
+  $event->add_record_snapshot('course', $PAGE->course);
+  $event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
+  $event->trigger(); */
 
 // Print the page header.
 
-$PAGE->set_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
+$PAGE->set_url('/mod/scavengerhunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_pagelayout('standard');
-//$PAGE->set_pagelayout('embedded');
+//$PAGE->set_pagelayout('standard');
+
+
+
+
+$PAGE->requires->jquery();
+$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array($id, $cm->instance));
+$PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
+$PAGE->requires->css('/mod/scavengerhunt/css/jquerymobile.css');
+$PAGE->requires->css('/mod/scavengerhunt/css/mobile-jq.css');
+
+$PAGE->set_pagelayout('embedded');
 
 /*
  * Other things you may want to set - remove if not needed.
@@ -72,16 +82,12 @@ $output = $PAGE->get_renderer('mod_scavengerhunt');
 echo $output->header();
 // Replace the following lines with you own code.
 
-echo $output->heading(format_string($scavengerhunt->name));
-// Conditions to show the intro can change to look for own settings or whatever.
-if ($scavengerhunt->intro) {
-    echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
-}
+
 if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
         has_capability('mod/scavengerhunt:managescavenger', $context)) {
-
+    
 }
-$renderable = new \mod_scavengerhunt\output\index_page('Some text','some text2');
+$renderable = new \mod_scavengerhunt\output\index_page('Some text', 'some text2');
 echo $output->render_index_page($renderable);
 // Finish the page.
 echo $output->footer();

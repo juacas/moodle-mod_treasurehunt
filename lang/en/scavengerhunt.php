@@ -54,4 +54,21 @@ $string['scavengerhunt:managescavenger'] = 'Manage scavengerhunt';
 $string['scavengerhunt:view'] = 'View scavengerhunt';
 $string['scavengerhunt:addinstance'] = 'Add a new scavengerhunt';
 $string['scavengerhuntislocked'] = 'Someone is editing this scavengerhunt right now. Try to edit it in a few minutes.';
+/**Template */
+$string['sendlotacion_title'] = 'Are you sure you want to send this location?';
+$string['sendlotacion_content'] = 'This action can not be undone.';
+$string['cancel'] = 'Cancel';
+$string['send'] = 'Send';
+$string['exit'] = 'Exit';
+$string['discovered_riddle'] = 'Discovered riddle';
+$string['failed_location'] = 'Failed location';
+$string['nameRiddle'] = 'Name of riddle';
+$string['descriptionRiddle'] = 'Description of riddle';
+$string['info_validate_location'] = 'Validate location of this riddle';
+$string['button_validate_location'] = 'VALIDATE LOCATION';
+$string['search_button'] = 'Search';
+$string['layers_button'] = 'Layers';
+
+
+
 

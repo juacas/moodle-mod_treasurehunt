@@ -54,4 +54,23 @@ $string['scavengerhunt:managescavenger'] = 'Administrar Caza del tesoro';
 $string['scavengerhunt:view'] = 'Ver la caza del tesoro';
 $string['scavengerhunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['scavengerhuntislocked'] = 'Alguien está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
+/**Template */
+$string['sendlotacion_title'] = '¿Estás seguro de que deseas enviar esta ubicación?';
+$string['sendlotacion_content'] = 'Esta acción no se puede deshacer.';
+$string['cancel'] = 'Cancelar';
+$string['send'] = 'Enviar';
+$string['exit'] = 'Salir';
+$string['discovered_riddle'] = 'Pista descubierta';
+$string['failed_location'] = 'Localización fallada';
+$string['nameRiddle'] = 'Nombre de la pista';
+$string['descriptionRiddle'] = 'Descripción de la pista';
+$string['info_validate_location'] = 'Validar ubicación para esta pista';
+$string['button_validate_location'] = 'VALIDAR UBICACIÓN';
+$string['search_button'] = 'Buscar';
+$string['layers_button'] = 'Capas';
+
+
+
+
+
 
