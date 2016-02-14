@@ -15,7 +15,7 @@ class renderer extends plugin_renderer_base {
      *                                                                                                                              
      * @return string html for the page                                                                                             
      */                                                                                                                             
-    public function render_index_page(\mod_scavengerhunt\output\index_page $page) {
+    public function render_play_page(\mod_scavengerhunt\output\play_page $page) {
         $data = $page->export_for_template($this);                                                                                  
         return parent::render_from_template('mod_scavengerhunt/play', $data);                                                         
     }           

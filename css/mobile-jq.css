@@ -9,19 +9,15 @@ body {
 }
 .ui-footer {
     text-align: center;
-    padding: 5px 0;
 }
 .portrait, .portrait #mappage {
     min-height: 0;
 }
 /*.portrait, .portrait .ui-page{*/
-    /*min-height: 0;*/
+/*min-height: 0;*/
 /*}*/
-#mappage, #mappage .ui-content, #map {
-    width: 100%;
-    height: 100%;
-    position:static;
-}
+
+
 .bgimg {
     /* background-image: url(images/caza-tesoro-icon.png); */
     background-repeat:repeat-x;
@@ -29,18 +25,18 @@ body {
     background-size:180px 32px;
 }
 .ui-icon-geolocation:after {
-	background-image: url("images/geolocation.png");
-	background-size: 25px 25px;
+    background-image: url("../pix/images/geolocation.png");
+    background-size: 25px 25px;
 }
 .ui-icon-fb:after {
-	background-image: url("images/fb.jpg");
-	background-size: 25px 25px;
+    background-image: url("images/fb.jpg");
+    background-size: 25px 25px;
 }
 
 
 #navigation {
     position: absolute;
-    bottom: 80px;
+    top: -80px;
     right: 50px;
     z-index: 1000;
 }
@@ -70,5 +66,5 @@ body {
     margin: 0;
 }
 #details-list li{
-	padding:15px 10px;
+    padding:15px 10px;
 }

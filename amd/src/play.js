@@ -25,11 +25,12 @@ require.config({
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates','jquerymobile'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates,$m) {
+define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquerymobile'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates, $m) {
 
 
     var init = {
         playScavengerhunt: function (idModule, idScavengerhunt) {
+            
             var view = new ol.View({
                 center: [0, 0],
                 zoom: 2
@@ -38,13 +39,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             var map = new ol.Map({
                 layers: [
                     new ol.layer.Tile({
-                        source: new ol.source.BingMaps({
-                            key: 'AkGbxXx6tDWf1swIhPJyoAVp06H0s0gDTYslNWWHZ6RoPqMpB9ld5FY1WutX8UoF',
-                            imagerySet: 'Road'
-                        })
+                        source: new ol.source.OSM()
                     })
                 ],
-                controls: ol.control.defaults({rotate: false,attribution:false,zoom:false}),
+                controls: ol.control.defaults({rotate: false, attribution: false, zoom: false}),
                 target: 'map',
                 view: view
             });
@@ -57,10 +55,30 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 view.setCenter(geolocation.getPosition());
                 view.setResolution(2.388657133911758);
             });
+            $m.loading("show", {
+                text: "Cargando",
+                textVisible: true,
+                theme: 'b'});
+            // This will call the function to load and render our template. 
+            var promise = templates.render('mod_scavengerhunt/play', '');
 
+            // The promise object returned by this function means "I've considered your request and will finish it later - I PROMISE!"
 
+            // How we deal with promise objects is by adding callbacks.
+            promise.done(function (source, javascript) {
+                // Here eventually I have my compiled template, and any javascript that it generated.
+                
+                // I can execute the javascript (probably after adding the html to the DOM) like this:
+                templates.runTemplateJS(javascript);
+                $m.loading("hide");
+            });
 
-        } // End of function init
+            // Sometimes things fail
+            promise.fail(function (ex) {
+                // Deal with this exception (I recommend core/notify exception function for this).
+            });
+
+        } // End of function playScavengerhunt
     }; // End of init var
     return init;
 });

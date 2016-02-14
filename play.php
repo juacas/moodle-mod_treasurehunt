@@ -83,11 +83,10 @@ echo $output->header();
 // Replace the following lines with you own code.
 
 
-if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
-        has_capability('mod/scavengerhunt:managescavenger', $context)) {
-    
-}
-$renderable = new \mod_scavengerhunt\output\index_page('Some text', 'some text2');
-echo $output->render_index_page($renderable);
+
+$scavengerhunt_output= array('name'=>$scavengerhunt->name,'description'=>format_module_intro('scavengerhunt', $scavengerhunt, $cm->id));
+
+$renderable = new \mod_scavengerhunt\output\play_page($scavengerhunt_output, 'some text2');
+echo $output->render($renderable);
 // Finish the page.
 echo $output->footer();
