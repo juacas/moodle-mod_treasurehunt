@@ -500,3 +500,78 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
     }
 
 }
+class mod_scavengerhunt_external_check_riddle extends external_api {
+
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
+    public static function check_riddle_is_allowed_from_ajax() {
+        return true;
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function check_riddle_parameters() {
+        return new external_function_parameters(
+                array(
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'idLock' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL)
+                )
+        );
+    }
+
+    public static function check_riddle_returns() {
+        return new external_single_structure(
+                array(
+            'idLock' => new external_value(PARAM_INT, 'id of lock'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
+                )
+        );
+    }
+
+    /**
+     * Create groups
+     * @param array $groups array of group description arrays (with keys groupname and courseid)
+     * @return array of newly created groups
+     */
+    public static function check_riddle($idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::check_riddle_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
+
+        $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/scavengerhunt:managescavenger', $context);
+        if (isset($idLock)) {
+            if (checkLock($idScavengerhunt, $idLock)) {
+                $idLock = renewLockScavengerhunt($idScavengerhunt);
+                $status['code'] = 0;
+                $status['msg'] = 'Se ha renovado el bloqueo con exito';
+            } else {
+                $status['code'] = 1;
+                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            }
+        } else {
+            if (!isLockScavengerhunt($idScavengerhunt)) {
+                $idLock = renewLockScavengerhunt($idScavengerhunt);
+                $status['code'] = 0;
+                $status['msg'] = 'Se ha creado el bloqueo con exito';
+            } else {
+                $status['code'] = 1;
+                $status['msg'] = 'La caza del tesoro está siendo editada';
+            }
+        }
+        $result = array();
+        $result['status'] = $status;
+        $result['idLock'] = $idLock;
+        return $result;
+    }
+
+}

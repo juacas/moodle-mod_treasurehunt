@@ -43,15 +43,15 @@ spl_autoload_register(array('GeoJSON', 'autoload'));
  * }
  */
 
- function object_to_wkt($text) {
-  $WKT = new WKT();
-  return $WKT->write($text);
-  }
+function object_to_wkt($text) {
+    $WKT = new WKT();
+    return $WKT->write($text);
+}
 
-  function wkt_to_object($text) {
-  $WKT = new WKT();
-  return $WKT->read($text);
-  } 
+function wkt_to_object($text) {
+    $WKT = new WKT();
+    return $WKT->read($text);
+}
 
 function geojson_to_object($text) {
     $GeoJSON = new GeoJSON();
@@ -74,7 +74,7 @@ function insertEntryBD(stdClass $entry) {
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
     $question_id = $entry->question_id;
-    if (isset($entry->num_riddle)) {
+    if (isset($entry->num_riddle) && $entry->num_riddle > 0) {
         $num_riddle = $entry->num_riddle;
     } else {
         $num_riddle = $DB->get_record_sql('SELECT count(id) + 1 as num_riddle FROM mdl_scavengerhunt_riddle where road_id = (?)', array($road_id));
@@ -149,7 +149,7 @@ function getScavengerhunt($idScavengerhunt, $context) {
         array_push($riddlesArray, $feature);
     }
     $featureCollection = new FeatureCollection($riddlesArray);
-    /*prueba*/
+    /* prueba */
 //    $intersect = $riddlesArray[0]->getGeometry()->intersects($riddlesArray[1]->getGeometry());
     $geojson = object_to_geojson($featureCollection);
 //Recojo todos los caminos
@@ -204,4 +204,11 @@ function checkLock($idScavengerhunt, $idLock) {
     } else {
         return false;
     }
+}
+
+function checkRiddle($idRoad) {
+    global $USER, $DB;
+    $query = "SELECT max(num_riddle) from {scavengerhunt_riddles} r, {scavengerhunt_attempts} c where c.riddle_id=r.id and c.user_id=? and c.road_id=r.road_id and c.road_id=?";
+    $params = array($USER->id,$idRoad);
+    $numRiddle=$DB->get_record_sql($query, $params);
 }

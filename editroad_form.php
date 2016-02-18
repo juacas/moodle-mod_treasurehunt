@@ -36,7 +36,7 @@ require_once("$CFG->libdir/formslib.php");
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class riddle_form extends moodleform {
+class road_form extends moodleform {
 
     /**
      * Defines forms elements
@@ -44,8 +44,9 @@ class riddle_form extends moodleform {
     public function definition() {
 
         $mform = $this->_form;
-        $descriptionoptions = $this->_customdata['descriptionoptions'];
+        $selectoptions = $this->_customdata['selectoptions'];
         $currententry = $this->_customdata['current'];
+        $groups = $this->_customdata['groups'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -60,20 +61,26 @@ class riddle_form extends moodleform {
         $mform->addRule('name', null, 'required', null, 'client');
         //Aquí añadimos la regla del tamaño máximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
-        // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'description_editor', get_string('riddle_editor', 'scavengerhunt'), null, $descriptionoptions);
-        $mform->setType('description_editor', PARAM_RAW);
-        $mform->addRule('description_editor', null, 'required', null, 'client');
+
+        $options = array();
+        $options[0] = get_string('none');
+        foreach ($selectoptions as $option) {
+            $options[$option->id] = $option->name;
+        }
+        if ($groups) {
+            $select = $mform->addElement('select', 'group_id', get_string('groupid','scavengerhunt'), $options);
+            $mform->addHelpButton('group_id', 'groupid_help', 'scavengerhunt');
+        } else {
+            $select = $mform->addElement('select', 'group_id', get_string('groupingid','scavengerhunt'), $options);
+            $mform->addHelpButton('group_id', 'groupingid_help', 'scavengerhunt');
+        }
+
         //Añado los campos ocultos id y newFeature
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'road_id');
-        $mform->setType('road_id', PARAM_INT);
-        $mform->addElement('hidden', 'num_riddle');
-        $mform->setType('num_riddle', PARAM_INT);
+
 
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);

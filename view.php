@@ -54,8 +54,8 @@ $event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
 $event->trigger();
 
 // Print the page header.
-
-$PAGE->set_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
+$url = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
+$PAGE->set_url($url);
 $PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
@@ -81,7 +81,8 @@ if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
         has_capability('mod/scavengerhunt:managescavenger', $context)) {
 
 }
-$renderable = new \mod_scavengerhunt\output\index_page('Some text','some text2');
-echo $output->render_index_page($renderable);
+//$renderable = new \mod_scavengerhunt\output\index_page('Some text','some text2');
+//echo $output->render_index_page($renderable);
+$value=groups_get_my_groups();
 // Finish the page.
 echo $output->footer();

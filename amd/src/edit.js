@@ -947,13 +947,22 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             }
 
 
-            function editFormEntry(idRiddle, idModule) {
+            function editFormRiddleEntry(idRiddle, idModule) {
                 var url = 'editriddle.php?cmid=' + idModule + '&id=' + idRiddle;
                 window.location.href = url;
             }
 
-            function newFormEntry(idRoad, idModule) {
+            function newFormRiddleEntry(idRoad, idModule) {
                 var url = "editriddle.php?cmid=" + idModule + "&road_id=" + idRoad;
+                window.location.href = url;
+            }
+            function editFormRoadEntry(idRoad, idModule) {
+                var url = 'editroad.php?cmid=' + idModule + '&id=' + idRoad;
+                window.location.href = url;
+            }
+
+            function newFormRoadEntry(idModule) {
+                var url = "editroad.php?cmid=" + idModule;
                 window.location.href = url;
             }
 
@@ -1195,17 +1204,19 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             ;
             $("#addRiddle").on('click', function () {
-                var numRiddle = $('#riddleList li[idRoad="' + idRoad + '"]').length;
-                //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {
-                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormEntry, [idRoad, idModule], idLock);
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormRiddleEntry, [idRoad, idModule], idLock);
                 } else {
-                    newFormEntry(idRoad, idModule);
+                    newFormRiddleEntry(idRoad, idModule);
                 }
 
             });
             $("#addRoad").on('click', function () {
-                addRoad(idScavengerhunt, idLock);
+                if (dirty) {
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormRoadEntry, [idModule], idLock);
+                } else {
+                    newFormRoadEntry(idRoad, idModule);
+                }
             });
 
             $("#removeFeature").on('click', function () {
@@ -1241,12 +1252,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#riddleList").on('click', '.ui-icon-pencil', function () {
                 //Busco el idRiddle del li que contiene la papelera seleccionada
+                debugger;
                 var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
                 //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {
-                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormEntry, [idRiddle, idModule], idLock);
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormRiddleEntry, [idRiddle, idModule], idLock);
                 } else {
-                    editFormEntry(idRiddle, idModule);
+                    editFormRiddleEntry(idRiddle, idModule);
                 }
 
             });
@@ -1303,21 +1315,16 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 deactivateEdition();
             });
             $("#roadList").on('click', '.ui-icon-pencil', function () {
-                var $div = $(this).parents("li").children(".nameRoad");
-                var width = $div.width();
-                oriVal = $div.text();
-                $div.text("");
-                $("<input type='text' id='modRoadName'>").val(oriVal).width(width).appendTo($div).focus();
-            });
-            $("#roadList").on('focusout', 'li .nameRoad > input', function () {
-                var $this = $(this);
-                var idRoad = $this.parents('li').attr('idRoad');
-                var nameRoad = $this.val();
-                if (nameRoad !== oriVal && nameRoad !== '') {
-                    updateRoad(idRoad, nameRoad, $this.parent(), idScavengerhunt, idLock);
+                //Busco el idRoad del li que contiene el lapicero seleccionado
+                debugger;
+                var idRoad = parseInt($(this).parents('li').attr('idRoad'));
+                //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
+                if (dirty) {
+                    saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormRoadEntry, [idRoad, idModule], idLock);
+                } else {
+                    editFormRoadEntry(idRoad, idModule);
                 }
-                $this.parent().text(oriVal);
-                $this.remove();
+
             });
             $("#roadList").on('click', '.ui-icon-trash', function () {
                 var $this_li = $(this).parents('li');

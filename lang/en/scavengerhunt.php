@@ -33,7 +33,6 @@ $string['modulenameplural'] = 'Scavengers Hunt';
 $string['modulename_help'] = 'Use the scavenger hunt module for... | The scavengerhunt module allows...';
 $string['scavengerhuntfieldset'] = 'Custom example fieldset';
 $string['scavengerhuntname'] = 'scavengerhunt name';
-$string['scavengerhuntname_help'] = 'This is the content of the help tooltip associated with the scavengerhuntname field. Markdown syntax is supported.';
 $string['scavengerhunt'] = 'scavengerhunt';
 $string['noscavengerhunts'] = 'Nothing to do here';
 $string['pluginadministration'] = 'scavengerhunt administration';
@@ -68,6 +67,10 @@ $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'VALIDATE LOCATION';
 $string['search_button'] = 'Search';
 $string['layers_button'] = 'Layers';
+$string['groupid'] = 'Group assigned to the road';
+$string['groupid_help'] = 'Users in this group are assigned to this road when the game starts';
+$string['groupingid'] = 'Grouping assigned to the road';
+$string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
 
 
 
