@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -61,7 +60,11 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
 
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
-        $this->standard_intro_elements();
+        if (method_exists($this, 'standard_intro_elements')) { //...compatibility check for 2.8
+            $this->standard_intro_elements();
+        } else {
+            $this->add_intro_editor();
+        }
 
         // Adding the rest of scavengerhunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
@@ -87,7 +90,7 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'assign');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
-     
+
 
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
