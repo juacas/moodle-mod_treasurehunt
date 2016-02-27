@@ -72,6 +72,10 @@ $string['groupid'] = 'Grupo asignado al camino';
 $string['groupid_help'] = 'Los usuarios de este grupo son asignados a este camino cuando empieza el juego';
 $string['groupingid'] = 'Agrupación asignada al camino';
 $string['groupingid_help'] = 'Los grupos de esta agrupación son asignados a este camino cuando empieza el juego';
+$string['noteam'] = 'No es miembro de ningún grupo';
+$string['noteamplay'] = 'No es miembro de ningún grupo, por lo que no puede realizar la actividad.';
+$string['multipleteams'] = 'Es miembro de más de un grupo';
+$string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
 
 
 

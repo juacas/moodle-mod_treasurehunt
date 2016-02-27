@@ -45,13 +45,13 @@ require_capability('mod/scavengerhunt:getscavengerhunt', $context);
 require_capability('mod/scavengerhunt:managescavenger', $context);
 
 //Poner evento de edicion o algo asi
-/*$event = \mod_scavengerhunt\event\course_module_viewed::create(array(
-            'objectid' => $PAGE->cm->instance,
-            'context' => $PAGE->context,
-        ));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
-$event->trigger();*/
+/* $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
+  'objectid' => $PAGE->cm->instance,
+  'context' => $PAGE->context,
+  ));
+  $event->add_record_snapshot('course', $PAGE->course);
+  $event->add_record_snapshot($PAGE->cm->modname, $scavengerhunt);
+  $event->trigger(); */
 
 // Print the page header.
 
@@ -83,7 +83,7 @@ echo $OUTPUT->header();
 // Replace the following lines with you own code.
 if ($lock) {
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $id));
-    notice(get_string('scavengerhuntislocked', 'scavengerhunt'),$returnurl);
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl);
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
     // Conditions to show the intro can change to look for own settings or whatever.

@@ -71,7 +71,10 @@ $string['groupid'] = 'Group assigned to the road';
 $string['groupid_help'] = 'Users in this group are assigned to this road when the game starts';
 $string['groupingid'] = 'Grouping assigned to the road';
 $string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
-
+$string['noteam'] = 'Not a member of any group';
+$string['noteamplay'] = 'Not a member of any group, so unable to make the activity.';
+$string['multipleteams'] = 'Member of more than one group';
+$string['multipleteamsplay'] = 'Member of more than one group, so unable to make the activity.';
 
 
 

@@ -379,10 +379,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     //Elimino la seleccion de features cuando cambia a off
                     selectedFeatures = this.select.getFeatures();
                     this.select.on('change:active', function () {
-                        if (!this.getActive()) {
-                            selectedFeatures.clear();
-                            deactivateDeleteButton();
-                        }
+                        selectedFeatures.clear();
+                        deactivateDeleteButton();
                     });
                     //Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no
                     this.select.on('select', function () {
@@ -1215,7 +1213,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 if (dirty) {
                     saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormRoadEntry, [idModule], idLock);
                 } else {
-                    newFormRoadEntry(idRoad, idModule);
+                    newFormRoadEntry(idModule);
                 }
             });
 

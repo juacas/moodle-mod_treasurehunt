@@ -37,7 +37,7 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,group_id FROM mdl_scavengerhunt_roads  WHERE id=?';
+        $sql = 'SELECT id,name,group_id,grouping_id FROM mdl_scavengerhunt_roads  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -47,15 +47,29 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
         $entry->id = null;
     }
     $entry->cmid = $cmid;
+
+
+
     //Compruebo el tipo de grupo
     if (groups_get_activity_groupmode($cm)) {
         $selectoptions = groups_get_all_groupings($course->id);
+        //Consulta de groupings ocuados en esta instancia
+        $sql = 'SELECT grouping_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
         $groups = true;
     } else {
         $selectoptions = groups_get_all_groups($course->id);
+        //Consulta de grupos ocuados en esta instancia
+        $sql = 'SELECT group_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
         $groups = false;
     }
-    $mform = new road_form(null, array('current' => $entry, 'selectoptions' => $selectoptions, 'groups' =>$groups)); //name of the form you defined in file above.
+    //Elimino los grupos ocupados
+    $parms = array('scavengerhunt_id' => $scavengerhunt->id, 'id' => $id);
+    $busy = $DB->get_records_sql($sql, $parms);
+    foreach ($busy as $option) {
+        unset($selectoptions[$option->busy]);
+    }
+
+    $mform = new road_form(null, array('current' => $entry, 'selectoptions' => $selectoptions, 'groups' => $groups)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
@@ -95,7 +109,7 @@ $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 if ($lock) {
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    notice(get_string('scavengerhuntislocked', 'scavengerhunt'), $returnurl);
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl);
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
     $mform->display();

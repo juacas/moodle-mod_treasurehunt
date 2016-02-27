@@ -217,149 +217,6 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
 
 }
 
-class mod_scavengerhunt_external_add_road extends external_api {
-
-    /**
-     * Can this function be called directly from ajax?
-     *
-     * @return boolean
-     * @since Moodle 2.9
-     */
-    public static function add_road_is_allowed_from_ajax() {
-        return true;
-    }
-
-    /**
-     * Returns description of method parameters
-     * @return external_function_parameters
-     */
-    public static function add_road_parameters() {
-        return new external_function_parameters(
-                array(
-            'nameRoad' => new external_value(PARAM_RAW, 'collection id riddles in JSON format', VALUE_OPTIONAL),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'idLock' => new external_value(PARAM_INT, 'id of lock')
-                )
-        );
-    }
-
-    public static function add_road_returns() {
-        return new external_single_structure(
-                array(
-            'road' => new external_single_structure(
-                    array(
-                'id' => new external_value(PARAM_INT, 'id of road'),
-                'name' => new external_value(PARAM_RAW, 'name of road'))),
-            'status' => new external_single_structure(
-                    array(
-                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code')))
-        ));
-    }
-
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function add_road($nameRoad, $idScavengerhunt, $idLock) { //Don't forget to set it as static
-        self::validate_parameters(self::add_road_parameters(), array('nameRoad' => $nameRoad, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
-
-        $road = array();
-
-        $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
-        $context = context_module::instance($cm->id);
-        self::validate_context($context);
-        require_capability('mod/scavengerhunt:managescavenger', $context);
-        require_capability('mod/scavengerhunt:addroad', $context);
-        if (checkLock($idScavengerhunt, $idLock)) {
-            if (!$nameRoad) {
-                list($id, $nameRoad) = addDefaultRoad($idScavengerhunt);
-            } else {
-                $id = insertRoadBD($idScavengerhunt, $nameRoad);
-            }
-            $road['id'] = $id;
-            $road['name'] = $nameRoad;
-            $status['code'] = 0;
-            $status['msg'] = 'El nuevo camino se ha generado con éxito';
-        } else {
-            $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
-        }
-        $result = array();
-        $result['road'] = $road;
-        $result['status'] = $status;
-        return $result;
-    }
-
-}
-
-class mod_scavengerhunt_external_update_road extends external_api {
-
-    /**
-     * Can this function be called directly from ajax?
-     *
-     * @return boolean
-     * @since Moodle 2.9
-     */
-    public static function update_road_is_allowed_from_ajax() {
-        return true;
-    }
-
-    /**
-     * Returns description of method parameters
-     * @return external_function_parameters
-     */
-    public static function update_road_parameters() {
-        return new external_function_parameters(
-                array(
-            'nameRoad' => new external_value(PARAM_RAW, 'new name for road'),
-            'idRoad' => new external_value(PARAM_INT, 'id of road'),
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'idLock' => new external_value(PARAM_INT, 'id of lock')
-                )
-        );
-    }
-
-    public static function update_road_returns() {
-        return new external_single_structure(
-                array(
-            'status' => new external_single_structure(
-                    array(
-                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code')))
-        ));
-    }
-
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function update_road($nameRoad, $idRoad, $idScavengerhunt, $idLock) { //Don't forget to set it as static
-        self::validate_parameters(self::update_road_parameters(), array('nameRoad' => $nameRoad, 'idRoad' => $idRoad, 'idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
-
-        $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
-        $context = context_module::instance($cm->id);
-        self::validate_context($context);
-        require_capability('mod/scavengerhunt:managescavenger', $context);
-        require_capability('mod/scavengerhunt:editroad', $context);
-        if (checkLock($idScavengerhunt, $idLock)) {
-            updateRoadBD($idRoad, $nameRoad);
-            $status['code'] = 0;
-            $status['msg'] = 'El camino se ha actualizado con éxito';
-        } else {
-            $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
-        }
-
-        $result = array();
-        $result['status'] = $status;
-        return $result;
-    }
-
-}
-
 class mod_scavengerhunt_external_delete_road extends external_api {
 
     /**
@@ -500,7 +357,8 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
     }
 
 }
-class mod_scavengerhunt_external_check_riddle extends external_api {
+
+class mod_scavengerhunt_external_send_location extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -508,7 +366,7 @@ class mod_scavengerhunt_external_check_riddle extends external_api {
      * @return boolean
      * @since Moodle 2.9
      */
-    public static function check_riddle_is_allowed_from_ajax() {
+    public static function send_location_is_allowed_from_ajax() {
         return true;
     }
 
@@ -516,19 +374,17 @@ class mod_scavengerhunt_external_check_riddle extends external_api {
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function check_riddle_parameters() {
+    public static function send_location_parameters() {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'idLock' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL)
                 )
         );
     }
 
-    public static function check_riddle_returns() {
+    public static function send_location_returns() {
         return new external_single_structure(
                 array(
-            'idLock' => new external_value(PARAM_INT, 'id of lock'),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -542,8 +398,8 @@ class mod_scavengerhunt_external_check_riddle extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function check_riddle($idScavengerhunt, $idLock) { //Don't forget to set it as static
-        self::validate_parameters(self::check_riddle_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
+    public static function send_location($idScavengerhunt, $idLock) { //Don't forget to set it as static
+        self::validate_parameters(self::send_location_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
@@ -571,6 +427,66 @@ class mod_scavengerhunt_external_check_riddle extends external_api {
         $result = array();
         $result['status'] = $status;
         $result['idLock'] = $idLock;
+        return $result;
+    }
+
+}
+
+class mod_scavengerhunt_external_user_progress extends external_api {
+
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
+    public static function user_progress_is_allowed_from_ajax() {
+        return true;
+    }
+
+    /**
+     * Returns description of method parameters
+     * @return external_function_parameters
+     */
+    public static function user_progress_parameters() {
+        return new external_function_parameters(
+                array(
+            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+                )
+        );
+    }
+
+    public static function user_progress_returns() {
+        return new external_single_structure(
+                array(
+            'riddles' => new external_value(PARAM_RAW, 'geojson with all riddles of the user/group'),
+            'status' => new external_single_structure(
+                    array(
+                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                'msg' => new external_value(PARAM_RAW, 'message explain code')))
+                )
+        );
+    }
+
+    /**
+     * Create groups
+     * @param array $groups array of group description arrays (with keys groupname and courseid)
+     * @return array of newly created groups
+     */
+    public static function user_progress($idScavengerhunt) { //Don't forget to set it as static
+        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt));
+
+        $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
+        $context = context_module::instance($cm->id);
+        self::validate_context($context);
+        require_capability('mod/scavengerhunt:managescavenger', $context);
+        $params = getUserGroupAndRoad($idScavengerhunt, $cm, $cm->modinfo->course->id);
+        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $idScavengerhunt, $context);
+        $status['code'] = 0;
+        $status['msg'] = 'El progreso de usuario se ha cargado con éxito';
+        $result = array();
+        $result['status'] = $status;
+        $result['riddles'] = $user_riddles;
         return $result;
     }
 

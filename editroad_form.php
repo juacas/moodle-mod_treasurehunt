@@ -68,11 +68,11 @@ class road_form extends moodleform {
             $options[$option->id] = $option->name;
         }
         if ($groups) {
-            $select = $mform->addElement('select', 'group_id', get_string('groupid','scavengerhunt'), $options);
-            $mform->addHelpButton('group_id', 'groupid_help', 'scavengerhunt');
+            $select = $mform->addElement('select', 'grouping_id', get_string('groupingid', 'scavengerhunt'), $options);
+            $mform->addHelpButton('grouping_id', 'groupingid', 'scavengerhunt');
         } else {
-            $select = $mform->addElement('select', 'group_id', get_string('groupingid','scavengerhunt'), $options);
-            $mform->addHelpButton('group_id', 'groupingid_help', 'scavengerhunt');
+            $select = $mform->addElement('select', 'group_id', get_string('groupid', 'scavengerhunt'), $options);
+            $mform->addHelpButton('group_id', 'groupid', 'scavengerhunt');
         }
 
         //Añado los campos ocultos id y newFeature
@@ -87,5 +87,6 @@ class road_form extends moodleform {
 
         $this->set_data($currententry);
     }
+    
 
 }

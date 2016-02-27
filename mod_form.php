@@ -87,13 +87,15 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'assign');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
-     
+
 
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
 
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
+
+
 
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);
