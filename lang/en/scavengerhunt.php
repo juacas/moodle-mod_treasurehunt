@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,14 +26,14 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Scavenger Hunt';
 $string['modulenameplural'] = 'Scavengers Hunt';
 $string['modulename_help'] = 'Use the scavenger hunt module for... | The scavengerhunt module allows...';
 $string['scavengerhuntfieldset'] = 'Custom example fieldset';
-$string['scavengerhuntname'] = 'scavengerhunt name';
+$string['riddlename'] = 'Riddle name';
+$string['scavengerhuntname'] = 'Scavengerhunt name';
 $string['scavengerhunt'] = 'scavengerhunt';
 $string['noscavengerhunts'] = 'Nothing to do here';
 $string['pluginadministration'] = 'scavengerhunt administration';
@@ -53,7 +54,20 @@ $string['scavengerhunt:managescavenger'] = 'Manage scavengerhunt';
 $string['scavengerhunt:view'] = 'View scavengerhunt';
 $string['scavengerhunt:addinstance'] = 'Add a new scavengerhunt';
 $string['scavengerhuntislocked'] = 'Someone is editing this scavengerhunt right now. Try to edit it in a few minutes.';
-/**Template */
+$string['availability'] = 'Availability';
+$string['allowsubmissionsfromdate'] = 'Allow submissions from';
+$string['allowsubmissionsfromdate_help'] = 'If enabled, students will not be able to submit before this date. If disabled, students will be able to start submitting right away.';
+$string['duedate'] = 'Due date';
+$string['duedate_help'] = 'This is when the assignment is due. Submissions will still be allowed after this date but any assignments submitted after this date are marked as late. To prevent submissions after a certain date - set the assignment cut off date.';
+$string['duedatereached'] = 'The due date for this assignment has now passed';
+$string['duedatevalidation'] = 'Due date must be after the allow submissions from date.';
+$string['cutoffdate'] = 'Cut-off date';
+$string['cutoffdate_help'] = 'If set, the assignment will not accept submissions after this date without an extension.';
+$string['cutoffdatevalidation'] = 'The cut-off date cannot be earlier than the due date.';
+$string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
+$string['alwaysshowdescription'] = 'Always show description';
+$string['alwaysshowdescription_help'] = 'If disabled, the Assignment Description above will only become visible to students at the "Allow submissions from" date.';
+/* * Template */
 $string['sendlotacion_title'] = 'Are you sure you want to send this location?';
 $string['sendlotacion_content'] = 'This action can not be undone.';
 $string['cancel'] = 'Cancel';

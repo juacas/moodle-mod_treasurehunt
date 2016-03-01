@@ -33,13 +33,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
             var view = new ol.View({
                 center: [0, 0],
-                zoom: 20,
+                zoom: 2,
                 minZoom: 2,
             });
             var source = new ol.source.Vector({
                 projection: 'EPSG:3857',
                 loader: function (extent, resolution, projection) {
-                    debugger;
                     var geoJSONFormat = new ol.format.GeoJSON();
                     var BBgeoJSON = geoJSONFormat.writeGeometry(new ol.geom.Polygon.fromExtent(extent), {
                         'dataProjection': "EPSG:4326",
@@ -49,7 +48,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                             methodname: 'mod_scavengerhunt_user_progress',
                             args: {
                                 idScavengerhunt: idScavengerhunt,
-                                //bbox:BBgeoJSON
+                                bbox:BBgeoJSON
                             }
                         }]);
                     geojson[0].done(function (response) {

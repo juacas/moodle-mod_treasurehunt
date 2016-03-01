@@ -506,13 +506,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
             function addNewFeatureToDirtySource(dirtyFeature, originalSource, dirtySource) {
+                debugger;
                 var idRiddle = dirtyFeature.get('idRiddle');
                 var feature = dirtySource.getFeatureById(idRiddle);
-                if (feature) {
-                    feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
-                } else {
+                if (!feature) {
                     feature = originalSource.getFeatureById(idRiddle).clone();
                     feature.setId(idRiddle);
+                    dirtySource.addFeature(feature);
                 }
                 if (feature.get('idFeaturesPolygons') === 'empty') {
                     feature.setProperties({
@@ -526,8 +526,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     });
                 }
                 feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
-                feature.setId(idRiddle);
-                dirtySource.addFeature(feature);
             }
 
 
@@ -556,6 +554,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             function removeFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
                 dirtyFeatures.forEach(function (dirtyFeature) {
+                    debugger;
                     var idRiddle = dirtyFeature.get('idRiddle');
                     var feature = dirtySource.getFeatureById(idRiddle);
                     var idFeaturesPolygons;
@@ -652,8 +651,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
                         //Add stage features to source originalStage
                         originalStage.addFeatures(geoJSON.readFeatures(geoJSONFeatures, {
-                            'dataProjection': "EPSG:4326",
-                            'featureProjection': "EPSG:3857"
+                            dataProjection: 'EPSG:4326',
+                            featureProjection: 'EPSG:3857'
                         }));
 
                         originalStage.getFeatures().forEach(function (feature) {
@@ -1117,10 +1116,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             }
 
             function saveRiddles(dirtySource, originalSource, idScavengerhunt, callback, options, idLock) {
+                debugger;
                 var geoJSONFormat = new ol.format.GeoJSON();
-                var geoJSON = geoJSONFormat.writeFeatures(dirtySource.getFeatures(), {
-                    'dataProjection': "EPSG:4326",
-                    'featureProjection': "EPSG:3857"
+                var features = dirtySource.getFeatures();
+                var geoJSON = geoJSONFormat.writeFeatures(features, {
+                    dataProjection: 'EPSG:4326',
+                    featureProjection: 'EPSG:3857'
                 });
                 var json = ajax.call([{
                         methodname: 'mod_scavengerhunt_update_riddles',

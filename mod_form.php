@@ -66,25 +66,25 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         // Adding the rest of scavengerhunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
 
-        $mform->addElement('header', 'availability', get_string('availability', 'assign'));
+        $mform->addElement('header', 'availability', get_string('availability', 'scavengerhunt'));
         $mform->setExpanded('availability', true);
 
-        $name = get_string('allowsubmissionsfromdate', 'assign');
+        $name = get_string('allowsubmissionsfromdate', 'scavengerhunt');
         $options = array('optional' => true);
         $mform->addElement('date_time_selector', 'allowsubmissionsfromdate', $name, $options);
-        $mform->addHelpButton('allowsubmissionsfromdate', 'allowsubmissionsfromdate', 'assign');
+        $mform->addHelpButton('allowsubmissionsfromdate', 'allowsubmissionsfromdate', 'scavengerhunt');
 
-        $name = get_string('duedate', 'assign');
+        $name = get_string('duedate', 'scavengerhunt');
         $mform->addElement('date_time_selector', 'duedate', $name, array('optional' => true));
-        $mform->addHelpButton('duedate', 'duedate', 'assign');
+        $mform->addHelpButton('duedate', 'duedate', 'scavengerhunt');
 
-        $name = get_string('cutoffdate', 'assign');
+        $name = get_string('cutoffdate', 'scavengerhunt');
         $mform->addElement('date_time_selector', 'cutoffdate', $name, array('optional' => true));
-        $mform->addHelpButton('cutoffdate', 'cutoffdate', 'assign');
+        $mform->addHelpButton('cutoffdate', 'cutoffdate', 'scavengerhunt');
 
-        $name = get_string('alwaysshowdescription', 'assign');
+        $name = get_string('alwaysshowdescription', 'scavengerhunt');
         $mform->addElement('checkbox', 'alwaysshowdescription', $name);
-        $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'assign');
+        $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'scavengerhunt');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
 
@@ -111,17 +111,17 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
 
         if ($data['allowsubmissionsfromdate'] && $data['duedate']) {
             if ($data['allowsubmissionsfromdate'] > $data['duedate']) {
-                $errors['duedate'] = get_string('duedatevalidation', 'assign');
+                $errors['duedate'] = get_string('duedatevalidation', 'scavengerhunt');
             }
         }
         if ($data['duedate'] && $data['cutoffdate']) {
             if ($data['duedate'] > $data['cutoffdate']) {
-                $errors['cutoffdate'] = get_string('cutoffdatevalidation', 'assign');
+                $errors['cutoffdate'] = get_string('cutoffdatevalidation', 'scavengerhunt');
             }
         }
         if ($data['allowsubmissionsfromdate'] && $data['cutoffdate']) {
             if ($data['allowsubmissionsfromdate'] > $data['cutoffdate']) {
-                $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'assign');
+                $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'scavengerhunt');
             }
         }
 

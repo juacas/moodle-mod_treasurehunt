@@ -51,7 +51,7 @@ class riddle_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('scavengerhuntname', 'scavengerhunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('riddlename', 'scavengerhunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
