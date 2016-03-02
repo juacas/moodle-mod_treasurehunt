@@ -40,9 +40,6 @@ require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 
-require_capability('mod/scavengerhunt:view', $context);
-require_capability('mod/scavengerhunt:getscavengerhunt', $context);
-require_capability('mod/scavengerhunt:managescavenger', $context);
 
 //Poner evento de edicion o algo asi
 /* $event = \mod_scavengerhunt\event\course_module_viewed::create(array(
@@ -59,6 +56,7 @@ $PAGE->set_url('/mod/scavengerhunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 //$PAGE->set_pagelayout('standard');
+//$user=getUserGroupAndRoad($scavengerhunt->id, $cm, $course->id);
 
 
 
@@ -84,7 +82,7 @@ echo $output->header();
 
 
 
-$scavengerhunt_output= array('name'=>$scavengerhunt->name,'description'=>format_module_intro('scavengerhunt', $scavengerhunt, $cm->id));
+$scavengerhunt_output = array('name' => $scavengerhunt->name, 'description' => format_module_intro('scavengerhunt', $scavengerhunt, $cm->id));
 
 $renderable = new \mod_scavengerhunt\output\play_page($scavengerhunt_output, 'some text2');
 echo $output->render($renderable);

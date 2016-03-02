@@ -37,7 +37,7 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddle  WHERE id=?';
+        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddles  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -105,7 +105,7 @@ $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 if ($lock) {
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    notice(get_string('scavengerhuntislocked', 'scavengerhunt'), $returnurl);
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl);
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
     $mform->display();

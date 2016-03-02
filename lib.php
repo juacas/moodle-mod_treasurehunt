@@ -51,6 +51,8 @@ define('WIDGET_ULTIMATE_ANSWER', 42);
 function scavengerhunt_supports($feature) {
 
     switch ($feature) {
+        case FEATURE_GROUPS:
+            return true;
         case FEATURE_MOD_INTRO:
             return true;
         case FEATURE_SHOW_DESCRIPTION:
@@ -139,7 +141,7 @@ function scavengerhunt_delete_instance($id) {
     $DB->delete_records('scavengerhunt', array('id' => $scavengerhunt->id));
     $roads_ids = $DB->get_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
     foreach ($roads_ids as $road) {
-        $DB->delete_records_select('scavengerhunt_riddle', 'road_id = ?', array($road->id));
+        $DB->delete_records_select('scavengerhunt_riddles', 'road_id = ?', array($road->id));
     }
     $DB->delete_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
     $DB->delete_records('scavengerhunt_locks', array('scavengerhunt_id' => $scavengerhunt->id));
@@ -498,7 +500,7 @@ function updateRoadBD($idRoad, $nameRoad) {
 function deleteRoadBD($idRoad) {
     GLOBAL $DB;
     $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
-    $DB->delete_records_select('scavengerhunt_riddle', 'road_id = ?', array($idRoad));
+    $DB->delete_records_select('scavengerhunt_riddles', 'road_id = ?', array($idRoad));
 }
 
 function getTotalRoads($idScavengerhunt) {

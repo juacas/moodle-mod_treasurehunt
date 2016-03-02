@@ -119,14 +119,9 @@
         <div id="map" class="smallmap"></div>
     </div>
     <div id="main_footer" data-role="footer" data-position='fixed' >
-        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-geolocation ui-btn-icon-notext" onclick="{{function}}
-                return false;"></a>
+        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-geolocation ui-btn-icon-notext" onclick="return false;"></a>
         <a href="#searchpage" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-search">{{#str}} search_button, mod_scavengerhunt{{/str}}</a>
-        <a href="#layerspage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a>
-        <select name="flip-2" id="flip-2" data-role="flipswitch" data-theme="b">
-            <option value="off">Off</option>
-            <option value="on">On</option>
-        </select>
+        <a href="#layerspage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a> 
         <div id="navigation" data-role="controlgroup" data-type="vertical">
             <a href="#" data-role="button" data-icon="plus" id="plus"
                data-iconpos="notext" onclick="{{function}}
