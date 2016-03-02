@@ -25,12 +25,31 @@ require.config({
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquerymobile'], function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates, $m) {
+define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquerymobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates, $m) {
 
 
     var init = {
         playScavengerhunt: function (idModule, idScavengerhunt) {
-
+            debugger;
+            var s = url.imageUrl('images/pergamino', 'scavengerhunt');
+            var defaultRiddleStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                    opacity: 1,
+                    scale: 0.2,
+                    src: s
+                }),
+                text: new ol.style.Text({
+                    textAlign: 'center',
+                    scale: 1.3,
+                    fill: new ol.style.Fill({
+                        color: '#fff'
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: '#000',
+                        width: 3.5
+                    })
+                })
+            });
             var view = new ol.View({
                 center: [0, 0],
                 zoom: 2,
@@ -39,16 +58,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             var source = new ol.source.Vector({
                 projection: 'EPSG:3857',
                 loader: function (extent, resolution, projection) {
-                    var geoJSONFormat = new ol.format.GeoJSON();
-                    var BBgeoJSON = geoJSONFormat.writeGeometry(new ol.geom.Polygon.fromExtent(extent), {
-                        'dataProjection': "EPSG:4326",
-                        'featureProjection': "EPSG:3857"
-                    });
                     var geojson = ajax.call([{
                             methodname: 'mod_scavengerhunt_user_progress',
                             args: {
                                 idScavengerhunt: idScavengerhunt,
-                                bbox:BBgeoJSON
                             }
                         }]);
                     geojson[0].done(function (response) {
@@ -71,8 +84,36 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             var vector = new ol.layer.Vector({
                 source: source,
-                /*updateWhileAnimating: true,
-                 updateWhileInteracting: true*/
+                style: styleFunction
+                        /*updateWhileAnimating: true,
+                         updateWhileInteracting: true*/
+            });
+            var selectSingleClick = new ol.interaction.Select({
+                style: function (feature) {
+                    var styles = [
+                        new ol.style.Style({
+                            image: new ol.style.Icon({
+                                opacity: 1,
+                                scale: 0.29,
+                                src: s
+                            }),
+                            text: new ol.style.Text({
+                                text: '' + feature.get('numRiddle'),
+                                textAlign: 'center',
+                                scale: 1.3,
+                                fill: new ol.style.Fill({
+                                    color: '#fff'
+                                }),
+                                stroke: new ol.style.Stroke({
+                                    color: '#3399CC',
+                                    width: 3.5
+                                })
+                            }),
+                            zIndex: 'Infinity'
+                        })];
+                    return styles;
+
+                }
             });
             $('#mappage').show();
             var map = new ol.Map({
@@ -87,6 +128,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 /*loadTilesWhileAnimating: true,
                  loadTilesWhileInteracting: true*/
             });
+            map.addInteraction(selectSingleClick);
             var geolocation = new ol.Geolocation({
                 projection: view.getProjection(),
                 trackingOptions: {
@@ -129,9 +171,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 })
             });
             //Si quiero que se actualicen con cada cambio de resolucion
-            map.getView().on('change:resolution', function (evt) {
-                source.clear();
-            });
+            /*map.getView().on('change:center', function (evt) {
+             debugger;
+             source.clear();
+             });*/
             function autolocate()
             {
                 geolocation.setTrackinig(true);
@@ -188,6 +231,17 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 }).appendTo($popUp);
                 $popUp.popup('open').trigger("create");
             }
+            function styleFunction(feature) {
+                // get the incomeLevel from the feature properties
+                var numRiddle = feature.get('numRiddle');
+                if (!isNaN(numRiddle)) {
+                    defaultRiddleStyle.getText().setText('' + numRiddle);
+                }
+                return [defaultRiddleStyle];
+            }
+
+
+
 
 
 

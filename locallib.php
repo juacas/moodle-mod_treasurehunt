@@ -85,6 +85,8 @@ function insertEntryBD(stdClass $entry) {
     $params = array($name, $road_id, $num_riddle, $description,
         $descriptionformat, $descriptiontrust, $timenow, $question_id);
     $DB->execute($sql, $params);
+    //Como he insertado una nueva pista sin geometrías pongo el camino como no valido
+    setValidRoad($road_id, false);
 //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddles  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
             . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ?';
@@ -113,12 +115,26 @@ function updateEntryBD(stdClass $entry) {
 function updateRiddleBD(Feature $feature) {
     GLOBAL $DB;
     $numRiddle = $feature->getProperty('numRiddle');
+    $road_id = $feature->getProperty('idRoad');
     $geometryWKT = object_to_wkt($feature->getGeometry());
     $timemodified = time();
     $idRiddle = $feature->getId();
     $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
+    setValidRoad($road_id);
+}
+
+function setValidRoad($road_id, $valid = null) {
+    GLOBAL $DB;
+    $road = new stdClass();
+    $road->id = $road_id;
+    if (is_null($valid)) {
+        $road->validated = isValidRoad($road_id);
+    } else {
+        $road->validated = $valid;
+    }
+    $DB->update_record("scavengerhunt_roads", $road);
 }
 
 function deleteEntryBD($id) {
@@ -219,27 +235,42 @@ function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
     return $geojson;
 }
 
-function getUserProgress($idRoad, $groupmode, $idgroup, $bbox, $idScavengerhunt, $context) {
+function getUserProgress($idRoad, $groupmode, $idgroup, $idScavengerhunt, $context) {
     global $USER, $DB;
-
-    $bboxWkt = object_to_wkt(geojson_to_object($bbox));
     if ($groupmode) {
         //Recupero la ultima pista descubierta por el grupo para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.group_id=? and a.road_id=r.road_id and a.road_id=? and ST_Intersects(geom,ST_GeomFromText(?))";
+        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.group_id=? and a.road_id=r.road_id and a.road_id=?";
     } else {
         //Recupero la ultima pista descubierta por el usuario para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=? and ST_Intersects(geom,ST_GeomFromText(?))";
+        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=?";
     }
 
-    $params = array($idgroup, $idRoad, $bboxWkt);
+    $params = array($idgroup, $idRoad);
     $user_progress = $DB->get_records_sql($query, $params);
     //Si no tiene ningún progreso mostrar primera pista del camino para comenzar
     if (count($user_progress) === 0) {
-        $query = "SELECT id,name,num_riddle,description,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1 and ST_Intersects(geom,ST_GeomFromText(?))";
-        $params = array($idRoad, $bboxWkt);
+        $query = "SELECT id,name,num_riddle,description,astext( ST_Centroid(geom)) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
+        $params = array($idRoad);
         $user_progress = $DB->get_records_sql($query, $params);
     }
     return riddlesDb2Geojson($user_progress, $context, $idScavengerhunt);
+}
+
+function isValidRoad($idRoad) {
+    global $DB;
+
+    $query = "SELECT geom as geometry from {scavengerhunt_riddles} where road_id = ?";
+    $params = array($idRoad);
+    $riddles = $DB->get_records_sql($query, $params);
+    if (count($riddles) < 2) {
+        return false;
+    }
+    foreach ($riddles as $riddle) {
+        if ($riddle->geometry === null) {
+            return false;
+        }
+    }
+    return true;
 }
 
 function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {

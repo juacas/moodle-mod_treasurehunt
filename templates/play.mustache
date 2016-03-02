@@ -110,16 +110,16 @@
 
     {{!Cabecera y barra de herramientas.}}
 
-    <div data-role="header" class="bgimg" data-position='fixed'>
+    <div data-role="header" data-position='fixed'>
         <a href="#infopanel"  data-rel="panel" data-dismissible="true" class="ui-btn ui-btn-left ui-btn-inline ui-icon-bars ui-btn-icon-notext"></a>
         <a href="#authors"  data-prefetch="true" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-right ui-btn-inline ui-icon-info ui-btn-icon-notext"></a>
-        <h1><img src="pix/images/caza-tesoro-icon.png" height="24"> {{scavengerhunt.name}}</h1>
+        <h1>{{#pix}} images/caza-tesoro-icon-small, scavengerhunt, Scavengerhunt Icon {{/pix}}{{scavengerhunt.name}}</h1>
     </div>		
     <div data-role="content" id="content">		  
         <div id="map" class="smallmap"></div>
     </div>
     <div id="main_footer" data-role="footer" data-position='fixed' >
-        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-geolocation ui-btn-icon-notext" onclick="return false;"></a>
+        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" onclick="return false;"></a>
         <a href="#searchpage" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-search">{{#str}} search_button, mod_scavengerhunt{{/str}}</a>
         <a href="#layerspage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a> 
         <div id="navigation" data-role="controlgroup" data-type="vertical">

@@ -452,7 +452,6 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'bbox' => new external_value(PARAM_RAW, 'bounding box of the map view')
                 )
         );
     }
@@ -474,15 +473,15 @@ class mod_scavengerhunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($idScavengerhunt,$bbox) { //Don't forget to set it as static
-        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt,'bbox'=>$bbox));
+    public static function user_progress($idScavengerhunt) { //Don't forget to set it as static
+        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         $params = getUserGroupAndRoad($idScavengerhunt, $cm, $cm->modinfo->course->id);
-        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id,$bbox,$idScavengerhunt, $context);
+        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id,$idScavengerhunt, $context);
         $status['code'] = 0;
         $status['msg'] = 'El progreso de usuario se ha cargado con éxito';
         $result = array();
