@@ -22,7 +22,9 @@ body {
 }
 #navigation .ui-btn-icon-notext {
     display: block;
-
+}
+#navigation button {
+    background-image: none;
 }
 #title, #tags, #shortdesc {
     display: none;

@@ -474,8 +474,8 @@ class mod_scavengerhunt_external_user_progress extends external_api {
      * @return array of newly created groups
      */
     public static function user_progress($idScavengerhunt) { //Don't forget to set it as static
+        global $COURSE;
         self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt));
-
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);

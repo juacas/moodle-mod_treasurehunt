@@ -81,6 +81,7 @@ $string['info_validate_location'] = 'Validar ubicación para esta pista';
 $string['button_validate_location'] = 'VALIDAR UBICACIÓN';
 $string['search_button'] = 'Buscar';
 $string['layers_button'] = 'Capas';
+$string['riddles_button'] = 'Pistas';
 $string['groupid'] = 'Grupo asignado al camino';
 $string['groupid_help'] = 'Los usuarios de este grupo son asignados a este camino cuando empieza el juego';
 $string['groupingid'] = 'Agrupación asignada al camino';

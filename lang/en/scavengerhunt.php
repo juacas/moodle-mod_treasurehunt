@@ -81,6 +81,7 @@ $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'VALIDATE LOCATION';
 $string['search_button'] = 'Search';
 $string['layers_button'] = 'Layers';
+$string['riddles_button'] = 'Riddles';
 $string['groupid'] = 'Group assigned to the road';
 $string['groupid_help'] = 'Users in this group are assigned to this road when the game starts';
 $string['groupingid'] = 'Grouping assigned to the road';

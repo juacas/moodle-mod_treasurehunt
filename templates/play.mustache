@@ -119,19 +119,24 @@
         <div id="map" class="smallmap"></div>
     </div>
     <div id="main_footer" data-role="footer" data-position='fixed' >
-        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" onclick="return false;"></a>
+        <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" id="autolocate"></a>
         <a href="#searchpage" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-search">{{#str}} search_button, mod_scavengerhunt{{/str}}</a>
-        <a href="#layerspage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a> 
+        <a href="#layerspage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a>
+        <a href="#riddlespage" data-transition="fade" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info">{{#str}} layers_button, mod_scavengerhunt{{/str}}</a> 
         <div id="navigation" data-role="controlgroup" data-type="vertical">
-            <a href="#" data-role="button" data-icon="plus" id="plus"
-               data-iconpos="notext" onclick="{{function}}
-                   return false;"></a>
-            <a href="#" data-role="button" data-icon="minus" id="minus"
-               data-iconpos="notext" onclick="{{function}}
-                   return false;"></a>
         </div>
     </div>
-
-
 </div>
 {{! end mappage }}
+{{#js}}
+require(['jquery','../amd/src/play','../amd/src/helloworld','jquerymobile'], function($,play,hello,$m) {
+   var game = new play(36,1);
+   game.select.on("select",function(features){
+        if(features.selected.length > 0){
+            $("#infoRiddlePanel").panel("open");
+        }
+   });
+   $('#infoRiddlePanel').panel({beforeclose: function(){game.select.getFeatures().clear();}});
+   $('#autolocate').on('click',function(){game.autolocate();});
+});
+{{/js}}

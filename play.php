@@ -61,7 +61,7 @@ $PAGE->set_heading(format_string($course->fullname));
 
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array($id, $cm->instance));
+//$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array($id, $cm->instance));
 $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/mobile-jq.css');
@@ -85,6 +85,5 @@ $scavengerhunt_output = array('name' => $scavengerhunt->name, 'description' => f
 
 $renderable = new \mod_scavengerhunt\output\play_page($scavengerhunt_output, 'some text2');
 echo $output->render($renderable);
-echo $url;
 // Finish the page.
 echo $output->footer();
