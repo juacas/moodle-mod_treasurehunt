@@ -358,7 +358,7 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
 
 }
 
-class mod_scavengerhunt_external_send_location extends external_api {
+class mod_scavengerhunt_external_validate_location extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -366,7 +366,7 @@ class mod_scavengerhunt_external_send_location extends external_api {
      * @return boolean
      * @since Moodle 2.9
      */
-    public static function send_location_is_allowed_from_ajax() {
+    public static function validate_location_is_allowed_from_ajax() {
         return true;
     }
 
@@ -374,15 +374,16 @@ class mod_scavengerhunt_external_send_location extends external_api {
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function send_location_parameters() {
+    public static function validate_location_parameters() {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
+            'location' => new external_value(PARAM_RAW, "GeoJSON with point's location")
                 )
         );
     }
 
-    public static function send_location_returns() {
+    public static function validate_location_returns() {
         return new external_single_structure(
                 array(
             'status' => new external_single_structure(
@@ -398,35 +399,23 @@ class mod_scavengerhunt_external_send_location extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function send_location($idScavengerhunt, $idLock) { //Don't forget to set it as static
-        self::validate_parameters(self::send_location_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'idLock' => $idLock));
+    public static function validate_location($idScavengerhunt, $location) { //Don't forget to set it as static
+        self::validate_parameters(self::validate_location_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'location' => $location));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
-        if (isset($idLock)) {
-            if (checkLock($idScavengerhunt, $idLock)) {
-                $idLock = renewLockScavengerhunt($idScavengerhunt);
-                $status['code'] = 0;
-                $status['msg'] = 'Se ha renovado el bloqueo con exito';
-            } else {
-                $status['code'] = 1;
-                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
-            }
+        $params = getUserGroupAndRoad($idScavengerhunt, $cm, $cm->modinfo->course->id);
+        if (checkRiddle($params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode)) {
+            $status['code'] = 0;
+            $status['msg'] = '¡¡¡Enhorabuena, a por la siguiente pista!!!';
         } else {
-            if (!isLockScavengerhunt($idScavengerhunt)) {
-                $idLock = renewLockScavengerhunt($idScavengerhunt);
-                $status['code'] = 0;
-                $status['msg'] = 'Se ha creado el bloqueo con exito';
-            } else {
-                $status['code'] = 1;
-                $status['msg'] = 'La caza del tesoro está siendo editada';
-            }
+            $status['code'] = 0;
+            $status['msg'] = 'No es el lugar correcto';
         }
         $result = array();
         $result['status'] = $status;
-        $result['idLock'] = $idLock;
         return $result;
     }
 
@@ -481,7 +470,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         $params = getUserGroupAndRoad($idScavengerhunt, $cm, $cm->modinfo->course->id);
-        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id,$idScavengerhunt, $context);
+        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $idScavengerhunt, $context);
         $status['code'] = 0;
         $status['msg'] = 'El progreso de usuario se ha cargado con éxito';
         $result = array();

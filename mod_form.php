@@ -62,6 +62,8 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
         $this->standard_intro_elements();
+        $mform->addElement('advcheckbox', 'playwithoutmove', get_string('playwithoutmove', 'scavengerhunt'));
+        $mform->addHelpButton('playwithoutmove', 'playwithoutmove', 'scavengerhunt');
 
         // Adding the rest of scavengerhunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.

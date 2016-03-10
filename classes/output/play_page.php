@@ -28,9 +28,8 @@ class play_page implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         GLOBAL $USER;
         $data = new stdClass();
-        //$output->user_picture($USER);
         $data->user->name = $USER->firstname.' '.$USER->lastname ;
-        $data->user->picture = $output->user_picture($USER);
+        $data->user->picture = $output->user_picture($USER,array('link'=>false));
         $data->scavengerhunt->name = $this->scavengerhunt[name];
         $data->scavengerhunt->description = $this->scavengerhunt[description];
         return $data;

@@ -119,7 +119,7 @@ function updateRiddleBD(Feature $feature) {
     $geometryWKT = object_to_wkt($feature->getGeometry());
     $timemodified = time();
     $idRiddle = $feature->getId();
-    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
+    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = ST_GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
     setValidRoad($road_id);
@@ -211,23 +211,55 @@ function checkLock($idScavengerhunt, $idLock) {
     }
 }
 
-function checkRiddle($idRoad) {
+function checkRiddle($idgroup, $idRoad, $point, $groupmode) {
     global $USER, $DB;
-    //Recupero la Ãºltima pista descubierta por el usuario para esta instancia
-    $query = "SELECT max(num_riddle) from {scavengerhunt_riddless} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=?";
-    $params = array($USER->id, $idRoad);
+    $location = object_to_wkt($point);
+    if ($groupmode) {
+        $group_type = 'group_id';
+    } else {
+        $group_type = 'user_id';
+    }
+    //Recupero la ultima pista descubierta por el usuario para esta instancia
+    $query = "SELECT max(num_riddle) as currentriddle from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id WHERE a.$group_type=? and a.road_id=? and a.success=1";
+    $params = array($idgroup, $idRoad);
     $currentriddle = $DB->get_record_sql($query, $params);
-    $nextriddle = $currentriddle + 1;
-    //Compruebo si la geometrÃ­a estÃ¡ dentro
+    $nextriddle = $currentriddle->currentriddle + 1;
+    //Compruebo si la geometria esta dentro
+    $query = "SELECT id, ST_Intersects(geom,ST_GeomFromText((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
+    $params = array($location, $nextriddle, $idRoad);
+    $nextriddle = $DB->get_record_sql($query, $params);
+    if ($nextriddle->inside) {
+        $nextriddle->inside = true;
+    } else {
+        $nextriddle->inside = false;
+    }
+    $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated,' . $group_type . ', success,'
+            . ' locations) VALUES ((?),(?),(?),(?),(?),ST_GeomFromText((?)))';
+    $params = array($idRoad, $nextriddle->id, time(),
+        $idgroup, $nextriddle->inside, $location);
+    $DB->execute($query, $params);
+
+    return $nextriddle->inside;
 }
 
 function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
     $riddlesArray = array();
     foreach ($riddles_result as $value) {
         $multipolygon = wkt_to_object($value->geometry);
-        $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
-        $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idScavengerhunt, 'description' => $description);
-        $feature = new Feature(intval($value->id), $multipolygon, $attr);
+        if (isset($value->description)) {
+            $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
+        } else {
+            $description = null;
+        }
+        $attr = array('idRoad' => intval($value->road_id),
+            'numRiddle' => intval($value->num_riddle),
+            'name' => $value->name,
+            'idStage' => $idScavengerhunt,
+            'description' => $description,
+            'date' => (is_null($value->timecreated)) ? null : intval($value->timecreated),
+            'success' => (is_null($value->success)) ? null : intval($value->success));
+        $feature = new Feature($value->id ?
+                        intval($value->id) : null, $multipolygon, $attr);
         array_push($riddlesArray, $feature);
     }
     $featureCollection = new FeatureCollection($riddlesArray);
@@ -236,15 +268,14 @@ function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
 }
 
 function getUserProgress($idRoad, $groupmode, $idgroup, $idScavengerhunt, $context) {
-    global $USER, $DB;
+    global $DB;
     if ($groupmode) {
-        //Recupero la ultima pista descubierta por el grupo para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.group_id=? and a.road_id=r.road_id and a.road_id=?";
+        $group_type = 'group_id';
     } else {
-        //Recupero la ultima pista descubierta por el usuario para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=?";
+        $group_type = 'user_id';
     }
-
+//Recupero las pistas descubiertas por el grupo para esta instancia
+    $query = "SELECT a.timecreated ,IF(a.success=0,NULL,r.name) as name,IF(a.success=0,NULL,r.id) as id,IF(a.success=0,NULL,r.description) as description,IF(a.success=0,r.num_riddle -1,r.num_riddle) as num_riddle,  astext(a.locations) as geometry,r.road_id,a.success from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id where a." . $group_type . "=(?) and a.road_id=(?)";
     $params = array($idgroup, $idRoad);
     $user_progress = $DB->get_records_sql($query, $params);
     //Si no tiene ningún progreso mostrar primera pista del camino para comenzar
