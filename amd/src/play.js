@@ -31,6 +31,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
+            var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
+
+
+
 
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -252,14 +256,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 {
                     $("#nameRiddle").html(feature.get('name'));
                     $("#descriptionRiddle").html(feature.get('description'));
-                    $("#timeLabel").html("Pista descubierta en la fecha " + date.toLocaleString());
-                    $("#infoRiddlePanel").trigger("updatelayout");
+                    $("#timeLabel").html(date.toLocaleString());
+                    //$("#infoRiddlePanel").trigger("updatelayout");
                     $("#infoRiddle").show();
                     $("#infoFailedLocation").hide();
                 } else {
                     $("#nameFailedRiddle").html(feature.get('name'));
-                    $("#timeLabelFailed").html("Pista descubierta en la fecha " + date.toLocaleString());
-                    $("#infoRiddlePanel").trigger("updatelayout");
+                    $("#timeLabelFailed").html(date.toLocaleString());
+                    //$("#infoRiddlePanel").trigger("updatelayout");
                     $("#infoFailedLocation").show();
                     $("#infoRiddle").hide();
                 }
@@ -283,6 +287,23 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 map.beforeRender(pan, zoom);
                 view.setCenter(point);
                 view.setResolution(2.388657133911758);
+            }
+            function flyTo(map, extent) {
+                var duration = 500;
+                var view = map.getView();
+                var size = map.getSize();
+                var pan = ol.animation.pan({
+                    duration: duration,
+                    source: /** @type {ol.Coordinate} */
+                            (view.getCenter()),
+                });
+                var zoom = ol.animation.zoom({
+                    duration: duration,
+                    resolution: view.getResolution(),
+                });
+
+                map.beforeRender(pan, zoom);
+                view.fit(extent, size);
             }
 
             function validateLocation() {
@@ -314,6 +335,36 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     toast(error.message);
                 });
             }
+            $("#autocomplete").on("filterablebeforefilter", function (e, data) {
+                        var $ul = $(this),
+                                    value = $(data.input).val(),
+                                    html = "";
+                        $ul.html(html);
+                        if (value && value.length > 2) {
+                    $.mobile.loading("show", {
+                        text: "Buscando",
+                        textVisible: true});
+                    openStreetMapGeocoder.geocode(value, function (response) {
+                        $.each(response, function (i, place) {
+                            $('<li>')
+                                    .hide().append($("<a href='#'>").text(place.totalName)
+                                    ).appendTo($ul).click(function () {
+                                $.mobile.pageContainer.pagecontainer("change", "#mappage");
+                                var extend = new Array();
+                                extend[0] = parseFloat(place.boundingbox[2]);
+                                extend[1] = parseFloat(place.boundingbox[0]);
+                                extend[2] = parseFloat(place.boundingbox[3]);
+                                extend[3] = parseFloat(place.boundingbox[1]);
+                                extend = ol.proj.transformExtent(extend, 'EPSG:4326', 'EPSG:3857');
+                                flyTo(map, extend);
+                            }).show();                                              
+                        });
+                                        $ul.listview("refresh");
+                                        $ul.trigger("updatelayout");
+                        $.mobile.loading("hide");
+                            });
+                }
+                });
             /*-------------------------------Eventos-----------------------------------*/
             geolocation.on('change:position', function () {
                 debugger;

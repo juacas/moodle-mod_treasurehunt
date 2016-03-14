@@ -73,15 +73,16 @@ $string['sendlotacion_content'] = 'This action can not be undone.';
 $string['cancel'] = 'Cancel';
 $string['send'] = 'Send';
 $string['exit'] = 'Exit';
+$string['back'] = 'Back';
+$string['layers'] = 'Layers';
 $string['discovered_riddle'] = 'Discovered riddle';
 $string['failed_location'] = 'Failed location';
 $string['nameRiddle'] = 'Name of riddle';
 $string['descriptionRiddle'] = 'Description of riddle';
 $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'Validate location';
-$string['search_button'] = 'Search';
-$string['layers_button'] = 'Layers';
-$string['riddles_button'] = 'Riddles';
+$string['search'] = 'Search';
+$string['riddles'] = 'Riddles';
 $string['playwithoutmove'] = 'Playing without moving';
 $string['playwithoutmove_help'] = 'If this option is enabled students may play from their computers without moving to places. A mark on the map is enabled to select the desired point';
 $string['groupid'] = 'Group assigned to the road';
@@ -92,6 +93,7 @@ $string['noteam'] = 'Not a member of any group';
 $string['noteamplay'] = 'Not a member of any group, so unable to make the activity.';
 $string['multipleteams'] = 'Member of more than one group';
 $string['multipleteamsplay'] = 'Member of more than one group, so unable to make the activity.';
-
+$string['timeLabelFailed'] = 'Location sent on the date: ';
+$string['timeLabel'] = 'Riddle discovered on the date: ';
 
 
