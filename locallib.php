@@ -85,7 +85,7 @@ function insertEntryBD(stdClass $entry) {
     $params = array($name, $road_id, $num_riddle, $description,
         $descriptionformat, $descriptiontrust, $timenow, $question_id);
     $DB->execute($sql, $params);
-    //Como he insertado una nueva pista sin geometrías pongo el camino como no valido
+    //Como he insertado una nueva pista sin geometrÃ­as pongo el camino como no valido
     setValidRoad($road_id, false);
 //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddles  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
@@ -220,13 +220,13 @@ function checkRiddle($idgroup, $idRoad, $point, $groupmode) {
         $group_type = 'user_id';
     }
     //Recupero la ultima pista descubierta por el usuario para esta instancia
-    $query = "SELECT id,num_riddle as currentriddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1)";
+    $query = "SELECT id,num_riddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1)";
     $params = array($idgroup, $idRoad);
     $currentriddle = $DB->get_record_sql($query, $params);
-    $nextriddle = $currentriddle->currentriddle + 1;
+    $nextnumriddle = $currentriddle->num_riddle + 1;
     //Compruebo si la geometria esta dentro
     $query = "SELECT id, ST_Intersects(geom,ST_GeomFromText((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
-    $params = array($location, $nextriddle, $idRoad);
+    $params = array($location, $nextnumriddle, $idRoad);
     $nextriddle = $DB->get_record_sql($query, $params);
     if ($nextriddle->inside) {
         $isInside = true;
@@ -235,12 +235,14 @@ function checkRiddle($idgroup, $idRoad, $point, $groupmode) {
         $isInside = false;
         $pointIdRiddle = $currentriddle->id;
     }
-    $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated,' . $group_type . ', success,'
-            . ' locations) VALUES ((?),(?),(?),(?),(?),ST_GeomFromText((?)))';
-    $params = array($idRoad, $pointIdRiddle, time(),
-        $idgroup, $isInside, $location);
-    $DB->execute($query, $params);
-
+    //Si no es la primera pista fallada, y por lo tanto null
+    if (!is_null($pointIdRiddle)) {
+        $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated,' . $group_type . ', success,'
+                . ' locations) VALUES ((?),(?),(?),(?),(?),ST_GeomFromText((?)))';
+        $params = array($idRoad, $pointIdRiddle, time(),
+            $idgroup, $isInside, $location);
+        $DB->execute($query, $params);
+    }
     return $nextriddle->inside;
 }
 
@@ -280,9 +282,9 @@ function getUserProgress($idRoad, $groupmode, $idgroup, $idScavengerhunt, $conte
     $query = "SELECT a.timecreated ,r.name,IF(a.success=0,NULL,r.id) as id,IF(a.success=0,NULL,r.description) as description,r.num_riddle,  astext(a.locations) as geometry,r.road_id,a.success from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id where a." . $group_type . "=(?) and a.road_id=(?)";
     $params = array($idgroup, $idRoad);
     $user_progress = $DB->get_records_sql($query, $params);
-    //Si no tiene ningún progreso mostrar primera pista del camino para comenzar
+    //Si no tiene ningÃºn progreso mostrar primera pista del camino para comenzar
     if (count($user_progress) === 0) {
-        $query = "SELECT id,name,num_riddle,description,astext( ST_Centroid(geom)) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
+        $query = "SELECT num_riddle -1,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
         $params = array($idRoad);
         $user_progress = $DB->get_records_sql($query, $params);
     }
@@ -336,10 +338,10 @@ function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {
     }
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
     if (count($groups) === 0) {
-        //No pertenece a ningÃƒÂºn grupo
+        //No pertenece a ningÃƒÆ’Ã‚Âºn grupo
         print_error('noteamplay', 'scavengerhunt', $returnurl);
     } else if (count($groups) > 1) {
-        //Pertenece a mÃƒÂ¡s de un grupo
+        //Pertenece a mÃƒÆ’Ã‚Â¡s de un grupo
         print_error('multipleteamsplay', 'scavengerhunt', $returnurl);
     } else {
         //Bien

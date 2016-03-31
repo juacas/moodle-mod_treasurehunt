@@ -13,29 +13,28 @@
 require.config({
     baseUrl: 'js',
     shim: {
-        openlayers: {
+        'openlayers': {
             exports: 'OpenLayers'
-        }
+        },
+        'jquery.mobile-config': ['jquery'],
+        'jquery.mobile': ['jquery', 'jquery.mobile-config']
     },
     paths: {
         openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
-        jquerymobile: 'jquery-mobile/jquerymobile'
+        'jquery.mobile-config': 'jquery-mobile/jquery.mobile-config',
+        'jquery.mobile': 'jquery-mobile/jquerymobile',
     }
 });
-define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquerymobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates, $m) {
+define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
         playScavengerhunt: function (idModule, idScavengerhunt, playwithoutmove) {
-
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
             var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-
-
-
-
+            /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
                 scale: 1.3,
@@ -95,47 +94,62 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 text: selectText,
                 zIndex: 'Infinity'
             });
-            var geoJSONFormat = new ol.format.GeoJSON();
-            var view = new ol.View({
-                center: [0, 0],
-                zoom: 2,
-                minZoom: 2,
+            var positionFeatureStyle = new ol.style.Style({
+                image: new ol.style.Circle({
+                    radius: 6,
+                    fill: new ol.style.Fill({
+                        color: [0, 0, 0, 1]
+                    }),
+                    stroke: new ol.style.Stroke({
+                        color: [255, 255, 255, 1],
+                        width: 2
+                    })
+                })
             });
+            var accuracyFeatureStyle = new ol.style.Style({
+                fill: new ol.style.Fill({
+                    color: [255, 255, 255, 0.3]
+                }),
+                stroke: new ol.style.Stroke({
+                    color: [0, 0, 0, 0.5],
+                    width: 1
+                }),
+                zIndex: -1
+            });
+            var markerFeatureStyle = new ol.style.Style({
+                image: new ol.style.Icon({
+                    anchor: [0.5, 1],
+                    opacity: 1,
+                    scale: 0.3,
+                    src: markerUrl
+                })
+            });
+            /*-------------------------------Layers-----------------------------------*/
+            var layers = [];
+            var geoJSONFormat = new ol.format.GeoJSON();
             var source = new ol.source.Vector({
-                projection: 'EPSG:3857',
-                loader: function (extent, resolution, projection) {
-                    var geojson = ajax.call([{
-                            methodname: 'mod_scavengerhunt_user_progress',
-                            args: {
-                                idScavengerhunt: idScavengerhunt,
-                            }
-                        }]);
-                    geojson[0].done(function (response) {
-                        console.log('json: ' + response.riddles);
-                        if (response.status.code) {
-                            toast(response.status.msg);
-                        } else {
-                            source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
-                                'dataProjection': "EPSG:4326",
-                                'featureProjection': "EPSG:3857"
-                            }));
-                        }
-                    }).fail(function (error) {
-                        console.log(error);
-                        error_dialog(error.message);
-                    });
-                },
-                strategy: ol.loadingstrategy.bbox
+                projection: 'EPSG:3857'
             });
             var vector = new ol.layer.Vector({
                 source: source,
-                style: styleFunction,
-                /*updateWhileAnimating: true,
-                 updateWhileInteracting: true*/
+                style: styleFunction
+                        /*updateWhileAnimating: true,
+                         updateWhileInteracting: true*/
+            });
+            var view = new ol.View({
+                center: [0, 0],
+                zoom: 2,
+                minZoom: 2
             });
             var select = new ol.interaction.Select({
                 layers: [vector],
-                style: selectStyleFunction
+                style: selectStyleFunction,
+                filter: function (feature, layer) {
+                    if (feature.get('numRiddle') === 0) {
+                        return false;
+                    }
+                    return true;
+                }
             });
             var geolocation = new ol.Geolocation({
                 projection: view.getProjection(),
@@ -147,29 +161,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 tracking: false
             });
             var accuracyFeature = new ol.Feature();
-            accuracyFeature.setStyle(new ol.style.Style({
-                fill: new ol.style.Fill({
-                    color: [255, 255, 255, 0.3]
-                }),
-                stroke: new ol.style.Stroke({
-                    color: [0, 0, 0, 0.5],
-                    width: 1
-                }),
-                zIndex: -1
-            }));
+            accuracyFeature.setStyle(accuracyFeatureStyle);
             var positionFeature = new ol.Feature();
-            positionFeature.setStyle(new ol.style.Style({
-                image: new ol.style.Circle({
-                    radius: 6,
-                    fill: new ol.style.Fill({
-                        color: [0, 0, 0, 1]
-                    }),
-                    stroke: new ol.style.Stroke({
-                        color: [255, 255, 255, 1],
-                        width: 2
-                    })
-                })
-            }));
+            positionFeature.setStyle(positionFeatureStyle);
             var userPosition = new ol.layer.Vector({
                 source: new ol.source.Vector({
                     features: [accuracyFeature, positionFeature]
@@ -177,24 +171,25 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             var markerFeature = new ol.Feature();
             markerFeature.setGeometry(null);
-            markerFeature.setStyle(new ol.style.Style({
-                image: new ol.style.Icon({
-                    anchor: [0.5, 1],
-                    opacity: 1,
-                    scale: 0.3,
-                    src: markerUrl
-                })
-            }));
+            markerFeature.setStyle(markerFeatureStyle);
             var markerVector = new ol.layer.Vector({
                 source: new ol.source.Vector({
                     features: [markerFeature]
                 })
             });
-            $("#container").show();
             //Nuevo zoom personalizado
             var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
             var map = new ol.Map({
-                layers: [
+                layers: [new ol.layer.Tile({
+                        visible: false,
+                        source: new ol.source.BingMaps({
+                            key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
+                            imagerySet: 'AerialWithLabels',
+                            maxZoom: 19
+                                    // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                                    // "no photos at this zoom level" tiles
+                                    // maxZoom: 19
+                        })}),
                     new ol.layer.Tile({
                         source: new ol.source.OSM()
                     }), vector, userPosition, markerVector
@@ -206,15 +201,37 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                          loadTilesWhileInteracting: true*/
             });
             map.addInteraction(select);
-
-            //Si quiero que se actualicen con cada cambio de resolucion
-            map.getView().on('change:resolution', function (evt) {
-                source.clear();
-            });
-
+            //Si quiero que se actualicen cada 20 seg
+            renewSource();
+            setInterval(function () {
+                renewSource();
+            }, 20000);
             function styleFunction(feature, resolution) {
                 // get the incomeLevel from the feature properties
                 var numRiddle = feature.get('numRiddle');
+                if (numRiddle === 0) {
+                    var fill = new ol.style.Fill({
+                        color: 'rgba(255,255,255,0.4)'
+                    });
+                    var stroke = new ol.style.Stroke({
+                        color: '#3399CC',
+                        width: 1.25
+                    });
+                    var styles = new ol.style.Style({
+                        image: new ol.style.Circle({
+                            fill: fill,
+                            stroke: stroke,
+                            radius: 5
+                        }),
+                        fill: fill,
+                        stroke: stroke,
+                        text: new ol.style.Text({
+                            text: 'Solo puedes empezar desde aquí',
+                            textAlign: 'center',
+                        })
+                    });
+                    return [styles];
+                }
                 if (!feature.get('success')) {
                     failRiddleStyle.getImage().setScale((view.getZoom() / 220));
                     failRiddleStyle.getText().setText('' + numRiddle);
@@ -233,7 +250,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 defaultSelectRiddleStyle.getText().setText('' + numRiddle);
                 return [defaultSelectRiddleStyle];
             }
-            /*-------------------------------Funcionalidades-----------------------------------*/
+            /*-------------------------------Functions-----------------------------------*/
             function autolocate(center, validate) {
                 center = center || false;
                 validate = validate || false;
@@ -250,7 +267,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 }
             }
             function setTextRiddle(feature) {
-                debugger;
                 var date = new Date(feature.get('date') * 1000);
                 if (feature.get('success'))
                 {
@@ -283,7 +299,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     duration: duration,
                     resolution: view.getResolution(),
                 });
-
                 map.beforeRender(pan, zoom);
                 view.setCenter(point);
                 view.setResolution(2.388657133911758);
@@ -301,7 +316,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     duration: duration,
                     resolution: view.getResolution(),
                 });
-
                 map.beforeRender(pan, zoom);
                 view.fit(extent, size);
             }
@@ -326,7 +340,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         }
                     }]);
                 geojson[0].done(function (response) {
-                    source.clear();
+                    renewSource();
                     $.mobile.loading("hide");
                     toast(response.status.msg);
                 }).fail(function (error) {
@@ -335,39 +349,109 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     toast(error.message);
                 });
             }
-            $("#autocomplete").on("filterablebeforefilter", function (e, data) {
-                        var $ul = $(this),
-                                    value = $(data.input).val(),
-                                    html = "";
-                        $ul.html(html);
-                        if (value && value.length > 2) {
-                    $.mobile.loading("show", {
-                        text: "Buscando",
-                        textVisible: true});
-                    openStreetMapGeocoder.geocode(value, function (response) {
-                        $.each(response, function (i, place) {
-                            $('<li>')
-                                    .hide().append($("<a href='#'>").text(place.totalName)
-                                    ).appendTo($ul).click(function () {
-                                $.mobile.pageContainer.pagecontainer("change", "#mappage");
-                                var extend = new Array();
-                                extend[0] = parseFloat(place.boundingbox[2]);
-                                extend[1] = parseFloat(place.boundingbox[0]);
-                                extend[2] = parseFloat(place.boundingbox[3]);
-                                extend[3] = parseFloat(place.boundingbox[1]);
-                                extend = ol.proj.transformExtent(extend, 'EPSG:4326', 'EPSG:3857');
-                                flyTo(map, extend);
-                            }).show();                                              
-                        });
-                                        $ul.listview("refresh");
-                                        $ul.trigger("updatelayout");
-                        $.mobile.loading("hide");
-                            });
+            function renewSource() {
+                var geojson = ajax.call([{
+                        methodname: 'mod_scavengerhunt_user_progress',
+                        args: {
+                            idScavengerhunt: idScavengerhunt,
+                        }
+                    }]);
+                geojson[0].done(function (response) {
+                    console.log('json: ' + response.riddles);
+                    if (response.status.code) {
+                        toast(response.status.msg);
+                    } else {
+                        source.clear();
+                        source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
+                            'dataProjection': "EPSG:4326",
+                            'featureProjection': "EPSG:3857"
+                        }));
+                    }
+                }).fail(function (error) {
+                    console.log(error);
+                    error_dialog(error.message);
+                });
+            }
+            function initLayerList() {
+                $('#layerspage').page();
+                $('<li>', {
+                    "data-role": "list-divider",
+                    text: "Vista del Mapa"
+                })
+                        .appendTo('#layerslist');
+                var baseLayers = map.getLayersBy("isBaseLayer", true);
+                $.each(baseLayers, function () {
+                    addLayerToList(this);
+                });
+                $('<li>', {
+                    "data-role": "list-divider",
+                    text: "Capas"
+                })
+                        .appendTo('#layerslist');
+                var overlayLayers = map.getLayersBy("isBaseLayer", false);
+                $.each(overlayLayers, function () {
+                    switch (this.name) {
+                        case 'vector':
+                        case 'Tesoro:Editable':
+                        case 'Markers':
+                            break;
+                        default:
+                            if (this.name.indexOf('OpenLayers_Control') == -1) {
+                                addLayerToList(this);
+                            }
+                    }
+                });
+                $('#layerslist').listview('refresh');
+                map.events.register("addlayer", this, function (e) {
+                    switch (e.layer.name) {
+                        case 'OpenLayers.Handler.Polygon':
+                        case 'Pistas nuevo escenario':
+                            break;
+                        default:
+                            if (e.layer.name.indexOf('OpenLayers_Control') == -1) {
+                                addLayerToList(e.layer);
+                            }
+                    }
+                    $("#layerslist").listview("refresh");
+                });
+            }
+
+            function addLayerToList(layer) {
+                var item = $('<li>', {
+                    "data-icon": "check",
+                    "class": layer.getVisible() ? "checked" : "unchecked"
+                })
+                        .append($('<a />', {
+                            text: 'layer.name'
+                        })
+                                .click(function () {
+                                    if (layer instanceof ol.layer.Tile) {
+                                        baseLayerVisibility();
+                                        layer.setVisible(true);
+                                    } else {
+                                        layer.setVisible(!layer.getVisible());
+                                    }
+                                })
+                                );
+                layer.on('change:visible', function () {
+                    $(item).toggleClass('checked unchecked');
+                });
+                if (layer instanceof ol.layer.Tile) {
+                    item.insertAfter('#baseLayer');
+                } else {
+                    item.insertAfter('#overlayLayer');
                 }
-                });
-            /*-------------------------------Eventos-----------------------------------*/
+
+            }
+            function baseLayerVisibility() {
+                map.getLayers().forEach(function (layer) {
+                    if (layer instanceof ol.layer.Tile) {
+                        layer.setVisible(false);
+                    }
+                });
+            }
+            /*-------------------------------Events-----------------------------------*/
             geolocation.on('change:position', function () {
-                debugger;
                 var coordinates = this.getPosition();
                 if (this.get("center")) {
                     flyToPoint(map, coordinates);
@@ -397,7 +481,59 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             new ol.geom.Point(coordinates) : null);
                 }
             });
-            //Bottons events
+            map.getLayers().forEach(function (layer, i) {
+                addLayerToList(layer);
+            });
+            $("#autocomplete").on("filterablebeforefilter", function (e, data) {
+                var $ul = $(this),
+                        value = $(data.input).val(),
+                        html = "";
+                    $ul.html(html);
+                if (value && value.length > 2) {
+                    $.mobile.loading("show", {
+                        text: "Buscando",
+                        textVisible: true});
+                    openStreetMapGeocoder.geocode(value, function (response) {
+                        if (response[0] === false) {
+                            $ul.html("<li data-filtertext='" + value + "'>No hay resultados</li>");
+                        } else {
+                            $.each(response, function (i, place) {
+                                $("<li data-filtertext='" + value + "'>")
+                                        .hide().append($("<a href='#'>").text(place.totalName)
+                                        .append($("<p>").text(place.type))
+                                        ).appendTo($ul).click(function () {
+                                    var extent = new Array();
+                                    extent[0] = parseFloat(place.boundingbox[2]);
+                                    extent[1] = parseFloat(place.boundingbox[0]);
+                                    extent[2] = parseFloat(place.boundingbox[3]);
+                                    extent[3] = parseFloat(place.boundingbox[1]);
+                                    extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
+                                    flyTo(map, extent);
+                                    $('#searchpanel').panel("close");
+                                }).show();                                              
+                            });
+                        }
+                        $ul.listview("refresh");
+                        $ul.trigger("updatelayout");  
+                        $.mobile.loading("hide");
+                    });
+                } else {
+                    $.mobile.resetActivePageHeight();  
+                }                                    
+             });
+            $(document).on("pagecontainershow", function (event, ui) {
+                var pageId = $(":mobile-pagecontainer").pagecontainer('getActivePage').prop("id");
+                if (pageId === 'mappage') {
+                    if (map instanceof ol.Map) {
+                        map.updateSize();
+                    } else {
+                        // initialize map
+                        debugger;
+                    }
+                }
+
+            });
+            //Buttons events
             $('#autolocate').on('click', function () {
                 autolocate(true);
             });
@@ -408,7 +544,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             $('#sendLocation').on('click', function () {
                 autolocate(false, true);
             });
-
+            /*-------------------------------Initialize page -------------*/
+            if ($.mobile.autoInitializePage === false) {
+                $("#container").show();
+                $.mobile.initializePage();
+            }
 
             /*-------------------------------Help functions -------------*/
             function toast(msg) {

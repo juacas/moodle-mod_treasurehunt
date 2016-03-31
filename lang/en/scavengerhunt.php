@@ -82,6 +82,7 @@ $string['descriptionRiddle'] = 'Description of riddle';
 $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'Validate location';
 $string['search'] = 'Search';
+$string['info'] = 'Info';
 $string['riddles'] = 'Riddles';
 $string['playwithoutmove'] = 'Playing without moving';
 $string['playwithoutmove_help'] = 'If this option is enabled students may play from their computers without moving to places. A mark on the map is enabled to select the desired point';

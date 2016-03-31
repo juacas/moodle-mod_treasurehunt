@@ -42,19 +42,85 @@
 <div id="container" style="display:none;">
     {{! Pagina principal de la aplicacion }}
     <div data-role="page" id="mappage"  data-quicklinks="true" data-theme="b">
-
-
         {{!Panel principal de informacion}}
         <div data-role="panel" data-position="left" data-position-fixed="true" data-display="overlay" id="infopanel">
-            <div id="estadoLogin">
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
                 <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-                {{{user.picture}}} {{user.name}}
-                <a href="#" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" onclick="return false;">{{#str}} exit, mod_scavengerhunt{{/str}}</a>
+                <h1>{{#str}} info, mod_scavengerhunt{{/str}}</h1>
             </div>
-            <h3>{{scavengerhunt.name}}</h3>
-            <div id="welcomingInfo">
-                <p>{{{scavengerhunt.description}}}</p>
+            <div class="ui-bar ui-bar-b">
+                <h1>{{{user.picture}}} {{user.name}}</h1>
+
+                <a href="view.php?id={{scavengerhunt.id}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">{{#str}} exit, mod_scavengerhunt{{/str}}</a>
+
             </div>
+            <div data-role="collapsibleset" id="infoRiddles" data-iconpos="right">
+                <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+                    <h3>{{scavengerhunt.name}}</h3>
+                    <div>
+                        <p>{{{scavengerhunt.description}}}</p>
+                    </div>
+                </div>
+                <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+                    <h3><span class="ui-body-b">1</span> {{scavengerhunt.name}}</h3>
+                    <div>
+                        <div id="infoRiddle">
+                            <h3>
+                                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-btn-icon-left  ui-nodisc-icon ui-btn ui-icon-carat-l  ui-corner-all ui-btn-icon-notext"></a>
+                                {{#str}} discovered_riddle, mod_scavengerhunt{{/str}}
+                            </h3>
+                            <div class="ui-corner-all custom-corners">
+                                <div class="ui-bar ui-bar-b">
+                                    {{#str}} nameRiddle, mod_scavengerhunt{{/str}}
+                                </div>
+                                <div class="ui-body ui-overlay-a">
+                                    <p id="nameRiddle">{{riddle.name}}</p>
+                                </div>
+                            </div>
+                            <div class="ui-corner-all custom-corners">
+                                <div class="ui-bar ui-bar-b">
+                                    {{#str}} descriptionRiddle, mod_scavengerhunt{{/str}}
+                                </div>
+                                <div class="ui-body ui-overlay-a">
+                                    <p id="descriptionRiddle">{{riddle.description}}</p>
+                                </div>
+                            </div>
+                            {{#str}} timeLabel, mod_scavengerhunt{{/str}}
+                            <p id="timeLabel"></p>
+                        </div>
+                        <div id="infoFailedLocation">
+                            <h3>
+                                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+                                {{#str}} failed_location, mod_scavengerhunt{{/str}} 
+                            </h3>
+                            <div class="ui-corner-all custom-corners">
+                                <div class="ui-bar ui-bar-b">
+                                    <h3>{{#str}} nameRiddle, mod_scavengerhunt{{/str}}</h3>
+                                </div>
+                                <div class="ui-body ui-overlay-a">
+                                    <p id="nameFailedRiddle">{{name}}</p>
+                                </div>
+                            </div>
+                            {{#str}} timeLabelFailed, mod_scavengerhunt{{/str}}
+                            <p id="timeLabelFailed"></p>
+                        </div>		
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{!Panel de busqueda de informacion}}
+        <div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" id="searchpanel">
+            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+                <a href="#" data-role="button" data-rel="close" class="ui-btn-right ui-nodisc-icon ui-btn ui-icon-carat-r ui-btn-icon-notext ui-corner-all"></a>
+                <h1>{{#str}} search, mod_scavengerhunt{{/str}}</h1>
+                <div class="ui-bar ui-bar-b">
+                    <form class="ui-filterable">
+                        <input id="autocomplete-input" data-type="search" placeholder="Find a city...">
+                    </form>
+                </div>
+            </div>
+            <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true"  data-input="#autocomplete-input"></ul>
+
         </div>
 
         {{!Panel de informacion de la pista seleccionada}}
@@ -111,8 +177,10 @@
             </div>
             <div role="content" class="ui-content ui-overlay-b">
                 <p>{{#str}} sendlotacion_content, mod_scavengerhunt{{/str}}</p>
-                <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a" data-rel="back">{{#str}} cancel, mod_scavengerhunt{{/str}}</a>
-                <a href="#" class="ui-btn ui-corner-all ui-shadow ui-btn-inline ui-btn-a" data-rel="back" data-transition="flow" id="sendLocation">{{#str}} send, mod_scavengerhunt{{/str}}</a>
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back">{{#str}} cancel, mod_scavengerhunt{{/str}}</a></div>
+                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back" data-transition="flow" id="sendLocation">{{#str}} send, mod_scavengerhunt{{/str}}</a></div>
+                </fieldset>
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
 
@@ -120,8 +188,8 @@
 
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#infopanel"  data-rel="panel" data-dismissible="true" class="ui-btn ui-btn-left ui-btn-inline ui-icon-bars ui-btn-icon-notext"></a>
-            <a href="#searchpage" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all   ui-btn-inline ui-btn-icon-notext ui-icon-search">{{#str}} search, mod_scavengerhunt{{/str}}</a>
-            <h1>{{#pix}} images/caza-tesoro-icon-small, scavengerhunt, Scavengerhunt Icon {{/pix}}{{scavengerhunt.name}}</h1>
+            <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all   ui-btn-inline ui-btn-icon-notext ui-icon-search">{{#str}} search, mod_scavengerhunt{{/str}}</a>
+            <h1>{{#pix}} images/caza-tesoro-icon-small, scavengerhunt, Scavengerhunt Icon {{/pix}} {{scavengerhunt.name}}</h1>
         </div>		
         <div data-role="content" id="content">		  
             <div id="map"></div>
@@ -143,26 +211,13 @@
             <h1>{{#str}} layers, mod_scavengerhunt{{/str}}</h1>
         </div>
         <div data-role="content">
-            <ul data-role="listview" data-inset="true" data-theme="d" data-dividertheme="c" id="layerslist"></ul>
+            <ul data-role="listview" data-inset="true" data-theme="d" data-divider-theme="b" id="layerslist">
+                <li data-role="list-divider" id="baseLayer">Vista del mapa</li>
+                <li data-role="list-divider" id="overlayLayer">Capas</li>
+            </ul>
         </div>
     </div>
     {{!Fin de pagina de capas.}}
-    {{!Pagina de busquedas.}}
-    <div data-role="page" id="searchpage" data-theme="b">
-        <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#" data-role="button" data-rel="back" class="ui-btn-left ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} search, mod_scavengerhunt{{/str}}</h1>
-            <div class="ui-bar ui-bar-b">
-                <form class="ui-filterable">
-                    <input id="autocomplete-input" data-type="search" placeholder="Find a city...">
-                </form>
-            </div>
-        </div>
-        <div data-role="content">
-            <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
-        </div>
-    </div>
-    {{!Fin de pagina de busquedas.}}
     {{#js}}
 
     {{/js}}

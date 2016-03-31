@@ -82,6 +82,7 @@ $string['descriptionRiddle'] = 'Descripción de la pista';
 $string['info_validate_location'] = 'Validar ubicación para esta pista';
 $string['button_validate_location'] = 'Validar ubicación';
 $string['search'] = 'Buscar';
+$string['info'] = 'Información';
 $string['riddles'] = 'Pistas';
 $string['playwithoutmove'] = 'Jugar sin desplazarse';
 $string['playwithoutmove_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. Se habilita una marca en el mapa para seleccionar el punto deseado';
@@ -95,6 +96,7 @@ $string['multipleteams'] = 'Es miembro de más de un grupo';
 $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
 $string['timeLabelFailed'] = 'Ubicación enviada en la fecha: ';
 $string['timeLabel'] = 'Pista descubierta en la fecha: ';
+
 
 
 

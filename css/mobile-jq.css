@@ -6,7 +6,7 @@ body {
 }
 
 #content {
-    padding: 0;   
+    padding: 0;
 }
 #mappage{
     overflow: hidden;
@@ -27,41 +27,39 @@ h1, h2, h3, h4, h5, h6{
 #navigation {
     position: absolute;
     top: -80px;
-    right: 50px;
+    right: 10px;
     z-index: 1000;
+    background-color: rgba(255,255,255,.4);
+    border-radius: 4px;
+    padding:1px;
 }
-
-
 #navigation button {
+    display: block;
+    height: 1.375em;
+    width: 1.375em;
+    font-size: 1.14em;
     background-image: none;
-    background-color: 			#333 /*{b-bup-background-color}*/;
-    border-color:	 		#1f1f1f /*{b-bup-border}*/;
-    color: 					#fff /*{b-bup-color}*/;
-    text-shadow: 0 /*{b-bup-shadow-x}*/ 1px /*{b-bup-shadow-y}*/ 0 /*{b-bup-shadow-radius}*/ #111 /*{b-bup-shadow-color}*/;
+    margin:1px;
+    padding:0;
 }
+#searchpanel .ui-panel-inner {
+      padding-top:100px;
+} 
+#infopanel .ui-panel-inner {
+      padding-top:48px;
+ } 
+ 
 #title, #tags, #shortdesc {
     display: none;
 }
 /*.ui-icon-check {
     opacity: 0.3;
 }*/
-.checked .ui-icon-check {
+.checked {
     opacity: 1;
 }
-.ui-icon-locate {
-    background-image: url(img/locate.png);
-}
-.ui-icon-layers {
-    background-image: url(img/openlayers.png);
-}
-.ui-content .ui-listview-inset, #search_results {
-    margin: 1em;
-}
-.ui-content .ui-listview {
-    margin: 0;
-}
-#details-list li{
-    padding:15px 10px;
+.unchecked {
+    opacity: 0.3;
 }
 .ui-panel-inner {
     position: absolute;
