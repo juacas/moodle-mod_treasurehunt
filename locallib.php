@@ -220,8 +220,8 @@ function checkRiddle($idgroup, $idRoad, $point, $groupmode) {
         $group_type = 'user_id';
     }
     //Recupero la ultima pista descubierta por el usuario para esta instancia
-    $query = "SELECT id,num_riddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1)";
-    $params = array($idgroup, $idRoad);
+    $query = "SELECT id,num_riddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1) AND road_id = ?";
+    $params = array($idgroup, $idRoad, $idRoad);
     $currentriddle = $DB->get_record_sql($query, $params);
     $nextnumriddle = $currentriddle->num_riddle + 1;
     //Compruebo si la geometria esta dentro

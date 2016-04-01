@@ -54,58 +54,14 @@
                 <a href="view.php?id={{scavengerhunt.id}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">{{#str}} exit, mod_scavengerhunt{{/str}}</a>
 
             </div>
-            <div data-role="collapsibleset" id="infoRiddles" data-iconpos="right">
-                <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
+            <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
                     <h3>{{scavengerhunt.name}}</h3>
                     <div>
                         <p>{{{scavengerhunt.description}}}</p>
                     </div>
                 </div>
-                <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u">
-                    <h3><span class="ui-body-b">1</span> {{scavengerhunt.name}}</h3>
-                    <div>
-                        <div id="infoRiddle">
-                            <h3>
-                                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-btn-icon-left  ui-nodisc-icon ui-btn ui-icon-carat-l  ui-corner-all ui-btn-icon-notext"></a>
-                                {{#str}} discovered_riddle, mod_scavengerhunt{{/str}}
-                            </h3>
-                            <div class="ui-corner-all custom-corners">
-                                <div class="ui-bar ui-bar-b">
-                                    {{#str}} nameRiddle, mod_scavengerhunt{{/str}}
-                                </div>
-                                <div class="ui-body ui-overlay-a">
-                                    <p id="nameRiddle">{{riddle.name}}</p>
-                                </div>
-                            </div>
-                            <div class="ui-corner-all custom-corners">
-                                <div class="ui-bar ui-bar-b">
-                                    {{#str}} descriptionRiddle, mod_scavengerhunt{{/str}}
-                                </div>
-                                <div class="ui-body ui-overlay-a">
-                                    <p id="descriptionRiddle">{{riddle.description}}</p>
-                                </div>
-                            </div>
-                            {{#str}} timeLabel, mod_scavengerhunt{{/str}}
-                            <p id="timeLabel"></p>
-                        </div>
-                        <div id="infoFailedLocation">
-                            <h3>
-                                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-                                {{#str}} failed_location, mod_scavengerhunt{{/str}} 
-                            </h3>
-                            <div class="ui-corner-all custom-corners">
-                                <div class="ui-bar ui-bar-b">
-                                    <h3>{{#str}} nameRiddle, mod_scavengerhunt{{/str}}</h3>
-                                </div>
-                                <div class="ui-body ui-overlay-a">
-                                    <p id="nameFailedRiddle">{{name}}</p>
-                                </div>
-                            </div>
-                            {{#str}} timeLabelFailed, mod_scavengerhunt{{/str}}
-                            <p id="timeLabelFailed"></p>
-                        </div>		
-                    </div>
-                </div>
+            <div data-role="collapsibleset" id="infoRiddles" data-iconpos="right">
+                
             </div>
         </div>
         {{!Panel de busqueda de informacion}}

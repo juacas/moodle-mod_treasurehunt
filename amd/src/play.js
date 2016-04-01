@@ -426,8 +426,16 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         })
                                 .click(function () {
                                     if (layer instanceof ol.layer.Tile) {
-                                        baseLayerVisibility();
-                                        layer.setVisible(true);
+                                        map.getLayers().forEach(function (l) {
+                                            if (l instanceof ol.layer.Tile) {
+                                                if (l === layer) {
+                                                    l.setVisible(true);
+                                                } else {
+                                                    l.setVisible(false);
+                                                }
+                                            }
+                                        });
+
                                     } else {
                                         layer.setVisible(!layer.getVisible());
                                     }
@@ -441,15 +449,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 } else {
                     item.insertAfter('#overlayLayer');
                 }
+            }
+            function addRiddleToPanel(feature) {
+                var content = "<div data-role='collapsible' data-collapsed-icon='carat-d' data-expanded-icon='carat-u'><h3><span class='ui-body-b'>"+feature.get("numRiddle")+"</span> "+feature.get("name")+"</h3><p>"+feature.get('description')+"</p></div>";
+                $("#infoRiddles").append(content).collapsibleset("refresh");
+                $("#infopanel").panel("open");
+            }
 
-            }
-            function baseLayerVisibility() {
-                map.getLayers().forEach(function (layer) {
-                    if (layer instanceof ol.layer.Tile) {
-                        layer.setVisible(false);
-                    }
-                });
-            }
             /*-------------------------------Events-----------------------------------*/
             geolocation.on('change:position', function () {
                 var coordinates = this.getPosition();
@@ -474,6 +480,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
+                    //addRiddleToPanel(features.selected[0]);
                     setTextRiddle(features.selected[0]);
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
@@ -536,6 +543,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             //Buttons events
             $('#autolocate').on('click', function () {
                 autolocate(true);
+            });
+            $('#infopanel').panel({beforeclose: function () {
+                    select.getFeatures().clear();
+                }
             });
             $('#infoRiddlePanel').panel({beforeclose: function () {
                     select.getFeatures().clear();
