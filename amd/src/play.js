@@ -226,7 +226,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         fill: fill,
                         stroke: stroke,
                         text: new ol.style.Text({
-                            text: 'Solo puedes empezar desde aquí',
+                            text: 'Solo puedes empezar desde aquÃ­',
                             textAlign: 'center',
                         })
                     });
@@ -488,7 +488,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 var $ul = $(this),
                         value = $(data.input).val(),
                         html = "";
-                    $ul.html(html);
+                $ul.html(html);
                 if (value && value.length > 2) {
                     $.mobile.loading("show", {
                         text: "Buscando",
@@ -510,17 +510,17 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                     extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
                                     flyTo(map, extent);
                                     $('#searchpanel').panel("close");
-                                }).show();                                              
+                                }).show();
                             });
                         }
                         $ul.listview("refresh");
-                        $ul.trigger("updatelayout");  
+                        $ul.trigger("updatelayout");
                         $.mobile.loading("hide");
                     });
                 } else {
-                    $.mobile.resetActivePageHeight();  
-                }                                    
-             });
+                    $.mobile.resetActivePageHeight();
+                }
+            });
             $(document).on("pagecontainershow", function (event, ui) {
                 var pageId = $(":mobile-pagecontainer").pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {

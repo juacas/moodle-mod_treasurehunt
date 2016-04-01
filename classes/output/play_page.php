@@ -28,11 +28,11 @@ class play_page implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         GLOBAL $USER;
         $data = new stdClass();
-        $data->user->name = $USER->firstname . ' ' . $USER->lastname;
-        $data->user->picture = $output->user_picture($USER, array('link' => false));
-        $data->scavengerhunt->id = $this->scavengerhunt[id];
-        $data->scavengerhunt->name = $this->scavengerhunt[name];
-        $data->scavengerhunt->description = $this->scavengerhunt[description];
+        $user = new stdClass();
+        $user->name = $USER->firstname . ' ' . $USER->lastname;
+        $user->picture = $output->user_picture($USER, array('link' => false));         
+        $data->user = $user;
+        $data->scavengerhunt = $this->scavengerhunt;
         return $data;
     }
 
