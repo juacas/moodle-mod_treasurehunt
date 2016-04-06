@@ -468,7 +468,26 @@ function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $cour
  * @param navigation_node $scavengerhuntnode scavengerhunt administration node
  */
 function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode = null) {
-    // TODO Delete this function and its docblock, or implement it.
+    
+    global $PAGE;
+    // We want to add these new nodes after the Edit settings node, and before the
+    // Locally assigned roles node. Of course, both of those are controlled by capabilities.
+    $keys = $scavengerhuntnode->get_children_key_list();
+    $beforekey = null;
+    $i = array_search('modedit', $keys);
+    if ($i === false and array_key_exists(0, $keys)) {
+        $beforekey = $keys[0];
+    } else if (array_key_exists($i + 1, $keys)) {
+        $beforekey = $keys[$i + 1];
+    }
+
+    if (has_capability('mod/scavengerhunt:managescavenger', $PAGE->cm->context)) {
+        $node = navigation_node::create(get_string('editscavengerhunt', 'scavengerhunt'),
+                new moodle_url('/mod/scavengerhunt/edit.php', array('id'=>$PAGE->cm->id)),
+                navigation_node::TYPE_SETTING, null, 'mod_scavengerhunt_edit',
+                new pix_icon('t/edit', ''));
+        $scavengerhuntnode->add_node($node, $beforekey);
+    }
 }
 
 function insertRoadBD($idScavengerhunt, $nameRoad) {
