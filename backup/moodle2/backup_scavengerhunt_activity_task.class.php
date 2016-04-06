@@ -63,11 +63,11 @@ class backup_scavengerhunt_activity_task extends backup_activity_task {
 
         // Link to the list of scavengerhunts.
         $search = '/('.$base.'\/mod\/scavengerhunt\/index.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@scavengerhuntINDEX*$2@$', $content);
+        $content = preg_replace($search, '$@SCAVENGERHUNTINDEX*$2@$', $content);
 
         // Link to scavengerhunt view by moduleid.
         $search = '/('.$base.'\/mod\/scavengerhunt\/view.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@scavengerhuntVIEWBYID*$2@$', $content);
+        $content = preg_replace($search, '$@SCAVENGERHUNTVIEWBYID*$2@$', $content);
 
         return $content;
     }
