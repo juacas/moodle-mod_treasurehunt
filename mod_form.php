@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -60,11 +61,9 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
 
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
-        if (method_exists($this, 'standard_intro_elements')) { //...compatibility check for 2.8
-            $this->standard_intro_elements();
-        } else {
-            $this->add_intro_editor();
-        }
+        $this->standard_intro_elements();
+        $mform->addElement('advcheckbox', 'playwithoutmove', get_string('playwithoutmove', 'scavengerhunt'));
+        $mform->addHelpButton('playwithoutmove', 'playwithoutmove', 'scavengerhunt');
 
         // Adding the rest of scavengerhunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
@@ -77,10 +76,6 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addElement('date_time_selector', 'allowsubmissionsfromdate', $name, $options);
         $mform->addHelpButton('allowsubmissionsfromdate', 'allowsubmissionsfromdate', 'scavengerhunt');
 
-        $name = get_string('duedate', 'scavengerhunt');
-        $mform->addElement('date_time_selector', 'duedate', $name, array('optional' => true));
-        $mform->addHelpButton('duedate', 'duedate', 'scavengerhunt');
-
         $name = get_string('cutoffdate', 'scavengerhunt');
         $mform->addElement('date_time_selector', 'cutoffdate', $name, array('optional' => true));
         $mform->addHelpButton('cutoffdate', 'cutoffdate', 'scavengerhunt');
@@ -90,8 +85,11 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'scavengerhunt');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
-
-
+        $mform->addElement('header', 'groups', get_string('groups', 'scavengerhunt'));
+        $mform->setExpanded('groups', true);
+        $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'scavengerhunt'));
+        $mform->addHelpButton('groupmode', 'groupmode', 'scavengerhunt');
+        
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
 
@@ -112,16 +110,6 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['allowsubmissionsfromdate'] && $data['duedate']) {
-            if ($data['allowsubmissionsfromdate'] > $data['duedate']) {
-                $errors['duedate'] = get_string('duedatevalidation', 'scavengerhunt');
-            }
-        }
-        if ($data['duedate'] && $data['cutoffdate']) {
-            if ($data['duedate'] > $data['cutoffdate']) {
-                $errors['cutoffdate'] = get_string('cutoffdatevalidation', 'scavengerhunt');
-            }
-        }
         if ($data['allowsubmissionsfromdate'] && $data['cutoffdate']) {
             if ($data['allowsubmissionsfromdate'] > $data['cutoffdate']) {
                 $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'scavengerhunt');

@@ -15,7 +15,7 @@ class play_page implements renderable, templatable {
     var $scavengerhunt = null;
     var $riddle = null;
 
-    public function __construct($scavengerhunt,$riddle) {
+    public function __construct($scavengerhunt, $riddle) {
         $this->scavengerhunt = $scavengerhunt;
         $this->riddle = $riddle;
     }
@@ -28,13 +28,11 @@ class play_page implements renderable, templatable {
     public function export_for_template(renderer_base $output) {
         GLOBAL $USER;
         $data = new stdClass();
-        //$output->user_picture($USER);
-        $data->user=new stdClass();
-        $data->user->name = $USER->firstname.' '.$USER->lastname ;
-        $data->user->picture = $output->user_picture($USER);
-        $data->scavengerhunt=new stdClass();
-        $data->scavengerhunt->name = $this->scavengerhunt['name'];
-        $data->scavengerhunt->description = $this->scavengerhunt['description'];
+        $user = new stdClass();
+        $user->name = fullname($USER);//$USER->firstname . ' ' . $USER->lastname;
+        $user->picture = $output->user_picture($USER, array('link' => false));         
+        $data->user = $user;
+        $data->scavengerhunt = $this->scavengerhunt;
         return $data;
     }
 

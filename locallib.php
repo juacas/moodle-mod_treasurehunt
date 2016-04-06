@@ -85,6 +85,8 @@ function insertEntryBD(stdClass $entry) {
     $params = array($name, $road_id, $num_riddle, $description,
         $descriptionformat, $descriptiontrust, $timenow, $question_id);
     $DB->execute($sql, $params);
+    //Como he insertado una nueva pista sin geometrÃ­as pongo el camino como no valido
+    setValidRoad($road_id, false);
 //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddles  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
             . 'descriptionformat = ? AND descriptiontrust = ? AND timecreated = ?';
@@ -113,12 +115,26 @@ function updateEntryBD(stdClass $entry) {
 function updateRiddleBD(Feature $feature) {
     GLOBAL $DB;
     $numRiddle = $feature->getProperty('numRiddle');
+    $road_id = $feature->getProperty('idRoad');
     $geometryWKT = object_to_wkt($feature->getGeometry());
     $timemodified = time();
     $idRiddle = $feature->getId();
-    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
+    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = ST_GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
+    setValidRoad($road_id);
+}
+
+function setValidRoad($road_id, $valid = null) {
+    GLOBAL $DB;
+    $road = new stdClass();
+    $road->id = $road_id;
+    if (is_null($valid)) {
+        $road->validated = isValidRoad($road_id);
+    } else {
+        $road->validated = $valid;
+    }
+    $DB->update_record("scavengerhunt_roads", $road);
 }
 
 function deleteEntryBD($id) {
@@ -152,11 +168,10 @@ function getScavengerhunt($idScavengerhunt, $context) {
     return $fetchstage_returns;
 }
 
-function renewLockScavengerhunt($idScavengerhunt) {
-    global $DB, $USER;
+function renewLockScavengerhunt($idScavengerhunt,$userid) {
+    global $DB;
 
     $table = 'scavengerhunt_locks';
-    $userid = $USER->id;
     $params = array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid);
     $time = time() + 120;
     $lock = $DB->get_record($table, $params);
@@ -169,11 +184,11 @@ function renewLockScavengerhunt($idScavengerhunt) {
     }
 }
 
-function isLockScavengerhunt($idScavengerhunt) {
-    global $DB, $USER;
+function isLockScavengerhunt($idScavengerhunt,$userid) {
+    global $DB;
     deleteOldLocks($idScavengerhunt);
     $select = "scavengerhunt_id = ? AND lockedat > ? AND user_id != ?";
-    $params = array($idScavengerhunt, time(), $USER->id);
+    $params = array($idScavengerhunt, time(), $userid);
     return $DB->record_exists_select('scavengerhunt_locks', $select, $params);
 }
 
@@ -187,31 +202,67 @@ function deleteOldLocks($idScavengerhunt) {
     $DB->delete_records_select('scavengerhunt_locks', "lockedat < ? AND scavengerhunt_id = ? ", array(time(), $idScavengerhunt));
 }
 
-function checkLock($idScavengerhunt, $idLock) {
-    if (!isLockScavengerhunt($idScavengerhunt) && idLockIsValid($idLock)) {
+function checkLock($idScavengerhunt, $idLock, $userid) {
+    if (!isLockScavengerhunt($idScavengerhunt,$userid) && idLockIsValid($idLock)) {
         return true;
     } else {
         return false;
     }
 }
 
-function checkRiddle($idRoad) {
-    global $USER, $DB;
-    //Recupero la Ãºltima pista descubierta por el usuario para esta instancia
-    $query = "SELECT max(num_riddle) from {scavengerhunt_riddless} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=?";
-    $params = array($USER->id, $idRoad);
+function checkRiddle($userid,$idgroup, $idRoad, $point, $groupmode) {
+    global $DB;
+    $location = object_to_wkt($point);
+    if ($groupmode) {
+        $group_type = 'group_id';
+    } else {
+        $group_type = 'user_id';
+    }
+    //Recupero la ultima pista descubierta por el usuario para esta instancia
+    $query = "SELECT id,num_riddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1) AND road_id = ?";
+    $params = array($idgroup, $idRoad, $idRoad);
     $currentriddle = $DB->get_record_sql($query, $params);
-    $nextriddle = $currentriddle + 1;
-    //Compruebo si la geometrÃ­a estÃ¡ dentro
+    $nextnumriddle = $currentriddle->num_riddle + 1;
+    //Compruebo si la geometria esta dentro
+    $query = "SELECT id, ST_Intersects(geom,ST_GeomFromText((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
+    $params = array($location, $nextnumriddle, $idRoad);
+    $nextriddle = $DB->get_record_sql($query, $params);
+    if ($nextriddle->inside) {
+        $isInside = true;
+        $pointIdRiddle = $nextriddle->id;
+    } else {
+        $isInside = false;
+        $pointIdRiddle = $currentriddle->id;
+    }
+    //Si no es la primera pista fallada, y por lo tanto null
+    if (!is_null($pointIdRiddle)) {
+        $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated,' . $group_type . ', success,'
+                . ' locations) VALUES ((?),(?),(?),(?),(?),ST_GeomFromText((?)))';
+        $params = array($idRoad, $pointIdRiddle, time(),
+            $idgroup, $isInside, $location);
+        $DB->execute($query, $params);
+    }
+    return $nextriddle->inside;
 }
 
 function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
     $riddlesArray = array();
     foreach ($riddles_result as $value) {
         $multipolygon = wkt_to_object($value->geometry);
-        $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
-        $attr = array('idRoad' => intval($value->road_id), 'numRiddle' => intval($value->num_riddle), 'name' => $value->name, 'idStage' => $idScavengerhunt, 'description' => $description);
-        $feature = new Feature(intval($value->id), $multipolygon, $attr);
+        if (isset($value->description)) {
+            $description = file_rewrite_pluginfile_urls($value->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $value->id);
+        } else {
+            $description = null;
+        }
+        $attr = array('idRoad' => intval($value->road_id),
+            'numRiddle' => intval($value->num_riddle),
+            'name' => $value->name,
+            'idStage' => $idScavengerhunt,
+            'description' => $description,
+            'date' => (is_null($value->timecreated)) ? null : intval($value->timecreated),
+            'success' => (is_null($value->success)) ? null : intval($value->success));
+        $feature = new Feature($value->id ?
+                        intval($value->id) : null, $multipolygon, $attr);
         array_push($riddlesArray, $feature);
     }
     $featureCollection = new FeatureCollection($riddlesArray);
@@ -219,42 +270,56 @@ function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
     return $geojson;
 }
 
-function getUserProgress($idRoad, $groupmode, $idgroup, $bbox, $idScavengerhunt, $context) {
-    global $USER, $DB;
-
-    $bboxWkt = object_to_wkt(geojson_to_object($bbox));
+function getUserProgress($idRoad, $groupmode, $idgroup, $idScavengerhunt, $context) {
+    global $DB;
     if ($groupmode) {
-        //Recupero la ultima pista descubierta por el grupo para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.group_id=? and a.road_id=r.road_id and a.road_id=? and ST_Intersects(geom,ST_GeomFromText(?))";
+        $group_type = 'group_id';
     } else {
-        //Recupero la ultima pista descubierta por el usuario para esta instancia que contenga el bb
-        $query = "SELECT r.id,r.name,r.num_riddle,r.description,astext(r.geom) as geometry,r.road_id from {scavengerhunt_riddles} r, {scavengerhunt_attempts} a where a.riddle_id=r.id and a.user_id=? and a.road_id=r.road_id and a.road_id=? and ST_Intersects(geom,ST_GeomFromText(?))";
+        $group_type = 'user_id';
     }
-
-    $params = array($idgroup, $idRoad, $bboxWkt);
+//Recupero las pistas descubiertas por el grupo para esta instancia
+    $query = "SELECT a.timecreated ,r.name,IF(a.success=0,NULL,r.id) as id,IF(a.success=0,NULL,r.description) as description,r.num_riddle,  astext(a.locations) as geometry,r.road_id,a.success from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id where a." . $group_type . "=(?) and a.road_id=(?)";
+    $params = array($idgroup, $idRoad);
     $user_progress = $DB->get_records_sql($query, $params);
-    //Si no tiene ningún progreso mostrar primera pista del camino para comenzar
+    //Si no tiene ningÃºn progreso mostrar primera pista del camino para comenzar
     if (count($user_progress) === 0) {
-        $query = "SELECT id,name,num_riddle,description,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1 and ST_Intersects(geom,ST_GeomFromText(?))";
-        $params = array($idRoad, $bboxWkt);
+        $query = "SELECT num_riddle -1,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
+        $params = array($idRoad);
         $user_progress = $DB->get_records_sql($query, $params);
     }
     return riddlesDb2Geojson($user_progress, $context, $idScavengerhunt);
 }
 
-function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {
-    global $USER, $DB;
+function isValidRoad($idRoad) {
+    global $DB;
+
+    $query = "SELECT geom as geometry from {scavengerhunt_riddles} where road_id = ?";
+    $params = array($idRoad);
+    $riddles = $DB->get_records_sql($query, $params);
+    if (count($riddles) < 1) {
+        return false;
+    }
+    foreach ($riddles as $riddle) {
+        if ($riddle->geometry === null) {
+            return false;
+        }
+    }
+    return true;
+}
+
+function getUserGroupAndRoad($userid,$idScavengerhunt, $cm, $courseid) {
+    global $DB;
 
     $groups = array();
-    if ($groupmode = groups_get_activity_groupmode($cm)) {
+    if ($cm->groupmode) {
         //group mode
         $query = "SELECT grouping_id, id as idRoad from {scavengerhunt_roads} where scavengerhunt_id=? AND grouping_id != 0";
         $params = array($idScavengerhunt);
         $availablegroupings = $DB->get_records_sql($query, $params);
         foreach ($availablegroupings as $groupingid) {
-            if (count($allgroupsingrouping = groups_get_all_groups($courseid, $USER->id, $groupingid->grouping_id, 'g.id'))) {
+            if (count($allgroupsingrouping = groups_get_all_groups($courseid, $userid, $groupingid->grouping_id, 'g.id'))) {
                 foreach ($allgroupsingrouping as $groupingrouping) {
-                    array_push($groups, (object) array('groupmode' => $groupmode, 'group_id' => $groupingrouping->id, 'idRoad' => $groupingid->idroad));
+                    array_push($groups, (object) array('groupmode' => $cm->groupmode, 'group_id' => $groupingrouping->id, 'idRoad' => $groupingid->idroad));
                 }
             }
         }
@@ -265,17 +330,17 @@ function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {
         $availablegroups = $DB->get_records_sql($query, $params);
         foreach ($availablegroups as $groupid) {
             if (groups_is_member($groupid->group_id)) {
-                $groupid->groupmode = $groupmode;
+                $groupid->groupmode = $cm->groupmode;
                 array_push($groups, $groupid);
             }
         }
     }
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
     if (count($groups) === 0) {
-        //No pertenece a ningÃƒÂºn grupo
+        //No pertenece a ningun grupo
         print_error('noteamplay', 'scavengerhunt', $returnurl);
     } else if (count($groups) > 1) {
-        //Pertenece a mÃƒÂ¡s de un grupo
+        //Pertenece a mas de un grupo
         print_error('multipleteamsplay', 'scavengerhunt', $returnurl);
     } else {
         //Bien

@@ -4,7 +4,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editroad_form.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 
-global $COURSE, $PAGE, $CFG;
+global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
 // what instance of your module and what course you're in etc. Make sure you
 // include hidden variable in your forms which have their defaults set in set_data
@@ -32,8 +32,8 @@ require_capability('mod/scavengerhunt:addroad', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
-if (!$lock = isLockScavengerhunt($cm->instance)) {
-    $idLock = renewLockScavengerhunt($cm->instance);
+if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
+    $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
@@ -51,14 +51,14 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
 
 
     //Compruebo el tipo de grupo
-    if (groups_get_activity_groupmode($cm)) {
+    if ($cm->groupmode) {
         $selectoptions = groups_get_all_groupings($course->id);
-        //Consulta de groupings ocuados en esta instancia
+        //Consulta de groupings ocupados en esta instancia
         $sql = 'SELECT grouping_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
         $groups = true;
     } else {
         $selectoptions = groups_get_all_groups($course->id);
-        //Consulta de grupos ocuados en esta instancia
+        //Consulta de grupos ocupados en esta instancia
         $sql = 'SELECT group_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
         $groups = false;
     }

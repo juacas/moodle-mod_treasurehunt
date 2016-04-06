@@ -31,6 +31,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 require_once ($CFG->libdir . '/formslib.php');
 
+GLOBAL $USER;
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'scavengerhunt');
@@ -66,10 +67,10 @@ $PAGE->set_pagelayout('standard');
  * $PAGE->set_focuscontrol('some-html-id');
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
-if (!$lock = isLockScavengerhunt($cm->instance)) {
+if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
     //Get strings for init js
     $strings = get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'scavengerhunt');
-    $idLock = renewLockScavengerhunt($cm->instance);
+    $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');

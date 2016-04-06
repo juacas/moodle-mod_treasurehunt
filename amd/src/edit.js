@@ -47,8 +47,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             var selectedFeatures;
             var selectedRiddleFeatures = new Object();
             var idNewFeature = 1;
-            //Utilizada para guardar el valor original del nombre del camino
-            var oriVal;
             var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
             /**Initialize stage and selectedRiddleFeatures******************************************************
              */

@@ -55,16 +55,15 @@ $string['scavengerhunt:view'] = 'Ver la caza del tesoro';
 $string['scavengerhunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['scavengerhuntislocked'] = 'Alguien está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 $string['availability'] = 'Disponibilidad';
+$string['groups'] = 'Grupos';
+$string['groupmode'] = 'Juego en grupos';
+$string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración por defecto de los grupos o de una agrupación personalizada para cada camino. El juego del grupo será compartido entre los miembros del grupo y todos los miembros del grupo verán los cambios producidos en el juego.';
 $string['allowsubmissionsfromdate'] = 'Permitir entregas desde';
 $string['allowsubmissionsfromdate_help'] = 'Si está habilitado, los estudiantes no podrán hacer entregas antes de esta fecha. Si está deshabilitado, los estudiantes podrán comenzar las entregas de inmediato.';
-$string['duedate'] = 'Fecha de entrega';
-$string['duedate_help'] = 'Esto es cuando la Tarea ya se ha entregado. Todavía se permiten envíos después de esta fecha pero las tareas entregadas después de esta fecha se marcan como "retrasada". Para impedir envíos después de cierta fecha - ajustar la fecha de entrega de la tarea.';
 $string['duedatereached'] = 'La fecha de vencimiento de esta tarea ya ha pasado';
-$string['duedatevalidation'] = 'La fecha de vencimiento debe ser posterior a la fecha de inicio de las entregas.';
 $string['cutoffdate'] = 'Fecha límite';
 $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior de la de inicio.';
 $string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán entregas de tareas después de esta fecha sin una ampliación.';
-$string['cutoffdatevalidation'] = 'La fecha límite debe ser posterior a la de entrega.';
 $string['alwaysshowdescription'] = 'Mostrar siempre la descripción';
 $string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Tarea superior solo será visible para los estudiantes en la fecha "Permitir entregas desde",';
 /**Template */
@@ -73,14 +72,19 @@ $string['sendlotacion_content'] = 'Esta acción no se puede deshacer.';
 $string['cancel'] = 'Cancelar';
 $string['send'] = 'Enviar';
 $string['exit'] = 'Salir';
+$string['back'] = 'Atrás';
+$string['layers'] = 'Layers';
 $string['discovered_riddle'] = 'Pista descubierta';
 $string['failed_location'] = 'Localización fallada';
 $string['nameRiddle'] = 'Nombre de la pista';
 $string['descriptionRiddle'] = 'Descripción de la pista';
 $string['info_validate_location'] = 'Validar ubicación para esta pista';
-$string['button_validate_location'] = 'VALIDAR UBICACIÓN';
-$string['search_button'] = 'Buscar';
-$string['layers_button'] = 'Capas';
+$string['button_validate_location'] = 'Validar ubicación';
+$string['search'] = 'Buscar';
+$string['info'] = 'Información';
+$string['riddles'] = 'Pistas';
+$string['playwithoutmove'] = 'Jugar sin desplazarse';
+$string['playwithoutmove_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. Se habilita una marca en el mapa para seleccionar el punto deseado';
 $string['groupid'] = 'Grupo asignado al camino';
 $string['groupid_help'] = 'Los usuarios de este grupo son asignados a este camino cuando empieza el juego';
 $string['groupingid'] = 'Agrupación asignada al camino';
@@ -89,6 +93,9 @@ $string['noteam'] = 'No es miembro de ningún grupo';
 $string['noteamplay'] = 'No es miembro de ningún grupo, por lo que no puede realizar la actividad.';
 $string['multipleteams'] = 'Es miembro de más de un grupo';
 $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
+$string['timeLabelFailed'] = 'Ubicación enviada en la fecha: ';
+$string['timeLabel'] = 'Pista descubierta en la fecha: ';
+
 
 
 

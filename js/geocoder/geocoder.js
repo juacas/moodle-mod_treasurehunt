@@ -450,7 +450,7 @@ if (function (a) {
         var c = new a.Geocoded();
         return c.latitude = 1 * b.lat, c.longitude = 1 * b.lon, c.streetNumber = void 0 !== b.address.house_number ? b.address.house_number : void 0,
                 c.streetName = b.address.road, c.city = b.address.city, c.region = b.address.state, c.county = b.address.county, c.totalName = b.display_name,
-                c.boundingbox = b.boundingbox, c.postal_code = b.address.postcode, c;
+                c.boundingbox = b.boundingbox, c.postal_code = b.address.postcode,c.type = b.type, c;
     };
 }(GeocoderJS), "undefined" == typeof GeocoderJS && "function" == typeof require) {
     var GeocoderJS = require("../GeocoderJS.js");
