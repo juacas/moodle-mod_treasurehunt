@@ -56,6 +56,7 @@ $string['scavengerhunt:addinstance'] = 'Add a new scavengerhunt';
 $string['scavengerhuntislocked'] = 'Someone is editing this scavengerhunt right now. Try to edit it in a few minutes.';
 $string['availability'] = 'Availability';
 $string['groups'] = 'Groups';
+$string['gradingsummary'] = 'Grading summary';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the default set of groups or a custom grouping for each road. A group game will be shared among group members and all members of the group will see each others changes to the game.';
 $string['allowsubmissionsfromdate'] = 'Allow submissions from';

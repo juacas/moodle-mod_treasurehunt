@@ -56,6 +56,7 @@ $string['scavengerhunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['scavengerhuntislocked'] = 'Alguien está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 $string['availability'] = 'Disponibilidad';
 $string['groups'] = 'Grupos';
+$string['gradingsummary'] = 'Sumario de calificaciones';
 $string['groupmode'] = 'Juego en grupos';
 $string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración por defecto de los grupos o de una agrupación personalizada para cada camino. El juego del grupo será compartido entre los miembros del grupo y todos los miembros del grupo verán los cambios producidos en el juego.';
 $string['allowsubmissionsfromdate'] = 'Permitir entregas desde';
