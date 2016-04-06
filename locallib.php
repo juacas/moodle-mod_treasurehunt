@@ -168,11 +168,10 @@ function getScavengerhunt($idScavengerhunt, $context) {
     return $fetchstage_returns;
 }
 
-function renewLockScavengerhunt($idScavengerhunt) {
-    global $DB, $USER;
+function renewLockScavengerhunt($idScavengerhunt,$userid) {
+    global $DB;
 
     $table = 'scavengerhunt_locks';
-    $userid = $USER->id;
     $params = array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid);
     $time = time() + 120;
     $lock = $DB->get_record($table, $params);
@@ -185,11 +184,11 @@ function renewLockScavengerhunt($idScavengerhunt) {
     }
 }
 
-function isLockScavengerhunt($idScavengerhunt) {
-    global $DB, $USER;
+function isLockScavengerhunt($idScavengerhunt,$userid) {
+    global $DB;
     deleteOldLocks($idScavengerhunt);
     $select = "scavengerhunt_id = ? AND lockedat > ? AND user_id != ?";
-    $params = array($idScavengerhunt, time(), $USER->id);
+    $params = array($idScavengerhunt, time(), $userid);
     return $DB->record_exists_select('scavengerhunt_locks', $select, $params);
 }
 
@@ -203,16 +202,16 @@ function deleteOldLocks($idScavengerhunt) {
     $DB->delete_records_select('scavengerhunt_locks', "lockedat < ? AND scavengerhunt_id = ? ", array(time(), $idScavengerhunt));
 }
 
-function checkLock($idScavengerhunt, $idLock) {
-    if (!isLockScavengerhunt($idScavengerhunt) && idLockIsValid($idLock)) {
+function checkLock($idScavengerhunt, $idLock, $userid) {
+    if (!isLockScavengerhunt($idScavengerhunt,$userid) && idLockIsValid($idLock)) {
         return true;
     } else {
         return false;
     }
 }
 
-function checkRiddle($idgroup, $idRoad, $point, $groupmode) {
-    global $USER, $DB;
+function checkRiddle($userid,$idgroup, $idRoad, $point, $groupmode) {
+    global $DB;
     $location = object_to_wkt($point);
     if ($groupmode) {
         $group_type = 'group_id';
@@ -297,7 +296,7 @@ function isValidRoad($idRoad) {
     $query = "SELECT geom as geometry from {scavengerhunt_riddles} where road_id = ?";
     $params = array($idRoad);
     $riddles = $DB->get_records_sql($query, $params);
-    if (count($riddles) < 2) {
+    if (count($riddles) < 1) {
         return false;
     }
     foreach ($riddles as $riddle) {
@@ -308,19 +307,19 @@ function isValidRoad($idRoad) {
     return true;
 }
 
-function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {
-    global $USER, $DB;
+function getUserGroupAndRoad($userid,$idScavengerhunt, $cm, $courseid) {
+    global $DB;
 
     $groups = array();
-    if ($groupmode = groups_get_activity_groupmode($cm)) {
+    if ($cm->groupmode) {
         //group mode
         $query = "SELECT grouping_id, id as idRoad from {scavengerhunt_roads} where scavengerhunt_id=? AND grouping_id != 0";
         $params = array($idScavengerhunt);
         $availablegroupings = $DB->get_records_sql($query, $params);
         foreach ($availablegroupings as $groupingid) {
-            if (count($allgroupsingrouping = groups_get_all_groups($courseid, $USER->id, $groupingid->grouping_id, 'g.id'))) {
+            if (count($allgroupsingrouping = groups_get_all_groups($courseid, $userid, $groupingid->grouping_id, 'g.id'))) {
                 foreach ($allgroupsingrouping as $groupingrouping) {
-                    array_push($groups, (object) array('groupmode' => $groupmode, 'group_id' => $groupingrouping->id, 'idRoad' => $groupingid->idroad));
+                    array_push($groups, (object) array('groupmode' => $cm->groupmode, 'group_id' => $groupingrouping->id, 'idRoad' => $groupingid->idroad));
                 }
             }
         }
@@ -331,17 +330,17 @@ function getUserGroupAndRoad($idScavengerhunt, $cm, $courseid) {
         $availablegroups = $DB->get_records_sql($query, $params);
         foreach ($availablegroups as $groupid) {
             if (groups_is_member($groupid->group_id)) {
-                $groupid->groupmode = $groupmode;
+                $groupid->groupmode = $cm->groupmode;
                 array_push($groups, $groupid);
             }
         }
     }
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cm->id));
     if (count($groups) === 0) {
-        //No pertenece a ningÃƒÆ’Ã‚Âºn grupo
+        //No pertenece a ningun grupo
         print_error('noteamplay', 'scavengerhunt', $returnurl);
     } else if (count($groups) > 1) {
-        //Pertenece a mÃƒÆ’Ã‚Â¡s de un grupo
+        //Pertenece a mas de un grupo
         print_error('multipleteamsplay', 'scavengerhunt', $returnurl);
     } else {
         //Bien

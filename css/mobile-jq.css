@@ -15,7 +15,7 @@ body {
 h1, h2, h3, h4, h5, h6{
     line-height:inherit;
 }
-#autocomplete a,#popupDialog h1{
+#autocomplete a,[data-role="popup"] .ui-title{
     white-space:normal;
 }
 .ui-footer {
@@ -43,12 +43,18 @@ h1, h2, h3, h4, h5, h6{
     padding:0;
 }
 #searchpanel .ui-panel-inner {
-      padding-top:100px;
+    padding-top:100px;
 } 
-#infopanel .ui-panel-inner {
-      padding-top:48px;
- } 
- 
+.ui-panel-inner {
+    padding-top:48px;
+} 
+[data-role="popup"] .ui-title{
+    margin: 0 10%;
+}
+#popupInfoRiddle {
+    overflow-y:auto;
+}
+
 #title, #tags, #shortdesc {
     display: none;
 }

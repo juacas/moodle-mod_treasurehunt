@@ -76,10 +76,6 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addElement('date_time_selector', 'allowsubmissionsfromdate', $name, $options);
         $mform->addHelpButton('allowsubmissionsfromdate', 'allowsubmissionsfromdate', 'scavengerhunt');
 
-        $name = get_string('duedate', 'scavengerhunt');
-        $mform->addElement('date_time_selector', 'duedate', $name, array('optional' => true));
-        $mform->addHelpButton('duedate', 'duedate', 'scavengerhunt');
-
         $name = get_string('cutoffdate', 'scavengerhunt');
         $mform->addElement('date_time_selector', 'cutoffdate', $name, array('optional' => true));
         $mform->addHelpButton('cutoffdate', 'cutoffdate', 'scavengerhunt');
@@ -89,8 +85,11 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'scavengerhunt');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
-
-
+        $mform->addElement('header', 'groups', get_string('groups', 'scavengerhunt'));
+        $mform->setExpanded('groups', true);
+        $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'scavengerhunt'));
+        $mform->addHelpButton('groupmode', 'groupmode', 'scavengerhunt');
+        
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
 
@@ -111,16 +110,6 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['allowsubmissionsfromdate'] && $data['duedate']) {
-            if ($data['allowsubmissionsfromdate'] > $data['duedate']) {
-                $errors['duedate'] = get_string('duedatevalidation', 'scavengerhunt');
-            }
-        }
-        if ($data['duedate'] && $data['cutoffdate']) {
-            if ($data['duedate'] > $data['cutoffdate']) {
-                $errors['cutoffdate'] = get_string('cutoffdatevalidation', 'scavengerhunt');
-            }
-        }
         if ($data['allowsubmissionsfromdate'] && $data['cutoffdate']) {
             if ($data['allowsubmissionsfromdate'] > $data['cutoffdate']) {
                 $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'scavengerhunt');

@@ -29,7 +29,7 @@ class play_page implements renderable, templatable {
         GLOBAL $USER;
         $data = new stdClass();
         $user = new stdClass();
-        $user->name = $USER->firstname . ' ' . $USER->lastname;
+        $user->name = fullname($USER);//$USER->firstname . ' ' . $USER->lastname;
         $user->picture = $output->user_picture($USER, array('link' => false));         
         $data->user = $user;
         $data->scavengerhunt = $this->scavengerhunt;
