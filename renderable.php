@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -21,7 +22,6 @@
  * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -31,64 +31,24 @@ defined('MOODLE_INTERNAL') || die();
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class scavengerhunt_grading_summary implements renderable {
+
     /** @var int participantcount - The number of users who can submit to this assignment */
-    public $participantcount = 0;
-    /** @var bool submissiondraftsenabled - Allow submission drafts */
-    public $submissiondraftsenabled = false;
-    /** @var int submissiondraftscount - The number of submissions in draft status */
-    public $submissiondraftscount = 0;
-    /** @var bool submissionsenabled - Allow submissions */
-    public $submissionsenabled = false;
-    /** @var int submissionssubmittedcount - The number of submissions in submitted status */
-    public $submissionssubmittedcount = 0;
-    /** @var int submissionsneedgradingcount - The number of submissions that need grading */
-    public $submissionsneedgradingcount = 0;
-    /** @var int duedate - The assignment due date (if one is set) */
-    public $duedate = 0;
-    /** @var int cutoffdate - The assignment cut off date (if one is set) */
-    public $cutoffdate = 0;
-    /** @var int coursemoduleid - The assignment course module id */
-    public $coursemoduleid = 0;
-    /** @var boolean teamsubmission - Are team submissions enabled for this assignment */
-    public $teamsubmission = false;
-    /** @var boolean warnofungroupedusers - Do we need to warn people that there are users without groups */
-    public $warnofungroupedusers = false;
+    public $riddleid = 0;
+
+    /** @var int participantcount - The number of users who can submit to this assignment */
+    public $riddlenum = 0;
+
+    /** @var int participantcount - The number of users who can submit to this assignment */
+    public $groupmode = 0;
 
     /**
      * constructor
      *
      * @param int $participantcount
-     * @param bool $submissiondraftsenabled
-     * @param int $submissiondraftscount
-     * @param bool $submissionsenabled
-     * @param int $submissionssubmittedcount
-     * @param int $cutoffdate
-     * @param int $duedate
-     * @param int $coursemoduleid
-     * @param int $submissionsneedgradingcount
-     * @param bool $teamsubmission
      */
-    public function __construct($participantcount = 0,
-                                $submissiondraftsenabled = 0,
-                                $submissiondraftscount = 0,
-                                $submissionsenabled = 0,
-                                $submissionssubmittedcount = 0,
-                                $cutoffdate = 0,
-                                $duedate = 0,
-                                $coursemoduleid = 0,
-                                $submissionsneedgradingcount = 0,
-                                $teamsubmission = 0,
-                                $warnofungroupedusers = 0) {
-        $this->participantcount = $participantcount;
-        $this->submissiondraftsenabled = $submissiondraftsenabled;
-        $this->submissiondraftscount = $submissiondraftscount;
-        $this->submissionsenabled = $submissionsenabled;
-        $this->submissionssubmittedcount = $submissionssubmittedcount;
-        $this->duedate = $duedate;
-        $this->cutoffdate = $cutoffdate;
-        $this->coursemoduleid = $coursemoduleid;
-        $this->submissionsneedgradingcount = $submissionsneedgradingcount;
-        $this->teamsubmission = $teamsubmission;
-        $this->warnofungroupedusers = $warnofungroupedusers;
+    public function __construct($riddleid, $riddlenum,$groupmode) {
+        $this->riddleid = $riddleid;
+        $this->riddlenum = $riddlenum;
     }
+
 }

@@ -453,10 +453,10 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
  * @param stdClass $course current course record
  * @param stdClass $module current scavengerhunt instance record
  * @param cm_info $cm course module information
- */
+ 
 function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
     // TODO Delete this function and its docblock, or implement it.
-}
+}*/
 
 /**
  * Extends the settings navigation with the scavengerhunt settings
@@ -519,7 +519,10 @@ function updateRoadBD($idRoad, $nameRoad) {
 function deleteRoadBD($idRoad) {
     GLOBAL $DB;
     $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
-    $DB->delete_records_select('scavengerhunt_riddles', 'road_id = ?', array($idRoad));
+    $select = 'road_id = ?';
+    $params = array($idRoad);
+    $DB->delete_records_select('scavengerhunt_riddles', $select, $params);
+    $DB->delete_records_select('scavengerhunt_attempts', $select, $params);
 }
 
 function getTotalRoads($idScavengerhunt) {

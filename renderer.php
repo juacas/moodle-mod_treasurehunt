@@ -40,7 +40,20 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
         $row->cells = array($cell1, $cell2);
         $table->data[] = $row;
     }
-
+        /**
+     * Utility function to add a row of data to a table with 2 columns. Modified
+     * the table param and does not return a value
+     *
+     * @param html_table $table The table to append the row of data to
+     * @param string $first The row column text
+     * @return void
+     */
+    private function add_table_row_single(html_table $table, $first) {
+        $row = new html_table_row();
+        $cell1 = new html_table_cell($first);
+        $row->cells = array($cell1);
+        $table->data[] = $row;
+    }
     /**
      * Defer to template.                                                                                                           
      *                                                                                                                              

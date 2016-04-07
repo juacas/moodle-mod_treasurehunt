@@ -131,6 +131,12 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
                     updateRiddleBD($feature);
+                    // Trigger update riddle event.
+                    $eventparams = array(
+                        'context' => $context,
+                        'objectid' => $feature->getId()
+                    );
+                    \mod_scavengerhunt\event\riddle_updated::create($eventparams)->trigger();
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
@@ -204,6 +210,12 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
         require_capability('mod/scavengerhunt:editriddle', $context);
         if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
             deleteEntryBD($idRiddle);
+            // Trigger deleted riddle event.
+            $eventparams = array(
+                'context' => $context,
+                'objectid' => $idRiddle,
+            );
+            \mod_scavengerhunt\event\riddle_deleted::create($eventparams)->trigger();
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la pista se ha realizado con éxito';
         } else {
@@ -270,6 +282,12 @@ class mod_scavengerhunt_external_delete_road extends external_api {
         require_capability('mod/scavengerhunt:editroad', $context);
         if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
             deleteRoadBD($idRoad);
+            // Trigger deleted road event.
+            $eventparams = array(
+                'context' => $context,
+                'objectid' => $idRoad
+            );
+            \mod_scavengerhunt\event\road_deleted::create($eventparams)->trigger();
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con éxito';
         } else {
@@ -336,7 +354,7 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
         require_capability('mod/scavengerhunt:managescavenger', $context);
         if (isset($idLock)) {
             if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
-                $idLock = renewLockScavengerhunt($idScavengerhunt,$USER->id);
+                $idLock = renewLockScavengerhunt($idScavengerhunt, $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
             } else {
@@ -344,8 +362,8 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
                 $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
             }
         } else {
-            if (!isLockScavengerhunt($idScavengerhunt,$USER->id)) {
-                $idLock = renewLockScavengerhunt($idScavengerhunt,$USER->id);
+            if (!isLockScavengerhunt($idScavengerhunt, $USER->id)) {
+                $idLock = renewLockScavengerhunt($idScavengerhunt, $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha creado el bloqueo con exito';
             } else {
@@ -409,9 +427,9 @@ class mod_scavengerhunt_external_validate_location extends external_api {
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/scavengerhunt:view', $context);
-        $params = getUserGroupAndRoad($USER->id,$idScavengerhunt, $cm, $cm->modinfo->course->id);
-        if (checkRiddle($USER->id,$params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode)) {
+        require_capability('mod/scavengerhunt:play', $context);
+        $params = getUserGroupAndRoad($USER->id, $idScavengerhunt, $cm, $cm->modinfo->course->id);
+        if (checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode)) {
             $status['code'] = 0;
             $status['msg'] = '¡¡¡Enhorabuena, a por la siguiente pista!!!';
         } else {
@@ -467,14 +485,14 @@ class mod_scavengerhunt_external_user_progress extends external_api {
      * @return array of newly created groups
      */
     public static function user_progress($idScavengerhunt) { //Don't forget to set it as static
-        global $USER,$COURSE;
+        global $USER, $COURSE;
         self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt));
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/scavengerhunt:view', $context);
-        $params = getUserGroupAndRoad($USER->id,$idScavengerhunt, $cm, $COURSE->id);
-        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $idScavengerhunt, $context);
+        require_capability('mod/scavengerhunt:play', $context);
+        $params = getUserGroupAndRoad($USER->id, $idScavengerhunt, $cm, $COURSE->id);
+        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
         $status['code'] = 0;
         $status['msg'] = 'El progreso de usuario se ha cargado con éxito';
         $result = array();

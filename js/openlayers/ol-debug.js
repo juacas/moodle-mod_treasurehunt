@@ -1,6 +1,6 @@
 // OpenLayers 3. See http://openlayers.org/
 // License: https://raw.githubusercontent.com/openlayers/ol3/master/LICENSE.md
-// Version: v3.15.0
+// Version: v3.15.1
 
 (function (root, factory) {
   if (typeof exports === "object") {
@@ -49935,10 +49935,11 @@ goog.inherits(ol.render.canvas.Replay, ol.render.VectorContext);
  * @param {number} offset Offset.
  * @param {number} end End.
  * @param {number} stride Stride.
+ * @param {boolean} close Close.
  * @protected
  * @return {number} My end.
  */
-ol.render.canvas.Replay.prototype.appendFlatCoordinates = function(flatCoordinates, offset, end, stride) {
+ol.render.canvas.Replay.prototype.appendFlatCoordinates = function(flatCoordinates, offset, end, stride, close) {
 
   var myEnd = this.coordinates.length;
   var extent = this.getBufferedMaxExtent();
@@ -49977,6 +49978,10 @@ ol.render.canvas.Replay.prototype.appendFlatCoordinates = function(flatCoordinat
     this.coordinates[myEnd++] = lastCoord[1];
   }
 
+  if (close) {
+    this.coordinates[myEnd++] = flatCoordinates[offset];
+    this.coordinates[myEnd++] = flatCoordinates[offset + 1];
+  }
   return myEnd;
 };
 
@@ -50548,7 +50553,8 @@ goog.inherits(ol.render.canvas.ImageReplay, ol.render.canvas.Replay);
  * @return {number} My end.
  */
 ol.render.canvas.ImageReplay.prototype.drawCoordinates_ = function(flatCoordinates, offset, end, stride) {
-  return this.appendFlatCoordinates(flatCoordinates, offset, end, stride);
+  return this.appendFlatCoordinates(
+      flatCoordinates, offset, end, stride, false);
 };
 
 
@@ -50769,7 +50775,8 @@ goog.inherits(ol.render.canvas.LineStringReplay, ol.render.canvas.Replay);
  */
 ol.render.canvas.LineStringReplay.prototype.drawFlatCoordinates_ = function(flatCoordinates, offset, end, stride) {
   var myBegin = this.coordinates.length;
-  var myEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride);
+  var myEnd = this.appendFlatCoordinates(
+      flatCoordinates, offset, end, stride, false);
   var moveToLineToInstruction =
       [ol.render.canvas.Instruction.MOVE_TO_LINE_TO, myBegin, myEnd];
   this.instructions.push(moveToLineToInstruction);
@@ -50971,9 +50978,7 @@ ol.render.canvas.PolygonReplay = function(tolerance, maxExtent, resolution) {
    *         lineDash: Array.<number>,
    *         lineJoin: (string|undefined),
    *         lineWidth: (number|undefined),
-   *         miterLimit: (number|undefined),
-   *         pendingFill: number,
-   *         pendingStroke: number}|null}
+   *         miterLimit: (number|undefined)}|null}
    */
   this.state_ = {
     currentFillStyle: undefined,
@@ -50989,9 +50994,7 @@ ol.render.canvas.PolygonReplay = function(tolerance, maxExtent, resolution) {
     lineDash: null,
     lineJoin: undefined,
     lineWidth: undefined,
-    miterLimit: undefined,
-    pendingFill: 0,
-    pendingStroke: 0
+    miterLimit: undefined
   };
 
 };
@@ -51008,19 +51011,15 @@ goog.inherits(ol.render.canvas.PolygonReplay, ol.render.canvas.Replay);
  */
 ol.render.canvas.PolygonReplay.prototype.drawFlatCoordinatess_ = function(flatCoordinates, offset, ends, stride) {
   var state = this.state_;
-  if (state.pendingFill > 200 || state.pendingStroke > 200) {
-    this.fillStroke_();
-  }
   var beginPathInstruction = [ol.render.canvas.Instruction.BEGIN_PATH];
-  if (!state.pendingFill && !state.pendingStroke) {
-    this.instructions.push(beginPathInstruction);
-  }
+  this.instructions.push(beginPathInstruction);
   this.hitDetectionInstructions.push(beginPathInstruction);
   var i, ii;
   for (i = 0, ii = ends.length; i < ii; ++i) {
     var end = ends[i];
     var myBegin = this.coordinates.length;
-    var myEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride);
+    var myEnd = this.appendFlatCoordinates(
+        flatCoordinates, offset, end, stride, true);
     var moveToLineToInstruction =
         [ol.render.canvas.Instruction.MOVE_TO_LINE_TO, myBegin, myEnd];
     var closePathInstruction = [ol.render.canvas.Instruction.CLOSE_PATH];
@@ -51029,15 +51028,19 @@ ol.render.canvas.PolygonReplay.prototype.drawFlatCoordinatess_ = function(flatCo
         closePathInstruction);
     offset = end;
   }
-  this.hitDetectionInstructions.push([ol.render.canvas.Instruction.FILL]);
+  // FIXME is it quicker to fill and stroke each polygon individually,
+  // FIXME or all polygons together?
+  var fillInstruction = [ol.render.canvas.Instruction.FILL];
+  this.hitDetectionInstructions.push(fillInstruction);
   if (state.fillStyle !== undefined) {
-    state.pendingFill++;
+    this.instructions.push(fillInstruction);
   }
   if (state.strokeStyle !== undefined) {
     goog.asserts.assert(state.lineWidth !== undefined,
         'state.lineWidth should be defined');
-    state.pendingStroke++;
-    this.hitDetectionInstructions.push([ol.render.canvas.Instruction.STROKE]);
+    var strokeInstruction = [ol.render.canvas.Instruction.STROKE];
+    this.instructions.push(strokeInstruction);
+    this.hitDetectionInstructions.push(strokeInstruction);
   }
   return offset;
 };
@@ -51074,23 +51077,22 @@ ol.render.canvas.PolygonReplay.prototype.drawCircle = function(circleGeometry, f
   var stride = circleGeometry.getStride();
   var myBegin = this.coordinates.length;
   this.appendFlatCoordinates(
-      flatCoordinates, 0, flatCoordinates.length, stride);
+      flatCoordinates, 0, flatCoordinates.length, stride, false);
   var beginPathInstruction = [ol.render.canvas.Instruction.BEGIN_PATH];
   var circleInstruction = [ol.render.canvas.Instruction.CIRCLE, myBegin];
-  if (!state.pendingFill && !state.pendingStroke) {
-    this.instructions.push(beginPathInstruction);
-  }
-  this.instructions.push(circleInstruction);
-  this.hitDetectionInstructions.push(circleInstruction, beginPathInstruction);
-  this.hitDetectionInstructions.push([ol.render.canvas.Instruction.FILL]);
+  this.instructions.push(beginPathInstruction, circleInstruction);
+  this.hitDetectionInstructions.push(beginPathInstruction, circleInstruction);
+  var fillInstruction = [ol.render.canvas.Instruction.FILL];
+  this.hitDetectionInstructions.push(fillInstruction);
   if (state.fillStyle !== undefined) {
-    state.pendingFill++;
+    this.instructions.push(fillInstruction);
   }
   if (state.strokeStyle !== undefined) {
     goog.asserts.assert(state.lineWidth !== undefined,
         'state.lineWidth should be defined');
-    state.pendingStroke++;
-    this.hitDetectionInstructions.push([ol.render.canvas.Instruction.STROKE]);
+    var strokeInstruction = [ol.render.canvas.Instruction.STROKE];
+    this.instructions.push(strokeInstruction);
+    this.hitDetectionInstructions.push(strokeInstruction);
   }
   this.endGeometry(circleGeometry, feature);
 };
@@ -51172,27 +51174,12 @@ ol.render.canvas.PolygonReplay.prototype.drawMultiPolygon = function(multiPolygo
 
 
 /**
- * @private
- */
-ol.render.canvas.PolygonReplay.prototype.fillStroke_ = function() {
-  var state = this.state_;
-  if (state.pendingFill) {
-    this.instructions.push([ol.render.canvas.Instruction.FILL]);
-    state.pendingFill = 0;
-  }
-  if (state.pendingStroke) {
-    this.instructions.push([ol.render.canvas.Instruction.STROKE]);
-    state.pendingStroke = 0;
-  }
-};
-
-
-/**
  * @inheritDoc
  */
 ol.render.canvas.PolygonReplay.prototype.finish = function() {
   goog.asserts.assert(this.state_, 'this.state_ should not be null');
   this.reverseHitDetectionInstructions_();
+  this.state_ = null;
   // We want to preserve topology when drawing polygons.  Polygons are
   // simplified using quantization and point elimination. However, we might
   // have received a mix of quantized and non-quantized geometries, so ensure
@@ -51205,8 +51192,6 @@ ol.render.canvas.PolygonReplay.prototype.finish = function() {
       coordinates[i] = ol.geom.flat.simplify.snap(coordinates[i], tolerance);
     }
   }
-  this.fillStroke_();
-  this.state_ = null;
 };
 
 
@@ -51289,7 +51274,6 @@ ol.render.canvas.PolygonReplay.prototype.setFillStrokeStyles_ = function() {
   var lineWidth = state.lineWidth;
   var miterLimit = state.miterLimit;
   if (fillStyle !== undefined && state.currentFillStyle != fillStyle) {
-    this.fillStroke_();
     this.instructions.push(
         [ol.render.canvas.Instruction.SET_FILL_STYLE, fillStyle]);
     state.currentFillStyle = state.fillStyle;
@@ -51307,7 +51291,6 @@ ol.render.canvas.PolygonReplay.prototype.setFillStrokeStyles_ = function() {
         state.currentLineJoin != lineJoin ||
         state.currentLineWidth != lineWidth ||
         state.currentMiterLimit != miterLimit) {
-      this.fillStroke_();
       this.instructions.push(
           [ol.render.canvas.Instruction.SET_STROKE_STYLE,
            strokeStyle, lineWidth, lineCap, lineJoin, miterLimit, lineDash]);
@@ -51422,7 +51405,8 @@ ol.render.canvas.TextReplay.prototype.drawText = function(flatCoordinates, offse
   this.setReplayTextState_(this.textState_);
   this.beginGeometry(geometry, feature);
   var myBegin = this.coordinates.length;
-  var myEnd = this.appendFlatCoordinates(flatCoordinates, offset, end, stride);
+  var myEnd =
+      this.appendFlatCoordinates(flatCoordinates, offset, end, stride, false);
   var fill = !!this.textFillState_;
   var stroke = !!this.textStrokeState_;
   var drawTextInstruction = [
