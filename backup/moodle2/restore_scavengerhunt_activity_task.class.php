@@ -73,8 +73,8 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
     static public function define_decode_rules() {
         $rules = array();
 
-        $rules[] = new restore_decode_rule('scavengerhuntVIEWBYID', '/mod/scavengerhunt/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('scavengerhuntINDEX', '/mod/scavengerhunt/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('SCAVENGERHUNTVIEWBYID', '/mod/scavengerhunt/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('SCAVENGERHUNTINDEX', '/mod/scavengerhunt/index.php?id=$1', 'course');
 
         return $rules;
 
