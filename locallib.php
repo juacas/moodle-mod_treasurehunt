@@ -119,12 +119,25 @@ function updateRiddleBD(Feature $feature) {
     $geometryWKT = object_to_wkt($feature->getGeometry());
     $timemodified = time();
     $idRiddle = $feature->getId();
-    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = ST_GeomFromText((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
+    $geomfuncs = getgeometryfunctions($DB);
+    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = '.$geomfuncs['ST_GeomFromText'].'((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
     setValidRoad($road_id);
 }
-
+function getgeometryfunctions(moodle_database $DB){
+    $info=$DB->get_server_info();
+    $dbtype=$DB->get_dbfamily();
+    $functions=array();
+    if ($dbtype==='mysql' && version_compare($info['version'], '5.6.1')<0){
+        $functions['ST_GeomFromText']='GeomFromText';
+        $functions['ST_Intersects']='Intersects';
+    }else{ // OGC Simple SQL for Features.
+        $functions['ST_GeomFromText']='ST_GeomFromText';
+        $functions['ST_Intersects']='ST_Intersects';
+    }
+    return $functions;
+}
 function setValidRoad($road_id, $valid = null) {
     GLOBAL $DB;
     $road = new stdClass();
@@ -229,7 +242,8 @@ function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode) {
     $currentriddle = $DB->get_record_sql($query, $params);
     $nextnumriddle = $currentriddle->num_riddle + 1;
     //Compruebo si la geometria esta dentro
-    $query = "SELECT id, ST_Intersects(geom,ST_GeomFromText((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
+    $geomfuncs = getgeometryfunctions($DB);
+    $query = "SELECT id, {$geomfuncs['ST_Intersects']}(geom,{$geomfuncs['ST_GeomFromText']}((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
     $params = array($location, $nextnumriddle, $idRoad);
     $nextriddle = $DB->get_record_sql($query, $params);
     if ($nextriddle->inside) {
@@ -241,8 +255,9 @@ function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode) {
     }
     // Si no es la primera pista fallada, y por lo tanto null.
     if (!is_null($pointIdRiddle)) {
+        
         $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated, group_id, user_id, success,'
-                . ' locations) VALUES ((?),(?),(?),(?),(?),(?),ST_GeomFromText((?)))';
+                . ' locations) VALUES ((?),(?),(?),(?),(?),(?),'.$geomfuncs['ST_GeomFromText'].'((?)))';
         $params = array($idRoad, $pointIdRiddle, time(),
             $idgroup, $userid, $isInside, $location);
         $DB->execute($query, $params);
