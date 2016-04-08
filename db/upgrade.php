@@ -181,7 +181,17 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
 
         upgrade_mod_savepoint(true, 2007040200, 'scavengerhunt');
     }
+    if ($oldversion < 20160408000) {
 
+        // Define field course to be added to scavengerhunt.
+        $table = new xmldb_table('scavengerhunt_roads');
+        $field = new xmldb_field('validated', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'grouping_id');
+
+        // Add field course.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+    }
     /*
      * And that's all. Please, examine and understand the 3 example blocks above. Also
      * it's interesting to look how other modules are using this script. Remember that
