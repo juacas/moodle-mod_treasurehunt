@@ -46,6 +46,7 @@ class riddle_form extends moodleform {
         $mform = $this->_form;
         $descriptionoptions = $this->_customdata['descriptionoptions'];
         $currententry = $this->_customdata['current'];
+        $completionactivities = $this->_customdata['completionactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -65,19 +66,16 @@ class riddle_form extends moodleform {
         $mform->addElement('editor', 'description_editor', get_string('riddle_editor', 'scavengerhunt'), null, $descriptionoptions);
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
-        // Add restrict access completion activity
-        /*$options = array();
+        // Add restrict access completion activity.
+        $options = array();
         $options[0] = get_string('none');
-        foreach ($selectoptions as $option) {
+        foreach ($completionactivities as $option) {
             $options[$option->id] = $option->name;
         }
-        if ($groups) {
-            $select = $mform->addElement('select', 'grouping_id', get_string('groupingid', 'scavengerhunt'), $options);
-            $mform->addHelpButton('grouping_id', 'groupingid', 'scavengerhunt');
-        } else {
-            $select = $mform->addElement('select', 'group_id', get_string('groupid', 'scavengerhunt'), $options);
-            $mform->addHelpButton('group_id', 'groupid', 'scavengerhunt');
-        }*/
+        $mform->addElement('header', 'availabilityconditionsheader', get_string('restrictaccess', 'scavengerhunt'));
+        $mform->addElement('select', 'completeactivitybefore', get_string('completeactivitybefore', 'scavengerhunt'), $options);
+        $mform->addHelpButton('completeactivitybefore', 'completeactivitybefore', 'scavengerhunt');
+
         // Añado los campos ocultos id y newFeature.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);

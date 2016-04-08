@@ -32,8 +32,8 @@ require_capability('mod/scavengerhunt:addriddle', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
-if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
-    $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
+if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
+    $idLock = renewLockScavengerhunt($cm->instance, $USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
@@ -54,8 +54,12 @@ if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
         'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
     $entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
+    // List activities with Completion enabled
+    $completioninfo = new completion_info($course);
+    $completionactivities = $completioninfo->get_activities();
+    
 
-    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions)); //name of the form you defined in file above.
+    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions, 'completionactivities'=>$completionactivities)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
