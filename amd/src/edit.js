@@ -504,7 +504,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
 
             function addNewFeatureToDirtySource(dirtyFeature, originalSource, dirtySource) {
-                debugger;
+                
                 var idRiddle = dirtyFeature.get('idRiddle');
                 var feature = dirtySource.getFeatureById(idRiddle);
                 if (!feature) {
@@ -552,7 +552,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             function removeFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
                 dirtyFeatures.forEach(function (dirtyFeature) {
-                    debugger;
+                    
                     var idRiddle = dirtyFeature.get('idRiddle');
                     var feature = dirtySource.getFeatureById(idRiddle);
                     var idFeaturesPolygons;
@@ -1070,7 +1070,6 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
                     }]);
                 json[0].done(function (response) {
-                    debugger;
                     console.log(response);
                     if (response.status.code) {
                         notification.alert('Error', response.status.msg, 'Continue');
@@ -1114,7 +1113,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             }
 
             function saveRiddles(dirtySource, originalSource, idScavengerhunt, callback, options, idLock) {
-                debugger;
+                
                 var geoJSONFormat = new ol.format.GeoJSON();
                 var features = dirtySource.getFeatures();
                 var geoJSON = geoJSONFormat.writeFeatures(features, {
@@ -1130,7 +1129,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
                     }]);
                 json[0].done(function (response) {
-                    debugger;
+                    
                     console.log(response);
                     if (response.status.code) {
                         notification.alert('Error', response.status.msg, 'Continue');
@@ -1217,9 +1216,9 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
 
             $("#removeFeature").on('click', function () {
-                debugger;
+                
                 notification.confirm('Estas seguro?', 'Si la eliminas ya no podras recuperarla', 'Confirmar', 'Cancelar', function () {
-                    debugger;
+                    
                     removeFeatureToDirtySource(selectedFeatures, originalStage, dirtyStage, stage["roads"][idRoad].vector);
                     removeFeatures(selectedFeatures, stage["roads"][idRoad].vector);
                     //Desactivo el boton de borrar y activo el de guardar cambios
@@ -1232,7 +1231,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                 saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
             });
             $("#riddleList").on('click', '.ui-icon-info', function () {
-                debugger;
+                
                 var id = $(this).data('id');
                 //open dialogue
                 $(id).dialog("open");
@@ -1249,7 +1248,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#riddleList").on('click', '.ui-icon-pencil', function () {
                 //Busco el idRiddle del li que contiene la papelera seleccionada
-                debugger;
+                
                 var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
                 //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {
@@ -1313,7 +1312,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
             });
             $("#roadList").on('click', '.ui-icon-pencil', function () {
                 //Busco el idRoad del li que contiene el lapicero seleccionado
-                debugger;
+                
                 var idRoad = parseInt($(this).parents('li').attr('idRoad'));
                 //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
                 if (dirty) {

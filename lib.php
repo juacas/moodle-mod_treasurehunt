@@ -453,10 +453,10 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
  * @param stdClass $course current course record
  * @param stdClass $module current scavengerhunt instance record
  * @param cm_info $cm course module information
- */
+ 
 function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
     // TODO Delete this function and its docblock, or implement it.
-}
+}*/
 
 /**
  * Extends the settings navigation with the scavengerhunt settings
@@ -468,7 +468,26 @@ function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $cour
  * @param navigation_node $scavengerhuntnode scavengerhunt administration node
  */
 function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode = null) {
-    // TODO Delete this function and its docblock, or implement it.
+    
+    global $PAGE;
+    // We want to add these new nodes after the Edit settings node, and before the
+    // Locally assigned roles node. Of course, both of those are controlled by capabilities.
+    $keys = $scavengerhuntnode->get_children_key_list();
+    $beforekey = null;
+    $i = array_search('modedit', $keys);
+    if ($i === false and array_key_exists(0, $keys)) {
+        $beforekey = $keys[0];
+    } else if (array_key_exists($i + 1, $keys)) {
+        $beforekey = $keys[$i + 1];
+    }
+
+    if (has_capability('mod/scavengerhunt:managescavenger', $PAGE->cm->context)) {
+        $node = navigation_node::create(get_string('editscavengerhunt', 'scavengerhunt'),
+                new moodle_url('/mod/scavengerhunt/edit.php', array('id'=>$PAGE->cm->id)),
+                navigation_node::TYPE_SETTING, null, 'mod_scavengerhunt_edit',
+                new pix_icon('t/edit', ''));
+        $scavengerhuntnode->add_node($node, $beforekey);
+    }
 }
 
 function insertRoadBD($idScavengerhunt, $nameRoad) {
@@ -500,7 +519,10 @@ function updateRoadBD($idRoad, $nameRoad) {
 function deleteRoadBD($idRoad) {
     GLOBAL $DB;
     $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
-    $DB->delete_records_select('scavengerhunt_riddles', 'road_id = ?', array($idRoad));
+    $select = 'road_id = ?';
+    $params = array($idRoad);
+    $DB->delete_records_select('scavengerhunt_riddles', $select, $params);
+    $DB->delete_records_select('scavengerhunt_attempts', $select, $params);
 }
 
 function getTotalRoads($idScavengerhunt) {

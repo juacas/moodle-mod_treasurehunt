@@ -4,7 +4,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editriddle_form.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 
-global $COURSE, $PAGE, $CFG;
+global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
 // what instance of your module and what course you're in etc. Make sure you
 // include hidden variable in your forms which have their defaults set in set_data
@@ -32,8 +32,8 @@ require_capability('mod/scavengerhunt:addriddle', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
-if (!$lock = isLockScavengerhunt($cm->instance)) {
-    $idLock = renewLockScavengerhunt($cm->instance);
+if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
+    $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
@@ -89,7 +89,6 @@ if (!$lock = isLockScavengerhunt($cm->instance)) {
         $eventparams = array(
             'context' => $context,
             'objectid' => $entry->id,
-            'other' => array('name' => $entry->name)
         );
         if ($isnewentry) {
             $event = \mod_scavengerhunt\event\riddle_created::create($eventparams);

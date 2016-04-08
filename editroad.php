@@ -85,7 +85,6 @@ if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
         $eventparams = array(
             'context' => $context,
             'objectid' => $entry->id,
-            'other' => array('name' => $entry->name)
         );
         if (empty($entry->id)) {
             $entry->scavengerhunt_id = $scavengerhunt->id;

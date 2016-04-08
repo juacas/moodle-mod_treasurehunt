@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -28,7 +29,6 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -68,8 +68,20 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
      *
      * First example, some fields were added to install.xml on 2007/04/01
      */
+    if ($oldversion < 20150923389) {
+        // Define field intro to be added to scavengerhunt.
+        $table = new xmldb_table('scavengerhunt');
+        $field = new xmldb_field('groupmode', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'playwithoutmove');
+
+        // Add field intro.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        upgrade_mod_savepoint(true, 20150923389, 'scavengerhunt');
+    }
     if ($oldversion < 20150923351) {
-         // Define field intro to be added to scavengerhunt.
+        // Define field intro to be added to scavengerhunt.
         $table = new xmldb_table('scavengerhunt');
         $field = new xmldb_field('intro', XMLDB_TYPE_TEXT, 'medium', null, null, null, null, 'name');
 
@@ -77,18 +89,18 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         upgrade_mod_savepoint(true, 20150923351, 'scavengerhunt');
     }
     if ($oldversion < 20150923347) {
         $table = new xmldb_table('scavengerhunt');
         $field = new xmldb_field('work');
-        
-         // Add field intro.
+
+        // Add field intro.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         upgrade_mod_savepoint(true, 20150923347, 'scavengerhunt');
     }
     if ($oldversion < 2007040100) {
@@ -113,8 +125,7 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
 
         // Define field introformat to be added to scavengerhunt.
         $table = new xmldb_table('scavengerhunt');
-        $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0',
-            'intro');
+        $field = new xmldb_field('introformat', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'intro');
 
         // Add field introformat.
         if (!$dbman->field_exists($table, $field)) {
@@ -133,8 +144,7 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
 
         // Define field timecreated to be added to scavengerhunt.
         $table = new xmldb_table('scavengerhunt');
-        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0',
-            'introformat');
+        $field = new xmldb_field('timecreated', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'introformat');
 
         // Add field timecreated.
         if (!$dbman->field_exists($table, $field)) {
@@ -143,8 +153,7 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
 
         // Define field timemodified to be added to scavengerhunt.
         $table = new xmldb_table('scavengerhunt');
-        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0',
-            'timecreated');
+        $field = new xmldb_field('timemodified', XMLDB_TYPE_INTEGER, '10', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'timecreated');
 
         // Add field timemodified.
         if (!$dbman->field_exists($table, $field)) {
