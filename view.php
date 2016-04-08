@@ -29,6 +29,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
+require_once("$CFG->dirroot/mod/scavengerhunt/renderable.php");
 require_once ($CFG->libdir . '/formslib.php');
 
 
@@ -74,15 +75,16 @@ echo $output->header();
 
 echo $output->heading(format_string($scavengerhunt->name));
 // Conditions to show the intro can change to look for own settings or whatever.
-if ($scavengerhunt->intro) {
-    echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
-}
+
+echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
+//$usersummary = new scavengerhunt_grading_summary();
+//echo $output->render($usersummary);
+
 if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
         has_capability('mod/scavengerhunt:managescavenger', $context)) {
-
+    
 }
 //$renderable = new \mod_scavengerhunt\output\index_page('Some text','some text2');
 //echo $output->render_index_page($renderable);
-$value=groups_get_my_groups();
 // Finish the page.
 echo $output->footer();

@@ -313,6 +313,12 @@ function isValidRoad($idRoad) {
     return true;
 }
 
+function check_completion_activity($cm){
+    // Check if a user has complete that activity.
+    $current = $completion_info->get_data($cm);
+    return $completion_info->internal_get_state($cm, null  ,$current); // 0 or 1 , true or false.
+}
+
 function getUserGroupAndRoad($userid, $idScavengerhunt, $cm, $courseid) {
     global $DB;
 

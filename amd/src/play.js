@@ -34,6 +34,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
             var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
+            var previousJson;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -203,7 +204,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             map.addInteraction(select);
             //Si quiero que se actualicen cada 20 seg
             renewSource();
-            setInterval(function () {
+            var interval = setInterval(function () {
                 renewSource();
             }, 20000);
             function styleFunction(feature, resolution) {
@@ -226,8 +227,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         fill: fill,
                         stroke: stroke,
                         text: new ol.style.Text({
-                            text: 'Solo puedes empezar desde aquÃ­',
-                            textAlign: 'center',
+                            text: 'Solo puedes empezar desde aqui',
+                            textAlign: 'center'
                         })
                     });
                     return [styles];
@@ -273,9 +274,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $("#nameRiddle").html(feature.get('name'));
                     $("#descriptionRiddle").html(feature.get('description'));
                     $("#timeLabel").html(date.toLocaleString());
-                    //$("#infoRiddlePanel").trigger("updatelayout");
+                    /*$("#infoRiddlePanel").trigger("updatelayout");
                     $("#infoRiddle").show();
-                    $("#infoFailedLocation").hide();
+                    $("#infoFailedLocation").hide();*/
                 } else {
                     $("#nameFailedRiddle").html(feature.get('name'));
                     $("#timeLabelFailed").html(date.toLocaleString());
@@ -283,8 +284,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $("#infoFailedLocation").show();
                     $("#infoRiddle").hide();
                 }
-
-                $("#infoRiddlePanel").panel("open");
+                $("#infoRiddle").trigger("updatelayout");
+                $("#popupInfoRiddle").popup("open");
             }
 
             function flyToPoint(map, point) {
@@ -360,16 +361,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     console.log('json: ' + response.riddles);
                     if (response.status.code) {
                         toast(response.status.msg);
-                    } else {
+                    } else if (previousJson !== response.riddles) {
+                        previousJson = response.riddles;
                         source.clear();
                         source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
+                        addRiddlesToPanel(source);
                     }
                 }).fail(function (error) {
                     console.log(error);
                     error_dialog(error.message);
+                    clearInterval(interval);
                 });
             }
             function initLayerList() {
@@ -450,10 +454,15 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     item.insertAfter('#overlayLayer');
                 }
             }
-            function addRiddleToPanel(feature) {
-                var content = "<div data-role='collapsible' data-collapsed-icon='carat-d' data-expanded-icon='carat-u'><h3><span class='ui-body-b'>"+feature.get("numRiddle")+"</span> "+feature.get("name")+"</h3><p>"+feature.get('description')+"</p></div>";
-                $("#infoRiddles").append(content).collapsibleset("refresh");
-                $("#infopanel").panel("open");
+            function addRiddlesToPanel(source) {
+                $("#infoRiddles").not(':first').remove();
+                source.forEachFeature(function (feature) {
+                    if (feature.get('success')) {
+                        var content = "<div data-role='collapsible' data-collapsed-icon='carat-d' data-expanded-icon='carat-u' id='riddle" + feature.getId() + "'><h3><span class='ui-body-b'>" + feature.get("numRiddle") + "</span> " + feature.get("name") + "</h3><p>" + feature.get('description') + "</p></div>";
+                        $("#infoRiddles").append(content);
+                    }
+                });
+                $("#infoRiddles").collapsibleset("refresh");
             }
 
             /*-------------------------------Events-----------------------------------*/
@@ -480,7 +489,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    //addRiddleToPanel(features.selected[0]);
                     setTextRiddle(features.selected[0]);
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
@@ -528,6 +536,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $.mobile.resetActivePageHeight();
                 }
             });
+            $('#popupInfoRiddle').on({
+                popupbeforeposition: function () {
+                    var maxHeight = $(window).height() - 120;
+                    $('#popupInfoRiddle').css('max-height', maxHeight + 'px');
+                }
+            });
             $(document).on("pagecontainershow", function (event, ui) {
                 var pageId = $(":mobile-pagecontainer").pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {
@@ -548,10 +562,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     select.getFeatures().clear();
                 }
             });
-            $('#infoRiddlePanel').panel({beforeclose: function () {
-                    select.getFeatures().clear();
-                }
-            });
+            $('#popupInfoRiddle').on("popupafterclose", function () {
+                select.getFeatures().clear();
+            }
+            );
             $('#sendLocation').on('click', function () {
                 autolocate(false, true);
             });

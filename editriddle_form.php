@@ -73,8 +73,8 @@ class riddle_form extends moodleform {
             $options[$option->id] = $option->name;
         }
         $mform->addElement('header', 'availabilityconditionsheader', get_string('restrictaccess', 'scavengerhunt'));
-        $mform->addElement('select', 'completeactivitybefore', get_string('completeactivitybefore', 'scavengerhunt'), $options);
-        $mform->addHelpButton('completeactivitybefore', 'completeactivitybefore', 'scavengerhunt');
+        $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'scavengerhunt'), $options);
+        $mform->addHelpButton('activitytoend', 'activitytoend', 'scavengerhunt');
 
         // Añado los campos ocultos id y newFeature.
         $mform->addElement('hidden', 'cmid');
