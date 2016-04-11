@@ -38,7 +38,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_scavengerhunt_upgrade($oldversion) {
-    global $DB;
+    global $DB,$CFG;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
@@ -68,12 +68,17 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
      *
      * First example, some fields were added to install.xml on 2007/04/01
      */
+    if ($oldversion < 20160411020) {
+        // Define field activitytoend to be added to scavengerhunt riddles.
+        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddles CHANGE question_id activitytoend BIGINT(10) DEFAULT "0"');
+        upgrade_mod_savepoint(true, 20160411020, 'scavengerhunt');
+    }
     if ($oldversion < 20150923389) {
-        // Define field intro to be added to scavengerhunt.
+        // Define field groupmode to be added to scavengerhunt.
         $table = new xmldb_table('scavengerhunt');
         $field = new xmldb_field('groupmode', XMLDB_TYPE_INTEGER, '2', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, '0', 'playwithoutmove');
 
-        // Add field intro.
+        // Add field.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }

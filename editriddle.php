@@ -37,7 +37,7 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust FROM mdl_scavengerhunt_riddles  WHERE id=?';
+        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,activitytoend FROM mdl_scavengerhunt_riddles  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -46,7 +46,6 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         $entry = new stdClass();
         $entry->id = null;
         $entry->road_id = required_param('road_id', PARAM_INT);
-        $entry->num_riddle = optional_param('num_riddle', -1, PARAM_INT);
     }
     $entry->cmid = $cmid;
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
@@ -73,7 +72,6 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         $entry->description = '';          // updated later
         $entry->descriptionformat = FORMAT_HTML; // updated later
         $entry->descriptiontrust = 0;           // updated later
-        $entry->question_id = null;
         if (empty($entry->id)) {
             $entry->id = insertEntryBD($entry);
             $isnewentry = true;

@@ -42,7 +42,7 @@ class road_form extends moodleform {
      * Defines forms elements
      */
     public function definition() {
-
+        global $CFG;
         $mform = $this->_form;
         $selectoptions = $this->_customdata['selectoptions'];
         $currententry = $this->_customdata['current'];
@@ -52,7 +52,7 @@ class road_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('scavengerhuntname', 'scavengerhunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('roadname', 'scavengerhunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {

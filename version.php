@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_scavengerhunt';
-$plugin->version = 20160408000;
+$plugin->version = 20160411020;
 $plugin->release = 'v0.0';
 $plugin->requires = 2015051100;
 $plugin->maturity = MATURITY_ALPHA;

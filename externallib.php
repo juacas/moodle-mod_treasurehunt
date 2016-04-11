@@ -421,7 +421,7 @@ class mod_scavengerhunt_external_validate_location extends external_api {
      * @return array of newly created groups
      */
     public static function validate_location($idScavengerhunt, $location) { //Don't forget to set it as static
-        GLOBAL $USER;
+        GLOBAL $USER,$COURSE;
         self::validate_parameters(self::validate_location_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'location' => $location));
 
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
@@ -429,13 +429,9 @@ class mod_scavengerhunt_external_validate_location extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
         $params = getUserGroupAndRoad($USER->id, $idScavengerhunt, $cm, $cm->modinfo->course->id);
-        if (checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode)) {
-            $status['code'] = 0;
-            $status['msg'] = '¡¡¡Enhorabuena, a por la siguiente pista!!!';
-        } else {
-            $status['code'] = 0;
-            $status['msg'] = 'No es el lugar correcto';
-        }
+        $status['msg'] = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode,$COURSE);
+        $status['code'] = 0;
+        
         $result = array();
         $result['status'] = $status;
         return $result;

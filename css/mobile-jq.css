@@ -8,8 +8,9 @@ body {
 #content {
     padding: 0;
 }
+
 #mappage{
-    overflow: hidden;
+    //overflow: hidden;
 }
 
 h1, h2, h3, h4, h5, h6{
@@ -47,13 +48,19 @@ h1, h2, h3, h4, h5, h6{
 } 
 .ui-panel-inner {
     padding-top:48px;
-} 
-[data-role="popup"] .ui-title{
-    margin: 0 10%;
 }
-#popupInfoRiddle {
+.ui-popup {
+    max-width: 400px;
+}
+
+.ui-popup-container{
     overflow-y:auto;
+    overflow-x:hidden;
 }
+[data-role="popup"] .ui-title{
+    margin: 0 80px;
+}
+
 
 #title, #tags, #shortdesc {
     display: none;

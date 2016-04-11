@@ -73,19 +73,17 @@ function insertEntryBD(stdClass $entry) {
     $description = $entry->description;
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
-    $question_id = $entry->question_id;
-    if (isset($entry->num_riddle) && $entry->num_riddle > 0) {
-        $num_riddle = $entry->num_riddle;
-    } else {
-        $num_riddle = $DB->get_record_sql('SELECT count(id) + 1 as num_riddle FROM mdl_scavengerhunt_riddles where road_id = (?)', array($road_id));
-        $num_riddle = $num_riddle->num_riddle;
-    }
+    $activitytoend = $entry->activitytoend;
+
+    $num_riddle_result = $DB->get_record_sql('SELECT count(id) + 1 as num_riddle FROM mdl_scavengerhunt_riddles where road_id = (?)', array($road_id));
+    $num_riddle = $num_riddle_result->num_riddle;
+
     $sql = 'INSERT INTO mdl_scavengerhunt_riddles (name, road_id, num_riddle, description, descriptionformat, descriptiontrust, '
-            . 'timecreated, question_id) VALUES ((?),(?),(?),(?),(?),(?),(?),(?))';
+            . 'timecreated, activitytoend) VALUES ((?),(?),(?),(?),(?),(?),(?),(?))';
     $params = array($name, $road_id, $num_riddle, $description,
-        $descriptionformat, $descriptiontrust, $timenow, $question_id);
+        $descriptionformat, $descriptiontrust, $timenow, $activitytoend);
     $DB->execute($sql, $params);
-    //Como he insertado una nueva pista sin geometrÃ­as pongo el camino como no valido
+    //Como he insertado una nueva pista sin geometrias pongo el camino como no valido
     setValidRoad($road_id, false);
 //Como no tengo nada para saber el id, tengo que hacer otra consulta
     $sql = 'SELECT id FROM mdl_scavengerhunt_riddles  WHERE name= ? AND road_id = ? AND num_riddle = ? AND description = ? AND '
@@ -105,10 +103,10 @@ function updateEntryBD(stdClass $entry) {
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
     $timemodified = time();
-    $question_id = $entry->question_id;
+    $activitytoend = $entry->activitytoend;
     $idRiddle = $entry->id;
-    $sql = 'UPDATE mdl_scavengerhunt_riddles SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),question_id=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
-    $parms = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $question_id, $idRiddle);
+    $sql = 'UPDATE mdl_scavengerhunt_riddles SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),activitytoend=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
+    $parms = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $activitytoend, $idRiddle);
     $DB->execute($sql, $parms);
 }
 
@@ -120,24 +118,26 @@ function updateRiddleBD(Feature $feature) {
     $timemodified = time();
     $idRiddle = $feature->getId();
     $geomfuncs = getgeometryfunctions($DB);
-    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = '.$geomfuncs['ST_GeomFromText'].'((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
+    $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = ' . $geomfuncs['ST_GeomFromText'] . '((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
     $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
     $DB->execute($sql, $parms);
     setValidRoad($road_id);
 }
-function getgeometryfunctions(moodle_database $DB){
-    $info=$DB->get_server_info();
-    $dbtype=$DB->get_dbfamily();
-    $functions=array();
-    if ($dbtype==='mysql' && version_compare($info['version'], '5.6.1')<0){
-        $functions['ST_GeomFromText']='GeomFromText';
-        $functions['ST_Intersects']='Intersects';
-    }else{ // OGC Simple SQL for Features.
-        $functions['ST_GeomFromText']='ST_GeomFromText';
-        $functions['ST_Intersects']='ST_Intersects';
+
+function getgeometryfunctions(moodle_database $DB) {
+    $info = $DB->get_server_info();
+    $dbtype = $DB->get_dbfamily();
+    $functions = array();
+    if ($dbtype === 'mysql' && version_compare($info['version'], '5.6.1') < 0) {
+        $functions['ST_GeomFromText'] = 'GeomFromText';
+        $functions['ST_Intersects'] = 'Intersects';
+    } else { // OGC Simple SQL for Features.
+        $functions['ST_GeomFromText'] = 'ST_GeomFromText';
+        $functions['ST_Intersects'] = 'ST_Intersects';
     }
     return $functions;
 }
+
 function setValidRoad($road_id, $valid = null) {
     GLOBAL $DB;
     $road = new stdClass();
@@ -150,7 +150,7 @@ function setValidRoad($road_id, $valid = null) {
     $DB->update_record("scavengerhunt_roads", $road);
 }
 
-function deleteEntryBD($id,$context) {
+function deleteEntryBD($id, $context) {
     GLOBAL $DB;
     $riddle_sql = 'SELECT num_riddle,road_id FROM {scavengerhunt_riddles} WHERE id = ?';
     $riddle_result = $DB->get_record_sql($riddle_sql, array($id));
@@ -162,7 +162,7 @@ function deleteEntryBD($id,$context) {
     $select = 'riddle_id = ?';
     $DB->delete_records_select($table, $select, $params);
     $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle = num_riddle - 1 WHERE road_id = (?) AND num_riddle > (?)';
-    $parms = array($riddle_result->road_id,$riddle_result->num_riddle);
+    $parms = array($riddle_result->road_id, $riddle_result->num_riddle);
     $DB->execute($sql, $parms);
     setValidRoad($riddle_result->road_id);
 }
@@ -227,7 +227,7 @@ function checkLock($idScavengerhunt, $idLock, $userid) {
     }
 }
 
-function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode) {
+function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode, $course) {
     global $DB;
     $location = object_to_wkt($point);
     if ($groupmode) {
@@ -243,26 +243,32 @@ function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode) {
     $nextnumriddle = $currentriddle->num_riddle + 1;
     //Compruebo si la geometria esta dentro
     $geomfuncs = getgeometryfunctions($DB);
-    $query = "SELECT id, {$geomfuncs['ST_Intersects']}(geom,{$geomfuncs['ST_GeomFromText']}((?))) as inside from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
+    $query = "SELECT id, {$geomfuncs['ST_Intersects']}(geom,{$geomfuncs['ST_GeomFromText']}((?))) as inside,activitytoend from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
     $params = array($location, $nextnumriddle, $idRoad);
     $nextriddle = $DB->get_record_sql($query, $params);
     if ($nextriddle->inside) {
-        $isInside = true;
+        $isInside = 1;
         $pointIdRiddle = $nextriddle->id;
+        $msg = get_string('successlocation','scavengerhunt');      
     } else {
-        $isInside = false;
+        $isInside = 0;
         $pointIdRiddle = $currentriddle->id;
+        $msg = get_string('faillocation','scavengerhunt');      
     }
     // Si no es la primera pista fallada, y por lo tanto null.
     if (!is_null($pointIdRiddle)) {
-        
-        $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated, group_id, user_id, success,'
-                . ' locations) VALUES ((?),(?),(?),(?),(?),(?),'.$geomfuncs['ST_GeomFromText'].'((?)))';
-        $params = array($idRoad, $pointIdRiddle, time(),
-            $idgroup, $userid, $isInside, $location);
-        $DB->execute($query, $params);
+        //Si has completado la actividad requerida o has fallado la localizacion.
+        if (check_completion_activity($course, $nextriddle->activitytoend) || !$isInside) {
+            $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated, group_id, user_id, success,'
+                    . ' locations) VALUES ((?),(?),(?),(?),(?),(?),' . $geomfuncs['ST_GeomFromText'] . '((?)))';
+            $params = array($idRoad, $pointIdRiddle, time(),
+                $idgroup, $userid, $isInside, $location);
+            $DB->execute($query, $params);
+        } else {
+            $msg = get_string('lockedriddle','scavengerhunt');   
+        }
     }
-    return $nextriddle->inside;
+    return $msg;
 }
 
 function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
@@ -328,10 +334,17 @@ function isValidRoad($idRoad) {
     return true;
 }
 
-function check_completion_activity($cm){
+function check_completion_activity($course, $cmid) {
+    if ($cmid != 0) {
+        $modinfo = get_fast_modinfo($course);
+        $cmactivitytoend = $modinfo->get_cm($cmid);
+    } else {
+        return true;
+    }
     // Check if a user has complete that activity.
-    $current = $completion_info->get_data($cm);
-    return $completion_info->internal_get_state($cm, null  ,$current); // 0 or 1 , true or false.
+    $completioninfo = new completion_info($course);
+    $current = $completioninfo->get_data($cmactivitytoend);
+    return $completioninfo->internal_get_state($cmactivitytoend, null, $current); // 0 or 1 , true or false.
 }
 
 function getUserGroupAndRoad($userid, $idScavengerhunt, $cm, $courseid) {

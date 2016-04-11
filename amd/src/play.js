@@ -275,8 +275,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $("#descriptionRiddle").html(feature.get('description'));
                     $("#timeLabel").html(date.toLocaleString());
                     /*$("#infoRiddlePanel").trigger("updatelayout");
-                    $("#infoRiddle").show();
-                    $("#infoFailedLocation").hide();*/
+                     $("#infoRiddle").show();
+                     $("#infoFailedLocation").hide();*/
                 } else {
                     $("#nameFailedRiddle").html(feature.get('name'));
                     $("#timeLabelFailed").html(date.toLocaleString());
@@ -489,7 +489,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    setTextRiddle(features.selected[0]);
+                    //setTextRiddle(features.selected[0]);
+                    error_dialog(features.selected[0].get('name'),
+                            features.selected[0].get('description'));
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
                     markerFeature.setGeometry(coordinates ?
@@ -517,7 +519,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                         .hide().append($("<a href='#'>").text(place.totalName)
                                         .append($("<p>").text(place.type))
                                         ).appendTo($ul).click(function () {
-                                    var extent = new Array();
+                                    var extent = [];
                                     extent[0] = parseFloat(place.boundingbox[2]);
                                     extent[1] = parseFloat(place.boundingbox[0]);
                                     extent[2] = parseFloat(place.boundingbox[3]);
@@ -534,12 +536,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     });
                 } else {
                     $.mobile.resetActivePageHeight();
-                }
-            });
-            $('#popupInfoRiddle').on({
-                popupbeforeposition: function () {
-                    var maxHeight = $(window).height() - 120;
-                    $('#popupInfoRiddle').css('max-height', maxHeight + 'px');
                 }
             });
             $(document).on("pagecontainershow", function (event, ui) {
@@ -562,10 +558,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     select.getFeatures().clear();
                 }
             });
-            $('#popupInfoRiddle').on("popupafterclose", function () {
-                select.getFeatures().clear();
-            }
-            );
             $('#sendLocation').on('click', function () {
                 autolocate(false, true);
             });
@@ -591,40 +583,32 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             $(this).remove();
                         });
             }
-            function error_dialog(msg) {
-                var $popUp = $("<div/>").popup({
-                    dismissible: false,
-                    theme: "b",
-                    overlyaTheme: "e",
-                    transition: "pop"
-                }).on("popupafterclose", function () {
-                    window.location.replace("view.php?id=" + idModule);
-                    //remove the popup when closing
-                    $(this).remove();
-                }).css({
-                    'width': '270px',
-                    'height': '200px',
-                    'padding': '5px'
-                });
-                //create a title for the popup
-                $("<h2/>", {
-                    text: "Error"
-                }).appendTo($popUp);
-                //create a message for the popup
-                $("<p/>", {
-                    text: msg
-                }).appendTo($popUp);
-                $("<a>", {
-                    text: "Continue"
-                }).buttonMarkup({
-                    inline: false,
-                    mini: true,
-                    icon: "forward"
-                }).on("click", function () {
-                    $popUp.popup("close");
-                }).appendTo($popUp);
-                $popUp.popup('open').trigger("create");
+            function error_dialog(title, body) {
+                var closebtn = '<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>',
+                        header = '<div data-role="header"><h2>' + title + '</h2>'+closebtn+'</div>',
+                        content = '<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>',
+                        popup = '<div data-role="popup" id="popup-info"' +
+                        'data-theme="b" data-transition="slidedown"></div>';
+                // Create the popup.
+                $(header)
+                        .appendTo($(popup)
+                                .appendTo($.mobile.activePage)
+                                .popup())
+                        .toolbar()
+                        .after(content);
+                $("#popup-info").popup("open");
+
             }
+             // Set a max-height to make large images shrink to fit the screen.
+            $(document).on("popupbeforeposition", ".ui-popup", function () {
+                var maxHeight = $(window).height() - 120 + "px";
+                $("#popup-info").css("max-height", maxHeight);
+            });
+            // Remove the popup after it has been closed to manage DOM size
+            $(document).on("popupafterclose", ".ui-popup", function () {
+                $(this).remove();
+                select.getFeatures().clear();
+            });
         } // End of function playScavengerhunt
     };
     return init;
