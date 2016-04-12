@@ -51,6 +51,7 @@ h1, h2, h3, h4, h5, h6{
 }
 .ui-popup {
     max-width: 400px;
+    min-width: 250px;
 }
 
 .ui-popup-container{
@@ -58,7 +59,7 @@ h1, h2, h3, h4, h5, h6{
     overflow-x:hidden;
 }
 [data-role="popup"] .ui-title{
-    margin: 0 80px;
+    margin: 0 40px;
 }
 
 

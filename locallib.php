@@ -285,7 +285,7 @@ function riddlesDb2Geojson($riddles_result, $context, $idScavengerhunt) {
             'name' => $value->name,
             'idStage' => $idScavengerhunt,
             'description' => $description,
-            'date' => (is_null($value->timecreated)) ? null : intval($value->timecreated),
+            'date' => (is_null($value->timecreated)) ? null : userdate ($value->timecreated),
             'success' => (is_null($value->success)) ? null : intval($value->success));
         $feature = new Feature($value->id ?
                         intval($value->id) : null, $multipolygon, $attr);
@@ -399,4 +399,12 @@ function getUserGroupAndRoad($userid, $idScavengerhunt, $cm, $courseid) {
 
         return $groups[0];
     }
+}
+function get_strings_play (){
+    
+   return get_strings(array("discoveredriddle","failedlocation","riddlename",
+       "riddledescription","timelabelfailed",
+       "timelabelsuccess","searching"),"mod_scavengerhunt");
+  
+        
 }

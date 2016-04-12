@@ -29,7 +29,7 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playScavengerhunt: function (idModule, idScavengerhunt, playwithoutmove) {
+        playScavengerhunt: function (strings, idScavengerhunt, playwithoutmove) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
@@ -372,7 +372,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     }
                 }).fail(function (error) {
                     console.log(error);
-                    error_dialog(error.message);
+                    create_popup('displayerror', 'Error', error.message);
                     clearInterval(interval);
                 });
             }
@@ -489,9 +489,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    //setTextRiddle(features.selected[0]);
-                    error_dialog(features.selected[0].get('name'),
-                            features.selected[0].get('description'));
+                    var title, riddlename = features.selected[0].get('name'),
+                            riddledescription = features.selected[0].get('description'),
+                            date = features.selected[0].get('date'), body;
+                    body = get_block_text(strings["riddlename"], riddlename);
+                    if (features.selected[0].get('success'))
+                    {
+                        title = strings["discoveredriddle"];
+                        body += get_block_text(strings["riddledescription"], riddledescription);
+                        body += '<p>' + strings["timelabelsuccess"] + date + '</p>';
+                    } else {
+                        title = strings["failedlocation"];
+                        body += '<p>' + strings["timelabelfailed"] + date + '</p>';
+                    }
+                    create_popup('inforiddle', title, body);
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
                     markerFeature.setGeometry(coordinates ?
@@ -508,7 +519,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 $ul.html(html);
                 if (value && value.length > 2) {
                     $.mobile.loading("show", {
-                        text: "Buscando",
+                        text: strings['searching'],
                         textVisible: true});
                     openStreetMapGeocoder.geocode(value, function (response) {
                         if (response[0] === false) {
@@ -583,12 +594,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             $(this).remove();
                         });
             }
-            function error_dialog(title, body) {
-                var closebtn = '<a href="#" data-rel="back" class="ui-btn ui-corner-all ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>',
-                        header = '<div data-role="header"><h2>' + title + '</h2>'+closebtn+'</div>',
-                        content = '<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>',
-                        popup = '<div data-role="popup" id="popup-info"' +
-                        'data-theme="b" data-transition="slidedown"></div>';
+            function create_popup(type, title, body) {
+                var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
+                        content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>'),
+                        popup = $('<div data-role="popup" id="'+type+'"' +
+                        'data-theme="b" data-transition="slidedown"></div>');
+
+                if (type === 'inforiddle') {
+                    $('<a href="#" data-rel="back" class="ui-btn ui-corner-all'+ 
+                            'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>').appendTo(header);
+                }
+                if (type === 'displayerror') {
+                    $('<a href="view.php?id="'+idScavengerhunt+' class="ui-btn ui-mini ui-icon-forward ui-btn-icon-left" data-ajax="false"></a>')
+                            .appendTo(content);
+                }
                 // Create the popup.
                 $(header)
                         .appendTo($(popup)
@@ -596,16 +615,22 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 .popup())
                         .toolbar()
                         .after(content);
-                $("#popup-info").popup("open");
+                $("#"+type).popup("open");
 
             }
+            function get_block_text(title, body) {
+                return '<div class="ui-bar ui-bar-a">' + title +
+                        '</div><div class="ui-body ui-body-a">' + body +
+                        '</div>';
+            }
              // Set a max-height to make large images shrink to fit the screen.
-            $(document).on("popupbeforeposition", ".ui-popup", function () {
+            $(document).on("popupbeforeposition", ".ui-popup:not(#popupDialog)", function () {
+                debugger;
                 var maxHeight = $(window).height() - 120 + "px";
-                $("#popup-info").css("max-height", maxHeight);
+                $(this).css("max-height", maxHeight);
             });
             // Remove the popup after it has been closed to manage DOM size
-            $(document).on("popupafterclose", ".ui-popup", function () {
+            $(document).on("popupafterclose", ".ui-popup:not(#popupDialog)", function () {
                 $(this).remove();
                 select.getFeatures().clear();
             });

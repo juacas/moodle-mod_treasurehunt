@@ -38,7 +38,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_scavengerhunt_upgrade($oldversion) {
-    global $DB,$CFG;
+    global $DB, $CFG;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
 
@@ -68,6 +68,14 @@ function xmldb_scavengerhunt_upgrade($oldversion) {
      *
      * First example, some fields were added to install.xml on 2007/04/01
      */
+    if ($oldversion < 20160412000) {
+        // Drop field accum_time if exist.
+        $result = $DB->get_records_sql('SHOW COLUMNS FROM ' . $CFG->prefix . 'scavengerhunt_attempts LIKE ?',array("accum_time"));
+        if ($result) {
+            $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_attempts DROP accum_time');
+        }
+        upgrade_mod_savepoint(true, 20160412000, 'scavengerhunt');
+    }
     if ($oldversion < 20160411020) {
         // Define field activitytoend to be added to scavengerhunt riddles.
         $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddles CHANGE question_id activitytoend BIGINT(10) DEFAULT "0"');
