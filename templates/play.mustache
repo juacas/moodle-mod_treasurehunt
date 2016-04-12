@@ -80,51 +80,7 @@
 
         </div>
 
-        {{!Panel de informacion de la pista seleccionada}}
-
-        <div data-role="panel"  data-position="left" data-position-fixed="true" data-display="overlay" id="infoFailedLocation">
-            <div data-role="header" data-position="fixed" data-tap-toggle="false">
-                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-                <h1>{{#str}} failed_location, mod_scavengerhunt{{/str}}</h1>
-            </div>
-            <div id="infoRiddlea">
-                <h3>
-                    <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-btn-icon-left  ui-nodisc-icon ui-btn ui-icon-carat-l  ui-corner-all ui-btn-icon-notext"></a>
-                    {{#str}} discovered_riddle, mod_scavengerhunt{{/str}}
-                </h3>
-                <div class="ui-corner-all custom-corners">
-                    <div class="ui-bar ui-bar-b">
-                        {{#str}} nameRiddle, mod_scavengerhunt{{/str}}
-                    </div>
-                    <div class="ui-body ui-overlay-a">
-                        <p id="nameRiddle">{{riddle.name}}</p>
-                    </div>
-                </div>
-                <div class="ui-corner-all custom-corners">
-                    <div class="ui-bar ui-bar-b">
-                        {{#str}} descriptionRiddle, mod_scavengerhunt{{/str}}
-                    </div>
-                    <div class="ui-body ui-overlay-a">
-                        <p id="descriptionRiddle">{{riddle.description}}</p>
-                    </div>
-                </div>
-                {{#str}} timeLabel, mod_scavengerhunt{{/str}}
-                <p id="timeLabel"></p>
-            </div>
-            <div id="infoFailedLocations">
-
-                <div class="ui-corner-all custom-corners">
-                    <div class="ui-bar ui-bar-b">
-                        <h3>{{#str}} nameRiddle, mod_scavengerhunt{{/str}}</h3>
-                    </div>
-                    <div class="ui-body ui-overlay-a">
-                        <p id="nameFailedRiddle">{{name}}</p>
-                    </div>
-                </div>
-                {{#str}} timeLabelFailed, mod_scavengerhunt{{/str}}
-                <p id="timeLabelFailed"></p>
-            </div>		
-        </div>
+        
 
 
         {{!Popup de aviso de envio}}
@@ -142,26 +98,7 @@
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
 
-        {{!Popup de informacion de pista}}
-
-        <div data-role="popup" id="popupInfoRiddle" data-theme="b" data-overlay-theme="b" data-dismissible="false">
-            <div data-role="header" data-theme="b">
-                <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>
-                <h1 class="ui-title">{{#str}} discovered_riddle, mod_scavengerhunt{{/str}}</h1>
-            </div>
-
-            <div id="infoRiddle">
-                <div class="ui-grid-a">
-                    <div class="ui-block-a"><div class="ui-bar ui-bar-b" style="height:60px">{{#str}} nameRiddle, mod_scavengerhunt{{/str}}</div></div>
-                    <div class="ui-block-b"><div class="ui-bar ui-bar-a" style="height:60px" id="nameRiddle">Block B</div></div>
-                    <div class="ui-block-a"><div class="ui-bar ui-bar-a" style="height:60px">{{#str}} descriptionRiddle, mod_scavengerhunt{{/str}}</div></div>
-                    <div class="ui-block-b"><div class="ui-bar ui-bar-a" style="height:60px" id="descriptionRiddle">Block B</div></div>
-                    <div class="ui-block-a"><div class="ui-bar ui-bar-a" style="height:60px">{{#str}} timeLabel, mod_scavengerhunt{{/str}}</div></div>
-                    <div class="ui-block-b"><div class="ui-bar ui-bar-a" style="height:60px" id="timeLabel">Block B</div></div>
-                </div>
-            </div>
-
-        </div>{{!Fin de Popup de informacion de pista.}}
+      
         {{!Cabecera y barra de herramientas.}}
 
         <div data-role="header" data-position="fixed" data-tap-toggle="false">

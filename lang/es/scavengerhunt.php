@@ -84,10 +84,10 @@ $string['send'] = 'Enviar';
 $string['exit'] = 'Salir';
 $string['back'] = 'Atrás';
 $string['layers'] = 'Layers';
-$string['discovered_riddle'] = 'Pista descubierta';
-$string['failed_location'] = 'Localización fallada';
-$string['nameRiddle'] = 'Nombre de la pista';
-$string['descriptionRiddle'] = 'Descripción de la pista';
+$string['searching'] = 'Buscando';
+$string['discoveredriddle'] = 'Pista descubierta';
+$string['failedlocation'] = 'Localización fallada';
+$string['riddledescription'] = 'Descripción de la pista';
 $string['info_validate_location'] = 'Validar ubicación para esta pista';
 $string['button_validate_location'] = 'Validar ubicación';
 $string['search'] = 'Buscar';
@@ -106,8 +106,8 @@ $string['noteamplay'] = 'No es miembro de ningún grupo, por lo que no puede rea
 $string['multipleteams'] = 'Es miembro de más de un grupo';
 $string['invalidroad'] = 'El camino asignado no está validado';
 $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
-$string['timeLabelFailed'] = 'Ubicación enviada en la fecha: ';
-$string['timeLabel'] = 'Pista descubierta en la fecha: ';
+$string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
+$string['timelabelsuccess'] = 'Pista descubierta en la fecha: ';
 
 
 
