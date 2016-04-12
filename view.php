@@ -62,6 +62,14 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 //$PAGE->set_pagelayout('embedded');
 
+// Load timeplot libraries.
+$requ = $PAGE->requires;
+$requ->js('/mod/scavengerhunt/js/init_timeplot.js', true);
+$requ->js('/mod/scavengerhunt/js/timeplot/timeplot-api.js?bundle=true', true);
+$requ->js_init_call("init_timeplot", [$cm->id, null], true);
+$requ->css('/mod/scavengerhunt/styles.css');
+
+
 /*
  * Other things you may want to set - remove if not needed.
  * $PAGE->set_cacheable(false);
@@ -80,6 +88,9 @@ echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id),
 //$usersummary = new scavengerhunt_grading_summary();
 //echo $output->render($usersummary);
 
+// Place for the timeplot
+echo '<table><tr><td width="70%"><div id="treasure-timeplot" style="height: 150px;"></div></td><td width="30%">Leyenda:<li>juan<div style="float: left;width: 20px;height: 20px;background: #ff0000;"></div></li><li>Pepe<div style="float: left;width: 20px;height: 20px;background: #00ff00;"></div></li><li>Adrián<div style="float: left;width: 20px;height: 20px;background: #D0A825;"></div></li><li>Otro<div style="float: left;width: 20px;height: 20px;background: #0000ff;"></div></li></td></tr></table>';
+        
 if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
         has_capability('mod/scavengerhunt:managescavenger', $context)) {
     
