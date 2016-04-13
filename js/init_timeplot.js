@@ -1,6 +1,6 @@
 //SimileAjax_urlPrefix = document.URL.substr(0, document.URL.lastIndexOf('/')) + '/js/simile-ajax/';
-//Timeline_urlPrefix = document.URL.substr(0, document.URL.lastIndexOf('/')) + '/js/timeline/';
-//Timeline_ajax_url = document.URL.substr(0, document.URL.lastIndexOf('/')) + "/js/simile-ajax/simile-ajax-api.js"
+Timeplot_urlPrefix = document.URL.substr(0, document.URL.lastIndexOf('/')) + '/js/timeplot/';
+Timeplot_ajax_url = document.URL.substr(0, document.URL.lastIndexOf('/')) + "/js/simile-ajax/simile-ajax-api.js"
 function init_timeplot(Y, tcountid, user) {
     if ("Timeline" in window) {
         deferred_init_timeplot(Y, tcountid, user);
