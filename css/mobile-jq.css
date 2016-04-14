@@ -9,18 +9,12 @@ body {
     padding: 0;
 }
 
-#mappage{
-    //overflow: hidden;
-}
 
 h1, h2, h3, h4, h5, h6{
     line-height:inherit;
 }
 #autocomplete a,[data-role="popup"] .ui-title{
     white-space:normal;
-}
-.ui-footer {
-    text-align: center;
 }
 .portrait, .portrait #mappage {
     min-height: 0;
@@ -60,6 +54,9 @@ h1, h2, h3, h4, h5, h6{
 }
 [data-role="popup"] .ui-title{
     margin: 0 40px;
+}
+.center-wrapper,.ui-footer{
+  text-align: center;
 }
 
 

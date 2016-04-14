@@ -29,7 +29,7 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playScavengerhunt: function (strings, idScavengerhunt, playwithoutmove) {
+        playScavengerhunt: function (strings,cmid,idScavengerhunt, playwithoutmove) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
@@ -133,7 +133,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             var vector = new ol.layer.Vector({
                 source: source,
-                style: styleFunction
+                style: style_function
                         /*updateWhileAnimating: true,
                          updateWhileInteracting: true*/
             });
@@ -203,11 +203,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             map.addInteraction(select);
             //Si quiero que se actualicen cada 20 seg
-            renewSource();
+            renew_source();
             var interval = setInterval(function () {
-                renewSource();
+                renew_source();
             }, 20000);
-            function styleFunction(feature, resolution) {
+            function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
                 var numRiddle = feature.get('numRiddle');
                 if (numRiddle === 0) {
@@ -227,7 +227,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         fill: fill,
                         stroke: stroke,
                         text: new ol.style.Text({
-                            text: 'Solo puedes empezar desde aqui',
+                            text: strings["startfromhere"],
                             textAlign: 'center'
                         })
                     });
@@ -257,38 +257,18 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 validate = validate || false;
                 if (playwithoutmove && validate) {
                     if (markerFeature.getGeometry() !== null) {
-                        validateLocation();
+                        validate_location();
                     } else {
                         toast('Marca primero en el mapa el punto deseado');
                     }
                 } else {
                     $.mobile.loading("show");
-                    geolocation.setProperties({center: center, validateLocation: validate});
+                    geolocation.setProperties({center: center, validate_location: validate});
                     geolocation.setTracking(true);
                 }
             }
-            function setTextRiddle(feature) {
-                var date = new Date(feature.get('date') * 1000);
-                if (feature.get('success'))
-                {
-                    $("#nameRiddle").html(feature.get('name'));
-                    $("#descriptionRiddle").html(feature.get('description'));
-                    $("#timeLabel").html(date.toLocaleString());
-                    /*$("#infoRiddlePanel").trigger("updatelayout");
-                     $("#infoRiddle").show();
-                     $("#infoFailedLocation").hide();*/
-                } else {
-                    $("#nameFailedRiddle").html(feature.get('name'));
-                    $("#timeLabelFailed").html(date.toLocaleString());
-                    //$("#infoRiddlePanel").trigger("updatelayout");
-                    $("#infoFailedLocation").show();
-                    $("#infoRiddle").hide();
-                }
-                $("#infoRiddle").trigger("updatelayout");
-                $("#popupInfoRiddle").popup("open");
-            }
 
-            function flyToPoint(map, point) {
+            function fly_to_point(map, point) {
                 var duration = 500;
                 var view = map.getView();
                 var pan = ol.animation.pan({
@@ -304,7 +284,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 view.setCenter(point);
                 view.setResolution(2.388657133911758);
             }
-            function flyTo(map, extent) {
+            function fly_to_extent(map, extent) {
                 var duration = 500;
                 var view = map.getView();
                 var size = map.getSize();
@@ -321,7 +301,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 view.fit(extent, size);
             }
 
-            function validateLocation() {
+            function validate_location() {
                 var coordinates;
                 if (playwithoutmove) {
                     coordinates = markerFeature.getGeometry();
@@ -341,7 +321,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         }
                     }]);
                 geojson[0].done(function (response) {
-                    renewSource();
+                    renew_source();
                     $.mobile.loading("hide");
                     toast(response.status.msg);
                 }).fail(function (error) {
@@ -350,7 +330,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     toast(error.message);
                 });
             }
-            function renewSource() {
+            function renew_source() {
                 var geojson = ajax.call([{
                         methodname: 'mod_scavengerhunt_user_progress',
                         args: {
@@ -368,7 +348,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
-                        addRiddlesToPanel(source);
+                        fly_to_extent(map, source.getExtent());
+                        //add_msg_to_info_panel(source);
                     }
                 }).fail(function (error) {
                     console.log(error);
@@ -385,7 +366,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         .appendTo('#layerslist');
                 var baseLayers = map.getLayersBy("isBaseLayer", true);
                 $.each(baseLayers, function () {
-                    addLayerToList(this);
+                    add_layer_to_list(this);
                 });
                 $('<li>', {
                     "data-role": "list-divider",
@@ -401,7 +382,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             break;
                         default:
                             if (this.name.indexOf('OpenLayers_Control') == -1) {
-                                addLayerToList(this);
+                                add_layer_to_list(this);
                             }
                     }
                 });
@@ -413,14 +394,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             break;
                         default:
                             if (e.layer.name.indexOf('OpenLayers_Control') == -1) {
-                                addLayerToList(e.layer);
+                                add_layer_to_list(e.layer);
                             }
                     }
                     $("#layerslist").listview("refresh");
                 });
             }
 
-            function addLayerToList(layer) {
+            function add_layer_to_list(layer) {
                 var item = $('<li>', {
                     "data-icon": "check",
                     "class": layer.getVisible() ? "checked" : "unchecked"
@@ -454,27 +435,18 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     item.insertAfter('#overlayLayer');
                 }
             }
-            function addRiddlesToPanel(source) {
-                $("#infoRiddles").not(':first').remove();
-                source.forEachFeature(function (feature) {
-                    if (feature.get('success')) {
-                        var content = "<div data-role='collapsible' data-collapsed-icon='carat-d' data-expanded-icon='carat-u' id='riddle" + feature.getId() + "'><h3><span class='ui-body-b'>" + feature.get("numRiddle") + "</span> " + feature.get("name") + "</h3><p>" + feature.get('description') + "</p></div>";
-                        $("#infoRiddles").append(content);
-                    }
-                });
-                $("#infoRiddles").collapsibleset("refresh");
-            }
+            
 
             /*-------------------------------Events-----------------------------------*/
             geolocation.on('change:position', function () {
                 var coordinates = this.getPosition();
                 if (this.get("center")) {
-                    flyToPoint(map, coordinates);
+                    fly_to_point(map, coordinates);
                 }
                 positionFeature.setGeometry(coordinates ?
                         new ol.geom.Point(coordinates) : null);
-                if (this.get("validateLocation")) {
-                    validateLocation();
+                if (this.get("validate_location")) {
+                    validate_location();
                 }
             });
             geolocation.on('change:accuracyGeometry', function () {
@@ -510,7 +482,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 }
             });
             map.getLayers().forEach(function (layer, i) {
-                addLayerToList(layer);
+                add_layer_to_list(layer);
             });
             $("#autocomplete").on("filterablebeforefilter", function (e, data) {
                 var $ul = $(this),
@@ -523,7 +495,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         textVisible: true});
                     openStreetMapGeocoder.geocode(value, function (response) {
                         if (response[0] === false) {
-                            $ul.html("<li data-filtertext='" + value + "'>No hay resultados</li>");
+                            $ul.html("<li data-filtertext='" + value + "'>"+strings["noresults"]+"</li>");
                         } else {
                             $.each(response, function (i, place) {
                                 $("<li data-filtertext='" + value + "'>")
@@ -536,7 +508,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                     extent[2] = parseFloat(place.boundingbox[3]);
                                     extent[3] = parseFloat(place.boundingbox[1]);
                                     extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
-                                    flyTo(map, extent);
+                                    fly_to_extent(map, extent);
                                     $('#searchpanel').panel("close");
                                 }).show();
                             });
@@ -549,11 +521,22 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $.mobile.resetActivePageHeight();
                 }
             });
-            $(document).on("pagecontainershow", function (event, ui) {
-                var pageId = $(":mobile-pagecontainer").pagecontainer('getActivePage').prop("id");
+              // Set a max-height to make large images shrink to fit the screen.
+            $(document).on("popupbeforeposition", ".ui-popup:not(#popupDialog)", function () {
+                var maxHeight = $(window).height() - 120 + "px";
+                $(this).css("max-height", maxHeight);
+            });
+            // Remove the popup after it has been closed to manage DOM size
+            $(document).on("popupafterclose", ".ui-popup:not(#popupDialog)", function () {
+                $(this).remove();
+                select.getFeatures().clear();
+            });
+            // Redraw map
+            $(window).on("pagecontainershow resize", function (event, ui) {
+                var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {
                     if (map instanceof ol.Map) {
-                        map.updateSize();
+                        setTimeout( function() { map.updateSize();}, 200);
                     } else {
                         // initialize map
                         debugger;
@@ -605,8 +588,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>').appendTo(header);
                 }
                 if (type === 'displayerror') {
-                    $('<a href="view.php?id="'+idScavengerhunt+' class="ui-btn ui-mini ui-icon-forward ui-btn-icon-left" data-ajax="false"></a>')
+                    $('<p class="center-wrapper"><a href="view.php?id='+cmid+
+                            '" class="ui-btn  center-button ui-mini ui-icon-forward ui-btn-inline ui-btn-icon-left"'
+                            + 'data-ajax="false">'+strings["continue"]+'</a></p>')
                             .appendTo(content);
+                    var attributes = {'data-dismissible':false,'data-overlay-theme':"b"};
+                    $(popup).attr(attributes);
                 }
                 // Create the popup.
                 $(header)
@@ -623,17 +610,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         '</div><div class="ui-body ui-body-a">' + body +
                         '</div>';
             }
-             // Set a max-height to make large images shrink to fit the screen.
-            $(document).on("popupbeforeposition", ".ui-popup:not(#popupDialog)", function () {
-                debugger;
-                var maxHeight = $(window).height() - 120 + "px";
-                $(this).css("max-height", maxHeight);
-            });
-            // Remove the popup after it has been closed to manage DOM size
-            $(document).on("popupafterclose", ".ui-popup:not(#popupDialog)", function () {
-                $(this).remove();
-                select.getFeatures().clear();
-            });
         } // End of function playScavengerhunt
     };
     return init;

@@ -61,7 +61,7 @@ $PAGE->set_heading(format_string($course->fullname));
 
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->instance, intval($scavengerhunt->playwithoutmove)));
+$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->id, $cm->instance, intval($scavengerhunt->playwithoutmove)));
 //$PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/mobile-jq.css');
