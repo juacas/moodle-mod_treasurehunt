@@ -29,12 +29,12 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playScavengerhunt: function (strings,cmid,idScavengerhunt, playwithoutmove) {
+        playScavengerhunt: function (strings, cmid, idScavengerhunt, playwithoutmove, lasttimestamp) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
             var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-            var previousJson;
+            var timestamp = lasttimestamp;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -203,9 +203,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             map.addInteraction(select);
             //Si quiero que se actualicen cada 20 seg
-            renew_source();
+            renew_source(false, true);
             var interval = setInterval(function () {
-                renew_source();
+                renew_source(false, false);
             }, 20000);
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
@@ -257,7 +257,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 validate = validate || false;
                 if (playwithoutmove && validate) {
                     if (markerFeature.getGeometry() !== null) {
-                        validate_location();
+                        renew_source(true, false);
                     } else {
                         toast('Marca primero en el mapa el punto deseado');
                     }
@@ -300,55 +300,53 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 map.beforeRender(pan, zoom);
                 view.fit(extent, size);
             }
-
-            function validate_location() {
-                var coordinates;
-                if (playwithoutmove) {
-                    coordinates = markerFeature.getGeometry();
-                } else {
-                    coordinates = positionFeature.getGeometry();
+            function renew_source(location, initialize) {
+                var position;
+                if (location) {
+                    var coordinates;
+                    if (playwithoutmove) {
+                        coordinates = markerFeature.getGeometry();
+                    } else {
+                        coordinates = positionFeature.getGeometry();
+                    }
+                    position = geoJSONFormat.writeGeometry(coordinates, {
+                        dataProjection: 'EPSG:4326',
+                        featureProjection: 'EPSG:3857'
+                    });
+                    $.mobile.loading("show");
                 }
-                var position = geoJSONFormat.writeGeometry(coordinates, {
-                    dataProjection: 'EPSG:4326',
-                    featureProjection: 'EPSG:3857'
-                });
-                $.mobile.loading("show");
-                var geojson = ajax.call([{
-                        methodname: 'mod_scavengerhunt_validate_location',
-                        args: {
-                            idScavengerhunt: idScavengerhunt,
-                            location: position
-                        }
-                    }]);
-                geojson[0].done(function (response) {
-                    renew_source();
-                    $.mobile.loading("hide");
-                    toast(response.status.msg);
-                }).fail(function (error) {
-                    $.mobile.loading("hide");
-                    console.log(error);
-                    toast(error.message);
-                });
-            }
-            function renew_source() {
                 var geojson = ajax.call([{
                         methodname: 'mod_scavengerhunt_user_progress',
                         args: {
                             idScavengerhunt: idScavengerhunt,
+                            timestamp: timestamp,
+                            initialize: initialize,
+                            location: position
                         }
                     }]);
                 geojson[0].done(function (response) {
                     console.log('json: ' + response.riddles);
-                    if (response.status.code) {
-                        toast(response.status.msg);
-                    } else if (previousJson !== response.riddles) {
-                        previousJson = response.riddles;
+                    if (timestamp !== response.timestamp || initialize) {
+                        timestamp = response.timestamp;
                         source.clear();
                         source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
+                        if (response.infomsg.length > 0) {
+                            debugger;
+                            var body='';
+                            response.infomsg.forEach(function(msg){
+                                body += '<p>'+msg+'</p>';
+                            });
+                            create_popup('displayupdates', 'Actualizaciones',body);
+                        }
                         fly_to_extent(map, source.getExtent());
+                        if (location) {
+                            $.mobile.loading("hide");
+                            toast(response.status.msg);
+                        }
+
                         //add_msg_to_info_panel(source);
                     }
                 }).fail(function (error) {
@@ -435,7 +433,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     item.insertAfter('#overlayLayer');
                 }
             }
-            
+
 
             /*-------------------------------Events-----------------------------------*/
             geolocation.on('change:position', function () {
@@ -446,7 +444,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 positionFeature.setGeometry(coordinates ?
                         new ol.geom.Point(coordinates) : null);
                 if (this.get("validate_location")) {
-                    validate_location();
+                    renew_source(true, false);
                 }
             });
             geolocation.on('change:accuracyGeometry', function () {
@@ -495,7 +493,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         textVisible: true});
                     openStreetMapGeocoder.geocode(value, function (response) {
                         if (response[0] === false) {
-                            $ul.html("<li data-filtertext='" + value + "'>"+strings["noresults"]+"</li>");
+                            $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
                         } else {
                             $.each(response, function (i, place) {
                                 $("<li data-filtertext='" + value + "'>")
@@ -521,7 +519,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $.mobile.resetActivePageHeight();
                 }
             });
-              // Set a max-height to make large images shrink to fit the screen.
+             // Set a max-height to make large images shrink to fit the screen.
             $(document).on("popupbeforeposition", ".ui-popup:not(#popupDialog)", function () {
                 var maxHeight = $(window).height() - 120 + "px";
                 $(this).css("max-height", maxHeight);
@@ -536,7 +534,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {
                     if (map instanceof ol.Map) {
-                        setTimeout( function() { map.updateSize();}, 200);
+                        setTimeout(function () {
+                            map.updateSize();
+                        }, 200);
                     } else {
                         // initialize map
                         debugger;
@@ -580,19 +580,27 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             function create_popup(type, title, body) {
                 var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
                         content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>'),
-                        popup = $('<div data-role="popup" id="'+type+'"' +
-                        'data-theme="b" data-transition="slidedown"></div>');
+                        popup = $('<div data-role="popup" id="' + type + '"' +
+                                'data-theme="b" data-transition="slidedown"></div>');
 
                 if (type === 'inforiddle') {
-                    $('<a href="#" data-rel="back" class="ui-btn ui-corner-all'+ 
+                    $('<a href="#" data-rel="back" class="ui-btn ui-corner-all' +
                             'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>').appendTo(header);
                 }
-                if (type === 'displayerror') {
-                    $('<p class="center-wrapper"><a href="view.php?id='+cmid+
-                            '" class="ui-btn  center-button ui-mini ui-icon-forward ui-btn-inline ui-btn-icon-left"'
-                            + 'data-ajax="false">'+strings["continue"]+'</a></p>')
+                if (type === 'displayupdates') {
+                    $('<p class="center-wrapper"><a href="#" data-rel="back"'
+                    +'class="ui-btn center-button ui-mini ui-btn-inline">'
+                            + strings["continue"] + '</a></p>')
                             .appendTo(content);
-                    var attributes = {'data-dismissible':false,'data-overlay-theme':"b"};
+                    var attributes = {'data-dismissible': false, 'data-overlay-theme': "b"};
+                    $(popup).attr(attributes);
+                }
+                if (type === 'displayerror') {
+                    $('<p class="center-wrapper"><a href="view.php?id=' + cmid +
+                            '" class="ui-btn  center-button ui-mini ui-icon-forward ui-btn-inline ui-btn-icon-left"'
+                            + 'data-ajax="false">' + strings["continue"] + '</a></p>')
+                            .appendTo(content);
+                    var attributes = {'data-dismissible': false, 'data-overlay-theme': "b"};
                     $(popup).attr(attributes);
                 }
                 // Create the popup.
@@ -602,7 +610,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 .popup())
                         .toolbar()
                         .after(content);
-                $("#"+type).popup("open");
+                $("#" + type).popup("open");
 
             }
             function get_block_text(title, body) {

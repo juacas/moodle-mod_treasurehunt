@@ -379,66 +379,6 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
 
 }
 
-class mod_scavengerhunt_external_validate_location extends external_api {
-
-    /**
-     * Can this function be called directly from ajax?
-     *
-     * @return boolean
-     * @since Moodle 2.9
-     */
-    public static function validate_location_is_allowed_from_ajax() {
-        return true;
-    }
-
-    /**
-     * Returns description of method parameters
-     * @return external_function_parameters
-     */
-    public static function validate_location_parameters() {
-        return new external_function_parameters(
-                array(
-            'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'location' => new external_value(PARAM_RAW, "GeoJSON with point's location")
-                )
-        );
-    }
-
-    public static function validate_location_returns() {
-        return new external_single_structure(
-                array(
-            'status' => new external_single_structure(
-                    array(
-                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code')))
-                )
-        );
-    }
-
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function validate_location($idScavengerhunt, $location) { //Don't forget to set it as static
-        GLOBAL $USER,$COURSE;
-        self::validate_parameters(self::validate_location_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'location' => $location));
-
-        $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
-        $context = context_module::instance($cm->id);
-        self::validate_context($context);
-        require_capability('mod/scavengerhunt:play', $context);
-        $params = getUserGroupAndRoad($USER->id, $idScavengerhunt, $cm, $cm->modinfo->course->id);
-        $status['msg'] = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode,$COURSE);
-        $status['code'] = 0;
-        
-        $result = array();
-        $result['status'] = $status;
-        return $result;
-    }
-
-}
-
 class mod_scavengerhunt_external_user_progress extends external_api {
 
     /**
@@ -459,7 +399,9 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-                )
+            'timestamp' => new external_value(PARAM_INT, 'last timestamp since user progress is not updated'),
+            'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing'),
+            'location' => new external_value(PARAM_RAW, "GeoJSON with point's location", VALUE_OPTIONAL))
         );
     }
 
@@ -467,6 +409,8 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         return new external_single_structure(
                 array(
             'riddles' => new external_value(PARAM_RAW, 'geojson with all riddles of the user/group'),
+            'timestamp' => new external_value(PARAM_INT, 'last updated timestamp'),
+            'infomsg' => new external_value(PARAM_RAW, 'array with all strings with attempts since the last stored timestamp'),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -480,20 +424,33 @@ class mod_scavengerhunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($idScavengerhunt) { //Don't forget to set it as static
+    public static function user_progress($idScavengerhunt, $timestamp,$initialize, $location) { //Don't forget to set it as static
         global $USER, $COURSE;
-        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt));
+        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'location' => $location,'initialize' => $initialize,'timestamp' => $timestamp));
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
-        $params = getUserGroupAndRoad($USER->id, $idScavengerhunt, $cm, $COURSE->id);
-        $user_riddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
-        $status['code'] = 0;
-        $status['msg'] = 'El progreso de usuario se ha cargado con éxito';
+        $params = get_user_group_and_road($USER->id, $idScavengerhunt, $cm, $COURSE->id);
+        $checkupdates = check_timestamp($timestamp, $params->groupmode, $params->group_id, $USER->id, $params->idroad);
+        $newtimestamp = $checkupdates->timestamp;
+        if (!$checkupdates->success && isset($location)) {
+            $newattempt = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode, $COURSE);
+            $newtimestamp = $newattempt->timestamp;
+            $status['msg'] = $newattempt->msg;
+            $status['code'] = 0;
+        }
+        // Si se han realizado cambios o se esta inicializando
+        if ($newtimestamp != $timestamp || $initialize) {
+            $userriddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
+        }
+        /* $status['code'] = 0;
+          $status['msg'] = 'El progreso de usuario se ha cargado con éxito'; */
         $result = array();
+        $result['infomsg'] = $checkupdates->strings;
+        $result['timestamp'] = $newtimestamp;
         $result['status'] = $status;
-        $result['riddles'] = $user_riddles;
+        $result['riddles'] = $userriddles;
         return $result;
     }
 

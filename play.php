@@ -31,6 +31,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
 require_once ($CFG->libdir . '/formslib.php');
 
+global $USER;
 
 $id = required_param('id', PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'scavengerhunt');
@@ -56,12 +57,14 @@ $PAGE->set_url('/mod/scavengerhunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 //$PAGE->set_pagelayout('standard');
-//$user=getUserGroupAndRoad($scavengerhunt->id, $cm, $course->id);
 
+// Get last timestamp 
+$user=get_user_group_and_road($USER->id,$scavengerhunt->id, $cm, $course->id);
+$lasttimestamp=get_last_timestamp($USER->id,$user->groupmode,$user->group_id,$user->idroad);
 
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->id, $cm->instance, intval($scavengerhunt->playwithoutmove)));
+$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->id, $cm->instance, intval($scavengerhunt->playwithoutmove),$lasttimestamp));
 //$PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/mobile-jq.css');
