@@ -38,18 +38,17 @@ h1, h2, h3, h4, h5, h6{
     padding:0;
 }
 #searchpanel .ui-panel-inner {
-    padding-top:100px;
+    margin-top:100px;
 } 
 .ui-panel-inner {
-    padding-top:48px;
+    margin-top:48px;
 }
-.ui-popup {
+.ui-popup{
     max-width: 400px;
     min-width: 250px;
 }
-
-.ui-popup-container{
-    overflow-y:auto;
+.ui-popup-container [data-role="content"]{
+     overflow-y:auto;
     overflow-x:hidden;
 }
 [data-role="popup"] .ui-title{

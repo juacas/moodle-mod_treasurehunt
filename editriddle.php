@@ -37,7 +37,7 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,activitytoend FROM mdl_scavengerhunt_riddles  WHERE id=?';
+        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,activitytoend,road_id FROM mdl_scavengerhunt_riddles  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -56,9 +56,9 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
     // List activities with Completion enabled
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
-    
 
-    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions, 'completionactivities'=>$completionactivities)); //name of the form you defined in file above.
+
+    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
@@ -78,6 +78,7 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         } else {
             $isnewentry = false;
         }
+
         // This branch is where you process validated data.
         // Do stuff ...
         // Typically you finish up by redirecting to somewhere where the user
@@ -87,6 +88,7 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
 
         // store the updated value values
         updateEntryBD($entry);
+
         // Trigger event and update completion (if entry was created).
         $eventparams = array(
             'context' => $context,
@@ -98,6 +100,19 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
             $event = \mod_scavengerhunt\event\riddle_updated::create($eventparams);
         }
         $event->trigger();
+
+        // Actualizo el camino
+        $road = new stdClass();
+        $road->id = $entry->road_id;
+        $road->timemodified = time();
+        $DB->update_record('scavengerhunt_roads', $road);
+        // Trigger event
+        $eventparams = array(
+            'context' => $context,
+            'objectid' => $road->id,
+        );
+        $event = \mod_scavengerhunt\event\road_updated::create($eventparams)->trigger();
+
         redirect($returnurl);
     }
 }

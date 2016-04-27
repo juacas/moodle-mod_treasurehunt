@@ -54,13 +54,20 @@
                 <a href="view.php?id={{scavengerhunt.id}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">{{#str}} exit, mod_scavengerhunt{{/str}}</a>
 
             </div>
-            <div data-role="collapsible" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-iconpos="left">
-                <h3>{{scavengerhunt.name}}</h3>
-                <div>
-                    <p>{{{scavengerhunt.description}}}</p>
+            <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
+                <div data-role="collapsible">
+                    <h3>{{scavengerhunt.name}}</h3>
+                    <div>
+                        <p>{{{scavengerhunt.description}}}</p>
+                    </div>
+                </div>
+                <div id="lastsuccess" data-role="collapsible">
+                    <h3><span id="lastsuccessname"></span></h3>
+                    <div>
+                        <p id="lastsuccessdescription"></p>
+                    </div>
                 </div>
             </div>
-
         </div>
         {{!Panel de busqueda de informacion}}
         <div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" id="searchpanel">
@@ -77,13 +84,13 @@
 
         </div>
 
-        
+
 
 
         {{!Popup de aviso de envio}}
 
         <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
-            <div data-role="header" data-theme="a">
+            <div data-role="header" data-theme="b">
                 <h1>{{#str}} sendlotacion_title, mod_scavengerhunt{{/str}}</h1>
             </div>
             <div role="content" class="ui-content ui-overlay-b">
@@ -95,7 +102,7 @@
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
 
-      
+
         {{!Cabecera y barra de herramientas.}}
 
         <div data-role="header" data-position="fixed" data-tap-toggle="false">

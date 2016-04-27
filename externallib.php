@@ -399,7 +399,8 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         return new external_function_parameters(
                 array(
             'idScavengerhunt' => new external_value(PARAM_INT, 'id of scavengerhunt'),
-            'timestamp' => new external_value(PARAM_INT, 'last timestamp since user progress is not updated'),
+            'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+            'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
             'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing'),
             'location' => new external_value(PARAM_RAW, "GeoJSON with point's location", VALUE_OPTIONAL))
         );
@@ -409,8 +410,10 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         return new external_single_structure(
                 array(
             'riddles' => new external_value(PARAM_RAW, 'geojson with all riddles of the user/group'),
-            'timestamp' => new external_value(PARAM_INT, 'last updated timestamp'),
+            'attempttimestamp' => new external_value(PARAM_INT, 'last updated timestamp attempt'),
+            'roadtimestamp' => new external_value(PARAM_INT, 'last updated timestamp road'),
             'infomsg' => new external_value(PARAM_RAW, 'array with all strings with attempts since the last stored timestamp'),
+            'lastsuccess' => new external_value(PARAM_RAW, 'object with the name and description of the last successful riddle '),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -424,33 +427,36 @@ class mod_scavengerhunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($idScavengerhunt, $timestamp,$initialize, $location) { //Don't forget to set it as static
+    public static function user_progress($idScavengerhunt, $attempttimestamp, $roadtimestamp, $initialize, $location) { //Don't forget to set it as static
         global $USER, $COURSE;
-        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt, 'location' => $location,'initialize' => $initialize,'timestamp' => $timestamp));
+        self::validate_parameters(self::user_progress_parameters(), array('idScavengerhunt' => $idScavengerhunt, "attempttimestamp" => $attempttimestamp, "roadtimestamp" => $roadtimestamp, 'location' => $location, 'initialize' => $initialize));
         $cm = get_coursemodule_from_instance('scavengerhunt', $idScavengerhunt);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
         $params = get_user_group_and_road($USER->id, $idScavengerhunt, $cm, $COURSE->id);
-        $checkupdates = check_timestamp($timestamp, $params->groupmode, $params->group_id, $USER->id, $params->idroad);
-        $newtimestamp = $checkupdates->timestamp;
+        $checkupdates = check_timestamp($attempttimestamp, $params->groupmode, $params->group_id, $USER->id, $params->idroad);
+        $newattempttimestamp = $checkupdates->attempttimestamp;
+        $newroadtimestamp = $checkupdates->roadtimestamp;
         if (!$checkupdates->success && isset($location)) {
             $newattempt = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode, $COURSE);
-            $newtimestamp = $newattempt->timestamp;
+            $newattempttimestamp = $newattempt->attempttimestamp;
             $status['msg'] = $newattempt->msg;
             $status['code'] = 0;
         }
         // Si se han realizado cambios o se esta inicializando
-        if ($newtimestamp != $timestamp || $initialize) {
-            $userriddles = getUserProgress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
+        if ($newattempttimestamp != $attempttimestamp || $newroadtimestamp != $roadtimestamp || $initialize) {
+            list($userriddles,$lastsuccess) = get_user_progress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
         }
         /* $status['code'] = 0;
           $status['msg'] = 'El progreso de usuario se ha cargado con éxito'; */
         $result = array();
         $result['infomsg'] = $checkupdates->strings;
-        $result['timestamp'] = $newtimestamp;
+        $result['attempttimestamp'] = $newattempttimestamp;
+        $result['roadtimestamp'] = $newroadtimestamp;
         $result['status'] = $status;
         $result['riddles'] = $userriddles;
+        $result['lastsuccess'] = $lastsuccess;
         return $result;
     }
 

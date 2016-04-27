@@ -29,12 +29,18 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playScavengerhunt: function (strings, cmid, idScavengerhunt, playwithoutmove, lasttimestamp) {
+        playScavengerhunt: function (strings, cmid, idScavengerhunt, playwithoutmove, lastattempttimestamp, lastroadtimestamp) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
             var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
             var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
             var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-            var timestamp = lasttimestamp;
+            var attempttimestamp = lastattempttimestamp;
+            var roadtimestamp = lastroadtimestamp;
+            var initialize = true;
+            var lastsuccess;
+            var interval;
+            var imgloaded = 0, totalimg = 0;
+            var infomsgs = [];
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -202,11 +208,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                          loadTilesWhileInteracting: true*/
             });
             map.addInteraction(select);
-            //Si quiero que se actualicen cada 20 seg
-            renew_source(false, true);
-            var interval = setInterval(function () {
-                renew_source(false, false);
-            }, 20000);
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
                 var numRiddle = feature.get('numRiddle');
@@ -259,7 +260,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     if (markerFeature.getGeometry() !== null) {
                         renew_source(true, false);
                     } else {
-                        toast('Marca primero en el mapa el punto deseado');
+                        toast(strings["nomarks"]);
                     }
                 } else {
                     $.mobile.loading("show");
@@ -319,27 +320,43 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         methodname: 'mod_scavengerhunt_user_progress',
                         args: {
                             idScavengerhunt: idScavengerhunt,
-                            timestamp: timestamp,
+                            attempttimestamp: attempttimestamp,
+                            roadtimestamp: roadtimestamp,
                             initialize: initialize,
                             location: position
                         }
                     }]);
                 geojson[0].done(function (response) {
                     console.log('json: ' + response.riddles);
-                    if (timestamp !== response.timestamp || initialize) {
-                        timestamp = response.timestamp;
+                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
+                        attempttimestamp = response.attempttimestamp;
+                        roadtimestamp = response.roadtimestamp;
                         source.clear();
                         source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
+                        // Compruebo si ambos objetos son iguales
+                        if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
+                            lastsuccess = response.lastsuccess;
+                            $("#lastsuccessname").text(lastsuccess.name);
+                            $("#lastsuccessdescription").html(lastsuccess.description);
+                            //$("#lastsuccess").show();
+                            $("#collapsibleset").collapsibleset("refresh");
+                            $("#infopanel").panel("open");
+                            $("#lastsuccess").collapsible("expand");
+                        }
                         if (response.infomsg.length > 0) {
-                            debugger;
-                            var body='';
-                            response.infomsg.forEach(function(msg){
-                                body += '<p>'+msg+'</p>';
+                            var body = '';
+                            infomsgs.forEach(function (msg) {
+                                body += '<p>' + msg + '</p>';
                             });
-                            create_popup('displayupdates', 'Actualizaciones',body);
+                            response.infomsg.forEach(function (msg) {
+                                infomsgs.push(msg);
+                                body += '<p>' + msg + '</p>';
+                            });
+                            // Because chaining popups not allowed in jquery mobile
+                            create_popup('displayupdates', strings["updates"], body);
                         }
                         fly_to_extent(map, source.getExtent());
                         if (location) {
@@ -418,7 +435,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                                 }
                                             }
                                         });
-
                                     } else {
                                         layer.setVisible(!layer.getVisible());
                                     }
@@ -461,17 +477,16 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 if (features.selected.length === 1) {
                     var title, riddlename = features.selected[0].get('name'),
                             riddledescription = features.selected[0].get('description'),
-                            date = features.selected[0].get('date'), body;
+                            info = features.selected[0].get('info'), body;
                     body = get_block_text(strings["riddlename"], riddlename);
                     if (features.selected[0].get('success'))
                     {
                         title = strings["discoveredriddle"];
                         body += get_block_text(strings["riddledescription"], riddledescription);
-                        body += '<p>' + strings["timelabelsuccess"] + date + '</p>';
                     } else {
                         title = strings["failedlocation"];
-                        body += '<p>' + strings["timelabelfailed"] + date + '</p>';
                     }
+                    body += '<p>' + info + '</p>';
                     create_popup('inforiddle', title, body);
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
@@ -515,19 +530,27 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         $ul.trigger("updatelayout");
                         $.mobile.loading("hide");
                     });
-                } else {
-                    $.mobile.resetActivePageHeight();
                 }
             });
-             // Set a max-height to make large images shrink to fit the screen.
-            $(document).on("popupbeforeposition", ".ui-popup:not(#popupDialog)", function () {
-                var maxHeight = $(window).height() - 120 + "px";
-                $(this).css("max-height", maxHeight);
+            // Scroll to collapsible expanded
+            $("#infopanel").on("collapsibleexpand", "[data-role='collapsible']", function (event, ui) {
+                var innerinfopanel = $("#infopanel .ui-panel-inner");
+                innerinfopanel.animate({
+                    scrollTop: parseInt($(this).offset().top - innerinfopanel.offset().top + innerinfopanel.scrollTop())
+                }, 1200);
+            });
+            // Set a max-height to make large images shrink to fit the screen.
+            $(document).on("popupbeforeposition", function () {
+                var maxHeight = $(window).height() - 200 + "px";
+                $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
             });
             // Remove the popup after it has been closed to manage DOM size
             $(document).on("popupafterclose", ".ui-popup:not(#popupDialog)", function () {
                 $(this).remove();
                 select.getFeatures().clear();
+            });
+            $(document).on("click", "#acceptupdates", function () {
+                infomsgs = [];
             });
             // Redraw map
             $(window).on("pagecontainershow resize", function (event, ui) {
@@ -537,6 +560,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         setTimeout(function () {
                             map.updateSize();
                         }, 200);
+                        if (initialize) {
+                            initialize = false;
+                            //Si quiero que se actualicen cada 20 seg
+                            renew_source(false, true);
+                            interval = setInterval(function () {
+                                renew_source(false, false);
+                            }, 20000);
+                        }
                     } else {
                         // initialize map
                         debugger;
@@ -582,14 +613,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>'),
                         popup = $('<div data-role="popup" id="' + type + '"' +
                                 'data-theme="b" data-transition="slidedown"></div>');
-
                 if (type === 'inforiddle') {
                     $('<a href="#" data-rel="back" class="ui-btn ui-corner-all' +
                             'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>').appendTo(header);
                 }
                 if (type === 'displayupdates') {
-                    $('<p class="center-wrapper"><a href="#" data-rel="back"'
-                    +'class="ui-btn center-button ui-mini ui-btn-inline">'
+                    $('<p class="center-wrapper"><a id="acceptupdates" href="#" data-rel="back"'
+                            + 'class="ui-btn center-button ui-mini ui-btn-inline">'
                             + strings["continue"] + '</a></p>')
                             .appendTo(content);
                     var attributes = {'data-dismissible': false, 'data-overlay-theme': "b"};
@@ -610,7 +640,32 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 .popup())
                         .toolbar()
                         .after(content);
-                $("#" + type).popup("open");
+                // Need it for calculate popup's dimesions when popup contents an image.
+                totalimg = $(content).find('img');
+                if (totalimg.length > 0) {
+                    totalimg.one('load', function () {
+                        imgloaded++;
+                        if (totalimg.length === imgloaded) {
+                            open_popup(popup);
+                            imgloaded =0;
+                        }
+                    });
+                } else {
+                    open_popup(popup);
+                }
+
+
+            }
+            function open_popup(popup) {
+                // Because chaining of popups not allowed in jquery mobile.
+                if ($(".ui-popup-active").length > 0) {
+                    $(".ui-popup").popup("close");
+                    setTimeout(function () {
+                        $(popup).popup("open", {positionTo: "window"});
+                    }, 1000);
+                } else {
+                    $(popup).popup("open", {positionTo: "window"});
+                }
 
             }
             function get_block_text(title, body) {

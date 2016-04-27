@@ -30,25 +30,21 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scavengerhunt_grading_summary implements renderable {
+class scavengerhunt_user_historical_attempts implements renderable {
 
-    /** @var int participantcount - The number of users who can submit to this assignment */
-    public $riddleid = 0;
+    /** @var array participantcount - The number of users who can submit to this assignment */
+    public $attemptstrings = [];
+    public $coursemoduleid = 0;
 
-    /** @var int participantcount - The number of users who can submit to this assignment */
-    public $riddlenum = 0;
-
-    /** @var int participantcount - The number of users who can submit to this assignment */
-    public $groupmode = 0;
 
     /**
      * constructor
      *
-     * @param int $participantcount
+     * @param array $attemptstrings
      */
-    public function __construct($riddleid, $riddlenum,$groupmode) {
-        $this->riddleid = $riddleid;
-        $this->riddlenum = $riddlenum;
+    public function __construct($attemptstrings,$coursemoduleid) {
+        $this->attemptstrings = $attemptstrings;
+        $this->coursemoduleid = $coursemoduleid;
     }
 
 }

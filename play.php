@@ -60,11 +60,11 @@ $PAGE->set_heading(format_string($course->fullname));
 
 // Get last timestamp 
 $user=get_user_group_and_road($USER->id,$scavengerhunt->id, $cm, $course->id);
-$lasttimestamp=get_last_timestamp($USER->id,$user->groupmode,$user->group_id,$user->idroad);
+list($lastattempttimestamp,$lastroadtimestamp)=get_last_timestamps($USER->id,$user->groupmode,$user->group_id,$user->idroad);
 
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->id, $cm->instance, intval($scavengerhunt->playwithoutmove),$lasttimestamp));
+$PAGE->requires->js_call_amd('mod_scavengerhunt/play', 'playScavengerhunt', array(get_strings_play(), $cm->id, $cm->instance, intval($scavengerhunt->playwithoutmove),$lastattempttimestamp,$lastroadtimestamp));
 //$PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/scavengerhunt/css/mobile-jq.css');
