@@ -37,7 +37,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             var attempttimestamp = lastattempttimestamp;
             var roadtimestamp = lastroadtimestamp;
             var initialize = true;
-            var lastsuccess;
+            var lastsuccess = {};
             var interval;
             var imgloaded = 0, totalimg = 0;
             var infomsgs = [];
@@ -336,12 +336,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
+                        debugger;
                         // Compruebo si ambos objetos son iguales
                         if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
                             lastsuccess = response.lastsuccess;
                             $("#lastsuccessname").text(lastsuccess.name);
                             $("#lastsuccessdescription").html(lastsuccess.description);
-                            //$("#lastsuccess").show();
                             $("#collapsibleset").collapsibleset("refresh");
                             $("#infopanel").panel("open");
                             $("#lastsuccess").collapsible("expand");

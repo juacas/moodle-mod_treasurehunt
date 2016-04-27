@@ -310,6 +310,7 @@ function riddles_to_geojson($riddles_result, $context, $idScavengerhunt, $userid
 
 function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerhunt, $context) {
     global $DB;
+    $lastsuccess = new stdClass();
     if ($groupmode) {
         $group_type = 'group_id';
         $params = array($idgroup, $idRoad);
@@ -326,11 +327,12 @@ function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerh
         $query = "SELECT num_riddle -1,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
         $params = array($idRoad);
         $user_progress = $DB->get_records_sql($query, $params);
+        $lastsuccess->name = get_string('groupattemptovercome', 'scavengerhunt');
+        $lastsuccess->description = get_string('groupattemptovercome', 'scavengerhunt');
     } else {
         // Recupero la ultima pista acertada
         foreach ($user_progress as $riddle) {
             if ($riddle->success) {
-                $lastsuccess = new stdClass();
                 $lastsuccess->name = $riddle->name;
                 $lastsuccess->description = file_rewrite_pluginfile_urls($riddle->description, 'pluginfile.php', $context->id, 'mod_scavengerhunt', 'description', $riddle->id);
                 break;

@@ -32,12 +32,17 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
      * @param html_table $table The table to append the row of data to
      * @param string $first The first column text
      * @param string $second The second column text
+     * @param bool $header If cells are header or not
      * @return void
      */
-    private function add_table_row_tuple(html_table $table, $first, $second) {
+    private function add_table_row_tuple(html_table $table, $first, $second, $header) {
         $row = new html_table_row();
         $cell1 = new html_table_cell($first);
         $cell2 = new html_table_cell($second);
+        if ($header) {
+            $cell1->header = true;
+            $cell2->header = true;
+        }
         $row->cells = array($cell1, $cell2);
         $table->data[] = $row;
     }
@@ -85,9 +90,9 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
         if (count($historical->attemptstrings)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row_tuple($t, get_string('attempt', 'scavengerhunt'), get_string('status', 'scavengerhunt'));
+            $this->add_table_row_tuple($t, get_string('attempt', 'scavengerhunt'), get_string('status', 'scavengerhunt'), true);
             foreach ($historical->attemptstrings as $attempt) {
-                $this->add_table_row_tuple($t, $numattempt++, $attempt);
+                $this->add_table_row_tuple($t, $numattempt++, $attempt, false);
             }
             // All done - write the table.
             $o .= html_writer::table($t);

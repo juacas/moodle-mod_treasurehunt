@@ -55,12 +55,14 @@
 
             </div>
             <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
+                {{#hasdescription}}
                 <div data-role="collapsible">
                     <h3>{{scavengerhunt.name}}</h3>
                     <div>
                         <p>{{{scavengerhunt.description}}}</p>
                     </div>
                 </div>
+                {{/hasdescription}}
                 <div id="lastsuccess" data-role="collapsible">
                     <h3><span id="lastsuccessname"></span></h3>
                     <div>
