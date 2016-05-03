@@ -108,4 +108,20 @@ input#modRoadName{text-align: center;}
     cursor:pointer;
     z-index: 90;
 }
-
+/* Usado para la tabla**/
+.successfulattempt, .successwithoutfailures{
+    background-color: #5cd053 !important;
+    color:black !important;
+}
+.failedattempt, .failure{
+    background-color: #d45252 !important;
+    color:black !important;
+}
+.successwithfailures{
+    background-color: #EBF044 !important;
+    color:black !important;
+}
+.noattempt{
+    background-color: #C0C0C0 !important;
+    color:black !important;
+}

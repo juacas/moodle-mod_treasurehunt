@@ -11,54 +11,29 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
      * the table param and does not return a value
      *
      * @param html_table $table The table to append the row of data to
-     * @param string $first The first column text
-     * @param string $second The second column text
-     * @param string $third The third column text
-     * @return void
-     */
-    private function add_table_row_triple(html_table $table, $first, $second, $third) {
-        $row = new html_table_row();
-        $cell1 = new html_table_cell($first);
-        $cell2 = new html_table_cell($second);
-        $cell3 = new html_table_cell($third);
-        $row->cells = array($cell1, $cell2, $cell3);
-        $table->data[] = $row;
-    }
-
-    /**
-     * Utility function to add a row of data to a table with 2 columns. Modified
-     * the table param and does not return a value
-     *
-     * @param html_table $table The table to append the row of data to
-     * @param string $first The first column text
-     * @param string $second The second column text
+     * @param array $text Array with the text of each cell
      * @param bool $header If cells are header or not
+     * @param array $class Array with the class of each cell
+     * @param array $colspan Array with the class of each cell
      * @return void
      */
-    private function add_table_row_tuple(html_table $table, $first, $second, $header) {
+    private function add_table_row(html_table $table, array $text, $header, array $class = null, array $colspan = null) {
         $row = new html_table_row();
-        $cell1 = new html_table_cell($first);
-        $cell2 = new html_table_cell($second);
-        if ($header) {
-            $cell1->header = true;
-            $cell2->header = true;
+        $cells = array();
+        for ($i = 0, $f = count($text); $i < $f; $i++) {
+            $cell = new html_table_cell($text[$i]);
+            if ($header) {
+                $cell->header = true;
+            }
+            if (isset($class)) {
+                $cell->attributes['class'] = $class[$i];
+            }
+            if (isset($colspan)) {
+                $cell->colspan = $colspan[$i];
+            }
+            array_push($cells, $cell);
         }
-        $row->cells = array($cell1, $cell2);
-        $table->data[] = $row;
-    }
-
-    /**
-     * Utility function to add a row of data to a table with 2 columns. Modified
-     * the table param and does not return a value
-     *
-     * @param html_table $table The table to append the row of data to
-     * @param string $first The row column text
-     * @return void
-     */
-    private function add_table_row_single(html_table $table, $first) {
-        $row = new html_table_row();
-        $cell1 = new html_table_cell($first);
-        $row->cells = array($cell1);
+        $row->cells = $cells;
         $table->data[] = $row;
     }
 
@@ -83,16 +58,21 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
     public function render_scavengerhunt_user_historical_attempts(scavengerhunt_user_historical_attempts $historical) {
         // Create a table for the data.
         $o = '';
-        $o .= $this->output->container_start('historicalriddles');
+        $o .= $this->output->container_start('historicalattempts');
         $o .= $this->output->heading(get_string('historicalattempts', 'scavengerhunt'), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
-        if (count($historical->attemptstrings)) {
+        if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row_tuple($t, get_string('attempt', 'scavengerhunt'), get_string('status', 'scavengerhunt'), true);
-            foreach ($historical->attemptstrings as $attempt) {
-                $this->add_table_row_tuple($t, $numattempt++, $attempt, false);
+            $this->add_table_row($t, array(get_string('attempt', 'scavengerhunt'), get_string('status', 'scavengerhunt')), true);
+            foreach ($historical->attempts as $attempt) {
+                if ($attempt->success) {
+                    $class = 'successfulattempt';
+                } else {
+                    $class = 'failedattempt';
+                }
+                $this->add_table_row($t, array($numattempt++, $attempt->string), false, array($class, ''));
             }
             // All done - write the table.
             $o .= html_writer::table($t);
@@ -113,73 +93,57 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
     /**
      * Render a table containing the current status of the grading process.
      *
-     * @param scavengerhunt_grading_summary $summary
+     * @param scavengerhunt_user_progress $progress
      * @return string
      */
-    public function render_scavengerhunt_grading_summary(scavengerhunt_grading_summary $summary) {
+    public function render_scavengerhunt_users_progress(scavengerhunt_users_progress $progress) {
         // Create a table for the data.
         $o = '';
-        $o .= $this->output->container_start('gradingsummary');
-        $o .= $this->output->heading(get_string('gradingsummary', 'scavengerhunt'), 3);
-        $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
-        $t = new html_table();
-        // Status.
-        if ($summary->teamsubmission) {
-            if ($summary->warnofungroupedusers) {
-                $o .= $this->output->notification(get_string('ungroupedusers', 'assign'));
-            }
-
-            $this->add_table_row_tuple($t, get_string('numberofteams', 'assign'), $summary->participantcount);
-        } else {
-            $this->add_table_row_tuple($t, get_string('numberofparticipants', 'assign'), $summary->participantcount);
-        }
-
-        // Drafts count and dont show drafts count when using offline assignment.
-        if ($summary->submissiondraftsenabled && $summary->submissionsenabled) {
-            $this->add_table_row_tuple($t, get_string('numberofdraftsubmissions', 'assign'), $summary->submissiondraftscount);
-        }
-
-        // Submitted for grading.
-        if ($summary->submissionsenabled) {
-            $this->add_table_row_tuple($t, get_string('numberofsubmittedassignments', 'assign'), $summary->submissionssubmittedcount);
-            if (!$summary->teamsubmission) {
-                $this->add_table_row_tuple($t, get_string('numberofsubmissionsneedgrading', 'assign'), $summary->submissionsneedgradingcount);
-            }
-        }
-
-        $time = time();
-        if ($summary->duedate) {
-            // Due date.
-            $duedate = $summary->duedate;
-            $this->add_table_row_tuple($t, get_string('duedate', 'assign'), userdate($duedate));
-
-            // Time remaining.
-            $due = '';
-            if ($duedate - $time <= 0) {
-                $due = get_string('assignmentisdue', 'assign');
-            } else {
-                $due = format_time($duedate - $time);
-            }
-            $this->add_table_row_tuple($t, get_string('timeremaining', 'assign'), $due);
-
-            if ($duedate < $time) {
-                $cutoffdate = $summary->cutoffdate;
-                if ($cutoffdate) {
-                    if ($cutoffdate > $time) {
-                        $late = get_string('latesubmissionsaccepted', 'assign', userdate($summary->cutoffdate));
-                    } else {
-                        $late = get_string('nomoresubmissionsaccepted', 'assign');
-                    }
-                    $this->add_table_row_tuple($t, get_string('latesubmissions', 'assign'), $late);
+        $o .= $this->output->container_start('usersprogress');
+        $o .= $this->output->heading(get_string('usersprogress', 'scavengerhunt'), 3);
+        foreach ($progress->roadsusersprogress as $roadusersprogress) {
+            $o .= $this->output->heading($roadusersprogress->name, 4);
+            if (count($roadusersprogress->userlist)) {
+                $o .= $this->output->box_start('boxaligncenter usersprogresstable');
+                $t = new html_table();
+                if ($progress->groupmode) {
+                    $title = get_string('group', 'scavengerhunt');
+                } else {
+                    $title = get_string('user', 'scavengerhunt');
                 }
+                $this->add_table_row($t, array($title, get_string('riddles', 'scavengerhunt')), true, null, array(null, $roadusersprogress->totalriddles));
+                foreach ($roadusersprogress->userlist as $user) {
+                    $row = new html_table_row();
+                    if ($progress->groupmode) {
+                        $name = $user->name;
+                    } else {
+                        $name = fullname($user);
+                    }
+                    $cells = array($name);
+                    for ($i = 1; $i <= $roadusersprogress->totalriddles; $i++) {
+                        $cell = new html_table_cell($i);
+                        if (isset($user->ratings[$i])) {
+                            $cell->attributes['class'] = $user->ratings[$i]->class;
+                        } else {
+                            $cell->attributes['class'] = 'noattempt';
+                        }
+                        array_push($cells, $cell);
+                    }
+                    $row->cells = $cells;
+                    $t->data[] = $row;
+                }
+                // All done - write the table.
+                $o .= html_writer::table($t);
+                $o .= $this->output->box_end();
+            } else {
+                if ($progress->groupmode) {
+                    $notification = get_string('nogroupassigned', 'scavengerhunt');
+                } else {
+                    $notification = get_string('nouserassigned', 'scavengerhunt');
+                }
+                $o .= $this->output->notification($notification);
             }
         }
-        // All done - write the table.
-        $o .= html_writer::table($t);
-
-
-        $o .= $this->output->box_end();
-
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();
 

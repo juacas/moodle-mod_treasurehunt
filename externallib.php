@@ -434,7 +434,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
-        $params = get_user_group_and_road($USER->id, $idScavengerhunt, $cm, $COURSE->id);
+        $params = get_user_group_and_road($USER->id, $cm, $COURSE->id);
         $checkupdates = check_timestamp($attempttimestamp, $params->groupmode, $params->group_id, $USER->id, $params->idroad);
         $newattempttimestamp = $checkupdates->attempttimestamp;
         $newroadtimestamp = $checkupdates->roadtimestamp;

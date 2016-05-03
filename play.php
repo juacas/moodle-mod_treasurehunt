@@ -59,7 +59,7 @@ $PAGE->set_heading(format_string($course->fullname));
 //$PAGE->set_pagelayout('standard');
 
 // Get last timestamp 
-$user=get_user_group_and_road($USER->id,$scavengerhunt->id, $cm, $course->id);
+$user=get_user_group_and_road($USER->id, $cm, $course->id);
 list($lastattempttimestamp,$lastroadtimestamp)=get_last_timestamps($USER->id,$user->groupmode,$user->group_id,$user->idroad);
 
 

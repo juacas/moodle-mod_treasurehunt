@@ -33,7 +33,7 @@ defined('MOODLE_INTERNAL') || die();
 class scavengerhunt_user_historical_attempts implements renderable {
 
     /** @var array participantcount - The number of users who can submit to this assignment */
-    public $attemptstrings = [];
+    public $attempts = [];
     public $coursemoduleid = 0;
 
 
@@ -42,9 +42,33 @@ class scavengerhunt_user_historical_attempts implements renderable {
      *
      * @param array $attemptstrings
      */
-    public function __construct($attemptstrings,$coursemoduleid) {
-        $this->attemptstrings = $attemptstrings;
+    public function __construct($attempts,$coursemoduleid) {
+        $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
+    }
+
+}
+/**
+ * Renderable grading summary
+ * @package   mod_assign
+ * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class scavengerhunt_users_progress implements renderable {
+
+    /** @var array participantcount - The number of users who can submit to this assignment */
+    public $roadsusersprogress = [];
+    public $groupmode = 0;
+
+
+    /**
+     * constructor
+     *
+     * @param array $roadusersprogress
+     */
+    public function __construct($roadsusersprogress,$groupmode) {
+        $this->roadsusersprogress = $roadsusersprogress;
+        $this->groupmode = $groupmode;
     }
 
 }
