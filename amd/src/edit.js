@@ -738,8 +738,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                             "<div id='dialog" + idRiddle + "' title='" + name + "'>"
                                             + description + "</div></span></div>");
                             $('#dialog' + idRiddle).dialog({
-                                autoOpen: false,
-                            });
+                                maxHeight: 500,
+                                autoOpen: false});
                         } else {
                             console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                         }
@@ -791,7 +791,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     function emptyRiddle(idRiddle) {
                         var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
                         $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
-                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert'"+
+                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert'" +
                                 "title='" + strings.empty_ridle + "'></span>");
                     }
 

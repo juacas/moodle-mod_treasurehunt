@@ -366,8 +366,8 @@ function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerh
         $query = "SELECT num_riddle -1,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
         $params = array($idRoad);
         $user_progress = $DB->get_records_sql($query, $params);
-        $lastsuccess->name = get_string('groupattemptovercome', 'scavengerhunt');
-        $lastsuccess->description = get_string('groupattemptovercome', 'scavengerhunt');
+        $lastsuccess->name = get_string('start', 'scavengerhunt');
+        $lastsuccess->description = get_string('overcomefirstriddle', 'scavengerhunt');
     } else {
         // Recupero la ultima pista acertada
         foreach ($user_progress as $riddle) {

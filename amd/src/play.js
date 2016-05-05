@@ -355,7 +355,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 infomsgs.push(msg);
                                 body += '<p>' + msg + '</p>';
                             });
-                            // Because chaining popups not allowed in jquery mobile
                             create_popup('displayupdates', strings["updates"], body);
                         }
                         // Compruebo si es un multipolygon o acaba de empezar y lo centro
