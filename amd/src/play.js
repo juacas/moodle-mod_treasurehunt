@@ -358,7 +358,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             // Because chaining popups not allowed in jquery mobile
                             create_popup('displayupdates', strings["updates"], body);
                         }
-                        fly_to_extent(map, source.getExtent());
+                        // Compruebo si es un multipolygon o acaba de empezar y lo centro
+                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
+                            fly_to_extent(map, source.getExtent());
+                        }
                         if (location) {
                             $.mobile.loading("hide");
                             toast(response.status.msg);
@@ -537,7 +540,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 var innerinfopanel = $("#infopanel .ui-panel-inner");
                 innerinfopanel.animate({
                     scrollTop: parseInt($(this).offset().top - innerinfopanel.offset().top + innerinfopanel.scrollTop())
-                }, 1200);
+                }, 500);
             });
             // Set a max-height to make large images shrink to fit the screen.
             $(document).on("popupbeforeposition", function () {
@@ -647,7 +650,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         imgloaded++;
                         if (totalimg.length === imgloaded) {
                             open_popup(popup);
-                            imgloaded =0;
+                            imgloaded = 0;
                         }
                     });
                 } else {

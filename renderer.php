@@ -101,49 +101,59 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
         $o = '';
         $o .= $this->output->container_start('usersprogress');
         $o .= $this->output->heading(get_string('usersprogress', 'scavengerhunt'), 3);
-        foreach ($progress->roadsusersprogress as $roadusersprogress) {
-            $o .= $this->output->heading($roadusersprogress->name, 4);
-            if (count($roadusersprogress->userlist)) {
-                $o .= $this->output->box_start('boxaligncenter usersprogresstable');
-                $t = new html_table();
-                if ($progress->groupmode) {
-                    $title = get_string('group', 'scavengerhunt');
-                } else {
-                    $title = get_string('user', 'scavengerhunt');
-                }
-                $this->add_table_row($t, array($title, get_string('riddles', 'scavengerhunt')), true, null, array(null, $roadusersprogress->totalriddles));
-                foreach ($roadusersprogress->userlist as $user) {
-                    $row = new html_table_row();
-                    if ($progress->groupmode) {
-                        $name = $user->name;
-                    } else {
-                        $name = fullname($user);
-                    }
-                    $cells = array($name);
-                    for ($i = 1; $i <= $roadusersprogress->totalriddles; $i++) {
-                        $cell = new html_table_cell($i);
-                        if (isset($user->ratings[$i])) {
-                            $cell->attributes['class'] = $user->ratings[$i]->class;
+        if (!count($progress->roadsusersprogress)) {
+            $o .= $this->output->notification(get_string('noroads', 'scavengerhunt'));
+        } else {
+            foreach ($progress->roadsusersprogress as $roadusersprogress) {
+                $o .= $this->output->heading($roadusersprogress->name, 4);
+                if ($roadusersprogress->validated) {
+                    if (count($roadusersprogress->userlist)) {
+                        $o .= $this->output->box_start('boxaligncenter usersprogresstable');
+                        $t = new html_table();
+                        if ($progress->groupmode) {
+                            $title = get_string('group', 'scavengerhunt');
                         } else {
-                            $cell->attributes['class'] = 'noattempt';
+                            $title = get_string('user', 'scavengerhunt');
                         }
-                        array_push($cells, $cell);
+                        $this->add_table_row($t, array($title, get_string('riddles', 'scavengerhunt')), true, null, array(null, $roadusersprogress->totalriddles - 1));
+                        foreach ($roadusersprogress->userlist as $user) {
+                            $row = new html_table_row();
+                            if ($progress->groupmode) {
+                                $name = $user->name;
+                            } else {
+                                $name = fullname($user);
+                            }
+                            $cells = array($name);
+                            for ($i = 1; $i < $roadusersprogress->totalriddles; $i++) {
+                                $cell = new html_table_cell($i);
+                                if (isset($user->ratings[$i])) {
+                                    $cell->attributes['class'] = $user->ratings[$i]->class;
+                                } else {
+                                    $cell->attributes['class'] = 'noattempt';
+                                }
+                                array_push($cells, $cell);
+                            }
+                            $row->cells = $cells;
+                            $t->data[] = $row;
+                        }
+                        // All done - write the table.
+                        $o .= html_writer::table($t);
+                        $o .= $this->output->box_end();
+                    } else {
+                        if ($progress->groupmode) {
+                            $notification = get_string('nogroupassigned', 'scavengerhunt');
+                        } else {
+                            $notification = get_string('nouserassigned', 'scavengerhunt');
+                        }
+                        $o .= $this->output->notification($notification);
                     }
-                    $row->cells = $cells;
-                    $t->data[] = $row;
-                }
-                // All done - write the table.
-                $o .= html_writer::table($t);
-                $o .= $this->output->box_end();
-            } else {
-                if ($progress->groupmode) {
-                    $notification = get_string('nogroupassigned', 'scavengerhunt');
                 } else {
-                    $notification = get_string('nouserassigned', 'scavengerhunt');
+                    $o .= $this->output->notification(get_string('invalidroad', 'scavengerhunt'));
                 }
-                $o .= $this->output->notification($notification);
             }
         }
+        $urlparams = array('id' => $progress->coursemoduleid);
+        $o .= $this->output->single_button(new moodle_url('/mod/scavengerhunt/edit.php', $urlparams), get_string('editscavengerhunt', 'scavengerhunt'), 'get');
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();
 

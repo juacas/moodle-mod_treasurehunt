@@ -123,6 +123,45 @@ function updateRiddleBD(Feature $feature) {
     $DB->execute($sql, $parms);
     setValidRoad($road_id);
 }
+function insertRoadBD($idScavengerhunt, $nameRoad) {
+    GLOBAL $DB;
+    $road = new stdClass();
+    if (empty($nameRoad)) {
+        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
+    }
+    $road->name = $nameRoad;
+    $road->scavengerhunt_id = $idScavengerhunt;
+    $road->timecreated = time();
+    $road->timemodified = 0;
+    $id = $DB->insert_record('scavengerhunt_roads', $road);
+    return $id;
+}
+
+function updateRoadBD($idRoad, $nameRoad) {
+    GLOBAL $DB;
+    if (empty($nameRoad)) {
+        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
+    }
+    $road = new stdClass();
+    $road->id = $idRoad;
+    $road->name = $nameRoad;
+    $road->timemodified = time();
+    $DB->update_record('scavengerhunt_roads', $road, $bulk = false);
+}
+
+function deleteRoadBD($idRoad) {
+    GLOBAL $DB;
+    $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
+    $select = 'road_id = ?';
+    $params = array($idRoad);
+    $DB->delete_records_select('scavengerhunt_riddles', $select, $params);
+    $DB->delete_records_select('scavengerhunt_attempts', $select, $params);
+}
+function getTotalRoads($idScavengerhunt) {
+    GLOBAL $DB;
+    $number = $DB->count_records('scavengerhunt_roads', array('scavengerhunt_id' => $idScavengerhunt));
+    return $number;
+}
 
 function getgeometryfunctions(moodle_database $DB) {
     $info = $DB->get_server_info();
@@ -421,8 +460,8 @@ function get_user_group_and_road($userid, $cm, $courseid) {
     } else {
         //Bien
         if ($groups[0]->validated == 0) {
-            // El camino no está validado.
-            print_error('invalidroad', 'scavengerhunt', $returnurl);
+            // El camino no esta validado.
+            print_error('invalidassignedroad', 'scavengerhunt', $returnurl);
         }
 
         return $groups[0];
@@ -435,15 +474,19 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
     $roads = array();
     if ($cm->groupmode) {
         // Group mode.
-        $query = "SELECT grouping_id, name as roadname, id as roadid, (SELECT MAX(num_riddle) FROM {scavengerhunt_riddles} where road_id = r.id) as totalriddles from {scavengerhunt_roads} r where scavengerhunt_id=? AND grouping_id != 0";
+        $query = "SELECT id as roadid,grouping_id,validated, name as roadname, (SELECT MAX(num_riddle) FROM {scavengerhunt_riddles} where road_id = r.id) as totalriddles from {scavengerhunt_roads} r where scavengerhunt_id=?";
         $params = array($cm->instance);
         // Recojo todos los groupings disponibles en la actividad.
         $availablegroupings = $DB->get_records_sql($query, $params);
         // Para cada grouping saco los grupos que contiene.
         foreach ($availablegroupings as $groupingid) {
+            if($groupingid->grouping_id == 0){
+                $groupingid->grouping_id = -1;
+            }
             $road = new stdClass();
             $road->id = $groupingid->roadid;
             $road->name = $groupingid->roadname;
+            $road->validated = $groupingid->validated;
             $road->userlist = groups_get_all_groups($courseid, null, $groupingid->grouping_id);
             foreach ($road->userlist as $user) {
                 $user->ratings = array();
@@ -453,7 +496,7 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
         }
     } else {
         // Individual mode.
-        $query = "SELECT id as roadid, group_id, name as roadname,  (SELECT MAX(num_riddle) FROM {scavengerhunt_riddles} where road_id = r.id)  as totalriddles from {scavengerhunt_roads} r where scavengerhunt_id=?";
+        $query = "SELECT id as roadid,validated, group_id, name as roadname,  (SELECT MAX(num_riddle) FROM {scavengerhunt_riddles} where road_id = r.id)  as totalriddles from {scavengerhunt_roads} r where scavengerhunt_id=?";
         $params = array($cm->instance);
         $availablegroups = $DB->get_records_sql($query, $params);
         // If there is only one road validated and no groups.
@@ -461,6 +504,7 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
             $road = new stdClass();
             $road->id = current($availablegroups)->roadid;
             $road->name = current($availablegroups)->roadname;
+            $road->validated = current($availablegroups)->validated;
             $road->userlist = get_enrolled_users($context);
             foreach ($road->userlist as $user) {
                 $user->ratings = array();
@@ -472,6 +516,7 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
                 $road = new stdClass();
                 $road->id = $groupid->roadid;
                 $road->name = $groupid->roadname;
+                $road->validated = $groupid->validated;
                 $road->userlist = groups_get_members($groupid->group_id);
                 foreach ($road->userlist as $user) {
                     $user->ratings = array();
@@ -610,7 +655,7 @@ function view_users_progress_table($cm, $courseid, $context) {
         $roads[$attempt->roadid]->userlist[$attempt->user]->ratings[$rating->riddlenum] = $rating;
     }
     $output = $PAGE->get_renderer('mod_scavengerhunt');
-    $renderable = new scavengerhunt_users_progress($roads, $cm->groupmode);
+    $renderable = new scavengerhunt_users_progress($roads, $cm->groupmode, $cm->id);
     return $output->render($renderable);
 }
 

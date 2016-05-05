@@ -57,8 +57,9 @@ class scavengerhunt_user_historical_attempts implements renderable {
 class scavengerhunt_users_progress implements renderable {
 
     /** @var array participantcount - The number of users who can submit to this assignment */
-    public $roadsusersprogress = [];
+    public $roadsusersprogress = array();
     public $groupmode = 0;
+    public $coursemoduleid = 0;
 
 
     /**
@@ -66,9 +67,10 @@ class scavengerhunt_users_progress implements renderable {
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress,$groupmode) {
+    public function __construct($roadsusersprogress,$groupmode,$coursemoduleid) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
+        $this->coursemoduleid = $coursemoduleid;
     }
 
 }

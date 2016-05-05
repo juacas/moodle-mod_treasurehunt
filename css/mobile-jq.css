@@ -8,6 +8,10 @@ body {
 #content {
     padding: 0;
 }
+#map {
+    height:calc(100% - 104px); 
+    top: 53px;
+}
 
 
 h1, h2, h3, h4, h5, h6{

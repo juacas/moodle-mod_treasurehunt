@@ -61,6 +61,11 @@ $PAGE->set_title(format_string($scavengerhunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 
+// Si no hay ningún camino redirijo para crearlo.
+if(getTotalRoads($scavengerhunt->id)==0){
+    $roadurl = new moodle_url('/mod/scavengerhunt/editroad.php', array('cmid' => $id));
+    redirect($roadurl);
+}
 /*
  * Other things you may want to set - remove if not needed.
  * $PAGE->set_cacheable(false);

@@ -86,8 +86,6 @@ function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_m
     // You may have to add extra stuff in here.
 
     $scavengerhunt->id = $DB->insert_record('scavengerhunt', $scavengerhunt);
-    //Insert default road
-    addDefaultRoad($scavengerhunt->id);
     scavengerhunt_grade_item_update($scavengerhunt);
 
     return $scavengerhunt->id;
@@ -490,50 +488,4 @@ function scavengerhunt_extend_settings_navigation(settings_navigation $settingsn
     }
 }
 
-function insertRoadBD($idScavengerhunt, $nameRoad) {
-    GLOBAL $DB;
-    $road = new stdClass();
-    if (empty($nameRoad)) {
-        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
-    }
-    $road->name = $nameRoad;
-    $road->scavengerhunt_id = $idScavengerhunt;
-    $road->timecreated = time();
-    $road->timemodified = 0;
-    $id = $DB->insert_record('scavengerhunt_roads', $road);
-    return $id;
-}
 
-function updateRoadBD($idRoad, $nameRoad) {
-    GLOBAL $DB;
-    if (empty($nameRoad)) {
-        throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
-    }
-    $road = new stdClass();
-    $road->id = $idRoad;
-    $road->name = $nameRoad;
-    $road->timemodified = time();
-    $DB->update_record('scavengerhunt_roads', $road, $bulk = false);
-}
-
-function deleteRoadBD($idRoad) {
-    GLOBAL $DB;
-    $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
-    $select = 'road_id = ?';
-    $params = array($idRoad);
-    $DB->delete_records_select('scavengerhunt_riddles', $select, $params);
-    $DB->delete_records_select('scavengerhunt_attempts', $select, $params);
-}
-
-function getTotalRoads($idScavengerhunt) {
-    GLOBAL $DB;
-    $number = $DB->count_records('scavengerhunt_roads', array('scavengerhunt_id' => $idScavengerhunt));
-    return $number;
-}
-
-function addDefaultRoad($idScavengerhunt) {
-    $numberRoads = getTotalRoads($idScavengerhunt) + 1;
-    $nameRoad = get_string('default_road', 'scavengerhunt', $numberRoads);
-    $idRoad = insertRoadBD($idScavengerhunt, $nameRoad);
-    return array($idRoad, $nameRoad);
-}
