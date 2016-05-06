@@ -123,6 +123,7 @@ function updateRiddleBD(Feature $feature) {
     $DB->execute($sql, $parms);
     setValidRoad($road_id);
 }
+
 function insertRoadBD($idScavengerhunt, $nameRoad) {
     GLOBAL $DB;
     $road = new stdClass();
@@ -137,26 +138,27 @@ function insertRoadBD($idScavengerhunt, $nameRoad) {
     return $id;
 }
 
-function updateRoadBD($idRoad, $nameRoad) {
+function updateRoadBD($roadid, $nameRoad) {
     GLOBAL $DB;
     if (empty($nameRoad)) {
         throw new invalid_parameter_exception('El nombre introducido no puede estar vacio');
     }
     $road = new stdClass();
-    $road->id = $idRoad;
+    $road->id = $roadid;
     $road->name = $nameRoad;
     $road->timemodified = time();
     $DB->update_record('scavengerhunt_roads', $road, $bulk = false);
 }
 
-function deleteRoadBD($idRoad) {
+function deleteRoadBD($roadid) {
     GLOBAL $DB;
-    $DB->delete_records('scavengerhunt_roads', array('id' => $idRoad));
+    $DB->delete_records('scavengerhunt_roads', array('id' => $roadid));
     $select = 'road_id = ?';
-    $params = array($idRoad);
+    $params = array($roadid);
     $DB->delete_records_select('scavengerhunt_riddles', $select, $params);
     $DB->delete_records_select('scavengerhunt_attempts', $select, $params);
 }
+
 function getTotalRoads($idScavengerhunt) {
     GLOBAL $DB;
     $number = $DB->count_records('scavengerhunt_roads', array('scavengerhunt_id' => $idScavengerhunt));
@@ -237,13 +239,13 @@ function renewLockScavengerhunt($idScavengerhunt, $userid) {
         $DB->update_record($table, array('id' => $lock->id, 'lockedat' => $time));
         return $lock->id;
     } else {
+        deleteOldLocks($idScavengerhunt);
         return $DB->insert_record($table, array('scavengerhunt_id' => $idScavengerhunt, 'user_id' => $userid, 'lockedat' => $time));
     }
 }
 
 function isLockScavengerhunt($idScavengerhunt, $userid) {
     global $DB;
-    deleteOldLocks($idScavengerhunt);
     $select = "scavengerhunt_id = ? AND lockedat > ? AND user_id != ?";
     $params = array($idScavengerhunt, time(), $userid);
     return $DB->record_exists_select('scavengerhunt_locks', $select, $params);
@@ -267,16 +269,16 @@ function checkLock($idScavengerhunt, $idLock, $userid) {
     }
 }
 
-function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode, $course) {
+function checkRiddle($userid, $idgroup, $roadid, $point, $groupmode, $course) {
     global $DB;
     $return = new stdClass();
     $location = object_to_wkt($point);
     if ($groupmode) {
         $group_type = 'group_id';
-        $params = array($idgroup, $idRoad, $idRoad);
+        $params = array($idgroup, $roadid, $roadid);
     } else {
         $group_type = 'user_id';
-        $params = array($userid, $idRoad, $idRoad);
+        $params = array($userid, $roadid, $roadid);
     }
     // Recupero la ultima pista descubierta por el usuario/grupo para esta instancia.
     $query = "SELECT id,num_riddle from {scavengerhunt_riddles} WHERE num_riddle=(Select max(num_riddle) from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id  WHERE a.$group_type=? and a.road_id=? and a.success=1) AND road_id = ?";
@@ -289,7 +291,7 @@ function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode, $course) {
     // Compruebo si la geometria esta dentro.
     $geomfuncs = getgeometryfunctions($DB);
     $query = "SELECT id, {$geomfuncs['ST_Intersects']}(geom,{$geomfuncs['ST_GeomFromText']}((?))) as inside,activitytoend from {scavengerhunt_riddles} where num_riddle=(?) and road_id=(?)";
-    $params = array($location, $nextnumriddle, $idRoad);
+    $params = array($location, $nextnumriddle, $roadid);
     $nextriddle = $DB->get_record_sql($query, $params);
     if ($nextriddle->inside) {
         $isInside = 1;
@@ -307,7 +309,7 @@ function checkRiddle($userid, $idgroup, $idRoad, $point, $groupmode, $course) {
             $return->attempttimestamp = time();
             $query = 'INSERT INTO mdl_scavengerhunt_attempts (road_id, riddle_id, timecreated, group_id, user_id, success,'
                     . ' locations) VALUES ((?),(?),(?),(?),(?),(?),' . $geomfuncs['ST_GeomFromText'] . '((?)))';
-            $params = array($idRoad, $pointIdRiddle, $return->attempttimestamp,
+            $params = array($roadid, $pointIdRiddle, $return->attempttimestamp,
                 $idgroup, $userid, $isInside, $location);
             $DB->execute($query, $params);
         } else {
@@ -347,15 +349,15 @@ function riddles_to_geojson($riddles_result, $context, $idScavengerhunt, $userid
     return $geojson;
 }
 
-function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerhunt, $context) {
+function get_user_progress($roadid, $groupmode, $idgroup, $userid, $idScavengerhunt, $context) {
     global $DB;
     $lastsuccess = new stdClass();
     if ($groupmode) {
         $group_type = 'group_id';
-        $params = array($idgroup, $idRoad);
+        $params = array($idgroup, $roadid);
     } else {
         $group_type = 'user_id';
-        $params = array($userid, $idRoad);
+        $params = array($userid, $roadid);
     }
     // Recupero las pistas descubiertas y fallos cometidos por el usuario/grupo para esta instancia.
     $query = "SELECT a.timecreated,a.user_id as user ,r.name,IF(a.success=0,NULL,r.id) as id,IF(a.success=0,NULL,r.description) as description" .
@@ -364,7 +366,7 @@ function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerh
     // Si no tiene ningun progreso mostrar primera pista del camino para comenzar.
     if (count($user_progress) === 0) {
         $query = "SELECT num_riddle -1,astext(geom) as geometry,road_id from {scavengerhunt_riddles}  where  road_id=? and num_riddle=1";
-        $params = array($idRoad);
+        $params = array($roadid);
         $user_progress = $DB->get_records_sql($query, $params);
         $lastsuccess->name = get_string('start', 'scavengerhunt');
         $lastsuccess->description = get_string('overcomefirstriddle', 'scavengerhunt');
@@ -382,11 +384,11 @@ function get_user_progress($idRoad, $groupmode, $idgroup, $userid, $idScavengerh
     return array($geojson, $lastsuccess);
 }
 
-function is_valid_road($idRoad) {
+function is_valid_road($roadid) {
     global $DB;
 
     $query = "SELECT geom as geometry from {scavengerhunt_riddles} where road_id = ?";
-    $params = array($idRoad);
+    $params = array($roadid);
     $riddles = $DB->get_records_sql($query, $params);
     if (count($riddles) <= 1) {
         return false;
@@ -427,7 +429,7 @@ function get_user_group_and_road($userid, $cm, $courseid) {
         foreach ($availablegroupings as $groupingid) {
             if (count($allgroupsingrouping = groups_get_all_groups($courseid, $userid, $groupingid->grouping_id, 'g.id'))) {
                 foreach ($allgroupsingrouping as $groupingrouping) {
-                    array_push($groups, (object) array('groupmode' => $cm->groupmode, 'group_id' => $groupingrouping->id, 'idroad' => $groupingid->idroad, 'validated' => $groupingid->validated));
+                    array_push($groups, (object) array('group_id' => $groupingrouping->id, 'idroad' => $groupingid->idroad, 'validated' => $groupingid->validated));
                 }
             }
         }
@@ -438,12 +440,10 @@ function get_user_group_and_road($userid, $cm, $courseid) {
         $availablegroups = $DB->get_records_sql($query, $params);
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->group_id == 0) {
-            current($availablegroups)->groupmode = $cm->groupmode;
             array_push($groups, current($availablegroups));
         } else {
             foreach ($availablegroups as $groupid) {
                 if (groups_is_member($groupid->group_id)) {
-                    $groupid->groupmode = $cm->groupmode;
                     $groupid->group_id = 0;
                     array_push($groups, $groupid);
                 }
@@ -468,7 +468,7 @@ function get_user_group_and_road($userid, $cm, $courseid) {
     }
 }
 
-function get_list_participants_in_roads($cm, $courseid, $context) {
+function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
     global $DB;
 
     $roads = array();
@@ -480,19 +480,11 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
         $availablegroupings = $DB->get_records_sql($query, $params);
         // Para cada grouping saco los grupos que contiene.
         foreach ($availablegroupings as $groupingid) {
-            if($groupingid->grouping_id == 0){
+            if ($groupingid->grouping_id == 0) {
                 $groupingid->grouping_id = -1;
             }
-            $road = new stdClass();
-            $road->id = $groupingid->roadid;
-            $road->name = $groupingid->roadname;
-            $road->validated = $groupingid->validated;
-            $road->userlist = groups_get_all_groups($courseid, null, $groupingid->grouping_id);
-            foreach ($road->userlist as $user) {
-                $user->ratings = array();
-            }
-            $road->totalriddles = $groupingid->totalriddles;
-            $roads[$road->id] = $road;
+            $userlist = groups_get_all_groups($courseid, null, $groupingid->grouping_id);
+            $roads = add_road_userlist($roads, $groupingid, $userlist, $cm->groupmode);
         }
     } else {
         // Individual mode.
@@ -501,28 +493,12 @@ function get_list_participants_in_roads($cm, $courseid, $context) {
         $availablegroups = $DB->get_records_sql($query, $params);
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->group_id == 0) {
-            $road = new stdClass();
-            $road->id = current($availablegroups)->roadid;
-            $road->name = current($availablegroups)->roadname;
-            $road->validated = current($availablegroups)->validated;
-            $road->userlist = get_enrolled_users($context);
-            foreach ($road->userlist as $user) {
-                $user->ratings = array();
-            }
-            $road->totalriddles = current($availablegroups)->totalriddles;
-            $roads[$road->id] = $road;
+            $userlist = get_enrolled_users($context);
+            $roads = add_road_userlist($roads, current($availablegroups), $userlist, $cm->groupmode);
         } else {
             foreach ($availablegroups as $groupid) {
-                $road = new stdClass();
-                $road->id = $groupid->roadid;
-                $road->name = $groupid->roadname;
-                $road->validated = $groupid->validated;
-                $road->userlist = groups_get_members($groupid->group_id);
-                foreach ($road->userlist as $user) {
-                    $user->ratings = array();
-                }
-                $road->totalriddles = $groupid->totalriddles;
-                $roads[$road->id] = $road;
+                $userlist = groups_get_members($groupid->group_id);
+                $roads = add_road_userlist($roads, $groupid, $userlist, $cm->groupmode);
             }
         }
     }
@@ -537,14 +513,14 @@ function get_strings_play() {
         , "noresults", "startfromhere", "nomarks", "updates"), "mod_scavengerhunt");
 }
 
-function get_last_timestamps($userid, $groupmode, $idgroup, $idRoad) {
+function get_last_timestamps($userid, $groupmode, $idgroup, $roadid) {
     global $DB;
     if ($groupmode) {
         $group_type = 'group_id';
-        $params = array($idgroup, $idRoad, $idRoad);
+        $params = array($idgroup, $roadid, $roadid);
     } else {
         $group_type = 'user_id';
-        $params = array($userid, $idRoad, $idRoad);
+        $params = array($userid, $roadid, $roadid);
     }
     // Recupero la ultima marca de tiempo realizada para esta instancia por el grupo/usuario y
     // la ultima marca de tiempo de modificacion del camino.
@@ -553,19 +529,19 @@ function get_last_timestamps($userid, $groupmode, $idgroup, $idRoad) {
     return array(intval($timestamp->attempttimestamp), intval($timestamp->roadtimestamp));
 }
 
-function check_timestamp($timestamp, $groupmode, $idgroup, $userid, $idRoad) {
+function check_timestamp($timestamp, $groupmode, $idgroup, $userid, $roadid) {
     global $DB;
     $return = new stdClass();
     $return->strings = [];
     $return->success = false;
     if ($groupmode) {
         $group_type = 'group_id';
-        $params = array($timestamp, $idgroup, $idRoad);
+        $params = array($timestamp, $idgroup, $roadid);
     } else {
         $group_type = 'user_id';
-        $params = array($timestamp, $userid, $idRoad);
+        $params = array($timestamp, $userid, $roadid);
     }
-    list($return->attempttimestamp, $return->roadtimestamp) = get_last_timestamps($userid, $groupmode, $idgroup, $idRoad);
+    list($return->attempttimestamp, $return->roadtimestamp) = get_last_timestamps($userid, $groupmode, $idgroup, $roadid);
     if ($return->attempttimestamp > $timestamp) {
         // Recupero las acciones del usuario/grupo superiores a un timestamp dado.
         $query = "SELECT a.timecreated,a.success,r.num_riddle,a.user_id as user FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id WHERE a.timecreated >? AND $group_type=? AND a.road_id=? ORDER BY a.timecreated ASC";
@@ -580,18 +556,18 @@ function check_timestamp($timestamp, $groupmode, $idgroup, $userid, $idRoad) {
     return $return;
 }
 
-function view_user_historical_attempts($groupmode, $idgroup, $userid, $idRoad, $cmid) {
+function view_user_historical_attempts($groupmode, $idgroup, $userid, $roadid, $cmid) {
     global $DB, $PAGE;
     $attempts = [];
     if ($groupmode) {
         $group_type = 'group_id';
-        $params = array($idgroup, $idRoad);
+        $params = array($idgroup, $roadid);
     } else {
         $group_type = 'user_id';
-        $params = array($userid, $idRoad);
+        $params = array($userid, $roadid);
     }
     // Recupero todas las acciones de un usuario/grupo y las imprimo en una tabla.
-    $query = "SELECT a.timecreated,a.success,r.num_riddle,a.user_id as user FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id WHERE $group_type=? AND a.road_id=? ORDER BY a.timecreated ASC";
+    $query = "SELECT a.id,a.timecreated,a.success,r.num_riddle,a.user_id as user FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id WHERE $group_type=? AND a.road_id=? ORDER BY a.timecreated ASC";
     $results = $DB->get_records_sql($query, $params);
     foreach ($results as $result) {
         $attempt = new stdClass();
@@ -605,55 +581,10 @@ function view_user_historical_attempts($groupmode, $idgroup, $userid, $idRoad, $
 }
 
 function view_users_progress_table($cm, $courseid, $context) {
-    global $DB, $PAGE;
-    if ($cm->groupmode) {
-        $query = "SELECT a.id, ro.id as roadid,r.num_riddle,a.group_id as user,"
-                . " CASE WHEN COUNT(a.success)>1 AND "
-                . "(SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at "
-                . "ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 "
-                . "AND ri.road_id=r.road_id AND at.group_id=a.group_id "
-                . "GROUP BY ri.num_riddle) THEN 'successwithfailures' "
-                . "WHEN COUNT(a.success)>1 THEN 'failure' "
-                . "WHEN (SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at "
-                . "ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 "
-                . "AND ri.road_id=r.road_id AND at.user_id=a.user_id "
-                . "GROUP BY ri.num_riddle) THEN 'successwithoutfailures' "
-                . "ELSE 'noattempt' end as class "
-                . "FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a "
-                . "ON a.riddle_id=r.id INNER JOIN {scavengerhunt_roads} ro "
-                . "ON ro.id=r.road_id WHERE (a.group_id != 0 "
-                . "AND ro.scavengerhunt_id = ?) "
-                . "GROUP BY r.num_riddle, user,ro.id ORDER BY ro.id, a.timecreated ASC";
-    } else {
-        $query = "SELECT a.id, ro.id as roadid,r.num_riddle,a.user_id as user,"
-                . " CASE WHEN COUNT(a.success)>1 AND "
-                . "(SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at "
-                . "ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 "
-                . "AND ri.road_id=r.road_id AND at.user_id=a.user_id "
-                . "GROUP BY ri.num_riddle) THEN 'successwithfailures' "
-                . "WHEN COUNT(a.success)>1 THEN 'failure' "
-                . "WHEN (SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at "
-                . "ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 "
-                . "AND ri.road_id=r.road_id AND at.user_id=a.user_id "
-                . "GROUP BY ri.num_riddle) THEN 'successwithoutfailures' "
-                . "ELSE 'noattempt' end as class "
-                . "FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a "
-                . "ON a.riddle_id=r.id INNER JOIN {scavengerhunt_roads} ro "
-                . "ON ro.id=r.road_id WHERE (a.group_id = 0 AND ro.scavengerhunt_id = ?) "
-                . "GROUP BY r.num_riddle, user,ro.id ORDER BY ro.id, a.timecreated ASC";
-    }
-    $params = array($cm->instance);
-    // Recupero todas las acciones de los usuarios de una instancia.
-    $attempts = $DB->get_records_sql($query, $params);
+    global $PAGE;
+
     // Recojo la lista de usuarios/grupos asignada a cada camino.
-    $roads = get_list_participants_in_roads($cm, $courseid, $context);
-    // Anado a cada usuario/grupo su calificacion en color de cada pista.
-    foreach ($attempts as $attempt) {
-        $rating = new stdClass();
-        $rating->riddlenum = $attempt->num_riddle;
-        $rating->class = $attempt->class;
-        $roads[$attempt->roadid]->userlist[$attempt->user]->ratings[$rating->riddlenum] = $rating;
-    }
+    $roads = get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
     $output = $PAGE->get_renderer('mod_scavengerhunt');
     $renderable = new scavengerhunt_users_progress($roads, $cm->groupmode, $cm->id);
     return $output->render($renderable);
@@ -677,6 +608,63 @@ function set_string_attempt($attempt, $userid) {
             return get_string('userattemptovercome', 'scavengerhunt', $attempt);
         } else {
             return get_string('userattemptfailed', 'scavengerhunt', $attempt);
+        }
+    }
+}
+
+function add_road_userlist($roads, $data, $userlist, $groupmode) {
+    $road = new stdClass();
+    $road->id = $data->roadid;
+    $road->name = $data->roadname;
+    $road->validated = $data->validated;
+    $road->userlist = $userlist;
+    insert_riddle_progress_in_road_userlist($road, $groupmode);
+    $road->totalriddles = $data->totalriddles;
+    $roads[$road->id] = $road;
+    return $roads;
+}
+
+function insert_riddle_progress_in_road_userlist($road, $groupmode) {
+    global $DB;
+    foreach ($road->userlist as $user) {
+        if ($groupmode) {
+            $query = "SELECT a.id,r.num_riddle,COUNT(a.success) as attemptsnumber,
+                (SELECT at.success FROM mdl_scavengerhunt_riddles ri INNER JOIN mdl_scavengerhunt_attempts at 
+                ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 AND ri.road_id=r.road_id 
+                AND at.group_id=a.group_id GROUP BY ri.num_riddle)  as success 
+                FROM mdl_scavengerhunt_riddles r INNER JOIN mdl_scavengerhunt_attempts a 
+                ON a.riddle_id=r.id INNER JOIN mdl_scavengerhunt_roads ro 
+                ON ro.id=r.road_id WHERE (
+                r.road_id= ? AND a.group_id = ?) 
+                GROUP BY r.num_riddle ORDER BY  a.timecreated ASC";
+        } else {
+            $query = "SELECT a.id,r.num_riddle,COUNT(a.success) as attemptsnumber,
+                (SELECT at.success FROM mdl_scavengerhunt_riddles ri INNER JOIN mdl_scavengerhunt_attempts at 
+                ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 AND ri.road_id=r.road_id 
+                AND at.group_id=a.group_id GROUP BY ri.num_riddle)  as success 
+                FROM mdl_scavengerhunt_riddles r INNER JOIN mdl_scavengerhunt_attempts a 
+                ON a.riddle_id=r.id INNER JOIN mdl_scavengerhunt_roads ro 
+                ON ro.id=r.road_id WHERE (
+                r.road_id= ? AND a.user_id = ? AND a.group_id = 0) 
+                GROUP BY r.num_riddle ORDER BY  a.timecreated ASC";
+        }
+        $params = array($road->id, $user->id);
+        $attempts = $DB->get_records_sql($query, $params);
+        $user->ratings = array();
+        // Anado a cada usuario/grupo su calificacion en color de cada pista.
+        foreach ($attempts as $attempt) {
+            $rating = new stdClass();
+            $rating->riddlenum = $attempt->num_riddle;
+            if ($attempt->attemptsnumber > 1 && $attempt->success) {
+                $rating->class = "successwithfailures";
+            } else if ($attempt->attemptsnumber > 1) {
+                $rating->class = "failure";
+            } else if ($attempt->success) {
+                $rating->class = "successwithoutfailures";
+            } else {
+                $rating->class = "noattempt";
+            }
+            $user->ratings[$rating->riddlenum] = $rating;
         }
     }
 }

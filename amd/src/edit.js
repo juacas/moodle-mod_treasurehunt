@@ -734,10 +734,10 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     .append("<div class='nameRiddle'>" + name + "</div>")
                                     .append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span>" +
                                             "<span class='ui-icon ui-icon-pencil'></span>" +
-                                            "<span class='ui-icon ui-icon-info' data-id='#dialog" + idRiddle + "'>" +
-                                            "<div id='dialog" + idRiddle + "' title='" + name + "'>"
+                                            "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" + idRiddle + "'>" +
+                                            "<div id='dialoginfo" + idRiddle + "' title='" + name + "'>"
                                             + description + "</div></span></div>");
-                            $('#dialog' + idRiddle).dialog({
+                            $('#dialoginfo' + idRiddle).dialog({
                                 maxHeight: 500,
                                 autoOpen: false});
                         } else {
@@ -791,8 +791,13 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     function emptyRiddle(idRiddle) {
                         var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
                         $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
-                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert'" +
-                                "title='" + strings.empty_ridle + "'></span>");
+                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert' "+
+                                "data-id='#dialogalert" + idRiddle + "'>" +
+                                 "<div id='dialogalert" + idRiddle + "' title='Error'>"
+                                + strings.empty_ridle + "</div></span>");
+                        $('#dialogalert' + idRiddle).dialog({
+                            maxHeight: 500,
+                            autoOpen: false});
                     }
 
                     function notEmptyRiddle(idRiddle) {
@@ -1203,8 +1208,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     $("#saveRiddle").on('click', function () {
                         saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
                     });
-                    $("#riddleList").on('click', '.ui-icon-info', function () {
-
+                    $("#riddleList").on('click', '.ui-icon-info, .ui-icon-alert', function () {
                         var id = $(this).data('id');
                         //open dialogue
                         $(id).dialog("open");

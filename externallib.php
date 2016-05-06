@@ -435,18 +435,18 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
         $params = get_user_group_and_road($USER->id, $cm, $COURSE->id);
-        $checkupdates = check_timestamp($attempttimestamp, $params->groupmode, $params->group_id, $USER->id, $params->idroad);
+        $checkupdates = check_timestamp($attempttimestamp, $cm->groupmode, $params->group_id, $USER->id, $params->idroad);
         $newattempttimestamp = $checkupdates->attempttimestamp;
         $newroadtimestamp = $checkupdates->roadtimestamp;
         if (!$checkupdates->success && isset($location)) {
-            $newattempt = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $params->groupmode, $COURSE);
+            $newattempt = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $cm->groupmode, $COURSE);
             $newattempttimestamp = $newattempt->attempttimestamp;
             $status['msg'] = $newattempt->msg;
             $status['code'] = 0;
         }
         // Si se han realizado cambios o se esta inicializando
         if ($newattempttimestamp != $attempttimestamp || $newroadtimestamp != $roadtimestamp || $initialize) {
-            list($userriddles,$lastsuccess) = get_user_progress($params->idroad, $params->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
+            list($userriddles,$lastsuccess) = get_user_progress($params->idroad, $cm->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
         }
         /* $status['code'] = 0;
           $status['msg'] = 'El progreso de usuario se ha cargado con éxito'; */

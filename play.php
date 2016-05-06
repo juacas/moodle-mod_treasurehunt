@@ -60,7 +60,7 @@ $PAGE->set_heading(format_string($course->fullname));
 
 // Get last timestamp 
 $user=get_user_group_and_road($USER->id, $cm, $course->id);
-list($lastattempttimestamp,$lastroadtimestamp)=get_last_timestamps($USER->id,$user->groupmode,$user->group_id,$user->idroad);
+list($lastattempttimestamp,$lastroadtimestamp)=get_last_timestamps($USER->id,$cm->groupmode,$user->group_id,$user->idroad);
 
 
 $PAGE->requires->jquery();

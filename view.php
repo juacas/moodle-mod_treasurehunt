@@ -80,9 +80,13 @@ echo $output->heading(format_string($scavengerhunt->name));
 echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
 //$usersummary = new scavengerhunt_grading_summary();
 //echo $output->render($usersummary);
-echo view_users_progress_table($cm, $course->id,$context);
-$user=get_user_group_and_road($USER->id, $cm, $course->id);
-echo view_user_historical_attempts($user->groupmode,$user->group_id,$USER->id,$user->idroad,$cm->id);  
+echo view_users_progress_table($cm, $course->id, $context);
+try {
+    $user = get_user_group_and_road($USER->id, $cm, $course->id);
+    echo view_user_historical_attempts($cm->groupmode, $user->group_id, $USER->id, $user->idroad, $cm->id);
+} catch (Exception $e) {
+    echo $output->notification($e->getMessage());
+}
 if (has_capability('mod/scavengerhunt:getscavengerhunt', $context) &&
         has_capability('mod/scavengerhunt:managescavenger', $context)) {
     
