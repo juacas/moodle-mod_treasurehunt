@@ -62,7 +62,7 @@ class mod_scavengerhunt_external_fetch_scavengerhunt extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:getscavengerhunt', $context);
-        list($scavengerhunt['riddles'], $scavengerhunt['roads']) = getScavengerhunt($idScavengerhunt, $context);
+        list($scavengerhunt['riddles'], $scavengerhunt['roads']) = get_scavengerhunt($idScavengerhunt, $context);
         $status['code'] = 0;
         $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
 
@@ -126,7 +126,7 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
         require_capability('mod/scavengerhunt:managescavenger', $context);
         require_capability('mod/scavengerhunt:editriddle', $context);
         $features = geojson_to_object($riddles);
-        if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
+        if (idLockIsValid($idLock)) {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
@@ -208,7 +208,7 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         require_capability('mod/scavengerhunt:editriddle', $context);
-        if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
+        if (idLockIsValid($idLock)) {
             deleteEntryBD($idRiddle);
             // Trigger deleted riddle event.
             $eventparams = array(
@@ -280,7 +280,7 @@ class mod_scavengerhunt_external_delete_road extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         require_capability('mod/scavengerhunt:editroad', $context);
-        if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
+        if (idLockIsValid($idLock)) {
             deleteRoadBD($idRoad);
             // Trigger deleted road event.
             $eventparams = array(
@@ -353,7 +353,7 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         if (isset($idLock)) {
-            if (checkLock($idScavengerhunt, $idLock, $USER->id)) {
+             if (idLockIsValid($idLock)) {
                 $idLock = renewLockScavengerhunt($idScavengerhunt, $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
@@ -446,7 +446,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         }
         // Si se han realizado cambios o se esta inicializando
         if ($newattempttimestamp != $attempttimestamp || $newroadtimestamp != $roadtimestamp || $initialize) {
-            list($userriddles,$lastsuccess) = get_user_progress($params->idroad, $cm->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
+            list($userriddles, $lastsuccess) = get_user_progress($params->idroad, $cm->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
         }
         /* $status['code'] = 0;
           $status['msg'] = 'El progreso de usuario se ha cargado con éxito'; */

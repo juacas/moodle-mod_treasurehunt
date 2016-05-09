@@ -73,14 +73,13 @@ if(getTotalRoads($scavengerhunt->id)==0){
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
 if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
-    //Get strings for init js
+    // Get strings for edit js.
     $strings = get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'scavengerhunt');
     $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/jquery-ui-touch-punch', 'jquerytp');
     $PAGE->requires->js_call_amd('mod_scavengerhunt/edit', 'editScavengerhunt', array($id, $cm->instance, $strings, $idLock));
     $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 }
@@ -89,7 +88,7 @@ echo $OUTPUT->header();
 // Replace the following lines with you own code.
 if ($lock) {
     $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $id));
-    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl);
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl,get_username_blocking_edition($scavengerhunt->id));
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
     // Conditions to show the intro can change to look for own settings or whatever.

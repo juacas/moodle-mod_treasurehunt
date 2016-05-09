@@ -29,7 +29,7 @@ define(['jquery', 'core/notification','core/ajax'], function ($, notification, a
         },
         /**Renuevo de continuo el bloqueo de edicion **/
         renewLockScavengerhunt: function (idScavengerhunt,idLock) {
-            repeat = setInterval(renewLock.renewLockAjax, 90000, idScavengerhunt,idLock);
+            repeat = setInterval(this.renewLockAjax, 90000, idScavengerhunt,idLock);
         },
         stopRenewLockScavengerhunt: function () {
             clearInterval(repeat);

@@ -120,8 +120,8 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 if ($lock) {
-    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl);
+$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl,get_username_blocking_edition($scavengerhunt->id));
 } else {
     echo $OUTPUT->heading(format_string($scavengerhunt->name));
     $mform->display();

@@ -192,7 +192,7 @@ function setValidRoad($road_id, $valid = null) {
     $DB->update_record("scavengerhunt_roads", $road);
 }
 
-function deleteEntryBD($id, $context) {
+function deleteEntryBD($id) {
     GLOBAL $DB;
     $riddle_sql = 'SELECT num_riddle,road_id FROM {scavengerhunt_riddles} WHERE id = ?';
     $riddle_result = $DB->get_record_sql($riddle_sql, array($id));
@@ -209,15 +209,15 @@ function deleteEntryBD($id, $context) {
     setValidRoad($riddle_result->road_id);
 }
 
-function getScavengerhunt($idScavengerhunt, $context) {
+function get_scavengerhunt($idScavengerhunt, $context) {
     global $DB;
 //Recojo todas las features
-    $riddles_sql = 'SELECT riddle.id, riddle.name, riddle.description, road_id, num_riddle,astext(geom) as geometry FROM {scavengerhunt_riddles} AS riddle'
+    $riddles_sql = 'SELECT riddle.id, CASE WHEN (SELECT at.success FROM {scavengerhunt_attempts} at WHERE riddle.id=at.riddle_id AND at.success = 1) THEN true ELSE false END AS blocked, riddle.name, riddle.description, road_id, num_riddle,astext(geom) as geometry FROM {scavengerhunt_riddles} AS riddle'
             . ' inner join {scavengerhunt_roads} AS roads on riddle.road_id = roads.id WHERE scavengerhunt_id = ? ORDER BY num_riddle DESC';
     $riddles_result = $DB->get_records_sql($riddles_sql, array($idScavengerhunt));
     $geojson = riddles_to_geojson($riddles_result, $context, $idScavengerhunt);
 //Recojo todos los caminos
-    $roads_sql = 'SELECT id, name FROM {scavengerhunt_roads} AS roads where scavengerhunt_id = ?';
+    $roads_sql = 'SELECT id, name FROM {scavengerhunt_roads} AS road where scavengerhunt_id = ?';
     $roads_result = $DB->get_records_sql($roads_sql, array($idScavengerhunt));
     foreach ($roads_result as &$value) {
         $value->id = intval($value->id);
@@ -256,17 +256,17 @@ function idLockIsValid($idLock) {
     return $DB->record_exists_select('scavengerhunt_locks', "id = ?", array($idLock));
 }
 
+function get_username_blocking_edition($idScavengerhunt) {
+    global $DB;
+    $table = 'scavengerhunt_locks';
+    $params = array('scavengerhunt_id' => $idScavengerhunt);
+    $result = $DB->get_record($table, $params);
+    return get_user_fullname_from_id($result->user_id);
+}
+
 function deleteOldLocks($idScavengerhunt) {
     global $DB;
     $DB->delete_records_select('scavengerhunt_locks', "lockedat < ? AND scavengerhunt_id = ? ", array(time(), $idScavengerhunt));
-}
-
-function checkLock($idScavengerhunt, $idLock, $userid) {
-    if (!isLockScavengerhunt($idScavengerhunt, $userid) && idLockIsValid($idLock)) {
-        return true;
-    } else {
-        return false;
-    }
 }
 
 function checkRiddle($userid, $idgroup, $roadid, $point, $groupmode, $course) {
@@ -333,6 +333,9 @@ function riddles_to_geojson($riddles_result, $context, $idScavengerhunt, $userid
             'name' => $riddle->name,
             'idStage' => $idScavengerhunt,
             'description' => $description);
+        if (property_exists($riddle, 'blocked')) {
+            $attr['blocked'] = intval($riddle->blocked);
+        }
         if (property_exists($riddle, 'timecreated')) {
             $attr['date'] = (is_null($riddle->timecreated)) ? null : userdate($riddle->timecreated);
         }
@@ -594,10 +597,7 @@ function set_string_attempt($attempt, $userid) {
     global $DB;
     $attempt->date = userdate($attempt->timecreated);
     if ($userid != $attempt->user) {
-        $select = 'SELECT id,firstnamephonetic,lastnamephonetic,middlename,alternatename,firstname,lastname FROM {user} WHERE id = ?';
-        $result = $DB->get_records_sql($select, array($attempt->user));
-        $fullname = fullname($result[$attempt->user]);
-        $attempt->user = $fullname;
+        $attempt->user = get_user_fullname_from_id($attempt->user);
         if ($attempt->success) {
             return get_string('groupattemptovercome', 'scavengerhunt', $attempt);
         } else {
@@ -629,21 +629,21 @@ function insert_riddle_progress_in_road_userlist($road, $groupmode) {
     foreach ($road->userlist as $user) {
         if ($groupmode) {
             $query = "SELECT a.id,r.num_riddle,COUNT(a.success) as attemptsnumber,
-                (SELECT at.success FROM mdl_scavengerhunt_riddles ri INNER JOIN mdl_scavengerhunt_attempts at 
+                (SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at 
                 ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 AND ri.road_id=r.road_id 
                 AND at.group_id=a.group_id GROUP BY ri.num_riddle)  as success 
-                FROM mdl_scavengerhunt_riddles r INNER JOIN mdl_scavengerhunt_attempts a 
-                ON a.riddle_id=r.id INNER JOIN mdl_scavengerhunt_roads ro 
+                FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a 
+                ON a.riddle_id=r.id INNER JOIN {scavengerhunt_roads} ro 
                 ON ro.id=r.road_id WHERE (
                 r.road_id= ? AND a.group_id = ?) 
                 GROUP BY r.num_riddle ORDER BY  a.timecreated ASC";
         } else {
             $query = "SELECT a.id,r.num_riddle,COUNT(a.success) as attemptsnumber,
-                (SELECT at.success FROM mdl_scavengerhunt_riddles ri INNER JOIN mdl_scavengerhunt_attempts at 
+                (SELECT at.success FROM {scavengerhunt_riddles} ri INNER JOIN {scavengerhunt_attempts} at 
                 ON at.riddle_id=ri.id WHERE ri.num_riddle=r.num_riddle+1 AND ri.road_id=r.road_id 
                 AND at.group_id=a.group_id GROUP BY ri.num_riddle)  as success 
-                FROM mdl_scavengerhunt_riddles r INNER JOIN mdl_scavengerhunt_attempts a 
-                ON a.riddle_id=r.id INNER JOIN mdl_scavengerhunt_roads ro 
+                FROM {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a 
+                ON a.riddle_id=r.id INNER JOIN {scavengerhunt_roads} ro 
                 ON ro.id=r.road_id WHERE (
                 r.road_id= ? AND a.user_id = ? AND a.group_id = 0) 
                 GROUP BY r.num_riddle ORDER BY  a.timecreated ASC";
@@ -667,4 +667,11 @@ function insert_riddle_progress_in_road_userlist($road, $groupmode) {
             $user->ratings[$rating->riddlenum] = $rating;
         }
     }
+}
+
+function get_user_fullname_from_id($id) {
+    global $DB;
+    $select = 'SELECT id,firstnamephonetic,lastnamephonetic,middlename,alternatename,firstname,lastname FROM {user} WHERE id = ?';
+    $result = $DB->get_records_sql($select, array($id));
+    return fullname($result[$id]);
 }

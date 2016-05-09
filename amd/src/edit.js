@@ -15,16 +15,21 @@ require.config({
     shim: {
         openlayers: {
             exports: 'OpenLayers'
+        },
+        'jquerytouch': {
+            deps: ['jqueryui'],
+            exports: '$'
         }
     },
     paths: {
         openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
+        'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch.min'
     }
 });
 
 
-define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates'],
+define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates'],
         function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates) {
 
 
@@ -63,7 +68,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     $("#riddleListPanel_global").addClass('.ui-widget-content ui-corner-all');
                     $('<span id="edition"/>').appendTo($("#controlPanel"));
                     $('<input type="radio" name="controlPanel" id="radio1" value="add">').appendTo($("#edition"));
-                    $("<label>").attr('for', "radio1").text('AÃƒÂ±adir').appendTo($("#edition"));
+                    $("<label>").attr('for', "radio1").text('Anadir').appendTo($("#edition"));
                     $('<input type="radio" name="controlPanel" id="radio2" value="modify">').appendTo($("#edition"));
                     $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
                     $('<button id="saveRiddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlPanel"));
@@ -123,7 +128,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         cursorAt: {top: -7},
                         cursor: "n-resize",
                         axis: 'y',
-                        items: "li:not(:hidden)",
+                        items: "li:not(:hidden , .blocked)",
                         helper: "clone",
                         start: function (event, ui) {
                             var idRoad = ui.item.attr('idRoad');
@@ -672,6 +677,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     var numRiddle = feature.get('numRiddle');
                                     var name = feature.get('name');
                                     var description = feature.get('description');
+                                    var blocked = feature.get('blocked');
                                     for (var i = 0; i < polygons.length; i++) {
                                         var newFeature = new ol.Feature(feature.getProperties());
                                         newFeature.setProperties({
@@ -691,7 +697,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                                     feature.setProperties({
                                         idFeaturesPolygons: '' + idNewFeatures
                                     });
-                                    addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description);
+                                    addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description, blocked);
                                     if (polygons.length === 0) {
                                         emptyRiddle(idRiddle);
                                     }
@@ -724,19 +730,28 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
 
                     }
 
-                    function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description) {
+                    function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description, blocked) {
                         if ($('#riddleList li[idRiddle="' + idRiddle + '"]').length < 1) {
-                            $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>')
-                                    .appendTo($("#riddleList")).addClass("ui-corner-all")
-                                    .prepend("<div class='handle riddle_valid'>" +
-                                            "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>" +
-                                            "<span class='sortable-number'>" + numRiddle + "</span></div>")
+                            var li = $('<li idRiddle="' + idRiddle + '" idRoad="' + idRoad + '" numRiddle="' + numRiddle + '"/>')
+                                    .appendTo($("#riddleList"));
+                            li.addClass("ui-corner-all")
                                     .append("<div class='nameRiddle'>" + name + "</div>")
-                                    .append("<div class='modifyRiddle'><span class='ui-icon ui-icon-trash'></span>" +
+                                    .append("<div class='modifyRiddle'>" +
                                             "<span class='ui-icon ui-icon-pencil'></span>" +
                                             "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" + idRiddle + "'>" +
                                             "<div id='dialoginfo" + idRiddle + "' title='" + name + "'>"
                                             + description + "</div></span></div>");
+                            if (blocked) {
+                                li.addClass("blocked")
+                                        .prepend("<div class='nohandle riddle_valid'>" +
+                                                "<span class='ui-icon ui-icon-locked'></span>" +
+                                                "<span class='sortable-number'>" + numRiddle + "</span></div>");
+                            } else {
+                                li.prepend("<div class='handle riddle_valid'>" +
+                                        "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>" +
+                                        "<span class='sortable-number'>" + numRiddle + "</span></div>");
+                                li.children(".modifyRiddle").prepend("<span class='ui-icon ui-icon-trash'></span>");
+                            }
                             $('#dialoginfo' + idRiddle).dialog({
                                 maxHeight: 500,
                                 autoOpen: false});
@@ -748,11 +763,12 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     function addRoad2ListPanel(idRoad, name) {
                         //Si no existe lo agrego
                         if ($('#roadList li[idRoad="' + idRoad + '"]').length < 1) {
-                            $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList"))
-                                    .addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>")
+                            var li = $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList"));
+                            li.addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>")
                                     .append("<div class='modifyRoad'><span class='ui-icon ui-icon-trash'></span>" +
                                             "<span class='ui-icon ui-icon-pencil'></span></div>");
                         }
+
                     }
                     function deleteRoad2ListPanel(idRoad) {
                         var $li = $('#roadList li[idRoad="' + idRoad + '"]');
@@ -791,13 +807,8 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                     function emptyRiddle(idRiddle) {
                         var $riddle = $('#riddleList li[idRiddle="' + idRiddle + '"]');
                         $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
-                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert' "+
-                                "data-id='#dialogalert" + idRiddle + "'>" +
-                                 "<div id='dialogalert" + idRiddle + "' title='Error'>"
-                                + strings.empty_ridle + "</div></span>");
-                        $('#dialogalert' + idRiddle).dialog({
-                            maxHeight: 500,
-                            autoOpen: false});
+                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert' " +
+                                "data-id='#dialogalert'/>");
                     }
 
                     function notEmptyRiddle(idRiddle) {
@@ -806,6 +817,11 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         $riddle.find(".ui-icon-alert").remove();
                     }
 
+                    $("<div id='dialogalert' title='Error'>"
+                            + strings.empty_ridle + "</div>").appendTo($("#riddleList"));
+                    $('#dialogalert').dialog({
+                        maxHeight: 500,
+                        autoOpen: false});
                     /** TOOLTIPS 
                      $("#riddleList").tooltip({
                      track: true,
@@ -1209,6 +1225,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
                     });
                     $("#riddleList").on('click', '.ui-icon-info, .ui-icon-alert', function () {
+                        debugger;
                         var id = $(this).data('id');
                         //open dialogue
                         $(id).dialog("open");
@@ -1231,7 +1248,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         //Busco el idRiddle del li que contiene la papelera seleccionada
 
                         var idRiddle = parseInt($(this).parents('li').attr('idRiddle'));
-                        //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
+                        //Si esta sucio guardo el escenario
                         if (dirty) {
                             saveRiddles(dirtyStage, originalStage, idScavengerhunt,
                                     editFormRiddleEntry, [idRiddle, idModule], idLock);
@@ -1261,7 +1278,7 @@ define(['jquery', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'co
                         }
                     });
                     $("#riddleList").on('click', 'li', function (e) {
-                        if ($(e.target).is('.handle , .ui-icon , .sortable-number')) {
+                        if ($(e.target).is('.handle ,.nohandle, .ui-icon , .sortable-number')) {
                             e.preventDefault();
                             return;
                         }
