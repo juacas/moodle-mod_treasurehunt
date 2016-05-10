@@ -95,7 +95,7 @@ if ($lock) {
     if ($scavengerhunt->intro) {
         echo $OUTPUT->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
     }
-    echo $OUTPUT->container_start(null, 'scavengerhunt_editor');
+    echo $OUTPUT->container_start("scavengerhunt_editor");
     echo $OUTPUT->box(null, null, 'controlPanel');
     echo $OUTPUT->container_start(null, 'riddleListPanel_global');
     echo $OUTPUT->box(null, null, 'riddleListPanel');

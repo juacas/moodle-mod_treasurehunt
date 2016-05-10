@@ -9,7 +9,7 @@ html, body
     display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
 /*Si no se me pone un background-image posterior*/
-#map button{
+.scavengerhunt_editor button{
     background-image: none;
 }
 #addRiddle, #addRoad{margin:0 auto; margin-left: 1%;margin-right:1%;}
@@ -70,7 +70,7 @@ input#modRoadName{text-align: center;}
     left:9px;
     width:15px;
 }
-/**usado para mostrar la x dentro de la bÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Âºsqueda **/
+/**usado para mostrar la x dentro de la busqueda **/
 .clearable{
     background: #fff url(data:image/gif;base64,R0lGODlhBwAHAIAAAP///5KSkiH5BAAAAAAALAAAAAAHAAcAAAIMTICmsGrIXnLxuDMLADs=) no-repeat right -10px center;
     border: 1px solid #999;
@@ -82,30 +82,11 @@ input#modRoadName{text-align: center;}
 .clearable.onX{ cursor: pointer; }
 .clearable::-ms-clear {display: none; width:0; height:0;}
 /* Usado para el resizable**/
-#egrip{
-    position:static;
-    display: block;
-    margin: 1px;
-    padding: 0;
-    color: white;
-    font-size: 1.14em;
-    font-weight: bold;
-    text-decoration: none;
-    text-align: center;
-    height: 1.375em;
-    width: 1.375em;
-    background-color: rgba(0,60,136,0.5);
-    border: none;
-    border-radius: 2px;
-}
-#egrip:hover,#egrip:focus{
-    text-decoration: none;
-    background-color: rgba(0,60,136,0.7);
-}
-#egrip-container{
+
+.egrip-container{
     position: absolute;
-    top: 65px;
-    left: .5em;
+    top: 70px;
+    right: -35px;
     cursor:pointer;
     z-index: 90;
 }

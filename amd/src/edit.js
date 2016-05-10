@@ -27,8 +27,6 @@ require.config({
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch.min'
     }
 });
-
-
 define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates'],
         function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates) {
 
@@ -117,7 +115,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     $("#edition").buttonset();
                     //Creo el riddleListPanel
                     $('<ul id="riddleList"/>').appendTo($("#riddleListPanel"));
-
                     //Lo cargo como un sortable
                     $("#riddleList").sortable({
                         handle: ".handle",
@@ -190,15 +187,12 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     //Creo el roadListPanel
                     $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
                     //Añado los handle custom
-                    //$('<button class="ui-resizable-handle " id="egrip">mierda</button>').appendTo($("#riddleListPanel_global")); 
-
                     /*Set control
                      * 
                      * @type edit_L27.ol.style.Style
                      */
                     window.app = {};
                     var app = window.app;
-
                     /**
                      * @constructor
                      * @extends {ol.control.Control}
@@ -206,25 +200,18 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                      */
                     app.generateResizableControl = function (opt_options) {
                         var options = opt_options || {};
-
-                        var span = document.createElement('span');
-                        span.innerHTML = '<>';
-                        span.className = 'ui-resizable-handle';
-                        span.id = 'egrip';
-
+                        var button = document.createElement('button');
+                        button.innerHTML = '<>';
+                        button.id = 'egrip';
                         var element = document.createElement('div');
-                        element.className = 'ol-unselectable ol-control';
-                        element.id = 'egrip-container';
-                        element.appendChild(span);
-
+                        element.className = 'ol-control ol-unselectable egrip-container';
+                        element.appendChild(button);
                         ol.control.Control.call(this, {
                             element: element,
                             target: options.target
                         });
                     };
                     ol.inherits(app.generateResizableControl, ol.control.Control);
-
-
                     /** Get style, vectors, map and interactions ***************************************************************
                      */
                     var defaultRiddleStyle = new ol.style.Style({
@@ -295,7 +282,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         }),
                         visible: false
                     });
-
                     var map = new ol.Map({
                         layers: [
                             new ol.layer.Tile({
@@ -309,18 +295,17 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             minZoom: 2
                         }),
                         controls: ol.control.defaults().extend([
-                            new app.generateResizableControl()
-                        ]),
+                            new app.generateResizableControl({target: document.getElementById("riddleListPanel_global")})
+                        ])
                     });
                     //Creo el resizable
                     $("#riddleListPanel_global").resizable({
                         handles: {'e': $('#egrip')},
                         resize: function (event, ui) {
                             ui.size.height = ui.originalSize.height;
-                        }
+                        },
+                        cancel: ''
                     });
-
-
                     var Modify = {
                         init: function () {
                             this.select = new ol.interaction.Select({
@@ -363,11 +348,9 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                             zIndex: 'Infinity'
                                         })];
                                     return styles;
-
                                 }
                             });
                             map.addInteraction(this.select);
-
                             this.modify = new ol.interaction.Modify({
                                 features: this.select.getFeatures(),
                                 style: new ol.style.Style({
@@ -420,8 +403,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         }
                     };
                     Modify.init();
-
-
                     var Draw = {
                         init: function () {
                             map.addInteraction(this.Polygon);
@@ -470,7 +451,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 stage.roads[idRoad].vector.getSource().addFeature(e.feature);
                                 //Agrego la feature a la coleccion de multipoligonos sucios
                                 addNewFeatureToDirtySource(e.feature, originalStage, dirtyStage);
-
                                 //Limpio el vector de dibujo
                                 vectorDraw.getSource().clear();
                                 activateSaveButton();
@@ -496,13 +476,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             Draw.Polygon.abortDrawing_();
                         }
                     });
-
                     Draw.init();
                     Draw.setActive(false);
                     Modify.setActive(false);
                     deactivateEdition();
-
-
                     // The snap interaction must be added after the Modify and Draw interactions
                     // in order for its map browser event handlers to be fired first. Its handlers
                     // are responsible of doing the snapping.
@@ -510,12 +487,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         source: vectorDraw.getSource()
                     });
                     map.addInteraction(snap);
-
-
                     //Cargo las features
                     fetchFeatures(idScavengerhunt);
-
-
                     function addNewFeatureToDirtySource(dirtyFeature, originalSource, dirtySource) {
 
                         var idRiddle = dirtyFeature.get('idRiddle');
@@ -665,7 +638,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     dataProjection: 'EPSG:4326',
                                     featureProjection: 'EPSG:3857'
                                 }));
-
                                 originalStage.getFeatures().forEach(function (feature) {
                                     if (feature.getGeometry() === null) {
                                         feature.setGeometry(new ol.geom.MultiPolygon([]));
@@ -715,7 +687,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                         }).fail(function (error) {
                             console.log(error);
-                            notification.alert('Error', error.message, 'Continue');
+                            notification.exception(error);
                         });
                     }
 
@@ -727,7 +699,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             vector.getSource().removeFeature(feature);
                         });
                         selectedFeatures.clear();
-
                     }
 
                     function addRiddle2ListPanel(idRiddle, idRoad, numRiddle, name, description, blocked) {
@@ -754,7 +725,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                             $('#dialoginfo' + idRiddle).dialog({
                                 maxHeight: 500,
-                                autoOpen: false});
+                                autoOpen: false
+                                });
                         } else {
                             console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                         }
@@ -843,11 +815,9 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                      });**/
                     function activateDeleteButton() {
                         $('#removeFeature').button("option", "disabled", false);
-
                     }
                     function deactivateDeleteButton() {
                         $('#removeFeature').button("option", "disabled", true);
-
                     }
 
                     function deactivateEdition() {
@@ -882,7 +852,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             duration: duration,
                             resolution: view.getResolution(),
                         });
-
                         map.beforeRender(pan, zoom);
                         view.fit(extent, size);
                     }
@@ -898,7 +867,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             duration: duration,
                             resolution: view.getResolution(),
                         });
-
                         map.beforeRender(pan, zoom);
                         view.setCenter(point);
                     }
@@ -978,7 +946,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 vector.getSource().getFeatureById(idFeaturesPolygons[i]).setProperties({
                                     'numRiddle': numRiddle
                                 });
-
                             }
                         }
                     }
@@ -1043,7 +1010,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                         }).fail(function (error) {
                             console.log(error);
-                            notification.alert('Error', error.message, 'Continue');
+                            notification.exception(error);
                         });
                     }
 
@@ -1064,7 +1031,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 var idFeaturesPolygons = false;
                                 var polygonFeature;
                                 var feature = dirtySource.getFeatureById(idRiddle);
-
                                 //Elimino y recoloco 
                                 deleteRiddle2ListPanel(idRiddle, dirtySource, originalSource, vectorOfPolygons);
                                 //Elimino la feature de dirtySource si la tuviese y todos los poligonos del vector de poligonos
@@ -1095,7 +1061,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                         }).fail(function (error) {
                             console.log(error);
-                            notification.alert('Error', error.message, 'Continue');
+                            notification.exception(error);
                         });
                     }
 
@@ -1133,7 +1099,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 //Desactivo el boton de guardar
                                 deactivateSaveButton();
                                 dirty = false;
-
                                 if (typeof callback === "function" && options instanceof Array) {
                                     callback.apply(null, options);
                                 }
@@ -1141,7 +1106,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                         }).fail(function (error) {
                             console.log(error);
-                            notification.alert('Error', error.message, 'Continue');
+                            notification.exception(error);
                         });
                     }
 
@@ -1188,7 +1153,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     }).on("click", function () {
                         $(this).autocomplete("search", $(this).value);
                     });
-
                     $("#addRiddle").on('click', function () {
                         if (dirty) {
                             saveRiddles(dirtyStage, originalStage, idScavengerhunt, newFormRiddleEntry, [idRoad, idModule], idLock);
@@ -1204,7 +1168,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             newFormRoadEntry(idModule);
                         }
                     });
-
                     $("#removeFeature").on('click', function () {
 
                         notification.confirm('Estas seguro?',
@@ -1225,11 +1188,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         saveRiddles(dirtyStage, originalStage, idScavengerhunt, null, null, idLock);
                     });
                     $("#riddleList").on('click', '.ui-icon-info, .ui-icon-alert', function () {
-                        debugger;
                         var id = $(this).data('id');
-                        //open dialogue
+                        // Open dialogue.
                         $(id).dialog("open");
-                        //remove focus from the buttons
+                        // Remove focus from the buttons.
                         $('.ui-dialog :button').blur();
                     });
                     $("#riddleList").on('click', '.ui-icon-trash', function () {
@@ -1241,7 +1203,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     var idRiddle = parseInt($this_li.attr('idRiddle'));
                                     deleteRiddle(idRiddle, dirtyStage, originalStage,
                                             stage.roads[idRoad].vector, idScavengerhunt, idLock);
-
                                 });
                     });
                     $("#riddleList").on('click', '.ui-icon-pencil', function () {
@@ -1293,8 +1254,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Paro de dibujar si cambio de pista
                         Draw.Polygon.abortDrawing_();
                     });
-
-
                     $("#roadList").on('click', 'li', function (e) {
                         if ($(e.target).is('.handle , .ui-icon')) {
                             e.preventDefault();
@@ -1314,7 +1273,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Busco el idRoad del li que contiene el lapicero seleccionado
 
                         var idRoad = parseInt($(this).parents('li').attr('idRoad'));
-                        //Si estÃƒÆ’Ã†â€™Ãƒâ€ Ã¢â‚¬â„¢ÃƒÆ’Ã¢â‚¬Å¡Ãƒâ€šÃ‚Â¡ sucio guardo el escenario
+                        //Si esta sucio guardo el escenario
                         if (dirty) {
                             saveRiddles(dirtyStage, originalStage, idScavengerhunt, editFormRoadEntry, [idRoad, idModule], idLock);
                         } else {
@@ -1332,7 +1291,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     deleteRoad(idRoad, dirtyStage, originalStage, idScavengerhunt, idLock);
                                 });
                     });
-
                     map.on('pointermove', function (evt) {
                         if (evt.dragging || Draw.getActive() || !Modify.getActive()) {
                             return;
@@ -1379,11 +1337,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             return message;
                         }
                     };
-
-
-
-
-
                 } // End of function init
             }; // End of init var
             return init;

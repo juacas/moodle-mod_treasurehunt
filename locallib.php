@@ -624,6 +624,14 @@ function add_road_userlist($roads, $data, $userlist, $groupmode) {
     return $roads;
 }
 
+function view_intro($scavengerhunt) {
+    if ($scavengerhunt->alwaysshowdescription ||
+            time() > $scavengerhunt->allowsubmissionsfromdate) {
+        return true;
+    }
+    return false;
+}
+
 function insert_riddle_progress_in_road_userlist($road, $groupmode) {
     global $DB;
     foreach ($road->userlist as $user) {

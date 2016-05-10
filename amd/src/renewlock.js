@@ -4,12 +4,12 @@
  * and open the template in the editor.
  */
 
-define(['jquery', 'core/notification','core/ajax'], function ($, notification, ajax) {
+define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, ajax) {
 
     var repeat;
     var idLockScavenger;
     var renewLock = {
-        renewLockAjax: function (idScavengerhunt,idLock) {
+        renewLockAjax: function (idScavengerhunt, idLock) {
             idLockScavenger = idLock;
             var json = ajax.call([{
                     methodname: 'mod_scavengerhunt_renew_lock',
@@ -20,16 +20,19 @@ define(['jquery', 'core/notification','core/ajax'], function ($, notification, a
                 }]);
             json[0].done(function (response) {
                 console.log(response);
-                //renewLock.stopRenewLockScavengerhunt();
-                //location.reload(true);
+                if (response.status.code) {
+                    debugger;
+                    notification.alert('Error', response.status.msg, 'Continue');
+                    renewLock.stopRenewLockScavengerhunt();
+                }
             }).fail(function (error) {
                 console.log(error);
-                notification.alert('Error', error.message, 'Continue');
+                notification.exception(error);
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
-        renewLockScavengerhunt: function (idScavengerhunt,idLock) {
-            repeat = setInterval(this.renewLockAjax, 90000, idScavengerhunt,idLock);
+        renewLockScavengerhunt: function (idScavengerhunt, idLock) {
+            repeat = setInterval(this.renewLockAjax, 90000, idScavengerhunt, idLock);
         },
         stopRenewLockScavengerhunt: function () {
             clearInterval(repeat);
@@ -37,7 +40,7 @@ define(['jquery', 'core/notification','core/ajax'], function ($, notification, a
         getIdLock: function () {
             return idLockScavenger;
         }
-        
+
     };
     return renewLock;
 });

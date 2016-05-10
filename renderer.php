@@ -65,7 +65,7 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
         if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row($t, array(get_string('attempt', 'scavengerhunt'), get_string('status', 'scavengerhunt')), true);
+            $this->add_table_row($t, array(get_string('attempt', 'scavengerhunt'), get_string('state', 'scavengerhunt')), true);
             foreach ($historical->attempts as $attempt) {
                 if ($attempt->success) {
                     $class = 'successfulattempt';

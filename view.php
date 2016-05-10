@@ -69,6 +69,9 @@ $PAGE->set_pagelayout('standard');
  * $PAGE->set_focuscontrol('some-html-id');
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
+$completion = new completion_info($course);
+$completion->set_module_viewed($cm);
+
 $output = $PAGE->get_renderer('mod_scavengerhunt');
 // Output starts here.
 echo $output->header();
@@ -76,8 +79,9 @@ echo $output->header();
 
 echo $output->heading(format_string($scavengerhunt->name));
 // Conditions to show the intro can change to look for own settings or whatever.
-
-echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
+if (view_intro($scavengerhunt)) {
+    echo $output->box(format_module_intro('scavengerhunt', $scavengerhunt, $cm->id), 'generalbox mod_introbox', 'scavengerhuntintro');
+}
 //$usersummary = new scavengerhunt_grading_summary();
 //echo $output->render($usersummary);
 echo view_users_progress_table($cm, $course->id, $context);
