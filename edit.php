@@ -73,14 +73,12 @@ if(getTotalRoads($scavengerhunt->id)==0){
  * $PAGE->add_body_class('scavengerhunt-'.$somevar);
  */
 if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
-    // Get strings for edit js.
-    $strings = get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'scavengerhunt');
     $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/edit', 'editScavengerhunt', array($id, $cm->instance, $strings, $idLock));
+    $PAGE->requires->js_call_amd('mod_scavengerhunt/edit', 'editScavengerhunt', array($id, $cm->instance, get_strings_edit(), $idLock));
     $PAGE->requires->css('/mod/scavengerhunt/css/ol.css');
 }
 // Output starts here.

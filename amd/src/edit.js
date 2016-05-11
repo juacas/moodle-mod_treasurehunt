@@ -186,7 +186,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
                     //Creo el roadListPanel
                     $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
-                    //Añado los handle custom
+                    //AÃƒÂ±ado los handle custom
                     /*Set control
                      * 
                      * @type edit_L27.ol.style.Style
@@ -913,7 +913,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             vectorOfPolygons.changed();
                             return;
                         }
-                        // Agrego los polígonos a mi objecto que almacena los poligonos seleccionados 
+                        // Agrego los polÃƒÂ­gonos a mi objecto que almacena los poligonos seleccionados 
                         // y tambien agrego al vector al que se le aplica la animacion.
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -1309,6 +1309,11 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             return false;
                         });
                         map.getTargetElement().style.cursor = hit ? 'pointer' : '';
+                    });
+                    // Evento para que funcione bien el boton de cerrar en dispositivos tactiles
+                    $(document).on('touchend','.ui-dialog-titlebar-close',function() {
+                        debugger;
+                        $(this).parent().siblings('.ui-dialog-content').dialog("close");
                     });
                     // /////
                     // CLEARABLE INPUT

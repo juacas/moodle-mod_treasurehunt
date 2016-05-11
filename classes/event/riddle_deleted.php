@@ -44,8 +44,8 @@ class riddle_deleted extends \core\event\base {
      * Init method
      */
     protected function init() {
-        $this->data['crud'] = 'c';
-        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['crud'] = 'd';
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
         $this->data['objecttable'] = 'scavengerhunt_riddles';
     }
 
@@ -68,21 +68,14 @@ class riddle_deleted extends \core\event\base {
             "the glossary activity with course module id '$this->contextinstanceid'.";
     }
 
-   /**
+      /**
      * Get URL related to the action.
      *
      * @return \moodle_url
      */
     public function get_url() {
-        // Entry does not exist any more, returning link to the module view page in the mode it was before deleting entry.
-        $params = array('id' => $this->contextinstanceid);
-        if (isset($this->other['hook'])) {
-            $params['hook'] = $this->other['hook'];
-        }
-        if (isset($this->other['mode'])) {
-            $params['mode'] = $this->other['mode'];
-        }
-        return new \moodle_url("/mod/scavengerhunt/view.php", $params);
+        return new \moodle_url("/mod/scavengerhunt/edit.php",
+                array('id' => $this->contextinstanceid));
     }
 
     /**

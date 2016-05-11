@@ -30,17 +30,18 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
 
     var init = {
         playScavengerhunt: function (strings, cmid, idScavengerhunt, playwithoutmove, lastattempttimestamp, lastroadtimestamp) {
-            var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt');
-            var falloUrl = url.imageUrl('images/fallo', 'scavengerhunt');
-            var markerUrl = url.imageUrl('flag-marker', 'scavengerhunt');
-            var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-            var attempttimestamp = lastattempttimestamp;
-            var roadtimestamp = lastroadtimestamp;
-            var initialize = true;
-            var lastsuccess = {};
-            var interval;
-            var imgloaded = 0, totalimg = 0;
-            var infomsgs = [];
+            var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt'),
+                    falloUrl = url.imageUrl('images/fallo', 'scavengerhunt'),
+                    markerUrl = url.imageUrl('flag-marker', 'scavengerhunt'),
+                    openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
+                    attempttimestamp = lastattempttimestamp,
+                    roadtimestamp = lastroadtimestamp,
+                    initialize = true,
+                    lastsuccess = {},
+                    interval,
+                    imgloaded = 0, totalimg = 0,
+                    infomsgs = [],
+                    changesinattemptshistory = 1;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -336,7 +337,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
-                        debugger;
+                        changesinattemptshistory = 1;
                         // Compruebo si ambos objetos son iguales
                         if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
                             lastsuccess = response.lastsuccess;
@@ -357,7 +358,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             });
                             create_popup('displayupdates', strings["updates"], body);
                         }
-                        // Compruebo si es un multipolygon o acaba de empezar y lo centro
+                        // Compruebo si es un multipolygon o acaba de empezar y lo centro.
                         if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
                             fly_to_extent(map, source.getExtent());
                         }
@@ -574,6 +575,24 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         // initialize map
                         debugger;
                     }
+                } else if (pageId === 'historypage') {
+                    // Compruebo si ha habido cambios desde la ultima vez
+                    if (changesinattemptshistory) {
+                        var $historylist = $("#historylist");
+                        // Lo reinicio
+                        $historylist.html('');
+                        changesinattemptshistory = 0;
+                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon) {
+                             $("<li>" +strings["noattempts"] +"</li>").appendTo($historylist);
+                        } else {
+                            // Anado cada intento
+                            source.forEachFeature(function (feature) {
+                                $("<li>" + feature.get("info") + "</li>").appendTo($historylist);
+                            });
+                        }
+                        $historylist.listview("refresh");
+                        $historylist.trigger("updatelayout");
+                    }
                 }
 
             });
@@ -591,6 +610,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             /*-------------------------------Initialize page -------------*/
             if ($.mobile.autoInitializePage === false) {
                 $("#container").show();
+                // Start with the map page
+                window.location.replace(window.location.href.split("#")[0] + "#mappage");
                 $.mobile.initializePage();
             }
 

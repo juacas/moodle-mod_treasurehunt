@@ -45,7 +45,7 @@ class riddle_created extends \core\event\base {
      */
     protected function init() {
         $this->data['crud'] = 'c';
-        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['edulevel'] = self::LEVEL_TEACHING;
         $this->data['objecttable'] = 'scavengerhunt_riddles';
     }
 
@@ -74,7 +74,7 @@ class riddle_created extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/scavengerhunt/view.php",
+        return new \moodle_url("/mod/scavengerhunt/edit.php",
                 array('id' => $this->contextinstanceid));
     }
 

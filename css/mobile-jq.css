@@ -18,7 +18,7 @@ h1, h2, h3, h4, h5, h6{
     line-height:inherit;
     color:white;
 }
-#autocomplete a,[data-role="popup"] .ui-title{
+.ui-listview>.ui-li-static, .ui-listview>.ui-li-divider, .ui-listview>li>a.ui-btn,[data-role="popup"] .ui-title{
     white-space:normal;
 }
 .portrait, .portrait #mappage {

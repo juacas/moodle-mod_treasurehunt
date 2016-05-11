@@ -45,6 +45,7 @@ $string['overcomefirstriddle'] = 'Para descubrir la primera pista debes comenzar
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['attempt'] = 'Intento';
 $string['historicalattempts'] = 'Historial de intentos';
+$string['history'] = 'Historial';
 $string['noattempts'] = 'No has realizado ningún intento';
 $string['state'] = 'Estado';
 $string['play'] = 'Jugar';

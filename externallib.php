@@ -353,7 +353,7 @@ class mod_scavengerhunt_external_renew_lock extends external_api {
         self::validate_context($context);
         require_capability('mod/scavengerhunt:managescavenger', $context);
         if (isset($idLock)) {
-             if (idLockIsValid($idLock)) {
+            if (idLockIsValid($idLock)) {
                 $idLock = renewLockScavengerhunt($idScavengerhunt, $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
@@ -414,6 +414,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
             'roadtimestamp' => new external_value(PARAM_INT, 'last updated timestamp road'),
             'infomsg' => new external_value(PARAM_RAW, 'array with all strings with attempts since the last stored timestamp'),
             'lastsuccess' => new external_value(PARAM_RAW, 'object with the name and description of the last successful riddle '),
+            'attemptshistory' => new external_value(PARAM_RAW, 'array with the attempts history'),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -434,10 +435,13 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/scavengerhunt:play', $context);
+        // Recojo el grupo y camino al que pertenece
         $params = get_user_group_and_road($USER->id, $cm, $COURSE->id);
+        // Recojo la info de las nuevas pistas descubiertas en caso de existir y los nuevos timestamp si han variado.
         $checkupdates = check_timestamp($attempttimestamp, $cm->groupmode, $params->group_id, $USER->id, $params->idroad);
         $newattempttimestamp = $checkupdates->attempttimestamp;
         $newroadtimestamp = $checkupdates->roadtimestamp;
+        // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa pista. 
         if (!$checkupdates->success && isset($location)) {
             $newattempt = checkRiddle($USER->id, $params->group_id, $params->idroad, geojson_to_object($location), $cm->groupmode, $COURSE);
             $newattempttimestamp = $newattempt->attempttimestamp;
@@ -446,7 +450,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         }
         // Si se han realizado cambios o se esta inicializando
         if ($newattempttimestamp != $attempttimestamp || $newroadtimestamp != $roadtimestamp || $initialize) {
-            list($userriddles, $lastsuccess) = get_user_progress($params->idroad, $cm->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
+            list($userriddles,$lastsuccess) = get_user_progress($params->idroad, $cm->groupmode, $params->group_id, $USER->id, $idScavengerhunt, $context);
         }
         /* $status['code'] = 0;
           $status['msg'] = 'El progreso de usuario se ha cargado con éxito'; */
@@ -457,6 +461,7 @@ class mod_scavengerhunt_external_user_progress extends external_api {
         $result['status'] = $status;
         $result['riddles'] = $userriddles;
         $result['lastsuccess'] = $lastsuccess;
+        $result['attemptshistory'] = $attemptshistory;
         return $result;
     }
 

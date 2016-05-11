@@ -106,8 +106,8 @@ function updateEntryBD(stdClass $entry) {
     $activitytoend = $entry->activitytoend;
     $idRiddle = $entry->id;
     $sql = 'UPDATE mdl_scavengerhunt_riddles SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),activitytoend=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
-    $parms = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $activitytoend, $idRiddle);
-    $DB->execute($sql, $parms);
+    $params = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $activitytoend, $idRiddle);
+    $DB->execute($sql, $params);
 }
 
 function updateRiddleBD(Feature $feature) {
@@ -119,8 +119,8 @@ function updateRiddleBD(Feature $feature) {
     $idRiddle = $feature->getId();
     $geomfuncs = getgeometryfunctions($DB);
     $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle=(?), geom = ' . $geomfuncs['ST_GeomFromText'] . '((?)), timemodified=(?) WHERE mdl_scavengerhunt_riddles.id = (?)';
-    $parms = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
-    $DB->execute($sql, $parms);
+    $params = array($numRiddle, $geometryWKT, $timemodified, $idRiddle);
+    $DB->execute($sql, $params);
     setValidRoad($road_id);
 }
 
@@ -204,9 +204,16 @@ function deleteEntryBD($id) {
     $select = 'riddle_id = ?';
     $DB->delete_records_select($table, $select, $params);
     $sql = 'UPDATE mdl_scavengerhunt_riddles SET num_riddle = num_riddle - 1 WHERE road_id = (?) AND num_riddle > (?)';
-    $parms = array($riddle_result->road_id, $riddle_result->num_riddle);
-    $DB->execute($sql, $parms);
+    $params = array($riddle_result->road_id, $riddle_result->num_riddle);
+    $DB->execute($sql, $params);
     setValidRoad($riddle_result->road_id);
+}
+
+function check_riddle_is_blocked($riddleid) {
+    global $DB;
+    $select = "riddle_id = ? AND success = 1";
+    $params = array($riddleid);
+    return $DB->record_exists_select('scavengerhunt_attempts', $select, $params);
 }
 
 function get_scavengerhunt($idScavengerhunt, $context) {
@@ -364,7 +371,7 @@ function get_user_progress($roadid, $groupmode, $idgroup, $userid, $idScavengerh
     }
     // Recupero las pistas descubiertas y fallos cometidos por el usuario/grupo para esta instancia.
     $query = "SELECT a.timecreated,a.user_id as user ,r.name,IF(a.success=0,NULL,r.id) as id,IF(a.success=0,NULL,r.description) as description" .
-            ",r.num_riddle,  astext(a.locations) as geometry,r.road_id,a.success from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id where a." . $group_type . "=(?) AND a.road_id=(?) ORDER BY r.num_riddle DESC";
+            ",r.num_riddle,  astext(a.locations) as geometry,r.road_id,a.success from {scavengerhunt_riddles} r INNER JOIN {scavengerhunt_attempts} a ON a.riddle_id=r.id where a." . $group_type . "=(?) AND a.road_id=(?) ORDER BY r.num_riddle DESC, a.timecreated DESC";
     $user_progress = $DB->get_records_sql($query, $params);
     // Si no tiene ningun progreso mostrar primera pista del camino para comenzar.
     if (count($user_progress) === 0) {
@@ -374,7 +381,7 @@ function get_user_progress($roadid, $groupmode, $idgroup, $userid, $idScavengerh
         $lastsuccess->name = get_string('start', 'scavengerhunt');
         $lastsuccess->description = get_string('overcomefirstriddle', 'scavengerhunt');
     } else {
-        // Recupero la ultima pista acertada
+         // Recupero la ultima pista acertada. He ordenado la consulta por numero de pista descendiente y luego por tiempo descendiente.
         foreach ($user_progress as $riddle) {
             if ($riddle->success) {
                 $lastsuccess->name = $riddle->name;
@@ -384,7 +391,7 @@ function get_user_progress($roadid, $groupmode, $idgroup, $userid, $idScavengerh
         }
     }
     $geojson = riddles_to_geojson($user_progress, $context, $idScavengerhunt, $userid);
-    return array($geojson, $lastsuccess);
+    return array($geojson,$lastsuccess);
 }
 
 function is_valid_road($roadid) {
@@ -512,8 +519,11 @@ function get_strings_play() {
 
     return get_strings(array("discoveredriddle", "failedlocation", "riddlename",
         "riddledescription", "timelabelfailed",
-        "timelabelsuccess", "searching", "continue"
+        "timelabelsuccess", "searching", "continue", "noattempts"
         , "noresults", "startfromhere", "nomarks", "updates"), "mod_scavengerhunt");
+}
+function get_strings_edit() {
+    return get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'mod_scavengerhunt');
 }
 
 function get_last_timestamps($userid, $groupmode, $idgroup, $roadid) {
@@ -592,6 +602,7 @@ function view_users_progress_table($cm, $courseid, $context) {
     $renderable = new scavengerhunt_users_progress($roads, $cm->groupmode, $cm->id);
     return $output->render($renderable);
 }
+
 
 function set_string_attempt($attempt, $userid) {
     global $DB;

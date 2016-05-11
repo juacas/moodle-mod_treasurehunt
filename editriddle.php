@@ -101,17 +101,12 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         }
         $event->trigger();
 
-        // Actualizo el camino
+        // Actualizo el tiempo de modificacion del camino.
         $road = new stdClass();
         $road->id = $entry->road_id;
         $road->timemodified = time();
         $DB->update_record('scavengerhunt_roads', $road);
-        // Trigger event
-        $eventparams = array(
-            'context' => $context,
-            'objectid' => $road->id,
-        );
-        $event = \mod_scavengerhunt\event\road_updated::create($eventparams)->trigger();
+
 
         redirect($returnurl);
     }

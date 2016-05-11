@@ -47,6 +47,7 @@ $string['attempt'] = 'Attempt';
 $string['state'] = 'State';
 $string['play'] = 'Play';
 $string['historicalattempts'] = 'Historical attempts';
+$string['history'] = 'History';
 $string['noattempts'] = 'You have not made any attempt';
 $string['noroads'] = 'No roads have been added yet';
 $string['noresults'] = 'No results found.';
