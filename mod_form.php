@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -88,7 +89,21 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->setExpanded('groups', true);
         $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'scavengerhunt'));
         $mform->addHelpButton('groupmode', 'groupmode', 'scavengerhunt');
-        
+
+        /*$mform->addElement('header', 'maps', get_string('groups', 'scavengerhunt'));
+        $maps = get_strings(array("googlemaps", "ost"), "scavengerhunt");
+        $group = array();
+        foreach ($maps as $map) {
+            $group[] = $mform->createElement('checkbox', $map, '', $map);
+        }
+        $mform->addGroup($group, $whenname . 'optionsgrp', get_string('review' . $whenname, 'quiz'), null, false);
+        $skillsarray = array(
+            '0' => 'Skill A',
+            '1' => 'Skill B',
+            '2' => 'Skill C'
+        );
+        $mform->addElement('select', 'md_skills', get_string('skills', 'metadata'), $skillsarray);
+        $mform->getElement('md_skills')->setMultiple(true);*/
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
 

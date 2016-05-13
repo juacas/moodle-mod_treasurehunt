@@ -36,12 +36,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                     attempttimestamp = lastattempttimestamp,
                     roadtimestamp = lastroadtimestamp,
-                    initialize = true,
                     lastsuccess = {},
                     interval,
                     imgloaded = 0, totalimg = 0,
                     infomsgs = [],
-                    changesinattemptshistory = 1;
+                    changesinattemptshistory = false,
+                    changesinlastsuccess = false,
+                    fitmap = false;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -138,19 +139,34 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             var source = new ol.source.Vector({
                 projection: 'EPSG:3857'
             });
-            var vector = new ol.layer.Vector({
+            var attemptslayer = new ol.layer.Vector({
                 source: source,
                 style: style_function
                         /*updateWhileAnimating: true,
                          updateWhileInteracting: true*/
             });
+            var aeriallayer = new ol.layer.Tile({
+                visible: false,
+                source: new ol.source.BingMaps({
+                    key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
+                    imagerySet: 'AerialWithLabels',
+                    maxZoom: 19
+                            // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                            // "no photos at this zoom level" tiles
+                            // maxZoom: 19
+                })});
+            aeriallayer.set("name", strings["aerialview"]);
+            var streetlayer = new ol.layer.Tile({
+                source: new ol.source.OSM()
+            });
+            streetlayer.set("name", strings["roadview"]);
             var view = new ol.View({
                 center: [0, 0],
                 zoom: 2,
                 minZoom: 2
             });
             var select = new ol.interaction.Select({
-                layers: [vector],
+                layers: [attemptslayer],
                 style: selectStyleFunction,
                 filter: function (feature, layer) {
                     if (feature.get('numRiddle') === 0) {
@@ -185,23 +201,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     features: [markerFeature]
                 })
             });
+            layers = [aeriallayer, streetlayer, attemptslayer, userPosition, markerVector];
             //Nuevo zoom personalizado
             var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
             var map = new ol.Map({
-                layers: [new ol.layer.Tile({
-                        visible: false,
-                        source: new ol.source.BingMaps({
-                            key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
-                            imagerySet: 'AerialWithLabels',
-                            maxZoom: 19
-                                    // use maxZoom 19 to see stretched tiles instead of the BingMaps
-                                    // "no photos at this zoom level" tiles
-                                    // maxZoom: 19
-                        })}),
-                    new ol.layer.Tile({
-                        source: new ol.source.OSM()
-                    }), vector, userPosition, markerVector
-                ],
+                layers: layers,
                 controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
                 target: 'map',
                 view: view
@@ -209,6 +213,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                          loadTilesWhileInteracting: true*/
             });
             map.addInteraction(select);
+            // Inicializo
+            //Si quiero que se actualicen cada 20 seg
+            renew_source(false, true);
+            interval = setInterval(function () {
+                renew_source(false, false);
+            }, 20000);
+            // Inicializo la pagina de capas
+            map.getLayers().forEach(function (layer, i) {
+                if (layer instanceof ol.layer.Tile) {
+                    add_layer_to_list(layer);
+                }
+            });
+
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
                 var numRiddle = feature.get('numRiddle');
@@ -337,16 +354,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
-                        changesinattemptshistory = 1;
-                        // Compruebo si ambos objetos son iguales
-                        if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
-                            lastsuccess = response.lastsuccess;
-                            $("#lastsuccessname").text(lastsuccess.name);
-                            $("#lastsuccessdescription").html(lastsuccess.description);
-                            $("#collapsibleset").collapsibleset("refresh");
-                            $("#infopanel").panel("open");
-                            $("#lastsuccess").collapsible("expand");
-                        }
+                        changesinattemptshistory = true;
                         if (response.infomsg.length > 0) {
                             var body = '';
                             infomsgs.forEach(function (msg) {
@@ -358,13 +366,26 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             });
                             create_popup('displayupdates', strings["updates"], body);
                         }
-                        // Compruebo si es un multipolygon o acaba de empezar y lo centro.
+                        // Compruebo si ambos objetos son iguales
+                        if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
+                            lastsuccess = response.lastsuccess;
+                            changesinlastsuccess = true;
+                        }
+                        // Compruebo si es un multipolygon o se esta inicializando y lo centro.
                         if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
-                            fly_to_extent(map, source.getExtent());
+                            fitmap = true;
                         }
                         if (location) {
                             $.mobile.loading("hide");
                             toast(response.status.msg);
+                        }
+                        var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
+                        if (pageId === 'mappage') {
+                            set_lastsuccess();
+                            fit_map_to_source();
+
+                        } else if (pageId === 'historypage') {
+                            set_attempts_history();
                         }
 
                         //add_msg_to_info_panel(source);
@@ -375,48 +396,49 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     clearInterval(interval);
                 });
             }
-            function initLayerList() {
-                $('#layerspage').page();
-                $('<li>', {
-                    "data-role": "list-divider",
-                    text: "Vista del Mapa"
-                })
-                        .appendTo('#layerslist');
-                var baseLayers = map.getLayersBy("isBaseLayer", true);
-                $.each(baseLayers, function () {
-                    add_layer_to_list(this);
-                });
-                $('<li>', {
-                    "data-role": "list-divider",
-                    text: "Capas"
-                })
-                        .appendTo('#layerslist');
-                var overlayLayers = map.getLayersBy("isBaseLayer", false);
-                $.each(overlayLayers, function () {
-                    switch (this.name) {
-                        case 'vector':
-                        case 'Tesoro:Editable':
-                        case 'Markers':
-                            break;
-                        default:
-                            if (this.name.indexOf('OpenLayers_Control') == -1) {
-                                add_layer_to_list(this);
-                            }
+            function fit_map_to_source() {
+                if (fitmap) {
+                    setTimeout(function () {
+                        fly_to_extent(map, source.getExtent());
+                    }, 500);
+                    fitmap = false;
+                }
+            }
+            function set_lastsuccess() {
+                if (changesinlastsuccess) {
+                    $("#lastsuccessname").text(lastsuccess.name);
+                    $("#lastsuccessdescription").html(lastsuccess.description);
+                    $("#collapsibleset").collapsibleset("refresh");
+                    $("#infopanel").panel("open");
+                    $("#lastsuccess").collapsible("expand");
+                    changesinlastsuccess = false;
+                }
+            }
+            function set_attempts_history() {
+                // Compruebo si ha habido cambios desde la ultima vez
+                if (changesinattemptshistory) {
+                    var $historylist = $("#historylist");
+                    // Lo reinicio
+                    $historylist.html('');
+                    changesinattemptshistory = false;
+                    if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon) {
+                        $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
+                    } else {
+
+                        var attempts = source.getFeatures();
+                        // Ordeno los intentos por fecha
+                        attempts.sort(function (a, b) {
+                            return (a.get('date') > b.get('date')) ? 1 : ((a.get('date') < b.get('date')) ? -1 : 0);
+                        });
+
+                        // Anado cada intento
+                        attempts.forEach(function (feature) {
+                            $("<li>" + feature.get("info") + "</li>").appendTo($historylist);
+                        });
                     }
-                });
-                $('#layerslist').listview('refresh');
-                map.events.register("addlayer", this, function (e) {
-                    switch (e.layer.name) {
-                        case 'OpenLayers.Handler.Polygon':
-                        case 'Pistas nuevo escenario':
-                            break;
-                        default:
-                            if (e.layer.name.indexOf('OpenLayers_Control') == -1) {
-                                add_layer_to_list(e.layer);
-                            }
-                    }
-                    $("#layerslist").listview("refresh");
-                });
+                    $historylist.listview("refresh");
+                    $historylist.trigger("updatelayout");
+                }
             }
 
             function add_layer_to_list(layer) {
@@ -425,7 +447,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     "class": layer.getVisible() ? "checked" : "unchecked"
                 })
                         .append($('<a />', {
-                            text: 'layer.name'
+                            text: layer.get("name")
                         })
                                 .click(function () {
                                     if (layer instanceof ol.layer.Tile) {
@@ -497,9 +519,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             new ol.geom.Point(coordinates) : null);
                 }
             });
-            map.getLayers().forEach(function (layer, i) {
-                add_layer_to_list(layer);
-            });
             $("#autocomplete").on("filterablebeforefilter", function (e, data) {
                 var $ul = $(this),
                         value = $(data.input).val(),
@@ -559,39 +578,18 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             $(window).on("pagecontainershow resize", function (event, ui) {
                 var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {
-                    if (map instanceof ol.Map) {
+                    if (event.type === "resize") {
                         setTimeout(function () {
                             map.updateSize();
                         }, 200);
-                        if (initialize) {
-                            initialize = false;
-                            //Si quiero que se actualicen cada 20 seg
-                            renew_source(false, true);
-                            interval = setInterval(function () {
-                                renew_source(false, false);
-                            }, 20000);
-                        }
                     } else {
-                        // initialize map
-                        debugger;
+                        map.updateSize();
+                        set_lastsuccess();
+                        fit_map_to_source();
                     }
                 } else if (pageId === 'historypage') {
-                    // Compruebo si ha habido cambios desde la ultima vez
-                    if (changesinattemptshistory) {
-                        var $historylist = $("#historylist");
-                        // Lo reinicio
-                        $historylist.html('');
-                        changesinattemptshistory = 0;
-                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon) {
-                             $("<li>" +strings["noattempts"] +"</li>").appendTo($historylist);
-                        } else {
-                            // Anado cada intento
-                            source.forEachFeature(function (feature) {
-                                $("<li>" + feature.get("info") + "</li>").appendTo($historylist);
-                            });
-                        }
-                        $historylist.listview("refresh");
-                        $historylist.trigger("updatelayout");
+                    if (event.type === 'pagecontainershow') {
+                        set_attempts_history();
                     }
                 }
 
@@ -611,7 +609,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             if ($.mobile.autoInitializePage === false) {
                 $("#container").show();
                 // Start with the map page
-                window.location.replace(window.location.href.split("#")[0] + "#mappage");
+                //window.location.replace(window.location.href.split("#")[0] + "#mappage");
                 $.mobile.initializePage();
             }
 

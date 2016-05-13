@@ -88,7 +88,7 @@ $scavengerhunt_output->name = $scavengerhunt->name;
 $scavengerhunt_output->description = format_module_intro('scavengerhunt', $scavengerhunt, $cm->id);
 $scavengerhunt_output->id = $cm->id;
 
-$renderable = new \mod_scavengerhunt\output\play_page($scavengerhunt_output, 'some text2');
+$renderable = new \mod_scavengerhunt\output\play_page($scavengerhunt_output);
 echo $output->render($renderable);
 // Finish the page.
 echo $output->footer();

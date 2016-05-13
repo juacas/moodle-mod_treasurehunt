@@ -344,7 +344,7 @@ function riddles_to_geojson($riddles_result, $context, $idScavengerhunt, $userid
             $attr['blocked'] = intval($riddle->blocked);
         }
         if (property_exists($riddle, 'timecreated')) {
-            $attr['date'] = (is_null($riddle->timecreated)) ? null : userdate($riddle->timecreated);
+            $attr['date'] = $riddle->timecreated;
         }
         if (property_exists($riddle, 'success')) {
             $attr['success'] = ((is_null($riddle->success)) ? null : intval($riddle->success));
@@ -519,7 +519,7 @@ function get_strings_play() {
 
     return get_strings(array("discoveredriddle", "failedlocation", "riddlename",
         "riddledescription", "timelabelfailed",
-        "timelabelsuccess", "searching", "continue", "noattempts"
+        "timelabelsuccess", "searching", "continue", "noattempts","aerialview","roadview"
         , "noresults", "startfromhere", "nomarks", "updates"), "mod_scavengerhunt");
 }
 function get_strings_edit() {
