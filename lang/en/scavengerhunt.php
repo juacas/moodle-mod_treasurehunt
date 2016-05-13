@@ -50,6 +50,7 @@ $string['historicalattempts'] = 'Historical attempts';
 $string['history'] = 'History';
 $string['aerialview'] = 'Aerial';
 $string['roadview'] = 'Road';
+$string['mapview'] = 'Map view';
 $string['noattempts'] = 'You have not made any attempt';
 $string['noroads'] = 'No roads have been added yet';
 $string['noresults'] = 'No results found.';

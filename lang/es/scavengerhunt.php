@@ -47,6 +47,7 @@ $string['attempt'] = 'Intento';
 $string['historicalattempts'] = 'Historial de intentos';
 $string['aerialview'] = 'Aérea';
 $string['roadview'] = 'Callejero';
+$string['mapview'] = 'Vista del mapa';
 $string['ost'] = 'Open Street Maps';
 $string['noattempts'] = 'No has realizado ningún intento';
 $string['state'] = 'Estado';

@@ -12,8 +12,12 @@ body {
     height:calc(100% - 104px); 
     top: 53px;
 }
-
-
+.successfulattempt1::after{
+    background-color: #5cd053 !important;
+}
+.failedattempt1::after{
+    background-color:#d45252 !important;
+}
 h1, h2, h3, h4, h5, h6{
     line-height:inherit;
     color:white;

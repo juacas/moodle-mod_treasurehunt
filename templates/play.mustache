@@ -56,7 +56,7 @@
             </div>
             <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
                 {{#hasdescription}}
-                <div data-role="collapsible">
+                <div data-role="collapsible" data-theme="a" data-iconpos="right">
                     <h3>{{scavengerhunt.name}}</h3>
                     <div>
                         <p>{{{scavengerhunt.description}}}</p>
@@ -133,8 +133,7 @@
         </div>
         <div data-role="content">
             <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
-                <li data-role="list-divider" id="baseLayer">Vista del mapa</li>
-                <li data-role="list-divider" id="overlayLayer">Capas</li>
+                <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_scavengerhunt{{/str}}</li>
             </ul>
         </div>
     </div>

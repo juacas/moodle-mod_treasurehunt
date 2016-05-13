@@ -156,10 +156,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             // maxZoom: 19
                 })});
             aeriallayer.set("name", strings["aerialview"]);
-            var streetlayer = new ol.layer.Tile({
+            var roadlayer = new ol.layer.Tile({
                 source: new ol.source.OSM()
             });
-            streetlayer.set("name", strings["roadview"]);
+            roadlayer.set("name", strings["roadview"]);
+            var layergroup = new ol.layer.Group({layers: [aeriallayer, roadlayer]});
             var view = new ol.View({
                 center: [0, 0],
                 zoom: 2,
@@ -201,7 +202,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     features: [markerFeature]
                 })
             });
-            layers = [aeriallayer, streetlayer, attemptslayer, userPosition, markerVector];
+            layers = [layergroup, attemptslayer, userPosition, markerVector];
             //Nuevo zoom personalizado
             var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
             var map = new ol.Map({
@@ -220,11 +221,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 renew_source(false, false);
             }, 20000);
             // Inicializo la pagina de capas
-            map.getLayers().forEach(function (layer, i) {
-                if (layer instanceof ol.layer.Tile) {
-                    add_layer_to_list(layer);
-                }
-            });
+            add_layergroup_to_list(layergroup);
 
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
@@ -424,16 +421,16 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon) {
                         $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
                     } else {
-
                         var attempts = source.getFeatures();
                         // Ordeno los intentos por fecha
                         attempts.sort(function (a, b) {
                             return (a.get('date') > b.get('date')) ? 1 : ((a.get('date') < b.get('date')) ? -1 : 0);
                         });
-
                         // Anado cada intento
                         attempts.forEach(function (feature) {
-                            $("<li>" + feature.get("info") + "</li>").appendTo($historylist);
+                            //$("<li class='"+(feature.get("success")?'successfulattempt':'failedattempt')+"'>" + feature.get("info") + "</li>").appendTo($historylist);
+                            $("<li><span class='ui-btn-icon-left " + (feature.get("success") ? 'ui-icon-check successfulattempt1' : 'ui-icon-delete failedattempt1') + "' style='position:relative'></span>" + feature.get("info") + "</li>").appendTo($historylist);
+
                         });
                     }
                     $historylist.listview("refresh");
@@ -441,38 +438,31 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 }
             }
 
-            function add_layer_to_list(layer) {
-                var item = $('<li>', {
-                    "data-icon": "check",
-                    "class": layer.getVisible() ? "checked" : "unchecked"
-                })
-                        .append($('<a />', {
-                            text: layer.get("name")
-                        })
-                                .click(function () {
-                                    if (layer instanceof ol.layer.Tile) {
-                                        map.getLayers().forEach(function (l) {
-                                            if (l instanceof ol.layer.Tile) {
-                                                if (l === layer) {
-                                                    l.setVisible(true);
-                                                } else {
-                                                    l.setVisible(false);
-                                                }
+            function add_layergroup_to_list(layergroup) {
+                layergroup.getLayers().forEach(function (layer) {
+                    var item = $('<li>', {
+                        "data-icon": "check",
+                        "class": layer.getVisible() ? "checked" : "unchecked"
+                    })
+                            .append($('<a />', {
+                                text: layer.get("name")
+                            })
+                                    .click(function () {
+                                        layergroup.getLayers().forEach(function (l) {
+                                            if (l === layer) {
+                                                l.setVisible(true);
+                                            } else {
+                                                l.setVisible(false);
                                             }
                                         });
-                                    } else {
-                                        layer.setVisible(!layer.getVisible());
-                                    }
-                                })
-                                );
-                layer.on('change:visible', function () {
-                    $(item).toggleClass('checked unchecked');
-                });
-                if (layer instanceof ol.layer.Tile) {
+                                    })
+                                    );
+                    layer.on('change:visible', function () {
+                        $(item).toggleClass('checked unchecked');
+                    });
                     item.insertAfter('#baseLayer');
-                } else {
-                    item.insertAfter('#overlayLayer');
-                }
+                });
+
             }
 
 
@@ -529,6 +519,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         text: strings['searching'],
                         textVisible: true});
                     openStreetMapGeocoder.geocode(value, function (response) {
+                        debugger;
                         if (response[0] === false) {
                             $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
                         } else {
@@ -664,11 +655,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 // Need it for calculate popup's dimesions when popup contents an image.
                 totalimg = $(content).find('img');
                 if (totalimg.length > 0) {
+                    $.mobile.loading("show");
                     totalimg.one('load', function () {
                         imgloaded++;
                         if (totalimg.length === imgloaded) {
                             open_popup(popup);
                             imgloaded = 0;
+                            $.mobile.loading("hide");
                         }
                     });
                 } else {
