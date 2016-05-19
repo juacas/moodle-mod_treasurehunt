@@ -130,7 +130,7 @@ class mod_scavengerhunt_external_update_riddles extends external_api {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
-                    updateRiddleBD($feature);
+                    update_geometry_and_position_of_riddle($feature);
                     // Trigger update riddle event.
                     $eventparams = array(
                         'context' => $context,
@@ -209,7 +209,7 @@ class mod_scavengerhunt_external_delete_riddle extends external_api {
         require_capability('mod/scavengerhunt:managescavenger', $context);
         require_capability('mod/scavengerhunt:editriddle', $context);
         if (idLockIsValid($idLock)) {
-            deleteEntryBD($idRiddle);
+            delete_riddle($idRiddle);
             // Trigger deleted riddle event.
             $eventparams = array(
                 'context' => $context,

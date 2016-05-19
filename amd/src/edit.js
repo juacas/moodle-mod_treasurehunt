@@ -621,7 +621,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 //agrego los vectores a cada camino
                                 for (var road in stage.roads) {
                                     if (stage.roads.hasOwnProperty(road)) {
-                                        addRoad2ListPanel(stage.roads[road].id, stage.roads[road].name);
+                                        addRoad2ListPanel(stage.roads[road].id, stage.roads[road].name,
+                                                stage.roads[road].blocked);
                                         vector = new ol.layer.Vector({
                                             source: new ol.source.Vector({
                                                 projection: 'EPSG:3857'
@@ -649,7 +650,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     var numRiddle = feature.get('numRiddle');
                                     var name = feature.get('name');
                                     var description = feature.get('description');
-                                    var blocked = feature.get('blocked');
+                                    var blocked = stage.roads[idRoad].blocked;
                                     for (var i = 0; i < polygons.length; i++) {
                                         var newFeature = new ol.Feature(feature.getProperties());
                                         newFeature.setProperties({
@@ -680,7 +681,12 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 for (var road in stage.roads) {
                                     if (stage.roads.hasOwnProperty(road)) {
                                         idRoad = road;
-                                        selectRoad(road, stage.roads[road].vector, map);
+                                        if (stage.roads[idRoad].blocked) {
+                                            deactivateAddRiddle();
+                                        } else {
+                                            activateAddRiddle();
+                                        }
+                                        selectRoad(idRoad, stage.roads[idRoad].vector, map);
                                         break;
                                     }
                                 }
@@ -726,16 +732,16 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             $('#dialoginfo' + idRiddle).dialog({
                                 maxHeight: 500,
                                 autoOpen: false
-                                });
+                            });
                         } else {
                             console.log('El li con ' + idRiddle + ' no ha podido crearse porque ya existia uno');
                         }
                     }
 
-                    function addRoad2ListPanel(idRoad, name) {
+                    function addRoad2ListPanel(idRoad, name, blocked) {
                         //Si no existe lo agrego
                         if ($('#roadList li[idRoad="' + idRoad + '"]').length < 1) {
-                            var li = $('<li idRoad="' + idRoad + '"/>').appendTo($("#roadList"));
+                            var li = $('<li idRoad="' + idRoad + '" blocked="' + blocked + '"/>').appendTo($("#roadList"));
                             li.addClass("ui-corner-all").append("<div class='nameRoad'>" + name + "</div>")
                                     .append("<div class='modifyRoad'><span class='ui-icon ui-icon-trash'></span>" +
                                             "<span class='ui-icon ui-icon-pencil'></span></div>");
@@ -819,7 +825,12 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     function deactivateDeleteButton() {
                         $('#removeFeature').button("option", "disabled", true);
                     }
-
+                    function activateAddRiddle() {
+                        $('#addRiddle').button("option", "disabled", false);
+                    }
+                    function deactivateAddRiddle() {
+                        $('#addRiddle').button("option", "disabled", true);
+                    }
                     function deactivateEdition() {
                         var radioButton = $("#edition").find("input:radio");
                         radioButton.attr('checked', false).button("refresh");
@@ -1106,7 +1117,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             }
                         }).fail(function (error) {
                             console.log(error);
-                            notification.exception(error);
+                            notification.alert('Error', error.message, 'Continue');
                         });
                     }
 
@@ -1266,6 +1277,11 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Paro de dibujar si cambio de camino
                         Draw.Polygon.abortDrawing_();
                         idRoad = $(this).attr('idRoad');
+                        if (parseInt($(this).attr('blocked'))) {
+                            deactivateAddRiddle();
+                        } else {
+                            activateAddRiddle();
+                        }
                         selectRoad(idRoad, stage.roads[idRoad].vector, map);
                         deactivateEdition();
                     });
@@ -1311,7 +1327,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         map.getTargetElement().style.cursor = hit ? 'pointer' : '';
                     });
                     // Evento para que funcione bien el boton de cerrar en dispositivos tactiles
-                    $(document).on('touchend','.ui-dialog-titlebar-close',function() {
+                    $(document).on('touchend', '.ui-dialog-titlebar-close', function () {
                         debugger;
                         $(this).parent().siblings('.ui-dialog-content').dialog("close");
                     });

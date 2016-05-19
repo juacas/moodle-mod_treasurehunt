@@ -32,8 +32,8 @@ require_capability('mod/scavengerhunt:addroad', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
-if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
-    $idLock = renewLockScavengerhunt($cm->instance,$USER->id);
+if (!isLockScavengerhunt($cm->instance, $USER->id)) {
+    $idLock = renewLockScavengerhunt($cm->instance, $USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
@@ -102,17 +102,15 @@ if (!$lock = isLockScavengerhunt($cm->instance,$USER->id)) {
         $event->trigger();
         redirect($returnurl);
     }
+} else {
+    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl, get_username_blocking_edition($scavengerhunt->id));
 }
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
-if ($lock) {
-$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl,get_username_blocking_edition($scavengerhunt->id));
-} else {
-    echo $OUTPUT->heading(format_string($scavengerhunt->name));
-    $mform->display();
-}
+echo $OUTPUT->heading(format_string($scavengerhunt->name));
+$mform->display();
 echo $OUTPUT->footer();
 
 

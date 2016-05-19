@@ -61,6 +61,8 @@ function scavengerhunt_supports($feature) {
             return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
+        case FEATURE_COMPLETION_TRACKS_VIEWS:
+            return true;
         default:
             return null;
     }
@@ -231,6 +233,7 @@ function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart
 function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
     
 }
+
 /**
  * Add a get_coursemodule_info function in case any assignment type wants to add 'extra' information
  * for the course (see resource).
@@ -245,9 +248,9 @@ function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, 
 function scavengerhunt_get_coursemodule_info($coursemodule) {
     global $CFG, $DB;
 
-    $dbparams = array('id'=>$coursemodule->instance);
+    $dbparams = array('id' => $coursemodule->instance);
     $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat';
-    if (! $scavengerhunt = $DB->get_record('scavengerhunt', $dbparams, $fields)) {
+    if (!$scavengerhunt = $DB->get_record('scavengerhunt', $dbparams, $fields)) {
         return false;
     }
 
@@ -261,6 +264,7 @@ function scavengerhunt_get_coursemodule_info($coursemodule) {
     }
     return $result;
 }
+
 /**
  * Function to be run periodically according to the moodle cron
  *
@@ -480,10 +484,10 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
  * @param stdClass $course current course record
  * @param stdClass $module current scavengerhunt instance record
  * @param cm_info $cm course module information
- 
-function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
-    // TODO Delete this function and its docblock, or implement it.
-}*/
+
+  function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
+  // TODO Delete this function and its docblock, or implement it.
+  } */
 
 /**
  * Extends the settings navigation with the scavengerhunt settings
@@ -495,7 +499,7 @@ function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $cour
  * @param navigation_node $scavengerhuntnode scavengerhunt administration node
  */
 function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode = null) {
-    
+
     global $PAGE;
     // We want to add these new nodes after the Edit settings node, and before the
     // Locally assigned roles node. Of course, both of those are controlled by capabilities.
@@ -509,12 +513,7 @@ function scavengerhunt_extend_settings_navigation(settings_navigation $settingsn
     }
 
     if (has_capability('mod/scavengerhunt:managescavenger', $PAGE->cm->context)) {
-        $node = navigation_node::create(get_string('editscavengerhunt', 'scavengerhunt'),
-                new moodle_url('/mod/scavengerhunt/edit.php', array('id'=>$PAGE->cm->id)),
-                navigation_node::TYPE_SETTING, null, 'mod_scavengerhunt_edit',
-                new pix_icon('t/edit', ''));
+        $node = navigation_node::create(get_string('editscavengerhunt', 'scavengerhunt'), new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_scavengerhunt_edit', new pix_icon('t/edit', ''));
         $scavengerhuntnode->add_node($node, $beforekey);
     }
 }
-
-

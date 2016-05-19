@@ -44,7 +44,8 @@ class riddle_form extends moodleform {
     public function definition() {
 
         $mform = $this->_form;
-        $descriptionoptions = $this->_customdata['descriptionoptions'];
+        $formid = $mform->_attributes['id'];
+        $editoroptions = $this->_customdata['descriptionoptions'];
         $currententry = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
 
@@ -63,31 +64,108 @@ class riddle_form extends moodleform {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'description_editor', get_string('riddle_editor', 'scavengerhunt'), null, $descriptionoptions);
+        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'scavengerhunt'), null, $editoroptions);
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
+
+        $mform->addElement('header', 'overcomeriddlesrestrictions', get_string('overcomeriddlerestrictions', 'scavengerhunt'));
         // Add restrict access completion activity.
         $options = array();
         $options[0] = get_string('none');
         foreach ($completionactivities as $option) {
             $options[$option->id] = $option->name;
         }
-        $mform->addElement('header', 'availabilityconditionsheader', get_string('restrictaccess', 'scavengerhunt'));
         $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'scavengerhunt'), $options);
         $mform->addHelpButton('activitytoend', 'activitytoend', 'scavengerhunt');
 
-        // Añado los campos ocultos id y newFeature.
+        // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco: llamo al cancel que no necesita comprobar la validacion
+        // ... y le doy un valor a una variable escondida.
+        $form = "document.forms['" . $formid . "']";
+        $javascript = "$form.reloaded.value='1';$form.showquestion.value= $form.addsimplequestion.value;$form.cancel.click();"; //create javascript: set reloaded field to "1" 
+        $attributes = array("onChange" => $javascript); // set onChange attribute
+        $select = $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'scavengerhunt'), $attributes);
+        $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'scavengerhunt');
+        $select->setSelected('0');
+
+        if (optional_param('showquestion', 0, PARAM_INT)) {
+            // Imprimo el editor de preguntas
+            $mform->addElement('editor', 'question_editor', get_string('question', 'scavengerhunt'), null, $editoroptions);
+            $mform->setType('question_editor', PARAM_RAW);
+            $mform->addRule('question_editor', null, 'required', null, 'client');
+            // Imprimo las respuestas
+            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, 2, 2);
+        }
+
+        // Añado los campos ocultos.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'road_id');
         $mform->setType('road_id', PARAM_INT);
+        // Necesario para recargar la pagina
+        $mform->addElement('hidden', 'reloaded');
+        $mform->setType('reloaded', PARAM_INT);
+        $mform->setConstant('reloaded', 0);
+        // Necesario para mostrar la pregunta
+        $mform->addElement('hidden', 'showquestion');
+        $mform->setType('showquestion', PARAM_INT, 0);
+
+
 
         // Add standard buttons, common to all modules. Botones.
-        $this->add_action_buttons($cancel = true);
+        $this->add_action_buttons();
 
         $this->set_data($currententry);
+    }
+
+    /**
+     * Get the list of form elements to repeat, one for each answer.
+     * @param object $mform the form being built.
+     * @param $label the label to use for each option.
+     * @param $editoroptions the possible grades for each answer.
+     * @param $repeatedoptions reference to array of repeated options to fill
+     * @param $answersoption reference to return the name of $question->options
+     *      field holding an array of answers
+     * @return array of form fields.
+     */
+    protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions, &$answersoption) {
+        $repeated = array();
+        $repeated[] = $mform->createElement('editor', 'answer', $label, array('rows' => 1), $editoroptions);
+        $repeated[] = $mform->createElement('advcheckbox', 'groupmode', '', get_string('groupmode', 'scavengerhunt'));
+        $repeatedoptions['answer']['type'] = PARAM_RAW;
+        $repeatedoptions['fraction']['default'] = 0;
+        $answersoption = 'answers';
+        return $repeated;
+    }
+
+    /**
+     * Add a set of form fields, obtained from get_per_answer_fields, to the form,
+     * one for each existing answer, with some blanks for some new ones.
+     * @param object $mform the form being built.
+     * @param $label the label to use for each option.
+     * @param $editoroptions the possible grades for each answer.
+     * @param $minoptions the minimum number of answer blanks to display.
+     *      Default QUESTION_NUMANS_START.
+     * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
+     */
+    protected function add_per_answer_fields(&$mform, $label, $editoroptions, $minoptions = 2, $addoptions = 0) {
+        global $CFG;
+        $answersoption = '';
+        $repeatedoptions = array();
+        $repeated = $this->get_per_answer_fields($mform, $label, $editoroptions, $repeatedoptions, $answersoption);
+
+        if (isset($this->question->options)) {
+            $repeatsatstart = count($this->question->options->$answersoption);
+        } else {
+            $repeatsatstart = $minoptions;
+        }
+        $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions, 'noanswers', 'addanswers', $addoptions);
+    }
+
+    public function is_reloaded() {
+
+        return optional_param('reloaded', 0, PARAM_INT);
     }
 
 }

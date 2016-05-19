@@ -104,6 +104,13 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
         if (!count($progress->roadsusersprogress)) {
             $o .= $this->output->notification(get_string('noroads', 'scavengerhunt'));
         } else {
+            if ($progress->warngroupedusers) {
+                if ($progress->groupmode) {
+                    $o .= $this->output->notification(get_string('warnusersgrouping', 'scavengerhunt'));
+                } else {
+                    $o .= $this->output->notification(get_string('warnusersgroup', 'scavengerhunt'));
+                }
+            }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 $o .= $this->output->heading($roadusersprogress->name, 4);
                 if ($roadusersprogress->validated) {

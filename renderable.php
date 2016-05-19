@@ -36,18 +36,18 @@ class scavengerhunt_user_historical_attempts implements renderable {
     public $attempts = [];
     public $coursemoduleid = 0;
 
-
     /**
      * constructor
      *
      * @param array $attemptstrings
      */
-    public function __construct($attempts,$coursemoduleid) {
+    public function __construct($attempts, $coursemoduleid) {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
     }
 
 }
+
 /**
  * Renderable grading summary
  * @package   mod_assign
@@ -60,17 +60,18 @@ class scavengerhunt_users_progress implements renderable {
     public $roadsusersprogress = array();
     public $groupmode = 0;
     public $coursemoduleid = 0;
-
+    public $warngroupedusers = false;
 
     /**
      * constructor
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress,$groupmode,$coursemoduleid) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $warngroupedusers) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
+        $this->warngroupedusers = $warngroupedusers;
     }
 
 }

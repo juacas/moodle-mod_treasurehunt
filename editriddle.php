@@ -32,7 +32,7 @@ require_capability('mod/scavengerhunt:addriddle', $context);
 
 $returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
 
-if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
+if (!isLockScavengerhunt($cm->instance, $USER->id)) {
     $idLock = renewLockScavengerhunt($cm->instance, $USER->id);
     $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
 
@@ -43,9 +43,20 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
             print_error('invalidentry');
         }
     } else { // new entry
+        $roadid = required_param('road_id', PARAM_INT);
+        $select = "id = ?";
+        $params = array($roadid);
+        // Compruebo si existe el camino
+        if (!$DB->record_exists_select('scavengerhunt_roads', $select, $params)) {
+            print_error('invalidentry');
+        }
+        // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna pista.
+        if(check_road_is_blocked($roadid)){
+            print_error('notcreateriddle','scavengerhunt',$returnurl);
+        }
         $entry = new stdClass();
         $entry->id = null;
-        $entry->road_id = required_param('road_id', PARAM_INT);
+        $entry->road_id = $roadid;
     }
     $entry->cmid = $cmid;
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
@@ -53,43 +64,46 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         'subdirs' => file_area_contains_subdirs($context, 'mod_scavengerhunt', 'description', $entry->id));
     $entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
-    // List activities with Completion enabled
+// List activities with Completion enabled
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
 
 
     $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
 
-    if ($mform->is_cancelled()) {
-// You need this section if you have a cancel button on your form
-// here you tell php what to do if your user presses cancel
-// probably a redirect is called for!
-// PLEASE NOTE: is_cancelled() should be called before get_data().
+    if ($mform->is_reloaded()) {
+        // Si se ha recargado es porque hemos cambiado algo
+    } else if ($mform->is_cancelled()) {
+        // You need this section if you have a cancel button on your form
+        // here you tell php what to do if your user presses cancel
+        // probably a redirect is called for!
+        // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
     } else if ($entry = $mform->get_data()) {
-        //Actualizamos los campos
+
+        // Actualizamos los campos
         $entry->name = trim($entry->name);
         $entry->description = '';          // updated later
         $entry->descriptionformat = FORMAT_HTML; // updated later
         $entry->descriptiontrust = 0;           // updated later
         if (empty($entry->id)) {
-            $entry->id = insertEntryBD($entry);
+            $entry->id = insert_riddle_form($entry);
             $isnewentry = true;
         } else {
             $isnewentry = false;
         }
 
-        // This branch is where you process validated data.
-        // Do stuff ...
-        // Typically you finish up by redirecting to somewhere where the user
-        // can see what they did.
-        // save and relink embedded images and save attachments
+// This branch is where you process validated data.
+// Do stuff ...
+// Typically you finish up by redirecting to somewhere where the user
+// can see what they did.
+// save and relink embedded images and save attachments
         $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_scavengerhunt', 'description', $entry->id);
 
-        // store the updated value values
-        updateEntryBD($entry);
+// store the updated value values
+        update_riddle_form($entry);
 
-        // Trigger event and update completion (if entry was created).
+// Trigger event and update completion (if entry was created).
         $eventparams = array(
             'context' => $context,
             'objectid' => $entry->id,
@@ -101,7 +115,7 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
         }
         $event->trigger();
 
-        // Actualizo el tiempo de modificacion del camino.
+// Actualizo el tiempo de modificacion del camino.
         $road = new stdClass();
         $road->id = $entry->road_id;
         $road->timemodified = time();
@@ -110,17 +124,15 @@ if (!$lock = isLockScavengerhunt($cm->instance, $USER->id)) {
 
         redirect($returnurl);
     }
+} else {
+    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
+    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl, get_username_blocking_edition($scavengerhunt->id));
 }
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
-if ($lock) {
-$returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl,get_username_blocking_edition($scavengerhunt->id));
-} else {
-    echo $OUTPUT->heading(format_string($scavengerhunt->name));
-    $mform->display();
-}
+echo $OUTPUT->heading(format_string($scavengerhunt->name));
+$mform->display();
 echo $OUTPUT->footer();
 
 

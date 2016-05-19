@@ -13,11 +13,9 @@ class play_page implements renderable, templatable {
 
     /** @var string $sometext Some text to show how to pass data to a template. */
     var $scavengerhunt = null;
-    var $riddle = null;
 
-    public function __construct($scavengerhunt, $riddle) {
+    public function __construct($scavengerhunt) {
         $this->scavengerhunt = $scavengerhunt;
-        $this->riddle = $riddle;
     }
 
     /**
