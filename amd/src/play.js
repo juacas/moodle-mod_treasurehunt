@@ -29,10 +29,10 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playScavengerhunt: function (strings, cmid, idScavengerhunt, playwithoutmove, lastattempttimestamp, lastroadtimestamp) {
-            var pergaminoUrl = url.imageUrl('images/pergamino', 'scavengerhunt'),
-                    falloUrl = url.imageUrl('images/fallo', 'scavengerhunt'),
-                    markerUrl = url.imageUrl('flag-marker', 'scavengerhunt'),
+        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, lastattempttimestamp, lastroadtimestamp) {
+            var pergaminoUrl = url.imageUrl('images/pergamino', 'treasurehunt'),
+                    falloUrl = url.imageUrl('images/fallo', 'treasurehunt'),
+                    markerUrl = url.imageUrl('flag-marker', 'treasurehunt'),
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                     attempttimestamp = lastattempttimestamp,
                     roadtimestamp = lastroadtimestamp,
@@ -170,7 +170,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 layers: [attemptslayer],
                 style: selectStyleFunction,
                 filter: function (feature, layer) {
-                    if (feature.get('numRiddle') === 0) {
+                    if (feature.get('noriddle') === 0) {
                         return false;
                     }
                     return true;
@@ -225,8 +225,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
 
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
-                var numRiddle = feature.get('numRiddle');
-                if (numRiddle === 0) {
+                var noriddle = feature.get('noriddle');
+                if (noriddle === 0) {
                     var fill = new ol.style.Fill({
                         color: 'rgba(255,255,255,0.4)'
                     });
@@ -251,20 +251,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 }
                 if (!feature.get('success')) {
                     failRiddleStyle.getImage().setScale((view.getZoom() / 220));
-                    failRiddleStyle.getText().setText('' + numRiddle);
+                    failRiddleStyle.getText().setText('' + noriddle);
                     return [failRiddleStyle];
                 }
                 defaultRiddleStyle.getImage().setScale((view.getZoom() / 110));
-                defaultRiddleStyle.getText().setText('' + numRiddle);
+                defaultRiddleStyle.getText().setText('' + noriddle);
                 return [defaultRiddleStyle];
             }
             function selectStyleFunction(feature, resolution) {
-                var numRiddle = feature.get('numRiddle');
+                var noriddle = feature.get('noriddle');
                 if (!feature.get('success')) {
-                    failSelectRiddleStyle.getText().setText('' + numRiddle);
+                    failSelectRiddleStyle.getText().setText('' + noriddle);
                     return [failSelectRiddleStyle];
                 }
-                defaultSelectRiddleStyle.getText().setText('' + numRiddle);
+                defaultSelectRiddleStyle.getText().setText('' + noriddle);
                 return [defaultSelectRiddleStyle];
             }
             /*-------------------------------Functions-----------------------------------*/
@@ -332,9 +332,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     $.mobile.loading("show");
                 }
                 var geojson = ajax.call([{
-                        methodname: 'mod_scavengerhunt_user_progress',
+                        methodname: 'mod_treasurehunt_user_progress',
                         args: {
-                            idScavengerhunt: idScavengerhunt,
+                            treasurehuntid: treasurehuntid,
                             attempttimestamp: attempttimestamp,
                             roadtimestamp: roadtimestamp,
                             initialize: initialize,
@@ -687,7 +687,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         '</div><div class="ui-body ui-body-a">' + body +
                         '</div>';
             }
-        } // End of function playScavengerhunt
+        } // End of function playtreasurehunt
     };
     return init;
 });

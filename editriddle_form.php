@@ -16,12 +16,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The main scavengerhunt configuration form
+ * The main treasurehunt configuration form
  *
  * It uses the standard core Moodle formslib. For more info about them, please
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,7 +32,7 @@ require_once("$CFG->libdir/formslib.php");
 /**
  * Module instance settings form
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -53,7 +53,7 @@ class riddle_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('riddlename', 'scavengerhunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('riddlename', 'treasurehunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -64,34 +64,34 @@ class riddle_form extends moodleform {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'scavengerhunt'), null, $editoroptions);
+        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null, $editoroptions);
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
 
-        $mform->addElement('header', 'overcomeriddlesrestrictions', get_string('overcomeriddlerestrictions', 'scavengerhunt'));
+        $mform->addElement('header', 'overcomeriddlesrestrictions', get_string('overcomeriddlerestrictions', 'treasurehunt'));
         // Add restrict access completion activity.
         $options = array();
         $options[0] = get_string('none');
         foreach ($completionactivities as $option) {
             $options[$option->id] = $option->name;
         }
-        $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'scavengerhunt'), $options);
-        $mform->addHelpButton('activitytoend', 'activitytoend', 'scavengerhunt');
+        $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'treasurehunt'), $options);
+        $mform->addHelpButton('activitytoend', 'activitytoend', 'treasurehunt');
 
         // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco: llamo al cancel que no necesita comprobar la validacion
         // ... y le doy un valor a una variable escondida.
         $form = "document.forms['" . $formid . "']";
         $javascript = "$form.reloaded.value='1';$form.showquestion.value= $form.addsimplequestion.value;$form.cancel.click();"; //create javascript: set reloaded field to "1" 
         $attributes = array("onChange" => $javascript); // set onChange attribute
-        $select = $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'scavengerhunt'), $attributes);
-        $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'scavengerhunt');
+        $select = $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'), $attributes);
+        $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
         $select->setSelected('0');
 
         if (optional_param('showquestion', 0, PARAM_INT)) {
             // Imprimo el editor de preguntas
-            $mform->addElement('editor', 'question_editor', get_string('question', 'scavengerhunt'), null, $editoroptions);
-            $mform->setType('question_editor', PARAM_RAW);
-            $mform->addRule('question_editor', null, 'required', null, 'client');
+            $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null, $editoroptions);
+            $mform->setType('questiontext_editor', PARAM_RAW);
+            $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Imprimo las respuestas
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, 2, 2);
         }
@@ -101,8 +101,8 @@ class riddle_form extends moodleform {
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-        $mform->addElement('hidden', 'road_id');
-        $mform->setType('road_id', PARAM_INT);
+        $mform->addElement('hidden', 'roadid');
+        $mform->setType('roadid', PARAM_INT);
         // Necesario para recargar la pagina
         $mform->addElement('hidden', 'reloaded');
         $mform->setType('reloaded', PARAM_INT);
@@ -131,8 +131,8 @@ class riddle_form extends moodleform {
      */
     protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions, &$answersoption) {
         $repeated = array();
-        $repeated[] = $mform->createElement('editor', 'answer', $label, array('rows' => 1), $editoroptions);
-        $repeated[] = $mform->createElement('advcheckbox', 'groupmode', '', get_string('groupmode', 'scavengerhunt'));
+        $repeated[] = $mform->createElement('editor', 'answertext', $label, array('rows' => 1), $editoroptions);
+        $repeated[] = $mform->createElement('advcheckbox', 'groupmode', '', get_string('groupmode', 'treasurehunt'));
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
         $answersoption = 'answers';

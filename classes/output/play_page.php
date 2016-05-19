@@ -2,7 +2,7 @@
 
 // Standard GPL and phpdocs
 
-namespace mod_scavengerhunt\output;
+namespace mod_treasurehunt\output;
 
 use renderable;
 use renderer_base;
@@ -12,10 +12,10 @@ use stdClass;
 class play_page implements renderable, templatable {
 
     /** @var string $sometext Some text to show how to pass data to a template. */
-    var $scavengerhunt = null;
+    var $treasurehunt = null;
 
-    public function __construct($scavengerhunt) {
-        $this->scavengerhunt = $scavengerhunt;
+    public function __construct($treasurehunt) {
+        $this->treasurehunt = $treasurehunt;
     }
 
     /**
@@ -30,8 +30,8 @@ class play_page implements renderable, templatable {
         $user->name = fullname($USER); //$USER->firstname . ' ' . $USER->lastname;
         $user->picture = $output->user_picture($USER, array('link' => false));
         $data->user = $user;
-        $data->scavengerhunt = $this->scavengerhunt;
-        if (empty($this->scavengerhunt->description)) {
+        $data->treasurehunt = $this->treasurehunt;
+        if (empty($this->treasurehunt->description)) {
             $hasdescription = false;
         } else {
             $hasdescription = true;

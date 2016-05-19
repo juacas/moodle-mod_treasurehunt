@@ -17,7 +17,7 @@
 /**
  * Provides the restore activity task class
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,19 +25,19 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot . '/mod/scavengerhunt/backup/moodle2/restore_scavengerhunt_stepslib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/restore_treasurehunt_stepslib.php');
 
 /**
- * Restore task for the scavengerhunt activity module
+ * Restore task for the treasurehunt activity module
  *
  * Provides all the settings and steps to perform complete restore of the activity.
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_scavengerhunt_activity_task extends restore_activity_task {
+class restore_treasurehunt_activity_task extends restore_activity_task {
 
     /**
      * Define (add) particular settings this activity can have
@@ -51,7 +51,7 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
      */
     protected function define_my_steps() {
         // We have just one structure step here.
-        $this->add_step(new restore_scavengerhunt_activity_structure_step('scavengerhunt_structure', 'scavengerhunt.xml'));
+        $this->add_step(new restore_treasurehunt_activity_structure_step('treasurehunt_structure', 'treasurehunt.xml'));
     }
 
     /**
@@ -61,7 +61,7 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
     static public function define_decode_contents() {
         $contents = array();
 
-        $contents[] = new restore_decode_content('scavengerhunt', array('intro'), 'scavengerhunt');
+        $contents[] = new restore_decode_content('treasurehunt', array('intro'), 'treasurehunt');
 
         return $contents;
     }
@@ -73,8 +73,8 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
     static public function define_decode_rules() {
         $rules = array();
 
-        $rules[] = new restore_decode_rule('SCAVENGERHUNTVIEWBYID', '/mod/scavengerhunt/view.php?id=$1', 'course_module');
-        $rules[] = new restore_decode_rule('SCAVENGERHUNTINDEX', '/mod/scavengerhunt/index.php?id=$1', 'course');
+        $rules[] = new restore_decode_rule('treasurehuntVIEWBYID', '/mod/treasurehunt/view.php?id=$1', 'course_module');
+        $rules[] = new restore_decode_rule('treasurehuntINDEX', '/mod/treasurehunt/index.php?id=$1', 'course');
 
         return $rules;
 
@@ -83,15 +83,15 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
     /**
      * Define the restore log rules that will be applied
      * by the {@link restore_logs_processor} when restoring
-     * scavengerhunt logs. It must return one array
+     * treasurehunt logs. It must return one array
      * of {@link restore_log_rule} objects
      */
     static public function define_restore_log_rules() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('scavengerhunt', 'add', 'view.php?id={course_module}', '{scavengerhunt}');
-        $rules[] = new restore_log_rule('scavengerhunt', 'update', 'view.php?id={course_module}', '{scavengerhunt}');
-        $rules[] = new restore_log_rule('scavengerhunt', 'view', 'view.php?id={course_module}', '{scavengerhunt}');
+        $rules[] = new restore_log_rule('treasurehunt', 'add', 'view.php?id={course_module}', '{treasurehunt}');
+        $rules[] = new restore_log_rule('treasurehunt', 'update', 'view.php?id={course_module}', '{treasurehunt}');
+        $rules[] = new restore_log_rule('treasurehunt', 'view', 'view.php?id={course_module}', '{treasurehunt}');
 
         return $rules;
     }
@@ -109,7 +109,7 @@ class restore_scavengerhunt_activity_task extends restore_activity_task {
     static public function define_restore_log_rules_for_course() {
         $rules = array();
 
-        $rules[] = new restore_log_rule('scavengerhunt', 'view all', 'index.php?id={course}', null);
+        $rules[] = new restore_log_rule('treasurehunt', 'view all', 'index.php?id={course}', null);
 
         return $rules;
     }

@@ -17,21 +17,21 @@
 
 
 /**
- * English strings for scavengerhunt
+ * English strings for treasurehunt
  *
  * You can have a rather longer description of the file as well,
  * if you like, and it can span multiple lines.
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
-$string['modulename'] = 'Scavenger Hunt';
-$string['modulenameplural'] = 'Scavengers Hunt';
-$string['modulename_help'] = 'Use the scavenger hunt module for... | The scavengerhunt module allows...';
-$string['scavengerhuntfieldset'] = 'Custom example fieldset';
+$string['modulename'] = 'Treasure Hunt';
+$string['modulenameplural'] = 'Treasures Hunt';
+$string['modulename_help'] = 'Use the scavenger hunt module for... | The treasurehunt module allows...';
+$string['treasurehuntfieldset'] = 'Custom example fieldset';
 $string['riddlename'] = 'Riddle\'s name';
 $string['roadname'] = 'Road\'s name';
 $string['continue'] = 'Continue';
@@ -51,26 +51,28 @@ $string['history'] = 'History';
 $string['aerialview'] = 'Aerial';
 $string['roadview'] = 'Road';
 $string['mapview'] = 'Map view';
+$string['noexsitsriddle'] = 'There is no riddle number {$a} in the database. Reload the page';
 $string['noattempts'] = 'You have not made any attempt';
 $string['notcreateriddle'] = 'Attempts have already been made in this road, you can not add more riddles';
 $string['notdeleteriddle'] = 'Attempts have already been made in this road, you can not delete any riddle';
+$string['notchangeorderriddle'] = 'You can not change the order of riddles after attempts have been made on the road';
 $string['noroads'] = 'No roads have been added yet';
 $string['noresults'] = 'No results found.';
 $string['nomarks'] = 'First mark on the map the desired point.';
 $string['startfromhere'] = 'You can only start from here';
-$string['userattemptovercome'] = 'Riddle {$a->num_riddle} discovered on the date: {$a->date}';
-$string['userattemptfailed'] = 'Location failed for riddle {$a->num_riddle} on the date: {$a->date}';
-$string['groupattemptovercome'] = 'Riddle {$a->num_riddle} discovered by {$a->user} on the date: {$a->date}';
-$string['groupattemptfailed'] = 'Location failed by {$a->user} for riddle {$a->num_riddle} on the date: {$a->date}';
+$string['userattemptovercome'] = 'Riddle {$a->number} discovered on the date: {$a->date}';
+$string['userattemptfailed'] = 'Location failed for riddle {$a->number} on the date: {$a->date}';
+$string['groupattemptovercome'] = 'Riddle {$a->number} discovered by {$a->user} on the date: {$a->date}';
+$string['groupattemptfailed'] = 'Location failed by {$a->user} for riddle {$a->number} on the date: {$a->date}';
 $string['successlocation'] = 'Congratulations, you are right !!!';
 $string['faillocation'] = 'It is not the right place';
 $string['lockedriddle'] = 'You must perform such activity to unlock the riddle';
-$string['scavengerhuntname'] = 'Scavengerhunt name';
-$string['scavengerhunt'] = 'Scavenger hunt';
-$string['noscavengerhunts'] = 'Nothing to do here';
-$string['pluginadministration'] = 'Scavenger hunt administration';
-$string['pluginname'] = 'Scavenger Hunt';
-$string['question_scavengerhunt'] = 'This works?';
+$string['treasurehuntname'] = 'Treasure hunt\'s name';
+$string['treasurehunt'] = 'Treasure hunt';
+$string['notreasurehunts'] = 'Nothing to do here';
+$string['pluginadministration'] = 'Treasure hunt administration';
+$string['pluginname'] = 'Treasure Hunt';
+$string['question_treasurehunt'] = 'This works?';
 $string['hello'] = 'Hello';
 $string['welcome'] = 'Welcome to my module scavenger hunt, I hope you enjoy';
 $string['question'] = 'Question';
@@ -87,19 +89,19 @@ $string['eventriddledeleted'] = 'Riddle has been deleted';
 $string['eventroadupdated'] = 'Road has been updated';
 $string['eventroadcreated'] = 'Road has been created';
 $string['eventroaddeleted'] = 'Road has been deleted';
-$string['scavengerhunt:managescavenger'] = 'Manage scavengerhunt';
-$string['scavengerhunt:view'] = 'View scavengerhunt';
-$string['scavengerhunt:addinstance'] = 'Add a new scavengerhunt';
-$string['scavengerhuntislocked'] = '{$a} is editing this scavengerhunt right now. Try to edit it in a few minutes.';
+$string['treasurehunt:managescavenger'] = 'Manage treasurehunt';
+$string['treasurehunt:view'] = 'View treasurehunt';
+$string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
+$string['treasurehuntislocked'] = '{$a} is editing this treasurehunt right now. Try to edit it in a few minutes.';
 $string['availability'] = 'Availability';
 $string['overcomeriddlerestrictions'] = 'Restrictions to overcome riddle';
 $string['groups'] = 'Groups';
-$string['editscavengerhunt'] = 'Edit scavenger hunt';
+$string['edittreasurehunt'] = 'Edit scavenger hunt';
 $string['gradingsummary'] = 'Grading summary';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the default set of groups or a custom grouping for each road. A group game will be shared among group members and all members of the group will see each others changes to the game.';
-$string['allowsubmissionsfromdate'] = 'Allow submissions from';
-$string['allowsubmissionsfromdate_help'] = 'If enabled, students will not be able to submit before this date. If disabled, students will be able to start submitting right away.';
+$string['allowattemptsfromdate'] = 'Allow attempts from';
+$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. If disabled, students will be able to start submitting right away.';
 $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the assignment will not accept submissions after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
@@ -137,7 +139,7 @@ $string['multiplegroupsplay'] = 'You have assigned more than one road, so you ca
 $string['multiplegroupingsplay'] = 'Your group has assigned more than one road, so you can not play the activity.';
 $string['multiplegroupssameroadplay'] = 'You belong to more than one group assigned to the same road, so you can not play the activity.';
 $string['invalidassignedroad'] = 'Assigned road is not validated';
-$string['invalidroad'] = 'The road is not validated';
+$string['invalroadid'] = 'The road is not validated';
 $string['multipleteamsplay'] = 'Member of more than one group, so unable to make the activity.';
 $string['warnusersgrouping'] = 'Some users are either not a member of any grouping, or are a member of more than one grouping, or are a member of more than one group in the same road, so are unable to play the activity.';
 $string['warnusersgroup'] = 'Some users are either not a member of any group, or are a member of more than one group, so are unable to play the activity.';

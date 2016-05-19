@@ -2,14 +2,14 @@ html, body
 {
     height: 100%;
 }
-#scavengerhunt_editor{
+#treasurehunt_editor{
     width: 100%;
 }
 #edition label {
     display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
 /*Si no se me pone un background-image posterior*/
-.scavengerhunt_editor button{
+.treasurehunt_editor button{
     background-image: none;
 }
 #addRiddle, #addRoad{margin:0 auto; margin-left: 1%;margin-right:1%;}
@@ -33,7 +33,7 @@ ul#roadList li {display: table-cell;}
 div.handle,div.nohandle {background: #f8f8f8; position: relative; width: 30px; display:table-cell;vertical-align: middle}
 div.handle {cursor: n-resize}
 div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20px}
-div.nameRiddle, div.nameRoad{ padding-left: 5px;padding-right: 5px;position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
+div.nameRiddle, div.roadname{ padding-left: 5px;padding-right: 5px;position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
 input#modRoadName{text-align: center;}
 .ui-selecting { background: #eee; }
 .ui-selected { background: rgba(22,145,190,0.2); }

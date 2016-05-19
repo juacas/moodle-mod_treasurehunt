@@ -16,12 +16,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The main scavengerhunt configuration form
+ * The main treasurehunt configuration form
  *
  * It uses the standard core Moodle formslib. For more info about them, please
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,11 +32,11 @@ require_once($CFG->dirroot . '/course/moodleform_mod.php');
 /**
  * Module instance settings form
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_scavengerhunt_mod_form extends moodleform_mod {
+class mod_treasurehunt_mod_form extends moodleform_mod {
 
     /**
      * Defines forms elements
@@ -49,7 +49,7 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('scavengerhuntname', 'scavengerhunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('treasurehuntname', 'treasurehunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -62,36 +62,36 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
         $this->standard_intro_elements();
-        $mform->addElement('advcheckbox', 'playwithoutmove', get_string('playwithoutmove', 'scavengerhunt'));
-        $mform->addHelpButton('playwithoutmove', 'playwithoutmove', 'scavengerhunt');
+        $mform->addElement('advcheckbox', 'playwithoutmove', get_string('playwithoutmove', 'treasurehunt'));
+        $mform->addHelpButton('playwithoutmove', 'playwithoutmove', 'treasurehunt');
 
-        // Adding the rest of scavengerhunt settings, spreading all them into this fieldset
+        // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
 
-        $mform->addElement('header', 'availability', get_string('availability', 'scavengerhunt'));
+        $mform->addElement('header', 'availability', get_string('availability', 'treasurehunt'));
         $mform->setExpanded('availability', true);
 
-        $name = get_string('allowsubmissionsfromdate', 'scavengerhunt');
+        $name = get_string('allowattemptsfromdate', 'treasurehunt');
         $options = array('optional' => true);
-        $mform->addElement('date_time_selector', 'allowsubmissionsfromdate', $name, $options);
-        $mform->addHelpButton('allowsubmissionsfromdate', 'allowsubmissionsfromdate', 'scavengerhunt');
+        $mform->addElement('date_time_selector', 'allowattemptsfromdate', $name, $options);
+        $mform->addHelpButton('allowattemptsfromdate', 'allowattemptsfromdate', 'treasurehunt');
 
-        $name = get_string('cutoffdate', 'scavengerhunt');
+        $name = get_string('cutoffdate', 'treasurehunt');
         $mform->addElement('date_time_selector', 'cutoffdate', $name, array('optional' => true));
-        $mform->addHelpButton('cutoffdate', 'cutoffdate', 'scavengerhunt');
+        $mform->addHelpButton('cutoffdate', 'cutoffdate', 'treasurehunt');
 
-        $name = get_string('alwaysshowdescription', 'scavengerhunt');
+        $name = get_string('alwaysshowdescription', 'treasurehunt');
         $mform->addElement('checkbox', 'alwaysshowdescription', $name);
-        $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'scavengerhunt');
+        $mform->addHelpButton('alwaysshowdescription', 'alwaysshowdescription', 'treasurehunt');
         $mform->disabledIf('alwaysshowdescription', 'allowsubmissionsfromdate[enabled]', 'notchecked');
 
-        $mform->addElement('header', 'groups', get_string('groups', 'scavengerhunt'));
+        $mform->addElement('header', 'groups', get_string('groups', 'treasurehunt'));
         $mform->setExpanded('groups', true);
-        $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'scavengerhunt'));
-        $mform->addHelpButton('groupmode', 'groupmode', 'scavengerhunt');
+        $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'treasurehunt'));
+        $mform->addHelpButton('groupmode', 'groupmode', 'treasurehunt');
 
-        /*$mform->addElement('header', 'maps', get_string('groups', 'scavengerhunt'));
-        $maps = get_strings(array("googlemaps", "ost"), "scavengerhunt");
+        /*$mform->addElement('header', 'maps', get_string('groups', 'treasurehunt'));
+        $maps = get_strings(array("googlemaps", "ost"), "treasurehunt");
         $group = array();
         foreach ($maps as $map) {
             $group[] = $mform->createElement('checkbox', $map, '', $map);
@@ -124,9 +124,9 @@ class mod_scavengerhunt_mod_form extends moodleform_mod {
     public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
-        if ($data['allowsubmissionsfromdate'] && $data['cutoffdate']) {
-            if ($data['allowsubmissionsfromdate'] > $data['cutoffdate']) {
-                $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'scavengerhunt');
+        if ($data['allowattemptsfromdate'] && $data['cutoffdate']) {
+            if ($data['allowattemptsfromdate'] > $data['cutoffdate']) {
+                $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'treasurehunt');
             }
         }
 

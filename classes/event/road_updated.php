@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_scavengerhunt\event;
+namespace mod_treasurehunt\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_scavengerhunt entry created event class.
+ * The mod_treasurehunt entry created event class.
  *
  * @property-read array $other {
  *      Extra information about event.
@@ -46,7 +46,7 @@ class road_updated extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'u';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'scavengerhunt_roads';
+        $this->data['objecttable'] = 'treasurehunt_roads';
     }
 
     /**
@@ -55,12 +55,12 @@ class road_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventroadupdated', 'mod_scavengerhunt');
+        return get_string('eventroadupdated', 'mod_treasurehunt');
     }
 
     public function get_description() {
-        return "The user with id '$this->userid' has updated the scavengerhunt road with id '$this->objectid' for " .
-            "the scavengerhunt activity with course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' has updated the treasurehunt road with id '$this->objectid' for " .
+            "the treasurehunt activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -69,7 +69,7 @@ class road_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/scavengerhunt/edit.php",
+        return new \moodle_url("/mod/treasurehunt/edit.php",
                 array('id' => $this->contextinstanceid));
     }
 
@@ -79,7 +79,7 @@ class road_updated extends \core\event\base {
      * @return array|null
      */
     public function get_legacy_logdata() {
-        return array($this->courseid, 'scavengerhunt', 'update road',
+        return array($this->courseid, 'treasurehunt', 'update road',
             "view.php?id={$this->contextinstanceid}",
             $this->objectid, $this->contextinstanceid);
     }

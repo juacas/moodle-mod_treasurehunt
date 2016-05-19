@@ -22,11 +22,11 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_scavengerhunt\event;
+namespace mod_treasurehunt\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_scavengerhunt entry created event class.
+ * The mod_treasurehunt entry created event class.
  *
  * @property-read array $other {
  *      Extra information about event.
@@ -46,7 +46,7 @@ class riddle_created extends \core\event\base {
     protected function init() {
         $this->data['crud'] = 'c';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'scavengerhunt_riddles';
+        $this->data['objecttable'] = 'treasurehunt_riddles';
     }
 
     /**
@@ -55,7 +55,7 @@ class riddle_created extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventriddlecreated', 'mod_scavengerhunt');
+        return get_string('eventriddlecreated', 'mod_treasurehunt');
     }
 
     /**
@@ -64,8 +64,8 @@ class riddle_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created the scavengerhunt riddle with id '$this->objectid' for " .
-            "the scavengerhunt activity with course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' has created the treasurehunt riddle with id '$this->objectid' for " .
+            "the treasurehunt activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -74,7 +74,7 @@ class riddle_created extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/scavengerhunt/edit.php",
+        return new \moodle_url("/mod/treasurehunt/edit.php",
                 array('id' => $this->contextinstanceid));
     }
 
@@ -84,7 +84,7 @@ class riddle_created extends \core\event\base {
      * @return array|null
      */
     public function get_legacy_logdata() {
-        return array($this->courseid, 'scavengerhunt', 'add riddle',
+        return array($this->courseid, 'treasurehunt', 'add riddle',
             "view.php?id={$this->contextinstanceid}",
             $this->objectid, $this->contextinstanceid);
     }

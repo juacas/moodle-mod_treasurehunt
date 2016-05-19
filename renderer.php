@@ -2,9 +2,9 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . '/mod/scavengerhunt/locallib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
-class mod_scavengerhunt_renderer extends plugin_renderer_base {
+class mod_treasurehunt_renderer extends plugin_renderer_base {
 
     /**
      * Utility function to add a row of data to a table with 2 columns. Modified
@@ -44,28 +44,28 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
      *                                                                                                                              
      * @return string html for the page                                                                                             
      */
-    public function render_play_page(\mod_scavengerhunt\output\play_page $page) {
+    public function render_play_page(\mod_treasurehunt\output\play_page $page) {
         $data = $page->export_for_template($this);
-        return parent::render_from_template('mod_scavengerhunt/play', $data);
+        return parent::render_from_template('mod_treasurehunt/play', $data);
     }
 
     /**
      * Render a table containing the current status of the grading process.
      *
-     * @param scavengerhunt_user_historical_riddles  $historical
+     * @param treasurehunt_user_historical_riddles  $historical
      * @return string
      */
-    public function render_scavengerhunt_user_historical_attempts(scavengerhunt_user_historical_attempts $historical) {
+    public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical) {
         // Create a table for the data.
         $o = '';
         $o .= $this->output->container_start('historicalattempts');
-        $o .= $this->output->heading(get_string('historicalattempts', 'scavengerhunt'), 3);
+        $o .= $this->output->heading(get_string('historicalattempts', 'treasurehunt'), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row($t, array(get_string('attempt', 'scavengerhunt'), get_string('state', 'scavengerhunt')), true);
+            $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')), true);
             foreach ($historical->attempts as $attempt) {
                 if ($attempt->success) {
                     $class = 'successfulattempt';
@@ -77,11 +77,11 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
             // All done - write the table.
             $o .= html_writer::table($t);
         } else {
-            $o .= $this->output->notification(get_string('noattempts', 'scavengerhunt'));
+            $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'));
         }
         // Si no ha finalizado pongo el botón de jugar
         $urlparams = array('id' => $historical->coursemoduleid);
-        $o .= $this->output->single_button(new moodle_url('/mod/scavengerhunt/play.php', $urlparams), get_string('play', 'scavengerhunt'), 'get');
+        $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), get_string('play', 'treasurehunt'), 'get');
         $o .= $this->output->box_end();
 
         // Close the container and insert a spacer.
@@ -93,22 +93,22 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
     /**
      * Render a table containing the current status of the grading process.
      *
-     * @param scavengerhunt_user_progress $progress
+     * @param treasurehunt_user_progress $progress
      * @return string
      */
-    public function render_scavengerhunt_users_progress(scavengerhunt_users_progress $progress) {
+    public function render_treasurehunt_users_progress(treasurehunt_users_progress $progress) {
         // Create a table for the data.
         $o = '';
         $o .= $this->output->container_start('usersprogress');
-        $o .= $this->output->heading(get_string('usersprogress', 'scavengerhunt'), 3);
+        $o .= $this->output->heading(get_string('usersprogress', 'treasurehunt'), 3);
         if (!count($progress->roadsusersprogress)) {
-            $o .= $this->output->notification(get_string('noroads', 'scavengerhunt'));
+            $o .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
             if ($progress->warngroupedusers) {
                 if ($progress->groupmode) {
-                    $o .= $this->output->notification(get_string('warnusersgrouping', 'scavengerhunt'));
+                    $o .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt'));
                 } else {
-                    $o .= $this->output->notification(get_string('warnusersgroup', 'scavengerhunt'));
+                    $o .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt'));
                 }
             }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
@@ -118,11 +118,11 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
                         $o .= $this->output->box_start('boxaligncenter usersprogresstable');
                         $t = new html_table();
                         if ($progress->groupmode) {
-                            $title = get_string('group', 'scavengerhunt');
+                            $title = get_string('group', 'treasurehunt');
                         } else {
-                            $title = get_string('user', 'scavengerhunt');
+                            $title = get_string('user', 'treasurehunt');
                         }
-                        $this->add_table_row($t, array($title, get_string('riddles', 'scavengerhunt')), true, null, array(null, $roadusersprogress->totalriddles - 1));
+                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalriddles - 1));
                         foreach ($roadusersprogress->userlist as $user) {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
@@ -148,19 +148,19 @@ class mod_scavengerhunt_renderer extends plugin_renderer_base {
                         $o .= $this->output->box_end();
                     } else {
                         if ($progress->groupmode) {
-                            $notification = get_string('nogroupassigned', 'scavengerhunt');
+                            $notification = get_string('nogroupassigned', 'treasurehunt');
                         } else {
-                            $notification = get_string('nouserassigned', 'scavengerhunt');
+                            $notification = get_string('nouserassigned', 'treasurehunt');
                         }
                         $o .= $this->output->notification($notification);
                     }
                 } else {
-                    $o .= $this->output->notification(get_string('invalidroad', 'scavengerhunt'));
+                    $o .= $this->output->notification(get_string('invalroadid', 'treasurehunt'));
                 }
             }
         }
         $urlparams = array('id' => $progress->coursemoduleid);
-        $o .= $this->output->single_button(new moodle_url('/mod/scavengerhunt/edit.php', $urlparams), get_string('editscavengerhunt', 'scavengerhunt'), 'get');
+        $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();
 

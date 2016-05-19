@@ -20,7 +20,7 @@
  * This file replaces the legacy STATEMENTS section in db/install.xml,
  * lib.php/modulename_install() post installation hook and partially defaults.php.
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name <your@email.adress>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -30,7 +30,7 @@
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_scavengerhunt_install() {
+function xmldb_treasurehunt_install() {
     install_geometry_columns();
 }
 
@@ -42,13 +42,13 @@ function xmldb_scavengerhunt_install() {
 function install_geometry_columns() {
     global $DB, $CFG;
     // If the database is initialized skips this function.
-    if (get_config('mod_scavengerhunt', 'geometrysupport') == true) {
+    if (get_config('mod_treasurehunt', 'geometrysupport') == true) {
         return;
     }
 
     $dbman = $DB->get_manager();
-    $table1 = new xmldb_table('scavengerhunt_attempts');
-    $table2 = new xmldb_table('scavengerhunt_riddles');
+    $table1 = new xmldb_table('treasurehunt_attempts');
+    $table2 = new xmldb_table('treasurehunt_riddles');
     //Compruebo si existe la base de datos con la tabla
     if ($dbman->table_exists($table1) && $dbman->table_exists($table2)) {
         /* @var $DB accesor to DB services. */
@@ -62,31 +62,31 @@ function install_geometry_columns() {
                         $DB->change_database_structure('create extension postgis;');
                     }
                     // Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                    if (!$dbman->field_exists('scavengerhunt_riddles', 'geom')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddles ADD geom geometry(MULTIPOLYGON,4326)');
+                    if (!$dbman->field_exists('treasurehunt_riddles', 'geom')) {
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom geometry(MULTIPOLYGON,4326)');
                     }
                     // Create points
-                    if (!$dbman->field_exists('scavengerhunt_attempts', 'locations')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_attempts ADD locations geometry(POINT,4326) NOT NULL');
+                    if (!$dbman->field_exists('treasurehunt_attempts', 'locations')) {
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD locations geometry(POINT,4326) NOT NULL');
                     }
                 } catch (ddl_change_structure_exception $ex) {
-                    set_config('geometrysupport', false, 'mod_scavengerhunt');
-                    throw new plugin_defective_exception('scavengerhunt',
+                    set_config('geometrysupport', false, 'mod_treasurehunt');
+                    throw new plugin_defective_exception('treasurehunt',
                     'Misconfigured database ' . $dbtype . ' Must have geometry capabilities installed. Please install postgis.');
                 }
                 break;
             case 'mysql':
                 //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_riddles ADD geom MULTIPOLYGON');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom MULTIPOLYGON');
                 //Create points
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'scavengerhunt_attempts ADD locations POINT NOT NULL');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD locations POINT NOT NULL');
                 break;
             default:
-                set_config('geometrysupport', false, 'mod_scavengerhunt');
-                throw new plugin_defective_exception('scavengerhunt',
+                set_config('geometrysupport', false, 'mod_treasurehunt');
+                throw new plugin_defective_exception('treasurehunt',
                 'Uncompatible database ' . $dbtype . ' Must have geometry capabilities.');
         }
-        set_config('geometrysupport', true, 'mod_scavengerhunt');
+        set_config('geometrysupport', true, 'mod_treasurehunt');
     }
 }
 
@@ -95,6 +95,6 @@ function install_geometry_columns() {
  *
  * @see upgrade_plugins_modules()
  */
-function xmldb_scavengerhunt_install_recovery() {
+function xmldb_treasurehunt_install_recovery() {
     install_geometry_columns();
 }

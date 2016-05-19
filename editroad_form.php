@@ -16,12 +16,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The main scavengerhunt configuration form
+ * The main treasurehunt configuration form
  *
  * It uses the standard core Moodle formslib. For more info about them, please
  * visit: http://docs.moodle.org/en/Development:lib/formslib.php
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -32,7 +32,7 @@ require_once("$CFG->libdir/formslib.php");
 /**
  * Module instance settings form
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -52,7 +52,7 @@ class road_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('roadname', 'scavengerhunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('roadname', 'treasurehunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -68,11 +68,11 @@ class road_form extends moodleform {
             $options[$option->id] = $option->name;
         }
         if ($groups) {
-            $select = $mform->addElement('select', 'grouping_id', get_string('groupingid', 'scavengerhunt'), $options);
-            $mform->addHelpButton('grouping_id', 'groupingid', 'scavengerhunt');
+            $select = $mform->addElement('select', 'groupingid', get_string('groupingid', 'treasurehunt'), $options);
+            $mform->addHelpButton('groupingid', 'groupingid', 'treasurehunt');
         } else {
-            $select = $mform->addElement('select', 'group_id', get_string('groupid', 'scavengerhunt'), $options);
-            $mform->addHelpButton('group_id', 'groupid', 'scavengerhunt');
+            $select = $mform->addElement('select', 'groupid', get_string('groupid', 'treasurehunt'), $options);
+            $mform->addHelpButton('groupid', 'groupid', 'treasurehunt');
         }
 
         //Añado los campos ocultos id y newFeature

@@ -15,23 +15,23 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Define all the restore steps that will be used by the restore_scavengerhunt_activity_task
+ * Define all the restore steps that will be used by the restore_treasurehunt_activity_task
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**
- * Structure step to restore one scavengerhunt activity
+ * Structure step to restore one treasurehunt activity
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class restore_scavengerhunt_activity_structure_step extends restore_activity_structure_step {
+class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
 
     /**
      * Defines structure of path elements to be processed during the restore
@@ -41,7 +41,7 @@ class restore_scavengerhunt_activity_structure_step extends restore_activity_str
     protected function define_structure() {
 
         $paths = array();
-        $paths[] = new restore_path_element('scavengerhunt', '/activity/scavengerhunt');
+        $paths[] = new restore_path_element('treasurehunt', '/activity/treasurehunt');
 
         // Return the paths wrapped into standard activity structure.
         return $this->prepare_activity_structure($paths);
@@ -52,7 +52,7 @@ class restore_scavengerhunt_activity_structure_step extends restore_activity_str
      *
      * @param array $data parsed element data
      */
-    protected function process_scavengerhunt($data) {
+    protected function process_treasurehunt($data) {
         global $DB;
 
         $data = (object)$data;
@@ -72,8 +72,8 @@ class restore_scavengerhunt_activity_structure_step extends restore_activity_str
             $data->grade = -($this->get_mappingid('scale', abs($data->grade)));
         }
 
-        // Create the scavengerhunt instance.
-        $newitemid = $DB->insert_record('scavengerhunt', $data);
+        // Create the treasurehunt instance.
+        $newitemid = $DB->insert_record('treasurehunt', $data);
         $this->apply_activity_instance($newitemid);
     }
 
@@ -81,7 +81,7 @@ class restore_scavengerhunt_activity_structure_step extends restore_activity_str
      * Post-execution actions
      */
     protected function after_execute() {
-        // Add scavengerhunt related files, no need to match by itemname (just internally handled context).
-        $this->add_related_files('mod_scavengerhunt', 'intro', null);
+        // Add treasurehunt related files, no need to match by itemname (just internally handled context).
+        $this->add_related_files('mod_treasurehunt', 'intro', null);
     }
 }

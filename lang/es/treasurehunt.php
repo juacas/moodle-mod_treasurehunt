@@ -16,12 +16,12 @@
 
 
 /**
- * English strings for scavengerhunt
+ * English strings for treasurehunt
  *
  * You can have a rather longer description of the file as well,
  * if you like, and it can span multiple lines.
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -57,18 +57,18 @@ $string['usersprogress'] = 'Progreso de los usuarios';
 $string['nomarks'] = 'Marca primero en el mapa el punto deseado.';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
-$string['userattemptovercome'] = 'Pista {$a->num_riddle} descubierta en la fecha: {$a->date}';
-$string['userattemptfailed'] = 'Localización fallida para la pista {$a->num_riddle} en la fecha: {$a->date}';
-$string['groupattemptovercome'] = 'Pista {$a->num_riddle} descubierta por {$a->user} en la fecha: {$a->date}';
-$string['groupattemptfailed'] = 'Localización fallida por {$a->user} para la pista {$a->num_riddle} en la fecha: {$a->date}';
+$string['userattemptovercome'] = 'Pista {$a->number} descubierta en la fecha: {$a->date}';
+$string['userattemptfailed'] = 'Localización fallida para la pista {$a->number} en la fecha: {$a->date}';
+$string['groupattemptovercome'] = 'Pista {$a->number} descubierta por {$a->user} en la fecha: {$a->date}';
+$string['groupattemptfailed'] = 'Localización fallida por {$a->user} para la pista {$a->number} en la fecha: {$a->date}';
 $string['lockedriddle'] = 'Debes realizar la actividad tal para desbloquear la pista';
-$string['scavengerhuntname'] = 'Nombre de la caza del tesoro';
-$string['scavengerhuntname_help'] = 'Este es el contenido asociado al nombre. Soporta barra baja.';
-$string['scavengerhunt'] = 'Scavenger hunt';
-$string['noscavengerhunts'] = 'A ver que sale D:';
+$string['treasurehuntname'] = 'Nombre de la caza del tesoro';
+$string['treasurehuntname_help'] = 'Este es el contenido asociado al nombre. Soporta barra baja.';
+$string['treasurehunt'] = 'Treasure hunt';
+$string['notreasurehunts'] = 'A ver que sale D:';
 $string['pluginadministration'] = 'Administración de la caza del tesoro';
 $string['pluginname'] = 'Caza del tesoro';
-$string['question_scavengerhunt'] = '¿Esto funciona?';
+$string['question_treasurehunt'] = '¿Esto funciona?';
 $string['hello'] = 'Hola';
 $string['question'] = 'Pregunta';
 $string['welcome'] = 'Bienvenido a mi módulo de caza del tesoro, espero que lo disfrutes';
@@ -85,14 +85,14 @@ $string['eventriddledeleted'] = 'La pista ha sido eliminada';
 $string['eventroadupdated'] = 'El camino ha sido actualizado';
 $string['eventroadcreated'] = 'El camino ha sido creado';
 $string['eventroaddeleted'] = 'El camino ha sido eliminado';
-$string['scavengerhunt:managescavenger'] = 'Administrar Caza del tesoro';
-$string['scavengerhunt:view'] = 'Ver la caza del tesoro';
-$string['scavengerhunt:addinstance'] = 'Añadir nueva caza del tesoro';
-$string['scavengerhuntislocked'] = '{$a} está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
+$string['treasurehunt:managescavenger'] = 'Administrar Caza del tesoro';
+$string['treasurehunt:view'] = 'Ver la caza del tesoro';
+$string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
+$string['treasurehuntislocked'] = '{$a} está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 $string['availability'] = 'Disponibilidad';
 $string['overcomeriddlerestrictions'] = 'Restricciones para superar la pista';
 $string['groups'] = 'Grupos';
-$string['editscavengerhunt'] = 'Editar caza del tesoro';
+$string['edittreasurehunt'] = 'Editar caza del tesoro';
 $string['gradingsummary'] = 'Sumario de calificaciones';
 $string['groupmode'] = 'Juego en grupos';
 $string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración por defecto de los grupos o de una agrupación personalizada para cada camino. El juego del grupo será compartido entre los miembros del grupo y todos los miembros del grupo verán los cambios producidos en el juego.';
@@ -130,10 +130,13 @@ $string['groupingid_help'] = 'Los grupos de esta agrupación son asignados a est
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual. Para que las actividades del curso se muestren en la lista debe estar habilitada la terminación de actividad en la configuración de Moodle, en la configuración del curso y en la propia actividad.';
 $string['noteam'] = 'No es miembro de ningún grupo';
+$string['noexsitsriddle'] = 'No existe la pista número {$a} en la base de datos. Recargue la página';
 $string['noteamplay'] = 'No es miembro de ningún grupo, por lo que no puede realizar la actividad.';
-$string['notdeleteriddle'] = 'Ya se han realizado intentos sobre este camino, no puedes eliminar ninguna pista';
+$string['notdeleteriddle'] = 'Ya se han realizado intentos sobre este camino, no puedes eliminar ninguna pista.';
+$string['notcreateriddle'] = 'Ya se han realizado intentos sobre este camino, no puedes añadir más pistas.';
+$string['notchangeorderriddle'] = 'No puedes cambiar el orden de las pistas una vez que se han realizado intentos sobre el camino.';
 $string['invalidassignedroad'] = 'El camino asignado no está validado';
-$string['invalidroad'] = 'El camino no está validado';
+$string['invalroadid'] = 'El camino no está validado';
 $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
 $string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
 $string['timelabelsuccess'] = 'Pista descubierta en la fecha: ';

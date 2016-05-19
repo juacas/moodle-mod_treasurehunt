@@ -7,14 +7,14 @@
 define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, ajax) {
 
     var repeat;
-    var idLockScavenger;
+    var idLockTreasure;
     var renewLock = {
-        renewLockAjax: function (idScavengerhunt, idLock) {
-            idLockScavenger = idLock;
+        renewLockAjax: function (treasurehuntid, idLock) {
+            idLockTreasure = idLock;
             var json = ajax.call([{
-                    methodname: 'mod_scavengerhunt_renew_lock',
+                    methodname: 'mod_treasurehunt_renew_lock',
                     args: {
-                        idScavengerhunt: idScavengerhunt,
+                        treasurehuntid: treasurehuntid,
                         idLock: idLock
                     }
                 }]);
@@ -23,7 +23,7 @@ define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, 
                 if (response.status.code) {
                     debugger;
                     notification.alert('Error', response.status.msg, 'Continue');
-                    renewLock.stopRenewLockScavengerhunt();
+                    renewLock.stoprenew_edition_lock();
                 }
             }).fail(function (error) {
                 console.log(error);
@@ -31,14 +31,14 @@ define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, 
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
-        renewLockScavengerhunt: function (idScavengerhunt, idLock) {
-            repeat = setInterval(this.renewLockAjax, 90000, idScavengerhunt, idLock);
+        renew_edition_lock: function (treasurehuntid, idLock) {
+            repeat = setInterval(this.renewLockAjax, 90000, treasurehuntid, idLock);
         },
-        stopRenewLockScavengerhunt: function () {
+        stoprenew_edition_lock: function () {
             clearInterval(repeat);
         },
         getIdLock: function () {
-            return idLockScavenger;
+            return idLockTreasure;
         }
 
     };

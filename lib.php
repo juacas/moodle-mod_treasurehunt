@@ -16,16 +16,16 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of interface functions and constants for module scavengerhunt
+ * Library of interface functions and constants for module treasurehunt
  *
  * All the core Moodle functions, neeeded to allow the module to work
  * integrated in Moodle should be placed here.
  *
- * All the scavengerhunt specific functions, needed to implement all the module
+ * All the treasurehunt specific functions, needed to implement all the module
  * logic, should go to locallib.php. This will help to save some memory when
  * Moodle is performing actions across all modules.
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -48,7 +48,7 @@ define('WIDGET_ULTIMATE_ANSWER', 42);
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed true if the feature is supported, null if unknown
  */
-function scavengerhunt_supports($feature) {
+function treasurehunt_supports($feature) {
 
     switch ($feature) {
         case FEATURE_GROUPS:
@@ -69,58 +69,58 @@ function scavengerhunt_supports($feature) {
 }
 
 /**
- * Saves a new instance of the scavengerhunt into the database
+ * Saves a new instance of the treasurehunt into the database
  *
  * Given an object containing all the necessary data,
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
  *
- * @param stdClass $scavengerhunt Submitted data from the form in mod_form.php
- * @param mod_scavengerhunt_mod_form $mform The form instance itself (if needed)
- * @return int The id of the newly inserted scavengerhunt record
+ * @param stdClass $treasurehunt Submitted data from the form in mod_form.php
+ * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
+ * @return int The id of the newly inserted treasurehunt record
  */
-function scavengerhunt_add_instance(stdClass $scavengerhunt, mod_scavengerhunt_mod_form $mform = null) {
+function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
     global $DB;
     $timenow = time();
-    $scavengerhunt->timecreated = $timenow;
+    $treasurehunt->timecreated = $timenow;
 
     // You may have to add extra stuff in here.
 
-    $scavengerhunt->id = $DB->insert_record('scavengerhunt', $scavengerhunt);
-    scavengerhunt_grade_item_update($scavengerhunt);
+    $treasurehunt->id = $DB->insert_record('treasurehunt', $treasurehunt);
+    treasurehunt_grade_item_update($treasurehunt);
 
-    return $scavengerhunt->id;
+    return $treasurehunt->id;
 }
 
 /**
- * Updates an instance of the scavengerhunt in the database
+ * Updates an instance of the treasurehunt in the database
  *
  * Given an object containing all the necessary data,
  * (defined by the form in mod_form.php) this function
  * will update an existing instance with new data.
  *
- * @param stdClass $scavengerhunt An object from the form in mod_form.php
- * @param mod_scavengerhunt_mod_form $mform The form instance itself (if needed)
+ * @param stdClass $treasurehunt An object from the form in mod_form.php
+ * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
  * @return boolean Success/Fail
  */
-function scavengerhunt_update_instance(stdClass $scavengerhunt, mod_scavengerhunt_mod_form $mform = null) {
+function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
     global $DB;
 
-    $scavengerhunt->timemodified = time();
-    $scavengerhunt->id = $scavengerhunt->instance;
+    $treasurehunt->timemodified = time();
+    $treasurehunt->id = $treasurehunt->instance;
 
     // You may have to add extra stuff in here.
 
-    $result = $DB->update_record('scavengerhunt', $scavengerhunt);
+    $result = $DB->update_record('treasurehunt', $treasurehunt);
 
-    scavengerhunt_grade_item_update($scavengerhunt);
+    treasurehunt_grade_item_update($treasurehunt);
 
     return $result;
 }
 
 /**
- * Removes an instance of the scavengerhunt from the database
+ * Removes an instance of the treasurehunt from the database
  *
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
@@ -129,23 +129,23 @@ function scavengerhunt_update_instance(stdClass $scavengerhunt, mod_scavengerhun
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
  */
-function scavengerhunt_delete_instance($id) {
+function treasurehunt_delete_instance($id) {
     global $DB;
 
-    if (!$scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $id))) {
+    if (!$treasurehunt = $DB->get_record('treasurehunt', array('id' => $id))) {
         return false;
     }
 
     // Delete any dependent records here.
 
-    $DB->delete_records('scavengerhunt', array('id' => $scavengerhunt->id));
-    $roads_ids = $DB->get_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
+    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
+    $roads_ids = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads_ids as $road) {
-        $DB->delete_records_select('scavengerhunt_riddles', 'road_id = ?', array($road->id));
+        $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', array($road->id));
     }
-    $DB->delete_records('scavengerhunt_roads', array('scavengerhunt_id' => $scavengerhunt->id));
-    $DB->delete_records('scavengerhunt_locks', array('scavengerhunt_id' => $scavengerhunt->id));
-    scavengerhunt_grade_item_delete($scavengerhunt);
+    $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
+    $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
+    treasurehunt_grade_item_delete($treasurehunt);
 
     return true;
 }
@@ -161,10 +161,10 @@ function scavengerhunt_delete_instance($id) {
  * @param stdClass $course The course record
  * @param stdClass $user The user record
  * @param cm_info|stdClass $mod The course module info object or record
- * @param stdClass $scavengerhunt The scavengerhunt instance record
+ * @param stdClass $treasurehunt The treasurehunt instance record
  * @return stdClass|null
  */
-function scavengerhunt_user_outline($course, $user, $mod, $scavengerhunt) {
+function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
 
     $return = new stdClass();
     $return->time = 0;
@@ -181,22 +181,22 @@ function scavengerhunt_user_outline($course, $user, $mod, $scavengerhunt) {
  * @param stdClass $course the current course record
  * @param stdClass $user the record of the user we are generating report for
  * @param cm_info $mod course module info
- * @param stdClass $scavengerhunt the module instance record
+ * @param stdClass $treasurehunt the module instance record
  */
-function scavengerhunt_user_complete($course, $user, $mod, $scavengerhunt) {
+function treasurehunt_user_complete($course, $user, $mod, $treasurehunt) {
     
 }
 
 /**
  * Given a course and a time, this module should find recent activity
- * that has occurred in scavengerhunt activities and print it out.
+ * that has occurred in treasurehunt activities and print it out.
  *
  * @param stdClass $course The course record
  * @param bool $viewfullnames Should we display full names
  * @param int $timestart Print activity since this timestamp
  * @return boolean True if anything was printed, otherwise false
  */
-function scavengerhunt_print_recent_activity($course, $viewfullnames, $timestart) {
+function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart) {
     return false;
 }
 
@@ -205,7 +205,7 @@ function scavengerhunt_print_recent_activity($course, $viewfullnames, $timestart
  *
  * This callback function is supposed to populate the passed array with
  * custom activity records. These records are then rendered into HTML via
- * {@link scavengerhunt_print_recent_mod_activity()}.
+ * {@link treasurehunt_print_recent_mod_activity()}.
  *
  * Returns void, it adds items into $activities and increases $index.
  *
@@ -217,12 +217,12 @@ function scavengerhunt_print_recent_activity($course, $viewfullnames, $timestart
  * @param int $userid check for a particular user's activity only, defaults to 0 (all users)
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
-function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
+function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
     
 }
 
 /**
- * Prints single activity item prepared by {@link scavengerhunt_get_recent_mod_activity()}
+ * Prints single activity item prepared by {@link treasurehunt_get_recent_mod_activity()}
  *
  * @param stdClass $activity activity record with added 'cmid' property
  * @param int $courseid the id of the course we produce the report for
@@ -230,7 +230,7 @@ function scavengerhunt_get_recent_mod_activity(&$activities, &$index, $timestart
  * @param array $modnames as returned by {@link get_module_types_names()}
  * @param bool $viewfullnames display users' full names
  */
-function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
+function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
     
 }
 
@@ -245,21 +245,21 @@ function scavengerhunt_print_recent_mod_activity($activity, $courseid, $detail, 
  * @return cached_cm_info An object on information that the courses
  *                        will know about (most noticeably, an icon).
  */
-function scavengerhunt_get_coursemodule_info($coursemodule) {
+function treasurehunt_get_coursemodule_info($coursemodule) {
     global $CFG, $DB;
 
     $dbparams = array('id' => $coursemodule->instance);
-    $fields = 'id, name, alwaysshowdescription, allowsubmissionsfromdate, intro, introformat';
-    if (!$scavengerhunt = $DB->get_record('scavengerhunt', $dbparams, $fields)) {
+    $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat';
+    if (!$treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields)) {
         return false;
     }
 
     $result = new cached_cm_info();
-    $result->name = $scavengerhunt->name;
+    $result->name = $treasurehunt->name;
     if ($coursemodule->showdescription) {
-        if ($scavengerhunt->alwaysshowdescription || time() > $scavengerhunt->allowsubmissionsfromdate) {
+        if ($treasurehunt->alwaysshowdescription || time() > $treasurehunt->allowattemptsfromdate) {
             // Convert intro to html. Do not filter cached version, filters run at display time.
-            $result->content = format_module_intro('scavengerhunt', $scavengerhunt, $coursemodule->id, false);
+            $result->content = format_module_intro('treasurehunt', $treasurehunt, $coursemodule->id, false);
         }
     }
     return $result;
@@ -275,7 +275,7 @@ function scavengerhunt_get_coursemodule_info($coursemodule) {
  *
  * @return boolean
  */
-function scavengerhunt_cron() {
+function treasurehunt_cron() {
     return true;
 }
 
@@ -287,26 +287,26 @@ function scavengerhunt_cron() {
  *
  * @return array
  */
-function scavengerhunt_get_extra_capabilities() {
+function treasurehunt_get_extra_capabilities() {
     return array();
 }
 
 /* Gradebook API */
 
 /**
- * Is a given scale used by the instance of scavengerhunt?
+ * Is a given scale used by the instance of treasurehunt?
  *
- * This function returns if a scale is being used by one scavengerhunt
+ * This function returns if a scale is being used by one treasurehunt
  * if it has support for grading and scales.
  *
- * @param int $scavengerhuntid ID of an instance of this module
+ * @param int $treasurehuntid ID of an instance of this module
  * @param int $scaleid ID of the scale
- * @return bool true if the scale is used by the given scavengerhunt instance
+ * @return bool true if the scale is used by the given treasurehunt instance
  */
-function scavengerhunt_scale_used($scavengerhuntid, $scaleid) {
+function treasurehunt_scale_used($treasurehuntid, $scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->record_exists('scavengerhunt', array('id' => $scavengerhuntid, 'grade' => -$scaleid))) {
+    if ($scaleid and $DB->record_exists('treasurehunt', array('id' => $treasurehuntid, 'grade' => -$scaleid))) {
         return true;
     } else {
         return false;
@@ -314,17 +314,17 @@ function scavengerhunt_scale_used($scavengerhuntid, $scaleid) {
 }
 
 /**
- * Checks if scale is being used by any instance of scavengerhunt.
+ * Checks if scale is being used by any instance of treasurehunt.
  *
  * This is used to find out if scale used anywhere.
  *
  * @param int $scaleid ID of the scale
- * @return boolean true if the scale is used by any scavengerhunt instance
+ * @return boolean true if the scale is used by any treasurehunt instance
  */
-function scavengerhunt_scale_used_anywhere($scaleid) {
+function treasurehunt_scale_used_anywhere($scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->record_exists('scavengerhunt', array('grade' => -$scaleid))) {
+    if ($scaleid and $DB->record_exists('treasurehunt', array('grade' => -$scaleid))) {
         return true;
     } else {
         return false;
@@ -332,29 +332,29 @@ function scavengerhunt_scale_used_anywhere($scaleid) {
 }
 
 /**
- * Creates or updates grade item for the given scavengerhunt instance
+ * Creates or updates grade item for the given treasurehunt instance
  *
  * Needed by {@link grade_update_mod_grades()}.
  *
- * @param stdClass $scavengerhunt instance object with extra cmidnumber and modname property
+ * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
  * @param bool $reset reset grades in the gradebook
  * @return void
  */
-function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset = false) {
+function treasurehunt_grade_item_update(stdClass $treasurehunt, $reset = false) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
     $item = array();
-    $item['itemname'] = clean_param($scavengerhunt->name, PARAM_NOTAGS);
+    $item['itemname'] = clean_param($treasurehunt->name, PARAM_NOTAGS);
     $item['gradetype'] = GRADE_TYPE_VALUE;
 
-    if ($scavengerhunt->grade > 0) {
+    if ($treasurehunt->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
-        $item['grademax'] = $scavengerhunt->grade;
+        $item['grademax'] = $treasurehunt->grade;
         $item['grademin'] = 0;
-    } else if ($scavengerhunt->grade < 0) {
+    } else if ($treasurehunt->grade < 0) {
         $item['gradetype'] = GRADE_TYPE_SCALE;
-        $item['scaleid'] = -$scavengerhunt->grade;
+        $item['scaleid'] = -$treasurehunt->grade;
     } else {
         $item['gradetype'] = GRADE_TYPE_NONE;
     }
@@ -363,38 +363,38 @@ function scavengerhunt_grade_item_update(stdClass $scavengerhunt, $reset = false
         $item['reset'] = true;
     }
 
-    grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt', $scavengerhunt->id, 0, null, $item);
+    grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null, $item);
 }
 
 /**
- * Delete grade item for given scavengerhunt instance
+ * Delete grade item for given treasurehunt instance
  *
- * @param stdClass $scavengerhunt instance object
+ * @param stdClass $treasurehunt instance object
  * @return grade_item
  */
-function scavengerhunt_grade_item_delete($scavengerhunt) {
+function treasurehunt_grade_item_delete($treasurehunt) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt', $scavengerhunt->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null, array('deleted' => 1));
 }
 
 /**
- * Update scavengerhunt grades in the gradebook
+ * Update treasurehunt grades in the gradebook
  *
  * Needed by {@link grade_update_mod_grades()}.
  *
- * @param stdClass $scavengerhunt instance object with extra cmidnumber and modname property
+ * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
  * @param int $userid update grade of specific user only, 0 means all participants
  */
-function scavengerhunt_update_grades(stdClass $scavengerhunt, $userid = 0) {
+function treasurehunt_update_grades(stdClass $treasurehunt, $userid = 0) {
     global $CFG, $DB;
     require_once($CFG->libdir . '/gradelib.php');
 
     // Populate array of grade objects indexed by userid.
     $grades = array();
 
-    grade_update('mod/scavengerhunt', $scavengerhunt->course, 'mod', 'scavengerhunt', $scavengerhunt->id, 0, $grades);
+    grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, $grades);
 }
 
 /* File API */
@@ -410,14 +410,14 @@ function scavengerhunt_update_grades(stdClass $scavengerhunt, $userid = 0) {
  * @param stdClass $context
  * @return array of [(string)filearea] => (string)description
  */
-function scavengerhunt_get_file_areas($course, $cm, $context) {
+function treasurehunt_get_file_areas($course, $cm, $context) {
     return array();
 }
 
 /**
- * File browsing support for scavengerhunt file areas
+ * File browsing support for treasurehunt file areas
  *
- * @package mod_scavengerhunt
+ * @package mod_treasurehunt
  * @category files
  *
  * @param file_browser $browser
@@ -431,25 +431,25 @@ function scavengerhunt_get_file_areas($course, $cm, $context) {
  * @param string $filename
  * @return file_info instance or null if not found
  */
-function scavengerhunt_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename) {
+function treasurehunt_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename) {
     return null;
 }
 
 /**
- * Serves the files from the scavengerhunt file areas
+ * Serves the files from the treasurehunt file areas
  *
- * @package mod_scavengerhunt
+ * @package mod_treasurehunt
  * @category files
  *
  * @param stdClass $course the course object
  * @param stdClass $cm the course module object
- * @param stdClass $context the scavengerhunt's context
+ * @param stdClass $context the treasurehunt's context
  * @param string $filearea the name of the file area
  * @param array $args extra arguments (itemid, path)
  * @param bool $forcedownload whether or not force download
  * @param array $options additional options affecting the file serving
  */
-function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
+function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -461,7 +461,7 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
     if ($filearea === 'description') {
         $fs = get_file_storage();
         $relativepath = implode('/', $args);
-        $fullpath = "/$context->id/mod_scavengerhunt/$filearea/$relativepath";
+        $fullpath = "/$context->id/mod_treasurehunt/$filearea/$relativepath";
         if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
             send_file_not_found();
         }
@@ -476,34 +476,34 @@ function scavengerhunt_pluginfile($course, $cm, $context, $filearea, array $args
 /* Navigation API */
 
 /**
- * Extends the global navigation tree by adding scavengerhunt nodes if there is a relevant content
+ * Extends the global navigation tree by adding treasurehunt nodes if there is a relevant content
  *
  * This can be called by an AJAX request so do not rely on $PAGE as it might not be set up properly.
  *
- * @param navigation_node $navref An object representing the navigation tree node of the scavengerhunt module instance
+ * @param navigation_node $navref An object representing the navigation tree node of the treasurehunt module instance
  * @param stdClass $course current course record
- * @param stdClass $module current scavengerhunt instance record
+ * @param stdClass $module current treasurehunt instance record
  * @param cm_info $cm course module information
 
-  function scavengerhunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
+  function treasurehunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
   // TODO Delete this function and its docblock, or implement it.
   } */
 
 /**
- * Extends the settings navigation with the scavengerhunt settings
+ * Extends the settings navigation with the treasurehunt settings
  *
- * This function is called when the context for the page is a scavengerhunt module. This is not called by AJAX
+ * This function is called when the context for the page is a treasurehunt module. This is not called by AJAX
  * so it is safe to rely on the $PAGE.
  *
  * @param settings_navigation $settingsnav complete settings navigation tree
- * @param navigation_node $scavengerhuntnode scavengerhunt administration node
+ * @param navigation_node $treasurehuntnode treasurehunt administration node
  */
-function scavengerhunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $scavengerhuntnode = null) {
+function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $treasurehuntnode = null) {
 
     global $PAGE;
     // We want to add these new nodes after the Edit settings node, and before the
     // Locally assigned roles node. Of course, both of those are controlled by capabilities.
-    $keys = $scavengerhuntnode->get_children_key_list();
+    $keys = $treasurehuntnode->get_children_key_list();
     $beforekey = null;
     $i = array_search('modedit', $keys);
     if ($i === false and array_key_exists(0, $keys)) {
@@ -512,8 +512,8 @@ function scavengerhunt_extend_settings_navigation(settings_navigation $settingsn
         $beforekey = $keys[$i + 1];
     }
 
-    if (has_capability('mod/scavengerhunt:managescavenger', $PAGE->cm->context)) {
-        $node = navigation_node::create(get_string('editscavengerhunt', 'scavengerhunt'), new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_scavengerhunt_edit', new pix_icon('t/edit', ''));
-        $scavengerhuntnode->add_node($node, $beforekey);
+    if (has_capability('mod/treasurehunt:managescavenger', $PAGE->cm->context)) {
+        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'), new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
+        $treasurehuntnode->add_node($node, $beforekey);
     }
 }

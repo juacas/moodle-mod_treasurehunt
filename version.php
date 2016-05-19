@@ -20,15 +20,15 @@
  * Setting the $plugin->version to 0 prevents the plugin from being installed.
  * See https://docs.moodle.org/dev/version.php for more info.
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name <your@email.address>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_scavengerhunt';
-$plugin->version = 20160412000;
+$plugin->component = 'mod_treasurehunt';
+$plugin->version = 2016051900;
 $plugin->release = 'v0.0';
 $plugin->requires = 2015051100;
 $plugin->maturity = MATURITY_ALPHA;

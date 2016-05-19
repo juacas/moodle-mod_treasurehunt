@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scavengerhunt_user_historical_attempts implements renderable {
+class treasurehunt_user_historical_attempts implements renderable {
 
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $attempts = [];
@@ -54,7 +54,7 @@ class scavengerhunt_user_historical_attempts implements renderable {
  * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class scavengerhunt_users_progress implements renderable {
+class treasurehunt_users_progress implements renderable {
 
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $roadsusersprogress = array();

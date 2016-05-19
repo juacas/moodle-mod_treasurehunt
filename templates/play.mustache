@@ -46,20 +46,20 @@
         <div data-role="panel" data-position="left" data-position-fixed="true" data-display="overlay" id="infopanel">
             <div data-role="header" data-position="fixed" data-tap-toggle="false">
                 <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-                <h1>{{#str}} info, mod_scavengerhunt{{/str}}</h1>
+                <h1>{{#str}} info, mod_treasurehunt{{/str}}</h1>
             </div>
             <div class="ui-bar ui-bar-b">
                 <h1>{{{user.picture}}} {{user.name}}</h1>
 
-                <a href="view.php?id={{scavengerhunt.id}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">{{#str}} exit, mod_scavengerhunt{{/str}}</a>
+                <a href="view.php?id={{treasurehunt.id}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">{{#str}} exit, mod_treasurehunt{{/str}}</a>
 
             </div>
             <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
                 {{#hasdescription}}
                 <div data-role="collapsible" data-theme="a" data-iconpos="right">
-                    <h3>{{scavengerhunt.name}}</h3>
+                    <h3>{{treasurehunt.name}}</h3>
                     <div>
-                        <p>{{{scavengerhunt.description}}}</p>
+                        <p>{{{treasurehunt.description}}}</p>
                     </div>
                 </div>
                 {{/hasdescription}}
@@ -75,7 +75,7 @@
         <div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" id="searchpanel">
             <div data-role="header" data-position="fixed" data-tap-toggle="false">
                 <a href="#" data-role="button" data-rel="close" class="ui-btn-right ui-nodisc-icon ui-btn ui-icon-carat-r ui-btn-icon-notext ui-corner-all"></a>
-                <h1>{{#str}} search, mod_scavengerhunt{{/str}}</h1>
+                <h1>{{#str}} search, mod_treasurehunt{{/str}}</h1>
                 <div class="ui-bar ui-bar-b">
                     <form class="ui-filterable">
                         <input id="autocomplete-input" data-type="search" placeholder="Find a city...">
@@ -93,13 +93,13 @@
 
         <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
             <div data-role="header" data-theme="b">
-                <h1>{{#str}} sendlotacion_title, mod_scavengerhunt{{/str}}</h1>
+                <h1>{{#str}} sendlotacion_title, mod_treasurehunt{{/str}}</h1>
             </div>
             <div role="content" class="ui-content ui-overlay-b">
-                <p>{{#str}} sendlotacion_content, mod_scavengerhunt{{/str}}</p>
+                <p>{{#str}} sendlotacion_content, mod_treasurehunt{{/str}}</p>
                 <fieldset class="ui-grid-a">
-                    <div class="ui-block-a"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back">{{#str}} cancel, mod_scavengerhunt{{/str}}</a></div>
-                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back" data-transition="flow" id="sendLocation">{{#str}} send, mod_scavengerhunt{{/str}}</a></div>
+                    <div class="ui-block-a"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back">{{#str}} cancel, mod_treasurehunt{{/str}}</a></div>
+                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back" data-transition="flow" id="sendLocation">{{#str}} send, mod_treasurehunt{{/str}}</a></div>
                 </fieldset>
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
@@ -109,17 +109,17 @@
 
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#infopanel"  data-rel="panel" data-dismissible="true" class="ui-btn ui-btn-left ui-btn-inline ui-icon-bars ui-btn-icon-notext"></a>
-            <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all   ui-btn-inline ui-btn-icon-notext ui-icon-search">{{#str}} search, mod_scavengerhunt{{/str}}</a>
-            <h1>{{#pix}} images/caza-tesoro-icon-small, scavengerhunt, Scavengerhunt Icon {{/pix}} {{scavengerhunt.name}}</h1>
+            <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all   ui-btn-inline ui-btn-icon-notext ui-icon-search">{{#str}} search, mod_treasurehunt{{/str}}</a>
+            <h1>{{#pix}} images/caza-tesoro-icon-small, treasurehunt, treasurehunt Icon {{/pix}} {{treasurehunt.name}}</h1>
         </div>		
         <div data-role="content" id="content">		  
             <div id="map"></div>
         </div>
         <div id="main_footer" data-role="footer" data-position="fixed"  data-tap-toggle="false">
             <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" id="autolocate"></a>
-            <a href="#popupDialog" data-rel="popup" data-position-to="window" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validateLocation">{{#str}} button_validate_location, mod_scavengerhunt{{/str}}</a>
-            <a href="#layerspage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers, mod_scavengerhunt{{/str}}</a>
-            <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info">{{#str}} history, mod_scavengerhunt{{/str}}</a> 
+            <a href="#popupDialog" data-rel="popup" data-position-to="window" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validateLocation">{{#str}} button_validate_location, mod_treasurehunt{{/str}}</a>
+            <a href="#layerspage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets">{{#str}} layers, mod_treasurehunt{{/str}}</a>
+            <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info">{{#str}} history, mod_treasurehunt{{/str}}</a> 
             <div id="navigation"></div>
         </div>
         {{!Fin de Cabecera y barra de herramientas.}}
@@ -129,11 +129,11 @@
     <div data-role="page" id="layerspage" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} layers, mod_scavengerhunt{{/str}}</h1>
+            <h1>{{#str}} layers, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
             <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
-                <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_scavengerhunt{{/str}}</li>
+                <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_treasurehunt{{/str}}</li>
             </ul>
         </div>
     </div>
@@ -142,7 +142,7 @@
     <div data-role="page" id="historypage" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} history, mod_scavengerhunt{{/str}}</h1>
+            <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
             <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">

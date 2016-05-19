@@ -15,9 +15,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines backup_scavengerhunt_activity_task class
+ * Defines backup_treasurehunt_activity_task class
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -25,17 +25,17 @@
 
 defined('MOODLE_INTERNAL') || die;
 
-require_once($CFG->dirroot . '/mod/scavengerhunt/backup/moodle2/backup_scavengerhunt_stepslib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
 
 /**
- * Provides the steps to perform one complete backup of the scavengerhunt instance
+ * Provides the steps to perform one complete backup of the treasurehunt instance
  *
- * @package   mod_scavengerhunt
+ * @package   mod_treasurehunt
  * @category  backup
  * @copyright 2015 Your Name <your@email.adress>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class backup_scavengerhunt_activity_task extends backup_activity_task {
+class backup_treasurehunt_activity_task extends backup_activity_task {
 
     /**
      * No specific settings for this activity
@@ -44,10 +44,10 @@ class backup_scavengerhunt_activity_task extends backup_activity_task {
     }
 
     /**
-     * Defines a backup step to store the instance data in the scavengerhunt.xml file
+     * Defines a backup step to store the instance data in the treasurehunt.xml file
      */
     protected function define_my_steps() {
-        $this->add_step(new backup_scavengerhunt_activity_structure_step('scavengerhunt_structure', 'scavengerhunt.xml'));
+        $this->add_step(new backup_treasurehunt_activity_structure_step('treasurehunt_structure', 'treasurehunt.xml'));
     }
 
     /**
@@ -61,13 +61,13 @@ class backup_scavengerhunt_activity_task extends backup_activity_task {
 
         $base = preg_quote($CFG->wwwroot, '/');
 
-        // Link to the list of scavengerhunts.
-        $search = '/('.$base.'\/mod\/scavengerhunt\/index.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@SCAVENGERHUNTINDEX*$2@$', $content);
+        // Link to the list of treasurehunts.
+        $search = '/('.$base.'\/mod\/treasurehunt\/index.php\?id\=)([0-9]+)/';
+        $content = preg_replace($search, '$@treasurehuntINDEX*$2@$', $content);
 
-        // Link to scavengerhunt view by moduleid.
-        $search = '/('.$base.'\/mod\/scavengerhunt\/view.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@SCAVENGERHUNTVIEWBYID*$2@$', $content);
+        // Link to treasurehunt view by moduleid.
+        $search = '/('.$base.'\/mod\/treasurehunt\/view.php\?id\=)([0-9]+)/';
+        $content = preg_replace($search, '$@treasurehuntVIEWBYID*$2@$', $content);
 
         return $content;
     }

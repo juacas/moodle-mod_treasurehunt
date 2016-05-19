@@ -2,7 +2,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editroad_form.php');
-require_once("$CFG->dirroot/mod/scavengerhunt/locallib.php");
+require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 
 global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
@@ -15,29 +15,29 @@ $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
 
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'scavengerhunt');
-$scavengerhunt = $DB->get_record('scavengerhunt', array('id' => $cm->instance), '*', MUST_EXIST);
+list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
+$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/scavengerhunt/editroad.php', array('cmid' => $cmid));
+$url = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $cmid));
 if (!empty($id)) {
     $url->param('id', $id);
 }
 $PAGE->set_url($url);
 
-require_capability('mod/scavengerhunt:managescavenger', $context);
-require_capability('mod/scavengerhunt:addroad', $context);
+require_capability('mod/treasurehunt:managescavenger', $context);
+require_capability('mod/treasurehunt:addroad', $context);
 
-$returnurl = new moodle_url('/mod/scavengerhunt/edit.php', array('id' => $cmid));
+$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid));
 
-if (!isLockScavengerhunt($cm->instance, $USER->id)) {
-    $idLock = renewLockScavengerhunt($cm->instance, $USER->id);
-    $PAGE->requires->js_call_amd('mod_scavengerhunt/renewlock', 'renewLockScavengerhunt', array($cm->instance, $idLock));
+if (!is_edition_loked($cm->instance, $USER->id)) {
+    $idLock = renew_edition_lock($cm->instance, $USER->id);
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,group_id,grouping_id FROM mdl_scavengerhunt_roads  WHERE id=?';
+        $sql = 'SELECT id,name,groupid,groupingid FROM mdl_treasurehunt_roads  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -54,16 +54,16 @@ if (!isLockScavengerhunt($cm->instance, $USER->id)) {
     if ($cm->groupmode) {
         $selectoptions = groups_get_all_groupings($course->id);
         //Consulta de groupings ocupados en esta instancia
-        $sql = 'SELECT grouping_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
+        $sql = 'SELECT groupingid as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=?';
         $groups = true;
     } else {
         $selectoptions = groups_get_all_groups($course->id);
         //Consulta de grupos ocupados en esta instancia
-        $sql = 'SELECT group_id as busy FROM mdl_scavengerhunt_roads  WHERE scavengerhunt_id=? AND id !=?';
+        $sql = 'SELECT groupid as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=?';
         $groups = false;
     }
     //Elimino los grupos ocupados
-    $parms = array('scavengerhunt_id' => $scavengerhunt->id, 'id' => $id);
+    $parms = array('treasurehuntid' => $treasurehunt->id, 'id' => $id);
     $busy = $DB->get_records_sql($sql, $parms);
     foreach ($busy as $option) {
         unset($selectoptions[$option->busy]);
@@ -87,14 +87,14 @@ if (!isLockScavengerhunt($cm->instance, $USER->id)) {
             'objectid' => $entry->id,
         );
         if (empty($entry->id)) {
-            $entry->scavengerhunt_id = $scavengerhunt->id;
+            $entry->treasurehuntid = $treasurehunt->id;
             $entry->timecreated = $timenow;
-            $entry->id = $DB->insert_record('scavengerhunt_roads', $entry);
-            $event = \mod_scavengerhunt\event\road_created::create($eventparams);
+            $entry->id = $DB->insert_record('treasurehunt_roads', $entry);
+            $event = \mod_treasurehunt\event\road_created::create($eventparams);
         } else {
             $entry->timemodified = $timenow;
-            $DB->update_record('scavengerhunt_roads', $entry);
-            $event = \mod_scavengerhunt\event\road_updated::create($eventparams);
+            $DB->update_record('treasurehunt_roads', $entry);
+            $event = \mod_treasurehunt\event\road_updated::create($eventparams);
         }
         // store the updated value values
         // Trigger event and update completion (if entry was created).
@@ -103,13 +103,13 @@ if (!isLockScavengerhunt($cm->instance, $USER->id)) {
         redirect($returnurl);
     }
 } else {
-    $returnurl = new moodle_url('/mod/scavengerhunt/view.php', array('id' => $cmid));
-    print_error('scavengerhuntislocked', 'scavengerhunt', $returnurl, get_username_blocking_edition($scavengerhunt->id));
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($scavengerhunt->name));
+echo $OUTPUT->heading(format_string($treasurehunt->name));
 $mform->display();
 echo $OUTPUT->footer();
 

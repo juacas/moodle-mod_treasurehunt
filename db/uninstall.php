@@ -19,7 +19,7 @@
  *
  * @see uninstall_plugin()
  *
- * @package    mod_scavengerhunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Your Name <your@email.adress>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -27,6 +27,6 @@
 /**
  * Custom uninstallation procedure
  */
-function xmldb_scavengerhunt_uninstall() {
+function xmldb_treasurehunt_uninstall() {
     return true;
 }
