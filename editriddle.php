@@ -162,9 +162,11 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
                 }
             }
         } else {
-            // Elimino las posibles respuestas.
-            foreach ($answers as $answer) {
-                $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+            if (isset($answers)) {
+                // Elimino las anteriores respuestas.
+                foreach ($answers as $answer) {
+                    $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+                }
             }
         }
         // Actualizo la pista con los ficheros procesados.

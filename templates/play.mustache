@@ -150,6 +150,33 @@
         </div>
     </div>
     {{!Fin de pagina de historial de intentos.}}
+    {{!Pagina de reponder pregunta.}}
+
+    <div data-role="page" id="questionpage" data-theme="b">
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
+        </div>
+        <div data-role="content">
+            <p>¡¡Enhorabuena, has llegado al punto correcto!!</p>
+            <form id='form_answer'>  
+                        <fieldset data-role="controlgroup">
+                            <legend id="questionriddle">¿Cual de todos estos animales produce cáncer?</legend>
+                            <input type="radio" name="radio-choice-v-2" id="radio-choice-v-2a" value="1">
+                            <label for="radio-choice-v-2a">A</label>
+                            <input type="radio" name="radio-choice-v-2" id="radio-choice-v-2b" value="2">
+                            <label for="radio-choice-v-2b">B</label>
+                            <input type="radio" name="radio-choice-v-2" id="radio-choice-v-2c" value="3">
+                            <label for="radio-choice-v-2c">C</label>
+                </fieldset>
+            </form>
+            <div class="ui-grid-a">
+                <div class="ui-block-a"><a href="#" data-role="button" data-rel="back" data-icon="arrow-l">Back</a></div>
+                <div class="ui-block-b"><a href="#" data-role="button">Continuar</a></div>
+            </div>
+        </div>
+    </div>
+    {{!Fin de pagina de reponder pregunta.}}
     {{#js}}
 
     {{/js}}

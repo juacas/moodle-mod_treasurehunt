@@ -86,8 +86,8 @@ function insert_riddle_form(stdClass $entry) {
             . 'timecreated,questiontext,questiontextformat,questiontexttrust, '
             . 'activitytoend) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),(?))';
     $params = array($name, $roadid, $number, $description,
-        $descriptionformat, $descriptiontrust, $timenow,$questiontext,
-        $questiontextformat,$questiontexttrust,$activitytoend);
+        $descriptionformat, $descriptiontrust, $timenow, $questiontext,
+        $questiontextformat, $questiontexttrust, $activitytoend);
     $DB->execute($sql, $params);
     //Como he insertado una nueva pista sin geometrias pongo el camino como no valido
     set_valid_road($roadid, false);
@@ -118,8 +118,8 @@ function update_riddle_form(stdClass $entry) {
             . 'descriptiontrust=(?),timemodified=(?),questiontext=(?),'
             . 'questiontextformat=(?),questiontexttrust=(?),activitytoend=(?) '
             . 'WHERE mdl_treasurehunt_riddles.id = (?)';
-    $params = array($name, $description, $descriptionformat, 
-        $descriptiontrust, $timemodified,$questiontext,$questiontextformat,
+    $params = array($name, $description, $descriptionformat,
+        $descriptiontrust, $timemodified, $questiontext, $questiontextformat,
         $questiontexttrust, $activitytoend, $riddleid);
     $DB->execute($sql, $params);
 }
@@ -301,6 +301,7 @@ function delete_old_locks($treasurehuntid) {
 function check_user_location($userid, $idgroup, $roadid, $point, $groupmode, $course) {
     global $DB;
     $return = new stdClass();
+    $answers = array();
     $location = object_to_wkt($point);
     if ($groupmode) {
         $grouptype = 'groupid';
@@ -310,7 +311,7 @@ function check_user_location($userid, $idgroup, $roadid, $point, $groupmode, $co
         $params = array($userid, $roadid, $roadid);
     }
     // Recupero la ultima pista descubierta por el usuario/grupo para esta instancia.
-    $query = "SELECT id,number from {treasurehunt_riddles} WHERE number=(Select max(number) from {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a ON a.riddleid=r.id  WHERE a.$grouptype=? and r.roadid=? and a.success=1) AND roadid = ?";
+    $query = "SELECT id,number,questiontext from {treasurehunt_riddles} WHERE number=(Select max(number) from {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a ON a.riddleid=r.id  WHERE a.$grouptype=? and r.roadid=? and a.success=1) AND roadid = ?";
     $currentriddle = $DB->get_record_sql($query, $params);
     if ($currentriddle) {
         $nextnoriddle = $currentriddle->number + 1;
@@ -323,6 +324,10 @@ function check_user_location($userid, $idgroup, $roadid, $point, $groupmode, $co
     $params = array($location, $nextnoriddle, $roadid);
     $nextriddle = $DB->get_record_sql($query, $params);
     if ($nextriddle->inside) {
+        if ($currentriddle->questiontext !== '') {
+            $question = file_rewrite_pluginfile_urls($currentriddle->questiontext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'questiontext', $currentriddle->id);
+            $answers = get_answers_by_riddle_id($currentriddle->id,$context);
+        }
         $isinside = 1;
         $pointriddleid = $nextriddle->id;
         $return->msg = get_string('successlocation', 'treasurehunt');
@@ -346,6 +351,16 @@ function check_user_location($userid, $idgroup, $roadid, $point, $groupmode, $co
         }
     }
     return $return;
+}
+
+function get_answers_by_riddle_id($riddleid,$context) {
+    global $DB;
+    $query = "SELECT id,answertext,correct from {treasurehunt_answers} WHERE riddleid = ?";
+    $answers = $DB->get_records_sql($query, array($riddleid));
+    foreach($answers as &$answer){
+        $answer->answertext = file_rewrite_pluginfile_urls($answer->answertext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'answertext', $answer->id);
+    }
+    return $answers;
 }
 
 function riddles_to_geojson($riddles, $context, $treasurehuntid, $userid = null) {
