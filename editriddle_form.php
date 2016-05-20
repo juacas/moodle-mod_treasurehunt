@@ -60,9 +60,9 @@ class riddle_form extends moodleform {
             $mform->setType('name', PARAM_CLEAN);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        //Aquí añadimos la regla del tamaño máximo de la cadena.
+        //Aqui anadimos la regla del tamano maximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
+        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃ³n, si quieres 
         // ... que aparezca en la portada, etc.
         $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null, $editoroptions);
         $mform->setType('description_editor', PARAM_RAW);
@@ -96,7 +96,7 @@ class riddle_form extends moodleform {
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, 2, 2);
         }
 
-        // Añado los campos ocultos.
+        // Anado los campos ocultos.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');

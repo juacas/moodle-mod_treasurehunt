@@ -33449,6 +33449,7 @@ ol.control.Control = function(options) {
    * @type {function(ol.MapEvent)}
    */
   this.render = options.render ? options.render : ol.nullFunction;
+
   if (options.target) {
     this.setTarget(options.target);
   }
