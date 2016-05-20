@@ -147,6 +147,12 @@ $string['multiplegroupingsplay'] = 'Tu grupo tiene asignados más de un camino, 
 $string['multiplegroupssameroadplay'] = 'Perteneces a más de un grupo asignado al mismo camino, por lo que no puedes jugar la actividad.';
 $string['warnusersgrouping'] = 'Algunos usuarios no son ya sea miembros de una agrupación, o son miembros de más de una agrupación, o es un miembro de más de un grupo perteneciente al mismo camino, por lo que no son capaces de jugar la actividad.';
 $string['warnusersgroup'] = 'Algunos usuarios no son ya sea miembros de un grupo, o son miembros de más de un grupo, por lo que no son capaces de jugar la actividad.';
+$string['correctanswer'] = 'Respuesta correcta.';
+$string['errcorrectsetanswerblank'] = 'Respuesta correcta marcada, pero la respuesta está vacía';
+$string['errnocorrectanswers'] = 'Debe haber solo una respuesta correcta';
+$string['errcorrectanswers'] = 'Debe seleccionar una respuesta correcta';
+
+
 
 
 

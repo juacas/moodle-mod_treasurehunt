@@ -145,5 +145,10 @@ $string['warnusersgrouping'] = 'Some users are either not a member of any groupi
 $string['warnusersgroup'] = 'Some users are either not a member of any group, or are a member of more than one group, so are unable to play the activity.';
 $string['timelabelfailed'] = 'Location sent on the date: ';
 $string['timelabelsuccess'] = 'Riddle discovered on the date: ';
+$string['correctanswer'] = 'Correct answer.';
+$string['errcorrectsetanswerblank'] = 'Correct answer is set, but the Answer is blank';
+$string['errnocorrectanswers'] = 'There must be only one correct answer';
+$string['errcorrectanswers'] = 'You must select a correct answer';
+
 
 

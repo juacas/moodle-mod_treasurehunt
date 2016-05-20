@@ -30,6 +30,13 @@ defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->libdir/formslib.php");
 
 /**
+ * Constant determines the number of answer boxes to add in the editing
+ * form for multiple choice and similar question types when the user presses
+ * 'add form fields button'.
+ */
+define("NUMBER_NEW_ANSWERS", 2);
+
+/**
  * Module instance settings form
  *
  * @package    mod_treasurehunt
@@ -45,7 +52,7 @@ class riddle_form extends moodleform {
 
         $mform = $this->_form;
         $formid = $mform->_attributes['id'];
-        $editoroptions = $this->_customdata['descriptionoptions'];
+        $editoroptions = $this->_customdata['editoroptions'];
         $currententry = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
 
@@ -81,19 +88,18 @@ class riddle_form extends moodleform {
         // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco: llamo al cancel que no necesita comprobar la validacion
         // ... y le doy un valor a una variable escondida.
         $form = "document.forms['" . $formid . "']";
-        $javascript = "$form.reloaded.value='1';$form.showquestion.value= $form.addsimplequestion.value;$form.cancel.click();"; //create javascript: set reloaded field to "1" 
+        $javascript = "$form.reloaded.value='1';$form.cancel.click();"; //create javascript: set reloaded field to "1" 
         $attributes = array("onChange" => $javascript); // set onChange attribute
-        $select = $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'), $attributes);
+        $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'), $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
-        $select->setSelected('0');
 
-        if (optional_param('showquestion', 0, PARAM_INT)) {
+        if ($currententry->addsimplequestion) {
             // Imprimo el editor de preguntas
             $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null, $editoroptions);
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Imprimo las respuestas
-            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, 2, 2);
+            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, $currententry->noanswers, NUMBER_NEW_ANSWERS);
         }
 
         // Anado los campos ocultos.
@@ -107,9 +113,6 @@ class riddle_form extends moodleform {
         $mform->addElement('hidden', 'reloaded');
         $mform->setType('reloaded', PARAM_INT);
         $mform->setConstant('reloaded', 0);
-        // Necesario para mostrar la pregunta
-        $mform->addElement('hidden', 'showquestion');
-        $mform->setType('showquestion', PARAM_INT, 0);
 
 
 
@@ -117,6 +120,78 @@ class riddle_form extends moodleform {
         $this->add_action_buttons();
 
         $this->set_data($currententry);
+    }
+
+    public function set_data($entry) {
+        $entry = $this->data_preprocessing($entry);
+        parent::set_data($entry);
+    }
+
+    protected function data_preprocessing($entry) {
+        $editoroptions = $this->_customdata['editoroptions'];
+        $context = $this->_customdata['context'];
+        // Prepare all editors.
+        $entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $entry->id);
+
+        // Si existe la pregunta.
+        if ($entry->addsimplequestion) {
+            if (isset($entry->questiontext)) {
+                $entry = file_prepare_standard_editor($entry, 'questiontext', $editoroptions, $context, 'mod_treasurehunt', 'questiontext', $entry->id);
+            }
+            if (isset($entry->answers)) {
+                $k = 0;
+                foreach ($entry->answers as $answer) {
+                    $answer = file_prepare_standard_editor($answer, 'answertext', $editoroptions, $context, 'mod_treasurehunt', 'answertext', $answer->id);
+                    $entry->answertext_editor[$k] = $answer->answertext_editor;
+                    $entry->correct[$k] = $answer->correct;
+                    $k++;
+                }
+            }
+        }
+        return $entry;
+    }
+
+    public function validation($data, $files) {
+
+        $errors = array();
+
+        if (array_key_exists('answertext_editor',$data)) {
+            $answers = $data['answertext_editor'];
+            $answercount = 0;
+            $correctcount = 0;
+
+            foreach ($answers as $key => $answer) {
+                // Check no of choices.
+                $trimmedanswer = trim($answer['text']);
+                $correct = (int) $data['correct'][$key];
+                if ($trimmedanswer === '' && $correct === 0) {
+                    continue;
+                }
+                if ($correct === 1) {
+                    $correctcount++;
+                }
+                $answercount++;
+                if ($trimmedanswer === '') {
+                    $errors['correct[' . $key . ']'] = get_string('errcorrectsetanswerblank', 'treasurehunt');
+                }
+            }
+
+            if ($answercount === 0) {
+                $errors['answertext_editor[0]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
+                $errors['answertext_editor[1]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
+            } else if ($answercount == 1) {
+                $errors['answertext_editor[1]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
+            }
+
+            // Check if have correct choice
+            if ($correctcount === 0) {
+                $errors['correct[0]'] = get_string('errcorrectanswers', 'treasurehunt');
+            } else if ($correctcount > 1) {
+                $errors['correct[0]'] = get_string('errnocorrectanswers', 'treasurehunt');
+            }
+        }
+
+        return $errors;
     }
 
     /**
@@ -129,13 +204,12 @@ class riddle_form extends moodleform {
      *      field holding an array of answers
      * @return array of form fields.
      */
-    protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions, &$answersoption) {
+    protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions) {
         $repeated = array();
-        $repeated[] = $mform->createElement('editor', 'answertext', $label, array('rows' => 1), $editoroptions);
-        $repeated[] = $mform->createElement('advcheckbox', 'groupmode', '', get_string('groupmode', 'treasurehunt'));
+        $repeated[] = $mform->createElement('editor', 'answertext_editor', $label, array('rows' => 1), $editoroptions);
+        $repeated[] = $mform->createElement('advcheckbox', 'correct', '', get_string('correctanswer', 'treasurehunt'));
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
-        $answersoption = 'answers';
         return $repeated;
     }
 
@@ -149,17 +223,9 @@ class riddle_form extends moodleform {
      *      Default QUESTION_NUMANS_START.
      * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
      */
-    protected function add_per_answer_fields(&$mform, $label, $editoroptions, $minoptions = 2, $addoptions = 0) {
-        global $CFG;
-        $answersoption = '';
+    protected function add_per_answer_fields(&$mform, $label, $editoroptions, $repeatsatstart, $addoptions = 0) {
         $repeatedoptions = array();
-        $repeated = $this->get_per_answer_fields($mform, $label, $editoroptions, $repeatedoptions, $answersoption);
-
-        if (isset($this->question->options)) {
-            $repeatsatstart = count($this->question->options->$answersoption);
-        } else {
-            $repeatsatstart = $minoptions;
-        }
+        $repeated = $this->get_per_answer_fields($mform, $label, $editoroptions, $repeatedoptions);
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions, 'noanswers', 'addanswers', $addoptions);
     }
 

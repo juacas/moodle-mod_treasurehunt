@@ -37,10 +37,27 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $idLock));
 
     if ($id) { // if entry is specified
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,activitytoend,roadid FROM mdl_treasurehunt_riddles  WHERE id=?';
-        $parms = array('id' => $id);
-        if (!$entry = $DB->get_record_sql($sql, $parms)) {
+        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,'
+                . 'activitytoend,roadid,questiontext,questiontextformat,'
+                . 'questiontexttrust FROM {treasurehunt_riddles}  WHERE id=?';
+        $params = array($id);
+        if (!$entry = $DB->get_record_sql($sql, $params)) {
             print_error('invalidentry');
+        }
+        // Si existe la pregunta recojo las respuestas.
+        if ($entry->questiontext !== '') {
+            // Hago que se muestre la pregunta.
+            $entry->addsimplequestion = optional_param('addsimplequestion', 1, PARAM_INT);
+            $sqlanswers = 'SELECT a.id,a.answertext,a.answertextformat,a.answertexttrust,'
+                    . ' a.correct FROM {treasurehunt_answers} a INNER JOIN'
+                    . ' {treasurehunt_riddles} r ON r.id=a.riddleid WHERE r.id=?';
+            $params = array($entry->id);
+            $answers = $DB->get_records_sql($sqlanswers, $params);
+            $entry->answers = $answers;
+            $entry->noanswers = optional_param('noanswers', count($answers), PARAM_INT);
+            if (!empty(optional_param('addanswers', '', PARAM_TEXT))) {
+                $entry->noanswers += NUMBER_NEW_ANSWERS;
+            }
         }
     } else { // new entry
         $roadid = required_param('roadid', PARAM_INT);
@@ -51,26 +68,32 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             print_error('invalidentry');
         }
         // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna pista.
-        if(check_road_is_blocked($roadid)){
-            print_error('notcreateriddle','treasurehunt',$returnurl);
+        if (check_road_is_blocked($roadid)) {
+            print_error('notcreateriddle', 'treasurehunt', $returnurl);
         }
         $entry = new stdClass();
         $entry->id = null;
         $entry->roadid = $roadid;
     }
+    if (!isset($entry->questiontext) || $entry->questiontext === '') {
+        $entry->addsimplequestion = optional_param('addsimplequestion', 0, PARAM_INT);
+        $entry->noanswers = optional_param('noanswers', 2, PARAM_INT);
+        if (!empty(optional_param('addanswers', '', PARAM_TEXT))) {
+            $entry->noanswers += NUMBER_NEW_ANSWERS;
+        }
+    }
     $entry->cmid = $cmid;
-    
-    $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
-    $descriptionoptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'description', $entry->id));
-    $entry = file_prepare_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_treasurehunt', 'description', $entry->id);
 
+    $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
+    $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
+        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'description', $entry->id));
+    //$entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $entry->id);
     // List activities with Completion enabled
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
 
 
-    $mform = new riddle_form(null, array('current' => $entry, 'descriptionoptions' => $descriptionoptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
+    $mform = new riddle_form(null, array('current' => $entry, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
 
     if ($mform->is_reloaded()) {
         // Si se ha recargado es porque hemos cambiado algo
@@ -87,6 +110,10 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         $entry->description = '';          // updated later
         $entry->descriptionformat = FORMAT_HTML; // updated later
         $entry->descriptiontrust = 0;           // updated later
+        $entry->questiontext = '';          // updated later
+        $entry->questiontextformat = FORMAT_HTML; // updated later
+        $entry->questiontexttrust = 0;           // updated later
+
         if (empty($entry->id)) {
             $entry->id = insert_riddle_form($entry);
             $isnewentry = true;
@@ -99,14 +126,50 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
         // save and relink embedded images and save attachments
-        $entry = file_postupdate_standard_editor($entry, 'description', $descriptionoptions, $context, 'mod_treasurehunt', 'description', $entry->id);
-
+        $entry = file_postupdate_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $entry->id);
         // store the updated value values
-        update_riddle_form($entry);
-        
-        if($entry->showquestion){
-            
+        if ($entry->addsimplequestion) {
+            // Proceso los ficheros del editor de pregunta.
+            $entry = file_postupdate_standard_editor($entry, 'questiontext', $editoroptions, $context, 'mod_treasurehunt', 'questiontext', $entry->id);
+            if (isset($entry->answertext_editor)) {
+                // Proceso los editores de respuesta y guardo las respuestas.
+                foreach ($entry->answertext_editor as $key => $answertext) {
+                    $timenow = time();
+                    if (isset($answers) && count($answers) > 0) {
+                        $answer = array_shift($answers);
+                        if (trim($answertext['text']) === '') {
+                            $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+                            continue;
+                        }
+                        $answer->timemodified = $timenow;
+                        $answer->correct = $entry->correct[$key];
+                    } else {
+                        if (trim($answertext['text']) === '') {
+                            continue;
+                        }
+                        $answer = new stdClass();
+                        $answer->answertext = '';          // updated later
+                        $answer->answertextformat = FORMAT_HTML; // updated later
+                        $answer->answertexttrust = 0;           // updated later
+                        $answer->timecreated = $timenow;
+                        $answer->riddleid = $entry->id;
+                        $answer->correct = $entry->correct[$key];
+                        $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
+                    }
+                    $answer->answertext_editor = $answertext;
+                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context, 'mod_treasurehunt', 'answertext', $answer->id);
+                    $DB->update_record('treasurehunt_answers', $answer);
+                }
+            }
+        } else {
+            // Elimino las posibles respuestas.
+            foreach ($answers as $answer) {
+                $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+            }
         }
+        // Actualizo la pista con los ficheros procesados.
+        update_riddle_form($entry);
+
         // Trigger event and update completion (if entry was created).
         $eventparams = array(
             'context' => $context,

@@ -73,15 +73,21 @@ function insert_riddle_form(stdClass $entry) {
     $description = $entry->description;
     $descriptionformat = $entry->descriptionformat;
     $descriptiontrust = $entry->descriptiontrust;
+    $questiontext = $entry->questiontext;
+    $questiontextformat = $entry->questiontextformat;
+    $questiontexttrust = $entry->questiontexttrust;
     $activitytoend = $entry->activitytoend;
 
     $number_result = $DB->get_record_sql('SELECT count(id) + 1 as number FROM mdl_treasurehunt_riddles where roadid = (?)', array($roadid));
     $number = $number_result->number;
 
-    $sql = 'INSERT INTO mdl_treasurehunt_riddles (name, roadid, number, description, descriptionformat, descriptiontrust, '
-            . 'timecreated, activitytoend) VALUES ((?),(?),(?),(?),(?),(?),(?),(?))';
+    $sql = 'INSERT INTO mdl_treasurehunt_riddles (name, roadid, '
+            . 'number, description, descriptionformat, descriptiontrust, '
+            . 'timecreated,questiontext,questiontextformat,questiontexttrust, '
+            . 'activitytoend) VALUES ((?),(?),(?),(?),(?),(?),(?),(?),(?),(?),(?))';
     $params = array($name, $roadid, $number, $description,
-        $descriptionformat, $descriptiontrust, $timenow, $activitytoend);
+        $descriptionformat, $descriptiontrust, $timenow,$questiontext,
+        $questiontextformat,$questiontexttrust,$activitytoend);
     $DB->execute($sql, $params);
     //Como he insertado una nueva pista sin geometrias pongo el camino como no valido
     set_valid_road($roadid, false);
@@ -105,8 +111,16 @@ function update_riddle_form(stdClass $entry) {
     $timemodified = time();
     $activitytoend = $entry->activitytoend;
     $riddleid = $entry->id;
-    $sql = 'UPDATE mdl_treasurehunt_riddles SET name=(?), description = (?), descriptionformat=(?), descriptiontrust=(?),timemodified=(?),activitytoend=(?) WHERE mdl_treasurehunt_riddles.id = (?)';
-    $params = array($name, $description, $descriptionformat, $descriptiontrust, $timemodified, $activitytoend, $riddleid);
+    $questiontext = $entry->questiontext;
+    $questiontextformat = $entry->questiontextformat;
+    $questiontexttrust = $entry->questiontexttrust;
+    $sql = 'UPDATE mdl_treasurehunt_riddles SET name=(?), description = (?), descriptionformat=(?), '
+            . 'descriptiontrust=(?),timemodified=(?),questiontext=(?),'
+            . 'questiontextformat=(?),questiontexttrust=(?),activitytoend=(?) '
+            . 'WHERE mdl_treasurehunt_riddles.id = (?)';
+    $params = array($name, $description, $descriptionformat, 
+        $descriptiontrust, $timemodified,$questiontext,$questiontextformat,
+        $questiontexttrust, $activitytoend, $riddleid);
     $DB->execute($sql, $params);
 }
 
@@ -122,7 +136,7 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
     $sql = 'SELECT id,number FROM mdl_treasurehunt_riddles  WHERE id=?';
     $parms = array('id' => $riddleid);
     if (!$entry = $DB->get_record_sql($sql, $parms)) {
-        print_error('noexsitsriddle', 'treasurehunt','',$noriddle);
+        print_error('noexsitsriddle', 'treasurehunt', '', $noriddle);
     }
     if (check_road_is_blocked($roadid) && ($noriddle != $entry->number)) {
         // No se puede cambiar el numero de pista una vez bloqueado el camino.
@@ -138,6 +152,7 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
     $DB->execute($sql, $params);
     set_valid_road($roadid);
 }
+
 function delete_riddle($id) {
     GLOBAL $DB;
     $riddle_sql = 'SELECT number,roadid FROM {treasurehunt_riddles} WHERE id = ?';
@@ -203,8 +218,6 @@ function set_valid_road($roadid, $valid = null) {
     }
     $DB->update_record("treasurehunt_roads", $road);
 }
-
-
 
 function check_road_is_blocked($roadid) {
     global $DB;
