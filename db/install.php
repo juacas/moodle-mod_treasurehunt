@@ -66,8 +66,8 @@ function install_geometry_columns() {
                         $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom geometry(MULTIPOLYGON,4326)');
                     }
                     // Create points
-                    if (!$dbman->field_exists('treasurehunt_attempts', 'locations')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD locations geometry(POINT,4326) NOT NULL');
+                    if (!$dbman->field_exists('treasurehunt_attempts', 'location')) {
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location geometry(POINT,4326)');
                     }
                 } catch (ddl_change_structure_exception $ex) {
                     set_config('geometrysupport', false, 'mod_treasurehunt');
@@ -79,7 +79,7 @@ function install_geometry_columns() {
                 //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
                 $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom MULTIPOLYGON');
                 //Create points
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD locations POINT NOT NULL');
+                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location POINT');
                 break;
             default:
                 set_config('geometrysupport', false, 'mod_treasurehunt');

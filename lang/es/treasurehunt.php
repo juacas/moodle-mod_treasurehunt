@@ -59,9 +59,16 @@ $string['noresults'] = 'No se han encontrado resultados.';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
 $string['userattemptovercome'] = 'Pista {$a->number} descubierta en la fecha: {$a->date}';
 $string['userattemptfailed'] = 'Localización fallida para la pista {$a->number} en la fecha: {$a->date}';
+$string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la pista {$a->number}  en la fecha: {$a->date}';
+$string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
+$string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
+$string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
 $string['groupattemptovercome'] = 'Pista {$a->number} descubierta por {$a->user} en la fecha: {$a->date}';
 $string['groupattemptfailed'] = 'Localización fallida por {$a->user} para la pista {$a->number} en la fecha: {$a->date}';
-$string['lockedriddle'] = 'Debes realizar la actividad tal para desbloquear la pista';
+$string['lockedriddle'] = 'Pista bloqueada';
+$string['lockedcriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
+$string['lockedqacriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente a la siguiente pregunta para desbloquear la pista';
+$string['lockedqriddle'] = 'Debes responder correctamente a la siguiente pregunta para desbloquear la pista';
 $string['treasurehuntname'] = 'Nombre de la caza del tesoro';
 $string['treasurehuntname_help'] = 'Este es el contenido asociado al nombre. Soporta barra baja.';
 $string['treasurehunt'] = 'Treasure hunt';
@@ -151,7 +158,8 @@ $string['correctanswer'] = 'Respuesta correcta.';
 $string['errcorrectsetanswerblank'] = 'Respuesta correcta marcada, pero la respuesta está vacía';
 $string['errnocorrectanswers'] = 'Debe haber solo una respuesta correcta';
 $string['errcorrectanswers'] = 'Debe seleccionar una respuesta correcta';
-
+$string['errsendiganswer'] = 'El camino se ha actualizado mientras enviabas la respuesta, vuelvelo a intentar';
+$string['errsendiglocation'] = 'El camino se ha actualizado mientras enviabas tu localización, vuelvelo a intentar';
 
 
 

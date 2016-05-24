@@ -61,12 +61,19 @@ $string['noresults'] = 'No results found.';
 $string['nomarks'] = 'First mark on the map the desired point.';
 $string['startfromhere'] = 'You can only start from here';
 $string['userattemptovercome'] = 'Riddle {$a->number} discovered on the date: {$a->date}';
-$string['userattemptfailed'] = 'Location failed for riddle {$a->number} on the date: {$a->date}';
+$string['userattemptfailed'] = 'Failed location for riddle {$a->number} on the date: {$a->date}';
+$string['userquestionfailed'] = 'Failed answer to the question of riddle {$a->number} on the date: {$a->date}';
+$string['userquestionovercome'] = 'Succesful answer to the question of riddle {$a->number} on the date: {$a->date}';
+$string['groupquestionovercome'] = 'Succesful answer by {$a->user} to the question of riddle {$a->number} on the date: {$a->date}';
+$string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of riddle {$a->number} on the date: {$a->date}';
 $string['groupattemptovercome'] = 'Riddle {$a->number} discovered by {$a->user} on the date: {$a->date}';
-$string['groupattemptfailed'] = 'Location failed by {$a->user} for riddle {$a->number} on the date: {$a->date}';
+$string['groupattemptfailed'] = 'Failed location by {$a->user} for riddle {$a->number} on the date: {$a->date}';
 $string['successlocation'] = 'Congratulations, you are right !!!';
 $string['faillocation'] = 'It is not the right place';
-$string['lockedriddle'] = 'You must perform such activity to unlock the riddle';
+$string['lockedriddle'] = 'Locked riddle';
+$string['lockedcpriddle'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the riddle';
+$string['lockedqacriddle'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following question to unlock the riddle';
+$string['lockedqriddle'] = 'You must correctly answer the following question to unlock the riddle';
 $string['treasurehuntname'] = 'Treasure hunt\'s name';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['notreasurehunts'] = 'Nothing to do here';
@@ -149,6 +156,7 @@ $string['correctanswer'] = 'Correct answer.';
 $string['errcorrectsetanswerblank'] = 'Correct answer is set, but the Answer is blank';
 $string['errnocorrectanswers'] = 'There must be only one correct answer';
 $string['errcorrectanswers'] = 'You must select a correct answer';
-
+$string['errsendiganswer'] = 'The road has been updated while you was sending the answer, try again';
+$string['errsendiglocation'] = 'The road has been updated while you was sending the location, try again';
 
 

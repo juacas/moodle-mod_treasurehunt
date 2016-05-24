@@ -36,13 +36,15 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                     attempttimestamp = lastattempttimestamp,
                     roadtimestamp = lastroadtimestamp,
-                    lastsuccess = {},
+                    lastsuccessfulriddle = {},
                     interval,
                     imgloaded = 0, totalimg = 0,
                     infomsgs = [],
                     changesinattemptshistory = false,
-                    changesinlastsuccess = false,
-                    fitmap = false;
+                    changesinlastsuccessfulriddle = false,
+                    changesinquestionriddle = false,
+                    fitmap = false,
+                    roadfinished = false;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -316,8 +318,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 map.beforeRender(pan, zoom);
                 view.fit(extent, size);
             }
-            function renew_source(location, initialize) {
-                var position;
+            function renew_source(location, initialize, selectedanswerid) {
+                var position = 0;
+                if (!selectedanswerid) {
+                    selectedanswerid = 0;
+                } else {
+                    $.mobile.loading("show");
+                }
                 if (location) {
                     var coordinates;
                     if (playwithoutmove) {
@@ -338,12 +345,23 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             attempttimestamp: attempttimestamp,
                             roadtimestamp: roadtimestamp,
                             initialize: initialize,
-                            location: position
+                            location: position,
+                            selectedanswerid: selectedanswerid
                         }
                     }]);
                 geojson[0].done(function (response) {
                     console.log('json: ' + response.riddles);
-                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
+                    // Si he enviado una respuesta imprimo si es correcta o no
+                    if (selectedanswerid !== 0) {
+                        $.mobile.loading("hide");
+                        toast(response.status.msg);
+                    }
+                    roadfinished = response.roadfinished;
+                    if (roadfinished) {
+                        clearInterval(interval);
+                    }
+
+                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize || response.anychanges) {
                         attempttimestamp = response.attempttimestamp;
                         roadtimestamp = response.roadtimestamp;
                         source.clear();
@@ -364,9 +382,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             create_popup('displayupdates', strings["updates"], body);
                         }
                         // Compruebo si ambos objetos son iguales
-                        if (JSON.stringify(lastsuccess) !== JSON.stringify(response.lastsuccess)) {
-                            lastsuccess = response.lastsuccess;
-                            changesinlastsuccess = true;
+                        if (JSON.stringify(lastsuccessfulriddle) !== JSON.stringify(response.lastsuccessfulriddle)) {
+                            lastsuccessfulriddle = response.lastsuccessfulriddle;
+                            changesinlastsuccessfulriddle = true;
+                            // Si la pista no esta solucionada aviso de que hay cambios.
+                            if (!lastsuccessfulriddle.questionsolved) {
+                                changesinquestionriddle = true;
+                            }
                         }
                         // Compruebo si es un multipolygon o se esta inicializando y lo centro.
                         if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
@@ -376,16 +398,21 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             $.mobile.loading("hide");
                             toast(response.status.msg);
                         }
+                        // Compruebo la pagina en la que nos encontramos.
                         var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                         if (pageId === 'mappage') {
-                            set_lastsuccess();
+                            set_lastsuccessfulriddle();
                             fit_map_to_source();
 
                         } else if (pageId === 'historypage') {
                             set_attempts_history();
+                        } else if (pageId === 'questionpage') {
+                            if (lastsuccessfulriddle.questionsolved) {
+                                $.mobile.pageContainer.pagecontainer("change", "#mappage");
+                            } else {
+                                set_question();
+                            }
                         }
-
-                        //add_msg_to_info_panel(source);
                     }
                 }).fail(function (error) {
                     console.log(error);
@@ -401,15 +428,35 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     fitmap = false;
                 }
             }
-            function set_lastsuccess() {
-                if (changesinlastsuccess) {
-                    $("#lastsuccessname").text(lastsuccess.name);
-                    $("#lastsuccessdescription").html(lastsuccess.description);
+            function set_lastsuccessfulriddle() {
+                if (changesinlastsuccessfulriddle) {
+                    $("#lastsuccessfulriddlename").text(lastsuccessfulriddle.name);
+                    $("#lastsuccessfulriddledescription").html(lastsuccessfulriddle.description);
+                    if (!lastsuccessfulriddle.questionsolved) {
+                        $("#lastsuccessfulriddledescription").append("<a href='#questionpage' " +
+                                "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
+                                "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" + strings['question'] + "</a>");
+                    }
                     $("#collapsibleset").collapsibleset("refresh");
                     $("#infopanel").panel("open");
-                    $("#lastsuccess").collapsible("expand");
-                    changesinlastsuccess = false;
+                    $("#lastsuccessfulriddle").collapsible("expand");
+                    changesinlastsuccessfulriddle = false;
                 }
+            }
+            function set_question() {
+                if (changesinquestionriddle) {
+                    $('#questionform').html("<legend>" + lastsuccessfulriddle.question + "</legend>");
+                    var counter = 1;
+                    $.each(lastsuccessfulriddle.answers, function (key, answer) {
+                        var id = 'answer' + counter;
+                        $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="' + answer.id + '">' +
+                                '<label for="' + id + '">' + answer.answertext + '</label>');
+                        counter++;
+                    });
+                    $('#questionform').enhanceWithin().controlgroup("refresh");
+                    changesinquestionriddle = false;
+                }
+
             }
             function set_attempts_history() {
                 // Compruebo si ha habido cambios desde la ultima vez
@@ -428,7 +475,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         });
                         // Anado cada intento
                         attempts.forEach(function (feature) {
-                            //$("<li class='"+(feature.get("success")?'successfulattempt':'failedattempt')+"'>" + feature.get("info") + "</li>").appendTo($historylist);
                             $("<li><span class='ui-btn-icon-left " + (feature.get("success") ? 'ui-icon-check successfulattempt1' : 'ui-icon-delete failedattempt1') + "' style='position:relative'></span>" + feature.get("info") + "</li>").appendTo($historylist);
 
                         });
@@ -490,19 +536,26 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    var title, riddlename = features.selected[0].get('name'),
-                            riddledescription = features.selected[0].get('description'),
-                            info = features.selected[0].get('info'), body;
-                    body = get_block_text(strings["riddlename"], riddlename);
-                    if (features.selected[0].get('success'))
-                    {
-                        title = strings["discoveredriddle"];
-                        body += get_block_text(strings["riddledescription"], riddledescription);
+                    if (lastsuccessfulriddle.id === features.selected[0].getId()) {
+                        $("#infopanel").panel("open");
+                        $("#lastsuccessfulriddle").collapsible("expand");
                     } else {
-                        title = strings["failedlocation"];
+                        var title, riddlename = features.selected[0].get('name'),
+                                riddledescription = features.selected[0].get('description'),
+                                info = features.selected[0].get('info'), body;
+                        body = get_block_text(strings["riddlename"], riddlename);
+                        if (features.selected[0].get('success'))
+                        {
+                            title = strings["discoveredriddle"];
+                            body += get_block_text(strings["riddledescription"], riddledescription);
+                        } else {
+                            title = strings["failedlocation"];
+                        }
+                        if (info) {
+                            body += '<p>' + info + '</p>';
+                        }
+                        create_popup('inforiddle', title, body);
                     }
-                    body += '<p>' + info + '</p>';
-                    create_popup('inforiddle', title, body);
                 } else {
                     var coordinates = features.mapBrowserEvent.coordinate;
                     markerFeature.setGeometry(coordinates ?
@@ -519,7 +572,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         text: strings['searching'],
                         textVisible: true});
                     openStreetMapGeocoder.geocode(value, function (response) {
-                        debugger;
                         if (response[0] === false) {
                             $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
                         } else {
@@ -575,12 +627,21 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         }, 200);
                     } else {
                         map.updateSize();
-                        set_lastsuccess();
+                        set_lastsuccessfulriddle();
                         fit_map_to_source();
                     }
                 } else if (pageId === 'historypage') {
                     if (event.type === 'pagecontainershow') {
                         set_attempts_history();
+                    }
+                } else if (pageId === 'questionpage') {
+                    if (event.type === 'pagecontainershow') {
+                        if (lastsuccessfulriddle.questionsolved) {
+                            $.mobile.pageContainer.pagecontainer("change", "#mappage");
+                            toast('no existe la pregunta');
+                        } else {
+                            set_question();
+                        }
                     }
                 }
 
@@ -595,6 +656,28 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             $('#sendLocation').on('click', function () {
                 autolocate(false, true);
+            });
+            $('#sendAnswer').on('click', function (event) {
+                //selecciono la respuesta
+                debugger;
+                var selected = $("#questionform input[type='radio']:checked");
+                if (selected.length === 0) {
+                    event.preventDefault();
+                    toast('Debes seleccionar una respuesta');
+                } else {
+                    renew_source(false, false, selected.val());
+                }
+            });
+            $('#validateLocation').on('click', function (event) {
+                if (!lastsuccessfulriddle.questionsolved) {
+                    event.preventDefault();
+                    toast('Debes responder primero a la pregunta');
+                    $("#infopanel").panel("open");
+                }
+                if (roadfinished) {
+                    event.preventDefault();
+                    toast('Ya has completado esta caza del tesoro');
+                }
             });
             /*-------------------------------Initialize page -------------*/
             if ($.mobile.autoInitializePage === false) {
