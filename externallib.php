@@ -414,7 +414,6 @@ class mod_treasurehunt_external_user_progress extends external_api {
             'attempttimestamp' => new external_value(PARAM_INT, 'last updated timestamp attempt'),
             'roadtimestamp' => new external_value(PARAM_INT, 'last updated timestamp road'),
             'infomsg' => new external_value(PARAM_RAW, 'array with all strings with attempts since the last stored timestamp'),
-            'anychanges' => new external_value(PARAM_RAW, 'If true question or activity to end of riddle has been overtaken'),
             'lastsuccesfulriddle' => new external_single_structure(
                     array(
                 'name' => new external_value(PARAM_RAW, 'The name of the last successful riddle.'),
@@ -460,7 +459,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $lastsuccesfulatttempt = get_last_successful_attempt($USER->id, $params->groupid, $cm->groupmode, $params->roadid);
         $roadfinished = false;
         // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa pista. 
-        if (!$riddleresolved && $location && !$updateroad) {
+        if (!$riddleresolved && $location && !$updateroad && !$selectedanswerid) {
             $checklocation = check_user_location($lastsuccesfulatttempt, $USER->id, $params->groupid, $params->roadid, geojson_to_object($location));
             if ($checklocation->newattempt) {
                 $newattempttimestamp = $checklocation->attempttimestamp;
@@ -475,14 +474,17 @@ class mod_treasurehunt_external_user_progress extends external_api {
         }
 
         // Compruebo si se ha acertado la pista y completado la actividad requerida.
-        $qocsolved = check_question_and_completion_solved($lastsuccesfulatttempt, $selectedanswerid, $USER->id, $params->groupid, $updateroad, $riddleresolved);
+        $qocsolved = check_question_and_completion_solved($lastsuccesfulatttempt, $selectedanswerid, $USER->id, $params->groupid, $updateroad, $riddleresolved,$location);
         if ($qocsolved->msg !== '') {
             $status['msg'] = $qocsolved->msg;
             $status['code'] = $qocsolved->code;
         }
-
+        // Compruebo si se han producido cambios
+        if ($qocsolved->newattempt) {
+            $newattempttimestamp = $qocsolved->attempttimestamp;
+        }
         // Si se han realizado cambios o se esta inicializando
-        if ($newattempttimestamp != $attempttimestamp || $updateroad || $initialize || $qocsolved->changes) {
+        if ($newattempttimestamp != $attempttimestamp || $updateroad || $initialize) {
             list($userriddles, $lastsuccessfulriddle) = get_user_progress($params->roadid, $cm->groupmode, $params->groupid, $USER->id, $treasurehuntid, $context, $lastsuccesfulatttempt);
         }
         // Si se ha editado el camino aviso.
@@ -506,7 +508,6 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $result['status'] = $status;
         $result['riddles'] = $userriddles;
         $result['lastsuccessfulriddle'] = $lastsuccessfulriddle;
-        $result['anychanges'] = $qocsolved->changes;
         $result['roadfinished'] = $roadfinished;
         return $result;
     }

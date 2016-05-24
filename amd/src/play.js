@@ -361,7 +361,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         clearInterval(interval);
                     }
 
-                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize || response.anychanges) {
+                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
                         attempttimestamp = response.attempttimestamp;
                         roadtimestamp = response.roadtimestamp;
                         source.clear();

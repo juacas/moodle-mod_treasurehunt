@@ -77,6 +77,7 @@
                 <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The user id"/>
                 <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id"/>
                 <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been discovered"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and completion"/>
                 <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the previous riddle's question has been solved"/>
                 <FIELD NAME="completionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the previous riddle's activitytoend has been solved"/>
             </FIELDS>
@@ -85,6 +86,7 @@
             </KEYS>
             <INDEXES>
                 <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
+                <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
             </INDEXES>
         </TABLE>
         <TABLE NAME="treasurehunt_locks" COMMENT="Manages edition locks of treasurehunt.">

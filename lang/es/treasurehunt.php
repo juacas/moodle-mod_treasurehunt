@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -25,7 +26,6 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Caza del tesoro';
@@ -58,13 +58,16 @@ $string['nomarks'] = 'Marca primero en el mapa el punto deseado.';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
 $string['userattemptovercome'] = 'Pista {$a->number} descubierta en la fecha: {$a->date}';
-$string['userattemptfailed'] = 'Localización fallida para la pista {$a->number} en la fecha: {$a->date}';
+$string['userlocationblocked'] = 'Localización encontrada de la pista {$a->number} en la fecha: {$a->date}';
+$string['userattemptfailed'] = 'Localización fallida de la pista {$a->number} en la fecha: {$a->date}';
+$string['usercompletionovercome'] = 'Actividad a finalizar completada con éxito para la pista {$a->number} en la fecha: {$a->date}';
 $string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la pista {$a->number}  en la fecha: {$a->date}';
 $string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
 $string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
 $string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la pista {$a->number} en la fecha: {$a->date}';
 $string['groupattemptovercome'] = 'Pista {$a->number} descubierta por {$a->user} en la fecha: {$a->date}';
-$string['groupattemptfailed'] = 'Localización fallida por {$a->user} para la pista {$a->number} en la fecha: {$a->date}';
+$string['grouplocationblocked'] = 'Localización encontrada por {$a->user} de la pista {$a->number} en la fecha: {$a->date}';
+$string['groupattemptfailed'] = 'Localización fallida por {$a->user} de la pista {$a->number} en la fecha: {$a->date}';
 $string['lockedriddle'] = 'Pista bloqueada';
 $string['lockedcriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
 $string['lockedqacriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente a la siguiente pregunta para desbloquear la pista';
@@ -111,7 +114,7 @@ $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior d
 $string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán entregas de tareas después de esta fecha sin una ampliación.';
 $string['alwaysshowdescription'] = 'Mostrar siempre la descripción';
 $string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Tarea superior solo será visible para los estudiantes en la fecha "Permitir entregas desde",';
-/**Template */
+/* * Template */
 $string['sendlotacion_title'] = '¿Estás seguro de que deseas enviar esta ubicación?';
 $string['sendlotacion_content'] = 'Esta acción no se puede deshacer.';
 $string['cancel'] = 'Cancelar';
