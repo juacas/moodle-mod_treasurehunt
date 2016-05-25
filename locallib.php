@@ -464,6 +464,7 @@ function riddles_to_geojson($riddles, $context, $treasurehuntid, $userid = null)
         }
         if (property_exists($riddle, 'success')) {
             $attr['success'] = intval($riddle->success);
+            $attr['info'] = set_string_attempt($riddle, $userid);
         }
         if (property_exists($riddle, 'lastsuccessfulriddle')) {
             $attr['name'] = $riddle->lastsuccessfulriddle->name;
@@ -504,7 +505,7 @@ function get_user_progress($roadid, $groupmode, $groupid, $userid, $treasurehunt
     // Recupero las pistas descubiertas y fallos cometidos por el usuario/grupo para esta instancia.
     if ($groupmode) {
         $query = "SELECT a.id,a.timecreated,a.questionsolved,a.completionsolved,"
-                . "a.userid as user ,r.activitytoend,r.name,"
+                . "a.userid as user ,a.type,r.activitytoend,r.name,"
                 . "IF(a.success=0,NULL,r.description) as description,r.number, "
                 . "{$geomfuncs['ST_AsText']}(a.location) as geometry,"
                 . "r.roadid,a.success FROM {treasurehunt_riddles} r INNER JOIN "
@@ -514,7 +515,7 @@ function get_user_progress($roadid, $groupmode, $groupid, $userid, $treasurehunt
         $params = array($groupid, $roadid);
     } else {
         $query = "SELECT a.id,a.timecreated,a.questionsolved,a.completionsolved,"
-                . "a.userid as user ,r.activitytoend,r.name,"
+                . "a.userid as user ,a.type,r.activitytoend,r.name,"
                 . "IF(a.success=0,NULL,r.description) as description,r.number, "
                 . "{$geomfuncs['ST_AsText']}(a.location) as geometry,"
                 . "r.roadid,a.success FROM {treasurehunt_riddles} r INNER JOIN "
@@ -939,8 +940,9 @@ function check_attempts_updates($timestamp, $groupmode, $groupid, $userid, $road
     return array($attempttimestamp, $roadtimestamp, $strings, $riddleresolved, $questionresolved);
 }
 
-function view_user_historical_attempts($groupmode, $groupid, $userid, $roadid, $cmid) {
-    global $DB, $PAGE;
+function get_user_historical_attempts($groupmode, $groupid, $userid, $roadid) {
+    global $DB;
+
     $attempts = [];
     // Recupero todas las acciones de un usuario/grupo y las imprimo en una tabla.
     if ($groupmode) {
@@ -962,9 +964,16 @@ function view_user_historical_attempts($groupmode, $groupid, $userid, $roadid, $
     foreach ($results as $result) {
         $attempt = new stdClass();
         $attempt->string = set_string_attempt($result, $userid);
-        $attempt->success = $result->success;
+        $attempt->success = intval($result->success);
         $attempts[] = $attempt;
     }
+    return $attempts;
+}
+
+function view_user_historical_attempts($groupmode, $groupid, $userid, $roadid, $cmid) {
+    global $PAGE;
+    
+    $attempts = get_user_historical_attempts($groupmode, $groupid, $userid, $roadid);
     $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid);
     return $output->render($renderable);
@@ -1063,7 +1072,7 @@ function insert_riddle_progress_in_road_userlist(&$road, $userlist, $groupmode) 
                     . "ri.number=r.number AND ri.roadid=r.roadid AND at.groupid=a.groupid "
                     . "AND at.success=0) as withfailures, EXISTS(SELECT 1 FROM "
                     . "{treasurehunt_riddles} ri INNER JOIN {treasurehunt_attempts} at ON "
-                    . "at.riddleid=ri.id WHERE ri.number=r.number AND ri.roadid=r.roadid AND "
+                    . "at.riddleid=ri.id WHERE ri.number=r.number+1 AND ri.roadid=r.roadid AND "
                     . "at.groupid=a.groupid AND at.success=1  AND at.type='location') as success "
                     . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
                     . "ON a.riddleid=r.id INNER JOIN {treasurehunt_roads} ro "
@@ -1075,7 +1084,7 @@ function insert_riddle_progress_in_road_userlist(&$road, $userlist, $groupmode) 
                     . "ri.number=r.number AND ri.roadid=r.roadid AND at.groupid=a.groupid "
                     . "AND at.success=0 AND at.userid=a.userid) as withfailures, EXISTS(SELECT 1 FROM "
                     . "{treasurehunt_riddles} ri INNER JOIN {treasurehunt_attempts} at ON "
-                    . "at.riddleid=ri.id WHERE ri.number=r.number AND ri.roadid=r.roadid AND "
+                    . "at.riddleid=ri.id WHERE ri.number=r.number+1 AND ri.roadid=r.roadid AND "
                     . "at.groupid=a.groupid AND at.userid=a.userid AND at.success=1  AND "
                     . "at.type='location') as success FROM {treasurehunt_riddles} r "
                     . "INNER JOIN {treasurehunt_attempts} a ON a.riddleid=r.id INNER "

@@ -483,9 +483,11 @@ class mod_treasurehunt_external_user_progress extends external_api {
         if ($qocsolved->newattempt) {
             $newattempttimestamp = $qocsolved->attempttimestamp;
         }
+        $historicalattempts = array();
         // Si se han realizado cambios o se esta inicializando
         if ($newattempttimestamp != $attempttimestamp || $updateroad || $initialize) {
             list($userriddles, $lastsuccessfulriddle) = get_user_progress($params->roadid, $cm->groupmode, $params->groupid, $USER->id, $treasurehuntid, $context, $lastsuccesfulatttempt);
+            $historicalattempts = get_user_historical_attempts($cm->groupmode, $params->groupid, $USER->id, $params->roadid);
         }
         // Si se ha editado el camino aviso.
         if ($updateroad) {
@@ -509,6 +511,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $result['riddles'] = $userriddles;
         $result['lastsuccessfulriddle'] = $lastsuccessfulriddle;
         $result['roadfinished'] = $roadfinished;
+        $result['historicalattempts'] = $historicalattempts;
         return $result;
     }
 

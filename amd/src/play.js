@@ -40,6 +40,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     interval,
                     imgloaded = 0, totalimg = 0,
                     infomsgs = [],
+                    attemptshistory = [],
                     changesinattemptshistory = false,
                     changesinlastsuccessfulriddle = false,
                     changesinquestionriddle = false,
@@ -369,6 +370,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             'dataProjection': "EPSG:4326",
                             'featureProjection': "EPSG:3857"
                         }));
+                        attemptshistory = response.historicalattempts;
                         changesinattemptshistory = true;
                         if (response.infomsg.length > 0) {
                             var body = '';
@@ -465,17 +467,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     // Lo reinicio
                     $historylist.html('');
                     changesinattemptshistory = false;
-                    if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon) {
+                    if (attemptshistory.length === 0) {
                         $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
                     } else {
-                        var attempts = source.getFeatures();
-                        // Ordeno los intentos por fecha
-                        attempts.sort(function (a, b) {
-                            return (a.get('date') > b.get('date')) ? 1 : ((a.get('date') < b.get('date')) ? -1 : 0);
-                        });
                         // Anado cada intento
-                        attempts.forEach(function (feature) {
-                            $("<li><span class='ui-btn-icon-left " + (feature.get("success") ? 'ui-icon-check successfulattempt1' : 'ui-icon-delete failedattempt1') + "' style='position:relative'></span>" + feature.get("info") + "</li>").appendTo($historylist);
+                        attemptshistory.forEach(function (attempt) {
+                            $("<li><span class='ui-btn-icon-left " + (attempt.success ? 'ui-icon-check successfulattempt1' : 'ui-icon-delete failedattempt1') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
 
                         });
                     }
