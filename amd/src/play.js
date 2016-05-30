@@ -252,7 +252,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     });
                     return [styles];
                 }
-                if (!feature.get('success')) {
+                if (!feature.get('geometrysolved')) {
                     failRiddleStyle.getImage().setScale((view.getZoom() / 220));
                     failRiddleStyle.getText().setText('' + noriddle);
                     return [failRiddleStyle];
@@ -263,7 +263,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             }
             function selectStyleFunction(feature, resolution) {
                 var noriddle = feature.get('noriddle');
-                if (!feature.get('success')) {
+                if (!feature.get('geometrysolved')) {
                     failSelectRiddleStyle.getText().setText('' + noriddle);
                     return [failSelectRiddleStyle];
                 }
@@ -351,25 +351,15 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         }
                     }]);
                 geojson[0].done(function (response) {
-                    console.log('json: ' + response.riddles);
-                    // Si he enviado una respuesta imprimo si es correcta o no
-                    if (selectedanswerid !== 0) {
-                        $.mobile.loading("hide");
-                        toast(response.status.msg);
-                    }
+                    console.log(response);
+
                     roadfinished = response.roadfinished;
                     if (roadfinished) {
                         clearInterval(interval);
                     }
-
                     if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
                         attempttimestamp = response.attempttimestamp;
                         roadtimestamp = response.roadtimestamp;
-                        source.clear();
-                        source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
-                            'dataProjection': "EPSG:4326",
-                            'featureProjection': "EPSG:3857"
-                        }));
                         attemptshistory = response.historicalattempts;
                         changesinattemptshistory = true;
                         if (response.infomsg.length > 0) {
@@ -383,12 +373,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             });
                             create_popup('displayupdates', strings["updates"], body);
                         }
-                        // Compruebo si ambos objetos son iguales
-                        if (JSON.stringify(lastsuccessfulriddle) !== JSON.stringify(response.lastsuccessfulriddle)) {
+                        // Compruebo si es distinto de null, lo que indica que se ha actualizado.
+                        if (response.riddles !== null) {
+                            source.clear();
+                            source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
+                                'dataProjection': "EPSG:4326",
+                                'featureProjection': "EPSG:3857"
+                            }));
+                        }
+                        // Compruebo si es distinto de null, lo que indica que se ha actualizado.
+                        if (response.lastsuccessfulriddle !== null) {
                             lastsuccessfulriddle = response.lastsuccessfulriddle;
                             changesinlastsuccessfulriddle = true;
                             // Si la pista no esta solucionada aviso de que hay cambios.
-                            if (!lastsuccessfulriddle.questionsolved) {
+                            if (lastsuccessfulriddle.question !== '') {
                                 changesinquestionriddle = true;
                             }
                         }
@@ -396,7 +394,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
                             fitmap = true;
                         }
-                        if (location) {
+                        // Si he enviado una localización o una respuesta imprimo si es correcta o no.
+                        if (location || selectedanswerid) {
                             $.mobile.loading("hide");
                             toast(response.status.msg);
                         }
@@ -405,11 +404,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         if (pageId === 'mappage') {
                             set_lastsuccessfulriddle();
                             fit_map_to_source();
-
                         } else if (pageId === 'historypage') {
                             set_attempts_history();
                         } else if (pageId === 'questionpage') {
-                            if (lastsuccessfulriddle.questionsolved) {
+                            if (lastsuccessfulriddle.question === '') {
                                 $.mobile.pageContainer.pagecontainer("change", "#mappage");
                             } else {
                                 set_question();
@@ -434,7 +432,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 if (changesinlastsuccessfulriddle) {
                     $("#lastsuccessfulriddlename").text(lastsuccessfulriddle.name);
                     $("#lastsuccessfulriddledescription").html(lastsuccessfulriddle.description);
-                    if (!lastsuccessfulriddle.questionsolved) {
+                    if (lastsuccessfulriddle.question !== '') {
                         $("#lastsuccessfulriddledescription").append("<a href='#questionpage' " +
                                 "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
                                 "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" + strings['question'] + "</a>");
@@ -472,7 +470,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     } else {
                         // Anado cada intento
                         attemptshistory.forEach(function (attempt) {
-                            $("<li><span class='ui-btn-icon-left " + (attempt.success ? 'ui-icon-check successfulattempt1' : 'ui-icon-delete failedattempt1') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
+                            $("<li><span class='ui-btn-icon-left " + (attempt.penalty ? 'ui-icon-delete failedattempt1' : 'ui-icon-check successfulattempt1') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
 
                         });
                     }
@@ -539,10 +537,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     } else {
                         var title, riddlename = features.selected[0].get('name'),
                                 riddledescription = features.selected[0].get('description'),
-                                info = features.selected[0].get('info'), body;
-                        body = get_block_text(strings["riddlename"], riddlename);
+                                info = features.selected[0].get('info'), body='';
                         if (features.selected[0].get('success'))
                         {
+                            body = get_block_text(strings["riddlename"], riddlename);
                             title = strings["discoveredriddle"];
                             body += get_block_text(strings["riddledescription"], riddledescription);
                         } else {
@@ -633,7 +631,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     }
                 } else if (pageId === 'questionpage') {
                     if (event.type === 'pagecontainershow') {
-                        if (lastsuccessfulriddle.questionsolved) {
+                        if (lastsuccessfulriddle.question === '') {
                             $.mobile.pageContainer.pagecontainer("change", "#mappage");
                             toast('no existe la pregunta');
                         } else {
@@ -666,7 +664,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 }
             });
             $('#validateLocation').on('click', function (event) {
-                if (!lastsuccessfulriddle.questionsolved) {
+                if (lastsuccessfulriddle.question !== '') {
                     event.preventDefault();
                     toast('Debes responder primero a la pregunta');
                     $("#infopanel").panel("open");

@@ -32,7 +32,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
 
             var init = {
-                edittreasurehunt: function (idModule, treasurehuntid, strings, idLock) {
+                edittreasurehunt: function (idModule, treasurehuntid, strings, lockid) {
                     /** Global var ***************************************************************
                      */
                     var stage = {
@@ -982,13 +982,13 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     }
 
 
-                    function deleteRoad(roadid, dirtySource, originalSource, treasurehuntid, idLock) {
+                    function deleteRoad(roadid, dirtySource, originalSource, treasurehuntid, lockid) {
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_road',
                                 args: {
                                     roadid: roadid,
                                     treasurehuntid: treasurehuntid,
-                                    idLock: idLock
+                                    lockid: lockid
                                 }
                             }]);
                         json[0].done(function (response) {
@@ -1025,13 +1025,13 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         });
                     }
 
-                    function deleteRiddle(riddleid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid, idLock) {
+                    function deleteRiddle(riddleid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid, lockid) {
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_riddle',
                                 args: {
                                     riddleid: riddleid,
                                     treasurehuntid: treasurehuntid,
-                                    idLock: idLock
+                                    lockid: lockid
                                 }
                             }]);
                         json[0].done(function (response) {
@@ -1076,7 +1076,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         });
                     }
 
-                    function saveRiddles(dirtySource, originalSource, treasurehuntid, callback, options, idLock) {
+                    function saveRiddles(dirtySource, originalSource, treasurehuntid, callback, options, lockid) {
 
                         var geoJSONFormat = new ol.format.GeoJSON();
                         var features = dirtySource.getFeatures();
@@ -1089,7 +1089,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 args: {
                                     riddles: geoJSON,
                                     treasurehuntid: treasurehuntid,
-                                    idLock: idLock
+                                    lockid: lockid
                                 }
                             }]);
                         json[0].done(function (response) {
@@ -1166,7 +1166,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     });
                     $("#addRiddle").on('click', function () {
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], idLock);
+                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], lockid);
                         } else {
                             newFormRiddleEntry(roadid, idModule);
                         }
@@ -1174,7 +1174,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     });
                     $("#addRoad").on('click', function () {
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule], idLock);
+                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule], lockid);
                         } else {
                             newFormRoadEntry(idModule);
                         }
@@ -1196,7 +1196,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 });
                     });
                     $("#saveRiddle").on('click', function () {
-                        saveRiddles(dirtyStage, originalStage, treasurehuntid, null, null, idLock);
+                        saveRiddles(dirtyStage, originalStage, treasurehuntid, null, null, lockid);
                     });
                     $("#riddleList").on('click', '.ui-icon-info, .ui-icon-alert', function () {
                         var id = $(this).data('id');
@@ -1213,7 +1213,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 'Cancelar', function () {
                                     var riddleid = parseInt($this_li.attr('riddleid'));
                                     deleteRiddle(riddleid, dirtyStage, originalStage,
-                                            stage.roads[roadid].vector, treasurehuntid, idLock);
+                                            stage.roads[roadid].vector, treasurehuntid, lockid);
                                 });
                     });
                     $("#riddleList").on('click', '.ui-icon-pencil', function () {
@@ -1223,7 +1223,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Si esta sucio guardo el escenario
                         if (dirty) {
                             saveRiddles(dirtyStage, originalStage, treasurehuntid,
-                                    editFormRiddleEntry, [riddleid, idModule], idLock);
+                                    editFormRiddleEntry, [riddleid, idModule], lockid);
                         } else {
                             editFormRiddleEntry(riddleid, idModule);
                         }
@@ -1291,7 +1291,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule], idLock);
+                            saveRiddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule], lockid);
                         } else {
                             editFormRoadEntry(roadid, idModule);
                         }
@@ -1304,7 +1304,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 'Confirmar',
                                 'Cancelar', function () {
                                     var roadid = parseInt($this_li.attr('roadid'));
-                                    deleteRoad(roadid, dirtyStage, originalStage, treasurehuntid, idLock);
+                                    deleteRoad(roadid, dirtyStage, originalStage, treasurehuntid, lockid);
                                 });
                     });
                     map.on('pointermove', function (evt) {

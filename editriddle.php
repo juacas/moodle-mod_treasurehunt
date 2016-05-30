@@ -13,7 +13,7 @@ global $COURSE, $PAGE, $CFG, $USER;
 // Print the page header.
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
-
+$roadid = optional_param('roadid',0, PARAM_INT);
 
 list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -25,6 +25,9 @@ $url = new moodle_url('/mod/treasurehunt/editriddle.php', array('cmid' => $cmid)
 if (!empty($id)) {
     $url->param('id', $id);
 }
+if (!empty($roadid)) {
+    $url->param('roadid', $roadid);
+}
 $PAGE->set_url($url);
 
 require_capability('mod/treasurehunt:managescavenger', $context);
@@ -33,10 +36,11 @@ require_capability('mod/treasurehunt:addriddle', $context);
 $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid));
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
-    $idLock = renew_edition_lock($cm->instance, $USER->id);
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $idLock));
+    $lockid = renew_edition_lock($cm->instance, $USER->id);
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
 
     if ($id) { // if entry is specified
+        $title = get_string('editingriddle', 'treasurehunt');
         $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,'
                 . 'activitytoend,roadid,questiontext,questiontextformat,'
                 . 'questiontexttrust FROM {treasurehunt_riddles}  WHERE id=?';
@@ -60,6 +64,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             }
         }
     } else { // new entry
+        $title = get_string('addingriddle', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = "id = ?";
         $params = array($roadid);
@@ -197,10 +202,14 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
     print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
 }
+//$PAGE->navbar->ignore_active();
+$PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
+$PAGE->navbar->add(get_string('editriddle', 'treasurehunt'), $url);
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
-echo $OUTPUT->heading(format_string($treasurehunt->name));
+echo $OUTPUT->heading($title);
 $mform->display();
 echo $OUTPUT->footer();
 

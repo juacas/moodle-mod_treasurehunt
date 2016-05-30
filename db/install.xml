@@ -18,7 +18,10 @@
                 <FIELD NAME="alwaysshowdescription" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If false the treasurehunt intro will only be displayed after the allowsubmissionsfrom date. If true it will always be displayed."/>
                 <FIELD NAME="allowattemptsfromdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, submissions will only be accepted after this date."/>
                 <FIELD NAME="cutoffdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The final date after which submissions will no longer be accepted for this treasurehunt without an extensions."/>
-                <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="100" SEQUENCE="false" COMMENT="The maximum grade. Can be negative to indicate the use of a scale."/>
+                <FIELD NAME="grade" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The maximum grade. Can be negative to indicate the use of a scale."/>
+                <FIELD NAME="gradepenlocation" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure a localization expressed in % of the grade."/>
+                <FIELD NAME="gradepenanswer" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure an answer expressed in % of the grade."/>
+                <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMRIDDLES, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -88,7 +91,7 @@
                 <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
                 <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
             </INDEXES>
-        </TABLE>
+        </TABLE>     
         <TABLE NAME="treasurehunt_locks" COMMENT="Manages edition locks of treasurehunt.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>

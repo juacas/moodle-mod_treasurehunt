@@ -91,19 +91,22 @@ input#modRoadName{text-align: center;}
     z-index: 90;
 }
 /* Usado para la tabla**/
-.successfulattempt, .successwithoutfailures{
+.path-mod-treasurehunt .successfulattempt,.path-mod-treasurehunt .successwithoutfailures{
     background-color: #5cd053 !important;
     color:black !important;
 }
-.failedattempt, .failure{
+.path-mod-treasurehunt .failedattempt,.path-mod-treasurehunt .failure{
     background-color: #d45252 !important;
     color:black !important;
 }
-.successwithfailures{
+.path-mod-treasurehunt .successwithfailures{
     background-color: #EBF044 !important;
     color:black !important;
 }
-.noattempt{
+.path-mod-treasurehunt .noattempt{
     background-color: #C0C0C0 !important;
     color:black !important;
+}
+.path-mod-treasurehunt .singlebutton{
+    text-align: center;
 }

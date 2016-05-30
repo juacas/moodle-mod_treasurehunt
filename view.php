@@ -57,7 +57,7 @@ $event->trigger();
 // Print the page header.
 $url = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
 $PAGE->set_url($url);
-$PAGE->set_title(format_string($treasurehunt->name));
+$PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 //$PAGE->set_pagelayout('embedded');

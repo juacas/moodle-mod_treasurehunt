@@ -28,6 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 /**
  * Module instance settings form
@@ -90,23 +91,27 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'treasurehunt'));
         $mform->addHelpButton('groupmode', 'groupmode', 'treasurehunt');
 
-        /*$mform->addElement('header', 'maps', get_string('groups', 'treasurehunt'));
-        $maps = get_strings(array("googlemaps", "ost"), "treasurehunt");
-        $group = array();
-        foreach ($maps as $map) {
-            $group[] = $mform->createElement('checkbox', $map, '', $map);
-        }
-        $mform->addGroup($group, $whenname . 'optionsgrp', get_string('review' . $whenname, 'quiz'), null, false);
-        $skillsarray = array(
-            '0' => 'Skill A',
-            '1' => 'Skill B',
-            '2' => 'Skill C'
-        );
-        $mform->addElement('select', 'md_skills', get_string('skills', 'metadata'), $skillsarray);
-        $mform->getElement('md_skills')->setMultiple(true);*/
+
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
-
+        // Grading method.
+        $mform->addElement('select', 'grademethod', get_string('grademethod', 'treasurehunt'), treasurehunt_get_grading_options());
+        $mform->addHelpButton('grademethod', 'grademethod', 'treasurehunt');
+        $mform->setDefault('grademethod', TREASUREHUNT_GRADEFROMRIDDLES);
+        $mform->disabledIf('grademethod', 'grade[modgrade_type]', 'neq', 'point');
+        // Grading penalization.
+        $mform->addElement('text', 'gradepenlocation', get_string('gradepenlocation', 'treasurehunt'));
+        $mform->addHelpButton('gradepenlocation', 'gradepenlocation', 'treasurehunt');
+        $mform->setType('gradepenlocation', PARAM_FLOAT);
+        $mform->setDefault('gradepenlocation', 0.00);
+        $mform->addRule('gradepenlocation', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+        $mform->disabledIf('gradepenlocation', 'grade[modgrade_type]', 'neq', 'point');
+        $mform->addElement('text', 'gradepenanswer', get_string('gradepenanswer', 'treasurehunt'));
+        $mform->addHelpButton('gradepenanswer', 'gradepenlocation', 'treasurehunt');
+        $mform->setType('gradepenanswer', PARAM_FLOAT);
+        $mform->setDefault('gradepenanswer', 0.00);
+        $mform->addRule('gradepenanswer', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+        $mform->disabledIf('gradepenanswer', 'grade[modgrade_type]', 'neq', 'point');
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
 
@@ -128,6 +133,18 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             if ($data['allowattemptsfromdate'] > $data['cutoffdate']) {
                 $errors['cutoffdate'] = get_string('cutoffdatefromdatevalidation', 'treasurehunt');
             }
+        }
+        if ($data['gradepenlocation'] > 100) {
+            $errors['gradepenlocation'] = get_string('errpenalizationexceed', 'treasurehunt');
+        }
+        if ($data['gradepenlocation'] < 0) {
+            $errors['gradepenlocation'] = get_string('errpenalizationexceed', 'treasurehunt');
+        }
+        if ($data['gradepenanswer'] > 100) {
+            $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
+        }
+        if ($data['gradepenanswer'] < 0) {
+            $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
 
         return $errors;

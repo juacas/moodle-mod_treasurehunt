@@ -67,7 +67,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $t = new html_table();
             $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')), true);
             foreach ($historical->attempts as $attempt) {
-                if ($attempt->success) {
+                if (!$attempt->penalty) {
                     $class = 'successfulattempt';
                 } else {
                     $class = 'failedattempt';
@@ -100,16 +100,18 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Create a table for the data.
         $o = '';
         $o .= $this->output->container_start('usersprogress');
-        $o .= $this->output->heading(get_string('usersprogress', 'treasurehunt'), 3);
+        $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress','treasurehunt',null,null,3);
         if (!count($progress->roadsusersprogress)) {
             $o .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
-            if ($progress->warngroupedusers) {
-                if ($progress->groupmode) {
-                    $o .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt'));
-                } else {
-                    $o .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt'));
-                }
+            if (count($progress->duplicategroupsingroupings)) {
+                $o .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt', implode(",", $progress->duplicategroupsingroupings)));
+            }
+            if(count($progress->duplicateusersingroups)) {
+                $o .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt', implode(",", $progress->duplicateusersingroups)));
+            }
+            if(count($progress->noassignedusers)){
+                  $o .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->noassignedusers)));
             }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 $o .= $this->output->heading($roadusersprogress->name, 4);
@@ -122,7 +124,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         } else {
                             $title = get_string('user', 'treasurehunt');
                         }
-                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalriddles - 1));
+                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalriddles));
                         foreach ($roadusersprogress->userlist as $user) {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
@@ -131,7 +133,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 $name = fullname($user);
                             }
                             $cells = array($name);
-                            for ($i = 1; $i < $roadusersprogress->totalriddles; $i++) {
+                            for ($i = 1; $i <= $roadusersprogress->totalriddles; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($user->ratings[$i])) {
                                     $cell->attributes['class'] = $user->ratings[$i]->class;

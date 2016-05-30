@@ -75,7 +75,7 @@ class riddle_form extends moodleform {
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
 
-        $mform->addElement('header', 'overcomeriddlesrestrictions', get_string('overcomeriddlerestrictions', 'treasurehunt'));
+        $mform->addElement('header', 'restrictionsdiscoverriddle', get_string('restrictionsdiscoverriddle', 'treasurehunt'));
         // Add restrict access completion activity.
         $options = array();
         $options[0] = get_string('none');

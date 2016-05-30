@@ -33,10 +33,14 @@ require_once $CFG->libdir . '/filelib.php';
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * Example constant, you probably want to remove this :-)
+/* * #@+
+ * Options determining how the grades from individual attempts are combined to give
+ * the overall grade for a user
  */
-define('WIDGET_ULTIMATE_ANSWER', 42);
+define('TREASUREHUNT_GRADEFROMRIDDLES', '1');
+define('TREASUREHUNT_GRADEFROMTIME', '2');
+define('TREASUREHUNT_GRADEFROMPOSITION', '3');
+/* * #@- */
 
 /* Moodle core API */
 
@@ -137,10 +141,14 @@ function treasurehunt_delete_instance($id) {
     }
 
     // Delete any dependent records here.
-
     $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
-    $roads_ids = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
-    foreach ($roads_ids as $road) {
+    $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
+    foreach ($roads as $road) {
+        $riddles = $DB->get_records('treasurehunt_riddles', 'roadid = ?', array($road->id));
+        foreach ($riddles as $riddle) {
+            $DB->delete_records_select('treasurehunt_attempts', 'riddleid = ?', array($riddle->id));
+            $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
+        }
         $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', array($road->id));
     }
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
@@ -346,7 +354,6 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $reset = false) 
 
     $item = array();
     $item['itemname'] = clean_param($treasurehunt->name, PARAM_NOTAGS);
-    $item['gradetype'] = GRADE_TYPE_VALUE;
 
     if ($treasurehunt->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
@@ -387,14 +394,39 @@ function treasurehunt_grade_item_delete($treasurehunt) {
  * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
  * @param int $userid update grade of specific user only, 0 means all participants
  */
-function treasurehunt_update_grades(stdClass $treasurehunt, $userid = 0) {
-    global $CFG, $DB;
+function treasurehunt_update_grades(stdClass $treasurehunt, $userid = 0, $nullifnone = true) {
+    global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    // Populate array of grade objects indexed by userid.
-    $grades = array();
+    if ($treasurehunt->grade == 0) {
+        treasurehunt_grade_item_update($treasurehunt);
+    } else if ($grades = treasurehunt_get_user_grades($treasurehunt, $userid)) {
+        treasurehunt_grade_item_update($treasurehunt, $grades);
+    } else if ($userid && $nullifnone) {
+        $grade = new stdClass();
+        $grade->userid = $userid;
+        $grade->rawgrade = null;
+        treasurehunt_grade_item_update($treasurehunt, $grade);
+    } else {
+        treasurehunt_grade_item_update($treasurehunt);
+    }
+}
 
-    grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, $grades);
+/**
+ * Return grade for given user or all users.
+ *
+ * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
+ * @param int $userid optional user id, 0 means all users
+ * @return array array of grades, false if none. These are raw grades. They should
+ * be processed with quiz_format_grade for display.
+ */
+function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
+    global $CFG;
+    
+    require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
+
+    $grades = treasurehunt_calculate_user_grades($treasurehunt, $userid);
+    return $grades;
 }
 
 /* File API */

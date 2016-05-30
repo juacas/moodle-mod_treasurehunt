@@ -60,18 +60,23 @@ class treasurehunt_users_progress implements renderable {
     public $roadsusersprogress = array();
     public $groupmode = 0;
     public $coursemoduleid = 0;
-    public $warngroupedusers = false;
+    public $duplicategroupsingroupings = array();
+    public $duplicateusersingroups = array();
+    public $noassignedusers = array();
 
     /**
      * constructor
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $warngroupedusers) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings,
+            $duplicateusersingroups,$noassignedusers) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
-        $this->warngroupedusers = $warngroupedusers;
+        $this->duplicategroupsingroupings = $duplicategroupsingroupings;
+        $this->duplicateusersingroups = $duplicateusersingroups;
+        $this->noassignedusers = $noassignedusers;
     }
 
 }

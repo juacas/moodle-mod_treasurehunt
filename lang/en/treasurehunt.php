@@ -43,6 +43,11 @@ $string['nogroupassigned'] = 'No group assigned to this road';
 $string['overcomefirstriddle'] = 'To discover the first riddle you should start from the marked area on the map';
 $string['nouserassigned'] = 'No user assigned to this road';
 $string['usersprogress'] = 'Progress users';
+$string['usersprogress_help'] = 'Indicates the progress of the riddles of each student / group according to the colors:: '
+        . '<P>The color <B> green </B> indicates that the riddle has been overcome without failures.</P>'
+        . '<P>The color <B> yellow </B> indicates that the riddle has been oavercome with failures.</P>'
+        . '<P>The color <B> red </B> indicates that the riddle has not been overcome and failures have been made.</P>'
+        . '<P>The color <B> grey </B> indicates that the riddle has not been overcome and no failures have been made.</P>';
 $string['attempt'] = 'Attempt';
 $string['state'] = 'State';
 $string['play'] = 'Play';
@@ -60,18 +65,19 @@ $string['noroads'] = 'No roads have been added yet';
 $string['noresults'] = 'No results found.';
 $string['nomarks'] = 'First mark on the map the desired point.';
 $string['startfromhere'] = 'You can only start from here';
-$string['userattemptovercome'] = 'Riddle {$a->number} discovered on the date: {$a->date}';
-$string['userlocationblocked'] = 'Succesful location of riddle {$a->number} on the date: {$a->date}';
-$string['userattemptfailed'] = 'Failed location of riddle {$a->number} on the date: {$a->date}';
+$string['userlocationovercome'] = 'Succesful location of riddle {$a->number} on the date: {$a->date}';
+$string['userriddleovercome'] = 'Riddle {$a->number} overcome on the date: {$a->date}';
+$string['userlocationfailed'] = 'Failed location of riddle {$a->number} on the date: {$a->date}';
 $string['usercompletionovercome'] = 'Activity to end successfully completed for riddle {$a->number} on the date: {$a->date}';
 $string['userquestionfailed'] = 'Failed answer to the question of riddle {$a->number} on the date: {$a->date}';
 $string['userquestionovercome'] = 'Succesful answer to the question of riddle {$a->number} on the date: {$a->date}';
 $string['groupquestionovercome'] = 'Succesful answer by {$a->user} to the question of riddle {$a->number} on the date: {$a->date}';
 $string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of riddle {$a->number} on the date: {$a->date}';
-$string['groupattemptovercome'] = 'Riddle {$a->number} discovered by {$a->user} on the date: {$a->date}';
-$string['grouplocationblocked'] = 'Succesful location by {$a->user} of riddle {$a->number} on the date: {$a->date}';
-$string['groupattemptfailed'] = 'Failed location by {$a->user} of riddle {$a->number} on the date: {$a->date}';
-$string['successlocation'] = 'Congratulations, you are right !!!';
+$string['grouplocationovercome'] = 'Succesful location by {$a->user} of riddle {$a->number} on the date: {$a->date}';
+$string['groupriddleovercome'] = 'Riddle {$a->number} overcome by {$a->user} on the date: {$a->date}';
+$string['grouplocationfailed'] = 'Failed location by {$a->user} of riddle {$a->number} on the date: {$a->date}';
+$string['groupcompletionovercome'] = 'Activity to end successfully completed by {$a->user} for riddle {$a->number} on the date: {$a->date}';
+$string['successlocation'] = 'It is the right place!';
 $string['faillocation'] = 'It is not the right place';
 $string['lockedriddle'] = 'Locked riddle';
 $string['lockedcpriddle'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the riddle';
@@ -87,7 +93,7 @@ $string['hello'] = 'Hello';
 $string['welcome'] = 'Welcome to my module scavenger hunt, I hope you enjoy';
 $string['question'] = 'Question';
 $string['addsimplequestion'] = 'Add simple question';
-$string['addsimplequestion_help'] = 'Adds a simple question before overcome successfully  the riddle';
+$string['addsimplequestion_help'] = 'Adds a simple question before displaying the description of this riddle';
 $string['insert_road'] = 'Insert new road';
 $string['insert_riddle'] = 'Insert new riddle';
 $string['saveemptyridle'] = 'All modified riddles must have geometry before saving';
@@ -104,9 +110,16 @@ $string['treasurehunt:view'] = 'View treasurehunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehuntislocked'] = '{$a} is editing this treasurehunt right now. Try to edit it in a few minutes.';
 $string['availability'] = 'Availability';
-$string['overcomeriddlerestrictions'] = 'Restrictions to overcome riddle';
+$string['restrictionsdiscoverriddle'] = 'Restrictions to discover riddle';
 $string['groups'] = 'Groups';
-$string['edittreasurehunt'] = 'Edit scavenger hunt';
+$string['edittreasurehunt'] = 'Edit treasure hunt';
+$string['editingtreasurehunt'] = 'Editing treasure hunt';
+$string['editriddle'] = 'Edit riddle';
+$string['editingriddle'] = 'Editing riddle';
+$string['addingriddle'] = 'Adding riddle';
+$string['editroad'] = 'Edit road';
+$string['editingroad'] = 'Editing road';
+$string['addingroad'] = 'Adding road';
 $string['gradingsummary'] = 'Grading summary';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the default set of groups or a custom grouping for each road. A group game will be shared among group members and all members of the group will see each others changes to the game.';
@@ -128,7 +141,7 @@ $string['layers'] = 'Layers';
 $string['searching'] = 'Searching';
 $string['discoveredriddle'] = 'Discovered riddle';
 $string['failedlocation'] = 'Failed location';
-$string['riddledescription'] = 'Riddle\'s description';
+$string['riddledescription'] = 'Description to locate the next track';
 $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'Validate location';
 $string['search'] = 'Search';
@@ -151,8 +164,9 @@ $string['multiplegroupssameroadplay'] = 'You belong to more than one group assig
 $string['invalidassignedroad'] = 'Assigned road is not validated';
 $string['invalroadid'] = 'The road is not validated';
 $string['multipleteamsplay'] = 'Member of more than one group, so unable to make the activity.';
-$string['warnusersgrouping'] = 'Some users are either not a member of any grouping, or are a member of more than one grouping, or are a member of more than one group in the same road, so are unable to play the activity.';
-$string['warnusersgroup'] = 'Some users are either not a member of any group, or are a member of more than one group, so are unable to play the activity.';
+$string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
+$string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
+$string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
 $string['timelabelfailed'] = 'Location sent on the date: ';
 $string['timelabelsuccess'] = 'Riddle discovered on the date: ';
 $string['correctanswer'] = 'Correct answer.';
@@ -161,5 +175,33 @@ $string['errnocorrectanswers'] = 'There must be only one correct answer';
 $string['errcorrectanswers'] = 'You must select a correct answer';
 $string['errsendiganswer'] = 'The road has been updated while you was sending the answer, try again';
 $string['errsendiglocation'] = 'The road has been updated while you was sending the location, try again';
+$string['gradefromtime'] = 'Grade from time';
+$string['gradefromriddles'] = 'Grade from riddles';
+$string['gradefromposition'] = 'Grade from position';
+$string['grademethod'] = 'Grading method';
+$string['grademethod_help'] = '<P><B>Grade from riddles</B><P>
+<UL>
+<P>Each player (or team) scores proportionally by number of riddles solved, 
+being 100% when a road is completely solved, and 0% when no riddle is solved.</UL>
 
+<P><B>Grade from time</B><P>
+<UL>
+<P>The winner of the hunt marks the best time. The grade is calculated 
+by interpolating the finishing time being 50% the end time of the hunt 
+and 100% the best finishing time. The players that did not finish the 
+hunt receive a grade under 50 calculated just by the number of riddles solved.</UL>
 
+<P><B>Grade from position</B><P>
+<UL>
+<P>The score is calculated by interpolating the position in the ranking, 
+being 100% the score for the first player and 50% for the last player. 
+The players that did not finish the hunt receive a grade under 50% calculated 
+just by the number of riddles solved.</UL>';
+$string['gradepenlocation'] = 'Penalize failure in location';
+$string['gradepenanswer'] = 'Penalize failure in answer';
+$string['gradepenlocation_help'] = 'Penalization is expressed in % of the grade. '
+        . 'Per example, if penalization is 5.4, a player with 3 failures will penalize '
+        . 'his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the rest of the criteria.';
+$string['errpenalizationexceed'] = 'The penalty can not be greater than 100';
+$string['errpenalizationfall'] = 'The penalty can not be less than 0';
+$string['errnumeric'] = 'You must enter a valid decimal number';

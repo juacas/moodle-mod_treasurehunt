@@ -55,54 +55,48 @@ require_capability('mod/treasurehunt:managescavenger', $context);
   $event->trigger(); */
 
 // Print the page header.
-
+$title = get_string('editingtreasurehunt','treasurehunt').': '.format_string($treasurehunt->name);
 $PAGE->set_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($treasurehunt->name));
+$PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 
-// Si no hay ningún camino redirijo para crearlo.
-if(get_total_roads($treasurehunt->id)==0){
-    $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $id));
-    redirect($roadurl);
-}
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('treasurehunt-'.$somevar);
- */
-if (!$lock = is_edition_loked($cm->instance,$USER->id)) {
-    $idLock = renew_edition_lock($cm->instance,$USER->id);
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $idLock));
+
+if (!is_edition_loked($cm->instance, $USER->id)) {
+    // Si no hay ningún camino redirijo para crearlo.
+    if (get_total_roads($treasurehunt->id) == 0) {
+        $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $id));
+        redirect($roadurl);
+    }
+    $lockid = renew_edition_lock($cm->instance, $USER->id);
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $cm->instance, get_strings_edit(), $idLock));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $cm->instance, get_strings_edit(), $lockid));
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
-}
-// Output starts here.
-echo $OUTPUT->header();
-// Replace the following lines with you own code.
-if ($lock) {
-    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,get_username_blocking_edition($treasurehunt->id));
 } else {
-    echo $OUTPUT->heading(format_string($treasurehunt->name));
-    // Conditions to show the intro can change to look for own settings or whatever.
-    if ($treasurehunt->intro) {
-        echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
-    }
-    echo $OUTPUT->container_start("treasurehunt_editor");
-    echo $OUTPUT->box(null, null, 'controlPanel');
-    echo $OUTPUT->container_start(null, 'riddleListPanel_global');
-    echo $OUTPUT->box(null, null, 'riddleListPanel');
-    echo $OUTPUT->container_end();
-    echo $OUTPUT->container_start(null, 'map_global');
-    echo $OUTPUT->box(null, null, 'map');
-    echo $OUTPUT->container_end();
-    echo $OUTPUT->box(null, null, 'roadListPanel');
-    echo $OUTPUT->container_end();
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
 }
+
+
+echo $OUTPUT->header();
+echo $OUTPUT->heading($title);
+// Conditions to show the intro can change to look for own settings or whatever.
+if ($treasurehunt->intro) {
+    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
+}
+echo $OUTPUT->container_start("treasurehunt_editor");
+echo $OUTPUT->box(null, null, 'controlPanel');
+echo $OUTPUT->container_start(null, 'riddleListPanel_global');
+echo $OUTPUT->box(null, null, 'riddleListPanel');
+echo $OUTPUT->container_end();
+echo $OUTPUT->container_start(null, 'map_global');
+echo $OUTPUT->box(null, null, 'map');
+echo $OUTPUT->container_end();
+echo $OUTPUT->box(null, null, 'roadListPanel');
+echo $OUTPUT->container_end();
+
 // Finish the page.
 echo $OUTPUT->footer();

@@ -7,15 +7,15 @@
 define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, ajax) {
 
     var repeat;
-    var idLockTreasure;
+    var lockidTreasure;
     var renewLock = {
-        renewLockAjax: function (treasurehuntid, idLock) {
-            idLockTreasure = idLock;
+        renewLockAjax: function (treasurehuntid, lockid) {
+            lockidTreasure = lockid;
             var json = ajax.call([{
                     methodname: 'mod_treasurehunt_renew_lock',
                     args: {
                         treasurehuntid: treasurehuntid,
-                        idLock: idLock
+                        lockid: lockid
                     }
                 }]);
             json[0].done(function (response) {
@@ -31,14 +31,14 @@ define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, 
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
-        renew_edition_lock: function (treasurehuntid, idLock) {
-            repeat = setInterval(this.renewLockAjax, 90000, treasurehuntid, idLock);
+        renew_edition_lock: function (treasurehuntid, lockid) {
+            repeat = setInterval(this.renewLockAjax, 90000, treasurehuntid, lockid);
         },
         stoprenew_edition_lock: function () {
             clearInterval(repeat);
         },
-        getIdLock: function () {
-            return idLockTreasure;
+        getlockid: function () {
+            return lockidTreasure;
         }
 
     };
