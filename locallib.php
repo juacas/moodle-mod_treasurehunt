@@ -402,8 +402,9 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
             $return->msg = 'Es el lugar correcto y has superado la actividad a completar';
         }
     }
-    if ($attempt->success && $nextnoriddle == $noriddles) {
-        treasurehunt_update_grades($treasurehunt, 0);
+    if ($attempt->success && $nextnoriddle == $noriddles &&
+            $treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+        treasurehunt_update_grades($treasurehunt);
     } else {
         set_grade($treasurehunt, $groupid, $userid);
     }
@@ -963,8 +964,9 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
             }
         }
         if ($return->newattempt == true) {
-            if ($lastattempt->success && $lastattempt->number == $noriddles) {
-                treasurehunt_update_grades($treasurehunt, 0);
+            if ($lastattempt->success && $lastattempt->number == $noriddles &&
+                    $treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+                treasurehunt_update_grades($treasurehunt);
             } else {
                 set_grade($treasurehunt, $groupid, $userid);
             }

@@ -121,7 +121,8 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     if (($oldtreasurehunt->grade!= $treasurehunt->grade && $treasurehunt->grade>0) ||
             $oldtreasurehunt->grademethod != $treasurehunt->grademethod ||
             $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation ||
-            $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer) {
+            $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer ||
+            $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
         treasurehunt_update_grades($treasurehunt);
     }
 
