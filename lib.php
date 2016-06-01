@@ -111,12 +111,19 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
 function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
     global $DB;
 
+    // Get the current value, so we can see what changed.
+    $oldtreasurehunt = $DB->get_record('treasurehunt', array('id' => $treasurehunt->instance));
+    // Update the database.
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
-
-    // You may have to add extra stuff in here.
-
     $result = $DB->update_record('treasurehunt', $treasurehunt);
+
+    if (($oldtreasurehunt->grade!= $treasurehunt->grade && $treasurehunt->grade>0) ||
+            $oldtreasurehunt->grademethod != $treasurehunt->grademethod ||
+            $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation ||
+            $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer) {
+        treasurehunt_update_grades($treasurehunt);
+    }
 
     treasurehunt_grade_item_update($treasurehunt);
 
@@ -348,12 +355,13 @@ function treasurehunt_scale_used_anywhere($scaleid) {
  * @param bool $reset reset grades in the gradebook
  * @return void
  */
-function treasurehunt_grade_item_update(stdClass $treasurehunt, $reset = false) {
+function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = NULL) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
     $item = array();
     $item['itemname'] = clean_param($treasurehunt->name, PARAM_NOTAGS);
+    $item['idnumber'] = $treasurehunt->cmidnumber;
 
     if ($treasurehunt->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
@@ -366,11 +374,12 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $reset = false) 
         $item['gradetype'] = GRADE_TYPE_NONE;
     }
 
-    if ($reset) {
+    if ($grades === 'reset') {
         $item['reset'] = true;
+        $grades = NULL;
     }
 
-    grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null, $item);
+    grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, $grades, $item);
 }
 
 /**
@@ -422,7 +431,7 @@ function treasurehunt_update_grades(stdClass $treasurehunt, $userid = 0, $nullif
  */
 function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
     global $CFG;
-    
+
     require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
     $grades = treasurehunt_calculate_user_grades($treasurehunt, $userid);

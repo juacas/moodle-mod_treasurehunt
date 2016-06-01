@@ -87,7 +87,7 @@ if (view_intro($treasurehunt)) {
 echo view_users_progress_table($cm, $course->id, $context);
 try {
     $user = get_user_group_and_road($USER->id, $cm, $course->id);
-    echo view_user_historical_attempts($cm->groupmode, $user->groupid, $USER->id, $user->roadid, $cm->id);
+    echo view_user_historical_attempts($user->groupid, $USER->id, $user->roadid, $cm->id);
 } catch (Exception $e) {
     echo $output->notification($e->getMessage());
 }

@@ -537,7 +537,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     } else {
                         var title, riddlename = features.selected[0].get('name'),
                                 riddledescription = features.selected[0].get('description'),
-                                info = features.selected[0].get('info'), body='';
+                                info = features.selected[0].get('info'), body = '';
                         if (features.selected[0].get('success'))
                         {
                             body = get_block_text(strings["riddlename"], riddlename);
@@ -667,6 +667,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 if (lastsuccessfulriddle.question !== '') {
                     event.preventDefault();
                     toast('Debes responder primero a la pregunta');
+                    $("#infopanel").panel("open");
+                }
+                debugger;
+                if (lastsuccessfulriddle.completion === 0) {
+                    event.preventDefault();
+                    toast('Debes completar primero la actividad a resolver');
                     $("#infopanel").panel("open");
                 }
                 if (roadfinished) {
