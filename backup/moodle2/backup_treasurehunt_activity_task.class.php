@@ -26,6 +26,8 @@
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_settingslib.php');
+
 
 /**
  * Provides the steps to perform one complete backup of the treasurehunt instance
@@ -63,11 +65,11 @@ class backup_treasurehunt_activity_task extends backup_activity_task {
 
         // Link to the list of treasurehunts.
         $search = '/('.$base.'\/mod\/treasurehunt\/index.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@treasurehuntINDEX*$2@$', $content);
+        $content = preg_replace($search, '$@TREASUREHUNTINDEX*$2@$', $content);
 
         // Link to treasurehunt view by moduleid.
         $search = '/('.$base.'\/mod\/treasurehunt\/view.php\?id\=)([0-9]+)/';
-        $content = preg_replace($search, '$@treasurehuntVIEWBYID*$2@$', $content);
+        $content = preg_replace($search, '$@TREASUREHUNTVIEWBYID*$2@$', $content);
 
         return $content;
     }

@@ -448,45 +448,44 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $userparams = get_user_group_and_road($USER->id, $cm);
         // Recojo el numero total de pistas del camino del usuario.
         $noriddles = get_total_riddles($userparams->roadid);
+        // Compruebo si el usuario ha finalizado el camino.
+        $roadfinished = check_if_user_has_finished($userparams->userid, $userparams->groupid, $userparams->roadid);
         // Recojo la info de las nuevas pistas descubiertas en caso de existir y los nuevos timestamp si han variado.
         list($newattempttimestamp,
                 $newroadtimestamp,
                 $updates,
                 $geometrysolved,
-                $newgeometry,
-                $newroadassigned) = check_attempts_updates($params['attempttimestamp'],$userparams->groupid, $USER->id, $userparams->roadid);
+                $newgeometry) = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id, $userparams->roadid);
         if ($newroadtimestamp != $params['roadtimestamp']) {
             $updateroad = true;
         } else {
             $updateroad = false;
         }
-
+        // Compruebo si se ha acertado la pista y completado la actividad requerida.
+        $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles);
+        if ($qocsolved->msg !== '') {
+            $status['msg'] = $qocsolved->msg;
+            $status['code'] = 0;
+        }
+        // Compruebo si se han producido cambios
+        if ($qocsolved->newattempt) {
+            $newattempttimestamp = $qocsolved->attempttimestamp;
+        }
 
         // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa pista. 
-        if (!$geometrysolved && $params['location'] && !$updateroad && !$params['selectedanswerid']) {
+        if (!$geometrysolved && $params['location'] && !$updateroad && !$roadfinished) {
             $checklocation = check_user_location($USER->id, $userparams->groupid, $userparams->roadid, geojson_to_object($params['location']), $context, $treasurehunt, $noriddles);
-            $newattempttimestamp = $checklocation->attempttimestamp;
-            // Si se ha descubierto una nueva pista recojo el nuevo id.
+            if ($checklocation->newattempt) {
+                $newattempttimestamp = $checklocation->attempttimestamp;
+                $newgeometry = true;
+            }
             if ($checklocation->newriddle) {
                 $geometrysolved = true;
             }
-            $newgeometry = true;
             $status['msg'] = $checklocation->msg;
             $status['code'] = 0;
         }
 
-        if (!$params['location']) {
-            // Compruebo si se ha acertado la pista y completado la actividad requerida.
-            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles);
-            if ($qocsolved->msg !== '') {
-                $status['msg'] = $qocsolved->msg;
-                $status['code'] = 0;
-            }
-            // Compruebo si se han producido cambios
-            if ($qocsolved->newattempt) {
-                $newattempttimestamp = $qocsolved->attempttimestamp;
-            }
-        }
 
         $historicalattempts = array();
         // Si se ha producido cualquier nuevo intento recargo el historial de intentos.
@@ -494,11 +493,11 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $historicalattempts = get_user_historical_attempts($userparams->groupid, $USER->id, $userparams->roadid);
         }
         // Si se ha acertado una nueva localizacion, se ha modificado el camino,se esta inicializando o se ha resuelto una pregunta o completion.
-        if ($geometrysolved || $newroadassigned || $updateroad || $qocsolved->newattempt || $params['initialize']) {
+        if ($geometrysolved || $updateroad || $qocsolved->newattempt || $params['initialize']) {
             $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid, $context);
         }
         // Si se han realizado un nuevo intento de localización o se esta inicializando
-        if ($newgeometry || $newroadassigned || $updateroad || $params['initialize']) {
+        if ($newgeometry || $updateroad || $params['initialize']) {
             $userriddles = get_user_progress($userparams->roadid, $userparams->groupid, $USER->id, $treasurehuntid, $context);
         }
         // Si se ha editado el camino aviso.
@@ -519,7 +518,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $result['status'] = $status;
         $result['riddles'] = $userriddles;
         $result['lastsuccessfulriddle'] = $lastsuccessfulriddle;
-        //$result['roadfinished'] = $roadfinished;
+        $result['roadfinished'] = $roadfinished;
         $result['historicalattempts'] = $historicalattempts;
         return $result;
     }

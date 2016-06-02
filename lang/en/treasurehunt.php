@@ -43,7 +43,7 @@ $string['nogroupassigned'] = 'No group assigned to this road';
 $string['overcomefirstriddle'] = 'To discover the first riddle you should start from the marked area on the map';
 $string['nouserassigned'] = 'No user assigned to this road';
 $string['usersprogress'] = 'Progress users';
-$string['usersprogress_help'] = 'Indicates the progress of the riddles of each student / group according to the colors:: '
+$string['usersprogress_help'] = 'Indicates the progress of the riddles of each student / group according to the colors: '
         . '<P>The color <B> green </B> indicates that the riddle has been overcome without failures.</P>'
         . '<P>The color <B> yellow </B> indicates that the riddle has been oavercome with failures.</P>'
         . '<P>The color <B> red </B> indicates that the riddle has not been overcome and failures have been made.</P>'
@@ -55,6 +55,7 @@ $string['historicalattempts'] = 'Historical attempts';
 $string['history'] = 'History';
 $string['aerialview'] = 'Aerial';
 $string['roadview'] = 'Road';
+$string['loading'] = 'Loading';
 $string['mapview'] = 'Map view';
 $string['noexsitsriddle'] = 'There is no riddle number {$a} in the database. Reload the page';
 $string['noattempts'] = 'You have not made any attempt';

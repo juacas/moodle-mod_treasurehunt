@@ -80,9 +80,11 @@
                 <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The user id"/>
                 <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id"/>
                 <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been discovered"/>
+                <FIELD NAME="penalty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If it is true flag as failed a question or location"/>
                 <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and completion"/>
-                <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the previous riddle's question has been solved"/>
-                <FIELD NAME="completionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the previous riddle's activitytoend has been solved"/>
+                <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's question has been solved"/>
+                <FIELD NAME="completionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's activitytoend has been solved"/>
+                <FIELD NAME="geometrysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's geometry has been solved"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

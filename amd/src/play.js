@@ -23,7 +23,7 @@ require.config({
         openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
         'jquery.mobile-config': 'jquery-mobile/jquery.mobile-config',
-        'jquery.mobile': 'jquery-mobile/jquerymobile',
+        'jquery.mobile': 'jquery-mobile/jquerymobile'
     }
 });
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
@@ -390,14 +390,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 changesinquestionriddle = true;
                             }
                         }
-                        // Compruebo si es un multipolygon o se esta inicializando y lo centro.
-                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
-                            fitmap = true;
-                        }
                         // Si he enviado una localización o una respuesta imprimo si es correcta o no.
                         if (location || selectedanswerid) {
                             $.mobile.loading("hide");
                             toast(response.status.msg);
+                        }
+                        // Compruebo si es un multipolygon o se esta inicializando y lo centro.
+                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
+                            fitmap = true;
                         }
                         // Compruebo la pagina en la que nos encontramos.
                         var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
@@ -422,9 +422,17 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             }
             function fit_map_to_source() {
                 if (fitmap) {
-                    setTimeout(function () {
-                        fly_to_extent(map, source.getExtent());
-                    }, 500);
+                    var features = source.getFeatures();
+                    if (features.length === 1 && features[0].getGeometry() instanceof ol.geom.Point) {
+                        setTimeout(function () {
+                            fly_to_point(map, features[0].getGeometry().getCoordinates());
+                        }, 500);
+                    } else {
+                        setTimeout(function () {
+                            fly_to_extent(map, source.getExtent());
+                        }, 500);
+                    }
+
                     fitmap = false;
                 }
             }
@@ -654,7 +662,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             $('#sendAnswer').on('click', function (event) {
                 //selecciono la respuesta
-                debugger;
                 var selected = $("#questionform input[type='radio']:checked");
                 if (selected.length === 0) {
                     event.preventDefault();
@@ -669,7 +676,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     toast('Debes responder primero a la pregunta');
                     $("#infopanel").panel("open");
                 }
-                debugger;
                 if (lastsuccessfulriddle.completion === 0) {
                     event.preventDefault();
                     toast('Debes completar primero la actividad a resolver');
@@ -683,8 +689,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             /*-------------------------------Initialize page -------------*/
             if ($.mobile.autoInitializePage === false) {
                 $("#container").show();
-                // Start with the map page
-                //window.location.replace(window.location.href.split("#")[0] + "#mappage");
+                $("#loader").remove();
                 $.mobile.initializePage();
             }
 

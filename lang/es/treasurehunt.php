@@ -52,6 +52,7 @@ $string['ost'] = 'Open Street Maps';
 $string['noattempts'] = 'No has realizado ningún intento';
 $string['state'] = 'Estado';
 $string['play'] = 'Jugar';
+$string['loading'] = 'Cargando';
 $string['updates'] = 'Actualizaciones';
 $string['usersprogress'] = 'Progreso de los usuarios';
 $string['usersprogress_help'] = 'Indica el progreso de las pistas de cada alumno/grupo en función de los colores: '

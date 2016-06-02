@@ -92,7 +92,6 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
         'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'description', $entry->id));
-    //$entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $entry->id);
     // List activities with Completion enabled
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();

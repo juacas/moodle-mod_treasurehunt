@@ -118,7 +118,7 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
 
-    if (($oldtreasurehunt->grade!= $treasurehunt->grade && $treasurehunt->grade>0) ||
+    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0) ||
             $oldtreasurehunt->grademethod != $treasurehunt->grademethod ||
             $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation ||
             $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer ||
@@ -152,7 +152,8 @@ function treasurehunt_delete_instance($id) {
     $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads as $road) {
-        $riddles = $DB->get_records('treasurehunt_riddles', 'roadid = ?', array($road->id));
+        $riddles = $DB->get_records_sql('SELECT id FROM {treasurehunt_riddles} WHERE roadid = ?'
+                , array($road->id));
         foreach ($riddles as $riddle) {
             $DB->delete_records_select('treasurehunt_attempts', 'riddleid = ?', array($riddle->id));
             $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
