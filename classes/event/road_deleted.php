@@ -17,7 +17,7 @@
 /**
  * The mod_glossary entry updated event.
  *
- * @package    mod_scavengerthunt
+ * @package    mod_treasurethunt
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */

@@ -1,7 +1,7 @@
 <?php
 
 $services = array(
-    'scavengerservices' => array(//the name of the web service
+    'treasurehuntservices' => array(//the name of the web service
         'functions' => array('mod_treasurehunt_fetch_treasurehunt', 'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle', 'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock','mod_treasurehunt_validate_location','mod_treasurehunt_user_progress'), //web service functions of this service
         'requiredcapability' => '', //if set, the web service user need this capability to access 
         //any function of this service. For example: 'some/capability:specified'                 

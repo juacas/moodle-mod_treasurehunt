@@ -80,7 +80,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    'mod/treasurehunt:managescavenger' => array(
+    'mod/treasurehunt:managetreasurehunt' => array(
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(

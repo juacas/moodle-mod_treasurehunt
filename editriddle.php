@@ -30,7 +30,7 @@ if (!empty($roadid)) {
 }
 $PAGE->set_url($url);
 
-require_capability('mod/treasurehunt:managescavenger', $context);
+require_capability('mod/treasurehunt:managetreasurehunt', $context);
 require_capability('mod/treasurehunt:addriddle', $context);
 
 $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid));

@@ -94,7 +94,7 @@ if (has_capability('mod/treasurehunt:play', $context) &&
         echo $output->notification($e->getMessage());
     }
 }
-if (has_capability('mod/treasurehunt:managescavenger', $context) ||
+if (has_capability('mod/treasurehunt:managetreasurehunt', $context) ||
         time() > $treasurehunt->allowattemptsfromdate) {
     echo view_users_progress_table($cm, $course->id, $context);
 }

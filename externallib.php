@@ -123,7 +123,7 @@ class mod_treasurehunt_external_update_riddles extends external_api {
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:managescavenger', $context);
+        require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editriddle', $context);
         $features = geojson_to_object($params['riddles']);
         if (edition_lock_id_is_valid($params['lockid'])) {
@@ -205,7 +205,7 @@ class mod_treasurehunt_external_delete_riddle extends external_api {
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:managescavenger', $context);
+        require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editriddle', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
             delete_riddle($params['riddleid']);
@@ -276,7 +276,7 @@ class mod_treasurehunt_external_delete_road extends external_api {
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:managescavenger', $context);
+        require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
             delete_road($params['roadid']);
@@ -349,7 +349,7 @@ class mod_treasurehunt_external_renew_lock extends external_api {
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:managescavenger', $context);
+        require_capability('mod/treasurehunt:managetreasurehunt', $context);
         if (isset($params['lockid'])) {
             if (edition_lock_id_is_valid($params['lockid'])) {
                 $lockid = renew_edition_lock($params['treasurehuntid'], $USER->id);
