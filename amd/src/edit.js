@@ -186,7 +186,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
                     //Creo el roadListPanel
                     $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
-                    //AÃƒÂ±ado los handle custom
+                    //Anado los handle custom
                     /*Set control
                      * 
                      * @type edit_L27.ol.style.Style

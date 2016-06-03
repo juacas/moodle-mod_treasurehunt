@@ -417,9 +417,10 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
                 $return->msg = 'Es el lugar correcto y has superado la actividad a completar';
             }
         }
-        if ($attempt->success && $nextnoriddle == $noriddles &&
-                $treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
-            treasurehunt_update_grades($treasurehunt);
+        if ($attempt->success && $nextnoriddle == $noriddles) {
+            if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+                treasurehunt_update_grades($treasurehunt);
+            }
             $return->roadfinished = true;
         } else {
             set_grade($treasurehunt, $groupid, $userid);
@@ -1012,9 +1013,10 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
             }
         }
         if ($return->newattempt == true) {
-            if ($lastattempt->success && $lastattempt->number == $noriddles &&
-                    $treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
-                treasurehunt_update_grades($treasurehunt);
+            if ($lastattempt->success && $lastattempt->number == $noriddles) {
+                if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+                    treasurehunt_update_grades($treasurehunt);
+                }
                 $return->roadfinished = true;
             } else {
                 set_grade($treasurehunt, $groupid, $userid);
@@ -1380,7 +1382,7 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                 $positiverate = treasurehunt_calculate_line_equation(
                         $stats[$student->id]->besttime
                         , $treasurehunt->grade
-                        , $stats[$student->id]->worstime
+                        , $stats[$student->id]->worsttime
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->usertime);
             } else if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
