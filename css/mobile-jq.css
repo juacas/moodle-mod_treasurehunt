@@ -22,8 +22,8 @@ h1, h2, h3, h4, h5, h6{
     line-height:inherit;
     color:white;
 }
-.ui-listview>.ui-li-static, .ui-listview>.ui-li-divider, .ui-listview>li>a.ui-btn,[data-role="popup"] .ui-title{
-    white-space:normal;
+.ui-listview>.ui-li-static, .ui-listview>.ui-li-divider, .ui-listview>li>a.ui-btn,.ui-btn,[data-role="popup"] .ui-title{
+    white-space:normal !important;
 }
 .portrait, .portrait #mappage {
     min-height: 0;
@@ -57,14 +57,14 @@ h1, h2, h3, h4, h5, h6{
     min-width: 250px;
 }
 .ui-popup-container [data-role="content"]{
-     overflow-y:auto;
+    overflow-y:auto;
     overflow-x:hidden;
 }
 [data-role="popup"] .ui-title{
     margin: 0 40px;
 }
 .center-wrapper,.ui-footer{
-  text-align: center;
+    text-align: center;
 }
 
 
@@ -89,4 +89,9 @@ h1, h2, h3, h4, h5, h6{
     overflow: auto;
     -webkit-overflow-scrolling: touch;
 }
-
+.custom-count-pos{
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0.2em 0.5em;
+    float: right;
+}

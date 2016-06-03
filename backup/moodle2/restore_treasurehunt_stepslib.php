@@ -107,10 +107,10 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $data = (object) $data;
         $oldid = $data->id;
         $data->roadid = $this->get_new_parentid('treasurehunt_road');
+        $data->activitytoend = $this->get_mappingid('course_module', $data->activitytoend);
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
-        // Avoid problems that the activity does not exist.
-        $data->activitytoend = 0;
+
 
         $geomfuncs = get_geometry_functions($DB);
         $sql = "INSERT INTO {treasurehunt_riddles} (name, roadid, "

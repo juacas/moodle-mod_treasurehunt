@@ -107,6 +107,6 @@ input#modRoadName{text-align: center;}
     background-color: #C0C0C0 !important;
     color:black !important;
 }
-.path-mod-treasurehunt .singlebutton{
+.path-mod-treasurehunt .singlebutton,.path-mod-treasurehunt .treasurehuntinfo{
     text-align: center;
 }

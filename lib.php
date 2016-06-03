@@ -500,20 +500,20 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
+    $fileareas = array('description', 'questiontext', 'answertext');
+    if (!in_array($filearea, $fileareas)) {
+        return false;
+    }
 
-    if ($filearea === 'description') {
-        $fs = get_file_storage();
-        $relativepath = implode('/', $args);
-        $fullpath = "/$context->id/mod_treasurehunt/$filearea/$relativepath";
-        if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
-            send_file_not_found();
-        }
-
-        // finally send the file
-        send_stored_file($file, null, 0, $forcedownload, $options);
-    } else {
+    $fs = get_file_storage();
+    $relativepath = implode('/', $args);
+    $fullpath = "/$context->id/mod_treasurehunt/$filearea/$relativepath";
+    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
         send_file_not_found();
     }
+
+    // finally send the file
+    send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
 /* Navigation API */

@@ -35,15 +35,45 @@ class treasurehunt_user_historical_attempts implements renderable {
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $attempts = [];
     public $coursemoduleid = 0;
+    public $outoftime = 0;
+    public $roadfinished = 0;
 
     /**
      * constructor
      *
      * @param array $attemptstrings
      */
-    public function __construct($attempts, $coursemoduleid) {
+    public function __construct($attempts, $coursemoduleid, $outoftime, $roadfinished) {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
+        $this->outoftime = $outoftime;
+        $this->roadfinished = $roadfinished;
+    }
+
+}
+
+/**
+ * Renderable grading summary
+ * @package   mod_assign
+ * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class treasurehunt_info implements renderable {
+
+    /** @var array participantcount - The number of users who can submit to this assignment */
+    public $treasurehunt = null;
+    public $timenow = 0;
+    public $courseid = 0;
+
+    /**
+     * constructor
+     *
+     * @param array $attemptstrings
+     */
+    public function __construct($treasurehunt, $timenow, $courseid) {
+        $this->treasurehunt = $treasurehunt;
+        $this->timenow = $timenow;
+        $this->courseid = $courseid;
     }
 
 }
@@ -63,20 +93,21 @@ class treasurehunt_users_progress implements renderable {
     public $duplicategroupsingroupings = array();
     public $duplicateusersingroups = array();
     public $noassignedusers = array();
+    public $permission = false;
 
     /**
      * constructor
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings,
-            $duplicateusersingroups,$noassignedusers) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $permission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
         $this->duplicategroupsingroupings = $duplicategroupsingroupings;
         $this->duplicateusersingroups = $duplicateusersingroups;
         $this->noassignedusers = $noassignedusers;
+        $this->permission = $permission;
     }
 
 }

@@ -119,6 +119,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         // Define id annotations
         $road->annotate_ids('groups', 'groupid');
         $road->annotate_ids('groupings', 'groupingid');
+        $riddle->annotate_ids('course_modules', 'activitytoend');
         $attempt->annotate_ids('user', 'userid');
         $attempt->annotate_ids('groups', 'groupid');
 

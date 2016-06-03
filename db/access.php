@@ -70,7 +70,7 @@ $capabilities = array(
         )
     ),
     'mod/treasurehunt:play' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
             'guest' => CAP_ALLOW,
@@ -78,14 +78,6 @@ $capabilities = array(
             'teacher' => CAP_ALLOW,
             'editingteacher' => CAP_ALLOW,
             'manager' => CAP_ALLOW
-        )
-    ),
-    'mod/treasurehunt:submit' => array(
-        'riskbitmask' => RISK_SPAM,
-        'captype' => 'write',
-        'contextlevel' => CONTEXT_MODULE,
-        'legacy' => array(
-            'student' => CAP_ALLOW
         )
     ),
     'mod/treasurehunt:managescavenger' => array(
@@ -107,7 +99,7 @@ $capabilities = array(
         )
     ),
     'mod/treasurehunt:editroad' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
@@ -116,7 +108,7 @@ $capabilities = array(
         )
     ),
     'mod/treasurehunt:editriddle' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
@@ -125,7 +117,7 @@ $capabilities = array(
         )
     ),
         'mod/treasurehunt:addriddle' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,
@@ -134,7 +126,7 @@ $capabilities = array(
         )
     ),
         'mod/treasurehunt:addroad' => array(
-        'captype' => 'read',
+        'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'archetypes' => array(
             'editingteacher' => CAP_ALLOW,

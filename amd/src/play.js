@@ -45,7 +45,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     changesinlastsuccessfulriddle = false,
                     changesinquestionriddle = false,
                     fitmap = false,
-                    roadfinished = false;
+                    roadfinished = false,
+                    available = true;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -354,25 +355,22 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     console.log(response);
 
                     roadfinished = response.roadfinished;
-                    if (roadfinished) {
+                    available = response.available;
+                    if (roadfinished || !available) {
                         clearInterval(interval);
+                    }
+                    // Si he enviado una localización o una respuesta imprimo si es correcta o no.
+                    if (location || selectedanswerid) {
+                        $.mobile.loading("hide");
+                        if (response.status !== null) {
+                            toast(response.status.msg);
+                        }
                     }
                     if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
                         attempttimestamp = response.attempttimestamp;
                         roadtimestamp = response.roadtimestamp;
                         attemptshistory = response.historicalattempts;
                         changesinattemptshistory = true;
-                        if (response.infomsg.length > 0) {
-                            var body = '';
-                            infomsgs.forEach(function (msg) {
-                                body += '<p>' + msg + '</p>';
-                            });
-                            response.infomsg.forEach(function (msg) {
-                                infomsgs.push(msg);
-                                body += '<p>' + msg + '</p>';
-                            });
-                            create_popup('displayupdates', strings["updates"], body);
-                        }
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
                         if (response.riddles !== null) {
                             source.clear();
@@ -390,11 +388,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 changesinquestionriddle = true;
                             }
                         }
-                        // Si he enviado una localización o una respuesta imprimo si es correcta o no.
-                        if (location || selectedanswerid) {
-                            $.mobile.loading("hide");
-                            toast(response.status.msg);
-                        }
                         // Compruebo si es un multipolygon o se esta inicializando y lo centro.
                         if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
                             fitmap = true;
@@ -411,7 +404,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 $.mobile.pageContainer.pagecontainer("change", "#mappage");
                             } else {
                                 set_question();
+                                $.mobile.resetActivePageHeight();
                             }
+                        }
+                        if (response.infomsg.length > 0) {
+                            var body = '';
+                            infomsgs.forEach(function (msg) {
+                                body += '<p>' + msg + '</p>';
+                            });
+                            response.infomsg.forEach(function (msg) {
+                                infomsgs.push(msg);
+                                body += '<p>' + msg + '</p>';
+                            });
+                            create_popup('displayupdates', strings["updates"], body);
                         }
                     }
                 }).fail(function (error) {
@@ -439,6 +444,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             function set_lastsuccessfulriddle() {
                 if (changesinlastsuccessfulriddle) {
                     $("#lastsuccessfulriddlename").text(lastsuccessfulriddle.name);
+                    $("#lastsuccesfulriddlepos").text(lastsuccessfulriddle.number +
+                            " / " + lastsuccessfulriddle.totalnumber);
                     $("#lastsuccessfulriddledescription").html(lastsuccessfulriddle.description);
                     if (lastsuccessfulriddle.question !== '') {
                         $("#lastsuccessfulriddledescription").append("<a href='#questionpage' " +
@@ -573,7 +580,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 if (value && value.length > 2) {
                     $.mobile.loading("show", {
                         text: strings['searching'],
-                        textVisible: true});
+                        textVisible: true,
+                        theme: "b"});
                     openStreetMapGeocoder.geocode(value, function (response) {
                         if (response[0] === false) {
                             $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
@@ -622,6 +630,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             // Redraw map
             $(window).on("pagecontainershow resize", function (event, ui) {
+                $.mobile.resetActivePageHeight();
                 var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                 if (pageId === 'mappage') {
                     if (event.type === "resize") {
@@ -663,27 +672,41 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             $('#sendAnswer').on('click', function (event) {
                 //selecciono la respuesta
                 var selected = $("#questionform input[type='radio']:checked");
-                if (selected.length === 0) {
+                if (!available) {
                     event.preventDefault();
-                    toast('Debes seleccionar una respuesta');
+                    toast('Se ha superado el tiempo de entrega');
                 } else {
-                    renew_source(false, false, selected.val());
+                    if (selected.length === 0) {
+                        event.preventDefault();
+                        toast('Debes seleccionar una respuesta');
+                    } else {
+                        renew_source(false, false, selected.val());
+                    }
                 }
+
             });
             $('#validateLocation').on('click', function (event) {
+                if (roadfinished) {
+                    event.preventDefault();
+                    toast('Ya has completado esta caza del tesoro');
+                    return;
+                }
+                if (!available) {
+                    event.preventDefault();
+                    toast('Se ha superado el tiempo de entrega');
+                    return;
+                }
                 if (lastsuccessfulriddle.question !== '') {
                     event.preventDefault();
                     toast('Debes responder primero a la pregunta');
                     $("#infopanel").panel("open");
+                    return;
                 }
                 if (lastsuccessfulriddle.completion === 0) {
                     event.preventDefault();
                     toast('Debes completar primero la actividad a resolver');
                     $("#infopanel").panel("open");
-                }
-                if (roadfinished) {
-                    event.preventDefault();
-                    toast('Ya has completado esta caza del tesoro');
+                    return;
                 }
             });
             /*-------------------------------Initialize page -------------*/

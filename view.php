@@ -84,17 +84,22 @@ if (view_intro($treasurehunt)) {
 }
 //$usersummary = new treasurehunt_grading_summary();
 //echo $output->render($usersummary);
-echo view_users_progress_table($cm, $course->id, $context);
-try {
-    $user = get_user_group_and_road($USER->id, $cm, $course->id);
-    echo view_user_historical_attempts($user->groupid, $USER->id, $user->roadid, $cm->id);
-} catch (Exception $e) {
-    echo $output->notification($e->getMessage());
+echo view_treasurehunt_info($treasurehunt,$course->id);
+if (has_capability('mod/treasurehunt:play', $context) &&
+        time() > $treasurehunt->allowattemptsfromdate) {
+    try {
+        $user = get_user_group_and_road($USER->id, $cm, $course->id);
+        echo view_user_historical_attempts($treasurehunt,$user->groupid, $USER->id, $user->roadid, $cm->id);
+    } catch (Exception $e) {
+        echo $output->notification($e->getMessage());
+    }
 }
-if (has_capability('mod/treasurehunt:gettreasurehunt', $context) &&
-        has_capability('mod/treasurehunt:managescavenger', $context)) {
-    
+if (has_capability('mod/treasurehunt:managescavenger', $context) ||
+        time() > $treasurehunt->allowattemptsfromdate) {
+    echo view_users_progress_table($cm, $course->id, $context);
 }
+
+
 //$renderable = new \mod_treasurehunt\output\index_page('Some text','some text2');
 //echo $output->render_index_page($renderable);
 // Finish the page.

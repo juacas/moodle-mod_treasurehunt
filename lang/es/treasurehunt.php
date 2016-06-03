@@ -52,6 +52,9 @@ $string['ost'] = 'Open Street Maps';
 $string['noattempts'] = 'No has realizado ningún intento';
 $string['state'] = 'Estado';
 $string['play'] = 'Jugar';
+$string['reviewofplay'] = 'Revisión del juego';
+$string['treasurehuntclosed'] = 'Esta caza del tesoro está cerrada desde el {$a}';
+$string['treasurehuntcloseson'] = 'Esta caza del tesoro cerrará el {$a}';
 $string['loading'] = 'Cargando';
 $string['updates'] = 'Actualizaciones';
 $string['usersprogress'] = 'Progreso de los usuarios';
@@ -176,11 +179,15 @@ $string['correctanswer'] = 'Respuesta correcta.';
 $string['errcorrectsetanswerblank'] = 'Respuesta correcta marcada, pero la respuesta está vacía';
 $string['errnocorrectanswers'] = 'Debe haber solo una respuesta correcta';
 $string['errcorrectanswers'] = 'Debe seleccionar una respuesta correcta';
-$string['errsendiganswer'] = 'El camino se ha actualizado mientras enviabas la respuesta, vuelvelo a intentar';
-$string['errsendiglocation'] = 'El camino se ha actualizado mientras enviabas tu localización, vuelvelo a intentar';
+$string['erroutoftimeanswer'] = 'No es posible enviar la respuesta, estás fuera del tiempo de entrega';
+$string['erroutoftimelocation'] = 'No es posible enviar la localización, estás fuera del tiempo de entrega';
+$string['errsendinganswer'] = 'El camino se ha actualizado mientras enviabas la respuesta, vuelvelo a intentar';
+$string['errsendinglocation'] = 'El camino se ha actualizado mientras enviabas tu localización, vuelvelo a intentar';
 $string['gradefromtime'] = 'Puntuación por tiempo';
 $string['gradefromriddles'] = 'Puntuación por pistas';
 $string['gradefromposition'] = 'Puntuación por posición';
+$string['grademethodinfo'] = 'Método de calificación: {$a}';
+$string['backtocourse'] = 'Volver al curso';
 $string['grademethod'] = 'Método de calificación';
 $string['grademethod_help'] = '<P><B>Puntuación por pistas</B><P>
 <UL>
@@ -208,6 +215,8 @@ $string['gradepenlocation_help'] = 'La penalización es expresada en % de la cal
 $string['errpenalizationexceed'] = 'La penalización no puede ser mayor que 100';
 $string['errpenalizationfall'] = 'La penalización no puede ser menor que 0';
 $string['errnumeric'] = 'Debe introducir un número decimal válido';
+$string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible hasta el {$a}';
+$string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta desde el {$a}';
 
 
 

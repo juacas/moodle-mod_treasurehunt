@@ -73,12 +73,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setExpanded('availability', true);
 
         $name = get_string('allowattemptsfromdate', 'treasurehunt');
-        $options = array('optional' => true);
+        $options = array('optional' => true, 'step' => 1);
         $mform->addElement('date_time_selector', 'allowattemptsfromdate', $name, $options);
         $mform->addHelpButton('allowattemptsfromdate', 'allowattemptsfromdate', 'treasurehunt');
 
         $name = get_string('cutoffdate', 'treasurehunt');
-        $mform->addElement('date_time_selector', 'cutoffdate', $name, array('optional' => true));
+        $mform->addElement('date_time_selector', 'cutoffdate', $name, $options);
         $mform->addHelpButton('cutoffdate', 'cutoffdate', 'treasurehunt');
 
         $name = get_string('alwaysshowdescription', 'treasurehunt');

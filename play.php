@@ -57,14 +57,21 @@ $PAGE->set_url('/mod/treasurehunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 //$PAGE->set_pagelayout('standard');
-
+if ($treasurehunt->allowattemptsfromdate > time()) {
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
+    print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl,userdate($treasurehunt->allowattemptsfromdate));
+}
 // Get last timestamp 
-$user=get_user_group_and_road($USER->id, $cm, $course->id);
-list($lastattempttimestamp,$lastroadtimestamp)=get_last_timestamps($USER->id,$cm->groupmode,$user->groupid,$user->roadid);
+$user = get_user_group_and_road($USER->id, $cm, $course->id);
+list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id,$user->groupid, $user->roadid);
 
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(get_strings_play(), $cm->id, $cm->instance, intval($treasurehunt->playwithoutmove),$lastattempttimestamp,$lastroadtimestamp));
+$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
+    get_strings_play(),
+    $cm->id, $cm->instance,
+    intval($treasurehunt->playwithoutmove),
+    $lastattempttimestamp, $lastroadtimestamp));
 //$PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/treasurehunt/css/mobile-jq.css');
