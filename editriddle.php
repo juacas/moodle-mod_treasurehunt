@@ -33,7 +33,6 @@ $PAGE->set_url($url);
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 require_capability('mod/treasurehunt:addriddle', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid));
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
@@ -88,6 +87,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         }
     }
     $entry->cmid = $cmid;
+    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid,'roadid'=>$entry->roadid));
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,

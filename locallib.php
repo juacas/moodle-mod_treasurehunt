@@ -820,7 +820,7 @@ function get_strings_play() {
 }
 
 function get_strings_edit() {
-    return get_strings(array('insert_riddle', 'insert_road', 'empty_ridle'), 'mod_treasurehunt');
+    return get_strings(array('insert_riddle', 'insert_road'), 'mod_treasurehunt');
 }
 
 function get_last_timestamps($userid, $groupid, $roadid) {
@@ -1153,7 +1153,17 @@ function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid
     $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $outoftime, $roadfinished);
     return $output->render($renderable);
 }
+function view_editor($cm, $courseid, $context) {
+    global $PAGE;
 
+    // Recojo la lista de usuarios/grupos asignada a cada camino y los posibles warnings.
+    list($roads, $duplicategroupsingroupings, $duplicateusersingroups,
+            $noassignedusers) = get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
+    $permission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
+    $output = $PAGE->get_renderer('mod_treasurehunt');
+    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $permission);
+    return $output->render($renderable);
+}
 function view_users_progress_table($cm, $courseid, $context) {
     global $PAGE;
 

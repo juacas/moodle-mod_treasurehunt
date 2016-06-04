@@ -32,7 +32,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
 
             var init = {
-                edittreasurehunt: function (idModule, treasurehuntid, strings, lockid) {
+                edittreasurehunt: function (idModule, treasurehuntid, strings, selectedroadid, lockid) {
                     /** Global var ***************************************************************
                      */
                     var stage = {
@@ -62,21 +62,20 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
                     /**Load the control pane, riddle and road list ***************************************************
                      */
-                    $("#controlPanel").addClass('ui-widget-header ui-corner-all');
-                    $("#riddleListPanel_global").addClass('.ui-widget-content ui-corner-all');
-                    $('<span id="edition"/>').appendTo($("#controlPanel"));
-                    $('<input type="radio" name="controlPanel" id="radio1" value="add">').appendTo($("#edition"));
+                    $("#controlpanel").addClass('ui-widget-header ui-corner-all');
+                    $('<span id="edition"/>').appendTo($("#controlpanel"));
+                    $('<input type="radio" name="controlpanel" id="radio1" value="add">').appendTo($("#edition"));
                     $("<label>").attr('for', "radio1").text('Anadir').appendTo($("#edition"));
-                    $('<input type="radio" name="controlPanel" id="radio2" value="modify">').appendTo($("#edition"));
+                    $('<input type="radio" name="controlpanel" id="radio2" value="modify">').appendTo($("#edition"));
                     $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
-                    $('<button id="saveRiddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlPanel"));
-                    $('<button id="removeFeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlPanel"));
-                    $('<div id="searchContainer">').appendTo($("#controlPanel"));
-                    $('<input id="searchAddress" type="search" placeholder="Enter a Location" class="clearable"/>')
-                            .appendTo($("#searchContainer"));
-                    $('<span id="searchIcon" class="ui-icon  ui-icon-search"></span>').appendTo($("#searchContainer"));
-                    $('<button id="addRiddle"/>').text('Riddle').prependTo($("#controlPanel"));
-                    $('<button id="addRoad"/>').text('Road').prependTo($("#controlPanel"));
+                    $('<button id="saveriddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlpanel"));
+                    $('<button id="removefeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlpanel"));
+                    $('<div id="searchcontainer">').appendTo($("#controlpanel"));
+                    $('<input id="searchaddress" type="search" placeholder="Enter a Location" class="clearable"/>')
+                            .appendTo($("#searchcontainer"));
+                    $('<span id="searchicon" class="ui-icon  ui-icon-search"></span>').appendTo($("#searchcontainer"));
+                    $('<button id="addriddle"/>').text('Riddle').prependTo($("#controlpanel"));
+                    $('<button id="addroad"/>').text('Road').prependTo($("#controlpanel"));
                     $("#radio1").button({
                         text: false,
                         icons: {
@@ -89,34 +88,34 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             primary: "ui-icon-pencil"
                         }
                     });
-                    $("#removeFeature").button({
+                    $("#removefeature").button({
                         text: false,
                         icons: {
                             primary: "ui-icon-trash"
                         }
                     });
-                    $("#saveRiddle").button({
+                    $("#saveriddle").button({
                         text: false,
                         icons: {
                             primary: "ui-icon-disk"
                         }
                     });
-                    $("#addRiddle").button({
+                    $("#addriddle").button({
                         icons: {
                             primary: "ui-icon-circle-plus"
                         }
                     });
-                    $("#addRoad").button({
+                    $("#addroad").button({
                         icons: {
                             primary: "ui-icon-circle-plus"
                         }
                     });
                     //Lo cargo como un buttonset
                     $("#edition").buttonset();
-                    //Creo el riddleListPanel
-                    $('<ul id="riddleList"/>').appendTo($("#riddleListPanel"));
+                    //Creo el riddlelistpanel
+                    $('<ul id="riddlelist"/>').prependTo($("#riddlelistpanel"));
                     //Lo cargo como un sortable
-                    $("#riddleList").sortable({
+                    $("#riddlelist").sortable({
                         handle: ".handle",
                         tolerance: "pointer",
                         zIndex: 9999,
@@ -184,8 +183,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 newVal, parseInt($($item).attr('roadid')), dirtyStage, originalStage, vector);
                     }
 
-                    //Creo el roadListPanel
-                    $('<ul id="roadList"/>').appendTo($("#roadListPanel"));
+                    //Creo el roadlistpanel
+                    $('<ul id="roadlist"/>').appendTo($("#roadlistpanel"));
                     //Anado los handle custom
                     /*Set control
                      * 
@@ -290,19 +289,22 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         renderer: 'canvas',
                         target: 'map',
                         view: new ol.View({
-                            center: new ol.proj.transform([-4.715354, 41.654618], 'EPSG:4326', 'EPSG:3857'),
-                            zoom: 12,
+                            center: [0, 0],
+                            zoom: 2,
                             minZoom: 2
                         }),
                         controls: ol.control.defaults().extend([
-                            new app.generateResizableControl({target: document.getElementById("riddleListPanel_global")})
+                            new app.generateResizableControl({target: document.getElementById("riddlelistpanel")})
                         ])
                     });
                     //Creo el resizable
-                    $("#riddleListPanel_global").resizable({
+                    $("#riddlelistpanel").resizable({
                         handles: {'e': $('#egrip')},
                         resize: function (event, ui) {
                             ui.size.height = ui.originalSize.height;
+                        },
+                        stop: function (event, ui) {
+                            map.updateSize();
                         },
                         cancel: ''
                     });
@@ -492,6 +494,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     function addNewFeatureToDirtySource(dirtyFeature, originalSource, dirtySource) {
 
                         var riddleid = dirtyFeature.get('riddleid');
+                        var roadid = dirtyFeature.get('roadid');
                         var feature = dirtySource.getFeatureById(riddleid);
                         if (!feature) {
                             feature = originalSource.getFeatureById(riddleid).clone();
@@ -503,7 +506,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 'idFeaturesPolygons': '' + dirtyFeature.getId()
                             });
                             //Quito la advertencia
-                            notEmptyRiddle(riddleid);
+                            notEmptyRiddle(riddleid, roadid);
                         } else {
                             feature.setProperties({
                                 'idFeaturesPolygons': feature.get('idFeaturesPolygons') + ',' + dirtyFeature.getId()
@@ -535,11 +538,12 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         });
                     }
 
-                    function removeFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
+                    function removefeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
 
                         dirtyFeatures.forEach(function (dirtyFeature) {
 
                             var riddleid = dirtyFeature.get('riddleid');
+                            var roadid = dirtyFeature.get('roadid');
                             var feature = dirtySource.getFeatureById(riddleid);
                             var idFeaturesPolygons;
                             var polygons = new ol.Collection();
@@ -569,7 +573,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 feature.setProperties({
                                     'idFeaturesPolygons': 'empty'
                                 });
-                                emptyRiddle(riddleid);
+                                emptyRiddle(riddleid, roadid);
+
                             }
 
                         });
@@ -621,7 +626,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 //agrego los vectores a cada camino
                                 for (var road in stage.roads) {
                                     if (stage.roads.hasOwnProperty(road)) {
-                                        addRoad2ListPanel(stage.roads[road].id, stage.roads[road].name,
+                                        addroad2ListPanel(stage.roads[road].id, stage.roads[road].name,
                                                 stage.roads[road].blocked);
                                         vector = new ol.layer.Vector({
                                             source: new ol.source.Vector({
@@ -670,26 +675,37 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     feature.setProperties({
                                         idFeaturesPolygons: '' + idNewFeatures
                                     });
-                                    addRiddle2ListPanel(riddleid, roadid, noriddle, name, description, blocked);
+                                    addriddle2ListPanel(riddleid, roadid, noriddle, name, description, blocked);
                                     if (polygons.length === 0) {
                                         emptyRiddle(riddleid);
                                     }
                                 });
-                                //Ordeno la lista de pistas
+                                // Ordeno la lista de pistas
                                 sortList();
-                                //Selecciono el primer camino 
-                                for (var road in stage.roads) {
-                                    if (stage.roads.hasOwnProperty(road)) {
-                                        roadid = road;
-                                        if (stage.roads[roadid].blocked) {
-                                            deactivateAddRiddle();
-                                        } else {
-                                            activateAddRiddle();
+                                // Selecciono el camino seleccionado si existe o sino el primero.
+                                if (typeof stage.roads[selectedroadid] !== 'undefined') {
+                                    roadid = selectedroadid;
+                                    if (stage.roads[roadid].blocked) {
+                                        deactivateAddRiddle();
+                                    } else {
+                                        activateAddRiddle();
+                                    }
+                                    selectRoad(roadid, stage.roads[roadid].vector, map);
+                                } else {
+                                    for (var road in stage.roads) {
+                                        if (stage.roads.hasOwnProperty(road)) {
+                                            roadid = road;
+                                            if (stage.roads[roadid].blocked) {
+                                                deactivateAddRiddle();
+                                            } else {
+                                                activateAddRiddle();
+                                            }
+                                            selectRoad(roadid, stage.roads[roadid].vector, map);
+                                            break;
                                         }
-                                        selectRoad(roadid, stage.roads[roadid].vector, map);
-                                        break;
                                     }
                                 }
+
                             }
                         }).fail(function (error) {
                             console.log(error);
@@ -700,34 +716,34 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
 
                     /** Panel functions ***************************************************************
                      */
-                    function removeFeatures(selectedFeatures, vector) {
+                    function removefeatures(selectedFeatures, vector) {
                         selectedFeatures.forEach(function (feature) {
                             vector.getSource().removeFeature(feature);
                         });
                         selectedFeatures.clear();
                     }
 
-                    function addRiddle2ListPanel(riddleid, roadid, noriddle, name, description, blocked) {
-                        if ($('#riddleList li[riddleid="' + riddleid + '"]').length < 1) {
+                    function addriddle2ListPanel(riddleid, roadid, noriddle, name, description, blocked) {
+                        if ($('#riddlelist li[riddleid="' + riddleid + '"]').length < 1) {
                             var li = $('<li riddleid="' + riddleid + '" roadid="' + roadid + '" noriddle="' + noriddle + '"/>')
-                                    .appendTo($("#riddleList"));
+                                    .appendTo($("#riddlelist"));
                             li.addClass("ui-corner-all")
-                                    .append("<div class='nameRiddle'>" + name + "</div>")
-                                    .append("<div class='modifyRiddle'>" +
+                                    .append("<div class='riddlename'>" + name + "</div>")
+                                    .append("<div class='modifyriddle'>" +
                                             "<span class='ui-icon ui-icon-pencil'></span>" +
                                             "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" + riddleid + "'>" +
                                             "<div id='dialoginfo" + riddleid + "' title='" + name + "'>"
                                             + description + "</div></span></div>");
                             if (blocked) {
                                 li.addClass("blocked")
-                                        .prepend("<div class='nohandle riddle_valid'>" +
+                                        .prepend("<div class='nohandle validriddle'>" +
                                                 "<span class='ui-icon ui-icon-locked'></span>" +
                                                 "<span class='sortable-number'>" + noriddle + "</span></div>");
                             } else {
-                                li.prepend("<div class='handle riddle_valid'>" +
+                                li.prepend("<div class='handle validriddle'>" +
                                         "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>" +
                                         "<span class='sortable-number'>" + noriddle + "</span></div>");
-                                li.children(".modifyRiddle").prepend("<span class='ui-icon ui-icon-trash'></span>");
+                                li.children(".modifyriddle").prepend("<span class='ui-icon ui-icon-trash'></span>");
                             }
                             $('#dialoginfo' + riddleid).dialog({
                                 maxHeight: 500,
@@ -738,70 +754,82 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         }
                     }
 
-                    function addRoad2ListPanel(roadid, name, blocked) {
+                    function addroad2ListPanel(roadid, name, blocked) {
                         //Si no existe lo agrego
-                        if ($('#roadList li[roadid="' + roadid + '"]').length < 1) {
-                            var li = $('<li roadid="' + roadid + '" blocked="' + blocked + '"/>').appendTo($("#roadList"));
+                        if ($('#roadlist li[roadid="' + roadid + '"]').length < 1) {
+                            var li = $('<li roadid="' + roadid + '" blocked="' + blocked + '"/>').appendTo($("#roadlist"));
                             li.addClass("ui-corner-all").append("<div class='roadname'>" + name + "</div>")
-                                    .append("<div class='modifyRoad'><span class='ui-icon ui-icon-trash'></span>" +
+                                    .append("<div class='modifyroad'><span class='ui-icon ui-icon-trash'></span>" +
                                             "<span class='ui-icon ui-icon-pencil'></span></div>");
                         }
 
                     }
                     function deleteRoad2ListPanel(roadid) {
-                        var $li = $('#roadList li[roadid="' + roadid + '"]');
+                        var $li = $('#roadlist li[roadid="' + roadid + '"]');
                         if ($li.length > 0) {
-                            var $lis = $('#riddleList li[roadid="' + roadid + '"]');
-                            //Elimino el li del roadList
+                            var $lis = $('#riddlelist li[roadid="' + roadid + '"]');
+                            //Elimino el li del roadlist
                             $li.remove();
-                            //Elimino todos los li del riddleList
+                            //Elimino todos los li del riddlelist
                             $lis.remove();
                         }
                     }
                     function deleteRiddle2ListPanel(riddleid, dirtySource, originalSource, vectorOfPolygons) {
-                        var $li = $('#riddleList li[riddleid="' + riddleid + '"]');
+                        var $li = $('#riddlelist li[riddleid="' + riddleid + '"]');
                         if ($li.length > 0) {
                             var roadid = $li.attr('roadid');
-                            var start_pos = $li.index('li[roadid="' + roadid + '"]');
+                            debugger;
                             //Elimino el li
                             $li.remove();
+                            var $riddlelist = $("#riddlelist li[roadid='" + roadid + "']");
+                            // Compruebo el resto de pistas de la lista.
+                            check_riddle_list($riddlelist);
+                            var start_pos = $li.index('li[roadid="' + roadid + '"]');
                             //Recoloco el resto
-                            var $listitems = $("#riddleList").children('li[roadid="' + roadid + '"]');
-                            var $listlength = $($listitems).length;
+                            var $listlength = $($riddlelist).length;
                             for (var i = 0; i <= start_pos - 1; i++) {
-                                relocateRiddleList($listitems, $listlength, i, dirtySource, originalSource, vectorOfPolygons);
+                                relocateRiddleList($riddlelist, $listlength, i, dirtySource, originalSource, vectorOfPolygons);
                             }
                         }
                     }
                     function sortList() {
                         //Ordeno la lista 
-                        $('#riddleList li').sort(function (a, b) {
+                        $('#riddlelist li').sort(function (a, b) {
                             var contentA = parseInt($(a).attr('noriddle'));
                             var contentB = parseInt($(b).attr('noriddle'));
                             return (contentA < contentB) ? 1 : (contentA > contentB) ? -1 : 0;
-                        }).appendTo($("#riddleList"));
+                        }).appendTo($("#riddlelist"));
                     }
 
-                    function emptyRiddle(riddleid) {
-                        var $riddle = $('#riddleList li[riddleid="' + riddleid + '"]');
-                        $riddle.children(".handle").addClass('riddle_invalid').removeClass('riddle_valid');
-                        $riddle.children(".modifyRiddle").append("<span class='ui-icon ui-icon-alert' " +
-                                "data-id='#dialogalert'/>");
+                    function emptyRiddle(riddleid, roadid) {
+                        var $riddle = $('#riddlelist li[riddleid="' + riddleid + '"]');
+                        $riddle.children(".handle,.nohandle").addClass('invalidriddle').removeClass('validriddle');
+                        // Compruebo si en este camino hay alguna pista sin geometria.
+                        if (roadid) {
+                            $("label[for='radio1']").addClass('highlightbutton');
+                            var $riddlelist = $("#riddlelist li[roadid='" + roadid + "']");
+                            if ($riddlelist.length >= 2) {
+                                $("#erremptyriddle").removeClass("invisible");
+                            }
+                        }
                     }
 
-                    function notEmptyRiddle(riddleid) {
-                        var $riddle = $('#riddleList li[riddleid="' + riddleid + '"]');
-                        $riddle.children(".handle").addClass('riddle_valid').removeClass('riddle_invalid');
-                        $riddle.find(".ui-icon-alert").remove();
+                    function notEmptyRiddle(riddleid, roadid) {
+                        var $riddle = $('#riddlelist li[riddleid="' + riddleid + '"]');
+                        $riddle.children(".handle, .nohandle").addClass('validriddle').removeClass('invalidriddle');
+                        if (roadid) {
+                            // Compruebo si en este camino hay alguna pista sin geometria.
+                            $("label[for='radio1']").removeClass('highlightbutton');
+                            var $riddlelist = $("#riddlelist li[roadid='" + roadid + "']");
+                            if ($riddlelist.find(".invalidriddle").length === 0) {
+                                $("#erremptyriddle").addClass("invisible");
+                            }
+                        }
+
                     }
 
-                    $("<div id='dialogalert' title='Error'>"
-                            + strings.empty_ridle + "</div>").appendTo($("#riddleList"));
-                    $('#dialogalert').dialog({
-                        maxHeight: 500,
-                        autoOpen: false});
                     /** TOOLTIPS 
-                     $("#riddleList").tooltip({
+                     $("#riddlelist").tooltip({
                      track: true,
                      items: '.ui-icon-alert, .ui-icon-info',
                      position: {
@@ -820,21 +848,22 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                      }
                      });**/
                     function activateDeleteButton() {
-                        $('#removeFeature').button("option", "disabled", false);
+                        $('#removefeature').button("option", "disabled", false);
                     }
                     function deactivateDeleteButton() {
-                        $('#removeFeature').button("option", "disabled", true);
+                        $('#removefeature').button("option", "disabled", true);
                     }
                     function activateAddRiddle() {
-                        $('#addRiddle').button("option", "disabled", false);
+                        $('#addriddle').button("option", "disabled", false);
                     }
                     function deactivateAddRiddle() {
-                        $('#addRiddle').button("option", "disabled", true);
+                        $('#addriddle').button("option", "disabled", true);
                     }
                     function deactivateEdition() {
                         var radioButton = $("#edition").find("input:radio");
                         radioButton.attr('checked', false).button("refresh");
                         radioButton.button("option", "disabled", true);
+                        $("label[for='radio1']").removeClass('highlightbutton');
                         Draw.setActive(false);
                         Modify.setActive(false);
                     }
@@ -843,10 +872,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         $("#edition").find("input:radio").button("option", "disabled", false);
                     }
                     function activateSaveButton() {
-                        $('#saveRiddle').button("option", "disabled", false);
+                        $('#saveriddle').button("option", "disabled", false);
                     }
                     function deactivateSaveButton() {
-                        $('#saveRiddle').button("option", "disabled", true);
+                        $('#saveriddle').button("option", "disabled", true);
                     }
 
 
@@ -881,15 +910,36 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         map.beforeRender(pan, zoom);
                         view.setCenter(point);
                     }
-
+                    function check_riddle_list($riddlelist) {
+                        if ($riddlelist.length > 0) {
+                            $("#riddlelistpanel").removeClass("invisible");
+                            map.updateSize();
+                        } else {
+                            $("#riddlelistpanel").addClass("invisible");
+                            map.updateSize();
+                        }
+                        if ($riddlelist.length < 2) {
+                            $("#addriddle").addClass("highlightbutton");
+                            $("#errvalidroad").removeClass("invisible");
+                            $("#erremptyriddle").addClass("invisible");
+                        } else if ($riddlelist.find(".invalidriddle").length > 0) {
+                            $("#addriddle").removeClass("highlightbutton");
+                            $("#errvalidroad").addClass("invisible");
+                            $("#erremptyriddle").removeClass("invisible");
+                        } else {
+                            $("#addriddle").removeClass("highlightbutton");
+                            $("#errvalidroad").addClass("invisible");
+                            $("#erremptyriddle").addClass("invisible");
+                        }
+                    }
                     function selectRoad(roadid, vectorOfPolygons, map) {
-
                         //Limpio todas las features seleccionadas,oculto todos los li y solo muestro los que tengan el roadid 
-                        //selectRiddleFeatures(vectorOfPolygons, null, selectedFeatures);
-                        $("#riddleList li").removeClass("ui-selected").hide();
-                        $("#riddleList li[roadid='" + roadid + "']").show();
+                        $("#riddlelist li").removeClass("ui-selected").hide();
+                        var $riddlelist = $("#riddlelist li[roadid='" + roadid + "']");
+                        $riddlelist.show();
+                        check_riddle_list($riddlelist);
                         //Si no esta marcado el li road lo marco
-                        $("#roadList li[roadid='" + roadid + "']").addClass("ui-selected");
+                        $("#roadlist li[roadid='" + roadid + "']").addClass("ui-selected");
                         //Dejo visible solo el vector con el roadid
                         map.getLayers().forEach(function (layer) {
                             if (layer instanceof ol.layer.Vector) {
@@ -1015,8 +1065,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 }
                                 deactivateEdition();
                                 /*//Guardo el escenario
-                                 saveRiddles(dirtySource, originalSource);
-                                 $("#saveRiddle").button("option", "disabled", true);
+                                 saveriddles(dirtySource, originalSource);
+                                 $("#saveriddle").button("option", "disabled", true);
                                  dirty = false;*/
                             }
                         }).fail(function (error) {
@@ -1064,11 +1114,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                     }
                                 }
 
-                                /*//Guardo el escenario
-                                 saveRiddles(dirtySource, originalSource);
-                                 $("#saveRiddle").button("option", "disabled", true);
-                                 dirty = false;*/
-
                             }
                         }).fail(function (error) {
                             console.log(error);
@@ -1076,7 +1121,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         });
                     }
 
-                    function saveRiddles(dirtySource, originalSource, treasurehuntid, callback, options, lockid) {
+                    function saveriddles(dirtySource, originalSource, treasurehuntid, callback, options, lockid) {
 
                         var geoJSONFormat = new ol.format.GeoJSON();
                         var features = dirtySource.getFeatures();
@@ -1121,7 +1166,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         });
                     }
 
-                    $("#searchAddress").autocomplete({
+                    $("#searchaddress").autocomplete({
                         minLength: 4,
                         source: function (request, response) {
                             var term = request.term;
@@ -1164,48 +1209,48 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     }).on("click", function () {
                         $(this).autocomplete("search", $(this).value);
                     });
-                    $("#addRiddle").on('click', function () {
+                    $("#addriddle").on('click', function () {
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], lockid);
                         } else {
                             newFormRiddleEntry(roadid, idModule);
                         }
 
                     });
-                    $("#addRoad").on('click', function () {
+                    $("#addroad").on('click', function () {
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule], lockid);
                         } else {
                             newFormRoadEntry(idModule);
                         }
                     });
-                    $("#removeFeature").on('click', function () {
+                    $("#removefeature").on('click', function () {
 
                         notification.confirm('Estas seguro?',
                                 'Si la eliminas ya no podras recuperarla',
                                 'Confirmar',
                                 'Cancelar', function () {
 
-                                    removeFeatureToDirtySource(selectedFeatures, originalStage,
+                                    removefeatureToDirtySource(selectedFeatures, originalStage,
                                             dirtyStage, stage.roads[roadid].vector);
-                                    removeFeatures(selectedFeatures, stage.roads[roadid].vector);
+                                    removefeatures(selectedFeatures, stage.roads[roadid].vector);
                                     //Desactivo el boton de borrar y activo el de guardar cambios
                                     deactivateDeleteButton();
                                     activateSaveButton();
                                     dirty = true;
                                 });
                     });
-                    $("#saveRiddle").on('click', function () {
-                        saveRiddles(dirtyStage, originalStage, treasurehuntid, null, null, lockid);
+                    $("#saveriddle").on('click', function () {
+                        saveriddles(dirtyStage, originalStage, treasurehuntid, null, null, lockid);
                     });
-                    $("#riddleList").on('click', '.ui-icon-info, .ui-icon-alert', function () {
+                    $("#riddlelist").on('click', '.ui-icon-info, .ui-icon-alert', function () {
                         var id = $(this).data('id');
                         // Open dialogue.
                         $(id).dialog("open");
                         // Remove focus from the buttons.
                         $('.ui-dialog :button').blur();
                     });
-                    $("#riddleList").on('click', '.ui-icon-trash', function () {
+                    $("#riddlelist").on('click', '.ui-icon-trash', function () {
                         var $this_li = $(this).parents('li');
                         notification.confirm('Estas seguro?',
                                 'Si la eliminas ya no podras recuperarla',
@@ -1216,27 +1261,27 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                             stage.roads[roadid].vector, treasurehuntid, lockid);
                                 });
                     });
-                    $("#riddleList").on('click', '.ui-icon-pencil', function () {
+                    $("#riddlelist").on('click', '.ui-icon-pencil', function () {
                         //Busco el riddleid del li que contiene la papelera seleccionada
 
                         var riddleid = parseInt($(this).parents('li').attr('riddleid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid,
+                            saveriddles(dirtyStage, originalStage, treasurehuntid,
                                     editFormRiddleEntry, [riddleid, idModule], lockid);
                         } else {
                             editFormRiddleEntry(riddleid, idModule);
                         }
 
                     });
-                    $("input[name=controlPanel]:radio").on('click', function () {
+                    $("input[name=controlpanel]:radio").on('click', function () {
                         if ($(this).attr('previousValue') === 'true') {
                             $(this).attr('checked', false).button("refresh");
                         } else {
-                            $("input[name=controlPanel]:radio").attr('previousValue', false);
+                            $("input[name=controlpanel]:radio").attr('previousValue', false);
                         }
                         $(this).attr('previousValue', $(this).is(':checked'));
-                        var selected = $("input[type='radio'][name='controlPanel']:checked");
+                        var selected = $("input[type='radio'][name='controlpanel']:checked");
                         var value = selected.val();
                         if (value === 'add') {
                             Draw.setActive(true);
@@ -1249,7 +1294,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             Modify.setActive(false);
                         }
                     });
-                    $("#riddleList").on('click', 'li', function (e) {
+                    $("#riddlelist").on('click', 'li', function (e) {
                         if ($(e.target).is('.handle ,.nohandle, .ui-icon , .sortable-number')) {
                             e.preventDefault();
                             return;
@@ -1262,11 +1307,17 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         selectRiddleFeatures(stage.roads[roadid].vector, vectorSelected,
                                 riddleid, selectedFeatures, dirtyStage, originalStage);
                         activateEdition();
+                        // Si la pista no tiene geometría resalto el boton de anadir.
+                        if ($(this).find(".invalidriddle").length > 0) {
+                            $("label[for='radio1']").addClass('highlightbutton');
+                        } else {
+                            $("label[for='radio1']").removeClass('highlightbutton');
+                        }
                         //Paro de dibujar si cambio de pista
                         Draw.Polygon.abortDrawing_();
                     });
-                    $("#roadList").on('click', 'li', function (e) {
-                        if ($(e.target).is('.handle , .ui-icon')) {
+                    $("#roadlist").on('click', 'li', function (e) {
+                        if ($(e.target).is('.ui-icon')) {
                             e.preventDefault();
                             return;
                         }
@@ -1285,19 +1336,19 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         selectRoad(roadid, stage.roads[roadid].vector, map);
                         deactivateEdition();
                     });
-                    $("#roadList").on('click', '.ui-icon-pencil', function () {
+                    $("#roadlist").on('click', '.ui-icon-pencil', function () {
                         //Busco el roadid del li que contiene el lapicero seleccionado
 
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            saveRiddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule], lockid);
                         } else {
                             editFormRoadEntry(roadid, idModule);
                         }
 
                     });
-                    $("#roadList").on('click', '.ui-icon-trash', function () {
+                    $("#roadlist").on('click', '.ui-icon-trash', function () {
                         var $this_li = $(this).parents('li');
                         notification.confirm('Estas seguro?',
                                 'Si la eliminas se eliminaran todas las pitas asociadas y ya no podras recuperarlas',

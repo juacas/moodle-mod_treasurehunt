@@ -172,7 +172,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             });
             var select = new ol.interaction.Select({
                 layers: [attemptslayer],
-                style: selectStyleFunction,
+                style: select_style_function,
                 filter: function (feature, layer) {
                     if (feature.get('noriddle') === 0) {
                         return false;
@@ -227,6 +227,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             // Inicializo la pagina de capas
             add_layergroup_to_list(layergroup);
 
+
+            /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
                 var noriddle = feature.get('noriddle');
@@ -262,7 +264,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 defaultRiddleStyle.getText().setText('' + noriddle);
                 return [defaultRiddleStyle];
             }
-            function selectStyleFunction(feature, resolution) {
+            function select_style_function(feature, resolution) {
                 var noriddle = feature.get('noriddle');
                 if (!feature.get('geometrysolved')) {
                     failSelectRiddleStyle.getText().setText('' + noriddle);
@@ -271,7 +273,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                 defaultSelectRiddleStyle.getText().setText('' + noriddle);
                 return [defaultSelectRiddleStyle];
             }
-            /*-------------------------------Functions-----------------------------------*/
             function autolocate(center, validate) {
                 center = center || false;
                 validate = validate || false;

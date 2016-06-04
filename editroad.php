@@ -30,12 +30,11 @@ $PAGE->set_url($url);
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 require_capability('mod/treasurehunt:addroad', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid));
+$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid,'roadid'=>$id));
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
-
     if ($id) { // if entry is specified
         $title = get_string('editingroad', 'treasurehunt');
         $sql = 'SELECT id,name,groupid,groupingid FROM mdl_treasurehunt_roads  WHERE id=?';
@@ -50,28 +49,25 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     }
     $entry->cmid = $cmid;
 
-
-
     //Compruebo el tipo de grupo
     if ($cm->groupmode) {
         $selectoptions = groups_get_all_groupings($course->id);
-        //Consulta de groupings ocupados en esta instancia
-        $sql = 'SELECT groupingid as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=?';
-        $groups = true;
+        $grouptype = "groupingid";
+        $grouptypecond = "AND groupingid != 0";
     } else {
         $selectoptions = groups_get_all_groups($course->id);
-        //Consulta de grupos ocupados en esta instancia
-        $sql = 'SELECT groupid as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=?';
-        $groups = false;
+        $grouptype = "groupid";
+        $grouptypecond = "AND groupid != 0";
     }
     //Elimino los grupos ocupados
+    $sql = "SELECT $grouptype as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=? $grouptypecond";
     $parms = array('treasurehuntid' => $treasurehunt->id, 'id' => $id);
     $busy = $DB->get_records_sql($sql, $parms);
     foreach ($busy as $option) {
         unset($selectoptions[$option->busy]);
     }
 
-    $mform = new road_form(null, array('current' => $entry, 'selectoptions' => $selectoptions, 'groups' => $groups)); //name of the form you defined in file above.
+    $mform = new road_form(null, array('current' => $entry, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
@@ -102,6 +98,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         // Trigger event and update completion (if entry was created).
 
         $event->trigger();
+        $returnurl->param('roadid',$entry->id);
         redirect($returnurl);
     }
 } else {

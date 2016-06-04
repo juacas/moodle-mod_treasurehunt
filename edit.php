@@ -34,6 +34,7 @@ require_once ($CFG->libdir . '/formslib.php');
 GLOBAL $USER;
 
 $id = required_param('id', PARAM_INT);
+$roadid = optional_param('roadid',0, PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
@@ -73,7 +74,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $cm->instance, get_strings_edit(), $lockid));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $cm->instance, get_strings_edit(),$roadid, $lockid));
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
@@ -88,14 +89,12 @@ if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
 echo $OUTPUT->container_start("treasurehunt_editor");
-echo $OUTPUT->box(null, null, 'controlPanel');
-echo $OUTPUT->container_start(null, 'riddleListPanel_global');
-echo $OUTPUT->box(null, null, 'riddleListPanel');
-echo $OUTPUT->container_end();
-echo $OUTPUT->container_start(null, 'map_global');
+echo $OUTPUT->box(get_string('errvalidroad','treasurehunt'), 'alert alert-error invisible','errvalidroad');
+echo $OUTPUT->box(get_string('erremptyriddle','treasurehunt'), 'alert alert-error invisible','erremptyriddle');
+echo $OUTPUT->box(null, null, 'controlpanel');
+echo $OUTPUT->box(null, null, 'riddlelistpanel');
 echo $OUTPUT->box(null, null, 'map');
-echo $OUTPUT->container_end();
-echo $OUTPUT->box(null, null, 'roadListPanel');
+echo $OUTPUT->box(null, null, 'roadlistpanel');
 echo $OUTPUT->container_end();
 
 // Finish the page.

@@ -2,7 +2,7 @@ html, body
 {
     height: 100%;
 }
-#treasurehunt_editor{
+.treasurehunt_editor{
     width: 100%;
 }
 #edition label {
@@ -12,59 +12,65 @@ html, body
 .treasurehunt_editor button{
     background-image: none;
 }
-#addRiddle, #addRoad{margin:0 auto; margin-left: 1%;margin-right:1%;}
-#saveRiddle,#removeFeature {margin:0 auto;margin-left: 1%; }
-#controlPanel{margin:0 auto}
-#map_global{position: relative;overflow: hidden;padding-bottom: 54%; }
-#map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
+#addriddle, #addroad{margin:0 auto; margin-left: 1%;margin-right:1%;}
+#saveriddle,#removefeature {margin:0 auto;margin-left: 1%; }
+#controlpanel{margin:0 auto}
+//#controlpanel{}
+//#global-map{position: relative;overflow: hidden;padding-bottom: 54%; }
+//#map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
+#map{position: relative; overflow: hidden;}
 /*Selectable y sortable*/
-div#riddleListPanel_global{position: relative;float:left;width: 150px; padding-bottom: 54%; max-width: 60%; min-width: 100px;}
-div#riddleListPanel { width: 100%; height: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto; overflow-x: hidden;overflow-y:auto;}
-div#roadListPanel{width: 100%; position: static;overflow-x:auto; overflow-y: hidden; top:0;left:0; display:block;cursor:default;clear: both;}
-ul#riddleList {width: 100%; position: static; margin:0 auto;}
-ul#roadList {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
-ul#riddleList li,ul#roadList li{border: 2px solid gray; list-style: none; cursor:default;  
+//div#global-riddlelistpanel{position: relative;float:left;width: 150px;padding-bottom: 54%;max-width: 60%; min-width: 100px;}
+//div#riddlelistpanel { width: 100%; height: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto; overflow-x: hidden;overflow-y:auto;}
+div#riddlelistpanel {float:left; width: 150px;max-width: 60%; min-width: 100px; position: relative; /*overflow-x: hidden;overflow-y:auto;*/}
+div#roadlistpanel{width: 100%; position: static;overflow-x:auto; overflow-y: hidden; top:0;left:0; display:block;cursor:default;clear: both;}
+ul#riddlelist {width: 100%;height: 100%; position: relative; margin:0 auto;overflow-x: hidden;overflow-y:auto;}
+ul#roadlist {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
+ul#riddlelist li,ul#roadlist li{border: 2px solid gray; list-style: none; cursor:default;  
                                 -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
                                 -moz-box-sizing: border-box;    /* Firefox, other Gecko */
                                 box-sizing: border-box;         /* Opera/IE 8+ */
 }   
-ul#riddleList li {width: 100%;display:table;table-layout: fixed;}
-ul#roadList li {display: table-cell;}
+ul#riddlelist li {width: 100%;display:table;table-layout: fixed;}
+ul#roadlist li {display: table-cell;}
 div.handle,div.nohandle {background: #f8f8f8; position: relative; width: 30px; display:table-cell;vertical-align: middle}
 div.handle {cursor: n-resize}
-div.modifyRiddle, div.modifyRoad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20px}
-div.nameRiddle, div.roadname{ padding-left: 5px;padding-right: 5px;position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
-input#modRoadName{text-align: center;}
+div.modifyriddle, div.modifyroad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20px}
+div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
 .ui-selecting { background: #eee; }
 .ui-selected { background: rgba(22,145,190,0.2); }
 .sortable-number { font-weight: bold;}
-.riddle_valid { 
-    box-shadow: 0 0 10px #5cd053;
-    border-color: #28921f;
-    border-width: 15px;
+.validriddle { 
+    box-shadow: 0 0 12px #28921f;
+    z-index: 10;
 }
-.riddle_invalid { 
-    box-shadow: 0 0 10px #d45252;
-    border-color: #b03535;
-    border-width: 15px;
-
+.invalidriddle { 
+    box-shadow: 0 0 12px #b03535;
+    z-index: 10;
+}
+.invisible {
+    display: none;
+}
+.highlightbutton {
+    box-shadow: 0 0 13px #2F33BA;
+    z-index: 10;
 }
 .ui-icon-trash, .ui-icon-pencil,.ui-icon-alert,.ui-icon-info  {cursor:pointer;}
 .ui-autocomplete-loading {
     background: white url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
 }
 /** Usado para meter el icono dentro del input**/
-#searchContainer {
+#searchcontainer {
     display: inline-block;
     position:relative;
     padding:0;
     margin-left: 1%;
 }
-#searchAddress {
+#searchaddress {
     margin:0 auto;
     padding-left: 30px;
 }
-#searchIcon {
+#searchicon {
     position:absolute;
     bottom:8px;
     left:9px;
@@ -109,4 +115,21 @@ input#modRoadName{text-align: center;}
 }
 .path-mod-treasurehunt .singlebutton,.path-mod-treasurehunt .treasurehuntinfo{
     text-align: center;
+}
+
+@media screen and (max-height: 480px) {
+#map{height: 160px}
+div#riddlelistpanel{height: 160px}
+}
+@media screen and (min-height: 481px) {
+#map{height: 325px}
+div#riddlelistpanel{height: 325px}
+}
+@media screen and (min-height: 620px) {
+#map{height: 450px}
+div#riddlelistpanel{height: 450px}
+}
+@media screen and (min-height: 750px) {
+#map{height: 560px}
+div#riddlelistpanel{height: 560px}
 }
