@@ -2,7 +2,7 @@
 
 $services = array(
     'treasurehuntservices' => array(//the name of the web service
-        'functions' => array('mod_treasurehunt_fetch_treasurehunt', 'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle', 'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock','mod_treasurehunt_validate_location','mod_treasurehunt_user_progress'), //web service functions of this service
+        'functions' => array('mod_treasurehunt_fetch_treasurehunt', 'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle', 'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock', 'mod_treasurehunt_user_progress'), //web service functions of this service
         'requiredcapability' => '', //if set, the web service user need this capability to access 
         //any function of this service. For example: 'some/capability:specified'                 
         'restrictedusers' => 0, //if enabled, the Moodle administrator must link some user to this service
@@ -47,18 +47,11 @@ $functions = array(
         'description' => 'Creates new groups.', //human readable description of the web service function
         'type' => 'write', //database rights of the web service function (read, write)
     ),
-    'mod_treasurehunt_validate_location' => array(//web service function name
-        'classname' => 'mod_treasurehunt_external_validate_location', //class containing the external function
-        'methodname' => 'validate_location', //external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', //file containing the class/external function
-        'description' => 'Creates new groups.', //human readable description of the web service function
-        'type' => 'write', //database rights of the web service function (read, write)
-    ),
-        'mod_treasurehunt_user_progress' => array(//web service function name
+    'mod_treasurehunt_user_progress' => array(//web service function name
         'classname' => 'mod_treasurehunt_external_user_progress', //class containing the external function
         'methodname' => 'user_progress', //external function name
         'classpath' => 'mod/treasurehunt/externallib.php', //file containing the class/external function
         'description' => 'Creates new groups.', //human readable description of the web service function
-        'type' => 'read', //database rights of the web service function (read, write)
+        'type' => 'write', //database rights of the web service function (read, write)
     ),
 );
