@@ -22,7 +22,7 @@ require.config({
         }
     },
     paths: {
-        openlayers: 'openlayers/ol-debug',
+        openlayers: 'openlayers/ol',
         geocoderjs: 'geocoder/geocoder',
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch.min'
     }
@@ -287,7 +287,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 source: new ol.source.OSM()
                             }), vectorDraw],
                         renderer: 'canvas',
-                        target: 'map',
+                        target: 'mapedit',
                         view: new ol.View({
                             center: [0, 0],
                             zoom: 2,

@@ -20,7 +20,7 @@ require.config({
         'jquery.mobile': ['jquery', 'jquery.mobile-config']
     },
     paths: {
-        openlayers: 'openlayers/ol-debug',
+        openlayers: 'openlayers/ol',
         geocoderjs: 'geocoder/geocoder',
         'jquery.mobile-config': 'jquery-mobile/jquery.mobile-config',
         'jquery.mobile': 'jquery-mobile/jquerymobile'
@@ -212,7 +212,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
             var map = new ol.Map({
                 layers: layers,
                 controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
-                target: 'map',
+                target: 'mapplay',
                 view: view
                         /*loadTilesWhileAnimating: true,
                          loadTilesWhileInteracting: true*/
@@ -502,7 +502,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         "class": layer.getVisible() ? "checked" : "unchecked"
                     })
                             .append($('<a />', {
-                                text: layer.get("name")
+                                text: layer.get("name"),
+                                href: "#mappage"
                             })
                                     .click(function () {
                                         layergroup.getLayers().forEach(function (l) {
@@ -568,9 +569,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         create_popup('inforiddle', title, body);
                     }
                 } else {
-                    var coordinates = features.mapBrowserEvent.coordinate;
-                    markerFeature.setGeometry(coordinates ?
-                            new ol.geom.Point(coordinates) : null);
+                    if (playwithoutmove) {
+                        var coordinates = features.mapBrowserEvent.coordinate;
+                        markerFeature.setGeometry(coordinates ?
+                                new ol.geom.Point(coordinates) : null);
+                    }
                 }
             });
             $("#autocomplete").on("filterablebeforefilter", function (e, data) {

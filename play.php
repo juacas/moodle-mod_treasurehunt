@@ -62,7 +62,7 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
     print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl,userdate($treasurehunt->allowattemptsfromdate));
 }
 // Get last timestamp 
-$user = get_user_group_and_road($USER->id, $cm, $course->id);
+$user = get_user_group_and_road($USER->id,$treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id,$user->groupid, $user->roadid);
 
 

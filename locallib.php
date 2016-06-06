@@ -486,7 +486,7 @@ function get_riddle_answers($riddleid, $context) {
     return $answers;
 }
 
-function riddles_to_geojson($riddles, $context, $treasurehuntid, $userid = null) {
+function riddles_to_geojson($riddles, $context, $treasurehuntid, $groupid = 0) {
     $riddlesarray = array();
     foreach ($riddles as $riddle) {
         $multipolygon = wkt_to_object($riddle->geometry);
@@ -508,7 +508,7 @@ function riddles_to_geojson($riddles, $context, $treasurehuntid, $userid = null)
             $attr['success'] = intval($riddle->success);
             $riddle->type = "location";
             // Modifico el tipo a location
-            $attr['info'] = set_string_attempt($riddle, $userid);
+            $attr['info'] = set_string_attempt($riddle, $groupid);
         }
         $feature = new Feature($riddle->id ?
                         intval($riddle->id) : null, $multipolygon, $attr);
@@ -586,7 +586,7 @@ function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context
         $params = array($roadid);
         $userprogress[] = $DB->get_record_sql($query, $params);
     }
-    $geojson = riddles_to_geojson($userprogress, $context, $treasurehuntid, $userid);
+    $geojson = riddles_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
     return $geojson;
 }
 
@@ -635,70 +635,105 @@ function check_completion_activity($cmid, $userid, $groupid, $context) {
     return false;
 }
 
-function get_user_group_and_road($userid, $cm) {
-    global $DB, $COURSE;
+function get_group_road($groupid, $treasurehuntid,$groupame = '') {
+    global $DB;
 
-    $groups = array();
-    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
-    if ($cm->groupmode) {
-        // Group mode.
-        $query = "SELECT groupingid,validated, id as roadid from {treasurehunt_roads} where treasurehuntid=? AND groupingid != 0";
-        $params = array($cm->instance);
-        // Recojo todos los groupings disponibles en la actividad.
-        $availablegroupings = $DB->get_records_sql($query, $params);
-        // Para cada grouping saco los grupos que contiene y compruebo si el usuario pertenece a uno de ellos.
-        foreach ($availablegroupings as $groupingid) {
-            $allgroupsingrouping = groups_get_all_groups($COURSE->id, $userid, $groupingid->groupingid, 'g.id');
-            if (count($allgroupsingrouping) > 1) {
-                // El usuario pertenece a mas de un grupo dentro de un mismo grouping.
-                print_error('multiplegroupssameroadplay', 'treasurehunt', $returnurl);
-            }
-            foreach ($allgroupsingrouping as $groupingrouping) {
-                array_push($groups, (object) array('groupid' => $groupingrouping->id, 'roadid' => $groupingid->roadid, 'validated' => $groupingid->validated));
-            }
+    $query = "SELECT r.id as roadid, r.validated, gg.groupid "
+            . "FROM  {treasurehunt_roads} r INNER JOIN mdl_groupings_groups "
+            . "gg ON gg.groupingid = r.groupingid  WHERE gg.groupid =? AND r.treasurehuntid=?";
+    $params = array($groupid, $treasurehuntid);
+    // Recojo todos los groupings disponibles en la actividad.
+    $groupdata = $DB->get_records_sql($query, $params);
+    if (count($groupdata) === 0) {
+        // El grupo no pertenece a ningun grouping.
+        print_error('nogrouproad', 'treasurehunt','',$groupame);
+    } else if (count($groupdata) > 1) {
+        // El grupo pertenece a mas de un grouping.
+        print_error('groupmultipleroads', 'treasurehunt','',$groupame);
+    } else {
+        if (current($groupdata)->validated == 0) {
+            // El camino no esta validado.
+            print_error('groupinvalidroad', 'treasurehunt','',$groupame);
         }
+        return current($groupdata);
+    }
+}
+
+function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview = false, $username = '') {
+    global $DB;
+
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
+    if ($treasurehunt->groupmode) {
+        // Group mode.
+        $cond = "{groupings_groups} gg ON gg.groupingid = r.groupingid "
+                . "INNER JOIN {groups_members} gm ON gm.groupid = gg.groupid";
     } else {
         // Individual mode.
-        $query = "SELECT  id as roadid, groupid,validated from {treasurehunt_roads} where treasurehuntid=?";
-        $params = array($cm->instance);
-        $availablegroups = $DB->get_records_sql($query, $params);
-        // If there is only one road validated and no groups.
-        if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
-            array_push($groups, current($availablegroups));
-        } else {
-            foreach ($availablegroups as $groupid) {
-                if (groups_is_member($groupid->groupid)) {
-                    $groupid->groupid = 0;
-                    array_push($groups, $groupid);
-                }
-            }
+        $cond = "{groups_members} gm ON gm.groupid = r.groupid";
+    }
+    $query = "SELECT r.id as roadid,count(r.id) as groupsnumber, "
+            . "gm.groupid,r.validated FROM {treasurehunt_roads} r "
+            . "INNER JOIN  $cond WHERE gm.userid =? AND "
+            . "r.treasurehuntid=? group by roadid";
+    $params = array($userid, $treasurehunt->id);
+    $userdata = $DB->get_records_sql($query, $params);
+    // Si estamos en modo individual y no hay datos comprobamos si existe un unico camino
+    // para la caza que no tenga grupos.
+    if (count($userdata) === 0 && !$treasurehunt->groupmode) {
+        $query = "SELECT r.id as roadid, r.validated,r.groupid FROM "
+                . "{treasurehunt_roads} r WHERE r.treasurehuntid=?";
+        $availableroads = $DB->get_records_sql($query, array($treasurehunt->id));
+        if (count($availableroads) === 1 && current($availableroads)->groupid == 0) {
+            $userdata [] = current($availableroads);
         }
     }
-
-    if (count($groups) === 0) {
-        if ($cm->groupmode) {
-            // El grupo no pertenece a ningun grouping.
-            print_error('nogroupingplay', 'treasurehunt', $returnurl);
+    if (count($userdata) === 0) {
+        if ($treasurehunt->groupmode) {
+            $errormsg = 'nogroupingplay';
         } else {
-            // El usuario no pertenece a ningun grupo.
-            print_error('nogroupplay', 'treasurehunt', $returnurl);
+            $errormsg = 'nogroupplay';
         }
-    } else if (count($groups) > 1) {
-        if ($cm->groupmode) {
-            // El grupo pertenece a mas de un grouping.
-            print_error('multiplegroupingsplay', 'treasurehunt', $returnurl);
+        if ($teacherreview) {
+            $errormsg = 'nouserroad';
+        }
+        // El usuario no pertenece a ningun grupo.
+        print_error($errormsg, 'treasurehunt', $returnurl,$username);
+    } else if (count($userdata) > 1) {
+        if ($treasurehunt->groupmode) {
+            $errormsg = 'multiplegroupingsplay';
         } else {
-            // El usuario pertenece a mas de un grupo.
-            print_error('multiplegroupsplay', 'treasurehunt', $returnurl);
+            $errormsg = 'multiplegroupsplay';
         }
+        if ($teacherreview) {
+            $errormsg = 'usermultipleroads';
+        }
+        // El usuario pertenece a mas de un grupo.
+        print_error($errormsg, 'treasurehunt', $returnurl,$username);
     } else {
-        //Bien
-        if ($groups[0]->validated == 0) {
-            // El camino no esta validado.
-            print_error('invalidassignedroad', 'treasurehunt', $returnurl);
+        if ($treasurehunt->groupmode) {
+            if (current($userdata)->groupsnumber > 1) {
+                if ($teacherreview) {
+                    $errormsg = 'usermultiplesameroad';
+                } else {
+                    $errormsg = 'multiplegroupssameroadplay';
+                }
+                // El usuario pertenece a mas de un grupo dentro de un mismo grouping.
+                print_error($errormsg, 'treasurehunt', $returnurl,$username);
+            }
+        }else{
+            current($userdata)->groupid = 0;
         }
-
-        return $groups[0];
+        if (current($userdata)->validated == 0) {
+            if ($teacherreview) {
+                $errormsg = 'userinvalidroad';
+            } else {
+                $errormsg = 'invalidassignedroad';
+            }
+            // El camino no esta validado.
+            print_error($errormsg, 'treasurehunt', $returnurl,$username);
+        } else {
+            return current($userdata);
+        }
     }
 }
 
@@ -772,7 +807,7 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
                 $groupingid->groupingid = -1;
             }
             $grouplist = groups_get_all_groups($courseid, null, $groupingid->groupingid);
-            // Compruebo si existe mas de un camino asignado a cada grupo. Significa que hay grupos en mÃ¡s de un grouping.
+            // Compruebo si existe mas de un camino asignado a cada grupo. Significa que hay grupos en mas de un grouping.
             list($totalparticipantsgroups,
                     $duplicategroupsingroupings) = check_if_user_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
             $roads = add_road_userlist($roads, $groupingid, $grouplist, $attempts);
@@ -1098,7 +1133,7 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid) {
                     $attemptsolved = true;
                 }
             }
-            $strings [] = set_string_attempt($newattempt, $userid);
+            $strings [] = set_string_attempt($newattempt, $groupid);
         }
     }
     return array($attempttimestamp, $roadtimestamp, $strings, $newgeometry, $geometrysolved, $attemptsolved);
@@ -1124,7 +1159,7 @@ function get_user_historical_attempts($groupid, $userid, $roadid) {
     $results = $DB->get_records_sql($query, $params);
     foreach ($results as $result) {
         $attempt = new stdClass();
-        $attempt->string = set_string_attempt($result, $userid);
+        $attempt->string = set_string_attempt($result, $groupid);
         $attempt->penalty = intval($result->penalty);
         $attempts[] = $attempt;
     }
@@ -1140,7 +1175,7 @@ function view_treasurehunt_info($treasurehunt, $courseid) {
     return $output->render($renderable);
 }
 
-function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid) {
+function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid,$username,$teacherreview) {
     global $PAGE;
     $roadfinished = check_if_user_has_finished($userid, $groupid, $roadid);
     $attempts = get_user_historical_attempts($groupid, $userid, $roadid);
@@ -1150,20 +1185,10 @@ function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid
         $outoftime = false;
     }
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $outoftime, $roadfinished);
+    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished,$teacherreview);
     return $output->render($renderable);
 }
-function view_editor($cm, $courseid, $context) {
-    global $PAGE;
 
-    // Recojo la lista de usuarios/grupos asignada a cada camino y los posibles warnings.
-    list($roads, $duplicategroupsingroupings, $duplicateusersingroups,
-            $noassignedusers) = get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
-    $permission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
-    $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $permission);
-    return $output->render($renderable);
-}
 function view_users_progress_table($cm, $courseid, $context) {
     global $PAGE;
 
@@ -1176,11 +1201,11 @@ function view_users_progress_table($cm, $courseid, $context) {
     return $output->render($renderable);
 }
 
-function set_string_attempt($attempt, $userid) {
+function set_string_attempt($attempt, $group) {
 
     $attempt->date = userdate($attempt->timecreated);
     // Si se es un grupo y el usuario no es el mismo que el que lo descubrio/fallo.
-    if ($userid != $attempt->user) {
+    if ($group) {
         $attempt->user = get_user_fullname_from_id($attempt->user);
         // Si son intentos a preguntas
         if ($attempt->type === 'question') {

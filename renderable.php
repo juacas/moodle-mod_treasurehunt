@@ -35,19 +35,23 @@ class treasurehunt_user_historical_attempts implements renderable {
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $attempts = [];
     public $coursemoduleid = 0;
+    public $username = '';
     public $outoftime = 0;
     public $roadfinished = 0;
+    public $teacherreview = 0;
 
     /**
      * constructor
      *
      * @param array $attemptstrings
      */
-    public function __construct($attempts, $coursemoduleid, $outoftime, $roadfinished) {
+    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
+        $this->username = $username;
         $this->outoftime = $outoftime;
         $this->roadfinished = $roadfinished;
+        $this->teacherreview = $teacherreview;
     }
 
 }

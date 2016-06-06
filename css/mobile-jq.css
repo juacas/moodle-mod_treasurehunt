@@ -8,9 +8,11 @@ body {
 #content {
     padding: 0;
 }
-#map {
-    height:calc(100% - 104px); 
+#mapplay {
+    height:calc(100% - 104px);
+    width: 100%;
     top: 53px;
+    position:absolute;
 }
 .successfulattempt1::after{
     background-color: #5cd053 !important;

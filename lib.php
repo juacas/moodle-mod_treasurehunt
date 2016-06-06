@@ -117,7 +117,6 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
-
     if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0) ||
             $oldtreasurehunt->grademethod != $treasurehunt->grademethod ||
             $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation ||
@@ -125,8 +124,8 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
             $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
         treasurehunt_update_grades($treasurehunt);
     }
-
     treasurehunt_grade_item_update($treasurehunt);
+
 
     return $result;
 }

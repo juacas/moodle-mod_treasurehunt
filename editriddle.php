@@ -14,6 +14,7 @@ global $COURSE, $PAGE, $CFG, $USER;
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
 $roadid = optional_param('roadid',0, PARAM_INT);
+$addanswers=optional_param('addanswers', '', PARAM_TEXT);
 
 list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -58,7 +59,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             $answers = $DB->get_records_sql($sqlanswers, $params);
             $entry->answers = $answers;
             $entry->noanswers = optional_param('noanswers', count($answers), PARAM_INT);
-            if (!empty(optional_param('addanswers', '', PARAM_TEXT))) {
+            if (!empty($addanswers)) {
                 $entry->noanswers += NUMBER_NEW_ANSWERS;
             }
         }
@@ -82,7 +83,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     if (!isset($entry->questiontext) || $entry->questiontext === '') {
         $entry->addsimplequestion = optional_param('addsimplequestion', 0, PARAM_INT);
         $entry->noanswers = optional_param('noanswers', 2, PARAM_INT);
-        if (!empty(optional_param('addanswers', '', PARAM_TEXT))) {
+        if (!empty($addanswers)) {
             $entry->noanswers += NUMBER_NEW_ANSWERS;
         }
     }

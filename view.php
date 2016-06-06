@@ -35,6 +35,9 @@ require_once ($CFG->libdir . '/formslib.php');
 
 global $USER;
 $id = required_param('id', PARAM_INT);
+$userid = optional_param('userid', $USER->id, PARAM_INT);
+$groupid = optional_param('groupid', -1, PARAM_INT);
+
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
@@ -56,6 +59,9 @@ $event->trigger();
 
 // Print the page header.
 $url = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
+if ($userid != $USER->id) {
+    $url->param('userid', $userid);
+}
 $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
@@ -84,12 +90,38 @@ if (view_intro($treasurehunt)) {
 }
 //$usersummary = new treasurehunt_grading_summary();
 //echo $output->render($usersummary);
-echo view_treasurehunt_info($treasurehunt,$course->id);
-if (has_capability('mod/treasurehunt:play', $context) &&
-        time() > $treasurehunt->allowattemptsfromdate) {
+
+echo view_treasurehunt_info($treasurehunt, $course->id);
+if ((has_capability('mod/treasurehunt:play', $context) &&
+        time() > $treasurehunt->allowattemptsfromdate && $userid == $USER->id && $groupid == -1) ||
+        (has_capability('mod/treasurehunt:play', $context, $userid) &&
+        has_capability('mod/treasurehunt:managetreasurehunt', $context) && $groupid == -1) ||
+        (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) &&
+        has_capability('mod/treasurehunt:managetreasurehunt', $context) &&
+        $treasurehunt->groupmode)) {
     try {
-        $user = get_user_group_and_road($USER->id, $cm, $course->id);
-        echo view_user_historical_attempts($treasurehunt,$user->groupid, $USER->id, $user->roadid, $cm->id);
+        $teacherreview = true;
+        $username = '';
+        if ($groupid != -1) {
+            $username = groups_get_group_name($groupid);
+            $params = get_group_road($groupid, $treasurehunt->id, $username);
+        } else {
+            if ($userid == $USER->id) {
+                $teacherreview = false;
+            } else {
+                $username = get_user_fullname_from_id($userid);
+            }
+            $params = get_user_group_and_road($userid, $treasurehunt, $cm->id, $teacherreview, $username);
+            if ($userid == $USER->id) {
+                if ($params->groupid) {
+                    $username = groups_get_group_name($params->groupid);
+                } else {
+                    $username = get_user_fullname_from_id($userid);
+                }
+            }
+        }
+        echo view_user_historical_attempts($treasurehunt, $params->groupid
+                , $userid, $params->roadid, $cm->id, $username, $teacherreview);
     } catch (Exception $e) {
         echo $output->notification($e->getMessage());
     }

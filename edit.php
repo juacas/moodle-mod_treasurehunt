@@ -54,10 +54,13 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
   $event->add_record_snapshot('course', $PAGE->course);
   $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
   $event->trigger(); */
-
+$url = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
+if (!empty($roadid)) {
+    $url->param('roadid', $roadid);
+}
 // Print the page header.
 $title = get_string('editingtreasurehunt','treasurehunt').': '.format_string($treasurehunt->name);
-$PAGE->set_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
+$PAGE->set_url($url);
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
@@ -93,7 +96,7 @@ echo $OUTPUT->box(get_string('errvalidroad','treasurehunt'), 'alert alert-error 
 echo $OUTPUT->box(get_string('erremptyriddle','treasurehunt'), 'alert alert-error invisible','erremptyriddle');
 echo $OUTPUT->box(null, null, 'controlpanel');
 echo $OUTPUT->box(null, null, 'riddlelistpanel');
-echo $OUTPUT->box(null, null, 'map');
+echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
 echo $OUTPUT->container_end();
 

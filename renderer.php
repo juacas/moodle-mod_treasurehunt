@@ -59,7 +59,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Create a table for the data.
         $o = '';
         $o .= $this->output->container_start('historicalattempts');
-        $o .= $this->output->heading(get_string('historicalattempts', 'treasurehunt'), 3);
+        $o .= $this->output->heading(get_string('historicalattempts', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
@@ -77,7 +77,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             // All done - write the table.
             $o .= html_writer::table($t);
         } else {
-            $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'));
+            if ($historical->teacherreview) {
+                $o .= $this->output->notification(get_string('nouserattempts', 'treasurehunt', $historical->username));
+            } else {
+                $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'));
+            }
         }
         // Si no ha finalizado pongo el botón de jugar
         $urlparams = array('id' => $historical->coursemoduleid);
@@ -86,7 +90,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         } else {
             $string = get_string('play', 'treasurehunt');
         }
-        if (count($historical->attempts) || !$historical->outoftime) {
+        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
             $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
         }
         $o .= $this->output->box_end();
@@ -135,8 +139,18 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
                                 $name = $user->name;
+                                if ($progress->permission) {
+                                    $params = array('id' => $progress->coursemoduleid, 'groupid' => $user->id);
+                                    $url = new moodle_url('/mod/treasurehunt/view.php', $params);
+                                    $name = html_writer::link($url, $name);
+                                }
                             } else {
                                 $name = fullname($user);
+                                if ($progress->permission) {
+                                    $params = array('id' => $progress->coursemoduleid, 'userid' => $user->id);
+                                    $url = new moodle_url('/mod/treasurehunt/view.php', $params);
+                                    $name = html_writer::link($url, $name);
+                                }
                             }
                             $cells = array($name);
                             for ($i = 1; $i <= $roadusersprogress->totalriddles; $i++) {

@@ -44,12 +44,13 @@ $string['nouserassigned'] = 'Ningún usuario asignado a este camino';
 $string['overcomefirstriddle'] = 'Para descubrir la primera pista debes comenzar desde el área marcada en el mapa';
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['attempt'] = 'Intento';
-$string['historicalattempts'] = 'Historial de intentos';
+$string['historicalattempts'] = 'Historial de intentos de {$a}';
 $string['aerialview'] = 'Aérea';
 $string['roadview'] = 'Callejero';
 $string['mapview'] = 'Vista del mapa';
 $string['ost'] = 'Open Street Maps';
 $string['noattempts'] = 'No has realizado ningún intento';
+$string['nouserattempts'] = '{$a} no ha realizado ningún intento';
 $string['state'] = 'Estado';
 $string['play'] = 'Jugar';
 $string['reviewofplay'] = 'Revisión del juego';
@@ -170,6 +171,13 @@ $string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
 $string['timelabelsuccess'] = 'Pista descubierta en la fecha: ';
 $string['nogroupplay'] = 'No tienes ningún camino asignado, por lo que no puedes jugar la actividad.';
 $string['nogroupingplay'] = 'No tienes ningún grupo asignado a un camino, por lo que no puedes jugar la actividad.';
+$string['nogrouproad'] = '{$a} no tiene ningún camino asignado.';
+$string['groupmultipleroads'] = '{$a} tiene más de un camino asignado.';
+$string['groupinvalidroad'] = '{$a} tiene asignado un camino no validado.';
+$string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
+$string['usermultiplesameroad'] = '{$a} pertenece a más de un grupo asignado al mismo camino.';
+$string['usermultipleroads'] = '{$a} tiene más de un camino asignado.';
+$string['userinvalidroad'] = '{$a} tiene asignado un camino no validado.';
 $string['multiplegroupsplay'] = 'Tienes asignados más de un camino, por lo que no puedes jugar la actividad.';
 $string['multiplegroupingsplay'] = 'Tu grupo tiene asignados más de un camino, por lo que no puedes jugar la actividad.';
 $string['multiplegroupssameroadplay'] = 'Perteneces a más de un grupo asignado al mismo camino, por lo que no puedes jugar la actividad.';
@@ -218,7 +226,13 @@ $string['errpenalizationfall'] = 'La penalización no puede ser menor que 0';
 $string['errnumeric'] = 'Debe introducir un número decimal válido';
 $string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible hasta el {$a}';
 $string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta desde el {$a}';
-
+$string['treasurehunt:addriddle'] = 'Añadir pista';
+$string['treasurehunt:addroad'] = 'Añadir camino';
+$string['treasurehunt:editriddle'] = 'Editar pista';
+$string['treasurehunt:editroad'] = 'Editar camino';
+$string['treasurehunt:gettreasurehunt'] = 'Obtener todas las pistas y caminos de la caza del tesoro';
+$string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
+$string['treasurehunt:play'] = 'Jugar';
 
 
 
