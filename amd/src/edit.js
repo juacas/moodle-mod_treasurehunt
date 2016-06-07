@@ -527,7 +527,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 feature.setId(riddleid);
                                 dirtySource.addFeature(feature);
                             }
-                            var multipolygon = new ol.geom.MultiPolygon();
+                            var multipolygon = new ol.geom.MultiPolygon([]);
                             //Get those multipolygons of vector layer 
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -546,7 +546,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             var roadid = dirtyFeature.get('roadid');
                             var feature = dirtySource.getFeatureById(riddleid);
                             var idFeaturesPolygons;
-                            var polygons = new ol.Collection();
                             var remove;
                             if (!feature) {
                                 feature = originalSource.getFeatureById(riddleid).clone();
