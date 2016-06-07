@@ -475,7 +475,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Si pulso la tecla esc dejo de dibujar
                         if (e.keyCode === 27) // esc
                         {
-                            Draw.Polygon.abortDrawing_();
+                            Draw.Polygon.abortDrawing();
                         }
                     });
                     Draw.init();
@@ -522,19 +522,19 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             var riddleid = dirtyFeature.get('riddleid');
                             var feature = dirtySource.getFeatureById(riddleid);
                             var idFeaturesPolygons;
-                            var polygons = new ol.Collection();
                             if (!feature) {
                                 feature = originalSource.getFeatureById(riddleid).clone();
                                 feature.setId(riddleid);
                                 dirtySource.addFeature(feature);
                             }
-                            var multipolygon = feature.getGeometry();
+                            var multipolygon = new ol.geom.MultiPolygon();
                             //Get those multipolygons of vector layer 
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
-                                polygons.push(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
+                                multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
                             }
-                            multipolygon.setPolygons(polygons.getArray());
+                            debugger;
+                            feature.setGeometry(multipolygon);
                         });
                     }
 
@@ -553,17 +553,18 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 feature.setId(riddleid);
                                 dirtySource.addFeature(feature);
                             }
-                            var multipolygon = feature.getGeometry();
+                            debugger;
+                            var multipolygon = new ol.geom.MultiPolygon([]);
                             //Get those multipolygons of vector layer which riddleid isn't id of dirtyFeature
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 if (idFeaturesPolygons[i] != dirtyFeature.getId()) {
-                                    polygons.push(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
+                                    multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
                                 } else {
                                     remove = i;
                                 }
                             }
-                            multipolygon.setPolygons(polygons.getArray());
+                            feature.setGeometry(multipolygon);
                             if (multipolygon.getPolygons().length) {
                                 idFeaturesPolygons.splice(remove, 1);
                                 feature.setProperties({
@@ -1314,7 +1315,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             $("label[for='radio1']").removeClass('highlightbutton');
                         }
                         //Paro de dibujar si cambio de pista
-                        Draw.Polygon.abortDrawing_();
+                        Draw.Polygon.abortDrawing();
                     });
                     $("#roadlist").on('click', 'li', function (e) {
                         if ($(e.target).is('.ui-icon')) {
@@ -1326,7 +1327,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         //Borro las pistas seleccionadas
                         selectedRiddleFeatures = {};
                         //Paro de dibujar si cambio de camino
-                        Draw.Polygon.abortDrawing_();
+                        Draw.Polygon.abortDrawing();
                         roadid = $(this).attr('roadid');
                         if (parseInt($(this).attr('blocked'))) {
                             deactivateAddRiddle();
