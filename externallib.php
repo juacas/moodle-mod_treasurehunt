@@ -420,6 +420,10 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 'description' => new external_value(PARAM_RAW, 'The description of the last successful riddle.'),
                 'question' => new external_value(PARAM_RAW, 'The question of the last successful riddle.'),
                 'answers' => new external_value(PARAM_RAW, 'The answers of the last successful riddle.')), 'object with data from the last successful riddle', VALUE_OPTIONAL),
+            'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
+            'available' => new external_value(PARAM_RAW, 'If true the hunt is available.'),
+            'playwithoutmove' => new external_value(PARAM_RAW, 'If true the play mode is without move.'),
+            'historicalattempts' => new external_value(PARAM_RAW, 'Array with user/group historical attempts.'),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -445,7 +449,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:play', $context);
         // Recojo el grupo y camino al que pertenece
-        $userparams = get_user_group_and_road($USER->id,$treasurehunt, $cm->id);
+        $userparams = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Recojo el numero total de pistas del camino del usuario.
         $noriddles = get_total_riddles($userparams->roadid);
         // Compruebo si el usuario ha finalizado el camino.
@@ -475,7 +479,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             if ($qocsolved->newattempt) {
                 $newattempttimestamp = $qocsolved->attempttimestamp;
             }
-            if($qocsolved->attemptsolved){
+            if ($qocsolved->attemptsolved) {
                 $attemptsolved = true;
             }
             if ($qocsolved->roadfinished) {
@@ -525,7 +529,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             }
         }
         // Si esta fuera de tiempo aviso.
-        if ($outoftime) {
+        if ($available) {
             if ($params['location']) {
                 $status['msg'] = get_string('erroutoftimelocation', 'treasurehunt');
                 $status['code'] = 1;
@@ -544,6 +548,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $result['lastsuccessfulriddle'] = $lastsuccessfulriddle;
         $result['roadfinished'] = $roadfinished;
         $result['available'] = $available;
+        $result['playwithoutmove'] = intval($treasurehunt->playwithoutmove);
         $result['historicalattempts'] = $historicalattempts;
         return $result;
     }

@@ -4,16 +4,16 @@ body {
     padding: 0;
     height: 100%;
 }
-
 #content {
     padding: 0;
 }
 #mapplay {
     height:calc(100% - 104px);
     width: 100%;
-    top: 53px;
     position:absolute;
+    left:0;
 }
+
 .successfulattempt1::after{
     background-color: #5cd053 !important;
 }
@@ -69,7 +69,6 @@ h1, h2, h3, h4, h5, h6{
     text-align: center;
 }
 
-
 #title, #tags, #shortdesc {
     display: none;
 }
@@ -96,4 +95,13 @@ h1, h2, h3, h4, h5, h6{
     font-weight: bold;
     padding: 0.2em 0.5em;
     float: right;
+}
+.toast{
+    display: block;
+    opacity: 0.90;
+    position: fixed;
+    padding: 7px;
+    text-align: center;
+    width: 270px;
+    background-color:black;
 }

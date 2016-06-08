@@ -354,6 +354,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                     }]);
                 geojson[0].done(function (response) {
                     console.log(response);
+                    var body = '';
 
                     roadfinished = response.roadfinished;
                     available = response.available;
@@ -409,7 +410,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             }
                         }
                         if (response.infomsg.length > 0) {
-                            var body = '';
                             infomsgs.forEach(function (msg) {
                                 body += '<p>' + msg + '</p>';
                             });
@@ -419,6 +419,22 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             });
                             create_popup('displayupdates', strings["updates"], body);
                         }
+                    }
+                    // Si cambia el modo de juego (móvil o estático)
+                    if (playwithoutmove !== response.playwithoutmove) {
+                        playwithoutmove = response.playwithoutmove;
+                        if (playwithoutmove) {
+                            body = 'Se ha cambiado al modo jugar sin desplazarse';
+                        } else {
+                            markerFeature.setGeometry(null);
+                            body = 'Se ha cambiado al modo jugar con desplazamiento';
+                        }
+                        infomsgs.push(body);
+                        body = '';
+                        infomsgs.forEach(function (msg) {
+                            body += '<p>' + msg + '</p>';
+                        });
+                        create_popup('displayupdates', strings["updates"], body);
                     }
                 }).fail(function (error) {
                     console.log(error);
@@ -722,19 +738,21 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
 
             /*-------------------------------Help functions -------------*/
             function toast(msg) {
-                $("<div class='ui-loader ui-overlay-shadow  ui-corner-all' style='background-color:black;'><p>" + msg + "</p></div>")
-                        .css({display: "block",
-                            opacity: 0.90,
-                            position: "fixed",
-                            padding: "7px",
-                            "text-align": "center",
-                            width: "270px",
-                            left: ($(window).width() - 284) / 2,
-                            top: $(window).height() / 2})
-                        .appendTo($.mobile.pageContainer).delay(1500)
-                        .fadeOut(400, function () {
-                            $(this).remove();
-                        });
+                if ($(".toast").length > 0) {
+                    setTimeout(function () {
+                        toast(msg);
+                    }, 2500);
+                    debugger;
+                } else {
+                    $("<div class='ui-loader ui-overlay-shadow  ui-corner-all toast'>" +
+                            "<p>" + msg + "</p></div>")
+                            .css({left: ($(window).width() - 284) / 2,
+                                top: $(window).height() / 2})
+                            .appendTo($.mobile.pageContainer).delay(2000)
+                            .fadeOut(400, function () {
+                                $(this).remove();
+                            });
+                }
             }
             function create_popup(type, title, body) {
                 var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
