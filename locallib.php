@@ -420,6 +420,8 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         if ($attempt->success && $nextnoriddle == $noriddles) {
             if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
                 treasurehunt_update_grades($treasurehunt);
+            } else {
+                set_grade($treasurehunt, $groupid, $userid);
             }
             $return->roadfinished = true;
         } else {
@@ -1051,6 +1053,8 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
             if ($lastattempt->success && $lastattempt->number == $noriddles) {
                 if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
                     treasurehunt_update_grades($treasurehunt);
+                } else {
+                    set_grade($treasurehunt, $groupid, $userid);
                 }
                 $return->roadfinished = true;
             } else {
