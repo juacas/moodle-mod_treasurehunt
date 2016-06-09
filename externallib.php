@@ -422,8 +422,11 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 'name' => new external_value(PARAM_RAW, 'The name of the last successful riddle.'),
                 'description' => new external_value(PARAM_RAW, 'The description of the last successful riddle.'),
                 'question' => new external_value(PARAM_RAW, 'The question of the last successful riddle.'),
-                'answers' => new external_multiple_structure(
-                        new external_value(PARAM_TEXT, 'The text of answer'), 'Array with all answers of the last successful riddle.'),
+                'answers' => new external_multiple_structure(new external_single_structure(
+                        array(
+                    'id' => new external_value(PARAM_INT, 'The id of answer'),
+                    'answertext' => new external_value(PARAM_RAW, 'The text of answer')
+                        )), 'Array with all answers of the last successful riddle.'),
                 'totalnumber' => new external_value(PARAM_INT, 'The total number of riddles on the road.'),
                 'completion' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
                     ), 'object with data from the last successful riddle', VALUE_OPTIONAL),
