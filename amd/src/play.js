@@ -29,13 +29,11 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
 
     var init = {
-        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, lastattempttimestamp, lastroadtimestamp) {
+        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'treasurehunt'),
                     falloUrl = url.imageUrl('images/fallo', 'treasurehunt'),
                     markerUrl = url.imageUrl('flag-marker', 'treasurehunt'),
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
-                    attempttimestamp = lastattempttimestamp,
-                    roadtimestamp = lastroadtimestamp,
                     lastsuccessfulriddle = {},
                     interval,
                     imgloaded = 0, totalimg = 0,
@@ -345,8 +343,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                         methodname: 'mod_treasurehunt_user_progress',
                         args: {
                             treasurehuntid: treasurehuntid,
-                            attempttimestamp: attempttimestamp,
-                            roadtimestamp: roadtimestamp,
+                            attempttimestamp: lastattempttimestamp,
+                            roadtimestamp: lastroadtimestamp,
+                            playwithoutmove: playwithoutmove,
+                            groupmode: groupmode,
                             initialize: initialize,
                             location: position,
                             selectedanswerid: selectedanswerid
@@ -368,9 +368,17 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                             toast(response.status.msg);
                         }
                     }
-                    if (attempttimestamp !== response.attempttimestamp || roadtimestamp !== response.roadtimestamp || initialize) {
-                        attempttimestamp = response.attempttimestamp;
-                        roadtimestamp = response.roadtimestamp;
+                    // Si cambia el modo de juego (móvil o estático)
+                    if (playwithoutmove != response.playwithoutmove) {
+                        playwithoutmove = response.playwithoutmove;
+                    }
+                    // Si cambia el modo grupo
+                    if (groupmode != response.groupmode) {
+                        groupmode = response.groupmode;
+                    }
+                    if (lastattempttimestamp !== response.attempttimestamp || lastroadtimestamp !== response.roadtimestamp || initialize) {
+                        lastattempttimestamp = response.attempttimestamp;
+                        lastroadtimestamp = response.roadtimestamp;
                         attemptshistory = response.historicalattempts;
                         changesinattemptshistory = true;
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
@@ -381,8 +389,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 'featureProjection': "EPSG:3857"
                             }));
                         }
-                        // Compruebo si es distinto de null, lo que indica que se ha actualizado.
-                        if (response.lastsuccessfulriddle !== null) {
+                        // Compruebo si existe, lo que indica que se ha actualizado.
+                        if (response.lastsuccessfulriddle) {
                             lastsuccessfulriddle = response.lastsuccessfulriddle;
                             changesinlastsuccessfulriddle = true;
                             // Si la pista no esta solucionada aviso de que hay cambios.
@@ -409,29 +417,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jq
                                 $.mobile.resetActivePageHeight();
                             }
                         }
-                        if (response.infomsg.length > 0) {
-                            infomsgs.forEach(function (msg) {
-                                body += '<p>' + msg + '</p>';
-                            });
-                            response.infomsg.forEach(function (msg) {
-                                infomsgs.push(msg);
-                                body += '<p>' + msg + '</p>';
-                            });
-                            create_popup('displayupdates', strings["updates"], body);
-                        }
                     }
-                    // Si cambia el modo de juego (móvil o estático)
-                    if (playwithoutmove !== response.playwithoutmove) {
-                        playwithoutmove = response.playwithoutmove;
-                        if (playwithoutmove) {
-                            body = 'Se ha cambiado al modo jugar sin desplazarse';
-                        } else {
-                            markerFeature.setGeometry(null);
-                            body = 'Se ha cambiado al modo jugar con desplazamiento';
-                        }
-                        infomsgs.push(body);
-                        body = '';
+                    if (response.infomsg.length > 0) {
                         infomsgs.forEach(function (msg) {
+                            body += '<p>' + msg + '</p>';
+                        });
+                        response.infomsg.forEach(function (msg) {
+                            infomsgs.push(msg);
                             body += '<p>' + msg + '</p>';
                         });
                         create_popup('displayupdates', strings["updates"], body);

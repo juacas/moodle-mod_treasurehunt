@@ -533,7 +533,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
                             }
-                            debugger;
                             feature.setGeometry(multipolygon);
                         });
                     }
@@ -552,7 +551,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                                 feature.setId(riddleid);
                                 dirtySource.addFeature(feature);
                             }
-                            debugger;
                             var multipolygon = new ol.geom.MultiPolygon([]);
                             //Get those multipolygons of vector layer which riddleid isn't id of dirtyFeature
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
@@ -778,15 +776,14 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         var $li = $('#riddlelist li[riddleid="' + riddleid + '"]');
                         if ($li.length > 0) {
                             var roadid = $li.attr('roadid');
-                            debugger;
+                            var start_pos = $li.index('li[roadid="' + roadid + '"]');
                             //Elimino el li
                             $li.remove();
                             var $riddlelist = $("#riddlelist li[roadid='" + roadid + "']");
                             // Compruebo el resto de pistas de la lista.
                             check_riddle_list($riddlelist);
-                            var start_pos = $li.index('li[roadid="' + roadid + '"]');
+                            var $listlength = $riddlelist.length;
                             //Recoloco el resto
-                            var $listlength = $($riddlelist).length;
                             for (var i = 0; i <= start_pos - 1; i++) {
                                 relocateRiddleList($riddlelist, $listlength, i, dirtySource, originalSource, vectorOfPolygons);
                             }
@@ -1335,6 +1332,17 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                         }
                         selectRoad(roadid, stage.roads[roadid].vector, map);
                         deactivateEdition();
+                        // Scroll to editor.
+                        var scrolltop;
+                        if ($('header[role=banner]').css("position") === "fixed") {
+                            scrolltop = parseInt($(".treasurehunt_editor").offset().top) -
+                                    parseInt($('header[role=banner]').outerHeight(true));
+                        } else {
+                            scrolltop = parseInt($(".treasurehunt_editor").offset().top);
+                        }
+                        $('html, body').animate({
+                            scrollTop: scrolltop
+                        }, 500);
                     });
                     $("#roadlist").on('click', '.ui-icon-pencil', function () {
                         //Busco el roadid del li que contiene el lapicero seleccionado
@@ -1379,7 +1387,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui'
                     });
                     // Evento para que funcione bien el boton de cerrar en dispositivos tactiles
                     $(document).on('touchend', '.ui-dialog-titlebar-close', function () {
-                        debugger;
                         $(this).parent().siblings('.ui-dialog-content').dialog("close");
                     });
                     // /////

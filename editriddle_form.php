@@ -64,7 +64,7 @@ class riddle_form extends moodleform {
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
-            $mform->setType('name', PARAM_CLEAN);
+            $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
         //Aqui anadimos la regla del tamano maximo de la cadena.

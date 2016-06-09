@@ -635,7 +635,7 @@ function check_completion_activity($cmid, $userid, $groupid, $context) {
     return false;
 }
 
-function get_group_road($groupid, $treasurehuntid,$groupame = '') {
+function get_group_road($groupid, $treasurehuntid, $groupame = '') {
     global $DB;
 
     $query = "SELECT r.id as roadid, r.validated, gg.groupid "
@@ -646,14 +646,14 @@ function get_group_road($groupid, $treasurehuntid,$groupame = '') {
     $groupdata = $DB->get_records_sql($query, $params);
     if (count($groupdata) === 0) {
         // El grupo no pertenece a ningun grouping.
-        print_error('nogrouproad', 'treasurehunt','',$groupame);
+        print_error('nogrouproad', 'treasurehunt', '', $groupame);
     } else if (count($groupdata) > 1) {
         // El grupo pertenece a mas de un grouping.
-        print_error('groupmultipleroads', 'treasurehunt','',$groupame);
+        print_error('groupmultipleroads', 'treasurehunt', '', $groupame);
     } else {
         if (current($groupdata)->validated == 0) {
             // El camino no esta validado.
-            print_error('groupinvalidroad', 'treasurehunt','',$groupame);
+            print_error('groupinvalidroad', 'treasurehunt', '', $groupame);
         }
         return current($groupdata);
     }
@@ -697,7 +697,7 @@ function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview =
             $errormsg = 'nouserroad';
         }
         // El usuario no pertenece a ningun grupo.
-        print_error($errormsg, 'treasurehunt', $returnurl,$username);
+        print_error($errormsg, 'treasurehunt', $returnurl, $username);
     } else if (count($userdata) > 1) {
         if ($treasurehunt->groupmode) {
             $errormsg = 'multiplegroupingsplay';
@@ -708,7 +708,7 @@ function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview =
             $errormsg = 'usermultipleroads';
         }
         // El usuario pertenece a mas de un grupo.
-        print_error($errormsg, 'treasurehunt', $returnurl,$username);
+        print_error($errormsg, 'treasurehunt', $returnurl, $username);
     } else {
         if ($treasurehunt->groupmode) {
             if (current($userdata)->groupsnumber > 1) {
@@ -718,9 +718,9 @@ function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview =
                     $errormsg = 'multiplegroupssameroadplay';
                 }
                 // El usuario pertenece a mas de un grupo dentro de un mismo grouping.
-                print_error($errormsg, 'treasurehunt', $returnurl,$username);
+                print_error($errormsg, 'treasurehunt', $returnurl, $username);
             }
-        }else{
+        } else {
             current($userdata)->groupid = 0;
         }
         if (current($userdata)->validated == 0) {
@@ -730,7 +730,7 @@ function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview =
                 $errormsg = 'invalidassignedroad';
             }
             // El camino no esta validado.
-            print_error($errormsg, 'treasurehunt', $returnurl,$username);
+            print_error($errormsg, 'treasurehunt', $returnurl, $username);
         } else {
             return current($userdata);
         }
@@ -1095,17 +1095,40 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $con
     return $lastsuccessfulriddle;
 }
 
-function check_attempts_updates($timestamp, $groupid, $userid, $roadid) {
+function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changesingroupmode) {
     global $DB;
     $return = new stdClass();
-    $strings = [];
-    $newgeometry = false;
-    $attemptsolved = false;
-    $geometrysolved = false;
+    $return->strings = [];
+    $return->newgeometry = false;
+    $return->attemptsolved = false;
+    $return->geometrysolved = false;
+    $return->geometrysolved = false;
+    $return->lessattempttimestamp = false;
+    $newattempts = array();
 
-    list($attempttimestamp, $roadtimestamp) = get_last_timestamps($userid, $groupid, $roadid);
+    list($return->newattempttimestamp, $return->newroadtimestamp) = get_last_timestamps($userid, $groupid, $roadid);
+    // Si ha habido un cambio de grupo.
+    if ($changesingroupmode) {
+        // Recupero todas las acciones de un usuario/grupo y las imprimo en una tabla.
+        if ($groupid) {
+            $grouptype = 'a.groupid=?';
+            $params = array($groupid, $roadid);
+            $return->strings[] = get_string('changetogroupmode', 'treasurehunt');
+        } else {
+            $grouptype = 'a.groupid=0 AND a.userid=?';
+            $params = array($userid, $roadid);
+            $return->strings[] = get_string('changetoindividualmode', 'treasurehunt');
+        }
+        $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
+                . "a.success,a.geometrysolved,a.penalty,r.number,a.userid as user "
+                . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
+                . "ON a.riddleid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
+                . "a.timecreated ASC";
+
+        $newattempts = $DB->get_records_sql($query, $params);
+    }
     // Si el timestamp recuperado es mayor que el que teniamos ha habido actualizaciones.
-    if ($attempttimestamp > $timestamp) {
+    if ($return->newattempttimestamp > $timestamp && !$changesingroupmode) {
         // Recupero las acciones del usuario/grupo superiores a un timestamp dado.
         if ($groupid) {
             $grouptype = 'a.groupid=(?)';
@@ -1121,22 +1144,23 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid) {
                 . "AND r.roadid=? ORDER BY a.timecreated ASC";
 
         $newattempts = $DB->get_records_sql($query, $params);
-        foreach ($newattempts as $newattempt) {
-            if ($newattempt->type === 'location') {
-                if ($newattempt->geometrysolved) {
-                    $geometrysolved = true;
-                }
-                $newgeometry = true;
-            } else {
-                if (($newattempt->type === 'question' && $newattempt->questionsolved) ||
-                        ($newattempt->type === 'completion' && $newattempt->completionsolved)) {
-                    $attemptsolved = true;
-                }
-            }
-            $strings [] = set_string_attempt($newattempt, $groupid);
-        }
     }
-    return array($attempttimestamp, $roadtimestamp, $strings, $newgeometry, $geometrysolved, $attemptsolved);
+
+    foreach ($newattempts as $newattempt) {
+        if ($newattempt->type === 'location') {
+            if ($newattempt->geometrysolved) {
+                $return->geometrysolved = true;
+            }
+            $return->newgeometry = true;
+        } else {
+            if (($newattempt->type === 'question' && $newattempt->questionsolved) ||
+                    ($newattempt->type === 'completion' && $newattempt->completionsolved)) {
+                $return->attemptsolved = true;
+            }
+        }
+        $return->strings [] = set_string_attempt($newattempt, $groupid);
+    }
+    return $return;
 }
 
 function get_user_historical_attempts($groupid, $userid, $roadid) {
@@ -1175,7 +1199,7 @@ function view_treasurehunt_info($treasurehunt, $courseid) {
     return $output->render($renderable);
 }
 
-function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid,$username,$teacherreview) {
+function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview) {
     global $PAGE;
     $roadfinished = check_if_user_has_finished($userid, $groupid, $roadid);
     $attempts = get_user_historical_attempts($groupid, $userid, $roadid);
@@ -1185,7 +1209,7 @@ function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid
         $outoftime = false;
     }
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished,$teacherreview);
+    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
     return $output->render($renderable);
 }
 
