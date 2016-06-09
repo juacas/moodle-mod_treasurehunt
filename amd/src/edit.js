@@ -12,12 +12,13 @@
  */
 require.config({
     baseUrl: 'js',
+    waitSeconds: 15,
     shim: {
         openlayers: {
             exports: 'OpenLayers'
         },
         'jquerytouch': {
-            deps: ['jqueryui'],
+            deps: ['jquery'],
             exports: '$'
         }
     },
@@ -27,8 +28,8 @@ require.config({
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch.min'
     }
 });
-define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates'],
-        function ($, notification, str, ol, jqui, ajax, GeocoderJS, templates) {
+define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates'],
+        function ($, notification, str, ol,ajax, GeocoderJS, templates) {
 
 
             var init = {

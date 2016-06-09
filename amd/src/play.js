@@ -12,6 +12,7 @@
  */
 require.config({
     baseUrl: 'js',
+    waitSeconds: 15,
     shim: {
         'openlayers': {
             exports: 'OpenLayers'
@@ -26,7 +27,7 @@ require.config({
         'jquery.mobile': 'jquery-mobile/jquerymobile'
     }
 });
-define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'jqueryui', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile-config', 'jquery.mobile'], function ($, notification, str, url, ol, jqui, ajax, GeocoderJS, templates) {
+define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates',  'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
 
     var init = {
         playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp) {

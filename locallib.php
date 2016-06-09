@@ -639,7 +639,7 @@ function get_group_road($groupid, $treasurehuntid, $groupame = '') {
     global $DB;
 
     $query = "SELECT r.id as roadid, r.validated, gg.groupid "
-            . "FROM  {treasurehunt_roads} r INNER JOIN mdl_groupings_groups "
+            . "FROM  {treasurehunt_roads} r INNER JOIN {groupings_groups} "
             . "gg ON gg.groupingid = r.groupingid  WHERE gg.groupid =? AND r.treasurehuntid=?";
     $params = array($groupid, $treasurehuntid);
     // Recojo todos los groupings disponibles en la actividad.
@@ -1336,7 +1336,7 @@ function treasurehunt_calculate_stats($treasurehunt) {
 
     if ($treasurehunt->groupmode) {
         $user = 'gr.userid';
-        $groupsmembers = "INNER JOIN mdl_groups_members gr ON a.groupid=gr.groupid";
+        $groupsmembers = "INNER JOIN {groups_members} gr ON a.groupid=gr.groupid";
         $groupid = 'a.groupid != 0';
         $groupidwithin = 'at.groupid=a.groupid';
     } else {

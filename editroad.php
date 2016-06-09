@@ -37,7 +37,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
     if ($id) { // if entry is specified
         $title = get_string('editingroad', 'treasurehunt');
-        $sql = 'SELECT id,name,groupid,groupingid FROM mdl_treasurehunt_roads  WHERE id=?';
+        $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
         $parms = array('id' => $id);
         if (!$entry = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
@@ -60,7 +60,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         $grouptypecond = "AND groupid != 0";
     }
     //Elimino los grupos ocupados
-    $sql = "SELECT $grouptype as busy FROM mdl_treasurehunt_roads  WHERE treasurehuntid=? AND id !=? $grouptypecond";
+    $sql = "SELECT $grouptype as busy FROM {treasurehunt_roads}  WHERE treasurehuntid=? AND id !=? $grouptypecond";
     $parms = array('treasurehuntid' => $treasurehunt->id, 'id' => $id);
     $busy = $DB->get_records_sql($sql, $parms);
     foreach ($busy as $option) {
