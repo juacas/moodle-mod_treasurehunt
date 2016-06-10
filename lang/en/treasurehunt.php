@@ -152,7 +152,9 @@ $string['layers'] = 'Layers';
 $string['searching'] = 'Searching';
 $string['discoveredriddle'] = 'Discovered riddle';
 $string['failedlocation'] = 'Failed location';
-$string['riddledescription'] = 'Description to locate the next track';
+$string['riddledescription'] = 'Description to locate the next riddle';
+$string['riddledescription_help'] = 'Here you should describe the riddle to reach the next location. '
+        . 'In case it is the last riddle, must leave a feedback message indicating that the treasure hunt has ended.';
 $string['info_validate_location'] = 'Validate location of this riddle';
 $string['button_validate_location'] = 'Validate location';
 $string['search'] = 'Search';

@@ -72,6 +72,7 @@ class riddle_form extends moodleform {
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃ³n, si quieres 
         // ... que aparezca en la portada, etc.
         $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null, $editoroptions);
+        $mform->addHelpButton('description_editor', 'riddledescription', 'treasurehunt');
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
 
@@ -155,7 +156,7 @@ class riddle_form extends moodleform {
 
         $errors = array();
 
-        if (array_key_exists('answertext_editor',$data)) {
+        if (array_key_exists('answertext_editor', $data)) {
             $answers = $data['answertext_editor'];
             $answercount = 0;
             $correctcount = 0;
