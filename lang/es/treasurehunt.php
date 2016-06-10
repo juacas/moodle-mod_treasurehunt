@@ -152,7 +152,7 @@ $string['failedlocation'] = 'Localización fallada';
 $string['riddledescription'] = 'Descripción para localizar la siguiente pista';
 $string['riddledescription_help'] = 'Aquí se debe describir la pista para alcanzar '
         . 'la siguiente localización. En el caso de que sea la última pista debe dejar '
-        . 'un mensaje retroalimentación indicando que la caza del tesoro ha finalizado';
+        . 'un mensaje de retroalimentación indicando que la caza del tesoro ha finalizado';
 $string['info_validate_location'] = 'Validar ubicación para esta pista';
 $string['button_validate_location'] = 'Validar ubicación';
 $string['search'] = 'Buscar';
