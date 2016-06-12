@@ -73,7 +73,8 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         redirect($roadurl);
     }
     $lockid = renew_edition_lock($cm->instance, $USER->id);
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
+    $renewlocktime = (get_setting_lock_time()-5)*1000;
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid,$renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');

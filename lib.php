@@ -42,6 +42,13 @@ define('TREASUREHUNT_GRADEFROMTIME', '2');
 define('TREASUREHUNT_GRADEFROMPOSITION', '3');
 /* * #@- */
 
+/* * #@+
+ * Options determining lock time and game update time
+ */
+define('TREASUREHUNT_LOCKTIME', 120);
+define('TREASUREHUNT_GAMEUPDATETIME', 20);
+/* * #@- */
+
 /* Moodle core API */
 
 /**
@@ -362,7 +369,7 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = NULL) 
 
     $item = array();
     $item['itemname'] = clean_param($treasurehunt->name, PARAM_NOTAGS);
-    $item['idnumber'] = $treasurehunt->cmidnumber;
+    $item['idnumber'] = isset($treasurehunt->cmidnumber) ? $treasurehunt->cmidnumber : null;
 
     if ($treasurehunt->grade > 0) {
         $item['gradetype'] = GRADE_TYPE_VALUE;
@@ -558,4 +565,94 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
         $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'), new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
         $treasurehuntnode->add_node($node, $beforekey);
     }
+}
+
+/**
+ * Implementation of the function for printing the form elements that control
+ * whether the course reset functionality affects the treasure hunt.
+ *
+ * @param $mform the course reset form that is being built.
+ */
+function treasurehunt_reset_course_form_definition($mform) {
+    $mform->addElement('header', 'treasurehuntheader', get_string('modulenameplural', 'treasurehunt'));
+    $mform->addElement('advcheckbox', 'reset_treasurehunt_attempts', get_string('removealltreasurehuntattempts', 'treasurehunt'));
+}
+
+/**
+ * Course reset form defaults.
+ * @return array the defaults.
+ */
+function treasurehunt_reset_course_form_defaults($course) {
+    return array('reset_treasurehunt_attempts' => 1);
+}
+
+/**
+ * Removes all grades from gradebook
+ *
+ * @param int $courseid
+ * @param string optional type
+ */
+function treasurehunt_reset_gradebook($courseid, $type = '') {
+    global $DB;
+
+    $treasurehunts = $DB->get_records_sql("
+            SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid
+            FROM {modules} m
+            JOIN {course_modules} cm ON m.id = cm.module
+            JOIN {treasurehunt} t ON cm.instance = t.id
+            WHERE m.name = 'treasurehunt' AND cm.course = ?", array($courseid));
+
+    foreach ($treasurehunts as $treasurehunt) {
+        treasurehunt_grade_item_update($treasurehunt, 'reset');
+    }
+}
+
+/**
+ * Actual implementation of the reset course functionality, delete all the
+ * treasure hunt attempts for course $data->courseid, if $data->reset_treasurehunt_attempts is
+ * set and true.
+ *
+ * Also, move the treasurehunt open and close dates, if the course start date is changing.
+ *
+ * @param object $data the data submitted from the reset course.
+ * @return array status array
+ */
+function treasurehunt_reset_userdata($data) {
+    global $DB;
+
+
+    $componentstr = get_string('modulenameplural', 'treasurehunt');
+    $status = array();
+
+    // Delete attempts.
+    if (!empty($data->reset_treasurehunt_attempts)) {
+        $DB->delete_records_select('treasurehunt_attempts', 'riddleid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
+                . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
+                . '{treasurehunt_riddles} ri ON r.id=ri.roadid WHERE t.course = ?)', array($data->courseid));
+        $status[] = array(
+            'component' => $componentstr,
+            'item' => get_string('attemptsdeleted', 'treasurehunt'),
+            'error' => false);
+
+        // Remove all grades from gradebook.
+        if (!empty($data->reset_gradebook_grades)) {
+            treasurehunt_reset_gradebook($data->courseid);
+            $status[] = array(
+                'component' => $componentstr,
+                'item' => get_string('gradesdeleted', 'treasurehunt'),
+                'error' => false);
+        }
+    }
+
+    // Updating dates - shift may be negative too.
+    if ($data->timeshift) {
+        shift_course_mod_dates('treasurehunt', array('allowattemptsfromdate', 'cutoffdate'), $data->timeshift, $data->courseid);
+
+        $status[] = array(
+            'component' => $componentstr,
+            'item' => get_string('datechanged'),
+            'error' => false);
+    }
+
+    return $status;
 }

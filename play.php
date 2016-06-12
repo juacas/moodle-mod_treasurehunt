@@ -64,7 +64,7 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
 // Get last timestamp 
 $user = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id, $user->groupid, $user->roadid);
-
+$gameupdatetime =  get_setting_game_update_time()*1000;
 
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
@@ -72,7 +72,7 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmove),
     intval($treasurehunt->groupmode),
-    $lastattempttimestamp, $lastroadtimestamp));
+    $lastattempttimestamp, $lastroadtimestamp,$gameupdatetime));
 //$PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/treasurehunt/css/mobile-jq.css');

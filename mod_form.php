@@ -43,7 +43,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * Defines forms elements
      */
     public function definition() {
-
+        $treasurehuntconfig = get_config('mod_treasurehunt');
         $mform = $this->_form;
 
         // Adding the "general" fieldset, where all the common settings are showed.
@@ -94,22 +94,24 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
 
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
+        $mform->setDefault('grade[modgrade_point]', $treasurehuntconfig->maximumgrade);
+        $mform->setDefault('grade[modgrade_type]', 'point');
         // Grading method.
         $mform->addElement('select', 'grademethod', get_string('grademethod', 'treasurehunt'), treasurehunt_get_grading_options());
         $mform->addHelpButton('grademethod', 'grademethod', 'treasurehunt');
-        $mform->setDefault('grademethod', TREASUREHUNT_GRADEFROMRIDDLES);
+        $mform->setDefault('grademethod', $treasurehuntconfig->grademethod);
         $mform->disabledIf('grademethod', 'grade[modgrade_type]', 'neq', 'point');
         // Grading penalization.
         $mform->addElement('text', 'gradepenlocation', get_string('gradepenlocation', 'treasurehunt'));
         $mform->addHelpButton('gradepenlocation', 'gradepenlocation', 'treasurehunt');
         $mform->setType('gradepenlocation', PARAM_FLOAT);
-        $mform->setDefault('gradepenlocation', 0.00);
+        $mform->setDefault('gradepenlocation', $treasurehuntconfig->penaltylocation);
         $mform->addRule('gradepenlocation', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('gradepenlocation', 'grade[modgrade_type]', 'neq', 'point');
         $mform->addElement('text', 'gradepenanswer', get_string('gradepenanswer', 'treasurehunt'));
         $mform->addHelpButton('gradepenanswer', 'gradepenlocation', 'treasurehunt');
         $mform->setType('gradepenanswer', PARAM_FLOAT);
-        $mform->setDefault('gradepenanswer', 0.00);
+        $mform->setDefault('gradepenanswer', $treasurehuntconfig->penaltyanswer);
         $mform->addRule('gradepenanswer', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('gradepenanswer', 'grade[modgrade_type]', 'neq', 'point');
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).

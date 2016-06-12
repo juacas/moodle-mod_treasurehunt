@@ -15,22 +15,36 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version and other meta-info about the plugin
+ * Admin settings class for the quiz grading method.
  *
- * Setting the $plugin->version to 0 prevents the plugin from being installed.
- * See https://docs.moodle.org/dev/version.php for more info.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name <your@email.address>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_quiz
+ * @copyright 2008 Tim Hunt
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 defined('MOODLE_INTERNAL') || die();
 
-$plugin->component = 'mod_treasurehunt';
-$plugin->version = 2016061209;
-$plugin->release = 'v0.0';
-$plugin->requires = 2015051100;
-$plugin->maturity = MATURITY_ALPHA;
-$plugin->cron = 0;
-$plugin->dependencies = array();
+
+/**
+ * Admin settings class for the quiz grading method.
+ *
+ * Just so we can lazy-load the choices.
+ *
+ * @copyright  2011 The Open University
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class mod_treasurehunt_admin_setting_grademethod extends admin_setting_configselect {
+    public function load_choices() {
+        global $CFG;
+
+        if (is_array($this->choices)) {
+            return true;
+        }
+
+        require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
+        $this->choices = treasurehunt_get_grading_options();
+
+        return true;
+    }
+}

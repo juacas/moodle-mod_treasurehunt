@@ -31,8 +31,8 @@ define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, 
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
-        renew_edition_lock: function (treasurehuntid, lockid) {
-            repeat = setInterval(this.renewLockAjax, 90000, treasurehuntid, lockid);
+        renew_edition_lock: function (treasurehuntid, lockid,renewtime) {
+            repeat = setInterval(this.renewLockAjax, renewtime, treasurehuntid, lockid);
         },
         stoprenew_edition_lock: function () {
             clearInterval(repeat);

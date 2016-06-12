@@ -303,7 +303,7 @@ function renew_edition_lock($treasurehuntid, $userid) {
 
     $table = 'treasurehunt_locks';
     $params = array('treasurehuntid' => $treasurehuntid, 'userid' => $userid);
-    $time = time() + 120;
+    $time = time() + get_setting_lock_time();
     $lock = $DB->get_record($table, $params);
 
     if (!empty($lock)) {
@@ -313,6 +313,20 @@ function renew_edition_lock($treasurehuntid, $userid) {
         delete_old_locks($treasurehuntid);
         return $DB->insert_record($table, array('treasurehuntid' => $treasurehuntid, 'userid' => $userid, 'lockedat' => $time));
     }
+}
+function get_setting_lock_time(){
+   if(($locktimeediting = get_config('mod_treasurehunt', 'locktimeediting')) > 5){
+       return $locktimeediting;
+   }else{
+       return TREASUREHUNT_LOCKTIME;
+   }
+}
+function get_setting_game_update_time(){
+   if(($gameupdatetime = get_config('mod_treasurehunt', 'gameupdatetime')) > 0){
+       return $gameupdatetime;
+   }else{
+       return TREASUREHUNT_GAMEUPDATETIME;
+   }
 }
 
 function is_edition_loked($treasurehuntid, $userid) {

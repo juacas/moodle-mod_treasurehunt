@@ -13,8 +13,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // Print the page header.
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
-$roadid = optional_param('roadid',0, PARAM_INT);
-$addanswers=optional_param('addanswers', '', PARAM_TEXT);
+$roadid = optional_param('roadid', 0, PARAM_INT);
+$addanswers = optional_param('addanswers', '', PARAM_TEXT);
 
 list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -37,7 +37,8 @@ require_capability('mod/treasurehunt:addriddle', $context);
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
+    $renewlocktime = (get_setting_lock_time() - 5) * 1000;
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
 
     if ($id) { // if entry is specified
         $title = get_string('editingriddle', 'treasurehunt');
@@ -88,7 +89,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         }
     }
     $entry->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid,'roadid'=>$entry->roadid));
+    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $entry->roadid));
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,

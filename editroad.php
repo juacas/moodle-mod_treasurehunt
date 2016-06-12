@@ -30,11 +30,12 @@ $PAGE->set_url($url);
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 require_capability('mod/treasurehunt:addroad', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid,'roadid'=>$id));
+$returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $id));
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid));
+    $renewlocktime = (get_setting_lock_time() - 5) * 1000;
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
     if ($id) { // if entry is specified
         $title = get_string('editingroad', 'treasurehunt');
         $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
@@ -98,7 +99,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         // Trigger event and update completion (if entry was created).
 
         $event->trigger();
-        $returnurl->param('roadid',$entry->id);
+        $returnurl->param('roadid', $entry->id);
         redirect($returnurl);
     }
 } else {

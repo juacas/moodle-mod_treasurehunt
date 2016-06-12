@@ -30,7 +30,7 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates',  'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
 
     var init = {
-        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp) {
+        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'treasurehunt'),
                     falloUrl = url.imageUrl('images/fallo', 'treasurehunt'),
                     markerUrl = url.imageUrl('flag-marker', 'treasurehunt'),
@@ -222,10 +222,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             renew_source(false, true);
             interval = setInterval(function () {
                 renew_source(false, false);
-            }, 20000);
+            }, gameupdatetime);
             // Inicializo la pagina de capas
             add_layergroup_to_list(layergroup);
-
+ 
 
             /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
@@ -551,7 +551,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 $.mobile.loading("hide");
             });
             geolocation.on('error', function (error) {
-                debugger;
                 $.mobile.loading("hide");
                 toast(error.message);
             });
@@ -735,7 +734,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     setTimeout(function () {
                         toast(msg);
                     }, 2500);
-                    debugger;
                 } else {
                     $("<div class='ui-loader ui-overlay-shadow  ui-corner-all toast'>" +
                             "<p>" + msg + "</p></div>")

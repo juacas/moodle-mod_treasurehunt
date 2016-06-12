@@ -88,8 +88,7 @@ echo $output->heading(format_string($treasurehunt->name));
 if (view_intro($treasurehunt)) {
     echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
-//$usersummary = new treasurehunt_grading_summary();
-//echo $output->render($usersummary);
+
 
 echo view_treasurehunt_info($treasurehunt, $course->id);
 if ((has_capability('mod/treasurehunt:play', $context) &&
