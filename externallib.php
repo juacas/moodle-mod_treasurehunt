@@ -557,7 +557,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             }
         }
         // Si esta fuera de tiempo aviso.
-        else if (!$available) {
+        if (!$available) {
             if ($params['location']) {
                 $status['msg'] = get_string('erroutoftimelocation', 'treasurehunt');
                 $status['code'] = 1;
@@ -566,12 +566,12 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 $status['msg'] = get_string('erroutoftimeanswer', 'treasurehunt');
                 $status['code'] = 1;
             }
-        } else {
-            if (!$status) {
-                $status['msg'] = get_string('userprogress', 'treasurehunt');
-                $status['code'] = 0;
-            }
         }
+        if (!$status) {
+            $status['msg'] = get_string('userprogress', 'treasurehunt');
+            $status['code'] = 0;
+        }
+
         $result = array();
         $result['infomsg'] = $updates->strings;
         $result['attempttimestamp'] = $updates->newattempttimestamp;
