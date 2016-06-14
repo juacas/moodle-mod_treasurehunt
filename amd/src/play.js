@@ -27,7 +27,7 @@ require.config({
         'jquery.mobile': 'jquery-mobile/jquerymobile'
     }
 });
-define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates',  'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
+define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
 
     var init = {
         playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
@@ -225,7 +225,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             }, gameupdatetime);
             // Inicializo la pagina de capas
             add_layergroup_to_list(layergroup);
- 
+
 
             /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
@@ -431,7 +431,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     }
                 }).fail(function (error) {
                     console.log(error);
-                    create_popup('displayerror', 'Error', error.message);
+                    create_popup('displayerror', strings['error'], error.message);
                     clearInterval(interval);
                 });
             }
@@ -686,11 +686,11 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 var selected = $("#questionform input[type='radio']:checked");
                 if (!available) {
                     event.preventDefault();
-                    toast('Se ha superado el tiempo de entrega');
+                    toast(strings['timeexceeded']);
                 } else {
                     if (selected.length === 0) {
                         event.preventDefault();
-                        toast('Debes seleccionar una respuesta');
+                        toast(strings['noasnwerselected']);
                     } else {
                         renew_source(false, false, selected.val());
                     }
@@ -700,23 +700,23 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             $('#validateLocation').on('click', function (event) {
                 if (roadfinished) {
                     event.preventDefault();
-                    toast('Ya has completado esta caza del tesoro');
+                    toast(strings['huntcompleted']);
                     return;
                 }
                 if (!available) {
                     event.preventDefault();
-                    toast('Se ha superado el tiempo de entrega');
+                    toast(strings['timeexceeded']);
                     return;
                 }
                 if (lastsuccessfulriddle.question !== '') {
                     event.preventDefault();
-                    toast('Debes responder primero a la pregunta');
+                    toast(strings['answerwarning']);
                     $("#infopanel").panel("open");
                     return;
                 }
                 if (lastsuccessfulriddle.completion === 0) {
                     event.preventDefault();
-                    toast('Debes completar primero la actividad a resolver');
+                    toast(strings['activitytoendwarning']);
                     $("#infopanel").panel("open");
                     return;
                 }

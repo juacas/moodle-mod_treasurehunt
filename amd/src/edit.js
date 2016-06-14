@@ -66,17 +66,17 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     $("#controlpanel").addClass('ui-widget-header ui-corner-all');
                     $('<span id="edition"/>').appendTo($("#controlpanel"));
                     $('<input type="radio" name="controlpanel" id="radio1" value="add">').appendTo($("#edition"));
-                    $("<label>").attr('for', "radio1").text('Anadir').appendTo($("#edition"));
+                    $("<label>").attr('for', "radio1").text(strings['add']).appendTo($("#edition"));
                     $('<input type="radio" name="controlpanel" id="radio2" value="modify">').appendTo($("#edition"));
-                    $("<label>").attr('for', "radio2").text('Modificar').appendTo($("#edition"));
-                    $('<button id="saveriddle"/>').attr('disabled', true).text('Guardar cambios').appendTo($("#controlpanel"));
-                    $('<button id="removefeature"/>').attr('disabled', true).text('Eliminar').appendTo($("#controlpanel"));
+                    $("<label>").attr('for', "radio2").text(strings['modify']).appendTo($("#edition"));
+                    $('<button id="saveriddle"/>').attr('disabled', true).text(strings['save']).appendTo($("#controlpanel"));
+                    $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($("#controlpanel"));
                     $('<div id="searchcontainer">').appendTo($("#controlpanel"));
-                    $('<input id="searchaddress" type="search" placeholder="Enter a Location" class="clearable"/>')
+                    $('<input id="searchaddress" type="search" placeholder="'+strings['searchlocation']+'" class="clearable"/>')
                             .appendTo($("#searchcontainer"));
                     $('<span id="searchicon" class="ui-icon  ui-icon-search"></span>').appendTo($("#searchcontainer"));
-                    $('<button id="addriddle"/>').text('Riddle').prependTo($("#controlpanel"));
-                    $('<button id="addroad"/>').text('Road').prependTo($("#controlpanel"));
+                    $('<button id="addriddle"/>').text(strings['riddle']).prependTo($("#controlpanel"));
+                    $('<button id="addroad"/>').text(strings['road']).prependTo($("#controlpanel"));
                     $("#radio1").button({
                         text: false,
                         icons: {
@@ -1224,10 +1224,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     $("#removefeature").on('click', function () {
 
-                        notification.confirm('Estas seguro?',
-                                'Si la eliminas ya no podras recuperarla',
-                                'Confirmar',
-                                'Cancelar', function () {
+                        notification.confirm(strings['areyousure'],
+                                strings['removewarning'],
+                                strings['confirm'],
+                                strings['cancel'], function () {
 
                                     removefeatureToDirtySource(selectedFeatures, originalStage,
                                             dirtyStage, stage.roads[roadid].vector);
@@ -1250,10 +1250,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     $("#riddlelist").on('click', '.ui-icon-trash', function () {
                         var $this_li = $(this).parents('li');
-                        notification.confirm('Estas seguro?',
-                                'Si la eliminas ya no podras recuperarla',
-                                'Confirmar',
-                                'Cancelar', function () {
+                        notification.confirm(strings['areyousure'],
+                                 strings['removewarning'],
+                                strings['confirm'],
+                                strings['cancel'], function () {
                                     var riddleid = parseInt($this_li.attr('riddleid'));
                                     deleteRiddle(riddleid, dirtyStage, originalStage,
                                             stage.roads[roadid].vector, treasurehuntid, lockid);
@@ -1359,10 +1359,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     $("#roadlist").on('click', '.ui-icon-trash', function () {
                         var $this_li = $(this).parents('li');
-                        notification.confirm('Estas seguro?',
-                                'Si la eliminas se eliminaran todas las pitas asociadas y ya no podras recuperarlas',
-                                'Confirmar',
-                                'Cancelar', function () {
+                        notification.confirm(strings['areyousure'],
+                                strings['removeroadwarning'],
+                                strings['confirm'],
+                                strings['cancel'], function () {
                                     var roadid = parseInt($this_li.attr('roadid'));
                                     deleteRoad(roadid, dirtyStage, originalStage, treasurehuntid, lockid);
                                 });
@@ -1405,7 +1405,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     //Al salirse
                     window.onbeforeunload = function (e) {
-                        var message = "No ha guardado los cambios realizados.",
+                        var message = strings['savewarning'],
                                 e = e || window.event;
                         if (dirty) {
                             // For IE and Firefox

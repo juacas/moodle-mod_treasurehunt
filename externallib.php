@@ -501,6 +501,9 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
             }
+            if (count($qocsolved->updates)) {
+                $updates->strings = array_merge($updates->strings, $qocsolved->updates);
+            }
             // Compruebo si se han producido cambios
             if ($qocsolved->newattempt) {
                 $updates->newattempttimestamp = $qocsolved->attempttimestamp;
@@ -524,6 +527,9 @@ class mod_treasurehunt_external_user_progress extends external_api {
             }
             if ($checklocation->roadfinished) {
                 $roadfinished = true;
+            }
+            if ($checklocation->update !== '') {
+                $updates->strings[] = $checklocation->update;
             }
             $status['msg'] = $checklocation->msg;
             $status['code'] = 0;
