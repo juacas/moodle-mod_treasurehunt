@@ -726,6 +726,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 $("#container").show();
                 $("#loader").remove();
                 $.mobile.initializePage();
+                var viewport = document.querySelector("meta[name=viewport]");
+                viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
+                        'maximum-scale=1.0, user-scalable=0,target-densitydpi=medium-dpi');
             }
 
             /*-------------------------------Help functions -------------*/

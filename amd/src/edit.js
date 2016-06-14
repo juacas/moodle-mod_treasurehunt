@@ -476,7 +476,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         //Si pulso la tecla esc dejo de dibujar
                         if (e.keyCode === 27) // esc
                         {
-                            Draw.Polygon.abortDrawing_();
+                            Draw.Polygon.abortDrawing();
                         }
                     });
                     Draw.init();
@@ -1312,7 +1312,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             $("label[for='radio1']").removeClass('highlightbutton');
                         }
                         //Paro de dibujar si cambio de pista
-                        Draw.Polygon.abortDrawing_();
+                        Draw.Polygon.abortDrawing();
                     });
                     $("#roadlist").on('click', 'li', function (e) {
                         if ($(e.target).is('.ui-icon')) {
@@ -1324,7 +1324,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         //Borro las pistas seleccionadas
                         selectedRiddleFeatures = {};
                         //Paro de dibujar si cambio de camino
-                        Draw.Polygon.abortDrawing_();
+                        Draw.Polygon.abortDrawing();
                         roadid = $(this).attr('roadid');
                         if (parseInt($(this).attr('blocked'))) {
                             deactivateAddRiddle();
