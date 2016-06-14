@@ -45,7 +45,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     changesinquestionriddle = false,
                     fitmap = false,
                     roadfinished = false,
-                    available = true;
+                    available = true,
+                    qocremoved = false;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -350,13 +351,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             groupmode: groupmode,
                             initialize: initialize,
                             location: position,
-                            selectedanswerid: selectedanswerid
+                            selectedanswerid: selectedanswerid,
+                            qocremoved: qocremoved
                         }
                     }]);
                 geojson[0].done(function (response) {
                     console.log(response);
                     var body = '';
-
+                    qocremoved  = response.qocremoved;
                     roadfinished = response.roadfinished;
                     available = response.available;
                     if (roadfinished || !available) {
@@ -714,7 +716,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     $("#infopanel").panel("open");
                     return;
                 }
-                if (lastsuccessfulriddle.completion === 0) {
+                if (!lastsuccessfulriddle.completion) {
                     event.preventDefault();
                     toast(strings['activitytoendwarning']);
                     $("#infopanel").panel("open");

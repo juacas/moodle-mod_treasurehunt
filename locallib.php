@@ -546,11 +546,12 @@ function get_locked_name_and_description($attempt, $context) {
     if (!$attempt->completionsolved) {
         $activitytoendname = get_activity_to_end_name($attempt->activitytoend);
     }
-    if (!$attempt->questionsolved && !$attempt->completionsolved) {
+    if ((!$attempt->questionsolved && $attempt->questiontext !== '') &&
+            (!$attempt->completionsolved && $attempt->activitytoend)) {
         $return->description = get_string('lockedqacriddle', 'treasurehunt', $activitytoendname);
-    } else if (!$attempt->questionsolved) {
+    } else if (!$attempt->questionsolved && $attempt->questiontext !== '') {
         $return->description = get_string('lockedqriddle', 'treasurehunt');
-    } else if (!$attempt->completionsolved) {
+    } else if (!$attempt->completionsolved && $attempt->activitytoend) {
         $return->description = get_string('lockedcpriddle', 'treasurehunt', $activitytoendname);
     } else {
         $return->name = $attempt->name;
@@ -930,7 +931,7 @@ function get_las_successful_attempt($userid, $groupid, $roadid) {
 }
 
 // Compruebo si se ha acertado la pista y completado la actividad requerida.
-function check_question_and_completion_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context, $treasurehunt, $noriddles) {
+function check_question_and_completion_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context, $treasurehunt, $noriddles, $qocremoved) {
     global $DB;
 
     $return = new stdClass();
@@ -939,6 +940,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     $return->newattempt = false;
     $return->attemptsolved = false;
     $return->roadfinished = false;
+    $return->qocremoved = false;
 
     // Recupero los datos del ultimo intento con geometria acertada para saber si tiene geometria resuelta y no esta superada.
     $lastattempt = get_las_successful_attempt($userid, $groupid, $roadid);
@@ -982,8 +984,12 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     }
                 }
             } else { // Si no existe la actividad a superar es que la han borrado.
-                $return->updates[] = get_string('removedactivitytoend', 'treasurehunt');
-                $return->attemptsolved = true;
+                $return->qocremoved = true;
+                if (!$qocremoved) {
+                    $return->updates[] = get_string('removedactivitytoend', 'treasurehunt');
+                    $return->attemptsolved = true;
+                }
+                $lastattempt->completionsolved = 1;
                 // Si no existe la pregunta es que la han borrado.
                 if ($lastattempt->questiontext === '') {
                     $lastattempt->questionsolved = 1;
@@ -993,11 +999,11 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                 if ($lastattempt->questionsolved) {
                     $lastattempt->success = 1;
                     $lastattempt->type = 'location';
-                    $lastattempt->completionsolved = 1;
                     $lastattempt->penalty = 0;
                     $lastattempt->timecreated = time();
                     insert_attempt($lastattempt);
                     $return->newattempt = true;
+                    $return->attemptsolved = true;
                 }
             }
         }
@@ -1005,8 +1011,11 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
         if (!$lastattempt->questionsolved) {
             // Si no existe la pregunta es que la han borrado.
             if ($lastattempt->questiontext === '') {
-                $return->updates[] = get_string('removedquestion', 'treasurehunt');
-                $return->attemptsolved = true;
+                $return->qocremoved = true;
+                if (!$qocremoved) {
+                    $return->updates[] = get_string('removedquestion', 'treasurehunt');
+                    $return->attemptsolved = true;
+                }
                 // Si la actividad a completar esta superada creo el intento como superado.
                 if ($lastattempt->completionsolved) {
                     $lastattempt->success = 1;
@@ -1016,6 +1025,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     $lastattempt->timecreated = time();
                     insert_attempt($lastattempt);
                     $return->newattempt = true;
+                    $return->attemptsolved = true;
                 }
             } else {
                 // Si exite la respuesta y no se ha actualizado el camino.
@@ -1030,13 +1040,10 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                         $lastattempt->type = 'question';
                         // Sumo uno por si se ha completado tambien la actividad a completar.
                         $lastattempt->timecreated = time() + 1;
-
                         if ($answer->correct) {
                             $return->attemptsolved = true;
                             $return->msg = get_string('correctanswer', 'treasurehunt');
-                            if (!$lastattempt->completionsolved && !$lastattempt->activitytoend) {
-                                $lastattempt->completionsolved = 1;
-                            }
+
                             $lastattempt->questionsolved = 1;
                             $lastattempt->penalty = 0;
                             // Si ya esta resuelta la actividad a completar la marco como superada.
@@ -1054,9 +1061,6 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                             }
                         } else {
                             $return->msg = get_string('incorrectanswer', 'treasurehunt');
-                            if (!$lastattempt->completionsolved && !$lastattempt->activitytoend) {
-                                $lastattempt->completionsolved = 1;
-                            }
                             $lastattempt->questionsolved = 0;
                             $lastattempt->penalty = 1;
                             insert_attempt($lastattempt);
@@ -1123,7 +1127,6 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changes
     $return->attemptsolved = false;
     $return->geometrysolved = false;
     $return->geometrysolved = false;
-    $return->lessattempttimestamp = false;
     $newattempts = array();
 
     list($return->newattempttimestamp, $return->newroadtimestamp) = get_last_timestamps($userid, $groupid, $roadid);

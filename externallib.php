@@ -403,7 +403,9 @@ class mod_treasurehunt_external_user_progress extends external_api {
             'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
             'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT, false),
             'location' => new external_value(PARAM_RAW, "GeoJSON with point's location", VALUE_DEFAULT, 0),
-            'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0))
+            'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
+            'qocremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
+                )
         );
     }
 
@@ -441,6 +443,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
                     )
                     ), 'Array with user/group historical attempts.'),
+            'qocremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
             'status' => new external_single_structure(
                     array(
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -454,13 +457,13 @@ class mod_treasurehunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmove, $groupmode, $initialize, $location, $selectedanswerid) { //Don't forget to set it as static
+    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmove, $groupmode, $initialize, $location, $selectedanswerid,$qocremoved) { //Don't forget to set it as static
         global $USER, $DB;
 
         $params = self::validate_parameters(self::user_progress_parameters(), array('treasurehuntid' => $treasurehuntid,
                     "attempttimestamp" => $attempttimestamp, "roadtimestamp" => $roadtimestamp,
                     'playwithoutmove' => $playwithoutmove, 'groupmode' => $groupmode, 'initialize' => $initialize,
-                    'location' => $location, 'selectedanswerid' => $selectedanswerid));
+                    'location' => $location, 'selectedanswerid' => $selectedanswerid,'qocremoved'=>$qocremoved));
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
@@ -473,6 +476,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         // Compruebo si el usuario ha finalizado el camino.
         $roadfinished = check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
+        $qocremoved = $params['qocremoved'];
         if ($params['groupmode'] != $treasurehunt->groupmode) {
             $changesingroupmode = true;
         }
@@ -496,7 +500,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
 
         if ($available) {
             // Compruebo si se ha acertado la pista y completado la actividad requerida.
-            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles);
+            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles,$qocremoved);
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
@@ -514,6 +518,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             if ($qocsolved->roadfinished) {
                 $roadfinished = true;
             }
+            $qocremoved = $qocsolved->qocremoved;
         }
         // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa pista. 
         if (!$updates->geometrysolved && $params['location'] && !$updateroad && !$roadfinished && $available && !$changesinplaymode && !$changesingroupmode) {
@@ -592,6 +597,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $result['playwithoutmove'] = intval($treasurehunt->playwithoutmove);
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['historicalattempts'] = $historicalattempts;
+        $result['qocremoved'] = $qocremoved;
         return $result;
     }
 
