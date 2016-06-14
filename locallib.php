@@ -286,7 +286,7 @@ function get_treasurehunt($treasurehuntid, $context) {
     $roadssql = "SELECT id, name, CASE WHEN (SELECT COUNT(at.id) "
             . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_riddles} ri "
             . "ON ri.id = at.riddleid INNER JOIN {treasurehunt_roads} r "
-            . "ON ri.roadid=r.id WHERE r.id= road.id) THEN true ELSE false "
+            . "ON ri.roadid=r.id WHERE r.id= road.id) > 0 THEN 1 ELSE 0 "
             . "END AS blocked FROM {treasurehunt_roads} AS road where treasurehuntid = ?";
     $roadsresult = $DB->get_records_sql($roadssql, array($treasurehuntid));
     foreach ($roadsresult as &$value) {
@@ -375,7 +375,8 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         $params = array($locationwkt, $nextnoriddle, $roadid);
         $nextriddle = $DB->get_record_sql($query, $params);
         // Si esta dentro
-        if ($nextriddle->inside) {
+        if ($nextriddle->inside == 't' || $nextriddle->inside == 1) {
+            $nextriddle->inside = 1;
             $questionsolved = ($nextriddle->questiontext === '' ? true : false);
             $completionsolved = ($nextriddle->activitytoend == 0 ? true : false);
             if ($questionsolved && $completionsolved) {
@@ -387,6 +388,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
             $return->msg = get_string('successlocation', 'treasurehunt');
             $return->newriddle = true;
         } else {
+            $nextriddle->inside = 0;
             $penalty = true;
             $questionsolved = false;
             $completionsolved = false;
@@ -690,7 +692,7 @@ function get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview =
     $query = "SELECT r.id as roadid,count(r.id) as groupsnumber, "
             . "gm.groupid,r.validated FROM {treasurehunt_roads} r "
             . "INNER JOIN  $cond WHERE gm.userid =? AND "
-            . "r.treasurehuntid=? group by roadid";
+            . "r.treasurehuntid=? group by roadid,gm.groupid";
     $params = array($userid, $treasurehunt->id);
     $userdata = $DB->get_records_sql($query, $params);
     // Si estamos en modo individual y no hay datos comprobamos si existe un unico camino
@@ -798,16 +800,16 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
         $groupid = 'a.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
-    $attemptsquery = "SELECT a.id,$user as user,r.number,EXISTS(SELECT 1 FROM "
+    $attemptsquery = "SELECT a.id,$user as user,r.number, CASE WHEN EXISTS(SELECT 1 FROM "
             . "{treasurehunt_riddles} ri INNER JOIN {treasurehunt_attempts} at "
             . "ON at.riddleid=ri.id WHERE ri.number=r.number AND ri.roadid=r.roadid "
-            . "AND $groupidwithin AND at.penalty=1) as withfailures, "
-            . "EXISTS(SELECT 1 FROM {treasurehunt_riddles} ri INNER JOIN "
+            . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
+            . "CASE WHEN EXISTS(SELECT 1 FROM {treasurehunt_riddles} ri INNER JOIN "
             . "{treasurehunt_attempts} at ON at.riddleid=ri.id WHERE ri.number=r.number "
             . "AND ri.roadid=r.roadid AND $groupidwithin AND at.success=1 AND "
-            . "at.type='location') as success FROM {treasurehunt_attempts} a INNER JOIN "
+            . "at.type='location') THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
             . "{treasurehunt_riddles} r ON a.riddleid=r.id INNER JOIN {treasurehunt_roads} "
-            . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid group by r.number,user";
+            . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid group by r.number,user,a.id,r.roadid";
     $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
             . "(SELECT MAX(number) FROM {treasurehunt_riddles} where roadid "
             . "= r.id) as totalriddles from {treasurehunt_roads} r where treasurehuntid=?";
@@ -885,12 +887,11 @@ function get_last_timestamps($userid, $groupid, $roadid) {
         $grouptype = 'a.groupid=0 AND a.userid=(?)';
         $params = array($userid, $roadid);
     }
-    $query = "SELECT MAX(a.timecreated) as attempttimestamp, "
-            . "ro.timemodified as roadtimestamp FROM "
-            . "{treasurehunt_attempts} a INNER JOIN "
-            . "{treasurehunt_riddles} r ON a.riddleid=r.id INNER JOIN "
-            . "{treasurehunt_roads} ro ON r.roadid = ro.id WHERE "
-            . "$grouptype AND ro.id=?";
+    $query = "SELECT coalesce(attempttimestamp,0) as attempttimestamp, "
+            . "ro.timemodified as roadtimestamp FROM  {treasurehunt_roads} ro LEFT JOIN (SELECT "
+            . "MAX(a.timecreated) as attempttimestamp, r.roadid FROM {treasurehunt_attempts} a INNER JOIN "
+            . "{treasurehunt_riddles} r ON a.riddleid=r.id where $grouptype group by r.roadid) q "
+            . "ON q.roadid = ro.id WHERE ro.id=?";
     $timestamp = $DB->get_record_sql($query, $params);
     if (!isset($timestamp->attempttimestamp)) {
         $timestamp->attempttimestamp = 0;

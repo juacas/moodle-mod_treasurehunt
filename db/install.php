@@ -57,17 +57,17 @@ function install_geometry_columns() {
             case 'postgres':
                 try {
                     // Check if postgis is installed in the database. Install extenssion if not.
-                    $postgis = $DB->get_record_sql("select * from pg_extension where extname='postgis'");
-                    if (count($postgis) === 0) {
-                        $DB->change_database_structure('create extension postgis;');
+                    $postgis = $DB->count_records_sql('select count(extname) from pg_extension where extname=?',array('postgis'));
+                    if ($postgis === 0) {
+                        $DB->execute('create extension postgis');
                     }
                     // Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
                     if (!$dbman->field_exists('treasurehunt_riddles', 'geom')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom geometry(MULTIPOLYGON,4326)');
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom geometry(MULTIPOLYGON,0)');
                     }
                     // Create points
                     if (!$dbman->field_exists('treasurehunt_attempts', 'location')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location geometry(POINT,4326) NOT NULL');
+                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location geometry(POINT,0) NOT NULL');
                     }
                 } catch (ddl_change_structure_exception $ex) {
                     set_config('geometrysupport', false, 'mod_treasurehunt');
