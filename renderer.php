@@ -111,16 +111,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Create a table for the data.
         $o = '';
         $s = '';
-        if (!count($progress->roadsusersprogress) && $progress->permission) {
+        if (!count($progress->roadsusersprogress) && $progress->managepermission) {
             $s .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
-            if (count($progress->duplicategroupsingroupings) && $progress->permission) {
+            if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt', implode(",", $progress->duplicategroupsingroupings)));
             }
-            if (count($progress->duplicateusersingroups) && $progress->permission) {
+            if (count($progress->duplicateusersingroups) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt', implode(",", $progress->duplicateusersingroups)));
             }
-            if (count($progress->noassignedusers) && $progress->permission) {
+            if (count($progress->noassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->noassignedusers)));
             }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
@@ -139,14 +139,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
                                 $name = $user->name;
-                                if ($progress->permission) {
+                                if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $user->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
                                     $name = html_writer::link($url, $name);
                                 }
                             } else {
                                 $name = fullname($user);
-                                if ($progress->permission) {
+                                if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $user->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
                                     $name = html_writer::link($url, $name);
@@ -169,7 +169,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         $s .= html_writer::table($t);
                         $s .= $this->output->box_end();
                     } else {
-                        if ($progress->permission) {
+                        if ($progress->managepermission) {
                             $s .= $this->output->heading($roadusersprogress->name, 4);
                             if ($progress->groupmode) {
                                 $notification = get_string('nogroupassigned', 'treasurehunt');
@@ -180,14 +180,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         }
                     }
                 } else {
-                    if ($progress->permission) {
+                    if ($progress->managepermission) {
                         $s .= $this->output->heading($roadusersprogress->name, 4);
                         $s .= $this->output->notification(get_string('invalroadid', 'treasurehunt'));
                     }
                 }
             }
         }
-        if ($progress->permission) {
+        if ($progress->managepermission) {
             $urlparams = array('id' => $progress->coursemoduleid);
             $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
         }

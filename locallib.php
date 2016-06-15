@@ -1242,9 +1242,10 @@ function view_users_progress_table($cm, $courseid, $context) {
     // Recojo la lista de usuarios/grupos asignada a cada camino y los posibles warnings.
     list($roads, $duplicategroupsingroupings, $duplicateusersingroups,
             $noassignedusers) = get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
-    $permission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
+    $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
+    $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $permission);
+    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission,$managepermission);
     return $output->render($renderable);
 }
 

@@ -97,21 +97,23 @@ class treasurehunt_users_progress implements renderable {
     public $duplicategroupsingroupings = array();
     public $duplicateusersingroups = array();
     public $noassignedusers = array();
-    public $permission = false;
+    public $viewpermission = false;
+    public $managepermission = false;
 
     /**
      * constructor
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $permission) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission,$managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
         $this->duplicategroupsingroupings = $duplicategroupsingroupings;
         $this->duplicateusersingroups = $duplicateusersingroups;
         $this->noassignedusers = $noassignedusers;
-        $this->permission = $permission;
+        $this->viewpermission = $viewpermission;
+        $this->managepermission = $managepermission;
     }
 
 }

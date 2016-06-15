@@ -164,15 +164,15 @@ $string['changetogroupmode'] = 'El modo de juego ha cambiado a jugar en grupos';
 $string['changetoindividualmode'] = 'El modo de juego ha cambiado a jugar individual';
 $string['changetoplaywithoutmove'] = 'El modo de juego ha cambiado a jugar sin desplazarse';
 $string['changetoplaywithmove'] = 'El modo de juego ha cambiado a jugar desplazándose';
-$string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración por defecto de los grupos o de una agrupación personalizada para cada camino. El juego del grupo será compartido entre los miembros del grupo y todos los miembros del grupo verán los cambios producidos en el juego.';
-$string['allowsubmissionsfromdate'] = 'Permitir entregas desde';
-$string['allowsubmissionsfromdate_help'] = 'Si está habilitado, los estudiantes no podrán hacer entregas antes de esta fecha. Si está deshabilitado, los estudiantes podrán comenzar las entregas de inmediato.';
+$string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración de grupos del curso. El juego del grupo será compartido entre los miembros del grupo y todos ellos verán los cambios producidos en el juego.';
+$string['allowattemptsfromdate'] = 'Permitir intentos desde';
+$string['allowattemptsfromdate_help'] = 'Si está habilitado, los estudiantes no podrán jugar antes de esta fecha. Si está deshabilitado, los estudiantes podrán comenzar a jugar de inmediato.';
 $string['duedatereached'] = 'La fecha de vencimiento de esta tarea ya ha pasado';
 $string['cutoffdate'] = 'Fecha límite';
 $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior de la de inicio.';
-$string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán entregas de tareas después de esta fecha sin una ampliación.';
+$string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán intentos después de esta fecha sin una ampliación.';
 $string['alwaysshowdescription'] = 'Mostrar siempre la descripción';
-$string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Tarea superior solo será visible para los estudiantes en la fecha "Permitir entregas desde",';
+$string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Caza del tesoro superior solo será visible para los estudiantes en la fecha "Permitir intentos desde".';
 /* * Template */
 $string['sendlotacion_title'] = '¿Estás seguro de que deseas enviar esta ubicación?';
 $string['sendlotacion_content'] = 'Esta acción no se puede deshacer.';
@@ -194,7 +194,7 @@ $string['search'] = 'Buscar';
 $string['info'] = 'Información';
 $string['riddles'] = 'Pistas';
 $string['playwithoutmove'] = 'Jugar sin desplazarse';
-$string['playwithoutmove_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. Se habilita una marca en el mapa para seleccionar el punto deseado';
+$string['playwithoutmove_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. Para ello cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, borrando la anterior si existiese, indicando el último punto deseado.';
 $string['groupid'] = 'Grupo asignado al camino';
 $string['groupid_help'] = 'Los usuarios de este grupo son asignados a este camino cuando empieza el juego. Si sólo existe un camino y la opción seleccionada es "ninguno", todos los participantes de la actividad jugarán por él';
 $string['groupingid'] = 'Agrupación asignada al camino';
@@ -263,8 +263,8 @@ siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron 
 la caza reciben una calificación por debajo del 50% calculado simplemente
 por el número de pistas resueltas.</UL>';
-$string['gradepenlocation'] = 'Penalizar fallo en localización';
-$string['gradepenanswer'] = 'Penalizar fallo en respuesta';
+$string['gradepenlocation'] = 'Penalización por fallo en localización';
+$string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation_help'] = 'La penalización es expresada en % de la calificación. '
         . 'Por ejemplo, si la penalización es 5.4, un jugador con 3 fallos penalizará su '
         . 'nota en un 16.2%, es decir, recibirá el 83.8% de la calificación calculada con el resto de criterios.';
@@ -280,6 +280,7 @@ $string['treasurehunt:editroad'] = 'Editar camino';
 $string['treasurehunt:gettreasurehunt'] = 'Obtener todas las pistas y caminos de la caza del tesoro';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehunt:play'] = 'Jugar';
+$string['treasurehunt:viewusershistoricalattempts'] = 'Ver el historial de intentos de los usuarios';
 
 
 

@@ -30,8 +30,7 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Treasure Hunt';
 $string['modulenameplural'] = 'Treasures Hunt';
-$string['modulename_help'] = 'Use the treasure hunt module for... | The treasurehunt module allows...';
-$string['treasurehuntfieldset'] = 'Custom example fieldset';
+$string['modulename_help'] = 'This module will be used to perform an activity geolocation';
 $string['riddlename'] = 'Riddle\'s name';
 $string['roadname'] = 'Road\'s name';
 $string['continue'] = 'Continue';
@@ -168,14 +167,14 @@ $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithoutmove'] = 'The game mode has changed to static play';
 $string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
-$string['groupmode_help'] = 'If enabled students will be divided into groups based on the default set of groups or a custom grouping for each road. A group game will be shared among group members and all members of the group will see each others changes to the game.';
+$string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups. A group game will be shared among group members and they will see the changes in the game.';
 $string['allowattemptsfromdate'] = 'Allow attempts from';
-$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. If disabled, students will be able to start submitting right away.';
+$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. If disabled, students will be able to start play right away.';
 $string['cutoffdate'] = 'Cut-off date';
-$string['cutoffdate_help'] = 'If set, the assignment will not accept submissions after this date without an extension.';
+$string['cutoffdate_help'] = 'If set, the treasure hunt will not accept attempts after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
 $string['alwaysshowdescription'] = 'Always show description';
-$string['alwaysshowdescription_help'] = 'If disabled, the Assignment Description above will only become visible to students at the "Allow submissions from" date.';
+$string['alwaysshowdescription_help'] = 'If disabled, the Treasure hunt Description above will only become visible to students at the "Allow attempts from" date.';
 /* * Template */
 $string['sendlotacion_title'] = 'Are you sure you want to send this location?';
 $string['sendlotacion_content'] = 'This action can not be undone.';
@@ -196,7 +195,7 @@ $string['search'] = 'Search';
 $string['info'] = 'Info';
 $string['riddles'] = 'Riddles';
 $string['playwithoutmove'] = 'Playing without moving';
-$string['playwithoutmove_help'] = 'If this option is enabled students may play from their computers without moving to places. A mark on the map is enabled to select the desired point';
+$string['playwithoutmove_help'] = 'If this option is enabled students may play from their computers without moving to places. To do this every time the student takes a simple click on the map a mark is created, erasing the previous if any, indicating the last desired point.';
 $string['groupid'] = 'Group assigned to the road';
 $string['groupid_help'] = 'Users in this group are assigned to this road when the game starts. If there is only one road and the selected option is "none", all participants in the activity will play for it';
 $string['groupingid'] = 'Grouping assigned to the road';
@@ -260,8 +259,8 @@ hunt receive a grade under 50 calculated just by the number of riddles solved.</
 being 100% the score for the first player and 50% for the last player. 
 The players that did not finish the hunt receive a grade under 50% calculated 
 just by the number of riddles solved.</UL>';
-$string['gradepenlocation'] = 'Penalize failure in location';
-$string['gradepenanswer'] = 'Penalize failure in answer';
+$string['gradepenlocation'] = 'Penalty for failure in location';
+$string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation_help'] = 'Penalization is expressed in % of the grade. '
         . 'Per example, if penalization is 5.4, a player with 3 failures will penalize '
         . 'his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the rest of the criteria.';
@@ -275,3 +274,4 @@ $string['treasurehunt:editroad'] = 'Edit road';
 $string['treasurehunt:gettreasurehunt'] = 'Get all riddles and roads of treasure hunt';
 $string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
 $string['treasurehunt:play'] = 'Play';
+$string['treasurehunt:viewusershistoricalattempts'] = 'View users historical attempts';
