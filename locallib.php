@@ -190,10 +190,14 @@ function delete_riddle($id) {
 function delete_road($roadid) {
     GLOBAL $DB;
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
-    $select = 'roadid = ?';
     $params = array($roadid);
-    $DB->delete_records_select('treasurehunt_riddles', $select, $params);
-    $DB->delete_records_select('treasurehunt_attempts', $select, $params);
+    $riddles = $DB->get_records_sql('SELECT id FROM {treasurehunt_riddles} WHERE roadid = ?'
+            , $params);
+    foreach ($riddles as $riddle) {
+        $DB->delete_records_select('treasurehunt_attempts', 'riddleid = ?', array($riddle->id));
+        $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
+    }
+    $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', $params);
 }
 
 function get_total_roads($treasurehuntid) {
@@ -1245,7 +1249,7 @@ function view_users_progress_table($cm, $courseid, $context) {
     $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission,$managepermission);
+    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission, $managepermission);
     return $output->render($renderable);
 }
 

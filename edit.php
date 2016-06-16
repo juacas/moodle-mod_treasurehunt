@@ -96,7 +96,7 @@ echo $OUTPUT->container_start("treasurehunt_editor");
 echo $OUTPUT->box(get_string('errvalidroad','treasurehunt'), 'alert alert-error invisible','errvalidroad');
 echo $OUTPUT->box(get_string('erremptyriddle','treasurehunt'), 'alert alert-error invisible','erremptyriddle');
 echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), null, 'controlpanel');
-echo $OUTPUT->box(null, null, 'riddlelistpanel');
+echo $OUTPUT->box(null, 'invisible', 'riddlelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
 echo $OUTPUT->container_end();
