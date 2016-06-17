@@ -875,8 +875,8 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
 function get_strings_play() {
 
     return get_strings(array("discoveredriddle", "failedlocation", "riddlename",
-        "riddledescription", "timelabelfailed", "question", "noasnwerselected",
-        "timelabelsuccess", "searching", "continue", "noattempts", "aerialview", "roadview"
+        "riddledescription", "question", "noasnwerselected",
+        "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
         "huntcompleted", "timeexceeded", "answerwarning", "error"), "mod_treasurehunt");
 }
