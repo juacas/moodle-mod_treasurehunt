@@ -271,7 +271,6 @@ $string['treasurehunt:addriddle'] = 'Add riddle';
 $string['treasurehunt:addroad'] = 'Add road';
 $string['treasurehunt:editriddle'] = 'Edit riddle';
 $string['treasurehunt:editroad'] = 'Edit road';
-$string['treasurehunt:gettreasurehunt'] = 'Get all riddles and roads of treasure hunt';
 $string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
 $string['treasurehunt:play'] = 'Play';
 $string['treasurehunt:viewusershistoricalattempts'] = 'View users historical attempts';

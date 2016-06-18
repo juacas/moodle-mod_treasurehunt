@@ -28,7 +28,6 @@ if (!empty($id)) {
 $PAGE->set_url($url);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
-require_capability('mod/treasurehunt:addroad', $context);
 
 $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $id));
 
@@ -37,6 +36,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $renewlocktime = (get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
     if ($id) { // if entry is specified
+        require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
         $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
         $parms = array('id' => $id);
@@ -44,6 +44,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             print_error('invalidentry');
         }
     } else { // new entry
+        require_capability('mod/treasurehunt:addroad', $context);
         $title = get_string('addingroad', 'treasurehunt');
         $entry = new stdClass();
         $entry->id = null;

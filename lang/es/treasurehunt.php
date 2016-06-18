@@ -277,7 +277,6 @@ $string['treasurehunt:addriddle'] = 'Añadir pista';
 $string['treasurehunt:addroad'] = 'Añadir camino';
 $string['treasurehunt:editriddle'] = 'Editar pista';
 $string['treasurehunt:editroad'] = 'Editar camino';
-$string['treasurehunt:gettreasurehunt'] = 'Obtener todas las pistas y caminos de la caza del tesoro';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehunt:play'] = 'Jugar';
 $string['treasurehunt:viewusershistoricalattempts'] = 'Ver el historial de intentos de los usuarios';

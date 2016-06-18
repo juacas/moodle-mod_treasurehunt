@@ -32,7 +32,6 @@ if (!empty($roadid)) {
 $PAGE->set_url($url);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
-require_capability('mod/treasurehunt:addriddle', $context);
 
 
 if (!is_edition_loked($cm->instance, $USER->id)) {
@@ -41,6 +40,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
 
     if ($id) { // if entry is specified
+        require_capability('mod/treasurehunt:editriddle', $context);
         $title = get_string('editingriddle', 'treasurehunt');
         $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,'
                 . 'activitytoend,roadid,questiontext,questiontextformat,'
@@ -65,6 +65,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             }
         }
     } else { // new entry
+        require_capability('mod/treasurehunt:addriddle', $context);
         $title = get_string('addingriddle', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = "id = ?";

@@ -42,8 +42,6 @@ require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 
-require_capability('mod/treasurehunt:view', $context);
-require_capability('mod/treasurehunt:gettreasurehunt', $context);
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 //Poner evento de edicion o algo asi

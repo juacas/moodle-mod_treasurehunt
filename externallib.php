@@ -61,7 +61,7 @@ class mod_treasurehunt_external_fetch_treasurehunt extends external_api {
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:gettreasurehunt', $context);
+        require_capability('mod/treasurehunt:managetreasurehunt', $context);
         list($treasurehunt['riddles'], $treasurehunt['roads']) = get_treasurehunt($params['treasurehuntid'], $context);
         $status['code'] = 0;
         $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
