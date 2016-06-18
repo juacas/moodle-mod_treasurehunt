@@ -72,9 +72,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     $('<button id="saveriddle"/>').attr('disabled', true).text(strings['save']).appendTo($("#controlpanel"));
                     $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($("#controlpanel"));
                     $('<div id="searchcontainer">').appendTo($("#controlpanel"));
-                    $('<input id="searchaddress" type="search" placeholder="' + strings['searchlocation'] + '" class="clearable"/>')
+                    $('<input type="search" placeholder="' + strings['searchlocation'] + '" class="searchaddress"/>')
                             .appendTo($("#searchcontainer"));
-                    $('<span id="searchicon" class="ui-icon  ui-icon-search"></span>').appendTo($("#searchcontainer"));
+                    $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo($("#searchcontainer"));
+                    $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($("#searchcontainer"));
                     $('<button id="addriddle"/>').text(strings['riddle']).prependTo($("#controlpanel"));
                     $('<button id="addroad"/>').text(strings['road']).prependTo($("#controlpanel"));
                     $("#radio1").button({
@@ -113,6 +114,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     //Lo cargo como un buttonset
                     $("#edition").buttonset();
+                    //Hago visible el controlpanel
+                    $("#controlpanel").removeClass('invisible');
                     //Creo el riddlelist
                     $('<ul id="riddlelist"/>').prependTo($("#riddlelistpanel"));
                     //Lo cargo como un sortable
@@ -1172,7 +1175,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         });
                     }
 
-                    $("#searchaddress").autocomplete({
+                    $(".searchaddress").autocomplete({
                         minLength: 4,
                         source: function (request, response) {
                             var term = request.term;
@@ -1210,11 +1213,15 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 flyToPoint(map, point);
                             }
                         },
-                        autoFocus: true,
-                        position: {my: "left top", at: "left bottom", collision: "fit"}
+                        autoFocus: true
                     }).on("click", function () {
                         $(this).autocomplete("search", $(this).value);
                     });
+                    // Necesario para regular la anchura de los resultados de autocompletado
+                    jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+                        var ul = this.menu.element;
+                        ul.outerWidth(this.element.outerWidth());
+                    };
                     $("#addriddle").on('click', function () {
                         if (dirty) {
                             saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], lockid);
@@ -1344,10 +1351,10 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         // Scroll to editor.
                         var scrolltop;
                         if ($('header[role=banner]').css("position") === "fixed") {
-                            scrolltop = parseInt($(".treasurehunt_editor").offset().top) -
+                            scrolltop = parseInt($(".treasurehunt-editor").offset().top) -
                                     parseInt($('header[role=banner]').outerHeight(true));
                         } else {
-                            scrolltop = parseInt($(".treasurehunt_editor").offset().top);
+                            scrolltop = parseInt($(".treasurehunt-editor").offset().top);
                         }
                         $('html, body').animate({
                             scrollTop: scrolltop
@@ -1401,15 +1408,15 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     // /////
                     // CLEARABLE INPUT
                     function tog(v) {
-                        return v ? 'addClass' : 'removeClass';
+                        return v ? 'removeClass' : 'addClass';
                     }
-                    $(document).on('input', '.clearable', function () {
-                        $(this)[tog(this.value)]('x');
-                    }).on('mousemove', '.x', function (e) {
-                        $(this)[tog(this.offsetWidth - 18 < e.clientX - this.getBoundingClientRect().left)]('onX');
-                    }).on('touchstart click', '.onX', function (ev) {
+                    $('.searchaddress').on('input', function () {
+                        $('.closeicon')[tog(this.value)]('invisible');
+                    });
+                    $('.closeicon').on('touchstart click', function (ev) {
                         ev.preventDefault();
-                        $(this).removeClass('x onX').val('').change().autocomplete("close");
+                        $(this).addClass('invisible');
+                        $('.searchaddress').val('').change().autocomplete("close");
                     });
                     //Al salirse
                     window.onbeforeunload = function (e) {
@@ -1425,6 +1432,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             return message;
                         }
                     };
+                    $('.treasurehunt-editor-loader').remove();
                 } // End of function init
             }; // End of init var
             return init;

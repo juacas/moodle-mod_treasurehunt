@@ -92,10 +92,14 @@ echo $OUTPUT->heading($title);
 if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
-echo $OUTPUT->container_start("treasurehunt_editor");
+echo $OUTPUT->container_start("treasurehunt-editor");
+echo $OUTPUT->container_start("treasurehunt-editor-loader");
+echo $OUTPUT->box(null, 'loader-circle-outside');
+echo $OUTPUT->box(null, 'loader-circle-inside');
+echo $OUTPUT->container_end();
 echo $OUTPUT->box(get_string('errvalidroad','treasurehunt'), 'alert alert-error invisible','errvalidroad');
 echo $OUTPUT->box(get_string('erremptyriddle','treasurehunt'), 'alert alert-error invisible','erremptyriddle');
-echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), null, 'controlpanel');
+echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
 echo $OUTPUT->box(null, 'invisible', 'riddlelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
