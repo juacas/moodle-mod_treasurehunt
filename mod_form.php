@@ -94,8 +94,13 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
 
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
-        $mform->setDefault('grade[modgrade_point]', $treasurehuntconfig->maximumgrade);
-        $mform->setDefault('grade[modgrade_type]', 'point');
+        // If is not an update.
+        if (empty($this->_cm)) {
+            $mform->setDefault('grade[modgrade_type]', 'point');
+        }
+        if (!$this->current->grade > 0) {
+            $mform->setDefault('grade[modgrade_point]', $treasurehuntconfig->maximumgrade);
+        }
         // Grading method.
         $mform->addElement('select', 'grademethod', get_string('grademethod', 'treasurehunt'), treasurehunt_get_grading_options());
         $mform->addHelpButton('grademethod', 'grademethod', 'treasurehunt');
