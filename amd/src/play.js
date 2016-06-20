@@ -374,6 +374,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     // Si cambia el modo de juego (móvil o estático)
                     if (playwithoutmove != response.playwithoutmove) {
                         playwithoutmove = response.playwithoutmove;
+                        if(!playwithoutmove){
+                            markerFeature.setGeometry(null);
+                        }
                     }
                     // Si cambia el modo grupo
                     if (groupmode != response.groupmode) {

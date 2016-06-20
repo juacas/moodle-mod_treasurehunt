@@ -59,6 +59,7 @@ $string['overcomefirstriddle'] = 'Para descubrir la primera pista debes comenzar
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['attempt'] = 'Intento';
 $string['historicalattempts'] = 'Historial de intentos de {$a}';
+$string['history'] = 'Historial';
 $string['aerialview'] = 'Aérea';
 $string['roadview'] = 'Callejero';
 $string['mapview'] = 'Vista del mapa';
@@ -180,7 +181,7 @@ $string['cancel'] = 'Cancelar';
 $string['send'] = 'Enviar';
 $string['exit'] = 'Salir';
 $string['back'] = 'Atrás';
-$string['layers'] = 'Layers';
+$string['layers'] = 'Capas';
 $string['searching'] = 'Buscando';
 $string['discoveredriddle'] = 'Pista descubierta';
 $string['failedlocation'] = 'Localización fallada';
@@ -189,7 +190,7 @@ $string['riddledescription_help'] = 'Aquí se debe describir la pista para alcan
         . 'la siguiente localización. En el caso de que esta sea la última pista debe dejar '
         . 'un mensaje de retroalimentación indicando que la caza del tesoro ha finalizado';
 $string['info_validate_location'] = 'Validar ubicación para esta pista';
-$string['button_validate_location'] = 'Validar ubicación';
+$string['validatelocation'] = 'Validar ubicación';
 $string['search'] = 'Buscar';
 $string['info'] = 'Información';
 $string['riddles'] = 'Pistas';

@@ -457,18 +457,18 @@ class mod_treasurehunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmove, $groupmode, $initialize, $location, $selectedanswerid,$qocremoved) { //Don't forget to set it as static
+    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmove, $groupmode, $initialize, $location, $selectedanswerid, $qocremoved) { //Don't forget to set it as static
         global $USER, $DB;
 
         $params = self::validate_parameters(self::user_progress_parameters(), array('treasurehuntid' => $treasurehuntid,
                     "attempttimestamp" => $attempttimestamp, "roadtimestamp" => $roadtimestamp,
                     'playwithoutmove' => $playwithoutmove, 'groupmode' => $groupmode, 'initialize' => $initialize,
-                    'location' => $location, 'selectedanswerid' => $selectedanswerid,'qocremoved'=>$qocremoved));
+                    'location' => $location, 'selectedanswerid' => $selectedanswerid, 'qocremoved' => $qocremoved));
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:play', $context,null,false);
+        require_capability('mod/treasurehunt:play', $context, null, false);
         // Recojo el grupo y camino al que pertenece
         $userparams = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Recojo el numero total de pistas del camino del usuario.
@@ -480,6 +480,13 @@ class mod_treasurehunt_external_user_progress extends external_api {
         if ($params['groupmode'] != $treasurehunt->groupmode) {
             $changesingroupmode = true;
         }
+        // Recojo la info de las nuevas pistas descubiertas en caso de existir y los nuevos timestamp si han variado.
+        $updates = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id, $userparams->roadid, $changesingroupmode);
+        if ($updates->newroadtimestamp != $params['roadtimestamp']) {
+            $updateroad = true;
+        } else {
+            $updateroad = false;
+        }
         $changesinplaymode = false;
         if ($params['playwithoutmove'] != $treasurehunt->playwithoutmove) {
             $changesinplaymode = true;
@@ -489,18 +496,11 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 $updates->strings[] = get_string('changetoplaywithoutmove', 'treasurehunt');
             }
         }
-        // Recojo la info de las nuevas pistas descubiertas en caso de existir y los nuevos timestamp si han variado.
-        $updates = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id, $userparams->roadid, $changesingroupmode);
-        if ($updates->newroadtimestamp != $params['roadtimestamp']) {
-            $updateroad = true;
-        } else {
-            $updateroad = false;
-        }
         $available = treasurehunt_is_available($treasurehunt);
 
         if ($available) {
             // Compruebo si se ha acertado la pista y completado la actividad requerida.
-            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles,$qocremoved);
+            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles, $qocremoved);
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
