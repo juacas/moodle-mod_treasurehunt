@@ -92,10 +92,10 @@ if (view_intro($treasurehunt)) {
 $viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 
 echo view_treasurehunt_info($treasurehunt, $course->id);
-if ((has_capability('mod/treasurehunt:play', $context) &&
+if ((has_capability('mod/treasurehunt:play', $context,null,false) &&
         time() > $treasurehunt->allowattemptsfromdate && $userid == $USER->id && $groupid == -1) ||
-        (has_capability('mod/treasurehunt:play', $context, $userid) &&
-        $viewusersattemptscap && $groupid == -1) ||
+        (has_capability('mod/treasurehunt:play', $context, $userid,false) &&
+        $viewusersattemptscap && $groupid == -1 && $userid != $USER->id) ||
         (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) &&
         $viewusersattemptscap && $treasurehunt->groupmode)) {
     try {

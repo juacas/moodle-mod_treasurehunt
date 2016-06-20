@@ -182,6 +182,7 @@ $string['cancel'] = 'Cancel';
 $string['send'] = 'Send';
 $string['exit'] = 'Exit';
 $string['back'] = 'Back';
+$string['backtocourse'] = 'Back to the course';
 $string['layers'] = 'Layers';
 $string['searching'] = 'Searching';
 $string['discoveredriddle'] = 'Discovered riddle';

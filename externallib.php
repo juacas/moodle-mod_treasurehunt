@@ -468,7 +468,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:play', $context);
+        require_capability('mod/treasurehunt:play', $context,null,false);
         // Recojo el grupo y camino al que pertenece
         $userparams = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Recojo el numero total de pistas del camino del usuario.

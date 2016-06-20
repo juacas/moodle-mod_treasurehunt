@@ -40,7 +40,7 @@ $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-require_capability('mod/treasurehunt:play', $context);
+require_capability('mod/treasurehunt:play', $context, null,false);
 
 //Poner evento de edicion o algo asi
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
