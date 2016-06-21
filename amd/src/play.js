@@ -250,7 +250,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         stroke: stroke,
                         text: new ol.style.Text({
                             text: strings["startfromhere"],
-                            textAlign: 'center'
+                            textAlign: 'center',
+                            fill: new ol.style.Fill({
+                                color: 'rgb(255,255,255)'
+                            }),
+                            stroke: new ol.style.Stroke({
+                                color: '#3399CC',
+                                width: 5
+                            })
                         })
                     });
                     return [styles];
@@ -358,7 +365,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 geojson[0].done(function (response) {
                     console.log(response);
                     var body = '';
-                    qocremoved  = response.qocremoved;
+                    qocremoved = response.qocremoved;
                     roadfinished = response.roadfinished;
                     available = response.available;
                     if (roadfinished || !available) {
@@ -374,7 +381,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     // Si cambia el modo de juego (móvil o estático)
                     if (playwithoutmove != response.playwithoutmove) {
                         playwithoutmove = response.playwithoutmove;
-                        if(!playwithoutmove){
+                        if (!playwithoutmove) {
                             markerFeature.setGeometry(null);
                         }
                     }
@@ -571,7 +578,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         if (features.selected[0].get('success'))
                         {
                             body = get_block_text(strings["riddlename"], riddlename);
-                            title = strings["discoveredriddle"];
+                            title = strings["overcomeriddle"];
                             body += get_block_text(strings["riddledescription"], riddledescription);
                         } else {
                             title = strings["failedlocation"];

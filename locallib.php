@@ -479,12 +479,14 @@ function insert_attempt(stdClass $attempt) {
     $DB->execute($query, $params);
 }
 
-function get_activity_to_end_name($activitytoend) {
+function get_activity_to_end_link($activitytoend) {
     global $COURSE;
     if ($activitytoend != 0) {
         $modinfo = get_fast_modinfo($COURSE);
         $cmactivitytoend = $modinfo->get_cm($activitytoend);
-        return $cmactivitytoend->name;
+        //
+        return '<a title="'.$cmactivitytoend->name.'" data-ajax="false" '
+                . 'href="'.$cmactivitytoend->url->__toString().'">'.$cmactivitytoend->name.'</a>';
     } else {
         return '';
     }
@@ -548,7 +550,7 @@ function get_locked_name_and_description($attempt, $context) {
     $return = new stdClass();
     $return->name = get_string('lockedriddle', 'treasurehunt');
     if (!$attempt->completionsolved) {
-        $activitytoendname = get_activity_to_end_name($attempt->activitytoend);
+        $activitytoendname = get_activity_to_end_link($attempt->activitytoend);
     }
     if ((!$attempt->questionsolved && $attempt->questiontext !== '') &&
             (!$attempt->completionsolved && $attempt->activitytoend)) {
@@ -838,7 +840,7 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
                     $duplicategroupsingroupings) = check_if_user_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
             $roads = add_road_userlist($roads, $groupingid, $grouplist, $attempts);
         }
-        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃ¡s de un grupo dentro del mismo camino.
+        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃƒÂ¡s de un grupo dentro del mismo camino.
         foreach ($totalparticipantsgroups as $group) {
             list($totalparticipants,
                     $duplicateusersingroups) = check_if_user_has_multiple_groups_or_roads($totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups, false);
@@ -874,7 +876,7 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
 
 function get_strings_play() {
 
-    return get_strings(array("discoveredriddle", "failedlocation", "riddlename",
+    return get_strings(array("overcomeriddle", "failedlocation", "riddlename",
         "riddledescription", "question", "noasnwerselected",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
