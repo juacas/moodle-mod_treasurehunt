@@ -437,7 +437,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
                     $attempt->timecreated +=1;
                     insert_attempt($attempt);
                 }
-                $return->update = get_string('overcomeactivitytoend', 'treasurehunt',get_activity_to_end_link($nextriddle->activitytoend));
+                $return->update = get_string('overcomeactivitytoend', 'treasurehunt', get_activity_to_end_link($nextriddle->activitytoend));
             }
         }
         if ($attempt->success && $nextnoriddle == $noriddles) {
@@ -494,14 +494,18 @@ function get_activity_to_end_link($activitytoend) {
 
 function treasurehunt_is_available($treasurehunt) {
     $timenow = time();
-    $avaible = false;
-    $outoftime = false;
+    $return = new stdClass();
+    $return->available = false;
+    $return->outoftime = false;
+    $return->actnotavailableyet = false;
     if ($timenow > $treasurehunt->cutoffdate && $treasurehunt->cutoffdate) {
-        $outoftime = true;
-    } else if (!($treasurehunt->allowattemptsfromdate > $timenow)) {
-        $avaible = true;
+        $return->outoftime = true;
+    } else if ($treasurehunt->allowattemptsfromdate > $timenow) {
+        $return->actnotavailableyet = true;
+    } else {
+        $return->available = true;
     }
-    return array($avaible, $outoftime);
+    return $return;
 }
 
 function get_riddle_answers($riddleid, $context) {
@@ -967,7 +971,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                 if ($usercompletion = check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
-                    $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt',get_activity_to_end_link($lastattempt->activitytoend));
+                    $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt', get_activity_to_end_link($lastattempt->activitytoend));
                     // Si no existe la pregunta y esta por superar es que la han borrado.
                     if (!$lastattempt->questionsolved && $lastattempt->questiontext === '') {
                         $lastattempt->questionsolved = 1;
@@ -1097,17 +1101,17 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     return $return;
 }
 
-function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $outoftime, $roadfinished, $context) {
+function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $outoftime, $actnotavailableyet, $roadfinished, $context) {
 
     $lastsuccessfulriddle = new stdClass();
 
     // Recupero el ultimo intento con geometria solucionada realizado por el usuario/grupo para esta instancia.
     $attempt = get_las_successful_attempt($userid, $groupid, $roadid);
-    if ($attempt && !$outoftime) {
+    if ($attempt && !$outoftime && !$actnotavailableyet) {
         $lastsuccessfulriddle = get_locked_name_and_description($attempt, $context);
         if (!$roadfinished) {
             $lastsuccessfulriddle->id = intval($attempt->riddleid);
-        }else{
+        } else {
             $lastsuccessfulriddle->id = 0;
         }
         $lastsuccessfulriddle->totalnumber = $noriddles;
@@ -1127,12 +1131,17 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $out
         $lastsuccessfulriddle->answers = array();
         $lastsuccessfulriddle->number = 0;
         $lastsuccessfulriddle->completion = 1;
-        if ($outoftime) {
+        if ($outoftime || $actnotavailableyet) {
             if (isset($attempt->number)) {
                 $lastsuccessfulriddle->number = intval($attempt->number);
             }
-            $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
-            $lastsuccessfulriddle->description = get_string('timeexceeded', 'treasurehunt');
+            if ($outoftime) {
+                $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
+                $lastsuccessfulriddle->description = get_string('timeexceeded', 'treasurehunt');
+            } else {
+                $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
+                $lastsuccessfulriddle->description = get_string('actnotavailableyet', 'treasurehunt');
+            }
         } else {
             $lastsuccessfulriddle->name = get_string('start', 'treasurehunt');
             $lastsuccessfulriddle->description = get_string('overcomefirstriddle', 'treasurehunt');

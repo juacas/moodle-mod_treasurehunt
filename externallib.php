@@ -496,9 +496,9 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 $updates->strings[] = get_string('changetoplaywithoutmove', 'treasurehunt');
             }
         }
-        list($available,$outoftime) = treasurehunt_is_available($treasurehunt);
+        $available = treasurehunt_is_available($treasurehunt);
 
-        if ($available) {
+        if ($available->available) {
             // Compruebo si se ha acertado la pista y completado la actividad requerida.
             $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles, $qocremoved);
             if ($qocsolved->msg !== '') {
@@ -549,8 +549,8 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $lastsuccessfulriddle = array();
         // Si se ha acertado una nueva localizacion, se ha modificado el camino, está fuera de tiempo,
         // se esta inicializando,se ha resuelto una pregunta o completion o se ha cambiado el modo grupo.
-        if ($updates->geometrysolved || $outoftime || $updateroad || $updates->attemptsolved || $params['initialize'] || $changesingroupmode) {
-            $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid, $noriddles,$outoftime,$roadfinished, $context);
+        if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved || $params['initialize'] || $changesingroupmode) {
+            $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid, $noriddles,$available->outoftime,$available->actnotavailableyet,$roadfinished, $context);
         }
         // Si se han realizado un nuevo intento de localización o se esta inicializando
         if ($updates->newgeometry || $updateroad || $roadfinished|| $params['initialize'] || $changesingroupmode) {
@@ -567,9 +567,13 @@ class mod_treasurehunt_external_user_progress extends external_api {
                 $status['code'] = 1;
             }
         }
-        // Si esta fuera de tiempo aviso y no está inicializando.
-        if ($outoftime && !$params['initialize']) {
+        // Si esta fuera de tiempo y no está inicializando aviso.
+        if ($available->outoftime && !$params['initialize']) {
             $updates->strings[] = get_string('timeexceeded', 'treasurehunt');
+        }
+        // Si la fecha de inicio aún no ha comenzado
+        if($available->actnotavailableyet){
+            $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
         if (!$status) {
             $status['msg'] = get_string('userprogress', 'treasurehunt');
@@ -586,7 +590,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $result['lastsuccessfulriddle'] = $lastsuccessfulriddle;
         }
         $result['roadfinished'] = $roadfinished;
-        $result['available'] = $available;
+        $result['available'] = $available->available;
         $result['playwithoutmove'] = intval($treasurehunt->playwithoutmove);
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['historicalattempts'] = $historicalattempts;
