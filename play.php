@@ -70,7 +70,7 @@ $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     get_strings_play(),
     $cm->id, $cm->instance,
-    intval($treasurehunt->playwithoutmove),
+    intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
     $lastattempttimestamp, $lastroadtimestamp,$gameupdatetime));
 //$PAGE->requires->css('/mod/treasurehunt/css/ol.css');

@@ -30,7 +30,7 @@ require.config({
 define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
 
     var init = {
-        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmove, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
+        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
             var pergaminoUrl = url.imageUrl('images/pergamino', 'treasurehunt'),
                     falloUrl = url.imageUrl('images/fallo', 'treasurehunt'),
                     markerUrl = url.imageUrl('flag-marker', 'treasurehunt'),
@@ -283,7 +283,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             function autolocate(center, validate) {
                 center = center || false;
                 validate = validate || false;
-                if (playwithoutmove && validate) {
+                if (playwithoutmoving && validate) {
                     if (markerFeature.getGeometry() !== null) {
                         renew_source(true, false);
                     } else {
@@ -337,7 +337,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 }
                 if (location) {
                     var coordinates;
-                    if (playwithoutmove) {
+                    if (playwithoutmoving) {
                         coordinates = markerFeature.getGeometry();
                     } else {
                         coordinates = positionFeature.getGeometry();
@@ -354,7 +354,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             treasurehuntid: treasurehuntid,
                             attempttimestamp: lastattempttimestamp,
                             roadtimestamp: lastroadtimestamp,
-                            playwithoutmove: playwithoutmove,
+                            playwithoutmoving: playwithoutmoving,
                             groupmode: groupmode,
                             initialize: initialize,
                             location: position,
@@ -376,9 +376,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         }
                     }
                     // Si cambia el modo de juego (móvil o estático)
-                    if (playwithoutmove != response.playwithoutmove) {
-                        playwithoutmove = response.playwithoutmove;
-                        if (!playwithoutmove) {
+                    if (playwithoutmoving != response.playwithoutmoving) {
+                        playwithoutmoving = response.playwithoutmoving;
+                        if (!playwithoutmoving) {
                             markerFeature.setGeometry(null);
                         }
                     }
@@ -602,7 +602,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         create_popup('inforiddle', title, body);
                     }
                 } else {
-                    if (playwithoutmove) {
+                    if (playwithoutmoving) {
                         var coordinates = features.mapBrowserEvent.coordinate;
                         markerFeature.setGeometry(coordinates ?
                                 new ol.geom.Point(coordinates) : null);

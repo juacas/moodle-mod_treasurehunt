@@ -63,8 +63,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
         // ... que aparezca en la portada, etc.
         $this->standard_intro_elements();
-        $mform->addElement('advcheckbox', 'playwithoutmove', get_string('playwithoutmove', 'treasurehunt'));
-        $mform->addHelpButton('playwithoutmove', 'playwithoutmove', 'treasurehunt');
+        $mform->addElement('advcheckbox', 'playwithoutmoving', get_string('playwithoutmoving', 'treasurehunt'));
+        $mform->addHelpButton('playwithoutmoving', 'playwithoutmoving', 'treasurehunt');
 
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.

@@ -235,6 +235,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
+        if($info->treasurehunt->playwithoutmoving){
+            $gamemode = get_string('playwithoutmoving','treasurehunt');
+        }else{
+            $gamemode = get_string('movingplay','treasurehunt');
+        }
+        $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
+        $o .= html_writer::tag('p', $message) . "\n";
         if ($info->treasurehunt->grade > 0) {
             $options = treasurehunt_get_grading_options();
             $message = get_string('grademethodinfo', 'treasurehunt', $options[$info->treasurehunt->grademethod]);

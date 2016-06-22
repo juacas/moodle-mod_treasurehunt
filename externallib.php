@@ -399,7 +399,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
             'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
             'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
-            'playwithoutmove' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
+            'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
             'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
             'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT, false),
             'location' => new external_value(PARAM_RAW, "GeoJSON with point's location", VALUE_DEFAULT, 0),
@@ -434,7 +434,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
                     ), 'object with data from the last successful riddle', VALUE_OPTIONAL),
             'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
             'available' => new external_value(PARAM_BOOL, 'If true the hunt is available.'),
-            'playwithoutmove' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
+            'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
             'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
             'historicalattempts' => new external_multiple_structure(
                     new external_single_structure(
@@ -457,12 +457,12 @@ class mod_treasurehunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmove, $groupmode, $initialize, $location, $selectedanswerid, $qocremoved) { //Don't forget to set it as static
+    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmoving, $groupmode, $initialize, $location, $selectedanswerid, $qocremoved) { //Don't forget to set it as static
         global $USER, $DB;
 
         $params = self::validate_parameters(self::user_progress_parameters(), array('treasurehuntid' => $treasurehuntid,
                     "attempttimestamp" => $attempttimestamp, "roadtimestamp" => $roadtimestamp,
-                    'playwithoutmove' => $playwithoutmove, 'groupmode' => $groupmode, 'initialize' => $initialize,
+                    'playwithoutmoving' => $playwithoutmoving, 'groupmode' => $groupmode, 'initialize' => $initialize,
                     'location' => $location, 'selectedanswerid' => $selectedanswerid, 'qocremoved' => $qocremoved));
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -488,12 +488,12 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $updateroad = false;
         }
         $changesinplaymode = false;
-        if ($params['playwithoutmove'] != $treasurehunt->playwithoutmove) {
+        if ($params['playwithoutmoving'] != $treasurehunt->playwithoutmoving) {
             $changesinplaymode = true;
-            if ($treasurehunt->playwithoutmove) {
+            if ($treasurehunt->playwithoutmoving) {
                 $updates->strings[] = get_string('changetoplaywithmove', 'treasurehunt');
             } else {
-                $updates->strings[] = get_string('changetoplaywithoutmove', 'treasurehunt');
+                $updates->strings[] = get_string('changetoplaywithoutmoving', 'treasurehunt');
             }
         }
         $available = treasurehunt_is_available($treasurehunt);
@@ -591,7 +591,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         }
         $result['roadfinished'] = $roadfinished;
         $result['available'] = $available->available;
-        $result['playwithoutmove'] = intval($treasurehunt->playwithoutmove);
+        $result['playwithoutmoving'] = intval($treasurehunt->playwithoutmoving);
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['historicalattempts'] = $historicalattempts;
         $result['qocremoved'] = $qocremoved;

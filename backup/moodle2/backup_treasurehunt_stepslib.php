@@ -49,7 +49,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
         // Define the root element describing the treasurehunt instance.
         $treasurehunt = new backup_nested_element('treasurehunt', array('id'), array(
-            'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmove',
+            'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmoving',
             'groupmode', 'alwaysshowdescription', 'allowattemptsfromdate',
             'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer'));
 

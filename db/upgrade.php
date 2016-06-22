@@ -41,7 +41,18 @@ function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB, $CFG;
 
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
-
+    if ($oldversion < 2016062218) {
+        // Define field grademethod,gradepenlocation and gradepenanswer.
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('playwithoutmove',XMLDB_TYPE_INTEGER,'2',XMLDB_UNSIGNED,XMLDB_NOTNULL,null,0);
+        $newname = 'playwithoutmoving';
+        // Add gradepenlocation if not exists.
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, $newname);
+        }
+        // Quiz savepoint reached.
+        upgrade_mod_savepoint(true, 2016062218, 'treasurehunt');
+    }
     if ($oldversion < 2016052608) {
 
         // Define field grademethod,gradepenlocation and gradepenanswer.
