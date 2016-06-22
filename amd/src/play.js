@@ -368,13 +368,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     qocremoved = response.qocremoved;
                     roadfinished = response.roadfinished;
                     available = response.available;
-                    if (roadfinished || !available) {
-                        clearInterval(interval);
-                    }
                     // Si he enviado una localización o una respuesta imprimo si es correcta o no.
                     if (location || selectedanswerid) {
                         $.mobile.loading("hide");
-                        if (response.status !== null) {
+                        if (response.status !== null && available) {
                             toast(response.status.msg);
                         }
                     }
@@ -389,11 +386,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     if (groupmode != response.groupmode) {
                         groupmode = response.groupmode;
                     }
-                    if (lastattempttimestamp !== response.attempttimestamp || lastroadtimestamp !== response.roadtimestamp || initialize) {
+                    if (lastattempttimestamp !== response.attempttimestamp || lastroadtimestamp !== response.roadtimestamp || initialize || !available) {
                         lastattempttimestamp = response.attempttimestamp;
                         lastroadtimestamp = response.roadtimestamp;
-                        attemptshistory = response.historicalattempts;
-                        changesinattemptshistory = true;
+                        if (response.historicalattempts.length > 0) {
+                            attemptshistory = response.historicalattempts;
+                            changesinattemptshistory = true;
+                        }
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
                         if (response.riddles !== null) {
                             source.clear();
@@ -409,6 +408,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             // Si la pista no esta solucionada aviso de que hay cambios.
                             if (lastsuccessfulriddle.question !== '') {
                                 changesinquestionriddle = true;
+                                $('#validateLocation').hide();
+                            }
+                            else if (!lastsuccessfulriddle.completion) {
+                                $('#validateLocation').hide();
+                            } else {
+                                $('#validateLocation').show();
                             }
                         }
                         // Compruebo si es un multipolygon o se esta inicializando y lo centro.
@@ -440,6 +445,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             body += '<p>' + msg + '</p>';
                         });
                         create_popup('displayupdates', strings["updates"], body);
+                    }
+                    if (roadfinished || !available) {
+                        $('#validateLocation').hide();
+                        clearInterval(interval);
                     }
                 }).fail(function (error) {
                     console.log(error);
@@ -575,11 +584,15 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         var title, riddlename = features.selected[0].get('name'),
                                 riddledescription = features.selected[0].get('description'),
                                 info = features.selected[0].get('info'), body = '';
-                        if (features.selected[0].get('success'))
+                        if (features.selected[0].get('geometrysolved'))
                         {
-                            body = get_block_text(strings["riddlename"], riddlename);
-                            title = strings["overcomeriddle"];
-                            body += get_block_text(strings["riddledescription"], riddledescription);
+                            if (riddlename && riddledescription) {
+                                title = strings["overcomeriddle"];
+                                body = get_block_text(strings["riddlename"], riddlename);
+                                body += get_block_text(strings["riddledescription"], riddledescription);
+                            } else {
+                                title = strings["discoveredlocation"];
+                            }
                         } else {
                             title = strings["failedlocation"];
                         }

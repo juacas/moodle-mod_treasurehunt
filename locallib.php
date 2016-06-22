@@ -437,7 +437,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
                     $attempt->timecreated +=1;
                     insert_attempt($attempt);
                 }
-                $return->update = get_string('overcomeactivitytoend', 'treasurehunt');
+                $return->update = get_string('overcomeactivitytoend', 'treasurehunt',get_activity_to_end_link($nextriddle->activitytoend));
             }
         }
         if ($attempt->success && $nextnoriddle == $noriddles) {
@@ -485,8 +485,8 @@ function get_activity_to_end_link($activitytoend) {
         $modinfo = get_fast_modinfo($COURSE);
         $cmactivitytoend = $modinfo->get_cm($activitytoend);
         //
-        return '<a title="'.$cmactivitytoend->name.'" data-ajax="false" '
-                . 'href="'.$cmactivitytoend->url->__toString().'">'.$cmactivitytoend->name.'</a>';
+        return '<a title="' . $cmactivitytoend->name . '" data-ajax="false" '
+                . 'href="' . $cmactivitytoend->url->__toString() . '">' . $cmactivitytoend->name . '</a>';
     } else {
         return '';
     }
@@ -494,12 +494,14 @@ function get_activity_to_end_link($activitytoend) {
 
 function treasurehunt_is_available($treasurehunt) {
     $timenow = time();
-    if (($timenow > $treasurehunt->cutoffdate && $treasurehunt->cutoffdate) ||
-            ($treasurehunt->allowattemptsfromdate > $timenow)) {
-        return false;
-    } else {
-        return true;
+    $avaible = false;
+    $outoftime = false;
+    if ($timenow > $treasurehunt->cutoffdate && $treasurehunt->cutoffdate) {
+        $outoftime = true;
+    } else if (!($treasurehunt->allowattemptsfromdate > $timenow)) {
+        $avaible = true;
     }
+    return array($avaible, $outoftime);
 }
 
 function get_riddle_answers($riddleid, $context) {
@@ -591,9 +593,10 @@ function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context
         $grouptypewithin = 'at.groupid=0 AND at.userid=?';
         $params = array($roadid, $userid, $roadid, $userid);
     }
-    $query = "SELECT a.id,a.timecreated,a.userid as user,a.riddleid,CASE WHEN a.success = 0 "
+    $query = "SELECT a.id as attemptid,a.timecreated,a.userid as user,a.riddleid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
-            . "r.description END AS description,a.geometrysolved,r.number,apt.geometry,"
+            . "r.description END AS description,CASE WHEN a.geometrysolved "
+            . "THEN r.id ELSE -1 END as id,a.geometrysolved,r.number,apt.geometry,"
             . "r.roadid,a.success FROM (SELECT MAX(at.timecreated) AS maxtime,"
             . "{$geomfuncs['ST_AsText']}(at.location) AS geometry FROM {treasurehunt_attempts} "
             . "at INNER JOIN {treasurehunt_riddles} ri ON ri.id=at.riddleid WHERE ri.roadid=? "
@@ -840,7 +843,7 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
                     $duplicategroupsingroupings) = check_if_user_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
             $roads = add_road_userlist($roads, $groupingid, $grouplist, $attempts);
         }
-        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃƒÂ¡s de un grupo dentro del mismo camino.
+        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃƒÆ’Ã‚Â¡s de un grupo dentro del mismo camino.
         foreach ($totalparticipantsgroups as $group) {
             list($totalparticipants,
                     $duplicateusersingroups) = check_if_user_has_multiple_groups_or_roads($totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups, false);
@@ -877,10 +880,10 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
 function get_strings_play() {
 
     return get_strings(array("overcomeriddle", "failedlocation", "riddlename",
-        "riddledescription", "question", "noasnwerselected",
+        "riddledescription", "question", "noasnwerselected", "timeexceeded",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-        "huntcompleted", "timeexceeded", "answerwarning", "error"), "mod_treasurehunt");
+        "huntcompleted", "discoveredlocation", "answerwarning", "error"), "mod_treasurehunt");
 }
 
 function get_strings_edit() {
@@ -933,7 +936,8 @@ function get_las_successful_attempt($userid, $groupid, $roadid) {
             . "INNER JOIN {treasurehunt_attempts} at ON at.riddleid=ri.id  WHERE "
             . "$grouptypewithin AND ri.roadid=r.roadid AND at.geometrysolved=1)"
             . "AND $grouptype AND r.roadid = ?";
-    return $DB->get_record_sql($sql, $params);
+    $algo = $DB->get_record_sql($sql, $params);
+    return $algo;
 }
 
 // Compruebo si se ha acertado la pista y completado la actividad requerida.
@@ -963,7 +967,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                 if ($usercompletion = check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
-                    $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt');
+                    $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt',get_activity_to_end_link($lastattempt->activitytoend));
                     // Si no existe la pregunta y esta por superar es que la han borrado.
                     if (!$lastattempt->questionsolved && $lastattempt->questiontext === '') {
                         $lastattempt->questionsolved = 1;
@@ -1093,19 +1097,23 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     return $return;
 }
 
-function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $context) {
-
+function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $outoftime, $roadfinished, $context) {
 
     $lastsuccessfulriddle = new stdClass();
 
     // Recupero el ultimo intento con geometria solucionada realizado por el usuario/grupo para esta instancia.
-    if ($attempt = get_las_successful_attempt($userid, $groupid, $roadid)) {
+    $attempt = get_las_successful_attempt($userid, $groupid, $roadid);
+    if ($attempt && !$outoftime) {
         $lastsuccessfulriddle = get_locked_name_and_description($attempt, $context);
-        $lastsuccessfulriddle->id = intval($attempt->id);
-        $lastsuccessfulriddle->number = intval($attempt->number);
+        if (!$roadfinished) {
+            $lastsuccessfulriddle->id = intval($attempt->riddleid);
+        }else{
+            $lastsuccessfulriddle->id = 0;
+        }
         $lastsuccessfulriddle->totalnumber = $noriddles;
         $lastsuccessfulriddle->question = '';
         $lastsuccessfulriddle->answers = array();
+        $lastsuccessfulriddle->number = intval($attempt->number);
         $lastsuccessfulriddle->completion = intval($attempt->completionsolved);
         if (!$attempt->questionsolved) {
             // Envio la pregunta y las respuestas de la pista anterior.
@@ -1113,14 +1121,22 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $con
             $lastsuccessfulriddle->question = file_rewrite_pluginfile_urls($attempt->questiontext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'questiontext', $attempt->riddleid);
         }
     } else {
-        $lastsuccessfulriddle->name = get_string('start', 'treasurehunt');
-        $lastsuccessfulriddle->description = get_string('overcomefirstriddle', 'treasurehunt');
-        $lastsuccessfulriddle->number = 0;
-        $lastsuccessfulriddle->totalnumber = $noriddles;
         $lastsuccessfulriddle->id = 0;
+        $lastsuccessfulriddle->totalnumber = $noriddles;
         $lastsuccessfulriddle->question = '';
-        $lastsuccessfulriddle->completion = 1;
         $lastsuccessfulriddle->answers = array();
+        $lastsuccessfulriddle->number = 0;
+        $lastsuccessfulriddle->completion = 1;
+        if ($outoftime) {
+            if (isset($attempt->number)) {
+                $lastsuccessfulriddle->number = intval($attempt->number);
+            }
+            $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
+            $lastsuccessfulriddle->description = get_string('timeexceeded', 'treasurehunt');
+        } else {
+            $lastsuccessfulriddle->name = get_string('start', 'treasurehunt');
+            $lastsuccessfulriddle->description = get_string('overcomefirstriddle', 'treasurehunt');
+        }
     }
     return $lastsuccessfulriddle;
 }

@@ -105,8 +105,8 @@
             <div role="content" class="ui-content ui-overlay-b">
                 <p>{{#str}} sendlotacion_content, mod_treasurehunt{{/str}}</p>
                 <fieldset class="ui-grid-a">
-                    <div class="ui-block-a"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back">{{#str}} cancel, mod_treasurehunt{{/str}}</a></div>
-                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-rel="back" data-transition="flow" id="sendLocation">{{#str}} send, mod_treasurehunt{{/str}}</a></div>
+                    <div class="ui-block-a"><a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-b">{{#str}} cancel, mod_treasurehunt{{/str}}</a></div>
+                    <div class="ui-block-b"><a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="flow" id="sendLocation">{{#str}} send, mod_treasurehunt{{/str}}</a></div>
                 </fieldset>
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
@@ -135,7 +135,7 @@
     {{!Pagina de capas.}}
     <div data-role="page" id="layerspage" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} layers, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
@@ -148,7 +148,7 @@
     {{!Pagina de historial de intentos.}}
     <div data-role="page" id="historypage" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
@@ -161,7 +161,7 @@
 
     <div data-role="page" id="questionpage" data-theme="b">
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#" data-role="button" data-rel="back" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} question, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
@@ -170,7 +170,7 @@
                 </fieldset>
             </form>
             <fieldset class="ui-grid-a">
-                <div class="ui-block-a"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none" data-rel="back">{{#str}} cancel, mod_treasurehunt{{/str}}</a></div>
+                <div class="ui-block-a"><a href="#mappage" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none">{{#str}} cancel, mod_treasurehunt{{/str}}</a></div>
                 <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b"  data-transition="none" id="sendAnswer">{{#str}} send, mod_treasurehunt{{/str}}</a></div>
             </fieldset>
         </div>
