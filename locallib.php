@@ -600,7 +600,7 @@ function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context
     $query = "SELECT a.id as attemptid,a.timecreated,a.userid as user,a.riddleid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
             . "r.description END AS description,CASE WHEN a.geometrysolved "
-            . "THEN r.id ELSE -1 END as id,a.geometrysolved,r.number,apt.geometry,"
+            . "THEN r.id ELSE null END as id,a.geometrysolved,r.number,apt.geometry,"
             . "r.roadid,a.success FROM (SELECT MAX(at.timecreated) AS maxtime,"
             . "{$geomfuncs['ST_AsText']}(at.location) AS geometry FROM {treasurehunt_attempts} "
             . "at INNER JOIN {treasurehunt_riddles} ri ON ri.id=at.riddleid WHERE ri.roadid=? "
@@ -847,7 +847,7 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
                     $duplicategroupsingroupings) = check_if_user_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
             $roads = add_road_userlist($roads, $groupingid, $grouplist, $attempts);
         }
-        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃƒÆ’Ã‚Â¡s de un grupo dentro del mismo camino.
+        // Compruebo si existen participantes en mas de un grupo dentro del mismo camino. Significa que hay usuarios en mÃƒÆ’Ã†â€™Ãƒâ€šÃ‚Â¡s de un grupo dentro del mismo camino.
         foreach ($totalparticipantsgroups as $group) {
             list($totalparticipants,
                     $duplicateusersingroups) = check_if_user_has_multiple_groups_or_roads($totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups, false);

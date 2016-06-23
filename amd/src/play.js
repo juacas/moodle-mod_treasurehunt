@@ -31,9 +31,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
 
     var init = {
         playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
-            var pergaminoUrl = url.imageUrl('images/pergamino', 'treasurehunt'),
-                    falloUrl = url.imageUrl('images/fallo', 'treasurehunt'),
-                    markerUrl = url.imageUrl('flag-marker', 'treasurehunt'),
+            var parchmenturl = url.imageUrl('parchment', 'treasurehunt'),
+                    failureurl = url.imageUrl('failure', 'treasurehunt'),
+                    markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                     lastsuccessfulriddle = {},
                     interval,
@@ -74,7 +74,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 image: new ol.style.Icon({
                     opacity: 1,
                     scale: 0.2,
-                    src: pergaminoUrl
+                    src: parchmenturl
                 }),
                 text: text,
                 zIndex: 'Infinity'
@@ -83,8 +83,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 image: new ol.style.Icon({
                     anchor: [0.5, 0.5],
                     opacity: 1,
-                    scale: 0.1,
-                    src: falloUrl
+                    scale: 1,
+                    src: failureurl
                 }),
                 text: text,
                 zIndex: 'Infinity'
@@ -93,7 +93,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 image: new ol.style.Icon({
                     opacity: 1,
                     scale: 0.29,
-                    src: pergaminoUrl
+                    src: parchmenturl
                 }),
                 text: selectText,
                 zIndex: 'Infinity'
@@ -101,8 +101,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             var failSelectRiddleStyle = new ol.style.Style({
                 image: new ol.style.Icon({
                     opacity: 1,
-                    scale: 0.14,
-                    src: falloUrl
+                    scale: 0.6,
+                    src: failureurl
                 }),
                 text: selectText,
                 zIndex: 'Infinity'
@@ -134,7 +134,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     anchor: [0.5, 1],
                     opacity: 1,
                     scale: 0.3,
-                    src: markerUrl
+                    src: markerurl
                 })
             });
             /*-------------------------------Layers-----------------------------------*/
@@ -263,7 +263,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     return [styles];
                 }
                 if (!feature.get('geometrysolved')) {
-                    failRiddleStyle.getImage().setScale((view.getZoom() / 220));
+                    failRiddleStyle.getImage().setScale((view.getZoom() / 50));
                     failRiddleStyle.getText().setText('' + noriddle);
                     return [failRiddleStyle];
                 }
