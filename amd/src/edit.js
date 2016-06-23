@@ -25,7 +25,7 @@ require.config({
     paths: {
         openlayers: 'openlayers/ol',
         geocoderjs: 'geocoder/geocoder',
-        'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch.min'
+        'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch'
     }
 });
 define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates'],
@@ -986,7 +986,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             vectorOfPolygons.changed();
                             return;
                         }
-                        // Agrego los polÃƒÂ­gonos a mi objecto que almacena los poligonos seleccionados 
+                        // Agrego los polÃƒÆ’Ã‚Â­gonos a mi objecto que almacena los poligonos seleccionados 
                         // y tambien agrego al vector al que se le aplica la animacion.
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -1320,7 +1320,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         selectRiddleFeatures(stage.roads[roadid].vector, vectorSelected,
                                 riddleid, selectedFeatures, dirtyStage, originalStage);
                         activateEdition();
-                        // Si la pista no tiene geometría resalto el boton de anadir.
+                        // Si la pista no tiene geometrÃ­a resalto el boton de anadir.
                         if ($(this).find(".invalidriddle").length > 0) {
                             $("label[for='radio1']").addClass('highlightbutton');
                         } else {

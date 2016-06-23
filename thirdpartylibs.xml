@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<libraries>
+    <library>
+        <location>js/geocoder/geocoder.js</location>
+        <name>geocoder</name>
+        <version>n/a</version>
+        <license>GPL</license>
+        <licenseversion>2.0</licenseversion>
+    </library>
+    <library>
+        <location>js/openlayers/ol.js/</location>
+        <name>Openlayers</name>
+        <version>3.16.0</version>
+        <license>FreeBSD</license>
+        <licenseversion>n/a</licenseversion>
+    </library>
+    <library>
+        <location>js/jquery-ui-touch-punch/jquery-ui-touch-punch.js/</location>
+        <name>jQuery UI Touch Punch</name>
+        <version>0.2.3</version>
+        <license>GPL</license>
+        <licenseversion>2.0</licenseversion>
+    </library>
+    <library>
+        <location>js/jquery-mobile</location>
+        <name>jQuery Mobile</name>
+        <version>1.4.5</version>
+        <license>Expat</license>
+        <licenseversion>n/a</licenseversion>
+    </library>
+    <library>
+        <location>GeoJSON</location>
+        <name>GeoJSON</name>
+        <version>n/a</version>
+        <license>informal</license>
+        <licenseversion>n/a</licenseversion>
+    </library>
+</libraries>
