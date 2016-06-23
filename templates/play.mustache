@@ -98,7 +98,7 @@
 
         {{!Popup de aviso de envio}}
 
-        <div data-role="popup" id="popupDialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+        <div data-role="popup" id="popupdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
             <div data-role="header" data-theme="b">
                 <h1>{{#str}} sendlotacion_title, mod_treasurehunt{{/str}}</h1>
             </div>
@@ -122,8 +122,8 @@
         <div data-role="content" id="content">		  
             <div id="mapplay"></div>
         </div>
-        <div id="main_footer" data-role="footer" data-position="fixed"  data-tap-toggle="false">
-            <a href="#popupDialog" data-rel="popup" data-position-to="window" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validateLocation">{{#str}} validatelocation, mod_treasurehunt{{/str}}</a>
+        <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
+            <a href="#popupdialog" data-rel="popup" data-position-to="window" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validatelocation">{{#str}} validatelocation, mod_treasurehunt{{/str}}</a>
             <a href="#layerspage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext">{{#str}} layers, mod_treasurehunt{{/str}}</a>
             <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext">{{#str}} history, mod_treasurehunt{{/str}}</a> 
             <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" id="autolocate"></a>

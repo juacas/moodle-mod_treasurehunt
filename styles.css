@@ -1,90 +1,171 @@
-html, body
+.path-mod-treasurehunt html, body
 {
     height: 100%;
 }
-.treasurehunt-editor{
+.path-mod-treasurehunt .treasurehunt-editor{
     width: 100%;
     position: relative;
 }
-#edition label {
+.path-mod-treasurehunt #edition label {
     display: inline-block; margin: 0 auto; /*width: 5%;*/ 
 }
 /*Si no se me pone un background-image posterior*/
-.treasurehunt-editor button{
+.path-mod-treasurehunt .treasurehunt-editor button{
     background-image: none;
 }
-#addriddle, #addroad{margin:0 auto; margin-left: 1%;margin-right:1%;}
-#saveriddle,#removefeature {margin:0 auto;margin-left: 1%; }
-#controlpanel{margin:0 auto}
-//#controlpanel{}
-//#global-map{position: relative;overflow: hidden;padding-bottom: 54%; }
-//#map{position: absolute;top: 0;left: 0;width: 100% ;height: 100% ;}
-#mapedit{position: relative; overflow: hidden;}
+.path-mod-treasurehunt #addriddle, .path-mod-treasurehunt #addroad{
+    margin:0 auto; 
+    margin-left: 1%;
+    margin-right:1%;
+}
+.path-mod-treasurehunt #saveriddle,.path-mod-treasurehunt #removefeature {
+    margin:0 auto;
+    margin-left: 1%; 
+}
+.path-mod-treasurehunt #controlpanel{
+    margin:0 auto
+}
+.path-mod-treasurehunt #mapedit{
+    position: relative; 
+    overflow: hidden;
+}
 /*Selectable y sortable*/
-//div#global-riddlelistpanel{position: relative;float:left;width: 150px;padding-bottom: 54%;max-width: 60%; min-width: 100px;}
-//div#riddlelistpanel { width: 100%; height: 100%; position: absolute; top:0;left:0;bottom: 0;margin:0 auto; overflow-x: hidden;overflow-y:auto;}
-div#riddlelistpanel {float:left; width: 150px;max-width: 60%; min-width: 100px; position: relative; /*overflow-x: hidden;overflow-y:auto;*/}
-div#roadlistpanel{width: 100%; position: static;overflow-x:auto; overflow-y: hidden; top:0;left:0; display:block;cursor:default;clear: both;}
-ul#riddlelist {width: 100%;height: 100%; position: relative; margin:0 auto;overflow-x: hidden;overflow-y:auto;}
-ul#roadlist {position: relative;white-space:nowrap;top:0;left:0;bottom:0;margin:0 auto; display:table}
-ul#riddlelist li,ul#roadlist li{border: 2px solid gray; list-style: none; cursor:default;  
-                                -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
-                                -moz-box-sizing: border-box;    /* Firefox, other Gecko */
-                                box-sizing: border-box;         /* Opera/IE 8+ */
+.path-mod-treasurehunt #riddlelistpanel {
+    float:left; 
+    width: 150px;
+    max-width: 60%; 
+    min-width: 100px; 
+    position: relative; 
+}
+.path-mod-treasurehunt #roadlistpanel{
+    width: 100%; 
+    position: static;
+    overflow-x:auto; 
+    overflow-y: hidden; 
+    top:0;left:0; 
+    display:block;
+    cursor:default;
+    clear: both;
+}
+.path-mod-treasurehunt #riddlelist {
+    width: 100%;
+    height: 100%; 
+    position: relative; 
+    margin:0 auto;
+    overflow-x: hidden;
+    overflow-y:auto;
+}
+.path-mod-treasurehunt #roadlist {
+    position: relative;
+    white-space:nowrap;
+    top:0;
+    left:0;
+    bottom:0;
+    margin:0 auto; 
+    display:table
+}
+.path-mod-treasurehunt #riddlelist li, .path-mod-treasurehunt #roadlist li{
+    border: 2px solid gray; 
+    list-style: none; 
+    cursor:default;  
+    -webkit-box-sizing: border-box; /* Safari/Chrome, other WebKit */
+    -moz-box-sizing: border-box;    /* Firefox, other Gecko */
+    box-sizing: border-box;         /* Opera/IE 8+ */
 }   
-ul#riddlelist li {width: 100%;display:table;table-layout: fixed;}
-ul#roadlist li {display: table-cell;}
-div.handle,div.nohandle {background: #f8f8f8; position: relative; width: 30px; display:table-cell;vertical-align: middle}
-div.handle {cursor: n-resize}
-div.modifyriddle, div.modifyroad{position: relative; display:table-cell;vertical-align: middle; text-align: center; width: 20px}
-div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: relative; display:table-cell; text-align: center;vertical-align: middle;text-overflow:ellipsis; white-space: nowrap; overflow: hidden; }
-.ui-selecting { background: #eee; }
-.ui-selected { background: rgba(22,145,190,0.2); }
-.sortable-number { font-weight: bold;}
-.validriddle { 
+.path-mod-treasurehunt #riddlelist li {
+    width: 100%;
+    display:table;
+    table-layout: fixed;
+}
+.path-mod-treasurehunt #roadlist li {
+    display: table-cell;
+}
+.path-mod-treasurehunt #riddlelist li:hover,.path-mod-treasurehunt #roadlist li:hover {
+   background: #eee; 
+}
+.path-mod-treasurehunt .handle, .path-mod-treasurehunt .nohandle {
+    background: #f8f8f8; 
+    position: relative; 
+    width: 30px; 
+    display:table-cell;
+    vertical-align: middle}
+.path-mod-treasurehunt .handle {
+    cursor: n-resize
+}
+.path-mod-treasurehunt .modifyriddle, .path-mod-treasurehunt .modifyroad{
+    position: relative; 
+    display:table-cell;
+    vertical-align: middle; 
+    text-align: center; 
+    width: 20px
+}
+.path-mod-treasurehunt .riddlename, .path-mod-treasurehunt .roadname{ 
+    padding-left: 5px;
+    padding-right: 5px;
+    position: relative; 
+    display:table-cell; 
+    text-align: center;
+    vertical-align: middle;
+    text-overflow:ellipsis; 
+    white-space: nowrap; 
+    overflow: hidden; 
+}
+.path-mod-treasurehunt .ui-selected { 
+    background: rgba(22,145,190,0.2); 
+}
+.path-mod-treasurehunt .ui-selected:hover{ 
+    background: rgba(22,145,190,0.2) !important; 
+}
+.path-mod-treasurehunt .sortable-number { 
+    font-weight: bold;
+}
+.path-mod-treasurehunt .validriddle { 
     box-shadow: 0 0 12px #28921f;
     z-index: 10;
 }
-.invalidriddle { 
+.path-mod-treasurehunt .invalidriddle { 
     box-shadow: 0 0 12px #b03535;
     z-index: 10;
 }
-.invisible {
+.path-mod-treasurehunt .invisible {
     display: none;
 }
-.highlightbutton {
+.path-mod-treasurehunt .highlightbutton {
     box-shadow: 0 0 13px #2F33BA;
     z-index: 10;
 }
-.ui-icon-trash, .ui-icon-pencil,.ui-icon-alert,.ui-icon-info  {cursor:pointer;}
-.ui-autocomplete-loading {
+.path-mod-treasurehunt .ui-icon-trash,.path-mod-treasurehunt .ui-icon-pencil,
+.path-mod-treasurehunt .ui-icon-alert,.path-mod-treasurehunt .ui-icon-info  {
+    cursor:pointer;
+}
+.path-mod-treasurehunt .ui-autocomplete-loading {
     background: white url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif") right center no-repeat;
 }
-.ui-autocomplete {
+.path-mod-treasurehunt .ui-autocomplete {
     overflow-y: auto;
     overflow-x: hidden;
 }
 /** Usado para meter el icono dentro del input**/
-#searchcontainer {
+.path-mod-treasurehunt #searchcontainer {
     display: inline-block;
     position:relative;
     padding:0;
     margin-left: 1%;
 }
-.searchicon {
+.path-mod-treasurehunt .searchicon {
     position:absolute;
     bottom:8px;
     left:9px;
     width:15px;
 }
-.closeicon {
+.path-mod-treasurehunt .closeicon {
     position:absolute;
     bottom:7px;
     right: 25px;
     width:15px;
     cursor: pointer;
 }
-.searchaddress{
+.path-mod-treasurehunt .searchaddress{
     border: 1px solid #999 !important;
     padding: 3px 43px 3px 30px !important;
     margin:0 !important;
@@ -92,7 +173,7 @@ div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: rel
 
 /* Usado para el resizable**/
 
-.egrip-container{
+.path-mod-treasurehunt .egrip-container{
     position: absolute;
     top: 70px;
     right: -35px;
@@ -100,11 +181,11 @@ div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: rel
     z-index: 90;
 }
 /* Usado para la tabla**/
-.path-mod-treasurehunt .successfulattempt,.path-mod-treasurehunt .successwithoutfailures{
+#page-mod-treasurehunt-view .successfulattempt,.path-mod-treasurehunt .successwithoutfailures{
     background-color: #5cd053 !important;
     color:black !important;
 }
-.path-mod-treasurehunt .failedattempt,.path-mod-treasurehunt .failure{
+#page-mod-treasurehunt-view .failedattempt,.path-mod-treasurehunt .failure{
     background-color: #d45252 !important;
     color:black !important;
 }
@@ -120,14 +201,14 @@ div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: rel
     text-align: center;
 }
 
-.treasurehunt-editor-loader{
+.path-mod-treasurehunt .treasurehunt-editor-loader{
     position: absolute;
     margin-left: auto;
     margin-right: auto;
     left: 0;
     right: 0;
 }
-.loader-circle-outside {
+.path-mod-treasurehunt .loader-circle-outside {
     background-color: rgba(0,0,0,0);
     border: 5px solid rgba(26,26,26,0.9);
     opacity: .9;
@@ -146,7 +227,7 @@ div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: rel
 
 }
 
-.loader-circle-inside {
+.path-mod-treasurehunt .loader-circle-inside {
     background-color: rgba(0,0,0,0);
     border: 5px solid rgba(26,26,26,0.9);
     opacity: .9;
@@ -303,26 +384,125 @@ div.riddlename, div.roadname{ padding-left: 5px;padding-right: 5px;position: rel
 }
 
 @media screen and (max-height: 480px) {
-    #mapedit{height: 160px}
-    div#riddlelistpanel{height: 160px}
-    .treasurehunt-editor-loader{margin-top: 75px}
-    .ui-autocomplete {max-height:192px}
+    .path-mod-treasurehunt #mapedit{height: 160px}
+    .path-mod-treasurehunt #riddlelistpanel{height: 160px}
+    .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 75px}
+    .path-mod-treasurehunt .ui-autocomplete {max-height:192px}
 }
 @media screen and (min-height: 481px) {
-    #mapedit{height: 325px}
-    div#riddlelistpanel{height: 325px}
-    .treasurehunt-editor-loader{margin-top: 157px}
-    .ui-autocomplete {max-height: 357px}
+    .path-mod-treasurehunt #mapedit{height: 325px}
+    .path-mod-treasurehunt #riddlelistpanel{height: 325px}
+    .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 157px}
+    .path-mod-treasurehunt .ui-autocomplete {max-height: 357px}
 }
 @media screen and (min-height: 620px) {
-    #mapedit{height: 450px}
-    div#riddlelistpanel{height: 450px}
-    .treasurehunt-editor-loader{margin-top: 220px}
-    .ui-autocomplete {max-height: 482px}
+    .path-mod-treasurehunt #mapedit{height: 450px}
+    .path-mod-treasurehunt #riddlelistpanel{height: 450px}
+    .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 220px}
+    .path-mod-treasurehunt .ui-autocomplete {max-height: 482px}
 }
 @media screen and (min-height: 750px) {
-    #mapedit{height: 560px}
-    div#riddlelistpanel{height: 560px}
-    .treasurehunt-editor-loader{margin-top: 275px}
-    .ui-autocomplete {max-height: 592px}
+    .path-mod-treasurehunt #mapedit{height: 560px}
+    .path-mod-treasurehunt #riddlelistpanel{height: 560px}
+    .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 275px}
+    .path-mod-treasurehunt .ui-autocomplete {max-height: 592px}
+}
+/* MAP PAGE*/
+#page-mod-treasurehunt-play,#page-mod-treasurehunt-play #content{
+    padding: 0;
+}
+#page-mod-treasurehunt-play #mapplay {
+    height:calc(100% - 104px);
+    width: 100%;
+    position:absolute;
+    left:0;
+}
+#page-mod-treasurehunt-play #validatelocation{
+    padding-top: .6em;
+    padding-bottom: .6em;
+    display:none;
+}
+#page-mod-treasurehunt-play .successfulattempt::after{
+    background-color: #5cd053 !important;
+}
+#page-mod-treasurehunt-play .failedattempt::after{
+    background-color:#d45252 !important;
+}
+#page-mod-treasurehunt-play h1, h2, h3, h4, h5, h6{
+    line-height:inherit;
+    color:white;
+}
+#page-mod-treasurehunt-play .ui-listview>.ui-li-static,#page-mod-treasurehunt-play .ui-listview>.ui-li-divider, 
+#page-mod-treasurehunt-play .ui-listview>li>a.ui-btn,#page-mod-treasurehunt-play .ui-btn,
+#page-mod-treasurehunt-play [data-role="popup"] .ui-title{
+    white-space:normal !important;
+}
+
+#page-mod-treasurehunt-play #navigation {
+    position: absolute;
+    top: -80px;
+    right: 10px;
+    z-index: 1000;
+    background-color: rgba(255,255,255,.4);
+    border-radius: 4px;
+    padding:1px;
+}
+#page-mod-treasurehunt-play #navigation button {
+    display: block;
+    height: 1.375em;
+    width: 1.375em;
+    font-size: 1.14em;
+    background-image: none;
+    margin:1px;
+    padding:0;
+}
+#page-mod-treasurehunt-play #searchpanel .ui-panel-inner {
+    margin-top:100px;
+} 
+#page-mod-treasurehunt-play .ui-panel-inner {
+    margin-top:48px;
+}
+#page-mod-treasurehunt-play .ui-popup{
+    max-width: 400px;
+    min-width: 250px;
+}
+#page-mod-treasurehunt-play .ui-popup-container [data-role="content"]{
+    overflow-y:auto;
+    overflow-x:hidden;
+}
+#page-mod-treasurehunt-play [data-role="popup"] .ui-title{
+    margin: 0 40px;
+}
+#page-mod-treasurehunt-play .center-wrapper,.ui-footer{
+    text-align: center;
+}
+#page-mod-treasurehunt-play .checked {
+    opacity: 1;
+}
+#page-mod-treasurehunt-play .unchecked {
+    opacity: 0.3;
+}
+#page-mod-treasurehunt-play .ui-panel-inner {
+    position: absolute;
+    top: 1px;
+    left: 0;
+    right: 0;
+    bottom: 0px;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+}
+#page-mod-treasurehunt-play .custom-count-pos{
+    font-size: 11px;
+    font-weight: bold;
+    padding: 0.2em 0.5em;
+    float: right;
+}
+#page-mod-treasurehunt-play .toast{
+    display: block;
+    opacity: 0.90;
+    position: fixed;
+    padding: 7px;
+    text-align: center;
+    width: 270px;
+    background-color:black;
 }

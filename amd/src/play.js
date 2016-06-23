@@ -81,7 +81,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             });
             var failRiddleStyle = new ol.style.Style({
                 image: new ol.style.Icon({
-                    anchor: [0.5, 0.5],
+                    anchor: [0.2, 0.2],
                     opacity: 1,
                     scale: 1,
                     src: failureurl
@@ -100,6 +100,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             });
             var failSelectRiddleStyle = new ol.style.Style({
                 image: new ol.style.Icon({
+                    anchor: [0.2, 0.2],
                     opacity: 1,
                     scale: 0.6,
                     src: failureurl
@@ -408,12 +409,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             // Si la pista no esta solucionada aviso de que hay cambios.
                             if (lastsuccessfulriddle.question !== '') {
                                 changesinquestionriddle = true;
-                                $('#validateLocation').hide();
+                                $('#validatelocation').hide();
                             }
                             else if (!lastsuccessfulriddle.completion) {
-                                $('#validateLocation').hide();
+                                $('#validatelocation').hide();
                             } else {
-                                $('#validateLocation').show();
+                                $('#validatelocation').show();
                             }
                         }
                         // Compruebo si es un multipolygon o se esta inicializando y lo centro.
@@ -447,7 +448,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         create_popup('displayupdates', strings["updates"], body);
                     }
                     if (roadfinished || !available) {
-                        $('#validateLocation').hide();
+                        $('#validatelocation').hide();
                         clearInterval(interval);
                     }
                 }).fail(function (error) {
@@ -516,7 +517,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     } else {
                         // Anado cada intento
                         attemptshistory.forEach(function (attempt) {
-                            $("<li><span class='ui-btn-icon-left " + (attempt.penalty ? 'ui-icon-delete failedattempt1' : 'ui-icon-check successfulattempt1') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
+                            $("<li><span class='ui-btn-icon-left " + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
 
                         });
                     }
@@ -658,7 +659,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
             });
             // Remove the popup after it has been closed to manage DOM size
-            $(document).on("popupafterclose", ".ui-popup:not(#popupDialog)", function () {
+            $(document).on("popupafterclose", ".ui-popup:not(#popupdialog)", function () {
                 $(this).remove();
                 select.getFeatures().clear();
             });
@@ -722,7 +723,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 }
 
             });
-            $('#validateLocation').on('click', function (event) {
+            $('#validatelocation').on('click', function (event) {
                 if (roadfinished) {
                     event.preventDefault();
                     toast(strings['huntcompleted']);

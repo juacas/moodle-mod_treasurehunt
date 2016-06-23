@@ -40,7 +40,7 @@ $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-require_capability('mod/treasurehunt:play', $context, null,false);
+require_capability('mod/treasurehunt:play', $context, null, false);
 
 //Poner evento de edicion o algo asi
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
@@ -64,7 +64,7 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
 // Get last timestamp 
 $user = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id, $user->groupid, $user->roadid);
-$gameupdatetime =  get_setting_game_update_time()*1000;
+$gameupdatetime = get_setting_game_update_time() * 1000;
 
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
@@ -72,10 +72,8 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
-    $lastattempttimestamp, $lastroadtimestamp,$gameupdatetime));
-//$PAGE->requires->css('/mod/treasurehunt/css/ol.css');
+    $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime));
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
-$PAGE->requires->css('/mod/treasurehunt/css/mobile-jq.css');
 
 $PAGE->set_pagelayout('embedded');
 
