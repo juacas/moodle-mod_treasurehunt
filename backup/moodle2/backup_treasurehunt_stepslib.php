@@ -93,26 +93,15 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
 
         // Define sources
-        $geomfuncs = get_geometry_functions($DB);
         $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
 
         $road->set_source_table('treasurehunt_roads', array('treasurehuntid' => backup::VAR_PARENTID), 'id ASC');
-        $riddle->set_source_sql("SELECT id,name,roadid,number,"
-                . "description,descriptionformat,descriptiontrust,"
-                . "timecreated,timemodified,activitytoend,questiontext,"
-                . "questiontextformat,questiontexttrust, {$geomfuncs['ST_AsText']}(geom) as geom "
-                . "FROM {treasurehunt_riddles} "
-                . "WHERE roadid = ? order by id ASC", array('roadid' => backup::VAR_PARENTID));
+        $riddle->set_source_table('treasurehunt_riddles', array('roadid' => backup::VAR_PARENTID));
         $answer->set_source_table('treasurehunt_answers', array('riddleid' => backup::VAR_PARENTID), 'id ASC');
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
-            $attempt->set_source_sql("SELECT id,riddleid,timecreated,"
-                    . "userid,groupid,success,type,completionsolved,"
-                    . "questionsolved,geometrysolved,penalty,"
-                    . "{$geomfuncs['ST_AsText']}(location) as location "
-                    . "FROM {treasurehunt_attempts} "
-                    . "WHERE riddleid = ? order by id ASC", array('riddleid' => backup::VAR_PARENTID));
+            $attempt->set_source_table('treasurehunt_attempts', array('riddleid' => backup::VAR_PARENTID));
         }
 
 

@@ -113,6 +113,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     } else if ($entry = $mform->get_data()) {
 
         // Actualizamos los campos
+        $timenow = time();
         $entry->name = trim($entry->name);
         $entry->description = '';          // updated later
         $entry->descriptionformat = FORMAT_HTML; // updated later
@@ -122,9 +123,11 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         $entry->questiontexttrust = 0;           // updated later
 
         if (empty($entry->id)) {
+            $entry->timecreated = $timenow;
             $entry->id = insert_riddle_form($entry);
             $isnewentry = true;
         } else {
+            $entry->timemodified = $timenow;
             $isnewentry = false;
         }
 
@@ -141,7 +144,6 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             if (isset($entry->answertext_editor)) {
                 // Proceso los editores de respuesta y guardo las respuestas.
                 foreach ($entry->answertext_editor as $key => $answertext) {
-                    $timenow = time();
                     if (isset($answers) && count($answers) > 0) {
                         $answer = array_shift($answers);
                         if (trim($answertext['text']) === '') {
@@ -177,7 +179,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             }
         }
         // Actualizo la pista con los ficheros procesados.
-        update_riddle_form($entry);
+        $DB->update_record('treasurehunt_riddles', $entry);
 
         // Trigger event and update completion (if entry was created).
         $eventparams = array(

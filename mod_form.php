@@ -98,7 +98,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if (empty($this->_cm)) {
             $mform->setDefault('grade[modgrade_type]', 'point');
         }
-        if (!($this->current->grade > 0)) {
+        if (isset($this->current->grade) && !($this->current->grade > 0)) {
             $mform->setDefault('grade[modgrade_point]', $treasurehuntconfig->maximumgrade);
         }
         // Grading method.

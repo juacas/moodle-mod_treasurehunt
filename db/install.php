@@ -61,25 +61,14 @@ function install_geometry_columns() {
                     if ($postgis === 0) {
                         $DB->execute('create extension postgis');
                     }
-                    // Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                    if (!$dbman->field_exists('treasurehunt_riddles', 'geom')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom geometry(MULTIPOLYGON,0)');
-                    }
-                    // Create points
-                    if (!$dbman->field_exists('treasurehunt_attempts', 'location')) {
-                        $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location geometry(POINT,0) NOT NULL');
-                    }
-                } catch (ddl_change_structure_exception $ex) {
+                } catch (Exception $ex) {
                     set_config('geometrysupport', false, 'mod_treasurehunt');
                     throw new plugin_defective_exception('treasurehunt',
-                    'Misconfigured database ' . $dbtype . ' Must have geometry capabilities installed. Please install postgis.');
+                    'Misconfigured database ' . $dbtype . ' Must have geometry capabilities installed. Please install postgis.'.$ex->getMessage());
                 }
                 break;
             case 'mysql':
-                //Create multipolygon. change_database_structure no permite poner la tabla entre corchetes
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_riddles ADD geom MULTIPOLYGON');
-                //Create points
-                $DB->change_database_structure('ALTER TABLE ' . $CFG->prefix . 'treasurehunt_attempts ADD location POINT NOT NULL');
+                // All ok.
                 break;
             default:
                 set_config('geometrysupport', false, 'mod_treasurehunt');

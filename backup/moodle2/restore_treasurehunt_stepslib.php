@@ -111,25 +111,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-
-        $geomfuncs = get_geometry_functions($DB);
-        $sql = "INSERT INTO {treasurehunt_riddles} (name, roadid, "
-                . "number, description, descriptionformat, descriptiontrust, "
-                . "timecreated,timemodified,activitytoend,questiontext,questiontextformat,"
-                . "questiontexttrust,geom) VALUES ((?),(?),(?),(?),(?),(?),"
-                . "(?),(?),(?),(?),(?),(?),{$geomfuncs['ST_GeomFromText']}((?)))";
-        $params = array($data->name, $data->roadid, $data->number, $data->description,
-            $data->descriptionformat, $data->descriptiontrust, $data->timecreated,
-            $data->timemodified, $data->activitytoend, $data->questiontext,
-            $data->questiontextformat, $data->questiontexttrust, $data->geom);
-        $DB->execute($sql, $params);
-        $sql = 'SELECT id FROM {treasurehunt_riddles} WHERE name= ? AND roadid = ? '
-                . 'AND number = ? AND description = ? AND descriptionformat = ? AND '
-                . 'descriptiontrust = ? AND timecreated = ? AND timemodified = ? AND '
-                . 'activitytoend = ? AND questiontext = ? AND questiontextformat = ? '
-                . 'AND questiontexttrust = ?';
-        $newitemid = $DB->get_record_sql($sql, $params);
-        $this->set_mapping('treasurehunt_riddle', $oldid, $newitemid->id);
+        $newitemid = $DB->insert_record('treasurehunt_riddles', $data);
+        $this->set_mapping('treasurehunt_riddle', $oldid, $newitemid);
     }
 
     protected function process_treasurehunt_answer($data) {
@@ -156,21 +139,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data->riddleid = $this->get_new_parentid('treasurehunt_riddle');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
-        $data->timemodified = $this->apply_date_offset($data->timemodified);
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->groupid = $this->get_mappingid('groups', $data->groupid);
 
-        $geomfuncs = get_geometry_functions($DB);
-        $sql = "INSERT INTO {treasurehunt_attempts} (riddleid, timecreated, "
-                . "userid,groupid,success,penalty,type, "
-                . "completionsolved,questionsolved,geometrysolved,"
-                . "location) VALUES ((?),(?),(?),(?),(?),"
-                . "(?),(?),(?),(?),(?),{$geomfuncs['ST_GeomFromText']}((?)))";
-        $params = array($data->riddleid, $data->timecreated, $data->userid,
-            $data->groupid, $data->success, $data->penalty, $data->type,
-            $data->completionsolved, $data->questionsolved, $data->geometrysolved,
-            $data->location);
-        $DB->execute($sql, $params);
+        $newitemid = $DB->insert_record('treasurehunt_attempts', $data);
+
         // No need to save this mapping as far as nothing depend on it
         // (child paths, file areas nor links decoder)
     }
