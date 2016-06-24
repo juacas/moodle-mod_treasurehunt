@@ -8,7 +8,7 @@
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
                 <FIELD NAME="course" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Course treasure hunt activity belongs to"/>
-                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for moodle instances"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for moodle instances"/>
                 <FIELD NAME="intro" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General introduction of the treasurehunt activity"/>
                 <FIELD NAME="introformat" TYPE="int" LENGTH="4" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Format of the intro field (MOODLE, HTML, MARKDOWN...)"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
@@ -25,16 +25,14 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="course" TYPE="foreign" FIELDS="course" REFTABLE="course" REFFIELDS="id"/>
             </KEYS>
-            <INDEXES>
-                <INDEX NAME="course" UNIQUE="false" FIELDS="course"/>
-            </INDEXES>
         </TABLE>
         <TABLE NAME="treasurehunt_roads" COMMENT="This table saves information about a road of mod_treasurehunt in a course.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
                 <FIELD NAME="treasurehuntid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Identying the activity created"/>
-                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for moodle instances"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for each road"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifies the group can play this road"/>
@@ -43,15 +41,15 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="treasurehuntid" TYPE="foreign" FIELDS="treasurehuntid" REFTABLE="treasurehunt" REFFIELDS="id"/>
+                <KEY NAME="groupid" TYPE="foreign" FIELDS="groupid" REFTABLE="groups" REFFIELDS="id"/>
+                <KEY NAME="groupingid" TYPE="foreign" FIELDS="groupingid" REFTABLE="groupings" REFFIELDS="id"/>
             </KEYS>
-            <INDEXES>
-                <INDEX NAME="treasurehuntid" UNIQUE="false" FIELDS="treasurehuntid"/>
-            </INDEXES>
         </TABLE>
         <TABLE NAME="treasurehunt_riddles" COMMENT="This table saves information about each riddle of every road in a course.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
-                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="name field for each riddle"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for each riddle"/>
                 <FIELD NAME="roadid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Identifying the road created"/>
                 <FIELD NAME="number" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Order of the riddles in every road. Every road starts with riddle = 1"/>
                 <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General description of the riddle"/>
@@ -59,16 +57,17 @@
                 <FIELD NAME="descriptiontrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false"/>
+                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="Activity to be completed before the riddle show"/>
                 <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question"/>
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>                
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="roadid" TYPE="foreign" FIELDS="roadid" REFTABLE="treasurehunt_roads" REFFIELDS="id"/>
+                <KEY NAME="activitytoend" TYPE="foreign" FIELDS="activitytoend" REFTABLE="course_modules" REFFIELDS="instance"/>
             </KEYS>
             <INDEXES>
-                <INDEX NAME="roadid" UNIQUE="false" FIELDS="roadid"/>
                 <INDEX NAME="number" UNIQUE="false" FIELDS="number"/>
             </INDEXES>
         </TABLE>
@@ -77,9 +76,9 @@
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
                 <FIELD NAME="riddleid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Identifies the riddle that the user is trying to solve "/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The user id"/>
-                <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id"/>
-                <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been discovered"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The user id who made the attempt"/>
+                <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id who made the attempt"/>
+                <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been overcome"/>
                 <FIELD NAME="penalty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If it is true flag as failed a question or location"/>
                 <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and completion"/>
                 <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's question has been solved"/>
@@ -88,10 +87,12 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="groupid" TYPE="foreign" FIELDS="groupid" REFTABLE="groups" REFFIELDS="id"/>
+                <KEY NAME="riddleid" TYPE="foreign" FIELDS="riddleid" REFTABLE="treasurehunt_riddles" REFFIELDS="id"/>
             </KEYS>
             <INDEXES>
-                <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
-                <INDEX NAME="type" UNIQUE="false" FIELDS="type"/>
+                <INDEX NAME="success" UNIQUE="false" FIELDS="success"/>
             </INDEXES>
         </TABLE>     
         <TABLE NAME="treasurehunt_locks" COMMENT="Manages edition locks of treasurehunt.">
@@ -103,11 +104,9 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="treasurehuntid" TYPE="foreign" FIELDS="treasurehuntid" REFTABLE="treasurehunt" REFFIELDS="id"/>
             </KEYS>
-            <INDEXES>
-                <INDEX NAME="treasurehuntid" UNIQUE="false" FIELDS="treasurehuntid"/>
-                <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
-            </INDEXES>
         </TABLE>
         <TABLE NAME="treasurehunt_answers" COMMENT="This table saves information about each answer of every riddle's question.">
             <FIELDS>
@@ -122,6 +121,7 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="riddleid" TYPE="foreign" FIELDS="riddleid" REFTABLE="treasurehunt_riddles" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
     </TABLES>
