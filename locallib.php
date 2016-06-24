@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -27,7 +26,8 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->dirroot/mod/treasurehunt/lib.php");
-require_once (dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
+require_once("$CFG->dirroot/mod/treasurehunt/GeoPHP/geoPHP.inc");
+require_once(dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
 
 
 
@@ -62,7 +62,27 @@ function object_to_geojson($text) {
     $GeoJSON = new GeoJSON();
     return $GeoJSON->dump($text);
 }
-
+/**
+ * Check if a point in inside a multipolygon geometry
+ * @param type $mpolygon_wkt
+ * @param type $point_wkt
+ * @return boolean
+ */
+function check_point_in_multipolygon($mpolygon_wkt,$point_wkt){
+$geometry = \geoPHP\geoPHP::load($mpolygon_wkt,'wkt');
+$point = \geoPHP\geoPHP::load($point_wkt);
+$numGeom = $geometry->numGeometries();
+for($i=1;$i<=$numGeom;$i++){
+    $geom=$geometry->geometryN($i);
+    if ( $geom instanceof geoPHP\Polygon){
+        $result=$geom->pointInPolygon($point);
+        if ($result){
+            return true;
+        };
+    }
+}
+return false;
+}
 /* ------------------------------------------------------------------------------ */
 
 /**
@@ -99,16 +119,12 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
     $riddle->geom = object_to_wkt($geometry);
     $riddle->timemodified = time();
     $riddle->id = $feature->getId();
-    $sql = 'SELECT id,number FROM {treasurehunt_riddles}  WHERE id=?';
     $parms = array('id' => $riddle->id);
-    if (!$entry = $DB->get_record_sql($sql, $parms)) {
-        print_error('noexsitsriddle', 'treasurehunt', '', $riddle->number);
-    }
+    $entry = $DB->get_record('treasurehunt_riddles',$parms,'id,number',MUST_EXIST);
     if (check_road_is_blocked($riddle->roadid) && ($riddle->number != $entry->number)) {
         // No se puede cambiar el numero de pista una vez bloqueado el camino.
         print_error('notchangeorderriddle', 'treasurehunt');
     }
-
     // Si intento salvar una pista sin geometria devuelvo error
     if (count($geometry->getComponents()) === 0) {
         print_error('saveemptyridle', 'treasurehunt');
@@ -119,19 +135,17 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
 
 function delete_riddle($id) {
     GLOBAL $DB;
-    $riddle_sql = 'SELECT number,roadid FROM {treasurehunt_riddles} WHERE id = ?';
-    $riddle_result = $DB->get_record_sql($riddle_sql, array($id));
+    $riddle_result = $DB->get_record('treasurehunt_riddles',array('id'=>$id),'number,roadid',MUST_EXIST);
     if (check_road_is_blocked($riddle_result->roadid)) {
         // No se puede borrar una pista de un camino empezado.
         print_error('notdeleteriddle', 'treasurehunt');
     }
-    $table = 'treasurehunt_riddles';
-    $select = 'id = ?';
-    $params = array($id);
-    $DB->delete_records_select($table, $select, $params);
+    
+    
+    $DB->delete_records('treasurehunt_riddles', array('id'=>$id));
     $table = 'treasurehunt_attempts';
     $select = 'riddleid = ?';
-    $DB->delete_records_select($table, $select, $params);
+    $DB->delete_records('treasurehunt_attempts', array('riddleid'=>$id));
     $sql = 'UPDATE {treasurehunt_riddles} '
             . 'SET number = number - 1 WHERE roadid = (?) AND number > (?)';
     $params = array($riddle_result->roadid, $riddle_result->number);
@@ -160,8 +174,7 @@ function get_total_roads($treasurehuntid) {
 
 function get_total_riddles($roadid) {
     GLOBAL $DB;
-    $sql = "SELECT COUNT(*) as  number FROM {treasurehunt_riddles} WHERE roadid = ?";
-    $number = $DB->get_record_sql($sql, array($roadid));
+    $number = $DB->count_records('treasurehunt_riddles', array('roadid'=>$roadid));
     return $number->number;
 }
 
@@ -187,7 +200,12 @@ function check_if_user_has_finished($userid, $groupid, $roadid) {
         return false;
     }
 }
-
+/**
+ * 
+ * @param moodle_database $DB
+ * @return string
+ * @deprecated since version 1.0
+ */
 function get_geometry_functions(moodle_database $DB) {
     $info = $DB->get_server_info();
     $dbtype = $DB->get_dbfamily();
@@ -317,7 +335,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
     $return->roadfinished = false;
     $locationwkt = object_to_wkt($point);
     // Recupero los datos del ultimo intento con geometria acertada para saber si tiene geometria resuelta y no esta superada.
-    $currentriddle = get_las_successful_attempt($userid, $groupid, $roadid);
+    $currentriddle = get_last_successful_attempt($userid, $groupid, $roadid);
     if ($currentriddle->success || !$currentriddle) {
         $return->newattempt = true;
         if ($currentriddle) {
@@ -326,13 +344,15 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
             $nextnoriddle = 1;
         }
         // Compruebo si la geometria esta dentro.
-        $geomfuncs = get_geometry_functions($DB);
-        $query = "SELECT id,questiontext,activitytoend, {$geomfuncs['ST_Intersects']}({$geomfuncs['ST_GeomFromText']}(geom),{$geomfuncs['ST_GeomFromText']}"
-                . "((?))) as inside,number from {treasurehunt_riddles} where number=(?) and roadid=(?)";
-        $params = array($locationwkt, $nextnoriddle, $roadid);
-        $nextriddle = $DB->get_record_sql($query, $params);
+//        $geomfuncs = get_geometry_functions($DB);
+//        $query = "SELECT id,questiontext,activitytoend, {$geomfuncs['ST_Intersects']}({$geomfuncs['ST_GeomFromText']}(geom),{$geomfuncs['ST_GeomFromText']}"
+//                . "((?))) as inside,number from {treasurehunt_riddles} where number=(?) and roadid=(?)";
+//        $params = array($locationwkt, $nextnoriddle, $roadid);
+//        $nextriddle = $DB->get_record_sql($query, $params);
+        $nextriddle = $DB->get_record('treasurehunt_riddles',array('number'=>$nextnoriddle,'roadid'=>$roadid),'*',MUST_EXIST);
+        $inside= check_point_in_multipolygon($nextriddle->geom, $locationwkt);
         // Si esta dentro
-        if ($nextriddle->inside == 't' || $nextriddle->inside == 1) {
+        if ($inside) {
             $nextriddle->inside = 1;
             $questionsolved = ($nextriddle->questiontext === '' ? true : false);
             $completionsolved = ($nextriddle->activitytoend == 0 ? true : false);
@@ -450,7 +470,7 @@ function get_riddle_answers($riddleid, $context) {
     global $DB;
 
     $sql = "SELECT id,answertext from {treasurehunt_answers} WHERE riddleid = ?";
-    $answers = $DB->get_records_sql($sql, array($riddleid));
+    $answers = $DB->get_records('treasurehunt_answers', array('riddleid'=>$riddleid),'','id,answertext');
     foreach ($answers as &$answer) {
         $answer->answertext = file_rewrite_pluginfile_urls($answer->answertext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'answertext', $answer->id);
     }
@@ -856,7 +876,7 @@ function get_last_timestamps($userid, $groupid, $roadid) {
     return array(intval($timestamp->attempttimestamp), intval($timestamp->roadtimestamp));
 }
 
-function get_las_successful_attempt($userid, $groupid, $roadid) {
+function get_last_successful_attempt($userid, $groupid, $roadid) {
     global $DB;
     // Recupero el ultimo intento con geometria solucionada realizado por el usuario/grupo para esta instancia.
     if ($groupid) {
@@ -893,7 +913,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     $return->qocremoved = false;
 
     // Recupero los datos del ultimo intento con geometria acertada para saber si tiene geometria resuelta y no esta superada.
-    $lastattempt = get_las_successful_attempt($userid, $groupid, $roadid);
+    $lastattempt = get_last_successful_attempt($userid, $groupid, $roadid);
 
     // Si el ultimo intento tiene la geometria resuelta pero no esta superado.
     if (!$lastattempt->success && $lastattempt->geometrysolved) {
@@ -980,8 +1000,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
             } else {
                 // Si exite la respuesta y no se ha actualizado el camino.
                 if ($selectedanswerid > 0 && !$updateroad) {
-                    $sql = 'SELECT correct,riddleid FROM {treasurehunt_answers} WHERE id = (?)';
-                    $answer = $DB->get_record_sql($sql, array($selectedanswerid));
+                    $answer = $DB->get_record('treasurehunt_answers', array('id'=>$selectedanswerid),'correct,riddleid',MUST_EXIST);
                     if ($answer->riddleid != $lastattempt->riddleid) {
                         $return->msg = get_string('warmatchanswer', 'treasurehunt');
                     } else {
@@ -1042,7 +1061,7 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $out
     $lastsuccessfulriddle = new stdClass();
 
     // Recupero el ultimo intento con geometria solucionada realizado por el usuario/grupo para esta instancia.
-    $attempt = get_las_successful_attempt($userid, $groupid, $roadid);
+    $attempt = get_last_successful_attempt($userid, $groupid, $roadid);
     if ($attempt && !$outoftime && !$actnotavailableyet) {
         $lastsuccessfulriddle = get_locked_name_and_description($attempt, $context);
         if (!$roadfinished) {
