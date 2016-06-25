@@ -48,7 +48,7 @@ class Polygon extends Collection {
      * @param boolean $pointOnVertex - whether a vertex should be considered "in" or not
      * @return boolean
      */
-    public function pointInPolygon($point, $pointOnBoundary = true, $pointOnVertex = true) {
+    public function pointInPolygon(Point $point, $pointOnBoundary = true, $pointOnVertex = true) {
         $vertices = $this->getComponents()[0]->getComponents();
 
         // Check if the point sits exactly on a vertex
