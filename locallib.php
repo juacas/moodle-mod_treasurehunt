@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -68,21 +69,19 @@ function object_to_geojson($text) {
  * @param type $point_wkt
  * @return boolean
  */
-function check_point_in_multipolygon($mpolygon_wkt,$point_wkt){
-$geometry = \geoPHP\geoPHP::load($mpolygon_wkt,'wkt');
-$point = \geoPHP\geoPHP::load($point_wkt);
-$numGeom = $geometry->numGeometries();
-for($i=1;$i<=$numGeom;$i++){
-    $geom=$geometry->geometryN($i);
-    if ( $geom instanceof geoPHP\Polygon){
-        $result=$geom->pointInPolygon($point);
-        if ($result){
-            return true;
-        };
+function check_point_in_multipolygon($mpolygon, $point) {
+    $polygons = $mpolygon->getComponents();
+    foreach ($polygons as $polygon) {
+        if ($polygon instanceof Polygon) {
+            $result = $polygon->pointInPolygon($point);
+            if ($result) {
+                return true;
+            };
+        }
     }
+    return false;
 }
-return false;
-}
+
 /* ------------------------------------------------------------------------------ */
 
 /**
@@ -99,16 +98,15 @@ function treasurehunt_get_grading_options() {
 
 function insert_riddle_form(stdClass $entry) {
     GLOBAL $DB;
-    $number= $DB->get_record_sql('SELECT count(id) + 1 as number FROM '
+    $number = $DB->get_record_sql('SELECT count(id) + 1 as number FROM '
             . '{treasurehunt_riddles} where roadid = (?)', array($entry->roadid));
     $entry->number = $number->number;
 
-   $id = $DB->insert_record("treasurehunt_riddles", $entry);
+    $id = $DB->insert_record("treasurehunt_riddles", $entry);
     //Como he insertado una nueva pista sin geometrias pongo el camino como no valido
     set_valid_road($entry->roadid, false);
     return $id;
 }
-
 
 function update_geometry_and_position_of_riddle(Feature $feature) {
     GLOBAL $DB;
@@ -120,7 +118,7 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
     $riddle->timemodified = time();
     $riddle->id = $feature->getId();
     $parms = array('id' => $riddle->id);
-    $entry = $DB->get_record('treasurehunt_riddles',$parms,'id,number',MUST_EXIST);
+    $entry = $DB->get_record('treasurehunt_riddles', $parms, 'id,number', MUST_EXIST);
     if (check_road_is_blocked($riddle->roadid) && ($riddle->number != $entry->number)) {
         // No se puede cambiar el numero de pista una vez bloqueado el camino.
         print_error('notchangeorderriddle', 'treasurehunt');
@@ -135,17 +133,17 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
 
 function delete_riddle($id) {
     GLOBAL $DB;
-    $riddle_result = $DB->get_record('treasurehunt_riddles',array('id'=>$id),'number,roadid',MUST_EXIST);
+    $riddle_result = $DB->get_record('treasurehunt_riddles', array('id' => $id), 'number,roadid', MUST_EXIST);
     if (check_road_is_blocked($riddle_result->roadid)) {
         // No se puede borrar una pista de un camino empezado.
         print_error('notdeleteriddle', 'treasurehunt');
     }
-    
-    
-    $DB->delete_records('treasurehunt_riddles', array('id'=>$id));
+
+
+    $DB->delete_records('treasurehunt_riddles', array('id' => $id));
     $table = 'treasurehunt_attempts';
     $select = 'riddleid = ?';
-    $DB->delete_records('treasurehunt_attempts', array('riddleid'=>$id));
+    $DB->delete_records('treasurehunt_attempts', array('riddleid' => $id));
     $sql = 'UPDATE {treasurehunt_riddles} '
             . 'SET number = number - 1 WHERE roadid = (?) AND number > (?)';
     $params = array($riddle_result->roadid, $riddle_result->number);
@@ -174,8 +172,8 @@ function get_total_roads($treasurehuntid) {
 
 function get_total_riddles($roadid) {
     GLOBAL $DB;
-    $number = $DB->count_records('treasurehunt_riddles', array('roadid'=>$roadid));
-    return $number->number;
+    $number = $DB->count_records('treasurehunt_riddles', array('roadid' => $roadid));
+    return $number;
 }
 
 function check_if_user_has_finished($userid, $groupid, $roadid) {
@@ -200,6 +198,7 @@ function check_if_user_has_finished($userid, $groupid, $roadid) {
         return false;
     }
 }
+
 /**
  * 
  * @param moodle_database $DB
@@ -349,8 +348,8 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
 //                . "((?))) as inside,number from {treasurehunt_riddles} where number=(?) and roadid=(?)";
 //        $params = array($locationwkt, $nextnoriddle, $roadid);
 //        $nextriddle = $DB->get_record_sql($query, $params);
-        $nextriddle = $DB->get_record('treasurehunt_riddles',array('number'=>$nextnoriddle,'roadid'=>$roadid),'*',MUST_EXIST);
-        $inside= check_point_in_multipolygon($nextriddle->geom, $locationwkt);
+        $nextriddle = $DB->get_record('treasurehunt_riddles', array('number' => $nextnoriddle, 'roadid' => $roadid), '*', MUST_EXIST);
+        $inside = check_point_in_multipolygon(wkt_to_object($nextriddle->geom), $point);
         // Si esta dentro
         if ($inside) {
             $nextriddle->inside = 1;
@@ -436,7 +435,6 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
     return $return;
 }
 
-
 function get_activity_to_end_link($activitytoend) {
     global $COURSE;
     if ($activitytoend != 0) {
@@ -470,7 +468,7 @@ function get_riddle_answers($riddleid, $context) {
     global $DB;
 
     $sql = "SELECT id,answertext from {treasurehunt_answers} WHERE riddleid = ?";
-    $answers = $DB->get_records('treasurehunt_answers', array('riddleid'=>$riddleid),'','id,answertext');
+    $answers = $DB->get_records('treasurehunt_answers', array('riddleid' => $riddleid), '', 'id,answertext');
     foreach ($answers as &$answer) {
         $answer->answertext = file_rewrite_pluginfile_urls($answer->answertext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'answertext', $answer->id);
     }
@@ -1000,7 +998,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
             } else {
                 // Si exite la respuesta y no se ha actualizado el camino.
                 if ($selectedanswerid > 0 && !$updateroad) {
-                    $answer = $DB->get_record('treasurehunt_answers', array('id'=>$selectedanswerid),'correct,riddleid',MUST_EXIST);
+                    $answer = $DB->get_record('treasurehunt_answers', array('id' => $selectedanswerid), 'correct,riddleid', MUST_EXIST);
                     if ($answer->riddleid != $lastattempt->riddleid) {
                         $return->msg = get_string('warmatchanswer', 'treasurehunt');
                     } else {
