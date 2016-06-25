@@ -40,47 +40,6 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB, $CFG;
 
-    $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
-    if ($oldversion < 2016062218) {
-        // Define field grademethod,gradepenlocation and gradepenanswer.
-        $table = new xmldb_table('treasurehunt');
-        $field = new xmldb_field('playwithoutmove',XMLDB_TYPE_INTEGER,'2',XMLDB_UNSIGNED,XMLDB_NOTNULL,null,0);
-        $newname = 'playwithoutmoving';
-        // Add gradepenlocation if not exists.
-        if ($dbman->field_exists($table, $field)) {
-            $dbman->rename_field($table, $field, $newname);
-        }
-        // Quiz savepoint reached.
-        upgrade_mod_savepoint(true, 2016062218, 'treasurehunt');
-    }
-    if ($oldversion < 2016052608) {
-
-        // Define field grademethod,gradepenlocation and gradepenanswer.
-        $table = new xmldb_table('treasurehunt');
-        $field = new xmldb_field('grademethod', XMLDB_TYPE_INTEGER, '4', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 1);
-
-
-        // Add grademethod if not exists.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        $field = new xmldb_field('gradepenlocation', XMLDB_TYPE_NUMBER, '10,5', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
-        // Add gradepenlocation if not exists.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        $field = new xmldb_field('gradepenanswer', XMLDB_TYPE_NUMBER, '10,5', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0);
-        // Add gradepenanswer if not exists.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-
-        // Quiz savepoint reached.
-        upgrade_mod_savepoint(true, 2016052608, 'treasurehunt');
-    }
-
-
-    /* Finally, return of upgrade result (true, all went good) to Moodle.
-     */
+   
     return true;
 }
