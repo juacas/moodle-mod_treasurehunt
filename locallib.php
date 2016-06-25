@@ -27,7 +27,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->dirroot/mod/treasurehunt/lib.php");
-require_once("$CFG->dirroot/mod/treasurehunt/geoPHP/geoPHP.inc");
 require_once(dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
 
 
