@@ -45,7 +45,7 @@ class road_form extends moodleform {
         global $CFG;
         $mform = $this->_form;
         $selectoptions = $this->_customdata['selectoptions'];
-        $currententry = $this->_customdata['current'];
+        $currentroad = $this->_customdata['current'];
         $groups = $this->_customdata['groups'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
@@ -85,7 +85,7 @@ class road_form extends moodleform {
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);
 
-        $this->set_data($currententry);
+        $this->set_data($currentroad);
     }
     
 

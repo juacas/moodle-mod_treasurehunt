@@ -53,7 +53,7 @@ class riddle_form extends moodleform {
         $mform = $this->_form;
         $formid = $mform->_attributes['id'];
         $editoroptions = $this->_customdata['editoroptions'];
-        $currententry = $this->_customdata['current'];
+        $currentriddle = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
@@ -94,13 +94,13 @@ class riddle_form extends moodleform {
         $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'), $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
 
-        if ($currententry->addsimplequestion) {
+        if ($currentriddle->addsimplequestion) {
             // Imprimo el editor de preguntas
             $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null, $editoroptions);
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Imprimo las respuestas
-            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, $currententry->noanswers, NUMBER_NEW_ANSWERS);
+            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, $currentriddle->noanswers, NUMBER_NEW_ANSWERS);
         }
 
         // Anado los campos ocultos.
@@ -120,7 +120,7 @@ class riddle_form extends moodleform {
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons();
 
-        $this->set_data($currententry);
+        $this->set_data($currentriddle);
     }
 
     public function set_data($entry) {

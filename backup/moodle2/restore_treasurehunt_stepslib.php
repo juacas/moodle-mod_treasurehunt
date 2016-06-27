@@ -91,8 +91,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data = (object) $data;
         $oldid = $data->id;
-        $data->groupid = $this->get_mappingid('groups', $data->groupid);
-        $data->groupingid = $this->get_mappingid('groupings', $data->groupingid);
+        $data->groupid = $this->get_mappingid('group', $data->groupid);
+        $data->groupingid = $this->get_mappingid('grouping', $data->groupingid);
         $data->treasurehuntid = $this->get_new_parentid('treasurehunt');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
@@ -112,51 +112,45 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
         $newitemid = $DB->insert_record('treasurehunt_riddles', $data);
-        $this->set_mapping('treasurehunt_riddle', $oldid, $newitemid);
+        $this->set_mapping('treasurehunt_riddle', $oldid, $newitemid, true);
     }
 
     protected function process_treasurehunt_answer($data) {
         global $DB;
 
         $data = (object) $data;
-
+        $oldid = $data->id;
         $data->riddleid = $this->get_new_parentid('treasurehunt_riddle');
-        $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->groupid = $this->get_mappingid('groups', $data->groupid);
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-
         $newitemid = $DB->insert_record('treasurehunt_answers', $data);
-        // No need to save this mapping as far as nothing depend on it
-        // (child paths, file areas nor links decoder)
+        $this->set_mapping('treasurehunt_answer', $oldid, $newitemid, true);
     }
 
     protected function process_treasurehunt_attempt($data) {
         global $DB;
 
         $data = (object) $data;
-
+        $oldid = $data->id;
         $data->riddleid = $this->get_new_parentid('treasurehunt_riddle');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->userid = $this->get_mappingid('user', $data->userid);
-        $data->groupid = $this->get_mappingid('groups', $data->groupid);
+        $data->groupid = $this->get_mappingid('group', $data->groupid);
 
         $newitemid = $DB->insert_record('treasurehunt_attempts', $data);
-
-        // No need to save this mapping as far as nothing depend on it
-        // (child paths, file areas nor links decoder)
+        $this->set_mapping('treasurehunt_attempt', $oldid, $newitemid);
     }
 
     /**
      * Post-execution actions
      */
     protected function after_execute() {
-        // Add treasurehunt related files, no need to match by itemname (just internally handled context).
+        // Add treasurehunt related files
         $this->add_related_files('mod_treasurehunt', 'intro', null);
-        $this->add_related_files('mod_treasurehunt_riddles', 'description', 'id');
-        $this->add_related_files('mod_treasurehunt_riddles', 'questiontext', 'id');
-        $this->add_related_files('mod_treasurehunt_answers', 'answertext', 'id');
+        $this->add_related_files('mod_treasurehunt', 'description', 'treasurehunt_riddle');
+        $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_riddle');
+        $this->add_related_files('mod_treasurehunt', 'answertext', 'treasurehunt_answer');
     }
 
 }

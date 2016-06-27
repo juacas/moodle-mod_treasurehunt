@@ -41,15 +41,15 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2014 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class road_created extends \core\event\base {
+class attempt_submitted extends \core\event\base {
 
     /**
      * Init method
      */
     protected function init() {
         $this->data['crud'] = 'c';
-        $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'treasurehunt_roads';
+        $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
+        $this->data['objecttable'] = 'treasurehunt_attempts';
     }
 
     /**
@@ -58,7 +58,7 @@ class road_created extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventroadcreated', 'mod_treasurehunt');
+        return get_string('eventattemptsubmitted', 'mod_treasurehunt');
     }
 
     /**
@@ -67,8 +67,14 @@ class road_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created the road with id '$this->objectid' for " .
-                "the treasure hunt activity with course module id '$this->contextinstanceid'.";
+        $descriptionstring = "The user with id '$this->userid' has submitted the attempt with id '$this->objectid' for " .
+                "the treasure hunt activity with course module id '$this->contextinstanceid'";
+        if (!empty($this->other['groupid'])) {
+            $descriptionstring .= " and the group with id '{$this->other['groupid']}'.";
+        } else {
+            $descriptionstring .= ".";
+        }
+        return $descriptionstring;
     }
 
     /**
@@ -77,12 +83,38 @@ class road_created extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/editroad.php", array('cmid' => $this->contextinstanceid,
-            'id' => $this->objectid));
+        $url = new \moodle_url("/mod/treasurehunt/view.php", array('id' => $this->contextinstanceid));
+        if (!empty($this->other['groupid'])) {
+            $url->param('groupid', $this->other['groupid']);
+        } else {
+            $url->param('userid', $this->userid);
+        }
+        return $url;
+    }
+
+    /**
+     * Custom validation.
+     *
+     * @throws \coding_exception
+     * @return void
+     */
+    protected function validate_data() {
+        parent::validate_data();
+
+        if (!isset($this->other['groupid'])) {
+            throw new \coding_exception('The \'groupid\' value must be set in other.');
+        }
     }
 
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt_roads', 'restore' => 'treasurehunt_road');
+        return array('db' => 'treasurehunt_attempts', 'restore' => 'treasurehunt_attempt');
+    }
+
+    public static function get_other_mapping() {
+        $othermapped = array();
+        $othermapped['groupid'] = array('db' => 'groups', 'restore' => 'group');
+
+        return $othermapped;
     }
 
 }

@@ -130,13 +130,7 @@ class mod_treasurehunt_external_update_riddles extends external_api {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
-                    update_geometry_and_position_of_riddle($feature);
-                    // Trigger update riddle event.
-                    $eventparams = array(
-                        'context' => $context,
-                        'objectid' => $feature->getId()
-                    );
-                    \mod_treasurehunt\event\riddle_updated::create($eventparams)->trigger();
+                    update_geometry_and_position_of_riddle($feature,$context);
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
@@ -208,13 +202,7 @@ class mod_treasurehunt_external_delete_riddle extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editriddle', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_riddle($params['riddleid']);
-            // Trigger deleted riddle event.
-            $eventparams = array(
-                'context' => $context,
-                'objectid' => $params['riddleid'],
-            );
-            \mod_treasurehunt\event\riddle_deleted::create($eventparams)->trigger();
+            delete_riddle($params['riddleid'],$context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la pista se ha realizado con éxito';
         } else {
@@ -279,13 +267,7 @@ class mod_treasurehunt_external_delete_road extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_road($params['roadid']);
-            // Trigger deleted road event.
-            $eventparams = array(
-                'context' => $context,
-                'objectid' => $params['roadid']
-            );
-            \mod_treasurehunt\event\road_deleted::create($eventparams)->trigger();
+            delete_road($params['roadid'],$context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con éxito';
         } else {

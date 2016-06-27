@@ -62,7 +62,8 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
         $contents = array();
 
         $contents[] = new restore_decode_content('treasurehunt', array('intro'), 'treasurehunt');
-
+        $contents[] = new restore_decode_content('treasurehunt_riddles', array('description','questiontext'), 'treasurehunt_riddle');
+        $contents[] = new restore_decode_content('treasurehunt_answers', array('answertext'), 'treasurehunt_answer');
         return $contents;
     }
 
@@ -91,12 +92,6 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
         $rules[] = new restore_log_rule('treasurehunt', 'add', 'view.php?id={course_module}', '{treasurehunt}');
         $rules[] = new restore_log_rule('treasurehunt', 'update', 'view.php?id={course_module}', '{treasurehunt}');
         $rules[] = new restore_log_rule('treasurehunt', 'view', 'view.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'add road', 'edit.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'update road', 'edit.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'delete road', 'edit.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'add riddle', 'edit.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'update riddle', 'edit.php?id={course_module}', '{treasurehunt}');
-        $rules[] = new restore_log_rule('treasurehunt', 'delete riddle', 'edit.php?id={course_module}', '{treasurehunt}');
         return $rules;
     }
 

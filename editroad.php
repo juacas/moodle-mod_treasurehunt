@@ -40,16 +40,16 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         $title = get_string('editingroad', 'treasurehunt');
         $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
         $parms = array('id' => $id);
-        if (!$entry = $DB->get_record_sql($sql, $parms)) {
+        if (!$road = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
         }
     } else { // new entry
         require_capability('mod/treasurehunt:addroad', $context);
         $title = get_string('addingroad', 'treasurehunt');
-        $entry = new stdClass();
-        $entry->id = null;
+        $road = new stdClass();
+        $road->id = null;
     }
-    $entry->cmid = $cmid;
+    $road->cmid = $cmid;
 
     //Compruebo el tipo de grupo
     if ($cm->groupmode) {
@@ -69,7 +69,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         unset($selectoptions[$option->busy]);
     }
 
-    $mform = new road_form(null, array('current' => $entry, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
+    $mform = new road_form(null, array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
@@ -77,30 +77,31 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
 // probably a redirect is called for!
 // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
-    } else if ($entry = $mform->get_data()) {
+    } else if ($road = $mform->get_data()) {
         //Actualizamos los campos
         $timenow = time();
-        $entry->name = trim($entry->name);
+        $road->name = trim($road->name);
 
         $eventparams = array(
             'context' => $context,
-            'objectid' => $entry->id,
+            'objectid' => $road->id,
         );
-        if (empty($entry->id)) {
-            $entry->treasurehuntid = $treasurehunt->id;
-            $entry->timecreated = $timenow;
-            $entry->id = $DB->insert_record('treasurehunt_roads', $entry);
+        if (empty($road->id)) {
+            $road->treasurehuntid = $treasurehunt->id;
+            $road->timecreated = $timenow;
+            $road->id = $DB->insert_record('treasurehunt_roads', $road);
+            $eventparams['objectid']=$road->id;
             $event = \mod_treasurehunt\event\road_created::create($eventparams);
         } else {
-            $entry->timemodified = $timenow;
-            $DB->update_record('treasurehunt_roads', $entry);
+            $road->timemodified = $timenow;
+            $DB->update_record('treasurehunt_roads', $road);
             $event = \mod_treasurehunt\event\road_updated::create($eventparams);
         }
         // store the updated value values
         // Trigger event and update completion (if entry was created).
 
         $event->trigger();
-        $returnurl->param('roadid', $entry->id);
+        $returnurl->param('roadid', $road->id);
         redirect($returnurl);
     }
 } else {

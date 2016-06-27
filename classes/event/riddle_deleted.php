@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,6 +24,7 @@
  */
 
 namespace mod_treasurehunt\event;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -40,6 +42,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class riddle_deleted extends \core\event\base {
+
     /**
      * Init method
      */
@@ -64,31 +67,21 @@ class riddle_deleted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has deleted the glossary entry with id '$this->objectid' for " .
-            "the glossary activity with course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' has deleted the riddle with id '$this->objectid' for " .
+                "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 
-      /**
+    /**
      * Get URL related to the action.
      *
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/edit.php",
-                array('id' => $this->contextinstanceid));
+        return null;
     }
 
-    /**
-     * Return the legacy event log data.
-     *
-     * @return array|null
-     */
-    public function get_legacy_logdata() {
-        return array($this->courseid, 'treasurehunt', 'delete riddle',
-            "view.php?id={$this->contextinstanceid}",
-            $this->objectid, $this->contextinstanceid);
+    public static function get_objectid_mapping() {
+        return \core\event\base::NOT_MAPPED;
     }
-
 
 }
-

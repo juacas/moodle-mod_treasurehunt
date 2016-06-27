@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -23,6 +24,7 @@
  */
 
 namespace mod_treasurehunt\event;
+
 defined('MOODLE_INTERNAL') || die();
 
 /**
@@ -40,6 +42,7 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class road_updated extends \core\event\base {
+
     /**
      * Init method
      */
@@ -59,8 +62,8 @@ class road_updated extends \core\event\base {
     }
 
     public function get_description() {
-        return "The user with id '$this->userid' has updated the treasurehunt road with id '$this->objectid' for " .
-            "the treasurehunt activity with course module id '$this->contextinstanceid'.";
+        return "The user with id '$this->userid' has updated the road with id '$this->objectid' for " .
+                "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 
     /**
@@ -69,21 +72,12 @@ class road_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/edit.php",
-                array('id' => $this->contextinstanceid));
+        return new \moodle_url("/mod/treasurehunt/editroad.php", array('cmid' => $this->contextinstanceid,
+            'id' => $this->objectid));
     }
 
-    /**
-     * Return the legacy event log data.
-     *
-     * @return array|null
-     */
-    public function get_legacy_logdata() {
-        return array($this->courseid, 'treasurehunt', 'update road',
-            "view.php?id={$this->contextinstanceid}",
-            $this->objectid, $this->contextinstanceid);
+    public static function get_objectid_mapping() {
+        return array('db' => 'treasurehunt_roads', 'restore' => 'treasurehunt_road');
     }
-
 
 }
-

@@ -62,6 +62,7 @@ function object_to_geojson($text) {
     $GeoJSON = new GeoJSON();
     return $GeoJSON->dump($text);
 }
+
 /**
  * Check if a point in inside a multipolygon geometry
  * @param type $mpolygon_wkt
@@ -107,7 +108,7 @@ function insert_riddle_form(stdClass $entry) {
     return $id;
 }
 
-function update_geometry_and_position_of_riddle(Feature $feature) {
+function update_geometry_and_position_of_riddle(Feature $feature, $context) {
     GLOBAL $DB;
     $riddle = new stdClass();
     $riddle->number = $feature->getProperty('noriddle');
@@ -128,9 +129,15 @@ function update_geometry_and_position_of_riddle(Feature $feature) {
     }
     $DB->update_record('treasurehunt_riddles', $riddle);
     set_valid_road($riddle->roadid);
+    // Trigger update riddle event.
+    $eventparams = array(
+        'context' => $context,
+        'objectid' => $riddle->id
+    );
+    \mod_treasurehunt\event\riddle_updated::create($eventparams)->trigger();
 }
 
-function delete_riddle($id) {
+function delete_riddle($id, $context) {
     GLOBAL $DB;
     $riddle_result = $DB->get_record('treasurehunt_riddles', array('id' => $id), 'number,roadid', MUST_EXIST);
     if (check_road_is_blocked($riddle_result->roadid)) {
@@ -138,19 +145,22 @@ function delete_riddle($id) {
         print_error('notdeleteriddle', 'treasurehunt');
     }
 
-
     $DB->delete_records('treasurehunt_riddles', array('id' => $id));
-    $table = 'treasurehunt_attempts';
-    $select = 'riddleid = ?';
     $DB->delete_records('treasurehunt_attempts', array('riddleid' => $id));
     $sql = 'UPDATE {treasurehunt_riddles} '
             . 'SET number = number - 1 WHERE roadid = (?) AND number > (?)';
     $params = array($riddle_result->roadid, $riddle_result->number);
     $DB->execute($sql, $params);
     set_valid_road($riddle_result->roadid);
+    // Trigger deleted riddle event.
+    $eventparams = array(
+        'context' => $context,
+        'objectid' => $id,
+    );
+    \mod_treasurehunt\event\riddle_deleted::create($eventparams)->trigger();
 }
 
-function delete_road($roadid) {
+function delete_road($roadid, $context) {
     GLOBAL $DB;
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
@@ -161,6 +171,12 @@ function delete_road($roadid) {
         $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
     }
     $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', $params);
+    // Trigger deleted road event.
+    $eventparams = array(
+        'context' => $context,
+        'objectid' => $roadid
+    );
+    \mod_treasurehunt\event\road_deleted::create($eventparams)->trigger();
 }
 
 function get_total_roads($treasurehuntid) {
@@ -384,7 +400,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         $attempt->geometrysolved = $nextriddle->inside;
         $attempt->location = $locationwkt;
         $attempt->penalty = $penalty;
-        $DB->insert_record("treasurehunt_attempts", $attempt);
+        insert_attempt($attempt, $context);
 
         // Si el intento acierta la localizacion  y existe el completion compruebo si esta superado.
         if ($nextriddle->inside && !$completionsolved) {
@@ -397,13 +413,13 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
                 if ($questionsolved) {
                     $attempt->success = 1;
                 }
-                $DB->insert_record("treasurehunt_attempts", $attempt);
+                insert_attempt($attempt, $context);
                 // Si ya se ha superado inserto el attempt de localizacion.
                 if ($questionsolved) {
                     $attempt->type = 'location';
                     // Para que siga un orden cronologico;
                     $attempt->timecreated +=1;
-                    $DB->insert_record("treasurehunt_attempts", $attempt);
+                    insert_attempt($attempt, $context);
                 }
                 $return->update = get_string('overcomeactivitytoend', 'treasurehunt', get_activity_to_end_link($nextriddle->activitytoend));
             }
@@ -479,7 +495,7 @@ function riddles_to_geojson($riddles, $context, $treasurehuntid, $groupid = 0) {
     foreach ($riddles as $riddle) {
         $multipolygon = wkt_to_object($riddle->geometry);
         if (isset($riddle->description)) {
-            $description = file_rewrite_pluginfile_urls($riddle->description, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'description', $riddle->riddleid);
+            $description = file_rewrite_pluginfile_urls($riddle->description, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'description', $riddle->id);
         } else {
             $description = null;
         }
@@ -941,13 +957,13 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     } else {
                         $lastattempt->success = 0;
                     }
-                    $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                    insert_attempt($lastattempt, $context);
                     $completionsolved = true;
                     // Si esta superada creo el intento como superado.
                     if ($lastattempt->questionsolved) {
                         $lastattempt->type = 'location';
                         $lastattempt->timecreated += 1;
-                        $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                        insert_attempt($lastattempt, $context);
                     }
                 }
             } else { // Si no existe la actividad a superar es que la han borrado.
@@ -968,7 +984,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     $lastattempt->type = 'location';
                     $lastattempt->penalty = 0;
                     $lastattempt->timecreated = time();
-                    $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                    insert_attempt($lastattempt, $context);
                     $return->newattempt = true;
                     $return->attemptsolved = true;
                 }
@@ -990,7 +1006,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     $lastattempt->questionsolved = 1;
                     $lastattempt->penalty = 0;
                     $lastattempt->timecreated = time();
-                    $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                    insert_attempt($lastattempt, $context);
                     $return->newattempt = true;
                     $return->attemptsolved = true;
                 }
@@ -1018,18 +1034,18 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                             } else {
                                 $lastattempt->success = 0;
                             }
-                            $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                            insert_attempt($lastattempt, $context);
                             // Si esta superada creo el intento como superado.
                             if ($lastattempt->completionsolved) {
                                 $lastattempt->type = 'location';
                                 $lastattempt->timecreated += 1;
-                                $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                                insert_attempt($lastattempt, $context);
                             }
                         } else {
                             $return->msg = get_string('incorrectanswer', 'treasurehunt');
                             $lastattempt->questionsolved = 0;
                             $lastattempt->penalty = 1;
-                            $DB->insert_record("treasurehunt_attempts", $lastattempt);
+                            insert_attempt($lastattempt, $context);
                         }
                     }
                 }
@@ -1051,6 +1067,17 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     }
 
     return $return;
+}
+
+function insert_attempt($attempt, $context) {
+    global $DB;
+    $id = $DB->insert_record("treasurehunt_attempts", $attempt);
+    $event = \mod_treasurehunt\event\attempt_submitted::create(array(
+                'objectid' => $id,
+                'context' => $context,
+                'other' => array('groupid' => $attempt->groupid)
+    ));
+    $event->trigger();
 }
 
 function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $outoftime, $actnotavailableyet, $roadfinished, $context) {
