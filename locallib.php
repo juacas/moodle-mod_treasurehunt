@@ -1373,20 +1373,27 @@ function get_user_fullname_from_id($id) {
     return fullname($result[$id]);
 }
 
-function treasurehunt_calculate_stats($treasurehunt) {
+function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     global $DB;
 
     if ($treasurehunt->groupmode) {
         $user = 'gr.userid';
         $groupsmembers = "INNER JOIN {groups_members} gr ON a.groupid=gr.groupid";
         $groupid = 'a.groupid != 0';
+        $groupid2 = 'at.groupid != 0';
         $groupidwithin = 'at.groupid=a.groupid';
     } else {
         $user = 'a.userid';
         $groupsmembers = "";
         $groupid = 'a.groupid=0';
+        $groupid2 = 'at.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
+    $userarray = array();
+    foreach ($restrictedusers as $restricteduser) {
+        $userarray[] = $restricteduser->id;
+    }
+    $users = '(' . join(",", $userarray) . ')';
     $orderby = '';
     $grademethodsql = '';
     $usercompletiontimesql = "(SELECT max(at.timecreated) from {treasurehunt_attempts} at 
@@ -1402,14 +1409,14 @@ function treasurehunt_calculate_stats($treasurehunt) {
             {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND 
             ri.number=(select max(rid.number) from {treasurehunt_riddles} 
             rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
-            AND at.type='location' AND  at.groupid=a.groupid) as worsttime,
+            AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
             (SELECT min(at.timecreated) from {treasurehunt_attempts} at 
             INNER JOIN {treasurehunt_riddles} ri ON ri.id = at.riddleid 
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
             at.success=1 AND ri.number=(select max(rid.number) from 
             {treasurehunt_riddles} rid where rid.roadid=ri.roadid) 
-            AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-            AND  at.groupid=a.groupid) as besttime,$usercompletiontimesql,";
+            AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,";
         $orderby = 'ORDER BY usertime ASC';
     }if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $grademethodsql = "(SELECT COUNT(*) from {treasurehunt_attempts} at
@@ -1417,7 +1424,7 @@ function treasurehunt_calculate_stats($treasurehunt) {
             JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 
             AND ri.number=(select max(rid.number) from {treasurehunt_riddles} rid 
             where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
-            AND at.type='location' AND  at.groupid=a.groupid) as lastposition,
+            AND at.type='location' AND at.userid IN $users AND $groupid2) as lastposition,
             $usercompletiontimesql,";
         $orderby = 'ORDER BY usertime ASC';
     }
@@ -1425,7 +1432,7 @@ function treasurehunt_calculate_stats($treasurehunt) {
         {treasurehunt_attempts} at INNER JOIN {treasurehunt_riddles} ri 
         ON ri.id = at.riddleid INNER JOIN {treasurehunt_roads} roa ON 
         ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND 
-        at.type='location' AND at.penalty=1 AND  $groupidwithin) as  
+        at.type='location' AND at.penalty=1 AND $groupidwithin) as  
         nolocationsfailed,
         (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN 
         {treasurehunt_riddles} ri ON ri.id = at.riddleid INNER JOIN 
@@ -1442,7 +1449,7 @@ function treasurehunt_calculate_stats($treasurehunt) {
         roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as noriddles
         from {treasurehunt_attempts} a INNER JOIN {treasurehunt_riddles} 
         r ON r.id=a.riddleid INNER JOIN {treasurehunt_roads} ro ON 
-        r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=? 
+        r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
         AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby";
     $stats = $DB->get_records_sql($sql, array($treasurehunt->id));
     // Si el metodo de calificacion es por posicion.
@@ -1466,10 +1473,10 @@ function treasurehunt_calculate_stats($treasurehunt) {
 function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
     $grades = array();
     foreach ($students as $student) {
+        $grade = new stdClass();
+        $grade->userid = $student->id;
+        $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
-            $grade = new stdClass();
-            $grade->userid = $student->id;
-            $grade->itemname = 'treasurehuntscore';
             if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION &&
                     isset($stats[$student->id]->position)) {
                 $positiverate = treasurehunt_calculate_line_equation(
@@ -1497,6 +1504,9 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                     ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
             $grade->rawgrade = max($positiverate * $negativepercentage, 0);
             $grades[$student->id] = $grade;
+        } else {
+            $grade->rawgrade = null;
+            $grades[$student->id] = $grade;
         }
     }
     return $grades;
@@ -1514,16 +1524,17 @@ function treasurehunt_calculate_line_equation($x1, $y1, $x2, $y2, $x3) {
 
 function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
     $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id, 0, false, MUST_EXIST);
+    $context = context_module::instance($cm->id);
+    $restrictedusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
     if ($userid == 0) {
-        $context = context_module::instance($cm->id);
-        $students = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
+        $students = $restrictedusers;
     } else {
         $student = new stdClass();
         $student->id = $userid;
         $students = array($student);
     }
 
-    $stats = treasurehunt_calculate_stats($treasurehunt);
+    $stats = treasurehunt_calculate_stats($treasurehunt, $restrictedusers);
     $grades = treasurehunt_calculate_grades($treasurehunt, $stats, $students);
     return $grades;
 }
