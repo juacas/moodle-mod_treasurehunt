@@ -2,7 +2,10 @@
 
 $services = array(
     'treasurehuntservices' => array(//the name of the web service
-        'functions' => array('mod_treasurehunt_fetch_treasurehunt', 'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle', 'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock', 'mod_treasurehunt_user_progress'), //web service functions of this service
+        'functions' => array('mod_treasurehunt_fetch_treasurehunt',
+            'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle',
+            'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock',
+            'mod_treasurehunt_user_progress'), //web service functions of this service
         'requiredcapability' => '', //if set, the web service user need this capability to access 
         //any function of this service. For example: 'some/capability:specified'                 
         'restrictedusers' => 0, //if enabled, the Moodle administrator must link some user to this service

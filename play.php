@@ -87,14 +87,6 @@ $output = $PAGE->get_renderer('mod_treasurehunt');
 // Output starts here.
 echo $output->header();
 // Replace the following lines with you own code.
-
-
-$treasurehunt_output = new stdClass();
-$treasurehunt_output->name = $treasurehunt->name;
-$treasurehunt_output->description = format_module_intro('treasurehunt', $treasurehunt, $cm->id);
-$treasurehunt_output->id = $cm->id;
-
-$renderable = new \mod_treasurehunt\output\play_page($treasurehunt_output);
-echo $output->render($renderable);
+echo treasurehunt_view_play_page($treasurehunt,$cm->id);
 // Finish the page.
 echo $output->footer();

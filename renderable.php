@@ -105,7 +105,7 @@ class treasurehunt_users_progress implements renderable {
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission,$managepermission) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission, $managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
@@ -114,6 +114,42 @@ class treasurehunt_users_progress implements renderable {
         $this->noassignedusers = $noassignedusers;
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
+    }
+
+}
+
+class treasurehunt_play_page implements renderable, templatable {
+
+    /** @var string $sometext Some text to show how to pass data to a template. */
+    var $treasurehunt = null;
+    var $cmid = 0;
+
+    public function __construct($treasurehunt, $cmid) {
+        $this->treasurehunt = $treasurehunt;
+        $this->cmid = $cmid;
+    }
+
+    /**
+     * Export this data so it can be used as the context for a mustache template.
+     *
+     * @return stdClass
+     */
+    public function export_for_template(renderer_base $output) {
+        GLOBAL $USER;
+        $data = new stdClass();
+        $user = new stdClass();
+        $user->name = fullname($USER);
+        $user->picture = $output->user_picture($USER, array('link' => false));
+        $data->user = $user;
+        $data->cmid = $this->cmid;
+        $data->treasurehunt = $this->treasurehunt;
+        if (empty($this->treasurehunt->description)) {
+            $hasdescription = false;
+        } else {
+            $hasdescription = true;
+        }
+        $data->hasdescription = $hasdescription;
+        return $data;
     }
 
 }

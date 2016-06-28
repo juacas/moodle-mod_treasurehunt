@@ -44,9 +44,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      *                                                                                                                              
      * @return string html for the page                                                                                             
      */
-    public function render_play_page(\mod_treasurehunt\output\play_page $page) {
+    public function render_treasurehunt_play_page(treasurehunt_play_page $page) {
         $data = $page->export_for_template($this);
-        return parent::render_from_template('mod_treasurehunt/play', $data);
+        return parent::render_from_template('mod_treasurehunt/play_page', $data);
     }
 
     /**

@@ -28,7 +28,7 @@
 defined('MOODLE_INTERNAL') || die();
 require_once("$CFG->dirroot/mod/treasurehunt/lib.php");
 require_once(dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
-
+require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
 
 
 //Cargo las clases necesarias de un objeto GeoJSON
@@ -1243,6 +1243,14 @@ function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid
     }
     $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
+    return $output->render($renderable);
+}
+
+function treasurehunt_view_play_page($treasurehunt, $cmid) {
+    global $PAGE;
+    $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
+    $output = $PAGE->get_renderer('mod_treasurehunt');
+    $renderable = new treasurehunt_play_page($treasurehunt, $cmid);
     return $output->render($renderable);
 }
 

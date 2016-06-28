@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -24,11 +25,10 @@
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 // Replace treasurehunt with the name of your module and remove this line.
 
-require_once(dirname(dirname(dirname(__FILE__))).'/config.php');
-require_once(dirname(__FILE__).'/lib.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course.
 
@@ -63,12 +63,12 @@ $table = new html_table();
 $table->attributes['class'] = 'generaltable mod_index';
 
 if ($usesections) {
-    $strsectionname = get_string('sectionname', 'format_'.$course->format);
-    $table->head  = array ($strsectionname, $strname);
-    $table->align = array ('center', 'left');
+    $strsectionname = get_string('sectionname', 'format_' . $course->format);
+    $table->head = array($strsectionname, $strname);
+    $table->align = array('center', 'left');
 } else {
-    $table->head  = array ($strname);
-    $table->align = array ('left');
+    $table->head = array($strname);
+    $table->align = array('left');
 }
 
 $modinfo = get_fast_modinfo($course);
@@ -80,17 +80,15 @@ foreach ($modinfo->instances['treasurehunt'] as $cm) {
             if ($cm->sectionnum) {
                 $row[] = get_section_name($course, $cm->sectionnum);
             }
-            if ($currentsection !== '') {
-                $table->data[] = 'hr';
-            }
             $currentsection = $cm->sectionnum;
+        } else {
+            $row[] = '';
         }
     }
 
     $class = $cm->visible ? null : array('class' => 'dimmed');
 
-    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $cm->id)),
-                $cm->get_formatted_name(), $class);
+    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $cm->id)), $cm->get_formatted_name(), $class);
     $table->data[] = $row;
 }
 

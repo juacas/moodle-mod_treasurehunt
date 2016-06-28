@@ -131,8 +131,5 @@ if (has_capability('mod/treasurehunt:managetreasurehunt', $context) ||
     echo view_users_progress_table($cm, $course->id, $context);
 }
 
-
-//$renderable = new \mod_treasurehunt\output\index_page('Some text','some text2');
-//echo $output->render_index_page($renderable);
 // Finish the page.
 echo $output->footer();
