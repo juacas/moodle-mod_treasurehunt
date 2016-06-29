@@ -53,7 +53,8 @@ class mod_treasurehunt_external_fetch_treasurehunt extends external_api {
      * @return array of newly created groups
      */
     public static function fetch_treasurehunt($treasurehuntid) { //Don't forget to set it as static
-        $params = self::validate_parameters(self::fetch_treasurehunt_parameters(), array('treasurehuntid' => $treasurehuntid));
+        $params = self::validate_parameters(self::fetch_treasurehunt_parameters(),
+                        array('treasurehuntid' => $treasurehuntid));
 
         $treasurehunt = array();
         $status = array();
@@ -117,7 +118,8 @@ class mod_treasurehunt_external_update_riddles extends external_api {
      */
     public static function update_riddles($riddles, $treasurehuntid, $lockid) { //Don't forget to set it as static
         global $DB, $USER;
-        $params = self::validate_parameters(self::update_riddles_parameters(), array('riddles' => $riddles, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::update_riddles_parameters(),
+                        array('riddles' => $riddles, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
@@ -130,7 +132,7 @@ class mod_treasurehunt_external_update_riddles extends external_api {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
-                    update_geometry_and_position_of_riddle($feature,$context);
+                    update_geometry_and_position_of_riddle($feature, $context);
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
@@ -193,7 +195,8 @@ class mod_treasurehunt_external_delete_riddle extends external_api {
      * @return array of newly created groups
      */
     public static function delete_riddle($riddleid, $treasurehuntid, $lockid) { //Don't forget to set it as static
-        $params = self::validate_parameters(self::delete_riddle_parameters(), array('riddleid' => $riddleid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::delete_riddle_parameters(),
+                        array('riddleid' => $riddleid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
@@ -202,7 +205,7 @@ class mod_treasurehunt_external_delete_riddle extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editriddle', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_riddle($params['riddleid'],$context);
+            delete_riddle($params['riddleid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la pista se ha realizado con éxito';
         } else {
@@ -259,7 +262,8 @@ class mod_treasurehunt_external_delete_road extends external_api {
      * @return array of newly created groups
      */
     public static function delete_road($roadid, $treasurehuntid, $lockid) { //Don't forget to set it as static
-        $params = self::validate_parameters(self::delete_road_parameters(), array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::delete_road_parameters(),
+                        array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -267,7 +271,7 @@ class mod_treasurehunt_external_delete_road extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_road($params['roadid'],$context);
+            delete_road($params['roadid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con éxito';
         } else {
@@ -326,7 +330,8 @@ class mod_treasurehunt_external_renew_lock extends external_api {
      */
     public static function renew_lock($treasurehuntid, $lockid) { //Don't forget to set it as static
         GLOBAL $USER;
-        $params = self::validate_parameters(self::renew_lock_parameters(), array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::renew_lock_parameters(),
+                        array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -379,7 +384,8 @@ class mod_treasurehunt_external_user_progress extends external_api {
         return new external_function_parameters(
                 array(
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-            'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+            'attempttimestamp' => new external_value(PARAM_INT,
+                    'last known timestamp since user\'s progress has not been updated'),
             'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
             'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
             'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
@@ -398,7 +404,8 @@ class mod_treasurehunt_external_user_progress extends external_api {
             'attempttimestamp' => new external_value(PARAM_INT, 'Last updated timestamp attempt'),
             'roadtimestamp' => new external_value(PARAM_INT, 'Last updated timestamp road'),
             'infomsg' => new external_multiple_structure(
-                    new external_value(PARAM_RAW, 'The info text of attempt'), 'Array with all strings with attempts since the last stored timestamp'),
+                    new external_value(PARAM_RAW, 'The info text of attempt'),
+                    'Array with all strings with attempts since the last stored timestamp'),
             'lastsuccessfulriddle' => new external_single_structure(
                     array(
                 'id' => new external_value(PARAM_INT, 'The id of the last successful riddle.'),
@@ -439,10 +446,12 @@ class mod_treasurehunt_external_user_progress extends external_api {
      * @param array $groups array of group description arrays (with keys groupname and courseid)
      * @return array of newly created groups
      */
-    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmoving, $groupmode, $initialize, $location, $selectedanswerid, $qocremoved) { //Don't forget to set it as static
+    public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmoving,
+            $groupmode, $initialize, $location, $selectedanswerid, $qocremoved) { //Don't forget to set it as static
         global $USER, $DB;
 
-        $params = self::validate_parameters(self::user_progress_parameters(), array('treasurehuntid' => $treasurehuntid,
+        $params = self::validate_parameters(self::user_progress_parameters(),
+                        array('treasurehuntid' => $treasurehuntid,
                     "attempttimestamp" => $attempttimestamp, "roadtimestamp" => $roadtimestamp,
                     'playwithoutmoving' => $playwithoutmoving, 'groupmode' => $groupmode, 'initialize' => $initialize,
                     'location' => $location, 'selectedanswerid' => $selectedanswerid, 'qocremoved' => $qocremoved));
@@ -463,7 +472,8 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $changesingroupmode = true;
         }
         // Recojo la info de las nuevas pistas descubiertas en caso de existir y los nuevos timestamp si han variado.
-        $updates = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id, $userparams->roadid, $changesingroupmode);
+        $updates = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id,
+                $userparams->roadid, $changesingroupmode);
         if ($updates->newroadtimestamp != $params['roadtimestamp']) {
             $updateroad = true;
         } else {
@@ -482,7 +492,9 @@ class mod_treasurehunt_external_user_progress extends external_api {
 
         if ($available->available) {
             // Compruebo si se ha acertado la pista y completado la actividad requerida.
-            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles, $qocremoved);
+            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id,
+                    $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles,
+                    $qocremoved);
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
@@ -503,8 +515,10 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $qocremoved = $qocsolved->qocremoved;
         }
         // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa pista. 
-        if (!$updates->geometrysolved && $params['location'] && !$updateroad && !$roadfinished && $available && !$changesinplaymode && !$changesingroupmode) {
-            $checklocation = check_user_location($USER->id, $userparams->groupid, $userparams->roadid, geojson_to_object($params['location']), $context, $treasurehunt, $noriddles);
+        if (!$updates->geometrysolved && $params['location'] && !$updateroad && !$roadfinished && $available
+                && !$changesinplaymode && !$changesingroupmode) {
+            $checklocation = check_user_location($USER->id, $userparams->groupid, $userparams->roadid,
+                    geojson_to_object($params['location']), $context, $treasurehunt, $noriddles);
             if ($checklocation->newattempt) {
                 $updates->newattempttimestamp = $checklocation->attempttimestamp;
                 $updates->newgeometry = true;
@@ -531,12 +545,15 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $lastsuccessfulriddle = array();
         // Si se ha acertado una nueva localizacion, se ha modificado el camino, está fuera de tiempo,
         // se esta inicializando,se ha resuelto una pregunta o completion o se ha cambiado el modo grupo.
-        if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved || $params['initialize'] || $changesingroupmode) {
-            $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid, $noriddles,$available->outoftime,$available->actnotavailableyet,$roadfinished, $context);
+        if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved
+                || $params['initialize'] || $changesingroupmode) {
+            $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid,
+                    $noriddles, $available->outoftime, $available->actnotavailableyet, $roadfinished, $context);
         }
         // Si se han realizado un nuevo intento de localización o se esta inicializando
-        if ($updates->newgeometry || $updateroad || $roadfinished|| $params['initialize'] || $changesingroupmode) {
-            $userriddles = get_user_progress($userparams->roadid, $userparams->groupid, $USER->id, $treasurehuntid, $context);
+        if ($updates->newgeometry || $updateroad || $roadfinished || $params['initialize'] || $changesingroupmode) {
+            $userriddles = get_user_progress($userparams->roadid, $userparams->groupid, $USER->id, $treasurehuntid,
+                    $context);
         }
         // Si se ha editado el camino aviso.
         if ($updateroad) {
@@ -554,7 +571,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
             $updates->strings[] = get_string('timeexceeded', 'treasurehunt');
         }
         // Si la fecha de inicio aún no ha comenzado
-        if($available->actnotavailableyet){
+        if ($available->actnotavailableyet) {
             $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
         if (!$status) {

@@ -124,11 +124,11 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
-    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0) ||
-            $oldtreasurehunt->grademethod != $treasurehunt->grademethod ||
-            $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation ||
-            $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer ||
-            $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
+    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0)
+            || $oldtreasurehunt->grademethod != $treasurehunt->grademethod
+            || $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation
+            || $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer
+            || $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
         treasurehunt_update_grades($treasurehunt);
     }
     treasurehunt_grade_item_update($treasurehunt);
@@ -188,11 +188,7 @@ function treasurehunt_delete_instance($id) {
  * @return stdClass|null
  */
 function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
-
-    $return = new stdClass();
-    $return->time = 0;
-    $return->info = '';
-    return $return;
+    return null;
 }
 
 /**
@@ -240,7 +236,8 @@ function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart)
  * @param int $userid check for a particular user's activity only, defaults to 0 (all users)
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
-function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
+function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0,
+        $groupid = 0) {
     
 }
 
@@ -400,7 +397,8 @@ function treasurehunt_grade_item_delete($treasurehunt) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null,
+            array('deleted' => 1));
 }
 
 /**
@@ -446,44 +444,6 @@ function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
     return $grades;
 }
 
-/* File API */
-
-/**
- * Returns the lists of all browsable file areas within the given module context
- *
- * The file area 'intro' for the activity introduction field is added automatically
- * by {@link file_browser::get_file_info_context_module()}
- *
- * @param stdClass $course
- * @param stdClass $cm
- * @param stdClass $context
- * @return array of [(string)filearea] => (string)description
- */
-function treasurehunt_get_file_areas($course, $cm, $context) {
-    return array();
-}
-
-/**
- * File browsing support for treasurehunt file areas
- *
- * @package mod_treasurehunt
- * @category files
- *
- * @param file_browser $browser
- * @param array $areas
- * @param stdClass $course
- * @param stdClass $cm
- * @param stdClass $context
- * @param string $filearea
- * @param int $itemid
- * @param string $filepath
- * @param string $filename
- * @return file_info instance or null if not found
- */
-function treasurehunt_get_file_info($browser, $areas, $course, $cm, $context, $filearea, $itemid, $filepath, $filename) {
-    return null;
-}
-
 /**
  * Serves the files from the treasurehunt file areas
  *
@@ -498,7 +458,8 @@ function treasurehunt_get_file_info($browser, $areas, $course, $cm, $context, $f
  * @param bool $forcedownload whether or not force download
  * @param array $options additional options affecting the file serving
  */
-function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
+function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload,
+        array $options = array()) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -522,22 +483,6 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
-/* Navigation API */
-
-/**
- * Extends the global navigation tree by adding treasurehunt nodes if there is a relevant content
- *
- * This can be called by an AJAX request so do not rely on $PAGE as it might not be set up properly.
- *
- * @param navigation_node $navref An object representing the navigation tree node of the treasurehunt module instance
- * @param stdClass $course current course record
- * @param stdClass $module current treasurehunt instance record
- * @param cm_info $cm course module information
-
-  function treasurehunt_extend_navigation(navigation_node $navref, stdClass $course, stdClass $module, cm_info $cm) {
-  // TODO Delete this function and its docblock, or implement it.
-  } */
-
 /**
  * Extends the settings navigation with the treasurehunt settings
  *
@@ -547,7 +492,8 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
  * @param settings_navigation $settingsnav complete settings navigation tree
  * @param navigation_node $treasurehuntnode treasurehunt administration node
  */
-function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $treasurehuntnode = null) {
+function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav,
+        navigation_node $treasurehuntnode = null) {
 
     global $PAGE;
     // We want to add these new nodes after the Edit settings node, and before the
@@ -562,7 +508,9 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
     }
 
     if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->cm->context)) {
-        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'), new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
+        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'),
+                        new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)),
+                        navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
         $treasurehuntnode->add_node($node, $beforekey);
     }
 }
@@ -575,7 +523,8 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
  */
 function treasurehunt_reset_course_form_definition($mform) {
     $mform->addElement('header', 'treasurehuntheader', get_string('modulenameplural', 'treasurehunt'));
-    $mform->addElement('advcheckbox', 'reset_treasurehunt_attempts', get_string('removealltreasurehuntattempts', 'treasurehunt'));
+    $mform->addElement('advcheckbox', 'reset_treasurehunt_attempts',
+            get_string('removealltreasurehuntattempts', 'treasurehunt'));
 }
 
 /**
@@ -626,7 +575,8 @@ function treasurehunt_reset_userdata($data) {
 
     // Delete attempts.
     if (!empty($data->reset_treasurehunt_attempts)) {
-        $DB->delete_records_select('treasurehunt_attempts', 'riddleid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
+        $DB->delete_records_select('treasurehunt_attempts',
+                'riddleid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
                 . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
                 . '{treasurehunt_riddles} ri ON r.id=ri.roadid WHERE t.course = ?)', array($data->courseid));
         $status[] = array(
@@ -646,7 +596,8 @@ function treasurehunt_reset_userdata($data) {
 
     // Updating dates - shift may be negative too.
     if ($data->timeshift) {
-        shift_course_mod_dates('treasurehunt', array('allowattemptsfromdate', 'cutoffdate'), $data->timeshift, $data->courseid);
+        shift_course_mod_dates('treasurehunt', array('allowattemptsfromdate', 'cutoffdate'), $data->timeshift,
+                $data->courseid);
 
         $status[] = array(
             'component' => $componentstr,

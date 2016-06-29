@@ -50,9 +50,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $paths[] = new restore_path_element('treasurehunt', '/activity/treasurehunt');
         $paths[] = new restore_path_element('treasurehunt_road', '/activity/treasurehunt/roads/road');
         $paths[] = new restore_path_element('treasurehunt_riddle', '/activity/treasurehunt/roads/road/riddles/riddle');
-        $paths[] = new restore_path_element('treasurehunt_answer', '/activity/treasurehunt/roads/road/riddles/riddle/answers/answer');
+        $paths[] = new restore_path_element('treasurehunt_answer',
+                '/activity/treasurehunt/roads/road/riddles/riddle/answers/answer');
         if ($userinfo) {
-            $paths[] = new restore_path_element('treasurehunt_attempt', '/activity/treasurehunt/roads/road/riddles/riddle/attempts/attempt');
+            $paths[] = new restore_path_element('treasurehunt_attempt',
+                    '/activity/treasurehunt/roads/road/riddles/riddle/attempts/attempt');
         }
 
         // Return the paths wrapped into standard activity structure.

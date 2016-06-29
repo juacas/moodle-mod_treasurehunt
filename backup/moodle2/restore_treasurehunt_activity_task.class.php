@@ -62,7 +62,8 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
         $contents = array();
 
         $contents[] = new restore_decode_content('treasurehunt', array('intro'), 'treasurehunt');
-        $contents[] = new restore_decode_content('treasurehunt_riddles', array('description','questiontext'), 'treasurehunt_riddle');
+        $contents[] = new restore_decode_content('treasurehunt_riddles', array('description', 'questiontext'),
+                'treasurehunt_riddle');
         $contents[] = new restore_decode_content('treasurehunt_answers', array('answertext'), 'treasurehunt_answer');
         return $contents;
     }

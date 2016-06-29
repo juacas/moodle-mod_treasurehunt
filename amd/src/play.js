@@ -27,10 +27,12 @@ require.config({
         'jquery.mobile': 'jquery-mobile/jquerymobile'
     }
 });
-define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates', 'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
+define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'core/ajax', 'geocoderjs',
+    'core/templates', 'jquery.mobile'], function ($, notification, str, url, ol, ajax, GeocoderJS, templates) {
 
     var init = {
-        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp, lastroadtimestamp, gameupdatetime) {
+        playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp,
+                lastroadtimestamp, gameupdatetime) {
             var parchmenturl = url.imageUrl('parchment', 'treasurehunt'),
                     failureurl = url.imageUrl('failure', 'treasurehunt'),
                     markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
@@ -387,7 +389,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     if (groupmode != response.groupmode) {
                         groupmode = response.groupmode;
                     }
-                    if (lastattempttimestamp !== response.attempttimestamp || lastroadtimestamp !== response.roadtimestamp || initialize || !available) {
+                    if (lastattempttimestamp !== response.attempttimestamp || lastroadtimestamp
+                            !== response.roadtimestamp || initialize || !available) {
                         lastattempttimestamp = response.attempttimestamp;
                         lastroadtimestamp = response.roadtimestamp;
                         if (response.historicalattempts.length > 0) {
@@ -482,7 +485,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     if (lastsuccessfulriddle.question !== '') {
                         $("#lastsuccessfulriddledescription").append("<a href='#questionpage' " +
                                 "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
-                                "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" + strings['question'] + "</a>");
+                                "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" + strings['question']
+                                + "</a>");
                     }
                     $("#collapsibleset").collapsibleset("refresh");
                     $("#infopanel").panel("open");
@@ -496,7 +500,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     var counter = 1;
                     $.each(lastsuccessfulriddle.answers, function (key, answer) {
                         var id = 'answer' + counter;
-                        $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="' + answer.id + '">' +
+                        $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
+                                + answer.id + '">' +
                                 '<label for="' + id + '">' + answer.answertext + '</label>');
                         counter++;
                     });
@@ -517,7 +522,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     } else {
                         // Anado cada intento
                         attemptshistory.forEach(function (attempt) {
-                            $("<li><span class='ui-btn-icon-left " + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt') + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo($historylist);
+                            $("<li><span class='ui-btn-icon-left "
+                                    + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt')
+                                    + "' style='position:relative'></span>" + attempt.string + "</li>").appendTo(
+                                    $historylist);
 
                         });
                     }
@@ -650,7 +658,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             $("#infopanel").on("collapsibleexpand", "[data-role='collapsible']", function (event, ui) {
                 var innerinfopanel = $("#infopanel .ui-panel-inner");
                 innerinfopanel.animate({
-                    scrollTop: parseInt($(this).offset().top - innerinfopanel.offset().top + innerinfopanel.scrollTop())
+                    scrollTop: parseInt($(this).offset().top - innerinfopanel.offset().top
+                            + innerinfopanel.scrollTop())
                 }, 500);
             });
             // Set a max-height to make large images shrink to fit the screen.

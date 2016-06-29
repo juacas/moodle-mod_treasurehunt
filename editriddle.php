@@ -37,7 +37,8 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
     $renewlocktime = (get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+            array($cm->instance, $lockid, $renewlocktime));
 
     if ($id) { // if entry is specified
         require_capability('mod/treasurehunt:editriddle', $context);
@@ -100,7 +101,8 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $completionactivities = $completioninfo->get_activities();
 
 
-    $mform = new riddle_form(null, array('current' => $riddle, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
+    $mform = new riddle_form(null,
+            array('current' => $riddle, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
 
     if ($mform->is_reloaded()) {
         // Si se ha recargado es porque hemos cambiado algo
@@ -136,11 +138,13 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
         // save and relink embedded images and save attachments
-        $riddle = file_postupdate_standard_editor($riddle, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $riddle->id);
+        $riddle = file_postupdate_standard_editor($riddle, 'description', $editoroptions, $context, 'mod_treasurehunt',
+                'description', $riddle->id);
         // store the updated value values
         if ($riddle->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
-            $riddle = file_postupdate_standard_editor($riddle, 'questiontext', $editoroptions, $context, 'mod_treasurehunt', 'questiontext', $riddle->id);
+            $riddle = file_postupdate_standard_editor($riddle, 'questiontext', $editoroptions, $context,
+                    'mod_treasurehunt', 'questiontext', $riddle->id);
             if (isset($riddle->answertext_editor)) {
                 // Proceso los editores de respuesta y guardo las respuestas.
                 foreach ($riddle->answertext_editor as $key => $answertext) {
@@ -166,7 +170,8 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
                         $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
                     }
                     $answer->answertext_editor = $answertext;
-                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context, 'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context,
+                            'mod_treasurehunt', 'answertext', $answer->id);
                     $DB->update_record('treasurehunt_answers', $answer);
                 }
             }

@@ -105,7 +105,8 @@ class treasurehunt_users_progress implements renderable {
      *
      * @param array $roadusersprogress
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers, $viewpermission, $managepermission) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings,
+            $duplicateusersingroups, $noassignedusers, $viewpermission, $managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;

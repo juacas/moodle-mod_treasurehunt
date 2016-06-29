@@ -87,6 +87,5 @@ class road_form extends moodleform {
 
         $this->set_data($currentroad);
     }
-    
 
 }

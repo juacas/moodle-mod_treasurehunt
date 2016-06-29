@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -31,8 +32,8 @@
  * @see upgrade_plugins_modules()
  */
 function xmldb_treasurehunt_install() {
+    
 }
-
 
 /**
  * Post installation recovery procedure
@@ -40,4 +41,5 @@ function xmldb_treasurehunt_install() {
  * @see upgrade_plugins_modules()
  */
 function xmldb_treasurehunt_install_recovery() {
+    
 }

@@ -81,7 +81,7 @@
     display: table-cell;
 }
 .path-mod-treasurehunt #riddlelist li:hover,.path-mod-treasurehunt #roadlist li:hover {
-   background: #eee; 
+    background: #eee; 
 }
 .path-mod-treasurehunt .handle, .path-mod-treasurehunt .nohandle {
     background: #f8f8f8; 

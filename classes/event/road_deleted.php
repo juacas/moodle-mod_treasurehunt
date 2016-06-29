@@ -81,7 +81,7 @@ class road_deleted extends \core\event\base {
     }
 
     public static function get_objectid_mapping() {
-        return  \core\event\base::NOT_MAPPED;
+        return \core\event\base::NOT_MAPPED;
     }
 
 }

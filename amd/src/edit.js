@@ -69,13 +69,16 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     $("<label>").attr('for', "radio1").text(strings['add']).appendTo($("#edition"));
                     $('<input type="radio" name="controlpanel" id="radio2" value="modify">').appendTo($("#edition"));
                     $("<label>").attr('for', "radio2").text(strings['modify']).appendTo($("#edition"));
-                    $('<button id="saveriddle"/>').attr('disabled', true).text(strings['save']).appendTo($("#controlpanel"));
-                    $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($("#controlpanel"));
+                    $('<button id="saveriddle"/>').attr('disabled', true).text(strings['save']).appendTo($(
+                            "#controlpanel"));
+                    $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($(
+                            "#controlpanel"));
                     $('<div id="searchcontainer">').appendTo($("#controlpanel"));
                     $('<input type="search" placeholder="' + strings['searchlocation'] + '" class="searchaddress"/>')
                             .appendTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo($("#searchcontainer"));
-                    $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($("#searchcontainer"));
+                    $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($(
+                            "#searchcontainer"));
                     $('<button id="addriddle"/>').text(strings['riddle']).prependTo($("#controlpanel"));
                     $('<button id="addroad"/>').text(strings['road']).prependTo($("#controlpanel"));
                     $("#radio1").button({
@@ -136,7 +139,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             ui.item.data('start_pos', start_pos);
                             //set max scrollTop for sortable scrolling
                             var scrollParent = $(this).data("ui-sortable").scrollParent;
-                            var maxScrollTop = scrollParent[0].scrollHeight - scrollParent[0].clientHeight - ui.helper.height();
+                            var maxScrollTop = scrollParent[0].scrollHeight - scrollParent[0].clientHeight
+                                    - ui.helper.height();
                             $(this).data('maxScrollTop', maxScrollTop);
                         },
                         sort: function (e, ui) {
@@ -372,7 +376,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                     })
                                 }),
                                 deleteCondition: function (event) {
-                                    return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(event);
+                                    return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(
+                                            event);
                                 }
                             });
                             map.addInteraction(this.modify);
@@ -396,7 +401,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             //Activo el boton de guardar segun se haya modificado algo o no
                             this.modify.on('modifyend', function (e) {
                                 activateSaveButton();
-                                modifyFeatureToDirtySource(e.features, originalStage, dirtyStage, stage.roads[roadid].vector);
+                                modifyFeatureToDirtySource(e.features, originalStage, dirtyStage,
+                                        stage.roads[roadid].vector);
                                 dirty = true;
                             });
                         },
@@ -535,7 +541,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             //Get those multipolygons of vector layer 
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
-                                multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
+                                multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).
+                                        getGeometry().clone());
                             }
                             feature.setGeometry(multipolygon);
                         });
@@ -560,7 +567,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 if (idFeaturesPolygons[i] != dirtyFeature.getId()) {
-                                    multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).getGeometry().clone());
+                                    multipolygon.appendPolygon(vector.getSource().getFeatureById(
+                                            idFeaturesPolygons[i]).getGeometry().clone());
                                 } else {
                                     remove = i;
                                 }
@@ -738,13 +746,16 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
                     function addriddle2ListPanel(riddleid, roadid, noriddle, name, description, blocked) {
                         if ($('#riddlelist li[riddleid="' + riddleid + '"]').length < 1) {
-                            var li = $('<li riddleid="' + riddleid + '" roadid="' + roadid + '" noriddle="' + noriddle + '"/>')
+                            var li = $(
+                                    '<li riddleid="' + riddleid + '" roadid="' + roadid + '" noriddle="' + noriddle
+                                    + '"/>')
                                     .appendTo($("#riddlelist"));
                             li.addClass("ui-corner-all")
                                     .append("<div class='riddlename'>" + name + "</div>")
                                     .append("<div class='modifyriddle'>" +
                                             "<span class='ui-icon ui-icon-pencil'></span>" +
-                                            "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" + riddleid + "'>" +
+                                            "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" + riddleid + "'>"
+                                            +
                                             "<div id='dialoginfo" + riddleid + "' title='" + name + "'>"
                                             + description + "</div></span></div>");
                             if (blocked) {
@@ -770,7 +781,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     function addroad2ListPanel(roadid, name, blocked) {
                         //Si no existe lo agrego
                         if ($('#roadlist li[roadid="' + roadid + '"]').length < 1) {
-                            var li = $('<li roadid="' + roadid + '" blocked="' + blocked + '"/>').appendTo($("#roadlist"));
+                            var li = $('<li roadid="' + roadid + '" blocked="' + blocked + '"/>').appendTo($(
+                                    "#roadlist"));
                             li.addClass("ui-corner-all").append("<div class='roadname'>" + name + "</div>")
                                     .append("<div class='modifyroad'><span class='ui-icon ui-icon-trash'></span>" +
                                             "<span class='ui-icon ui-icon-pencil'></span></div>");
@@ -800,7 +812,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             var $listlength = $riddlelist.length;
                             //Recoloco el resto
                             for (var i = 0; i <= start_pos - 1; i++) {
-                                relocateRiddleList($riddlelist, $listlength, i, dirtySource, originalSource, vectorOfPolygons);
+                                relocateRiddleList($riddlelist, $listlength, i, dirtySource, originalSource,
+                                        vectorOfPolygons);
                             }
                         }
                     }
@@ -991,7 +1004,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                             vectorSelected.getSource()
-                                    .addFeature(vectorOfPolygons.getSource().getFeatureById(idFeaturesPolygons[i]).clone());
+                                    .addFeature(vectorOfPolygons.getSource().getFeatureById(idFeaturesPolygons[i]).
+                                            clone());
                             selectedRiddleFeatures[idFeaturesPolygons[i]] = true;
                         }
                         //Coloco el mapa en la posicion de las pistas seleccionadas si la pista contiene alguna feature y 
@@ -1084,7 +1098,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         });
                     }
 
-                    function deleteRiddle(riddleid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid, lockid) {
+                    function deleteRiddle(riddleid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid,
+                            lockid) {
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_riddle',
                                 args: {
@@ -1118,7 +1133,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                                 if (idFeaturesPolygons) {
                                     for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
-                                        polygonFeature = vectorOfPolygons.getSource().getFeatureById(idFeaturesPolygons[i]);
+                                        polygonFeature = vectorOfPolygons.getSource().getFeatureById(
+                                                idFeaturesPolygons[i]);
                                         vectorOfPolygons.getSource().removeFeature(polygonFeature);
                                     }
                                 }
@@ -1224,7 +1240,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     };
                     $("#addriddle").on('click', function () {
                         if (dirty) {
-                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid, idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRiddleEntry, [roadid,
+                                idModule], lockid);
                         } else {
                             newFormRiddleEntry(roadid, idModule);
                         }
@@ -1232,7 +1249,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                     });
                     $("#addroad").on('click', function () {
                         if (dirty) {
-                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule],
+                                    lockid);
                         } else {
                             newFormRoadEntry(idModule);
                         }
@@ -1366,7 +1384,8 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            saveriddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule], lockid);
+                            saveriddles(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule
+                            ], lockid);
                         } else {
                             editFormRoadEntry(roadid, idModule);
                         }

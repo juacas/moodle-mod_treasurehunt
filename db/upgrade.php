@@ -40,6 +40,6 @@ defined('MOODLE_INTERNAL') || die();
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB, $CFG;
 
-   
+
     return true;
 }

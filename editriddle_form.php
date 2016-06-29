@@ -71,12 +71,14 @@ class riddle_form extends moodleform {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃ³n, si quieres 
         // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null, $editoroptions);
+        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null,
+                $editoroptions);
         $mform->addHelpButton('description_editor', 'riddledescription', 'treasurehunt');
         $mform->setType('description_editor', PARAM_RAW);
         $mform->addRule('description_editor', null, 'required', null, 'client');
 
-        $mform->addElement('header', 'restrictionsdiscoverriddle', get_string('restrictionsdiscoverriddle', 'treasurehunt'));
+        $mform->addElement('header', 'restrictionsdiscoverriddle',
+                get_string('restrictionsdiscoverriddle', 'treasurehunt'));
         // Add restrict access completion activity.
         $options = array();
         $options[0] = get_string('none');
@@ -91,16 +93,19 @@ class riddle_form extends moodleform {
         $form = "document.forms['" . $formid . "']";
         $javascript = "$form.reloaded.value='1';$form.cancel.click();"; //create javascript: set reloaded field to "1" 
         $attributes = array("onChange" => $javascript); // set onChange attribute
-        $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'), $attributes);
+        $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'),
+                $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
 
         if ($currentriddle->addsimplequestion) {
             // Imprimo el editor de preguntas
-            $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null, $editoroptions);
+            $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null,
+                    $editoroptions);
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Imprimo las respuestas
-            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions, $currentriddle->noanswers, NUMBER_NEW_ANSWERS);
+            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
+                    $currentriddle->noanswers, NUMBER_NEW_ANSWERS);
         }
 
         // Anado los campos ocultos.
@@ -132,17 +137,20 @@ class riddle_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $context = $this->_customdata['context'];
         // Prepare all editors.
-        $entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt', 'description', $entry->id);
+        $entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt',
+                'description', $entry->id);
 
         // Si existe la pregunta.
         if ($entry->addsimplequestion) {
             if (isset($entry->questiontext)) {
-                $entry = file_prepare_standard_editor($entry, 'questiontext', $editoroptions, $context, 'mod_treasurehunt', 'questiontext', $entry->id);
+                $entry = file_prepare_standard_editor($entry, 'questiontext', $editoroptions, $context,
+                        'mod_treasurehunt', 'questiontext', $entry->id);
             }
             if (isset($entry->answers)) {
                 $k = 0;
                 foreach ($entry->answers as $answer) {
-                    $answer = file_prepare_standard_editor($answer, 'answertext', $editoroptions, $context, 'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_prepare_standard_editor($answer, 'answertext', $editoroptions, $context,
+                            'mod_treasurehunt', 'answertext', $answer->id);
                     $entry->answertext_editor[$k] = $answer->answertext_editor;
                     $entry->correct[$k] = $answer->correct;
                     $k++;

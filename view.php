@@ -86,18 +86,18 @@ echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
 // Conditions to show the intro can change to look for own settings or whatever.
 if (view_intro($treasurehunt)) {
-    echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
+    echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
+            'treasurehuntintro');
 }
 
 $viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 
 echo view_treasurehunt_info($treasurehunt, $course->id);
-if ((has_capability('mod/treasurehunt:play', $context,null,false) &&
-        time() > $treasurehunt->allowattemptsfromdate && $userid == $USER->id && $groupid == -1) ||
-        (has_capability('mod/treasurehunt:play', $context, $userid,false) &&
-        $viewusersattemptscap && $groupid == -1 && $userid != $USER->id) ||
-        (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) &&
-        $viewusersattemptscap && $treasurehunt->groupmode)) {
+if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > $treasurehunt->allowattemptsfromdate
+        && $userid == $USER->id && $groupid == -1) || (has_capability('mod/treasurehunt:play', $context, $userid, false)
+        && $viewusersattemptscap && $groupid == -1 && $userid != $USER->id)
+        || (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) && $viewusersattemptscap
+        && $treasurehunt->groupmode)) {
     try {
         $teacherreview = true;
         $username = '';
@@ -119,15 +119,15 @@ if ((has_capability('mod/treasurehunt:play', $context,null,false) &&
                 }
             }
         }
-        echo view_user_historical_attempts($treasurehunt, $params->groupid
-                , $userid, $params->roadid, $cm->id, $username, $teacherreview);
+        echo view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid, $cm->id,
+                $username, $teacherreview);
     } catch (Exception $e) {
         echo $output->notification($e->getMessage());
     }
 }
-if (has_capability('mod/treasurehunt:managetreasurehunt', $context) ||
-        has_capability('mod/treasurehunt:viewusershistoricalattempts', $context) ||
-        time() > $treasurehunt->allowattemptsfromdate) {
+if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
+        || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
+        || time() > $treasurehunt->allowattemptsfromdate) {
     echo view_users_progress_table($cm, $course->id, $context);
 }
 

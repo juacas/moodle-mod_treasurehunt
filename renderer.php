@@ -65,7 +65,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')), true);
+            $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')),
+                    true);
             foreach ($historical->attempts as $attempt) {
                 if (!$attempt->penalty) {
                     $class = 'successfulattempt';
@@ -115,13 +116,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $s .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt', implode(",", $progress->duplicategroupsingroupings)));
+                $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt',
+                                implode(",", $progress->duplicategroupsingroupings)));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt', implode(",", $progress->duplicateusersingroups)));
+                $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
+                                implode(",", $progress->duplicateusersingroups)));
             }
             if (count($progress->noassignedusers) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->noassignedusers)));
+                $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
+                                implode(",", $progress->noassignedusers)));
             }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 if ($roadusersprogress->validated) {
@@ -134,7 +138,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         } else {
                             $title = get_string('user', 'treasurehunt');
                         }
-                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalriddles));
+                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null,
+                                array(null, $roadusersprogress->totalriddles));
                         foreach ($roadusersprogress->userlist as $user) {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
@@ -189,11 +194,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         }
         if ($progress->managepermission) {
             $urlparams = array('id' => $progress->coursemoduleid);
-            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
+            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams),
+                    get_string('edittreasurehunt', 'treasurehunt'), 'get');
         }
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
-            $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
+            $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress',
+                    'treasurehunt', null, null, 3);
             $o .= $s;
             // Close the container and insert a spacer.
             $o .= $this->output->container_end();
@@ -216,7 +223,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
             $notavailable = true;
-            $message = get_string('treasurehuntnotavailable', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
+            $message = get_string('treasurehuntnotavailable', 'treasurehunt',
+                    userdate($info->treasurehunt->allowattemptsfromdate));
             $o .= html_writer::tag('p', $message) . "\n";
             if ($info->treasurehunt->cutoffdate) {
                 $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
@@ -227,7 +235,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $o .= html_writer::tag('p', $message) . "\n";
         } else {
             if ($info->treasurehunt->allowattemptsfromdate) {
-                $message = get_string('treasurehuntopenedon', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
+                $message = get_string('treasurehuntopenedon', 'treasurehunt',
+                        userdate($info->treasurehunt->allowattemptsfromdate));
                 $o .= html_writer::tag('p', $message) . "\n";
             }
             if ($info->treasurehunt->cutoffdate) {
@@ -235,10 +244,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
-        if($info->treasurehunt->playwithoutmoving){
-            $gamemode = get_string('playwithoutmoving','treasurehunt');
-        }else{
-            $gamemode = get_string('movingplay','treasurehunt');
+        if ($info->treasurehunt->playwithoutmoving) {
+            $gamemode = get_string('playwithoutmoving', 'treasurehunt');
+        } else {
+            $gamemode = get_string('movingplay', 'treasurehunt');
         }
         $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
         $o .= html_writer::tag('p', $message) . "\n";
@@ -249,7 +258,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         }
         if ($notavailable) {
             $urlparams = array('id' => $info->courseid);
-            $o .= $this->output->single_button(new moodle_url('/course/view.php', $urlparams), get_string('backtocourse', 'treasurehunt'), 'get', array('class' => 'continuebutton'));
+            $o .= $this->output->single_button(new moodle_url('/course/view.php', $urlparams),
+                    get_string('backtocourse', 'treasurehunt'), 'get', array('class' => 'continuebutton'));
         }
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();

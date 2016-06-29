@@ -34,7 +34,7 @@ require_once ($CFG->libdir . '/formslib.php');
 GLOBAL $USER;
 
 $id = required_param('id', PARAM_INT);
-$roadid = optional_param('roadid',0, PARAM_INT);
+$roadid = optional_param('roadid', 0, PARAM_INT);
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
@@ -57,7 +57,7 @@ if (!empty($roadid)) {
     $url->param('roadid', $roadid);
 }
 // Print the page header.
-$title = get_string('editingtreasurehunt','treasurehunt').': '.format_string($treasurehunt->name);
+$title = get_string('editingtreasurehunt', 'treasurehunt') . ': ' . format_string($treasurehunt->name);
 $PAGE->set_url($url);
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
@@ -71,12 +71,14 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         redirect($roadurl);
     }
     $lockid = renew_edition_lock($cm->instance, $USER->id);
-    $renewlocktime = (get_setting_lock_time()-5)*1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid,$renewlocktime));
+    $renewlocktime = (get_setting_lock_time() - 5) * 1000;
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+            array($cm->instance, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $cm->instance, get_strings_edit(),$roadid, $lockid));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
+            array($id, $cm->instance, get_strings_edit(), $roadid, $lockid));
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
@@ -88,15 +90,16 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($treasurehunt->intro) {
-    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
+    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
+            'treasurehuntintro');
 }
 echo $OUTPUT->container_start("treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');
 echo $OUTPUT->box(null, 'loader-circle-inside');
 echo $OUTPUT->container_end();
-echo $OUTPUT->box(get_string('errvalidroad','treasurehunt'), 'alert alert-error invisible','errvalidroad');
-echo $OUTPUT->box(get_string('erremptyriddle','treasurehunt'), 'alert alert-error invisible','erremptyriddle');
+echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
+echo $OUTPUT->box(get_string('erremptyriddle', 'treasurehunt'), 'alert alert-error invisible', 'erremptyriddle');
 echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
 echo $OUTPUT->box(null, 'invisible', 'riddlelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');

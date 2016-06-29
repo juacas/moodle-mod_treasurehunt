@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -52,4 +53,5 @@ class course_module_viewed extends \core\event\course_module_viewed {
     public static function get_objectid_mapping() {
         return array('db' => 'treasurehunt', 'restore' => 'treasurehunt');
     }
+
 }

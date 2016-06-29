@@ -67,7 +67,8 @@ list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id,
 $gameupdatetime = get_setting_game_update_time() * 1000;
 
 $PAGE->requires->jquery();
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
+$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
+        array(
     get_strings_play(),
     $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmoving),
@@ -87,6 +88,6 @@ $output = $PAGE->get_renderer('mod_treasurehunt');
 // Output starts here.
 echo $output->header();
 // Replace the following lines with you own code.
-echo treasurehunt_view_play_page($treasurehunt,$cm->id);
+echo treasurehunt_view_play_page($treasurehunt, $cm->id);
 // Finish the page.
 echo $output->footer();

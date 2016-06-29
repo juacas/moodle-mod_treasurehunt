@@ -72,8 +72,10 @@ class riddle_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/editriddle.php", array('cmid' => $this->contextinstanceid,
-            'id' => $this->objectid));    }
+        return new \moodle_url("/mod/treasurehunt/editriddle.php",
+                array('cmid' => $this->contextinstanceid,
+            'id' => $this->objectid));
+    }
 
     public static function get_objectid_mapping() {
         return array('db' => 'treasurehunt_riddles', 'restore' => 'treasurehunt_riddle');

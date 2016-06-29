@@ -34,7 +34,8 @@ $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, '
 if (!is_edition_loked($cm->instance, $USER->id)) {
     $lockid = renew_edition_lock($cm->instance, $USER->id);
     $renewlocktime = (get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($cm->instance, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+            array($cm->instance, $lockid, $renewlocktime));
     if ($id) { // if entry is specified
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
@@ -69,7 +70,8 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
         unset($selectoptions[$option->busy]);
     }
 
-    $mform = new road_form(null, array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
+    $mform = new road_form(null,
+            array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
 // You need this section if you have a cancel button on your form
@@ -90,7 +92,7 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
             $road->treasurehuntid = $treasurehunt->id;
             $road->timecreated = $timenow;
             $road->id = $DB->insert_record('treasurehunt_roads', $road);
-            $eventparams['objectid']=$road->id;
+            $eventparams['objectid'] = $road->id;
             $event = \mod_treasurehunt\event\road_created::create($eventparams);
         } else {
             $road->timemodified = $timenow;
