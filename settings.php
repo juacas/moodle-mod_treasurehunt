@@ -23,7 +23,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
-require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('treasurehuntintro', '', get_string('configintro', 'treasurehunt')));
@@ -44,11 +44,11 @@ if ($ADMIN->fulltree) {
             PARAM_FLOAT));
     // Renewed times.
     $settings->add(new admin_setting_heading('updatetimesheading', get_string('updatetimes', 'treasurehunt'), ''));
-    // Maximum grade.
+    // Lock time editing.
     $settings->add(new admin_setting_configtext('mod_treasurehunt/locktimeediting',
             get_string('locktimeediting', 'treasurehunt'), get_string('locktimeediting_help', 'treasurehunt'),
             TREASUREHUNT_LOCKTIME, PARAM_INT));
-    // Maximum grade.
+    // Game update time.
     $settings->add(new admin_setting_configtext('mod_treasurehunt/gameupdatetime',
             get_string('gameupdatetime', 'treasurehunt'), get_string('gameupdatetime_help', 'treasurehunt'),
             TREASUREHUNT_GAMEUPDATETIME, PARAM_INT));

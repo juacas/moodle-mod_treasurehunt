@@ -33,21 +33,7 @@ require_once $CFG->libdir . '/filelib.php';
 
 defined('MOODLE_INTERNAL') || die();
 
-/* * #@+
- * Options determining how the grades from individual attempts are combined to give
- * the overall grade for a user
- */
-define('TREASUREHUNT_GRADEFROMRIDDLES', '1');
-define('TREASUREHUNT_GRADEFROMTIME', '2');
-define('TREASUREHUNT_GRADEFROMPOSITION', '3');
-/* * #@- */
 
-/* * #@+
- * Options determining lock time and game update time
- */
-define('TREASUREHUNT_LOCKTIME', 120);
-define('TREASUREHUNT_GAMEUPDATETIME', 20);
-/* * #@- */
 
 /* Moodle core API */
 

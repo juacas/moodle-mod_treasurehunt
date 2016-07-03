@@ -211,7 +211,6 @@ if (!is_edition_loked($cm->instance, $USER->id)) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
     print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
 }
-//$PAGE->navbar->ignore_active();
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editriddle', 'treasurehunt'), $url);
 $PAGE->set_title($title);

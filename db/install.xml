@@ -101,7 +101,7 @@
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
                 <FIELD NAME="treasurehuntid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Locked page"/>
-                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying user"/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Identifiying user"/>
                 <FIELD NAME="lockedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="timestamp"/>
             </FIELDS>
             <KEYS>
@@ -113,7 +113,7 @@
         <TABLE NAME="treasurehunt_answers" COMMENT="This table saves information about each answer of every riddle's question.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
-                <FIELD NAME="riddleid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying riddle's question"/>
+                <FIELD NAME="riddleid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="Identifiying riddle's question"/>
                 <FIELD NAME="answertext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the answer"/>
                 <FIELD NAME="answertextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="answertexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>                

@@ -26,10 +26,25 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
-require_once("$CFG->dirroot/mod/treasurehunt/lib.php");
-require_once(dirname(__FILE__) . '/GeoJSON/GeoJSON.class.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/GeoJSON/GeoJSON.class.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
 
+/* * #@+
+ * Options determining how the grades from individual attempts are combined to give
+ * the overall grade for a user
+ */
+define('TREASUREHUNT_GRADEFROMRIDDLES', '1');
+define('TREASUREHUNT_GRADEFROMTIME', '2');
+define('TREASUREHUNT_GRADEFROMPOSITION', '3');
+/* * #@- */
+
+/* * #@+
+ * Options determining lock time and game update time
+ */
+define('TREASUREHUNT_LOCKTIME', 120);
+define('TREASUREHUNT_GAMEUPDATETIME', 20);
+/* * #@- */
 
 //Cargo las clases necesarias de un objeto GeoJSON
 spl_autoload_register(array('GeoJSON', 'autoload'));
