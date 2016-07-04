@@ -188,7 +188,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 trackingOptions: {
                     enableHighAccuracy: true,
                     maximumAge: 0,
-                    timeout: 7000
+                    timeout: 0
                 },
                 tracking: false
             });
@@ -479,7 +479,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             function set_lastsuccessfulriddle() {
                 if (changesinlastsuccessfulriddle) {
                     $("#lastsuccessfulriddlename").text(lastsuccessfulriddle.name);
-                    $("#lastsuccesfulriddlepos").text(lastsuccessfulriddle.number +
+                    $("#lastsuccesfulriddlepos").text(lastsuccessfulriddle.position +
                             " / " + lastsuccessfulriddle.totalnumber);
                     $("#lastsuccessfulriddledescription").html(lastsuccessfulriddle.description);
                     if (lastsuccessfulriddle.question !== '') {
@@ -581,6 +581,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 $.mobile.loading("hide");
             });
             geolocation.on('error', function (error) {
+                this.setTracking(false);
                 $.mobile.loading("hide");
                 toast(error.message);
             });
@@ -697,7 +698,6 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     if (event.type === 'pagecontainershow') {
                         if (lastsuccessfulriddle.question === '') {
                             $.mobile.pageContainer.pagecontainer("change", "#mappage");
-                            toast('no existe la pregunta');
                         } else {
                             set_question();
                         }

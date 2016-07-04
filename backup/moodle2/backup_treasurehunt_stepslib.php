@@ -61,7 +61,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $riddles = new backup_nested_element('riddles');
 
         $riddle = new backup_nested_element('riddle', array('id'), array(
-            'name', 'number', 'description', 'descriptionformat', 'descriptiontrust',
+            'name', 'position', 'description', 'descriptionformat', 'descriptiontrust',
             'timecreated', 'timemodified', 'activitytoend', 'questiontext',
             'questiontextformat', 'questiontexttrust', 'geom'));
 
