@@ -75,7 +75,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
         $attempt = new backup_nested_element('attempt', array('id'), array(
             'timecreated', 'userid', 'groupid', 'success',
-            'penalty', 'type', 'questionsolved', 'completionsolved',
+            'penalty', 'type', 'questionsolved', 'activitysolved',
             'geometrysolved', 'location'));
 
         // Build the tree

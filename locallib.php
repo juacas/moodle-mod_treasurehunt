@@ -381,8 +381,8 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         if ($inside) {
             $nextriddle->inside = 1;
             $questionsolved = ($nextriddle->questiontext === '' ? true : false);
-            $completionsolved = ($nextriddle->activitytoend == 0 ? true : false);
-            if ($questionsolved && $completionsolved) {
+            $activitysolved = ($nextriddle->activitytoend == 0 ? true : false);
+            if ($questionsolved && $activitysolved) {
                 $success = true;
             } else {
                 $success = false;
@@ -394,7 +394,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
             $nextriddle->inside = 0;
             $penalty = true;
             $questionsolved = false;
-            $completionsolved = false;
+            $activitysolved = false;
             $success = false;
             $return->msg = get_string('faillocation', 'treasurehunt');
             $return->newriddle = false;
@@ -407,7 +407,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         $attempt->groupid = $groupid;
         $attempt->success = $success;
         $attempt->type = 'location';
-        $attempt->completionsolved = $completionsolved;
+        $attempt->activitysolved = $activitysolved;
         $attempt->questionsolved = $questionsolved;
         $attempt->geometrysolved = $nextriddle->inside;
         $attempt->location = $locationwkt;
@@ -415,10 +415,10 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         insert_attempt($attempt, $context);
 
         // Si el intento acierta la localizacion  y existe el completion compruebo si esta superado.
-        if ($nextriddle->inside && !$completionsolved) {
+        if ($nextriddle->inside && !$activitysolved) {
             if ($usercompletion = check_completion_activity($nextriddle->activitytoend, $userid, $groupid, $context)) {
-                $attempt->type = 'completion';
-                $attempt->completionsolved = 1;
+                $attempt->type = 'activity';
+                $attempt->activitysolved = 1;
                 $attempt->userid = $usercompletion;
                 // Para que siga un orden cronologico;
                 $attempt->timecreated +=1;
@@ -451,7 +451,7 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
     } else {
         $return->newriddle = false;
         $return->newattempt = false;
-        if (!$currentriddle->questionsolved && !$currentriddle->completionsolved) {
+        if (!$currentriddle->questionsolved && !$currentriddle->activitysolved) {
             $return->msg = get_string('mustcompleteboth', 'treasurehunt');
         } else if (!$currentriddle->questionsolved) {
             $return->msg = get_string('mustanswerquestion', 'treasurehunt');
@@ -541,15 +541,15 @@ function riddles_to_geojson($riddles, $context, $treasurehuntid, $groupid = 0) {
 function get_locked_name_and_description($attempt, $context) {
     $return = new stdClass();
     $return->name = get_string('lockedriddle', 'treasurehunt');
-    if (!$attempt->completionsolved) {
+    if (!$attempt->activitysolved) {
         $activitytoendname = get_activity_to_end_link($attempt->activitytoend);
     }
     if ((!$attempt->questionsolved && $attempt->questiontext !== '')
-            && (!$attempt->completionsolved && $attempt->activitytoend)) {
+            && (!$attempt->activitysolved && $attempt->activitytoend)) {
         $return->description = get_string('lockedqacriddle', 'treasurehunt', $activitytoendname);
     } else if (!$attempt->questionsolved && $attempt->questiontext !== '') {
         $return->description = get_string('lockedqriddle', 'treasurehunt');
-    } else if (!$attempt->completionsolved && $attempt->activitytoend) {
+    } else if (!$attempt->activitysolved && $attempt->activitytoend) {
         $return->description = get_string('lockedcpriddle', 'treasurehunt', $activitytoendname);
     } else {
         $return->name = $attempt->name;
@@ -925,7 +925,7 @@ function get_last_successful_attempt($userid, $groupid, $roadid) {
         $params = array($userid, $roadid);
     }
     $sql = "SELECT a.id,a.riddleid,a.success,a.location AS location,"
-            . "a.geometrysolved,a.questionsolved,a.completionsolved,r.name,r.description,"
+            . "a.geometrysolved,a.questionsolved,a.activitysolved,r.name,r.description,"
             . "r.questiontext,r.position,r.activitytoend FROM {treasurehunt_riddles} r "
             . "INNER JOIN {treasurehunt_attempts} a ON a.riddleid=r.id WHERE "
             . "a.timecreated=(SELECT MAX(at.timecreated) FROM {treasurehunt_riddles} ri "
@@ -937,7 +937,7 @@ function get_last_successful_attempt($userid, $groupid, $roadid) {
 }
 
 // Compruebo si se ha acertado la pista y completado la actividad requerida.
-function check_question_and_completion_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context,
+function check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context,
         $treasurehunt, $noriddles, $qocremoved) {
     global $DB;
 
@@ -956,9 +956,9 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
     if (!$lastattempt->success && $lastattempt->geometrysolved) {
         $lastattempt->userid = $userid;
         $lastattempt->groupid = $groupid;
-        $completionsolved = false;
+        $activitysolved = false;
         // Si no tiene completada la actividad a superar.
-        if (!$lastattempt->completionsolved) {
+        if (!$lastattempt->activitysolved) {
             // Si existe una actividad a superar.
             if ($lastattempt->activitytoend) {
                 if ($usercompletion = check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
@@ -972,9 +972,9 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                         $return->updates[] = get_string('removedquestion', 'treasurehunt');
                     }
                     $lastattempt->userid = $usercompletion;
-                    $lastattempt->type = 'completion';
+                    $lastattempt->type = 'activity';
                     $lastattempt->timecreated = time();
-                    $lastattempt->completionsolved = 1;
+                    $lastattempt->activitysolved = 1;
                     $lastattempt->penalty = 0;
                     // Si ya esta resuelta la pregunta la marco como superada.
                     if ($lastattempt->questionsolved) {
@@ -983,7 +983,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                         $lastattempt->success = 0;
                     }
                     insert_attempt($lastattempt, $context);
-                    $completionsolved = true;
+                    $activitysolved = true;
                     // Si esta superada creo el intento como superado.
                     if ($lastattempt->questionsolved) {
                         $lastattempt->type = 'location';
@@ -997,7 +997,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     $return->updates[] = get_string('removedactivitytoend', 'treasurehunt');
                     $return->attemptsolved = true;
                 }
-                $lastattempt->completionsolved = 1;
+                $lastattempt->activitysolved = 1;
                 // Si no existe la pregunta es que la han borrado.
                 if ($lastattempt->questiontext === '') {
                     $lastattempt->questionsolved = 1;
@@ -1025,7 +1025,7 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                     $return->attemptsolved = true;
                 }
                 // Si la actividad a completar esta superada creo el intento como superado.
-                if ($lastattempt->completionsolved) {
+                if ($lastattempt->activitysolved) {
                     $lastattempt->success = 1;
                     $lastattempt->type = 'location';
                     $lastattempt->questionsolved = 1;
@@ -1055,14 +1055,14 @@ function check_question_and_completion_solved($selectedanswerid, $userid, $group
                             $lastattempt->questionsolved = 1;
                             $lastattempt->penalty = 0;
                             // Si ya esta resuelta la actividad a completar la marco como superada.
-                            if ($lastattempt->completionsolved) {
+                            if ($lastattempt->activitysolved) {
                                 $lastattempt->success = 1;
                             } else {
                                 $lastattempt->success = 0;
                             }
                             insert_attempt($lastattempt, $context);
                             // Si esta superada creo el intento como superado.
-                            if ($lastattempt->completionsolved) {
+                            if ($lastattempt->activitysolved) {
                                 $lastattempt->type = 'location';
                                 $lastattempt->timecreated += 1;
                                 insert_attempt($lastattempt, $context);
@@ -1124,7 +1124,7 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $out
         $lastsuccessfulriddle->question = '';
         $lastsuccessfulriddle->answers = array();
         $lastsuccessfulriddle->position = intval($attempt->position);
-        $lastsuccessfulriddle->completion = intval($attempt->completionsolved);
+        $lastsuccessfulriddle->activitysolved = intval($attempt->activitysolved);
         if (!$attempt->questionsolved) {
             // Envio la pregunta y las respuestas de la pista anterior.
             $lastsuccessfulriddle->answers = get_riddle_answers($attempt->riddleid, $context);
@@ -1137,7 +1137,7 @@ function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $out
         $lastsuccessfulriddle->question = '';
         $lastsuccessfulriddle->answers = array();
         $lastsuccessfulriddle->position = 0;
-        $lastsuccessfulriddle->completion = 1;
+        $lastsuccessfulriddle->activitysolved = 1;
         if ($outoftime || $actnotavailableyet) {
             if (isset($attempt->position)) {
                 $lastsuccessfulriddle->position = intval($attempt->position);
@@ -1198,7 +1198,7 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changes
             $grouptype = 'a.groupid=0 AND a.userid=(?)';
             $params = array($timestamp, $userid, $roadid);
         }
-        $query = "SELECT a.id,a.type,a.questionsolved,a.completionsolved,a.timecreated,"
+        $query = "SELECT a.id,a.type,a.questionsolved,a.activitysolved,a.timecreated,"
                 . "a.success,r.position,a.userid as user,a.geometrysolved "
                 . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
                 . "ON a.riddleid=r.id WHERE a.timecreated >? AND $grouptype "
@@ -1214,8 +1214,8 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changes
             }
             $return->newgeometry = true;
         } else {
-            if (($newattempt->type === 'question' && $newattempt->questionsolved) || ($newattempt->type === 'completion' &&
-                    $newattempt->completionsolved)) {
+            if (($newattempt->type === 'question' && $newattempt->questionsolved) || ($newattempt->type === 'activity' &&
+                    $newattempt->activitysolved)) {
                 $return->attemptsolved = true;
             }
         }
@@ -1322,8 +1322,8 @@ function set_string_attempt($attempt, $group) {
             } else {
                 return get_string('grouplocationfailed', 'treasurehunt', $attempt);
             }
-        } else if ($attempt->type === 'completion') {
-            return get_string('groupcompletionovercome', 'treasurehunt', $attempt);
+        } else if ($attempt->type === 'activity') {
+            return get_string('groupactivityovercome', 'treasurehunt', $attempt);
         }
     } else {
         // Si son intentos a preguntas
@@ -1345,8 +1345,8 @@ function set_string_attempt($attempt, $group) {
             } else {
                 return get_string('userlocationfailed', 'treasurehunt', $attempt);
             }
-        } else if ($attempt->type === 'completion') {
-            return get_string('usercompletionovercome', 'treasurehunt', $attempt);
+        } else if ($attempt->type === 'activity') {
+            return get_string('useractivityovercome', 'treasurehunt', $attempt);
         }
     }
 }

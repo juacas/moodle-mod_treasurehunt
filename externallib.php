@@ -419,7 +419,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
                     'answertext' => new external_value(PARAM_RAW, 'The text of answer')
                         )), 'Array with all answers of the last successful riddle.'),
                 'totalnumber' => new external_value(PARAM_INT, 'The total number of riddles on the road.'),
-                'completion' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
+                'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
                     ), 'object with data from the last successful riddle', VALUE_OPTIONAL),
             'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
             'available' => new external_value(PARAM_BOOL, 'If true the hunt is available.'),
@@ -492,7 +492,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
 
         if ($available->available) {
             // Compruebo si se ha acertado la pista y completado la actividad requerida.
-            $qocsolved = check_question_and_completion_solved($params['selectedanswerid'], $USER->id,
+            $qocsolved = check_question_and_activity_solved($params['selectedanswerid'], $USER->id,
                     $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $noriddles,
                     $qocremoved);
             if ($qocsolved->msg !== '') {
@@ -544,7 +544,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
         }
         $lastsuccessfulriddle = array();
         // Si se ha acertado una nueva localizacion, se ha modificado el camino, está fuera de tiempo,
-        // se esta inicializando,se ha resuelto una pregunta o completion o se ha cambiado el modo grupo.
+        // se esta inicializando,se ha resuelto una pregunta o actividad o se ha cambiado el modo grupo.
         if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved
                 || $params['initialize'] || $changesingroupmode) {
             $lastsuccessfulriddle = get_last_successful_riddle($USER->id, $userparams->groupid, $userparams->roadid,

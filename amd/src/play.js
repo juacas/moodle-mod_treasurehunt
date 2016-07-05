@@ -414,7 +414,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                                 changesinquestionriddle = true;
                                 $('#validatelocation').hide();
                             }
-                            else if (!lastsuccessfulriddle.completion) {
+                            else if (!lastsuccessfulriddle.activitysolved) {
                                 $('#validatelocation').hide();
                             } else {
                                 $('#validatelocation').show();
@@ -749,7 +749,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     $("#infopanel").panel("open");
                     return;
                 }
-                if (!lastsuccessfulriddle.completion) {
+                if (!lastsuccessfulriddle.activitysolved) {
                     event.preventDefault();
                     toast(strings['activitytoendwarning']);
                     $("#infopanel").panel("open");

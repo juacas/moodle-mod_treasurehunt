@@ -21,13 +21,13 @@ define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, 
             json[0].done(function (response) {
                 console.log(response);
                 if (response.status.code) {
-                    debugger;
                     notification.alert('Error', response.status.msg, 'Continue');
                     renewLock.stoprenew_edition_lock();
                 }
             }).fail(function (error) {
                 console.log(error);
                 notification.exception(error);
+                renewLock.stoprenew_edition_lock();
             });
         },
         /**Renuevo de continuo el bloqueo de edicion **/
