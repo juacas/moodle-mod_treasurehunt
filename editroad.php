@@ -31,11 +31,11 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $id));
 
-if (!is_edition_loked($cm->instance, $USER->id)) {
-    $lockid = renew_edition_lock($cm->instance, $USER->id);
+if (!is_edition_loked($treasurehunt->id, $USER->id)) {
+    $lockid = renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-            array($cm->instance, $lockid, $renewlocktime));
+            array($treasurehunt->id, $lockid, $renewlocktime));
     if ($id) { // if entry is specified
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');

@@ -64,21 +64,21 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 
 
-if (!is_edition_loked($cm->instance, $USER->id)) {
+if (!is_edition_loked($treasurehunt->id, $USER->id)) {
     // Si no hay ningún camino redirijo para crearlo.
     if (get_total_roads($treasurehunt->id) == 0) {
         $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $id));
         redirect($roadurl);
     }
-    $lockid = renew_edition_lock($cm->instance, $USER->id);
+    $lockid = renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-            array($cm->instance, $lockid, $renewlocktime));
+            array($treasurehunt->id, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
-            array($id, $cm->instance, get_strings_edit(), $roadid, $lockid));
+            array($id, $treasurehunt->id, get_strings_edit(), $roadid, $lockid));
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));

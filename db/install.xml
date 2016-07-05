@@ -81,11 +81,11 @@
                 <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id who made the attempt"/>
                 <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been overcome"/>
                 <FIELD NAME="penalty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If it is true flag as failed a question or location"/>
-                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and completion"/>
+                <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and activity"/>
                 <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's question has been solved"/>
-                <FIELD NAME="completionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's activitytoend has been solved"/>
+                <FIELD NAME="activitysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's activitytoend has been solved"/>
                 <FIELD NAME="geometrysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's geometry has been solved"/>
-                <FIELD NAME="location" TYPE="text" NOTNULL="false" SEQUENCE="true" COMMENT="Keep the attempt location of users / groups"/>
+                <FIELD NAME="location" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep the attempt location of users / groups"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -102,7 +102,7 @@
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
                 <FIELD NAME="treasurehuntid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Locked page"/>
                 <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying user"/>
-                <FIELD NAME="lockedat" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="timestamp"/>
+                <FIELD NAME="lockedtill" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="timestamp"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
