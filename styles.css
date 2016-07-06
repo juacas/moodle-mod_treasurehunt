@@ -13,12 +13,12 @@
 .path-mod-treasurehunt .treasurehunt-editor button{
     background-image: none;
 }
-.path-mod-treasurehunt #addriddle, .path-mod-treasurehunt #addroad{
+.path-mod-treasurehunt #addstage, .path-mod-treasurehunt #addroad{
     margin:0 auto; 
     margin-left: 1%;
     margin-right:1%;
 }
-.path-mod-treasurehunt #saveriddle,.path-mod-treasurehunt #removefeature {
+.path-mod-treasurehunt #savestage,.path-mod-treasurehunt #removefeature {
     margin:0 auto;
     margin-left: 1%; 
 }
@@ -30,7 +30,7 @@
     overflow: hidden;
 }
 /*Selectable y sortable*/
-.path-mod-treasurehunt #riddlelistpanel {
+.path-mod-treasurehunt #stagelistpanel {
     float:left; 
     width: 150px;
     max-width: 60%; 
@@ -47,7 +47,7 @@
     cursor:default;
     clear: both;
 }
-.path-mod-treasurehunt #riddlelist {
+.path-mod-treasurehunt #stagelist {
     width: 100%;
     height: 100%; 
     position: relative; 
@@ -64,7 +64,7 @@
     margin:0 auto; 
     display:table
 }
-.path-mod-treasurehunt #riddlelist li, .path-mod-treasurehunt #roadlist li{
+.path-mod-treasurehunt #stagelist li, .path-mod-treasurehunt #roadlist li{
     border: 2px solid gray; 
     list-style: none; 
     cursor:default;  
@@ -72,7 +72,7 @@
     -moz-box-sizing: border-box;    /* Firefox, other Gecko */
     box-sizing: border-box;         /* Opera/IE 8+ */
 }   
-.path-mod-treasurehunt #riddlelist li {
+.path-mod-treasurehunt #stagelist li {
     width: 100%;
     display:table;
     table-layout: fixed;
@@ -80,7 +80,7 @@
 .path-mod-treasurehunt #roadlist li {
     display: table-cell;
 }
-.path-mod-treasurehunt #riddlelist li:hover,.path-mod-treasurehunt #roadlist li:hover {
+.path-mod-treasurehunt #stagelist li:hover,.path-mod-treasurehunt #roadlist li:hover {
     background: #eee; 
 }
 .path-mod-treasurehunt .handle, .path-mod-treasurehunt .nohandle {
@@ -92,14 +92,14 @@
 .path-mod-treasurehunt .handle {
     cursor: n-resize
 }
-.path-mod-treasurehunt .modifyriddle, .path-mod-treasurehunt .modifyroad{
+.path-mod-treasurehunt .modifystage, .path-mod-treasurehunt .modifyroad{
     position: relative; 
     display:table-cell;
     vertical-align: middle; 
     text-align: center; 
     width: 20px
 }
-.path-mod-treasurehunt .riddlename, .path-mod-treasurehunt .roadname{ 
+.path-mod-treasurehunt .stagename, .path-mod-treasurehunt .roadname{ 
     padding-left: 5px;
     padding-right: 5px;
     position: relative; 
@@ -119,11 +119,11 @@
 .path-mod-treasurehunt .sortable-number { 
     font-weight: bold;
 }
-.path-mod-treasurehunt .validriddle { 
+.path-mod-treasurehunt .validstage { 
     box-shadow: 0 0 12px #28921f;
     z-index: 10;
 }
-.path-mod-treasurehunt .invalidriddle { 
+.path-mod-treasurehunt .invalidstage { 
     box-shadow: 0 0 12px #b03535;
     z-index: 10;
 }
@@ -385,25 +385,25 @@
 
 @media screen and (max-height: 480px) {
     .path-mod-treasurehunt #mapedit{height: 160px}
-    .path-mod-treasurehunt #riddlelistpanel{height: 160px}
+    .path-mod-treasurehunt #stagelistpanel{height: 160px}
     .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 75px}
     .path-mod-treasurehunt .ui-autocomplete {max-height:192px}
 }
 @media screen and (min-height: 481px) {
     .path-mod-treasurehunt #mapedit{height: 325px}
-    .path-mod-treasurehunt #riddlelistpanel{height: 325px}
+    .path-mod-treasurehunt #stagelistpanel{height: 325px}
     .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 157px}
     .path-mod-treasurehunt .ui-autocomplete {max-height: 357px}
 }
 @media screen and (min-height: 620px) {
     .path-mod-treasurehunt #mapedit{height: 450px}
-    .path-mod-treasurehunt #riddlelistpanel{height: 450px}
+    .path-mod-treasurehunt #stagelistpanel{height: 450px}
     .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 220px}
     .path-mod-treasurehunt .ui-autocomplete {max-height: 482px}
 }
 @media screen and (min-height: 750px) {
     .path-mod-treasurehunt #mapedit{height: 560px}
-    .path-mod-treasurehunt #riddlelistpanel{height: 560px}
+    .path-mod-treasurehunt #stagelistpanel{height: 560px}
     .path-mod-treasurehunt .treasurehunt-editor-loader{margin-top: 275px}
     .path-mod-treasurehunt .ui-autocomplete {max-height: 592px}
 }

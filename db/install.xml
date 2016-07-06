@@ -21,7 +21,7 @@
                 <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The maximum grade for this treasure hunt. Can be negative to indicate the use of a scale."/>
                 <FIELD NAME="gradepenlocation" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure a localization expressed in % of the grade."/>
                 <FIELD NAME="gradepenanswer" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure an answer expressed in % of the grade."/>
-                <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMRIDDLES, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
+                <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMstageS, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -46,22 +46,22 @@
                 <KEY NAME="groupingid" TYPE="foreign" FIELDS="groupingid" REFTABLE="groupings" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
-        <TABLE NAME="treasurehunt_riddles" COMMENT="This table saves information about each riddle of every road in a course.">
+        <TABLE NAME="treasurehunt_stages" COMMENT="This table saves information about each stage of every road in a course.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
-                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for each riddle"/>
+                <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for each stage"/>
                 <FIELD NAME="roadid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifying the road created"/>
-                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Order of the riddles in every road. Every road starts with riddle position = 1"/>
-                <FIELD NAME="description" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General description of the riddle"/>
-                <FIELD NAME="descriptionformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="descriptiontrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Order of the stages in every road. Every road starts with stage position = 1"/>
+                <FIELD NAME="cluetext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Clue to reach the next stage"/>
+                <FIELD NAME="cluetextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="cluetexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="Activity to be completed before the riddle show"/>
-                <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question"/>
+                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="Activity to be completed before the clue show"/>
+                <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question to be answered before the clue show"/>
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="geom" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep riddle geometry"/>                
+                <FIELD NAME="geom" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep stage geometry"/>                
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -72,26 +72,26 @@
                 <INDEX NAME="position" UNIQUE="false" FIELDS="position"/>
             </INDEXES>
         </TABLE>
-        <TABLE NAME="treasurehunt_attempts" COMMENT="This table saves information on each attempt by a user to solve a riddle.">
+        <TABLE NAME="treasurehunt_attempts" COMMENT="This table saves information on each attempt by a user to solve a stage.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
-                <FIELD NAME="riddleid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifies the riddle that the user is trying to solve "/>
+                <FIELD NAME="stageid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifies the stage that the user is trying to solve "/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The user id who made the attempt"/>
                 <FIELD NAME="groupid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The group id who made the attempt"/>
-                <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle has been overcome"/>
+                <FIELD NAME="success" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the stage has been overcome"/>
                 <FIELD NAME="penalty" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If it is true flag as failed a question or location"/>
                 <FIELD NAME="type" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT="location" SEQUENCE="false" COMMENT="Defines the type of attempt. There are 3 types: location, question and activity"/>
-                <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's question has been solved"/>
-                <FIELD NAME="activitysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's activitytoend has been solved"/>
-                <FIELD NAME="geometrysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the riddle's geometry has been solved"/>
+                <FIELD NAME="questionsolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the stage's question has been solved"/>
+                <FIELD NAME="activitysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the stage's activitytoend has been solved"/>
+                <FIELD NAME="geometrysolved" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the stage's geometry has been solved"/>
                 <FIELD NAME="location" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep the attempt location of users / groups"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
                 <KEY NAME="userid" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
                 <KEY NAME="groupid" TYPE="foreign" FIELDS="groupid" REFTABLE="groups" REFFIELDS="id"/>
-                <KEY NAME="riddleid" TYPE="foreign" FIELDS="riddleid" REFTABLE="treasurehunt_riddles" REFFIELDS="id"/>
+                <KEY NAME="stageid" TYPE="foreign" FIELDS="stageid" REFTABLE="treasurehunt_stages" REFFIELDS="id"/>
             </KEYS>
             <INDEXES>
                 <INDEX NAME="success" UNIQUE="false" FIELDS="success"/>
@@ -110,10 +110,10 @@
                 <KEY NAME="treasurehuntid" TYPE="foreign" FIELDS="treasurehuntid" REFTABLE="treasurehunt" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
-        <TABLE NAME="treasurehunt_answers" COMMENT="This table saves information about each answer of every riddle's question.">
+        <TABLE NAME="treasurehunt_answers" COMMENT="This table saves information about each answer of every stage's question.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
-                <FIELD NAME="riddleid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying riddle's question"/>
+                <FIELD NAME="stageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying stage's question"/>
                 <FIELD NAME="answertext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the answer"/>
                 <FIELD NAME="answertextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="answertexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>                
@@ -123,7 +123,7 @@
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
-                <KEY NAME="riddleid" TYPE="foreign" FIELDS="riddleid" REFTABLE="treasurehunt_riddles" REFFIELDS="id"/>
+                <KEY NAME="stageid" TYPE="foreign" FIELDS="stageid" REFTABLE="treasurehunt_stages" REFFIELDS="id"/>
             </KEYS>
         </TABLE>
     </TABLES>

@@ -52,7 +52,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     /**
      * Render a table containing the current status of the grading process.
      *
-     * @param treasurehunt_user_historical_riddles  $historical
+     * @param treasurehunt_user_historical_stages  $historical
      * @return string
      */
     public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical) {
@@ -138,8 +138,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         } else {
                             $title = get_string('user', 'treasurehunt');
                         }
-                        $this->add_table_row($t, array($title, get_string('riddles', 'treasurehunt')), true, null,
-                                array(null, $roadusersprogress->totalriddles));
+                        $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null,
+                                array(null, $roadusersprogress->totalstages));
                         foreach ($roadusersprogress->userlist as $user) {
                             $row = new html_table_row();
                             if ($progress->groupmode) {
@@ -158,7 +158,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 }
                             }
                             $cells = array($name);
-                            for ($i = 1; $i <= $roadusersprogress->totalriddles; $i++) {
+                            for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($user->ratings[$i])) {
                                     $cell->attributes['class'] = $user->ratings[$i]->class;

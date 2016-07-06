@@ -3,7 +3,7 @@
 $services = array(
     'treasurehuntservices' => array(//the name of the web service
         'functions' => array('mod_treasurehunt_fetch_treasurehunt',
-            'mod_treasurehunt_update_riddles', 'mod_treasurehunt_delete_riddle',
+            'mod_treasurehunt_update_stages', 'mod_treasurehunt_delete_stage',
             'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock',
             'mod_treasurehunt_user_progress'), //web service functions of this service
         'requiredcapability' => '', //if set, the web service user need this capability to access 
@@ -22,16 +22,16 @@ $functions = array(
         'description' => 'Fetch all the features of stage.', //human readable description of the web service function
         'type' => 'read', //database rights of the web service function (read, write)
     ),
-    'mod_treasurehunt_update_riddles' => array(//web service function name
-        'classname' => 'mod_treasurehunt_external_update_riddles', //class containing the external function
-        'methodname' => 'update_riddles', //external function name
+    'mod_treasurehunt_update_stages' => array(//web service function name
+        'classname' => 'mod_treasurehunt_external_update_stages', //class containing the external function
+        'methodname' => 'update_stages', //external function name
         'classpath' => 'mod/treasurehunt/externallib.php', //file containing the class/external function
         'description' => 'Creates new groups.', //human readable description of the web service function
         'type' => 'write', //database rights of the web service function (read, write)
     ),
-    'mod_treasurehunt_delete_riddle' => array(//web service function name
-        'classname' => 'mod_treasurehunt_external_delete_riddle', //class containing the external function
-        'methodname' => 'delete_riddle', //external function name
+    'mod_treasurehunt_delete_stage' => array(//web service function name
+        'classname' => 'mod_treasurehunt_external_delete_stage', //class containing the external function
+        'methodname' => 'delete_stage', //external function name
         'classpath' => 'mod/treasurehunt/externallib.php', //file containing the class/external function
         'description' => 'Creates new groups.', //human readable description of the web service function
         'type' => 'write', //database rights of the web service function (read, write)

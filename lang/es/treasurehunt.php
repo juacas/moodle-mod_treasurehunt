@@ -31,7 +31,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['modulename'] = 'Caza del tesoro';
 $string['modulenameplural'] = 'Cazas del tesoro';
 $string['modulename_help'] = 'Este módulo servirá para realizar una actividad de geolocalización';
-$string['riddlename'] = 'Nombre de la pista';
+$string['stagename'] = 'Nombre de la etapa';
 $string['roadname'] = 'Nombre del camino';
 $string['successlocation'] = '¡Es el lugar correcto!';
 $string['faillocation'] = 'No es el lugar correcto';
@@ -55,7 +55,7 @@ $string['gradesdeleted'] = 'Eliminadas calificaciones de la caza del tesoro';
 $string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la caza del tesoro.';
 $string['nogroupassigned'] = 'Ningún grupo asignado a este camino';
 $string['nouserassigned'] = 'Ningún usuario asignado a este camino';
-$string['overcomefirstriddle'] = 'Para descubrir la primera pista debes comenzar desde el área marcada en el mapa';
+$string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['attempt'] = 'Intento';
 $string['historicalattempts'] = 'Historial de intentos de {$a}';
@@ -75,30 +75,30 @@ $string['loading'] = 'Cargando';
 $string['updates'] = 'Actualizaciones';
 $string['userprogress'] = 'El progreso de usuario se ha actualizado con éxito';
 $string['usersprogress'] = 'Progreso de los usuarios';
-$string['usersprogress_help'] = 'Indica el progreso de las pistas de cada alumno/grupo en función de los colores: '
-        . '<P>El color <B>verde</B> indica que la pista se ha superado sin fallos.</P>'
-        . '<P>El color <B>amarillo</B> indica que la pista se ha superado con fallos.</P>'
-        . '<P>El color <B>rojo</B> indica que la pista no se ha superado y se han cometido fallos.</P>'
-        . '<P>El color <B>gris</B> indica que la pista no se ha superado y no se han cometido fallos.</P>';
+$string['usersprogress_help'] = 'Indica el progreso de las etapas de cada alumno/grupo en función de los colores: '
+        . '<P>El color <B>verde</B> indica que la etapa se ha superado sin fallos.</P>'
+        . '<P>El color <B>amarillo</B> indica que la etapa se ha superado con fallos.</P>'
+        . '<P>El color <B>rojo</B> indica que la etapa no se ha superado y se han cometido fallos.</P>'
+        . '<P>El color <B>gris</B> indica que la etapa no se ha superado y no se han cometido fallos.</P>';
 $string['nomarks'] = 'Marca primero en el mapa el punto deseado.';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
-$string['userlocationovercome'] = 'Localización encontrada de la pista {$a->position} en la fecha: {$a->date}';
-$string['userriddleovercome'] = 'Pista {$a->position} superada en la fecha: {$a->date}';
-$string['userlocationfailed'] = 'Localización fallida de la pista {$a->position} en la fecha: {$a->date}';
-$string['useractivityovercome'] = 'Actividad a finalizar completada con éxito para la pista {$a->position} en la fecha: {$a->date}';
-$string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la pista {$a->position}  en la fecha: {$a->date}';
-$string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la pista {$a->position} en la fecha: {$a->date}';
-$string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la pista {$a->position} en la fecha: {$a->date}';
-$string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la pista {$a->position} en la fecha: {$a->date}';
-$string['grouplocationovercome'] = 'Localización encontrada por {$a->user} de la pista {$a->position} en la fecha: {$a->date}';
-$string['groupriddleovercome'] = 'Pista {$a->position} superada por {$a->user} en la fecha: {$a->date}';
-$string['grouplocationfailed'] = 'Localización fallida por {$a->user} de la pista {$a->position} en la fecha: {$a->date}';
-$string['groupactivityovercome'] = 'Actividad a finalizar completada con éxito por {$a->user} para la pista {$a->position} en la fecha: {$a->date}';
-$string['lockedriddle'] = 'Pista bloqueada';
-$string['lockedcriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
-$string['lockedqacriddle'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente a la siguiente pregunta para desbloquear la pista';
-$string['lockedqriddle'] = 'Debes responder correctamente a la siguiente pregunta para desbloquear la pista';
+$string['userlocationovercome'] = 'Localización encontrada de la etapa {$a->position} en la fecha: {$a->date}';
+$string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->date}';
+$string['userlocationfailed'] = 'Localización fallida de la etapa {$a->position} en la fecha: {$a->date}';
+$string['useractivityovercome'] = 'Actividad a finalizar completada con éxito para la etapa {$a->position} en la fecha: {$a->date}';
+$string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la etapa {$a->position}  en la fecha: {$a->date}';
+$string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
+$string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
+$string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
+$string['grouplocationovercome'] = 'Localización encontrada por {$a->user} de la etapa {$a->position} en la fecha: {$a->date}';
+$string['groupstageovercome'] = 'Etapa {$a->position} superada por {$a->user} en la fecha: {$a->date}';
+$string['grouplocationfailed'] = 'Localización fallida por {$a->user} de la etapa {$a->position} en la fecha: {$a->date}';
+$string['groupactivityovercome'] = 'Actividad a finalizar completada con éxito por {$a->user} para la etapa {$a->position} en la fecha: {$a->date}';
+$string['lockedclue'] = 'Pista bloqueada';
+$string['lockedcclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
+$string['lockedqacclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente a la siguiente pregunta para desbloquear la pista';
+$string['lockedqclue'] = 'Debes responder correctamente a la siguiente pregunta para desbloquear la pista';
 $string['treasurehuntname'] = 'Nombre de la caza del tesoro';
 $string['treasurehuntname_help'] = 'Este es el contenido asociado al nombre. Soporta barra baja.';
 $string['treasurehunt'] = 'Treasure hunt';
@@ -110,9 +110,9 @@ $string['hello'] = 'Hola';
 $string['question'] = 'Pregunta';
 $string['welcome'] = 'Bienvenido a mi módulo de caza del tesoro, espero que lo disfrutes';
 $string['addsimplequestion'] = 'Añadir pregunta simple';
-$string['addsimplequestion_help'] = 'Permite añadir una pregunta sencilla antes de mostrar la descripción de esta pista';
+$string['addsimplequestion_help'] = 'Permite añadir una pregunta sencilla antes de mostrar la pista de esta etapa';
 $string['road'] = 'Camino';
-$string['riddle'] = 'Pista';
+$string['stage'] = 'Etapa';
 $string['add'] = 'Añadir';
 $string['modify'] = 'Modificar';
 $string['save'] = 'Guardar';
@@ -120,7 +120,7 @@ $string['remove'] = 'Eliminar';
 $string['searchlocation'] = 'Buscar localización';
 $string['savewarning'] = 'No ha guardado los cambios realizados.';
 $string['removewarning'] = 'Si la eliminas ya no podras recuperarla';
-$string['removeroadwarning'] = 'Si eliminas el camino se eliminaran todas las pistas asociadas y ya no podras recuperarlas';
+$string['removeroadwarning'] = 'Si eliminas el camino se eliminaran todas las etapas asociadas y ya no podras recuperarlas';
 $string['areyousure'] = '¿Estás seguro?';
 $string['noasnwerselected'] = 'Debes seleccionar una respuesta';
 $string['timeexceeded'] = 'Se ha superado el tiempo limite para realizar la actividad. Esta pantalla solo sirve para revisar el juego';
@@ -134,15 +134,15 @@ $string['removedquestion'] = 'Se ha eliminado la pregunta';
 $string['warmatchanswer'] = 'La respuesta no corresponde con la pregunta';
 $string['confirm'] = 'Confirmar';
 $string['cancel'] = 'Cancelar';
-$string['confirm_delete_riddle'] = 'Se eliminaron las pistas correctamente';
-$string['saveemptyridle'] = 'Todas las pistas modificadas deben tener geometría antes de guardar';
-$string['erremptyriddle'] = 'Todas las pistas deben tener al menos una geometría para que el camino sea válido';
-$string['errvalidroad'] = 'Debe existir al menos dos pistas que tengan al menos una geometría para que el camino sea válido';
-$string['eventriddleupdated'] = 'Pista actualizada';
-$string['eventriddlecreated'] = 'Pista creada';
-$string['eventriddledeleted'] = 'Pista eliminada';
+$string['confirm_delete_stage'] = 'Se eliminaron las etapas correctamente';
+$string['saveemptyridle'] = 'Todas las etapas modificadas deben tener geometría antes de guardar';
+$string['erremptystage'] = 'Todas las etapas deben tener al menos una geometría para que el camino sea válido';
+$string['errvalidroad'] = 'Debe existir al menos dos etapas que tengan al menos una geometría para que el camino sea válido';
+$string['eventstageupdated'] = 'Etapa actualizada';
+$string['eventstagecreated'] = 'Etapa creada';
+$string['eventstagedeleted'] = 'Etapa eliminada';
 $string['eventroadupdated'] = 'Camino actualizado';
-$string['eventroadcreated'] = 'Camion creado';
+$string['eventroadcreated'] = 'Camino creado';
 $string['eventroaddeleted'] = 'Camino eliminado';
 $string['eventattemptsubmitted'] = 'Intento enviado';
 $string['treasurehunt:managetreasure'] = 'Administrar Caza del tesoro';
@@ -150,13 +150,13 @@ $string['treasurehunt:view'] = 'Ver la caza del tesoro';
 $string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['treasurehuntislocked'] = '{$a} está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 $string['availability'] = 'Disponibilidad';
-$string['restrictionsdiscoverriddle'] = 'Restricciones para descubrir la pista';
+$string['restrictionsdiscoverstage'] = 'Restricciones para descubrir la etapa';
 $string['groups'] = 'Grupos';
 $string['edittreasurehunt'] = 'Editar caza del tesoro';
 $string['editingtreasurehunt'] = 'Editando caza del tesoro';
-$string['editriddle'] = 'Editar pista';
-$string['editingriddle'] = 'Editando pista';
-$string['addingriddle'] = 'Añadiendo pista';
+$string['editstage'] = 'Editar etapa';
+$string['editingstage'] = 'Editando etapa';
+$string['addingstage'] = 'Añadiendo etapa';
 $string['editroad'] = 'Editar camino';
 $string['editingroad'] = 'Editando camino';
 $string['addingroad'] = 'Añadiendo camino';
@@ -185,18 +185,18 @@ $string['exit'] = 'Salir';
 $string['back'] = 'Atrás';
 $string['layers'] = 'Capas';
 $string['searching'] = 'Buscando';
-$string['overcomeriddle'] = 'Pista superada';
+$string['overcomestage'] = 'Etapa superada';
 $string['discoveredlocation'] = 'Localización descubierta';
 $string['failedlocation'] = 'Localización fallada';
-$string['riddledescription'] = 'Descripción para localizar la siguiente pista';
-$string['riddledescription_help'] = 'Aquí se debe describir la pista para alcanzar '
-        . 'la siguiente localización. En el caso de que esta sea la última pista debe dejar '
+$string['stageclue'] = 'Pista para localizar la siguiente etapa';
+$string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar '
+        . 'la siguiente localización. En el caso de que esta sea la última etapa debe dejar '
         . 'un mensaje de retroalimentación indicando que la caza del tesoro ha finalizado';
-$string['info_validate_location'] = 'Validar ubicación para esta pista';
+$string['info_validate_location'] = 'Validar ubicación para esta etapa';
 $string['validatelocation'] = 'Validar ubicación';
 $string['search'] = 'Buscar';
 $string['info'] = 'Información';
-$string['riddles'] = 'Pistas';
+$string['stages'] = 'Etapas';
 $string['playwithoutmoving'] = 'Jugar sin desplazarse';
 $string['movingplay'] = 'Jugar en movimiento';
 $string['playwithoutmoving_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. Para ello cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, borrando la anterior si existiese, indicando el último punto deseado.';
@@ -207,16 +207,16 @@ $string['groupingid_help'] = 'Los grupos de esta agrupación son asignados a est
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual. Para que las actividades del curso se muestren en la lista debe estar habilitada la terminación de actividad en la configuración de Moodle y en la propia actividad.';
 $string['noteam'] = 'No es miembro de ningún grupo';
-$string['noexsitsriddle'] = 'No existe la pista número {$a} en la base de datos. Recargue la página';
+$string['noexsitsstage'] = 'No existe la etapa número {$a} en la base de datos. Recargue la página';
 $string['noteamplay'] = 'No es miembro de ningún grupo, por lo que no puede realizar la actividad.';
-$string['notdeleteriddle'] = 'Ya se han realizado intentos sobre este camino, no puedes eliminar ninguna pista.';
-$string['notcreateriddle'] = 'Ya se han realizado intentos sobre este camino, no puedes añadir más pistas.';
-$string['notchangeorderriddle'] = 'No puedes cambiar el orden de las pistas una vez que se han realizado intentos sobre el camino.';
+$string['notdeletestage'] = 'Ya se han realizado intentos sobre este camino, no puedes eliminar ninguna etapa.';
+$string['notcreatestage'] = 'Ya se han realizado intentos sobre este camino, no puedes añadir más etapas.';
+$string['notchangeorderstage'] = 'No puedes cambiar el orden de las etapas una vez que se han realizado intentos sobre el camino.';
 $string['invalidassignedroad'] = 'El camino asignado no está validado';
 $string['invalroadid'] = 'El camino no está validado';
 $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no puede realizar la actividad.';
 $string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
-$string['timelabelsuccess'] = 'Pista descubierta en la fecha: ';
+$string['timelabelsuccess'] = 'Etapa descubierta en la fecha: ';
 $string['nogroupplay'] = 'No tienes ningún camino asignado, por lo que no puedes jugar la actividad.';
 $string['nogroupingplay'] = 'No tienes ningún grupo asignado a un camino, por lo que no puedes jugar la actividad.';
 $string['nogrouproad'] = '{$a} no tiene ningún camino asignado.';
@@ -242,23 +242,23 @@ $string['actnotavailableyet'] = 'La actividad aún no está disponible';
 $string['errsendinganswer'] = 'El camino se ha actualizado mientras enviabas la respuesta, vuelvelo a intentar';
 $string['errsendinglocation'] = 'El camino se ha actualizado mientras enviabas tu localización, vuelvelo a intentar';
 $string['gradefromtime'] = 'Puntuación por tiempo';
-$string['gradefromriddles'] = 'Puntuación por pistas';
+$string['gradefromstages'] = 'Puntuación por etapas';
 $string['gradefromposition'] = 'Puntuación por posición';
 $string['grademethodinfo'] = 'Método de calificación: {$a}';
 $string['backtocourse'] = 'Volver al curso';
 $string['edition'] = 'Panel de edición';
-$string['edition_help'] = 'Para habilitar el panel de creación y edición de geometrías debe seleccionar la pista que desea editar';
+$string['edition_help'] = 'Para habilitar el panel de creación y edición de geometrías debe seleccionar la etapa que desea editar';
 $string['grademethod'] = 'Método de calificación';
-$string['grademethod_help'] = '<P><B>Puntuación por pistas</B><P>
+$string['grademethod_help'] = '<P><B>Puntuación por etapas</B><P>
 <UL>
-<P>Cada jugador (o equipo) puntua de forma proporcional al número de pistas
+<P>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
 resueltas, siendo el 100% de la calificación máxima cuando se ha completado el camino
-y 0 cuando no se ha resuelto ninguna pista.</UL>
+y 0 cuando no se ha resuelto ninguna etapa.</UL>
 <P><B>Puntuación por tiempo</B><P>
 <UL>
 <P>El ganador de la caza es el que marca el mejor tiempo. La calificación se calcula interpolando el tiempo 
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor. 
-Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de pistas resueltas.
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
 </UL>
 <P><B>Puntuación por posición</B><P>
 <UL>
@@ -266,7 +266,7 @@ Los jugadores que no terminaron la caza reciben una calificación por debajo del
 siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron 
 la caza reciben una calificación por debajo del 50% calculado simplemente
-por el número de pistas resueltas.</UL>';
+por el número de etapas resueltas.</UL>';
 $string['gradepenlocation'] = 'Penalización por fallo en localización';
 $string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation_help'] = 'La penalización es expresada en % de la calificación. '
@@ -277,9 +277,9 @@ $string['errpenalizationfall'] = 'La penalización no puede ser menor que 0';
 $string['errnumeric'] = 'Debe introducir un número decimal válido';
 $string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible hasta el {$a}';
 $string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta desde el {$a}';
-$string['treasurehunt:addriddle'] = 'Añadir pista';
+$string['treasurehunt:addstage'] = 'Añadir etapa';
 $string['treasurehunt:addroad'] = 'Añadir camino';
-$string['treasurehunt:editriddle'] = 'Editar pista';
+$string['treasurehunt:editstage'] = 'Editar etapa';
 $string['treasurehunt:editroad'] = 'Editar camino';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehunt:play'] = 'Jugar';

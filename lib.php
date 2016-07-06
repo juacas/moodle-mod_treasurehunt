@@ -144,13 +144,13 @@ function treasurehunt_delete_instance($id) {
     $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads as $road) {
-        $riddles = $DB->get_records_sql('SELECT id FROM {treasurehunt_riddles} WHERE roadid = ?'
+        $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
                 , array($road->id));
-        foreach ($riddles as $riddle) {
-            $DB->delete_records_select('treasurehunt_attempts', 'riddleid = ?', array($riddle->id));
-            $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
+        foreach ($stages as $stage) {
+            $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
+            $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
         }
-        $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', array($road->id));
+        $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', array($road->id));
     }
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
@@ -453,7 +453,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
-    $fileareas = array('description', 'questiontext', 'answertext');
+    $fileareas = array('cluetext', 'questiontext', 'answertext');
     if (!in_array($filearea, $fileareas)) {
         return false;
     }
@@ -562,9 +562,9 @@ function treasurehunt_reset_userdata($data) {
     // Delete attempts.
     if (!empty($data->reset_treasurehunt_attempts)) {
         $DB->delete_records_select('treasurehunt_attempts',
-                'riddleid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
+                'stageid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
                 . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
-                . '{treasurehunt_riddles} ri ON r.id=ri.roadid WHERE t.course = ?)', array($data->courseid));
+                . '{treasurehunt_stages} ri ON r.id=ri.roadid WHERE t.course = ?)', array($data->courseid));
         $status[] = array(
             'component' => $componentstr,
             'item' => get_string('attemptsdeleted', 'treasurehunt'),

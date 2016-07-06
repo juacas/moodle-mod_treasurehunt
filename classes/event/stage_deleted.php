@@ -41,15 +41,15 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2014 Marina Glancy
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class riddle_updated extends \core\event\base {
+class stage_deleted extends \core\event\base {
 
     /**
      * Init method
      */
     protected function init() {
-        $this->data['crud'] = 'u';
+        $this->data['crud'] = 'd';
         $this->data['edulevel'] = self::LEVEL_TEACHING;
-        $this->data['objecttable'] = 'treasurehunt_riddles';
+        $this->data['objecttable'] = 'treasurehunt_stages';
     }
 
     /**
@@ -58,11 +58,16 @@ class riddle_updated extends \core\event\base {
      * @return string
      */
     public static function get_name() {
-        return get_string('eventriddleupdated', 'mod_treasurehunt');
+        return get_string('eventstagedeleted', 'mod_treasurehunt');
     }
 
+    /**
+     * Returns non-localised event description with id's for admin use only.
+     *
+     * @return string
+     */
     public function get_description() {
-        return "The user with id '$this->userid' has updated the riddle with id '$this->objectid' for " .
+        return "The user with id '$this->userid' has deleted the stage with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 
@@ -72,13 +77,11 @@ class riddle_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/editriddle.php",
-                array('cmid' => $this->contextinstanceid,
-            'id' => $this->objectid));
+        return null;
     }
 
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt_riddles', 'restore' => 'treasurehunt_riddle');
+        return \core\event\base::NOT_MAPPED;
     }
 
 }

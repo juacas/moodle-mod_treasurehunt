@@ -37,14 +37,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     failureurl = url.imageUrl('failure', 'treasurehunt'),
                     markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
                     openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
-                    lastsuccessfulriddle = {},
+                    lastsuccessfulstage = {},
                     interval,
                     imgloaded = 0, totalimg = 0,
                     infomsgs = [],
                     attemptshistory = [],
                     changesinattemptshistory = false,
-                    changesinlastsuccessfulriddle = false,
-                    changesinquestionriddle = false,
+                    changesinlastsuccessfulstage = false,
+                    changesinquestionstage = false,
                     fitmap = false,
                     roadfinished = false,
                     available = true,
@@ -72,7 +72,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     width: 3.5
                 })
             });
-            var defaultRiddleStyle = new ol.style.Style({
+            var defaultstageStyle = new ol.style.Style({
                 image: new ol.style.Icon({
                     opacity: 1,
                     scale: 0.2,
@@ -81,7 +81,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 text: text,
                 zIndex: 'Infinity'
             });
-            var failRiddleStyle = new ol.style.Style({
+            var failstageStyle = new ol.style.Style({
                 image: new ol.style.Icon({
                     anchor: [0.2, 0.2],
                     opacity: 1,
@@ -91,7 +91,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 text: text,
                 zIndex: 'Infinity'
             });
-            var defaultSelectRiddleStyle = new ol.style.Style({
+            var defaultSelectstageStyle = new ol.style.Style({
                 image: new ol.style.Icon({
                     opacity: 1,
                     scale: 0.29,
@@ -100,7 +100,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 text: selectText,
                 zIndex: 'Infinity'
             });
-            var failSelectRiddleStyle = new ol.style.Style({
+            var failSelectstageStyle = new ol.style.Style({
                 image: new ol.style.Icon({
                     anchor: [0.2, 0.2],
                     opacity: 1,
@@ -177,7 +177,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 layers: [attemptslayer],
                 style: select_style_function,
                 filter: function (feature, layer) {
-                    if (feature.get('noriddle') === 0) {
+                    if (feature.get('nostage') === 0) {
                         return false;
                     }
                     return true;
@@ -234,8 +234,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
-                var noriddle = feature.get('noriddle');
-                if (noriddle === 0) {
+                var nostage = feature.get('nostage');
+                if (nostage === 0) {
                     var fill = new ol.style.Fill({
                         color: 'rgba(255,255,255,0.4)'
                     });
@@ -266,22 +266,22 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     return [styles];
                 }
                 if (!feature.get('geometrysolved')) {
-                    failRiddleStyle.getImage().setScale((view.getZoom() / 50));
-                    failRiddleStyle.getText().setText('' + noriddle);
-                    return [failRiddleStyle];
+                    failstageStyle.getImage().setScale((view.getZoom() / 50));
+                    failstageStyle.getText().setText('' + nostage);
+                    return [failstageStyle];
                 }
-                defaultRiddleStyle.getImage().setScale((view.getZoom() / 110));
-                defaultRiddleStyle.getText().setText('' + noriddle);
-                return [defaultRiddleStyle];
+                defaultstageStyle.getImage().setScale((view.getZoom() / 110));
+                defaultstageStyle.getText().setText('' + nostage);
+                return [defaultstageStyle];
             }
             function select_style_function(feature, resolution) {
-                var noriddle = feature.get('noriddle');
+                var nostage = feature.get('nostage');
                 if (!feature.get('geometrysolved')) {
-                    failSelectRiddleStyle.getText().setText('' + noriddle);
-                    return [failSelectRiddleStyle];
+                    failSelectstageStyle.getText().setText('' + nostage);
+                    return [failSelectstageStyle];
                 }
-                defaultSelectRiddleStyle.getText().setText('' + noriddle);
-                return [defaultSelectRiddleStyle];
+                defaultSelectstageStyle.getText().setText('' + nostage);
+                return [defaultSelectstageStyle];
             }
             function autolocate(center, validate) {
                 center = center || false;
@@ -398,23 +398,23 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             changesinattemptshistory = true;
                         }
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
-                        if (response.riddles !== null) {
+                        if (response.stages !== null) {
                             source.clear();
-                            source.addFeatures(geoJSONFormat.readFeatures(response.riddles, {
+                            source.addFeatures(geoJSONFormat.readFeatures(response.stages, {
                                 'dataProjection': "EPSG:4326",
                                 'featureProjection': "EPSG:3857"
                             }));
                         }
                         // Compruebo si existe, lo que indica que se ha actualizado.
-                        if (response.lastsuccessfulriddle) {
-                            lastsuccessfulriddle = response.lastsuccessfulriddle;
-                            changesinlastsuccessfulriddle = true;
-                            // Si la pista no esta solucionada aviso de que hay cambios.
-                            if (lastsuccessfulriddle.question !== '') {
-                                changesinquestionriddle = true;
+                        if (response.lastsuccessfulstage) {
+                            lastsuccessfulstage = response.lastsuccessfulstage;
+                            changesinlastsuccessfulstage = true;
+                            // Si la etapa no esta solucionada aviso de que hay cambios.
+                            if (lastsuccessfulstage.question !== '') {
+                                changesinquestionstage = true;
                                 $('#validatelocation').hide();
                             }
-                            else if (!lastsuccessfulriddle.activitysolved) {
+                            else if (!lastsuccessfulstage.activitysolved) {
                                 $('#validatelocation').hide();
                             } else {
                                 $('#validatelocation').show();
@@ -427,12 +427,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         // Compruebo la pagina en la que nos encontramos.
                         var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
                         if (pageId === 'mappage') {
-                            set_lastsuccessfulriddle();
+                            set_lastsuccessfulstage();
                             fit_map_to_source();
                         } else if (pageId === 'historypage') {
                             set_attempts_history();
                         } else if (pageId === 'questionpage') {
-                            if (lastsuccessfulriddle.question === '') {
+                            if (lastsuccessfulstage.question === '') {
                                 $.mobile.pageContainer.pagecontainer("change", "#mappage");
                             } else {
                                 set_question();
@@ -476,29 +476,29 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     fitmap = false;
                 }
             }
-            function set_lastsuccessfulriddle() {
-                if (changesinlastsuccessfulriddle) {
-                    $("#lastsuccessfulriddlename").text(lastsuccessfulriddle.name);
-                    $("#lastsuccesfulriddlepos").text(lastsuccessfulriddle.position +
-                            " / " + lastsuccessfulriddle.totalnumber);
-                    $("#lastsuccessfulriddledescription").html(lastsuccessfulriddle.description);
-                    if (lastsuccessfulriddle.question !== '') {
-                        $("#lastsuccessfulriddledescription").append("<a href='#questionpage' " +
+            function set_lastsuccessfulstage() {
+                if (changesinlastsuccessfulstage) {
+                    $("#lastsuccessfulstagename").text(lastsuccessfulstage.name);
+                    $("#lastsuccesfulstagepos").text(lastsuccessfulstage.position +
+                            " / " + lastsuccessfulstage.totalnumber);
+                    $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+                    if (lastsuccessfulstage.question !== '') {
+                        $("#lastsuccessfulstageclue").append("<a href='#questionpage' " +
                                 "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
                                 "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" + strings['question']
                                 + "</a>");
                     }
                     $("#collapsibleset").collapsibleset("refresh");
                     $("#infopanel").panel("open");
-                    $("#lastsuccessfulriddle").collapsible("expand");
-                    changesinlastsuccessfulriddle = false;
+                    $("#lastsuccessfulstage").collapsible("expand");
+                    changesinlastsuccessfulstage = false;
                 }
             }
             function set_question() {
-                if (changesinquestionriddle) {
-                    $('#questionform').html("<legend>" + lastsuccessfulriddle.question + "</legend>");
+                if (changesinquestionstage) {
+                    $('#questionform').html("<legend>" + lastsuccessfulstage.question + "</legend>");
                     var counter = 1;
-                    $.each(lastsuccessfulriddle.answers, function (key, answer) {
+                    $.each(lastsuccessfulstage.answers, function (key, answer) {
                         var id = 'answer' + counter;
                         $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
                                 + answer.id + '">' +
@@ -506,7 +506,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         counter++;
                     });
                     $('#questionform').enhanceWithin().controlgroup("refresh");
-                    changesinquestionriddle = false;
+                    changesinquestionstage = false;
                 }
 
             }
@@ -587,19 +587,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    if (lastsuccessfulriddle.id === features.selected[0].getId()) {
+                    if (lastsuccessfulstage.id === features.selected[0].getId()) {
                         $("#infopanel").panel("open");
-                        $("#lastsuccessfulriddle").collapsible("expand");
+                        $("#lastsuccessfulstage").collapsible("expand");
                     } else {
-                        var title, riddlename = features.selected[0].get('name'),
-                                riddledescription = features.selected[0].get('description'),
+                        var title, stagename = features.selected[0].get('name'),
+                                stageclue = features.selected[0].get('clue'),
                                 info = features.selected[0].get('info'), body = '';
                         if (features.selected[0].get('geometrysolved'))
                         {
-                            if (riddlename && riddledescription) {
-                                title = strings["overcomeriddle"];
-                                body = get_block_text(strings["riddlename"], riddlename);
-                                body += get_block_text(strings["riddledescription"], riddledescription);
+                            if (stagename && stageclue) {
+                                title = strings["overcomestage"];
+                                body = get_block_text(strings["stagename"], stagename);
+                                body += get_block_text(strings["stageclue"], stageclue);
                             } else {
                                 title = strings["discoveredlocation"];
                             }
@@ -609,7 +609,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         if (info) {
                             body += '<p>' + info + '</p>';
                         }
-                        create_popup('inforiddle', title, body);
+                        create_popup('infostage', title, body);
                     }
                 } else {
                     if (playwithoutmoving) {
@@ -687,7 +687,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         }, 200);
                     } else {
                         map.updateSize();
-                        set_lastsuccessfulriddle();
+                        set_lastsuccessfulstage();
                         fit_map_to_source();
                     }
                 } else if (pageId === 'historypage') {
@@ -696,7 +696,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     }
                 } else if (pageId === 'questionpage') {
                     if (event.type === 'pagecontainershow') {
-                        if (lastsuccessfulriddle.question === '') {
+                        if (lastsuccessfulstage.question === '') {
                             $.mobile.pageContainer.pagecontainer("change", "#mappage");
                         } else {
                             set_question();
@@ -743,13 +743,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     toast(strings['timeexceeded']);
                     return;
                 }
-                if (lastsuccessfulriddle.question !== '') {
+                if (lastsuccessfulstage.question !== '') {
                     event.preventDefault();
                     toast(strings['answerwarning']);
                     $("#infopanel").panel("open");
                     return;
                 }
-                if (!lastsuccessfulriddle.activitysolved) {
+                if (!lastsuccessfulstage.activitysolved) {
                     event.preventDefault();
                     toast(strings['activitytoendwarning']);
                     $("#infopanel").panel("open");
@@ -788,7 +788,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body + '</div>'),
                         popup = $('<div data-role="popup" id="' + type + '"' +
                                 'data-theme="b" data-transition="slidedown"></div>');
-                if (type === 'inforiddle') {
+                if (type === 'infostage') {
                     $('<a href="#" data-rel="back" class="ui-btn ui-corner-all' +
                             'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>').appendTo(header);
                 }

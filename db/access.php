@@ -94,7 +94,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    'mod/treasurehunt:editriddle' => array(
+    'mod/treasurehunt:editstage' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
@@ -103,7 +103,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    'mod/treasurehunt:addriddle' => array(
+    'mod/treasurehunt:addstage' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,

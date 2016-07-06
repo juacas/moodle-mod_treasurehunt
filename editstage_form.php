@@ -43,7 +43,7 @@ define("NUMBER_NEW_ANSWERS", 2);
  * @copyright  2015 Your Name
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class riddle_form extends moodleform {
+class stage_form extends moodleform {
 
     /**
      * Defines forms elements
@@ -53,14 +53,14 @@ class riddle_form extends moodleform {
         $mform = $this->_form;
         $formid = $mform->_attributes['id'];
         $editoroptions = $this->_customdata['editoroptions'];
-        $currentriddle = $this->_customdata['current'];
+        $currentstage = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('riddlename', 'treasurehunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('stagename', 'treasurehunt'), array('size' => '64'));
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -71,14 +71,14 @@ class riddle_form extends moodleform {
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃ³n, si quieres 
         // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'description_editor', get_string('riddledescription', 'treasurehunt'), null,
+        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue', 'treasurehunt'), null,
                 $editoroptions);
-        $mform->addHelpButton('description_editor', 'riddledescription', 'treasurehunt');
-        $mform->setType('description_editor', PARAM_RAW);
-        $mform->addRule('description_editor', null, 'required', null, 'client');
+        $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
+        $mform->setType('cluetext_editor', PARAM_RAW);
+        $mform->addRule('cluetext_editor', null, 'required', null, 'client');
 
-        $mform->addElement('header', 'restrictionsdiscoverriddle',
-                get_string('restrictionsdiscoverriddle', 'treasurehunt'));
+        $mform->addElement('header', 'restrictionsdiscoverstage',
+                get_string('restrictionsdiscoverstage', 'treasurehunt'));
         // Add restrict access completion activity.
         $options = array();
         $options[0] = get_string('none');
@@ -97,7 +97,7 @@ class riddle_form extends moodleform {
                 $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
 
-        if ($currentriddle->addsimplequestion) {
+        if ($currentstage->addsimplequestion) {
             // Imprimo el editor de preguntas
             $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null,
                     $editoroptions);
@@ -105,7 +105,7 @@ class riddle_form extends moodleform {
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Imprimo las respuestas
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
-                    $currentriddle->noanswers, NUMBER_NEW_ANSWERS);
+                    $currentstage->noanswers, NUMBER_NEW_ANSWERS);
         }
 
         // Anado los campos ocultos.
@@ -125,7 +125,7 @@ class riddle_form extends moodleform {
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons();
 
-        $this->set_data($currentriddle);
+        $this->set_data($currentstage);
     }
 
     public function set_data($entry) {
@@ -137,8 +137,8 @@ class riddle_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $context = $this->_customdata['context'];
         // Prepare all editors.
-        $entry = file_prepare_standard_editor($entry, 'description', $editoroptions, $context, 'mod_treasurehunt',
-                'description', $entry->id);
+        $entry = file_prepare_standard_editor($entry, 'cluetext', $editoroptions, $context, 'mod_treasurehunt',
+                'cluetext', $entry->id);
 
         // Si existe la pregunta.
         if ($entry->addsimplequestion) {

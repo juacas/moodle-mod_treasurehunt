@@ -49,12 +49,12 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $paths[] = new restore_path_element('treasurehunt', '/activity/treasurehunt');
         $paths[] = new restore_path_element('treasurehunt_road', '/activity/treasurehunt/roads/road');
-        $paths[] = new restore_path_element('treasurehunt_riddle', '/activity/treasurehunt/roads/road/riddles/riddle');
+        $paths[] = new restore_path_element('treasurehunt_stage', '/activity/treasurehunt/roads/road/stages/stage');
         $paths[] = new restore_path_element('treasurehunt_answer',
-                '/activity/treasurehunt/roads/road/riddles/riddle/answers/answer');
+                '/activity/treasurehunt/roads/road/stages/stage/answers/answer');
         if ($userinfo) {
             $paths[] = new restore_path_element('treasurehunt_attempt',
-                    '/activity/treasurehunt/roads/road/riddles/riddle/attempts/attempt');
+                    '/activity/treasurehunt/roads/road/stages/stage/attempts/attempt');
         }
 
         // Return the paths wrapped into standard activity structure.
@@ -103,7 +103,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->set_mapping('treasurehunt_road', $oldid, $newitemid);
     }
 
-    protected function process_treasurehunt_riddle($data) {
+    protected function process_treasurehunt_stage($data) {
         global $DB;
 
         $data = (object) $data;
@@ -113,8 +113,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
-        $newitemid = $DB->insert_record('treasurehunt_riddles', $data);
-        $this->set_mapping('treasurehunt_riddle', $oldid, $newitemid, true);
+        $newitemid = $DB->insert_record('treasurehunt_stages', $data);
+        $this->set_mapping('treasurehunt_stage', $oldid, $newitemid, true);
     }
 
     protected function process_treasurehunt_answer($data) {
@@ -122,7 +122,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data = (object) $data;
         $oldid = $data->id;
-        $data->riddleid = $this->get_new_parentid('treasurehunt_riddle');
+        $data->stageid = $this->get_new_parentid('treasurehunt_stage');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 
@@ -135,7 +135,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data = (object) $data;
         $oldid = $data->id;
-        $data->riddleid = $this->get_new_parentid('treasurehunt_riddle');
+        $data->stageid = $this->get_new_parentid('treasurehunt_stage');
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->userid = $this->get_mappingid('user', $data->userid);
         $data->groupid = $this->get_mappingid('group', $data->groupid);
@@ -150,8 +150,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
     protected function after_execute() {
         // Add treasurehunt related files
         $this->add_related_files('mod_treasurehunt', 'intro', null);
-        $this->add_related_files('mod_treasurehunt', 'description', 'treasurehunt_riddle');
-        $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_riddle');
+        $this->add_related_files('mod_treasurehunt', 'cluetext', 'treasurehunt_stage');
+        $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'answertext', 'treasurehunt_answer');
     }
 

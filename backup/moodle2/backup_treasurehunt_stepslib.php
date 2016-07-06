@@ -58,10 +58,10 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $road = new backup_nested_element('road', array('id'), array(
             'name', 'timecreated', 'timemodified', 'groupid', 'groupingid', 'validated'));
 
-        $riddles = new backup_nested_element('riddles');
+        $stages = new backup_nested_element('stages');
 
-        $riddle = new backup_nested_element('riddle', array('id'), array(
-            'name', 'position', 'description', 'descriptionformat', 'descriptiontrust',
+        $stage = new backup_nested_element('stage', array('id'), array(
+            'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
             'timecreated', 'timemodified', 'activitytoend', 'questiontext',
             'questiontextformat', 'questiontexttrust', 'geom'));
 
@@ -82,13 +82,13 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $treasurehunt->add_child($roads);
         $roads->add_child($road);
 
-        $road->add_child($riddles);
-        $riddles->add_child($riddle);
+        $road->add_child($stages);
+        $stages->add_child($stage);
 
-        $riddle->add_child($answers);
+        $stage->add_child($answers);
         $answers->add_child($answer);
 
-        $riddle->add_child($attempts);
+        $stage->add_child($attempts);
         $attempts->add_child($attempt);
 
 
@@ -96,26 +96,26 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
 
         $road->set_source_table('treasurehunt_roads', array('treasurehuntid' => backup::VAR_PARENTID), 'id ASC');
-        $riddle->set_source_table('treasurehunt_riddles', array('roadid' => backup::VAR_PARENTID));
-        $answer->set_source_table('treasurehunt_answers', array('riddleid' => backup::VAR_PARENTID), 'id ASC');
+        $stage->set_source_table('treasurehunt_stages', array('roadid' => backup::VAR_PARENTID));
+        $answer->set_source_table('treasurehunt_answers', array('stageid' => backup::VAR_PARENTID), 'id ASC');
 
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
-            $attempt->set_source_table('treasurehunt_attempts', array('riddleid' => backup::VAR_PARENTID));
+            $attempt->set_source_table('treasurehunt_attempts', array('stageid' => backup::VAR_PARENTID));
         }
 
 
         // Define id annotations
         $road->annotate_ids('group', 'groupid');
         $road->annotate_ids('grouping', 'groupingid');
-        $riddle->annotate_ids('course_module', 'activitytoend');
+        $stage->annotate_ids('course_module', 'activitytoend');
         $attempt->annotate_ids('user', 'userid');
         $attempt->annotate_ids('group', 'groupid');
 
         // Define file annotations
         $treasurehunt->annotate_files('mod_treasurehunt', 'intro', null);
-        $riddle->annotate_files('mod_treasurehunt', 'description', 'id');
-        $riddle->annotate_files('mod_treasurehunt', 'questiontext', 'id');
+        $stage->annotate_files('mod_treasurehunt', 'cluetext', 'id');
+        $stage->annotate_files('mod_treasurehunt', 'questiontext', 'id');
         $answer->annotate_files('mod_treasurehunt', 'answertext', 'id');
 
         // Return the root element (treasurehunt), wrapped into standard activity structure.

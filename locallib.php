@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
  * Options determining how the grades from individual attempts are combined to give
  * the overall grade for a user
  */
-define('TREASUREHUNT_GRADEFROMRIDDLES', '1');
+define('TREASUREHUNT_GRADEFROMstageS', '1');
 define('TREASUREHUNT_GRADEFROMTIME', '2');
 define('TREASUREHUNT_GRADEFROMPOSITION', '3');
 /* * #@- */
@@ -105,87 +105,87 @@ function check_point_in_multipolygon($mpolygon, $point) {
  */
 function treasurehunt_get_grading_options() {
     return array(
-        TREASUREHUNT_GRADEFROMRIDDLES => get_string('gradefromriddles', 'treasurehunt'),
+        TREASUREHUNT_GRADEFROMstageS => get_string('gradefromstages', 'treasurehunt'),
         TREASUREHUNT_GRADEFROMTIME => get_string('gradefromtime', 'treasurehunt'),
         TREASUREHUNT_GRADEFROMPOSITION => get_string('gradefromposition', 'treasurehunt')
     );
 }
 
-function insert_riddle_form(stdClass $riddle) {
+function insert_stage_form(stdClass $stage) {
     GLOBAL $DB;
     $position = $DB->get_record_sql('SELECT count(id) + 1 as position FROM '
-            . '{treasurehunt_riddles} where roadid = (?)', array($riddle->roadid));
-    $riddle->position = $position->position;
+            . '{treasurehunt_stages} where roadid = (?)', array($stage->roadid));
+    $stage->position = $position->position;
 
-    $id = $DB->insert_record("treasurehunt_riddles", $riddle);
-    //Como he insertado una nueva pista sin geometrias pongo el camino como no valido
-    set_valid_road($riddle->roadid, false);
+    $id = $DB->insert_record("treasurehunt_stages", $stage);
+    //Como he insertado una nueva etapa sin geometrias pongo el camino como no valido
+    set_valid_road($stage->roadid, false);
     return $id;
 }
 
-function update_geometry_and_position_of_riddle(Feature $feature, $context) {
+function update_geometry_and_position_of_stage(Feature $feature, $context) {
     GLOBAL $DB;
-    $riddle = new stdClass();
-    $riddle->position = $feature->getProperty('noriddle');
-    $riddle->roadid = $feature->getProperty('roadid');
+    $stage = new stdClass();
+    $stage->position = $feature->getProperty('nostage');
+    $stage->roadid = $feature->getProperty('roadid');
     $geometry = $feature->getGeometry();
-    $riddle->geom = object_to_wkt($geometry);
-    $riddle->timemodified = time();
-    $riddle->id = $feature->getId();
-    $parms = array('id' => $riddle->id);
-    $entry = $DB->get_record('treasurehunt_riddles', $parms, 'id,position', MUST_EXIST);
-    if (check_road_is_blocked($riddle->roadid) && ($riddle->position != $entry->position)) {
-        // No se puede cambiar el numero de pista una vez bloqueado el camino.
-        print_error('notchangeorderriddle', 'treasurehunt');
+    $stage->geom = object_to_wkt($geometry);
+    $stage->timemodified = time();
+    $stage->id = $feature->getId();
+    $parms = array('id' => $stage->id);
+    $entry = $DB->get_record('treasurehunt_stages', $parms, 'id,position', MUST_EXIST);
+    if (check_road_is_blocked($stage->roadid) && ($stage->position != $entry->position)) {
+        // No se puede cambiar el numero de etapa una vez bloqueado el camino.
+        print_error('notchangeorderstage', 'treasurehunt');
     }
-    // Si intento salvar una pista sin geometria devuelvo error
+    // Si intento salvar una etapa sin geometria devuelvo error
     if (count($geometry->getComponents()) === 0) {
         print_error('saveemptyridle', 'treasurehunt');
     }
-    $DB->update_record('treasurehunt_riddles', $riddle);
-    set_valid_road($riddle->roadid);
-    // Trigger update riddle event.
+    $DB->update_record('treasurehunt_stages', $stage);
+    set_valid_road($stage->roadid);
+    // Trigger update stage event.
     $eventparams = array(
         'context' => $context,
-        'objectid' => $riddle->id
+        'objectid' => $stage->id
     );
-    \mod_treasurehunt\event\riddle_updated::create($eventparams)->trigger();
+    \mod_treasurehunt\event\stage_updated::create($eventparams)->trigger();
 }
 
-function delete_riddle($id, $context) {
+function delete_stage($id, $context) {
     GLOBAL $DB;
-    $riddle_result = $DB->get_record('treasurehunt_riddles', array('id' => $id), 'position,roadid', MUST_EXIST);
-    if (check_road_is_blocked($riddle_result->roadid)) {
-        // No se puede borrar una pista de un camino empezado.
-        print_error('notdeleteriddle', 'treasurehunt');
+    $stage_result = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST);
+    if (check_road_is_blocked($stage_result->roadid)) {
+        // No se puede borrar una etapa de un camino empezado.
+        print_error('notdeletestage', 'treasurehunt');
     }
 
-    $DB->delete_records('treasurehunt_riddles', array('id' => $id));
-    $DB->delete_records('treasurehunt_attempts', array('riddleid' => $id));
-    $sql = 'UPDATE {treasurehunt_riddles} '
+    $DB->delete_records('treasurehunt_stages', array('id' => $id));
+    $DB->delete_records('treasurehunt_attempts', array('stageid' => $id));
+    $sql = 'UPDATE {treasurehunt_stages} '
             . 'SET position = position - 1 WHERE roadid = (?) AND position > (?)';
-    $params = array($riddle_result->roadid, $riddle_result->position);
+    $params = array($stage_result->roadid, $stage_result->position);
     $DB->execute($sql, $params);
-    set_valid_road($riddle_result->roadid);
-    // Trigger deleted riddle event.
+    set_valid_road($stage_result->roadid);
+    // Trigger deleted stage event.
     $eventparams = array(
         'context' => $context,
         'objectid' => $id,
     );
-    \mod_treasurehunt\event\riddle_deleted::create($eventparams)->trigger();
+    \mod_treasurehunt\event\stage_deleted::create($eventparams)->trigger();
 }
 
 function delete_road($roadid, $context) {
     GLOBAL $DB;
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
-    $riddles = $DB->get_records_sql('SELECT id FROM {treasurehunt_riddles} WHERE roadid = ?'
+    $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
             , $params);
-    foreach ($riddles as $riddle) {
-        $DB->delete_records_select('treasurehunt_attempts', 'riddleid = ?', array($riddle->id));
-        $DB->delete_records_select('treasurehunt_answers', 'riddleid = ?', array($riddle->id));
+    foreach ($stages as $stage) {
+        $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
+        $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
-    $DB->delete_records_select('treasurehunt_riddles', 'roadid = ?', $params);
+    $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
     // Trigger deleted road event.
     $eventparams = array(
         'context' => $context,
@@ -200,9 +200,9 @@ function get_total_roads($treasurehuntid) {
     return $number;
 }
 
-function get_total_riddles($roadid) {
+function get_total_stages($roadid) {
     GLOBAL $DB;
-    $number = $DB->count_records('treasurehunt_riddles', array('roadid' => $roadid));
+    $number = $DB->count_records('treasurehunt_stages', array('roadid' => $roadid));
     return $number;
 }
 
@@ -216,9 +216,9 @@ function check_if_user_has_finished($userid, $groupid, $roadid) {
         $params = array($roadid, $userid);
     }
     $sql = "SELECT MAX(a.timecreated) as finished FROM "
-            . "{treasurehunt_attempts} a INNER JOIN {treasurehunt_riddles} r "
-            . "ON r.id = a.riddleid WHERE a.success=1 AND r.position=(SELECT "
-            . "max(ri.position) FROM {treasurehunt_riddles} ri where "
+            . "{treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} r "
+            . "ON r.id = a.stageid WHERE a.success=1 AND r.position=(SELECT "
+            . "max(ri.position) FROM {treasurehunt_stages} ri where "
             . "ri.roadid=r.roadid) AND r.roadid = ? "
             . "AND a.type='location' AND  $grouptype";
     $finished = $DB->get_record_sql($sql, $params);
@@ -265,8 +265,8 @@ function set_valid_road($roadid, $valid = null) {
 function check_road_is_blocked($roadid) {
     global $DB;
     $sql = "SELECT at.success "
-            . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_riddles} ri "
-            . "ON ri.id = at.riddleid INNER JOIN {treasurehunt_roads} r "
+            . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri "
+            . "ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} r "
             . "ON ri.roadid=r.id WHERE r.id=?";
     $params = array($roadid);
     return $DB->record_exists_sql($sql, $params);
@@ -276,17 +276,17 @@ function get_treasurehunt($treasurehuntid, $context) {
     global $DB;
 
 //Recojo todas las features
-    $riddlessql = "SELECT riddle.id, "
-            . "riddle.name, riddle.description, roadid, position,"
-            . "geom as geometry FROM {treasurehunt_riddles} AS riddle"
-            . " inner join {treasurehunt_roads} AS roads on riddle.roadid = roads.id"
+    $stagessql = "SELECT stage.id, "
+            . "stage.name, stage.cluetext, roadid, position,"
+            . "geom as geometry FROM {treasurehunt_stages} AS stage"
+            . " inner join {treasurehunt_roads} AS roads on stage.roadid = roads.id"
             . " WHERE treasurehuntid = ? ORDER BY position DESC";
-    $riddlesresult = $DB->get_records_sql($riddlessql, array($treasurehuntid));
-    $geojson = riddles_to_geojson($riddlesresult, $context, $treasurehuntid);
+    $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
+    $geojson = stages_to_geojson($stagesresult, $context, $treasurehuntid);
     // Recojo todos los caminos, los bloqueo en cuanto exista un intento.
     $roadssql = "SELECT id, name, CASE WHEN (SELECT COUNT(at.id) "
-            . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_riddles} ri "
-            . "ON ri.id = at.riddleid INNER JOIN {treasurehunt_roads} r "
+            . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri "
+            . "ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} r "
             . "ON ri.roadid=r.id WHERE r.id= road.id) > 0 THEN 1 ELSE 0 "
             . "END AS blocked FROM {treasurehunt_roads} AS road where treasurehuntid = ?";
     $roadsresult = $DB->get_records_sql($roadssql, array($treasurehuntid));
@@ -359,29 +359,29 @@ function delete_old_locks($treasurehuntid) {
             array(time(), $treasurehuntid));
 }
 
-function check_user_location($userid, $groupid, $roadid, $point, $context, $treasurehunt, $noriddles) {
+function check_user_location($userid, $groupid, $roadid, $point, $context, $treasurehunt, $nostages) {
     global $DB;
     $return = new stdClass();
     $return->update = '';
     $return->roadfinished = false;
     $locationwkt = object_to_wkt($point);
     // Recupero los datos del ultimo intento con geometria acertada para saber si tiene geometria resuelta y no esta superada.
-    $currentriddle = get_last_successful_attempt($userid, $groupid, $roadid);
-    if ($currentriddle->success || !$currentriddle) {
+    $currentstage = get_last_successful_attempt($userid, $groupid, $roadid);
+    if ($currentstage->success || !$currentstage) {
         $return->newattempt = true;
-        if ($currentriddle) {
-            $nextnoriddle = $currentriddle->position + 1;
+        if ($currentstage) {
+            $nextnostage = $currentstage->position + 1;
         } else {
-            $nextnoriddle = 1;
+            $nextnostage = 1;
         }
-        $nextriddle = $DB->get_record('treasurehunt_riddles', array('position' => $nextnoriddle, 'roadid' => $roadid),
-                '*', MUST_EXIST);
-        $inside = check_point_in_multipolygon(wkt_to_object($nextriddle->geom), $point);
+        $nextstage = $DB->get_record('treasurehunt_stages', array('position' => $nextnostage, 'roadid' => $roadid), '*',
+                MUST_EXIST);
+        $inside = check_point_in_multipolygon(wkt_to_object($nextstage->geom), $point);
         // Si esta dentro
         if ($inside) {
-            $nextriddle->inside = 1;
-            $questionsolved = ($nextriddle->questiontext === '' ? true : false);
-            $activitysolved = ($nextriddle->activitytoend == 0 ? true : false);
+            $nextstage->inside = 1;
+            $questionsolved = ($nextstage->questiontext === '' ? true : false);
+            $activitysolved = ($nextstage->activitytoend == 0 ? true : false);
             if ($questionsolved && $activitysolved) {
                 $success = true;
             } else {
@@ -389,19 +389,19 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
             }
             $penalty = false;
             $return->msg = get_string('successlocation', 'treasurehunt');
-            $return->newriddle = true;
+            $return->newstage = true;
         } else {
-            $nextriddle->inside = 0;
+            $nextstage->inside = 0;
             $penalty = true;
             $questionsolved = false;
             $activitysolved = false;
             $success = false;
             $return->msg = get_string('faillocation', 'treasurehunt');
-            $return->newriddle = false;
+            $return->newstage = false;
         }
         // Creo el attempt.
         $attempt = new stdClass();
-        $attempt->riddleid = $nextriddle->id;
+        $attempt->stageid = $nextstage->id;
         $attempt->timecreated = time();
         $attempt->userid = $userid;
         $attempt->groupid = $groupid;
@@ -409,14 +409,14 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         $attempt->type = 'location';
         $attempt->activitysolved = $activitysolved;
         $attempt->questionsolved = $questionsolved;
-        $attempt->geometrysolved = $nextriddle->inside;
+        $attempt->geometrysolved = $nextstage->inside;
         $attempt->location = $locationwkt;
         $attempt->penalty = $penalty;
         insert_attempt($attempt, $context);
 
         // Si el intento acierta la localizacion  y existe el completion compruebo si esta superado.
-        if ($nextriddle->inside && !$activitysolved) {
-            if ($usercompletion = check_completion_activity($nextriddle->activitytoend, $userid, $groupid, $context)) {
+        if ($nextstage->inside && !$activitysolved) {
+            if ($usercompletion = check_completion_activity($nextstage->activitytoend, $userid, $groupid, $context)) {
                 $attempt->type = 'activity';
                 $attempt->activitysolved = 1;
                 $attempt->userid = $usercompletion;
@@ -434,11 +434,11 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
                     insert_attempt($attempt, $context);
                 }
                 $return->update = get_string('overcomeactivitytoend', 'treasurehunt',
-                        get_activity_to_end_link($nextriddle->activitytoend));
+                        get_activity_to_end_link($nextstage->activitytoend));
             }
         }
-        if ($attempt->success && $nextnoriddle == $noriddles) {
-            if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+        if ($attempt->success && $nextnostage == $nostages) {
+            if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMstageS) {
                 treasurehunt_update_grades($treasurehunt);
             } else {
                 set_grade($treasurehunt, $groupid, $userid);
@@ -449,11 +449,11 @@ function check_user_location($userid, $groupid, $roadid, $point, $context, $trea
         }
         $return->attempttimestamp = $attempt->timecreated;
     } else {
-        $return->newriddle = false;
+        $return->newstage = false;
         $return->newattempt = false;
-        if (!$currentriddle->questionsolved && !$currentriddle->activitysolved) {
+        if (!$currentstage->questionsolved && !$currentstage->activitysolved) {
             $return->msg = get_string('mustcompleteboth', 'treasurehunt');
-        } else if (!$currentriddle->questionsolved) {
+        } else if (!$currentstage->questionsolved) {
             $return->msg = get_string('mustanswerquestion', 'treasurehunt');
         } else {
             $return->msg = get_string('mustcompleteactivity', 'treasurehunt');
@@ -492,11 +492,11 @@ function treasurehunt_is_available($treasurehunt) {
     return $return;
 }
 
-function get_riddle_answers($riddleid, $context) {
+function get_stage_answers($stageid, $context) {
     global $DB;
 
-    $sql = "SELECT id,answertext from {treasurehunt_answers} WHERE riddleid = ?";
-    $answers = $DB->get_records('treasurehunt_answers', array('riddleid' => $riddleid), '', 'id,answertext');
+    $sql = "SELECT id,answertext from {treasurehunt_answers} WHERE stageid = ?";
+    $answers = $DB->get_records('treasurehunt_answers', array('stageid' => $stageid), '', 'id,answertext');
     foreach ($answers as &$answer) {
         $answer->answertext = file_rewrite_pluginfile_urls($answer->answertext, 'pluginfile.php', $context->id,
                 'mod_treasurehunt', 'answertext', $answer->id);
@@ -504,57 +504,57 @@ function get_riddle_answers($riddleid, $context) {
     return $answers;
 }
 
-function riddles_to_geojson($riddles, $context, $treasurehuntid, $groupid = 0) {
-    $riddlesarray = array();
-    foreach ($riddles as $riddle) {
-        $multipolygon = wkt_to_object($riddle->geometry);
-        if (isset($riddle->description)) {
-            $description = file_rewrite_pluginfile_urls($riddle->description, 'pluginfile.php', $context->id,
-                    'mod_treasurehunt', 'description', $riddle->id);
+function stages_to_geojson($stages, $context, $treasurehuntid, $groupid = 0) {
+    $stagesarray = array();
+    foreach ($stages as $stage) {
+        $multipolygon = wkt_to_object($stage->geometry);
+        if (isset($stage->cluetext)) {
+            $cluetext = file_rewrite_pluginfile_urls($stage->cluetext, 'pluginfile.php', $context->id,
+                    'mod_treasurehunt', 'cluetext', $stage->id);
         } else {
-            $description = null;
+            $cluetext = null;
         }
-        $attr = array('roadid' => intval($riddle->roadid),
-            'noriddle' => intval($riddle->position),
-            'name' => $riddle->name,
+        $attr = array('roadid' => intval($stage->roadid),
+            'nostage' => intval($stage->position),
+            'name' => $stage->name,
             'treasurehuntid' => $treasurehuntid,
-            'description' => $description);
-        if (property_exists($riddle, 'timecreated')) {
-            $attr['date'] = $riddle->timecreated;
+            'clue' => $cluetext);
+        if (property_exists($stage, 'timecreated')) {
+            $attr['date'] = $stage->timecreated;
         }
-        if (property_exists($riddle, 'geometrysolved') && property_exists($riddle, 'success')) {
-            $attr['geometrysolved'] = intval($riddle->geometrysolved);
-            $attr['success'] = intval($riddle->success);
-            $riddle->type = "location";
+        if (property_exists($stage, 'geometrysolved') && property_exists($stage, 'success')) {
+            $attr['geometrysolved'] = intval($stage->geometrysolved);
+            $attr['success'] = intval($stage->success);
+            $stage->type = "location";
             // Modifico el tipo a location
-            $attr['info'] = set_string_attempt($riddle, $groupid);
+            $attr['info'] = set_string_attempt($stage, $groupid);
         }
-        $feature = new Feature($riddle->id ?
-                        intval($riddle->id) : null, $multipolygon, $attr);
-        array_push($riddlesarray, $feature);
+        $feature = new Feature($stage->id ?
+                        intval($stage->id) : null, $multipolygon, $attr);
+        array_push($stagesarray, $feature);
     }
-    $featurecollection = new FeatureCollection($riddlesarray);
+    $featurecollection = new FeatureCollection($stagesarray);
     $geojson = object_to_geojson($featurecollection);
     return $geojson;
 }
 
-function get_locked_name_and_description($attempt, $context) {
+function get_locked_clue($attempt, $context) {
     $return = new stdClass();
-    $return->name = get_string('lockedriddle', 'treasurehunt');
+    $return->name = get_string('lockedclue', 'treasurehunt');
     if (!$attempt->activitysolved) {
         $activitytoendname = get_activity_to_end_link($attempt->activitytoend);
     }
     if ((!$attempt->questionsolved && $attempt->questiontext !== '')
             && (!$attempt->activitysolved && $attempt->activitytoend)) {
-        $return->description = get_string('lockedqacriddle', 'treasurehunt', $activitytoendname);
+        $return->clue = get_string('lockedqacclue', 'treasurehunt', $activitytoendname);
     } else if (!$attempt->questionsolved && $attempt->questiontext !== '') {
-        $return->description = get_string('lockedqriddle', 'treasurehunt');
+        $return->clue = get_string('lockedqclue', 'treasurehunt');
     } else if (!$attempt->activitysolved && $attempt->activitytoend) {
-        $return->description = get_string('lockedcpriddle', 'treasurehunt', $activitytoendname);
+        $return->clue = get_string('lockedcpstage', 'treasurehunt', $activitytoendname);
     } else {
         $return->name = $attempt->name;
-        $return->description = file_rewrite_pluginfile_urls($attempt->description, 'pluginfile.php', $context->id,
-                'mod_treasurehunt', 'description', $attempt->riddleid);
+        $return->clue = file_rewrite_pluginfile_urls($attempt->cluetext, 'pluginfile.php', $context->id,
+                'mod_treasurehunt', 'cluetext', $attempt->stageid);
     }
     return $return;
 }
@@ -573,7 +573,7 @@ function set_grade($treasurehunt, $groupid, $userid) {
 function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context) {
     global $DB;
 
-    // Recupero las pistas descubiertas y fallos cometidos por el usuario/grupo para esta instancia.
+    // Recupero las etapas descubiertas y fallos cometidos por el usuario/grupo para esta instancia.
     if ($groupid) {
         $grouptype = 'a.groupid=(?)';
         $grouptypewithin = 'at.groupid=?';
@@ -583,16 +583,16 @@ function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context
         $grouptypewithin = 'at.groupid=0 AND at.userid=?';
         $params = array($roadid, $userid, $roadid, $userid);
     }
-    $query = "SELECT a.id as attemptid,a.timecreated,a.userid as user,a.riddleid,CASE WHEN a.success = 0 "
+    $query = "SELECT a.id as attemptid,a.timecreated,a.userid as user,a.stageid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
-            . "r.description END AS description,CASE WHEN a.geometrysolved=1 "
+            . "r.cluetext END AS cluetext,CASE WHEN a.geometrysolved=1 "
             . "THEN r.id ELSE null END as id,a.geometrysolved,r.position,apt.geometry,"
             . "r.roadid,a.success FROM (SELECT MAX(at.timecreated) AS maxtime,"
             . "at.location AS geometry FROM {treasurehunt_attempts} "
-            . "at INNER JOIN {treasurehunt_riddles} ri ON ri.id=at.riddleid WHERE ri.roadid=? "
+            . "at INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
             . "AND $grouptypewithin group by geometry) apt INNER JOIN {treasurehunt_attempts} a ON "
             . "a.timecreated=apt.maxtime AND apt.geometry = a.location "
-            . "INNER JOIN {treasurehunt_riddles} r ON a.riddleid=r.id WHERE r.roadid=? AND $grouptype";
+            . "INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE r.roadid=? AND $grouptype";
     $userprogress = $DB->get_records_sql($query, $params);
     $geometrysolved = false;
     foreach ($userprogress as $attempt) {
@@ -600,28 +600,28 @@ function get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context
             $geometrysolved = true;
         }
     }
-    // Si no tiene ningun progreso mostrar primera pista del camino para comenzar.
+    // Si no tiene ningun progreso mostrar primera etapa del camino para comenzar.
     if (count($userprogress) == 0 || !$geometrysolved) {
         $query = "SELECT position -1,geom as geometry,"
-                . "roadid FROM {treasurehunt_riddles}  WHERE  roadid=? AND position=1";
+                . "roadid FROM {treasurehunt_stages}  WHERE  roadid=? AND position=1";
         $params = array($roadid);
         $userprogress[] = $DB->get_record_sql($query, $params);
     }
-    $geojson = riddles_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
+    $geojson = stages_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
     return $geojson;
 }
 
 function is_valid_road($roadid) {
     global $DB;
 
-    $query = "SELECT geom as geometry from {treasurehunt_riddles} where roadid = ?";
+    $query = "SELECT geom as geometry from {treasurehunt_stages} where roadid = ?";
     $params = array($roadid);
-    $riddles = $DB->get_records_sql($query, $params);
-    if (count($riddles) <= 1) {
+    $stages = $DB->get_records_sql($query, $params);
+    if (count($stages) <= 1) {
         return false;
     }
-    foreach ($riddles as $riddle) {
-        if ($riddle->geometry === null) {
+    foreach ($stages as $stage) {
+        if ($stage->geometry === null) {
             return false;
         }
     }
@@ -804,18 +804,18 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
     $attemptsquery = "SELECT a.id,$user as user,r.position, CASE WHEN EXISTS(SELECT 1 FROM "
-            . "{treasurehunt_riddles} ri INNER JOIN {treasurehunt_attempts} at "
-            . "ON at.riddleid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
+            . "{treasurehunt_stages} ri INNER JOIN {treasurehunt_attempts} at "
+            . "ON at.stageid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
             . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
-            . "CASE WHEN EXISTS(SELECT 1 FROM {treasurehunt_riddles} ri INNER JOIN "
-            . "{treasurehunt_attempts} at ON at.riddleid=ri.id WHERE ri.position=r.position "
+            . "CASE WHEN EXISTS(SELECT 1 FROM {treasurehunt_stages} ri INNER JOIN "
+            . "{treasurehunt_attempts} at ON at.stageid=ri.id WHERE ri.position=r.position "
             . "AND ri.roadid=r.roadid AND $groupidwithin AND at.success=1 AND "
             . "at.type='location') THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
-            . "{treasurehunt_riddles} r ON a.riddleid=r.id INNER JOIN {treasurehunt_roads} "
+            . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
             . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid group by r.position,user,a.id,r.roadid";
     $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
-            . "(SELECT MAX(position) FROM {treasurehunt_riddles} where roadid "
-            . "= r.id) as totalriddles from {treasurehunt_roads} r where treasurehuntid=?";
+            . "(SELECT MAX(position) FROM {treasurehunt_stages} where roadid "
+            . "= r.id) as totalstages from {treasurehunt_roads} r where treasurehuntid=?";
     $params = array($cm->instance);
     $attempts = $DB->get_records_sql($attemptsquery, $params);
     if ($cm->groupmode) {
@@ -876,15 +876,15 @@ function get_list_participants_and_attempts_in_roads($cm, $courseid, $context) {
 
 function get_strings_play() {
 
-    return get_strings(array("overcomeriddle", "failedlocation", "riddlename",
-        "riddledescription", "question", "noasnwerselected", "timeexceeded",
+    return get_strings(array("overcomestage", "failedlocation", "stagename",
+        "stageclue", "question", "noasnwerselected", "timeexceeded",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
         "huntcompleted", "discoveredlocation", "answerwarning", "error"), "mod_treasurehunt");
 }
 
 function get_strings_edit() {
-    return get_strings(array('riddle', 'road', 'add', 'modify', 'save',
+    return get_strings(array('stage', 'road', 'add', 'modify', 'save',
         'remove', 'searchlocation', 'savewarning', 'removewarning',
         'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
 }
@@ -903,7 +903,7 @@ function get_last_timestamps($userid, $groupid, $roadid) {
     $query = "SELECT coalesce(attempttimestamp,0) as attempttimestamp, "
             . "ro.timemodified as roadtimestamp FROM  {treasurehunt_roads} ro LEFT JOIN (SELECT "
             . "MAX(a.timecreated) as attempttimestamp, r.roadid FROM {treasurehunt_attempts} a INNER JOIN "
-            . "{treasurehunt_riddles} r ON a.riddleid=r.id where $grouptype group by r.roadid) q "
+            . "{treasurehunt_stages} r ON a.stageid=r.id where $grouptype group by r.roadid) q "
             . "ON q.roadid = ro.id WHERE ro.id=?";
     $timestamp = $DB->get_record_sql($query, $params);
     if (!isset($timestamp->attempttimestamp)) {
@@ -924,21 +924,21 @@ function get_last_successful_attempt($userid, $groupid, $roadid) {
         $grouptype = 'a.groupid=0 AND a.userid=(?)';
         $params = array($userid, $roadid);
     }
-    $sql = "SELECT a.id,a.riddleid,a.success,a.location AS location,"
-            . "a.geometrysolved,a.questionsolved,a.activitysolved,r.name,r.description,"
-            . "r.questiontext,r.position,r.activitytoend FROM {treasurehunt_riddles} r "
-            . "INNER JOIN {treasurehunt_attempts} a ON a.riddleid=r.id WHERE "
-            . "a.timecreated=(SELECT MAX(at.timecreated) FROM {treasurehunt_riddles} ri "
-            . "INNER JOIN {treasurehunt_attempts} at ON at.riddleid=ri.id  WHERE "
+    $sql = "SELECT a.id,a.stageid,a.success,a.location AS location,"
+            . "a.geometrysolved,a.questionsolved,a.activitysolved,r.name,r.cluetext,"
+            . "r.questiontext,r.position,r.activitytoend FROM {treasurehunt_stages} r "
+            . "INNER JOIN {treasurehunt_attempts} a ON a.stageid=r.id WHERE "
+            . "a.timecreated=(SELECT MAX(at.timecreated) FROM {treasurehunt_stages} ri "
+            . "INNER JOIN {treasurehunt_attempts} at ON at.stageid=ri.id  WHERE "
             . "$grouptypewithin AND ri.roadid=r.roadid AND at.geometrysolved=1)"
             . "AND $grouptype AND r.roadid = ?";
     $algo = $DB->get_record_sql($sql, $params);
     return $algo;
 }
 
-// Compruebo si se ha acertado la pista y completado la actividad requerida.
+// Compruebo si se ha acertado la etapa y completado la actividad requerida.
 function check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context,
-        $treasurehunt, $noriddles, $qocremoved) {
+        $treasurehunt, $nostages, $qocremoved) {
     global $DB;
 
     $return = new stdClass();
@@ -1039,8 +1039,8 @@ function check_question_and_activity_solved($selectedanswerid, $userid, $groupid
                 // Si exite la respuesta y no se ha actualizado el camino.
                 if ($selectedanswerid > 0 && !$updateroad) {
                     $answer = $DB->get_record('treasurehunt_answers', array('id' => $selectedanswerid),
-                            'correct,riddleid', MUST_EXIST);
-                    if ($answer->riddleid != $lastattempt->riddleid) {
+                            'correct,stageid', MUST_EXIST);
+                    if ($answer->stageid != $lastattempt->stageid) {
                         $return->msg = get_string('warmatchanswer', 'treasurehunt');
                     } else {
                         $return->newattempt = true;
@@ -1078,8 +1078,8 @@ function check_question_and_activity_solved($selectedanswerid, $userid, $groupid
             }
         }
         if ($return->newattempt == true) {
-            if ($lastattempt->success && $lastattempt->position == $noriddles) {
-                if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
+            if ($lastattempt->success && $lastattempt->position == $nostages) {
+                if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMstageS) {
                     treasurehunt_update_grades($treasurehunt);
                 } else {
                     set_grade($treasurehunt, $groupid, $userid);
@@ -1106,55 +1106,55 @@ function insert_attempt($attempt, $context) {
     $event->trigger();
 }
 
-function get_last_successful_riddle($userid, $groupid, $roadid, $noriddles, $outoftime, $actnotavailableyet,
+function get_last_successful_stage($userid, $groupid, $roadid, $nostages, $outoftime, $actnotavailableyet,
         $roadfinished, $context) {
 
-    $lastsuccessfulriddle = new stdClass();
+    $lastsuccessfulstage = new stdClass();
 
     // Recupero el ultimo intento con geometria solucionada realizado por el usuario/grupo para esta instancia.
     $attempt = get_last_successful_attempt($userid, $groupid, $roadid);
     if ($attempt && !$outoftime && !$actnotavailableyet) {
-        $lastsuccessfulriddle = get_locked_name_and_description($attempt, $context);
+        $lastsuccessfulstage = get_locked_clue($attempt, $context);
         if (!$roadfinished) {
-            $lastsuccessfulriddle->id = intval($attempt->riddleid);
+            $lastsuccessfulstage->id = intval($attempt->stageid);
         } else {
-            $lastsuccessfulriddle->id = 0;
+            $lastsuccessfulstage->id = 0;
         }
-        $lastsuccessfulriddle->totalnumber = $noriddles;
-        $lastsuccessfulriddle->question = '';
-        $lastsuccessfulriddle->answers = array();
-        $lastsuccessfulriddle->position = intval($attempt->position);
-        $lastsuccessfulriddle->activitysolved = intval($attempt->activitysolved);
+        $lastsuccessfulstage->totalnumber = $nostages;
+        $lastsuccessfulstage->question = '';
+        $lastsuccessfulstage->answers = array();
+        $lastsuccessfulstage->position = intval($attempt->position);
+        $lastsuccessfulstage->activitysolved = intval($attempt->activitysolved);
         if (!$attempt->questionsolved) {
-            // Envio la pregunta y las respuestas de la pista anterior.
-            $lastsuccessfulriddle->answers = get_riddle_answers($attempt->riddleid, $context);
-            $lastsuccessfulriddle->question = file_rewrite_pluginfile_urls($attempt->questiontext, 'pluginfile.php',
-                    $context->id, 'mod_treasurehunt', 'questiontext', $attempt->riddleid);
+            // Envio la pregunta y las respuestas de la etapa anterior.
+            $lastsuccessfulstage->answers = get_stage_answers($attempt->stageid, $context);
+            $lastsuccessfulstage->question = file_rewrite_pluginfile_urls($attempt->questiontext, 'pluginfile.php',
+                    $context->id, 'mod_treasurehunt', 'questiontext', $attempt->stageid);
         }
     } else {
-        $lastsuccessfulriddle->id = 0;
-        $lastsuccessfulriddle->totalnumber = $noriddles;
-        $lastsuccessfulriddle->question = '';
-        $lastsuccessfulriddle->answers = array();
-        $lastsuccessfulriddle->position = 0;
-        $lastsuccessfulriddle->activitysolved = 1;
+        $lastsuccessfulstage->id = 0;
+        $lastsuccessfulstage->totalnumber = $nostages;
+        $lastsuccessfulstage->question = '';
+        $lastsuccessfulstage->answers = array();
+        $lastsuccessfulstage->position = 0;
+        $lastsuccessfulstage->activitysolved = 1;
         if ($outoftime || $actnotavailableyet) {
             if (isset($attempt->position)) {
-                $lastsuccessfulriddle->position = intval($attempt->position);
+                $lastsuccessfulstage->position = intval($attempt->position);
             }
             if ($outoftime) {
-                $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
-                $lastsuccessfulriddle->description = get_string('timeexceeded', 'treasurehunt');
+                $lastsuccessfulstage->name = get_string('outoftime', 'treasurehunt');
+                $lastsuccessfulstage->clue = get_string('timeexceeded', 'treasurehunt');
             } else {
-                $lastsuccessfulriddle->name = get_string('outoftime', 'treasurehunt');
-                $lastsuccessfulriddle->description = get_string('actnotavailableyet', 'treasurehunt');
+                $lastsuccessfulstage->name = get_string('outoftime', 'treasurehunt');
+                $lastsuccessfulstage->clue = get_string('actnotavailableyet', 'treasurehunt');
             }
         } else {
-            $lastsuccessfulriddle->name = get_string('start', 'treasurehunt');
-            $lastsuccessfulriddle->description = get_string('overcomefirstriddle', 'treasurehunt');
+            $lastsuccessfulstage->name = get_string('start', 'treasurehunt');
+            $lastsuccessfulstage->clue = get_string('overcomefirststage', 'treasurehunt');
         }
     }
-    return $lastsuccessfulriddle;
+    return $lastsuccessfulstage;
 }
 
 function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changesingroupmode) {
@@ -1182,8 +1182,8 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changes
         }
         $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
                 . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as user "
-                . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
-                . "ON a.riddleid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
+                . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
+                . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
                 . "a.timecreated ASC";
 
         $newattempts = $DB->get_records_sql($query, $params);
@@ -1200,8 +1200,8 @@ function check_attempts_updates($timestamp, $groupid, $userid, $roadid, $changes
         }
         $query = "SELECT a.id,a.type,a.questionsolved,a.activitysolved,a.timecreated,"
                 . "a.success,r.position,a.userid as user,a.geometrysolved "
-                . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
-                . "ON a.riddleid=r.id WHERE a.timecreated >? AND $grouptype "
+                . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
+                . "ON a.stageid=r.id WHERE a.timecreated >? AND $grouptype "
                 . "AND r.roadid=? ORDER BY a.timecreated ASC";
 
         $newattempts = $DB->get_records_sql($query, $params);
@@ -1238,8 +1238,8 @@ function get_user_historical_attempts($groupid, $userid, $roadid) {
     }
     $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
             . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as user "
-            . "FROM {treasurehunt_riddles} r INNER JOIN {treasurehunt_attempts} a "
-            . "ON a.riddleid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
+            . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
+            . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
             . "a.timecreated ASC";
     $results = $DB->get_records_sql($query, $params);
     foreach ($results as $result) {
@@ -1277,7 +1277,7 @@ function view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid
 
 function treasurehunt_view_play_page($treasurehunt, $cmid) {
     global $PAGE;
-    $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
+    $treasurehunt->cluetext = format_module_intro('treasurehunt', $treasurehunt, $cmid);
     $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_play_page($treasurehunt, $cmid);
     return $output->render($renderable);
@@ -1311,13 +1311,13 @@ function set_string_attempt($attempt, $group) {
                 return get_string('groupquestionfailed', 'treasurehunt', $attempt);
             }
         }
-        // Si son intentos a pistas
+        // Si son intentos a etapas
         else if ($attempt->type === 'location') {
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('grouplocationovercome', 'treasurehunt', $attempt);
                 } else {
-                    return get_string('groupriddleovercome', 'treasurehunt', $attempt);
+                    return get_string('groupstageovercome', 'treasurehunt', $attempt);
                 }
             } else {
                 return get_string('grouplocationfailed', 'treasurehunt', $attempt);
@@ -1334,13 +1334,13 @@ function set_string_attempt($attempt, $group) {
                 return get_string('userquestionfailed', 'treasurehunt', $attempt);
             }
         }
-        // Si son intentos a pistas
+        // Si son intentos a etapas
         else if ($attempt->type === 'location') {
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('userlocationovercome', 'treasurehunt', $attempt);
                 } else {
-                    return get_string('userriddleovercome', 'treasurehunt', $attempt);
+                    return get_string('userstageovercome', 'treasurehunt', $attempt);
                 }
             } else {
                 return get_string('userlocationfailed', 'treasurehunt', $attempt);
@@ -1356,8 +1356,8 @@ function add_road_userlist($roads, $data, $userlist, $attempts) {
     $road->id = $data->roadid;
     $road->name = $data->roadname;
     $road->validated = $data->validated;
-    $road->totalriddles = $data->totalriddles;
-    $road = insert_riddle_progress_in_road_userlist($road, $userlist, $attempts);
+    $road->totalstages = $data->totalstages;
+    $road = insert_stage_progress_in_road_userlist($road, $userlist, $attempts);
     $roads[$road->id] = $road;
     return $roads;
 }
@@ -1369,15 +1369,15 @@ function view_intro($treasurehunt) {
     return false;
 }
 
-function insert_riddle_progress_in_road_userlist($road, $userlist, $attempts) {
+function insert_stage_progress_in_road_userlist($road, $userlist, $attempts) {
     $road->userlist = array();
     foreach ($userlist as $user) {
         $user->ratings = array();
-        // Anado a cada usuario/grupo su calificacion en color de cada pista.
+        // Anado a cada usuario/grupo su calificacion en color de cada etapa.
         foreach ($attempts as $attempt) {
             if ($attempt->user === $user->id) {
                 $rating = new stdClass();
-                $rating->riddlenum = $attempt->position;
+                $rating->stagenum = $attempt->position;
                 if ($attempt->withfailures && $attempt->success) {
                     $rating->class = "successwithfailures";
                 } else if ($attempt->withfailures) {
@@ -1387,7 +1387,7 @@ function insert_riddle_progress_in_road_userlist($road, $userlist, $attempts) {
                 } else {
                     $rating->class = "noattempt";
                 }
-                $user->ratings[$rating->riddlenum] = $rating;
+                $user->ratings[$rating->stagenum] = $rating;
             }
         }
         $road->userlist [] = clone $user;
@@ -1426,58 +1426,58 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $orderby = '';
     $grademethodsql = '';
     $usercompletiontimesql = "(SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_riddles} ri ON ri.id = at.riddleid 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
             at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_riddles} rid where rid.roadid=ri.roadid) AND 
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
             roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
             AND $groupidwithin) as usertime";
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
         $grademethodsql = "(SELECT max(at.timecreated) from {treasurehunt_attempts}
-            at INNER JOIN {treasurehunt_riddles} ri ON ri.id = at.riddleid INNER JOIN 
+            at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
             {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND 
-            ri.position=(select max(rid.position) from {treasurehunt_riddles} 
+            ri.position=(select max(rid.position) from {treasurehunt_stages} 
             rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
             AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
             (SELECT min(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_riddles} ri ON ri.id = at.riddleid 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
             at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_riddles} rid where rid.roadid=ri.roadid) 
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) 
             AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
             AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,";
         $orderby = 'ORDER BY usertime ASC';
     }if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $grademethodsql = "(SELECT COUNT(*) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_riddles} ri ON ri.id = at.riddleid INNER 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER 
             JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 
-            AND ri.position=(select max(rid.position) from {treasurehunt_riddles} rid 
+            AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid 
             where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
             AND at.type='location' AND at.userid IN $users AND $groupid2) as lastposition,
             $usercompletiontimesql,";
         $orderby = 'ORDER BY usertime ASC';
     }
     $sql = "SELECT $user as user,$grademethodsql(SELECT COUNT(*) from 
-        {treasurehunt_attempts} at INNER JOIN {treasurehunt_riddles} ri 
-        ON ri.id = at.riddleid INNER JOIN {treasurehunt_roads} roa ON 
+        {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri 
+        ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON 
         ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND 
         at.type='location' AND at.penalty=1 AND $groupidwithin) as  
         nolocationsfailed,
         (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN 
-        {treasurehunt_riddles} ri ON ri.id = at.riddleid INNER JOIN 
+        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
         {treasurehunt_roads} roa ON ri.roadid=roa.id where 
         roa.treasurehuntid=ro.treasurehuntid AND at.type='question' AND 
         at.penalty=1 AND $groupidwithin) as noanswersfailed,
         (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN 
-        {treasurehunt_riddles} ri ON ri.id = at.riddleid INNER JOIN 
+        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
         {treasurehunt_roads} roa ON ri.roadid=roa.id where 
         roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-        AND at.success=1 AND $groupidwithin) as nosuccessfulriddles,
-        (SELECT COUNT(*) from {treasurehunt_riddles} ri INNER JOIN 
+        AND at.success=1 AND $groupidwithin) as nosuccessfulstages,
+        (SELECT COUNT(*) from {treasurehunt_stages} ri INNER JOIN 
         {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-        roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as noriddles
-        from {treasurehunt_attempts} a INNER JOIN {treasurehunt_riddles} 
-        r ON r.id=a.riddleid INNER JOIN {treasurehunt_roads} ro ON 
+        roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as nostages
+        from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
+        r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON 
         r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
         AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby";
     $stats = $DB->get_records_sql($sql, array($treasurehunt->id));
@@ -1520,12 +1520,12 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                         , $stats[$student->id]->worsttime
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->usertime);
-            } else if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMRIDDLES) {
-                $positiverate = ($stats[$student->id]->nosuccessfulriddles * $treasurehunt->grade)
-                        / (2 * $stats[$student->id]->noriddles);
+            } else if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMstageS) {
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade)
+                        / (2 * $stats[$student->id]->nostages);
             } else {
-                $positiverate = ($stats[$student->id]->nosuccessfulriddles * $treasurehunt->grade)
-                        / $stats[$student->id]->noriddles;
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade)
+                        / $stats[$student->id]->nostages;
             }
             $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation)
                     + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);

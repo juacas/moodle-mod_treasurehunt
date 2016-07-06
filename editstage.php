@@ -1,7 +1,7 @@
 <?php
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/editriddle_form.php');
+require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 
 global $COURSE, $PAGE, $CFG, $USER;
@@ -22,7 +22,7 @@ $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/treasurehunt/editriddle.php', array('cmid' => $cmid));
+$url = new moodle_url('/mod/treasurehunt/editstage.php', array('cmid' => $cmid));
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -41,33 +41,33 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
             array($treasurehunt->id, $lockid, $renewlocktime));
 
     if ($id) { // if entry is specified
-        require_capability('mod/treasurehunt:editriddle', $context);
-        $title = get_string('editingriddle', 'treasurehunt');
-        $sql = 'SELECT id,name,description,descriptionformat,descriptiontrust,'
+        require_capability('mod/treasurehunt:editstage', $context);
+        $title = get_string('editingstage', 'treasurehunt');
+        $sql = 'SELECT id,name,cluetext,cluetextformat,cluetexttrust,'
                 . 'activitytoend,roadid,questiontext,questiontextformat,'
-                . 'questiontexttrust FROM {treasurehunt_riddles}  WHERE id=?';
+                . 'questiontexttrust FROM {treasurehunt_stages}  WHERE id=?';
         $params = array($id);
-        if (!$riddle = $DB->get_record_sql($sql, $params)) {
+        if (!$stage = $DB->get_record_sql($sql, $params)) {
             print_error('invalidentry');
         }
         // Si existe la pregunta recojo las respuestas.
-        if ($riddle->questiontext !== '') {
+        if ($stage->questiontext !== '') {
             // Hago que se muestre la pregunta.
-            $riddle->addsimplequestion = optional_param('addsimplequestion', 1, PARAM_INT);
+            $stage->addsimplequestion = optional_param('addsimplequestion', 1, PARAM_INT);
             $sqlanswers = 'SELECT a.id,a.answertext,a.answertextformat,a.answertexttrust,'
                     . ' a.correct FROM {treasurehunt_answers} a INNER JOIN'
-                    . ' {treasurehunt_riddles} r ON r.id=a.riddleid WHERE r.id=?';
-            $params = array($riddle->id);
+                    . ' {treasurehunt_stages} r ON r.id=a.stageid WHERE r.id=?';
+            $params = array($stage->id);
             $answers = $DB->get_records_sql($sqlanswers, $params);
-            $riddle->answers = $answers;
-            $riddle->noanswers = optional_param('noanswers', count($answers), PARAM_INT);
+            $stage->answers = $answers;
+            $stage->noanswers = optional_param('noanswers', count($answers), PARAM_INT);
             if (!empty($addanswers)) {
-                $riddle->noanswers += NUMBER_NEW_ANSWERS;
+                $stage->noanswers += NUMBER_NEW_ANSWERS;
             }
         }
     } else { // new entry
-        require_capability('mod/treasurehunt:addriddle', $context);
-        $title = get_string('addingriddle', 'treasurehunt');
+        require_capability('mod/treasurehunt:addstage', $context);
+        $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = "id = ?";
         $params = array($roadid);
@@ -75,34 +75,34 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             print_error('invalidentry');
         }
-        // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna pista.
+        // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna etapa.
         if (check_road_is_blocked($roadid)) {
-            print_error('notcreateriddle', 'treasurehunt', $returnurl);
+            print_error('notcreatestage', 'treasurehunt', $returnurl);
         }
-        $riddle = new stdClass();
-        $riddle->id = null;
-        $riddle->roadid = $roadid;
+        $stage = new stdClass();
+        $stage->id = null;
+        $stage->roadid = $roadid;
     }
-    if (!isset($riddle->questiontext) || $riddle->questiontext === '') {
-        $riddle->addsimplequestion = optional_param('addsimplequestion', 0, PARAM_INT);
-        $riddle->noanswers = optional_param('noanswers', 2, PARAM_INT);
+    if (!isset($stage->questiontext) || $stage->questiontext === '') {
+        $stage->addsimplequestion = optional_param('addsimplequestion', 0, PARAM_INT);
+        $stage->noanswers = optional_param('noanswers', 2, PARAM_INT);
         if (!empty($addanswers)) {
-            $riddle->noanswers += NUMBER_NEW_ANSWERS;
+            $stage->noanswers += NUMBER_NEW_ANSWERS;
         }
     }
-    $riddle->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $riddle->roadid));
+    $stage->cmid = $cmid;
+    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $stage->roadid));
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'description', $riddle->id));
+        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
     // List activities with Completion enabled
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
 
 
-    $mform = new riddle_form(null,
-            array('current' => $riddle, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
+    $mform = new stage_form(null,
+            array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); //name of the form you defined in file above.
 
     if ($mform->is_reloaded()) {
         // Si se ha recargado es porque hemos cambiado algo
@@ -112,24 +112,24 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
         // probably a redirect is called for!
         // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
-    } else if ($riddle = $mform->get_data()) {
+    } else if ($stage = $mform->get_data()) {
 
         // Actualizamos los campos
         $timenow = time();
-        $riddle->name = trim($riddle->name);
-        $riddle->description = '';          // updated later
-        $riddle->descriptionformat = FORMAT_HTML; // updated later
-        $riddle->descriptiontrust = 0;           // updated later
-        $riddle->questiontext = '';          // updated later
-        $riddle->questiontextformat = FORMAT_HTML; // updated later
-        $riddle->questiontexttrust = 0;           // updated later
+        $stage->name = trim($stage->name);
+        $stage->cluetext = '';          // updated later
+        $stage->cluetextformat = FORMAT_HTML; // updated later
+        $stage->cluetexttrust = 0;           // updated later
+        $stage->questiontext = '';          // updated later
+        $stage->questiontextformat = FORMAT_HTML; // updated later
+        $stage->questiontexttrust = 0;           // updated later
 
-        if (empty($riddle->id)) {
-            $riddle->timecreated = $timenow;
-            $riddle->id = insert_riddle_form($riddle);
+        if (empty($stage->id)) {
+            $stage->timecreated = $timenow;
+            $stage->id = insert_stage_form($stage);
             $isnewentry = true;
         } else {
-            $riddle->timemodified = $timenow;
+            $stage->timemodified = $timenow;
             $isnewentry = false;
         }
 
@@ -138,16 +138,16 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
         // save and relink embedded images and save attachments
-        $riddle = file_postupdate_standard_editor($riddle, 'description', $editoroptions, $context, 'mod_treasurehunt',
-                'description', $riddle->id);
+        $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context, 'mod_treasurehunt',
+                'cluetext', $stage->id);
         // store the updated value values
-        if ($riddle->addsimplequestion) {
+        if ($stage->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
-            $riddle = file_postupdate_standard_editor($riddle, 'questiontext', $editoroptions, $context,
-                    'mod_treasurehunt', 'questiontext', $riddle->id);
-            if (isset($riddle->answertext_editor)) {
+            $stage = file_postupdate_standard_editor($stage, 'questiontext', $editoroptions, $context,
+                    'mod_treasurehunt', 'questiontext', $stage->id);
+            if (isset($stage->answertext_editor)) {
                 // Proceso los editores de respuesta y guardo las respuestas.
-                foreach ($riddle->answertext_editor as $key => $answertext) {
+                foreach ($stage->answertext_editor as $key => $answertext) {
                     if (isset($answers) && count($answers) > 0) {
                         $answer = array_shift($answers);
                         if (trim($answertext['text']) === '') {
@@ -155,7 +155,7 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
                             continue;
                         }
                         $answer->timemodified = $timenow;
-                        $answer->correct = $riddle->correct[$key];
+                        $answer->correct = $stage->correct[$key];
                     } else {
                         if (trim($answertext['text']) === '') {
                             continue;
@@ -165,8 +165,8 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
                         $answer->answertextformat = FORMAT_HTML; // updated later
                         $answer->answertexttrust = 0;           // updated later
                         $answer->timecreated = $timenow;
-                        $answer->riddleid = $riddle->id;
-                        $answer->correct = $riddle->correct[$key];
+                        $answer->stageid = $stage->id;
+                        $answer->correct = $stage->correct[$key];
                         $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
                     }
                     $answer->answertext_editor = $answertext;
@@ -183,24 +183,24 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
                 }
             }
         }
-        // Actualizo la pista con los ficheros procesados.
-        $DB->update_record('treasurehunt_riddles', $riddle);
+        // Actualizo la etapa con los ficheros procesados.
+        $DB->update_record('treasurehunt_stages', $stage);
 
         // Trigger event and update completion (if entry was created).
         $eventparams = array(
             'context' => $context,
-            'objectid' => $riddle->id,
+            'objectid' => $stage->id,
         );
         if ($isnewentry) {
-            $event = \mod_treasurehunt\event\riddle_created::create($eventparams);
+            $event = \mod_treasurehunt\event\stage_created::create($eventparams);
         } else {
-            $event = \mod_treasurehunt\event\riddle_updated::create($eventparams);
+            $event = \mod_treasurehunt\event\stage_updated::create($eventparams);
         }
         $event->trigger();
 
         // Actualizo el tiempo de modificacion del camino.
         $road = new stdClass();
-        $road->id = $riddle->roadid;
+        $road->id = $stage->roadid;
         $road->timemodified = time();
         $DB->update_record('treasurehunt_roads', $road);
 
@@ -212,7 +212,7 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
     print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
-$PAGE->navbar->add(get_string('editriddle', 'treasurehunt'), $url);
+$PAGE->navbar->add(get_string('editstage', 'treasurehunt'), $url);
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
