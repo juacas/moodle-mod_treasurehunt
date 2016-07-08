@@ -16,19 +16,17 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Defines the version and other meta-info about the plugin
+ * Version information
  *
- * Setting the $plugin->version to 0 prevents the plugin from being installed.
- * See https://docs.moodle.org/dev/version.php for more info.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name <your@email.address>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_treasurehunt';
-$plugin->version = 2016070600; // 06/7/2016
+$plugin->version = 2016070800; // 08/7/2016
 $plugin->release = 'v1.0';
 $plugin->requires = 2015051100; // Moodle 2.9
 $plugin->maturity = MATURITY_RC;

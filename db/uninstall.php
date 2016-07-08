@@ -16,13 +16,9 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Provides code to be executed during the module uninstallation
- *
- * @see uninstall_plugin()
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name <your@email.adress>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 /**

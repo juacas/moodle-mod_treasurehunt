@@ -16,13 +16,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Redirect the user to the appropriate submission related page
+ * Provides a redirection to the aproapiate url when the user comes from the gradebook.
  *
  * @package   mod_treasurehunt
  * @category  grade
- * @copyright 2015 Your Name
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 require_once(__DIR__ . "../../../config.php");
 
 $id = required_param('id', PARAM_INT); // Course module ID.

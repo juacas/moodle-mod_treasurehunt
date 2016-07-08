@@ -1,14 +1,31 @@
 <?php
 
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * External treasurehunt API
+ *
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once("$CFG->libdir/externallib.php");
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 
-class mod_treasurehunt_external_fetch_treasurehunt extends external_api {
+class mod_treasurehunt_external extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -63,7 +80,8 @@ class mod_treasurehunt_external_fetch_treasurehunt extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
-        list($treasurehunt['stages'], $treasurehunt['roads']) = get_treasurehunt($params['treasurehuntid'], $context);
+        list($treasurehunt['stages'], $treasurehunt['roads']) = treasurehunt_get_all_roads_and_stages($params['treasurehuntid'],
+                $context);
         $status['code'] = 0;
         $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
 
@@ -72,10 +90,6 @@ class mod_treasurehunt_external_fetch_treasurehunt extends external_api {
         $result['status'] = $status;
         return $result;
     }
-
-}
-
-class mod_treasurehunt_external_update_stages extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -120,19 +134,19 @@ class mod_treasurehunt_external_update_stages extends external_api {
         global $DB, $USER;
         $params = self::validate_parameters(self::update_stages_parameters(),
                         array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-//Recojo todas las features
+        //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
-        $features = geojson_to_object($params['stages']);
-        if (edition_lock_id_is_valid($params['lockid'])) {
+        $features = treasurehunt_geojson_to_object($params['stages']);
+        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
-                    update_geometry_and_position_of_stage($feature, $context);
+                    treasurehunt_update_geometry_and_position_of_stage($feature, $context);
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
@@ -150,10 +164,6 @@ class mod_treasurehunt_external_update_stages extends external_api {
         $result['status'] = $status;
         return $result;
     }
-
-}
-
-class mod_treasurehunt_external_delete_stage extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -204,8 +214,8 @@ class mod_treasurehunt_external_delete_stage extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
-        if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_stage($params['stageid'], $context);
+        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+            treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la etapa se ha realizado con éxito';
         } else {
@@ -217,10 +227,6 @@ class mod_treasurehunt_external_delete_stage extends external_api {
         $result['status'] = $status;
         return $result;
     }
-
-}
-
-class mod_treasurehunt_external_delete_road extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -270,8 +276,8 @@ class mod_treasurehunt_external_delete_road extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
-        if (edition_lock_id_is_valid($params['lockid'])) {
-            delete_road($params['roadid'], $context);
+        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+            treasurehunt_delete_road($params['roadid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con éxito';
         } else {
@@ -284,16 +290,6 @@ class mod_treasurehunt_external_delete_road extends external_api {
         return $result;
     }
 
-}
-
-class mod_treasurehunt_external_renew_lock extends external_api {
-
-    /**
-     * Can this function be called directly from ajax?
-     *
-     * @return boolean
-     * @since Moodle 2.9
-     */
     public static function renew_lock_is_allowed_from_ajax() {
         return true;
     }
@@ -338,8 +334,8 @@ class mod_treasurehunt_external_renew_lock extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         if (isset($params['lockid'])) {
-            if (edition_lock_id_is_valid($params['lockid'])) {
-                $lockid = renew_edition_lock($params['treasurehuntid'], $USER->id);
+            if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+                $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
             } else {
@@ -347,8 +343,8 @@ class mod_treasurehunt_external_renew_lock extends external_api {
                 $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
             }
         } else {
-            if (!is_edition_loked($params['treasurehuntid'], $USER->id)) {
-                $lockid = renew_edition_lock($params['treasurehuntid'], $USER->id);
+            if (!treasurehunt_is_edition_loked($params['treasurehuntid'], $USER->id)) {
+                $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha creado el bloqueo con exito';
             } else {
@@ -361,10 +357,6 @@ class mod_treasurehunt_external_renew_lock extends external_api {
         $result['lockid'] = $lockid;
         return $result;
     }
-
-}
-
-class mod_treasurehunt_external_user_progress extends external_api {
 
     /**
      * Can this function be called directly from ajax?
@@ -461,18 +453,18 @@ class mod_treasurehunt_external_user_progress extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:play', $context, null, false);
         // Recojo el grupo y camino al que pertenece
-        $userparams = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
+        $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Recojo el numero total de etapas del camino del usuario.
-        $nostages = get_total_stages($userparams->roadid);
+        $nostages = treasurehunt_get_total_stages($userparams->roadid);
         // Compruebo si el usuario ha finalizado el camino.
-        $roadfinished = check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
+        $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
         $qocremoved = $params['qocremoved'];
         if ($params['groupmode'] != $treasurehunt->groupmode) {
             $changesingroupmode = true;
         }
         // Recojo la info de las nuevas etapas descubiertas en caso de existir y los nuevos timestamp si han variado.
-        $updates = check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id,
+        $updates = treasurehunt_check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id,
                 $userparams->roadid, $changesingroupmode);
         if ($updates->newroadtimestamp != $params['roadtimestamp']) {
             $updateroad = true;
@@ -492,7 +484,7 @@ class mod_treasurehunt_external_user_progress extends external_api {
 
         if ($available->available) {
             // Compruebo si se ha acertado la etapa y completado la actividad requerida.
-            $qocsolved = check_question_and_activity_solved($params['selectedanswerid'], $USER->id,
+            $qocsolved = treasurehunt_check_question_and_activity_solved($params['selectedanswerid'], $USER->id,
                     $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $nostages,
                     $qocremoved);
             if ($qocsolved->msg !== '') {
@@ -517,8 +509,8 @@ class mod_treasurehunt_external_user_progress extends external_api {
         // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa etapa. 
         if (!$updates->geometrysolved && $params['location'] && !$updateroad && !$roadfinished && $available
                 && !$changesinplaymode && !$changesingroupmode) {
-            $checklocation = check_user_location($USER->id, $userparams->groupid, $userparams->roadid,
-                    geojson_to_object($params['location']), $context, $treasurehunt, $nostages);
+            $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid, $userparams->roadid,
+                    treasurehunt_geojson_to_object($params['location']), $context, $treasurehunt, $nostages);
             if ($checklocation->newattempt) {
                 $updates->newattempttimestamp = $checklocation->attempttimestamp;
                 $updates->newgeometry = true;
@@ -540,20 +532,22 @@ class mod_treasurehunt_external_user_progress extends external_api {
         $historicalattempts = array();
         // Si se ha producido cualquier nuevo intento recargo el historial de intentos.
         if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize']) {
-            $historicalattempts = get_user_historical_attempts($userparams->groupid, $USER->id, $userparams->roadid);
+            $historicalattempts = treasurehunt_get_user_historical_attempts($userparams->groupid, $USER->id,
+                    $userparams->roadid);
         }
         $lastsuccessfulstage = array();
         // Si se ha acertado una nueva localizacion, se ha modificado el camino, está fuera de tiempo,
         // se esta inicializando,se ha resuelto una pregunta o actividad o se ha cambiado el modo grupo.
         if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved
                 || $params['initialize'] || $changesingroupmode) {
-            $lastsuccessfulstage = get_last_successful_stage($USER->id, $userparams->groupid, $userparams->roadid,
-                    $nostages, $available->outoftime, $available->actnotavailableyet, $roadfinished, $context);
+            $lastsuccessfulstage = treasurehunt_get_last_successful_stage($USER->id, $userparams->groupid,
+                    $userparams->roadid, $nostages, $available->outoftime, $available->actnotavailableyet,
+                    $roadfinished, $context);
         }
         // Si se han realizado un nuevo intento de localización o se esta inicializando
         if ($updates->newgeometry || $updateroad || $roadfinished || $params['initialize'] || $changesingroupmode) {
-            $userstages = get_user_progress($userparams->roadid, $userparams->groupid, $USER->id, $treasurehuntid,
-                    $context);
+            $userstages = treasurehunt_get_user_progress($userparams->roadid, $userparams->groupid, $USER->id,
+                    $treasurehuntid, $context);
         }
         // Si se ha editado el camino aviso.
         if ($updateroad) {

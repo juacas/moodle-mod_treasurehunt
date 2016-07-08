@@ -20,21 +20,22 @@
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 global $CFG;
 // Needed for get_geometry_functions();
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 /**
- * Structure step to restore one treasurehunt activity
+ * Define the complete assignment structure for restore, with file and id annotations
  *
  * @package   mod_treasurehunt
- * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
 
     /**

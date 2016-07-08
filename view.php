@@ -16,16 +16,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Prints a particular instance of treasurehunt
+ * This file is the entry point to the assign module. All pages are rendered from here
  *
- * You can have a rather longer description of the file as well,
- * if you like, and it can span multiple lines.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
@@ -85,14 +81,14 @@ echo $output->header();
 
 echo $output->heading(format_string($treasurehunt->name));
 // Conditions to show the intro can change to look for own settings or whatever.
-if (view_intro($treasurehunt)) {
+if (treasurehunt_view_intro($treasurehunt)) {
     echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
             'treasurehuntintro');
 }
 
 $viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 
-echo view_treasurehunt_info($treasurehunt, $course->id);
+echo treasurehunt_view_info($treasurehunt, $course->id);
 if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > $treasurehunt->allowattemptsfromdate
         && $userid == $USER->id && $groupid == -1) || (has_capability('mod/treasurehunt:play', $context, $userid, false)
         && $viewusersattemptscap && $groupid == -1 && $userid != $USER->id)
@@ -103,23 +99,23 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
         $username = '';
         if ($groupid != -1) {
             $username = groups_get_group_name($groupid);
-            $params = get_group_road($groupid, $treasurehunt->id, $username);
+            $params = treasurehunt_get_group_road($groupid, $treasurehunt->id, $username);
         } else {
             if ($userid == $USER->id) {
                 $teacherreview = false;
             } else {
-                $username = get_user_fullname_from_id($userid);
+                $username = treasurehunt_get_user_fullname_from_id($userid);
             }
-            $params = get_user_group_and_road($userid, $treasurehunt, $cm->id, $teacherreview, $username);
+            $params = treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cm->id, $teacherreview, $username);
             if ($userid == $USER->id) {
                 if ($params->groupid) {
                     $username = groups_get_group_name($params->groupid);
                 } else {
-                    $username = get_user_fullname_from_id($userid);
+                    $username = treasurehunt_get_user_fullname_from_id($userid);
                 }
             }
         }
-        echo view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid, $cm->id,
+        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid, $cm->id,
                 $username, $teacherreview);
     } catch (Exception $e) {
         echo $output->notification($e->getMessage());
@@ -128,7 +124,7 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
         || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
         || time() > $treasurehunt->allowattemptsfromdate) {
-    echo view_users_progress_table($cm, $course->id, $context);
+    echo treasurehunt_view_users_progress_table($cm, $course->id, $context);
 }
 
 // Finish the page.

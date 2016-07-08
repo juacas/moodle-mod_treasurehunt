@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_glossary entry created event.
+ * The mod_treasurehunt attempt submitted event class.
  *
  * @package    mod_treasurethunt
  * @copyright  2015 Adrian Rodriguez
@@ -28,19 +28,19 @@ namespace mod_treasurehunt\event;
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_treasurehunt entry created event class.
+ * The mod_treasurehunt attempt submitted event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - string concept: (optional) the concept of created entry.
+ *      - int groupid: id of group.
  * }
  *
- * @package    mod_glossary
- * @since      Moodle 2.7
- * @copyright  2014 Marina Glancy
+ * @package    mod_treasurethunt
+ * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class attempt_submitted extends \core\event\base {
 
     /**

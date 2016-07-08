@@ -16,12 +16,13 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Administration settings definitions for the quiz module.
+ * Administration settings definitions for the treasurehunt module.
  *
- * @package   mod_quiz
- * @copyright 2010 Petr Skoda
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 

@@ -16,31 +16,31 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * The mod_glossary entry created event.
+ * The mod_treasurehunt road created event
  *
- * @package    mod_treasurethunt
- * @copyright  2015 Adrian Rodriguez
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+ 
 namespace mod_treasurehunt\event;
 
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * The mod_treasurehunt entry created event class.
+ * The mod_treasurehunt road created event class.
  *
  * @property-read array $other {
  *      Extra information about event.
  *
- *      - string concept: (optional) the concept of created entry.
+ *      - string concept: (optional) the concept of created road.
  * }
  *
- * @package    mod_glossary
- * @since      Moodle 2.7
- * @copyright  2014 Marina Glancy
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class road_created extends \core\event\base {
 
     /**

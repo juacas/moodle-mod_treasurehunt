@@ -16,27 +16,26 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Provides the restore activity task class
+ * Define all the backup steps that will be used by the backup_treasurehunt_activity_task
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/restore_treasurehunt_stepslib.php');
 
 /**
- * Restore task for the treasurehunt activity module
- *
- * Provides all the settings and steps to perform complete restore of the activity.
+ * treasurehunt restore task that provides all the settings and steps to perform one complete restore of the activity
  *
  * @package   mod_treasurehunt
- * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class restore_treasurehunt_activity_task extends restore_activity_task {
 
     /**

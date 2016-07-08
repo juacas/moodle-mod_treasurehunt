@@ -1,15 +1,25 @@
-/* global require */
-
-// Standard license block omitted.
-/*
- * @package    block_overview
- * @copyright  2015 Someone cool
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @module block_overview/helloworld
+ * @module    mod_treasurehunt/edit
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require.config({
     baseUrl: 'js',
     waitSeconds: 15,
@@ -28,8 +38,8 @@ require.config({
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch'
     }
 });
-define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax', 'geocoderjs', 'core/templates'],
-        function ($, notification, str, ol, ajax, GeocoderJS, templates) {
+define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoderjs'],
+        function ($, notification, ol, ajax, GeocoderJS) {
 
 
             var init = {
@@ -621,6 +631,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                             }]);
                         geojson[0].done(function (response) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log('json: ' + response.treasurehunt.stages + response.treasurehunt.roads);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
@@ -707,6 +718,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
                             }
                         }).fail(function (error) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(error);
                             notification.exception(error);
                         });
@@ -1059,6 +1071,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
 
                     function deleteRoad(roadid, dirtySource, originalSource, treasurehuntid, lockid) {
+                        $('.treasurehunt-editor-loader').show();
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_road',
                                 args: {
@@ -1068,6 +1081,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                             }]);
                         json[0].done(function (response) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
@@ -1093,6 +1107,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                             }
                         }).fail(function (error) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(error);
                             notification.exception(error);
                         });
@@ -1100,6 +1115,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
                     function deletestage(stageid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid,
                             lockid) {
+                        $('.treasurehunt-editor-loader').show();
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_stage',
                                 args: {
@@ -1109,6 +1125,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                             }]);
                         json[0].done(function (response) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
@@ -1141,13 +1158,14 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
                             }
                         }).fail(function (error) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(error);
                             notification.exception(error);
                         });
                     }
 
                     function savestages(dirtySource, originalSource, treasurehuntid, callback, options, lockid) {
-
+                        $('.treasurehunt-editor-loader').show();
                         var geoJSONFormat = new ol.format.GeoJSON();
                         var features = dirtySource.getFeatures();
                         var geoJSON = geoJSONFormat.writeFeatures(features, {
@@ -1163,7 +1181,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                                 }
                             }]);
                         json[0].done(function (response) {
-
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
@@ -1186,6 +1204,7 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
 
                             }
                         }).fail(function (error) {
+                            $('.treasurehunt-editor-loader').hide();
                             console.log(error);
                             notification.alert('Error', error.message, 'Continue');
                         });
@@ -1451,7 +1470,6 @@ define(['jquerytouch', 'core/notification', 'core/str', 'openlayers', 'core/ajax
                             return message;
                         }
                     };
-                    $('.treasurehunt-editor-loader').remove();
                 } // End of function init
             }; // End of init var
             return init;

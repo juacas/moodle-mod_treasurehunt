@@ -15,17 +15,14 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
- * English strings for treasurehunt
+ * Strings for component 'treasurehunt', language 'es'
  *
- * You can have a rather longer description of the file as well,
- * if you like, and it can span multiple lines.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die();
 
 $string['modulename'] = 'Caza del tesoro';

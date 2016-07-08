@@ -18,10 +18,11 @@
 /**
  * The mod_treasurehunt instance list viewed event.
  *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name <your@email.adress>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 
 namespace mod_treasurehunt\event;
 
@@ -30,10 +31,11 @@ defined('MOODLE_INTERNAL') || die();
 /**
  * The mod_treasurehunt instance list viewed event class.
  *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name <your@email.adress>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
     
 }

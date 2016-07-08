@@ -16,19 +16,15 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Library of interface functions and constants for module treasurehunt
+ * Library of functions for the treasurehunt module.
  *
- * All the core Moodle functions, neeeded to allow the module to work
- * integrated in Moodle should be placed here.
+ * This contains functions that are called also from outside the treasurehunt module
  *
- * All the treasurehunt specific functions, needed to implement all the module
- * logic, should go to locallib.php. This will help to save some memory when
- * Moodle is performing actions across all modules.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 require_once $CFG->libdir . '/filelib.php';
 
 defined('MOODLE_INTERNAL') || die();

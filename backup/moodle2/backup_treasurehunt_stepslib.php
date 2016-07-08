@@ -20,19 +20,20 @@
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die;
 
 /**
- * Define the complete treasurehunt structure for backup, with file and id annotations
+ * Define the complete choice structure for backup, with file and id annotations
  *
  * @package   mod_treasurehunt
- * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class backup_treasurehunt_activity_structure_step extends backup_activity_structure_step {
 
     /**

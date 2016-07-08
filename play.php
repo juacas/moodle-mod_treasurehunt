@@ -16,15 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Prints a particular instance of treasurehunt
- *
- * You can have a rather longer description of the file as well,
- * if you like, and it can span multiple lines.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 // Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -62,14 +58,14 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
     print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
 }
 // Get last timestamp 
-$user = get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-list($lastattempttimestamp, $lastroadtimestamp) = get_last_timestamps($USER->id, $user->groupid, $user->roadid);
-$gameupdatetime = get_setting_game_update_time() * 1000;
+$user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
+list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+$gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
         array(
-    get_strings_play(),
+    treasurehunt_get_strings_play(),
     $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),

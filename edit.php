@@ -15,16 +15,15 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+
 /**
- * Prints a particular instance of treasurehunt
+ * Page to edit instances
  *
- * You can have a rather longer description of the file as well,
- * if you like, and it can span multiple lines.
- *
- * @package    mod_treasurehunt
- * @copyright  2015 Your Name
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 // Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -64,25 +63,25 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 
 
-if (!is_edition_loked($treasurehunt->id, $USER->id)) {
+if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     // Si no hay ningún camino redirijo para crearlo.
-    if (get_total_roads($treasurehunt->id) == 0) {
+    if (treasurehunt_get_total_roads($treasurehunt->id) == 0) {
         $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $id));
         redirect($roadurl);
     }
-    $lockid = renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
+    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
             array($treasurehunt->id, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
-            array($id, $treasurehunt->id, get_strings_edit(), $roadid, $lockid));
+            array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 
 

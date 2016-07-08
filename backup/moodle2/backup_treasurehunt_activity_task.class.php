@@ -16,27 +16,27 @@
 
 /**
  * Defines backup_treasurehunt_activity_task class
+ * This file contains the backup activity for the treasurehunt module
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
+ 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_settingslib.php');
 
-
 /**
- * Provides the steps to perform one complete backup of the treasurehunt instance
+ * assign backup task that provides all the settings and steps to perform one complete backup of the activity
  *
  * @package   mod_treasurehunt
- * @category  backup
- * @copyright 2015 Your Name <your@email.adress>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 class backup_treasurehunt_activity_task extends backup_activity_task {
 
     /**

@@ -1,5 +1,29 @@
 <?php
 
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+
+/**
+ * Page to edit stage
+ *
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+ 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
@@ -34,9 +58,9 @@ $PAGE->set_url($url);
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 
-if (!is_edition_loked($treasurehunt->id, $USER->id)) {
-    $lockid = renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (get_setting_lock_time() - 5) * 1000;
+if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
+    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
+    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
             array($treasurehunt->id, $lockid, $renewlocktime));
 
@@ -76,7 +100,7 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
             print_error('invalidentry');
         }
         // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna etapa.
-        if (check_road_is_blocked($roadid)) {
+        if (treasurehunt_check_road_is_blocked($roadid)) {
             print_error('notcreatestage', 'treasurehunt', $returnurl);
         }
         $stage = new stdClass();
@@ -126,7 +150,7 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
 
         if (empty($stage->id)) {
             $stage->timecreated = $timenow;
-            $stage->id = insert_stage_form($stage);
+            $stage->id = treasurehunt_insert_stage_form($stage);
             $isnewentry = true;
         } else {
             $stage->timemodified = $timenow;
@@ -209,7 +233,7 @@ if (!is_edition_loked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editstage', 'treasurehunt'), $url);

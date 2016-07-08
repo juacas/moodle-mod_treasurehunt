@@ -18,16 +18,17 @@
 /**
  * This file contains the definition for the renderable classes for the assignment
  *
- * @package   mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+ 
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Renderable grading summary
- * @package   mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class treasurehunt_user_historical_attempts implements renderable {
