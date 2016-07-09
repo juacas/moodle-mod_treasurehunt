@@ -25,7 +25,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/GeoJSON/GeoJSON.class.php');
@@ -176,7 +175,7 @@ function treasurehunt_delete_stage($id, $context) {
     \mod_treasurehunt\event\stage_deleted::create($eventparams)->trigger();
 }
 
-function treasurehunt_delete_road($roadid, $context) {
+function treasurehunt_delete_road($roadid,$treasurehunt, $context) {
     GLOBAL $DB;
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
@@ -187,6 +186,7 @@ function treasurehunt_delete_road($roadid, $context) {
         $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
     $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
+    treasurehunt_update_grades($treasurehunt);
     // Trigger deleted road event.
     $eventparams = array(
         'context' => $context,
@@ -417,7 +417,8 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
 
         // Si el intento acierta la localizacion  y existe el completion compruebo si esta superado.
         if ($nextstage->inside && !$activitysolved) {
-            if ($usercompletion = treasurehunt_check_completion_activity($nextstage->activitytoend, $userid, $groupid, $context)) {
+            if ($usercompletion = treasurehunt_check_completion_activity($nextstage->activitytoend, $userid, $groupid,
+                    $context)) {
                 $attempt->type = 'activity';
                 $attempt->activitysolved = 1;
                 $attempt->userid = $usercompletion;
@@ -869,8 +870,8 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
     // Compruebo si algun usuario con acceso no puede realizar la actividad.
     $totalparticipantsincourse = get_enrolled_users($context, 'mod/treasurehunt:play');
     if ((count($totalparticipantsincourse) !== count($totalparticipants))) {
-        $noassignedusers = treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants, $totalparticipantsincourse,
-                $noassignedusers);
+        $noassignedusers = treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants,
+                $totalparticipantsincourse, $noassignedusers);
     }
     return array($roads, $duplicategroupsingroupings, $duplicateusersingroups, $noassignedusers);
 }
@@ -938,8 +939,8 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid) {
 }
 
 // Compruebo si se ha acertado la etapa y completado la actividad requerida.
-function treasurehunt_check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context,
-        $treasurehunt, $nostages, $qocremoved) {
+function treasurehunt_check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad,
+        $context, $treasurehunt, $nostages, $qocremoved) {
     global $DB;
 
     $return = new stdClass();
@@ -962,7 +963,8 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
         if (!$lastattempt->activitysolved) {
             // Si existe una actividad a superar.
             if ($lastattempt->activitytoend) {
-                if ($usercompletion = treasurehunt_check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
+                if ($usercompletion = treasurehunt_check_completion_activity($lastattempt->activitytoend, $userid,
+                        $groupid, $context)) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
                     $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt',
@@ -1168,7 +1170,8 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
     $return->geometrysolved = false;
     $newattempts = array();
 
-    list($return->newattempttimestamp, $return->newroadtimestamp) = treasurehunt_get_last_timestamps($userid, $groupid, $roadid);
+    list($return->newattempttimestamp, $return->newroadtimestamp) = treasurehunt_get_last_timestamps($userid, $groupid,
+            $roadid);
     // Si ha habido un cambio de grupo.
     if ($changesingroupmode) {
         // Recupero todas las acciones de un usuario/grupo y las imprimo en una tabla.
@@ -1261,7 +1264,8 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
     return $output->render($renderable);
 }
 
-function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview) {
+function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username,
+        $teacherreview) {
     global $PAGE;
     $roadfinished = treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
     $attempts = treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid);

@@ -131,7 +131,7 @@ class mod_treasurehunt_external extends external_api {
      * @return array of newly created groups
      */
     public static function update_stages($stages, $treasurehuntid, $lockid) { //Don't forget to set it as static
-        global $DB, $USER;
+        global $DB;
         $params = self::validate_parameters(self::update_stages_parameters(),
                         array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
         //Recojo todas las features
@@ -268,16 +268,18 @@ class mod_treasurehunt_external extends external_api {
      * @return array of newly created groups
      */
     public static function delete_road($roadid, $treasurehuntid, $lockid) { //Don't forget to set it as static
+        global $DB;
         $params = self::validate_parameters(self::delete_road_parameters(),
                         array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
+        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
-            treasurehunt_delete_road($params['roadid'], $context);
+            treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con éxito';
         } else {
