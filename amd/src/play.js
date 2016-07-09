@@ -606,7 +606,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         if (features.selected[0].get('geometrysolved'))
                         {
                             if (stagename && stageclue) {
-                                title = strings["overcomestage"];
+                                title = strings["stageovercome"];
                                 body = get_block_text(strings["stagename"], stagename);
                                 body += get_block_text(strings["stageclue"], stageclue);
                             } else {

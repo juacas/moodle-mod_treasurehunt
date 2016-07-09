@@ -435,7 +435,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
                     $attempt->timecreated +=1;
                     treasurehunt_insert_attempt($attempt, $context);
                 }
-                $return->update = get_string('overcomeactivitytoend', 'treasurehunt',
+                $return->update = get_string('activitytoendovercome', 'treasurehunt',
                         treasurehunt_get_activity_to_end_link($nextstage->activitytoend));
             }
         }
@@ -878,7 +878,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
 
 function treasurehunt_get_strings_play() {
 
-    return get_strings(array("overcomestage", "failedlocation", "stagename",
+    return get_strings(array("stageovercome", "failedlocation", "stagename",
         "stageclue", "question", "noanswerselected", "timeexceeded",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
@@ -967,7 +967,7 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
                         $groupid, $context)) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
-                    $return->updates[] = get_string('overcomeactivitytoend', 'treasurehunt',
+                    $return->updates[] = get_string('activitytoendovercome', 'treasurehunt',
                             treasurehunt_get_activity_to_end_link($lastattempt->activitytoend));
                     // Si no existe la pregunta y esta por superar es que la han borrado.
                     if (!$lastattempt->questionsolved && $lastattempt->questiontext === '') {

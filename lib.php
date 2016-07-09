@@ -24,7 +24,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 require_once $CFG->libdir . '/filelib.php';
 
 defined('MOODLE_INTERNAL') || die();
@@ -83,6 +82,8 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
     $treasurehunt->id = $DB->insert_record('treasurehunt', $treasurehunt);
     treasurehunt_grade_item_update($treasurehunt);
 
+    treasurehunt_update_events($treasurehunt);
+
     return $treasurehunt->id;
 }
 
@@ -115,6 +116,7 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     }
     treasurehunt_grade_item_update($treasurehunt);
 
+    treasurehunt_update_events($treasurehunt);
 
     return $result;
 }
@@ -151,6 +153,12 @@ function treasurehunt_delete_instance($id) {
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
     treasurehunt_grade_item_delete($treasurehunt);
+
+    $events = $DB->get_records('event', array('modulename' => 'treasurehunt', 'instance' => $treasurehunt->id));
+    foreach ($events as $event) {
+        $event = calendar_event::load($event);
+        $event->delete();
+    }
 
     return true;
 }
@@ -588,4 +596,69 @@ function treasurehunt_reset_userdata($data) {
     }
 
     return $status;
+}
+
+/**
+ * This function updates the events associated to the treasure hunt.
+ *
+ * @param object $treasurehunt the treasure hunt object.
+ */
+function treasurehunt_update_events($treasurehunt) {
+    global $DB;
+
+    // Load the old events relating to this treasure hunt.
+    $conds = array('modulename' => 'treasurehunt',
+        'instance' => $treasurehunt->id);
+
+    $oldevents = $DB->get_records('event', $conds);
+
+    if (!empty($treasurehunt->coursemodule)) {
+        $cmid = $treasurehunt->coursemodule;
+    } else {
+        $cmid = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id, $treasurehunt->course)->id;
+    }
+
+    $event = new stdClass();
+    $event->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
+
+    $event->courseid = $treasurehunt->course;
+    $event->groupid = 0;
+    $event->userid = 0;
+    $event->modulename = 'treasurehunt';
+    $event->instance = $treasurehunt->id;
+    $event->timeduration = 0;
+    $event->visible = instance_is_visible('treasurehunt', $treasurehunt);
+
+
+    // Separate start and end events.
+    $event->timeduration = 0;
+    if ($treasurehunt->allowattemptsfromdate) {
+        if ($oldevent = array_shift($oldevents)) {
+            $event->id = $oldevent->id;
+        } else {
+            unset($event->id);
+        }
+        $event->name = $treasurehunt->name . ' (' . get_string('treasurehuntopens', 'treasurehunt') . ')';
+        $event->timestart = $treasurehunt->allowattemptsfromdate;
+        $event->eventtype = 'open';
+        // The method calendar_event::create will reuse a db record if the id field is set.
+        calendar_event::create($event);
+    }
+    if ($treasurehunt->cutoffdate) {
+        if ($oldevent = array_shift($oldevents)) {
+            $event->id = $oldevent->id;
+        } else {
+            unset($event->id);
+        }
+        $event->name = $treasurehunt->name . ' (' . get_string('treasurehuntcloses', 'treasurehunt') . ')';
+        $event->timestart = $treasurehunt->cutoffdate;
+        $event->eventtype = 'close';
+        calendar_event::create($event);
+    }
+
+    // Delete any leftover events.
+    foreach ($oldevents as $badevent) {
+        $badevent = calendar_event::load($badevent);
+        $badevent->delete();
+    }
 }

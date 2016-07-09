@@ -29,6 +29,7 @@ $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual. '
         . 'Para que las actividades del curso se muestren en la lista debe estar habilitada '
         . 'la terminación de actividad en la configuración de Moodle y en la propia actividad.';
+$string['activitytoendovercome'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['activitytoendwarning'] = 'Debes completar primero la actividad a resolver';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
 $string['add'] = 'Añadir';
@@ -202,9 +203,7 @@ $string['nouserassigned'] = 'Ningún usuario asignado a este camino';
 $string['nouserattempts'] = '{$a} no ha realizado ningún intento';
 $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
 $string['outoftime'] = 'Fuera de tiempo';
-$string['overcomeactivitytoend'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
-$string['overcomestage'] = 'Etapa superada';
 $string['play'] = 'Jugar';
 $string['playwithoutmoving'] = 'Jugar sin desplazarse';
 $string['playwithoutmoving_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. '
@@ -239,6 +238,7 @@ $string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar '
         . 'la siguiente localización. En el caso de que esta sea la última etapa debe dejar '
         . 'un mensaje de retroalimentación indicando que la caza del tesoro ha finalizado';
 $string['stagename'] = 'Nombre de la etapa';
+$string['stageovercome'] = 'Etapa superada';
 $string['stages'] = 'Etapas';
 $string['start'] = 'Empezar';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
@@ -252,6 +252,7 @@ $string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['treasurehunt:addroad'] = 'Añadir camino';
 $string['treasurehunt:addstage'] = 'Añadir etapa';
 $string['treasurehuntclosed'] = 'Esta caza del tesoro está cerrada desde el {$a}';
+$string['treasurehuntcloses'] = 'Caza del tesoro cerrada';
 $string['treasurehuntcloseson'] = 'Esta caza del tesoro cerrará el {$a}';
 $string['treasurehunt:editroad'] = 'Editar camino';
 $string['treasurehunt:editstage'] = 'Editar etapa';
@@ -260,6 +261,7 @@ $string['treasurehunt:managetreasure'] = 'Administrar Caza del tesoro';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehuntname'] = 'Nombre de la caza del tesoro';
 $string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible hasta el {$a}';
+$string['treasurehuntopens'] = 'Caza del tesoro abierta';
 $string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta desde el {$a}';
 $string['treasurehunt:play'] = 'Jugar';
 $string['treasurehunt:view'] = 'Ver la caza del tesoro';
