@@ -197,8 +197,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 projection: view.getProjection(),
                 trackingOptions: {
                     enableHighAccuracy: true,
-                    maximumAge: 0,
-                    timeout: 0
+                    maximumAge: 0
                 },
                 tracking: false
             });
@@ -735,7 +734,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 } else {
                     if (selected.length === 0) {
                         event.preventDefault();
-                        toast(strings['noasnwerselected']);
+                        toast(strings['noanswerselected']);
                     } else {
                         renew_source(false, false, selected.val());
                     }

@@ -878,7 +878,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
 function treasurehunt_get_strings_play() {
 
     return get_strings(array("overcomestage", "failedlocation", "stagename",
-        "stageclue", "question", "noasnwerselected", "timeexceeded",
+        "stageclue", "question", "noanswerselected", "timeexceeded",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
         "huntcompleted", "discoveredlocation", "answerwarning", "error"), "mod_treasurehunt");
