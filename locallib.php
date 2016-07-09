@@ -774,7 +774,7 @@ function treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipa
     return array($totalparticipants, $duplicated);
 }
 
-function treasurehunt_treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants, $userlist, $noassignedusers) {
+function treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants, $userlist, $noassignedusers) {
     foreach ($userlist as $user) {
         if (!array_key_exists($user->id, $totalparticipants)) {
             $noassignedusers[$user->id] = fullname($user);
