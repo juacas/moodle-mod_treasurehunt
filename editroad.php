@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editroad_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
@@ -98,10 +97,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
             array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
-// You need this section if you have a cancel button on your form
-// here you tell php what to do if your user presses cancel
-// probably a redirect is called for!
-// PLEASE NOTE: is_cancelled() should be called before get_data().
+        // You need this section if you have a cancel button on your form
+        // here you tell php what to do if your user presses cancel
+        // probably a redirect is called for!
+        // PLEASE NOTE: is_cancelled() should be called before get_data().
+        if (treasurehunt_get_total_roads($treasurehunt->id) == 0) {
+            $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
+        }
         redirect($returnurl);
     } else if ($road = $mform->get_data()) {
         //Actualizamos los campos
@@ -132,7 +134,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,
+            treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editroad', 'treasurehunt'), $url);
