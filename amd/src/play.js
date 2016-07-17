@@ -19,7 +19,7 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 require.config({
     baseUrl: 'js',
     waitSeconds: 15,
@@ -58,7 +58,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     fitmap = false,
                     roadfinished = false,
                     available = true,
-                    qocremoved = false;
+                    qoaremoved = false;
             /*-------------------------------Styles-----------------------------------*/
             var text = new ol.style.Text({
                 textAlign: 'center',
@@ -187,7 +187,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 layers: [attemptslayer],
                 style: select_style_function,
                 filter: function (feature, layer) {
-                    if (feature.get('nostage') === 0) {
+                    if (feature.get('stageposition') === 0) {
                         return false;
                     }
                     return true;
@@ -243,8 +243,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
                 // get the incomeLevel from the feature properties
-                var nostage = feature.get('nostage');
-                if (nostage === 0) {
+                var stageposition = feature.get('stageposition');
+                if (stageposition === 0) {
                     var fill = new ol.style.Fill({
                         color: 'rgba(255,255,255,0.4)'
                     });
@@ -276,20 +276,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 }
                 if (!feature.get('geometrysolved')) {
                     failstageStyle.getImage().setScale((view.getZoom() / 50));
-                    failstageStyle.getText().setText('' + nostage);
+                    failstageStyle.getText().setText('' + stageposition);
                     return [failstageStyle];
                 }
                 defaultstageStyle.getImage().setScale((view.getZoom() / 110));
-                defaultstageStyle.getText().setText('' + nostage);
+                defaultstageStyle.getText().setText('' + stageposition);
                 return [defaultstageStyle];
             }
             function select_style_function(feature, resolution) {
-                var nostage = feature.get('nostage');
+                var stageposition = feature.get('stageposition');
                 if (!feature.get('geometrysolved')) {
-                    failSelectstageStyle.getText().setText('' + nostage);
+                    failSelectstageStyle.getText().setText('' + stageposition);
                     return [failSelectstageStyle];
                 }
-                defaultSelectstageStyle.getText().setText('' + nostage);
+                defaultSelectstageStyle.getText().setText('' + stageposition);
                 return [defaultSelectstageStyle];
             }
             function autolocate(center, validate) {
@@ -341,10 +341,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 view.fit(extent, size);
             }
             function renew_source(location, initialize, selectedanswerid) {
-                var position = 0;
-                if (!selectedanswerid) {
-                    selectedanswerid = 0;
-                } else {
+                var position;
+                if (selectedanswerid) {
                     $.mobile.loading("show");
                 }
                 if (location) {
@@ -354,7 +352,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     } else {
                         coordinates = positionFeature.getGeometry();
                     }
-                    position = geoJSONFormat.writeGeometry(coordinates, {
+                    position = geoJSONFormat.writeGeometryObject(coordinates, {
                         dataProjection: 'EPSG:4326',
                         featureProjection: 'EPSG:3857'
                     });
@@ -371,13 +369,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             initialize: initialize,
                             location: position,
                             selectedanswerid: selectedanswerid,
-                            qocremoved: qocremoved
+                            qoaremoved: qoaremoved
                         }
                     }]);
                 geojson[0].done(function (response) {
                     console.log(response);
                     var body = '';
-                    qocremoved = response.qocremoved;
+                    qoaremoved = response.qoaremoved;
                     roadfinished = response.roadfinished;
                     available = response.available;
                     // Si he enviado una localización o una respuesta imprimo si es correcta o no.
@@ -407,9 +405,10 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             changesinattemptshistory = true;
                         }
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
-                        if (response.stages !== null) {
+                        if (response.attempts || response.firststagegeom) {
+                            var features = response.attempts ? response.attempts : response.firststagegeom;
                             source.clear();
-                            source.addFeatures(geoJSONFormat.readFeatures(response.stages, {
+                            source.addFeatures(geoJSONFormat.readFeatures(features, {
                                 'dataProjection': "EPSG:4326",
                                 'featureProjection': "EPSG:3857"
                             }));
@@ -429,8 +428,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                                 $('#validatelocation').show();
                             }
                         }
-                        // Compruebo si es un multipolygon o se esta inicializando y lo centro.
-                        if (source.getFeatures()[0].getGeometry() instanceof ol.geom.MultiPolygon || initialize) {
+                        // Compruebo si es la primera geometria o se está inicializando y centro el mapa.
+                        if (response.firststagegeom || initialize) {
                             fitmap = true;
                         }
                         // Compruebo la pagina en la que nos encontramos.
@@ -596,7 +595,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             });
             select.on("select", function (features) {
                 if (features.selected.length === 1) {
-                    if (lastsuccessfulstage.id === features.selected[0].getId()) {
+                    if (lastsuccessfulstage.position === features.selected[0].get('stageposition')
+                            && features.selected[0].get('geometrysolved') && !roadfinished && available) {
                         $("#infopanel").panel("open");
                         $("#lastsuccessfulstage").collapsible("expand");
                     } else {

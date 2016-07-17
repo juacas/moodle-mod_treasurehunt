@@ -205,10 +205,15 @@ $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['play'] = 'Jugar';
+$string['playstagewithoutmoving'] = 'Descrubir etapa sin desplazarse';
+$string['playstagewithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán descubrir esta etapa sin tener '
+        . 'que desplazarse. Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
+        . 'borrando la anterior si existiese, indicando el último punto deseado. Al completar la etapa, el juego cambiará '
+        . 'a la configuración por defecto de la actividad';
 $string['playwithoutmoving'] = 'Jugar sin desplazarse';
-$string['playwithoutmoving_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. '
-        . 'Para ello cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
-        . 'borrando la anterior si existiese, indicando el último punto deseado.';
+$string['playwithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán jugar sin desplazarse a los lugares. '
+        . 'Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
+        . 'borrando la anterior si existiese, indicando el último punto deseado';
 $string['pluginadministration'] = 'Administración de la caza del tesoro';
 $string['pluginname'] = 'Caza del tesoro';
 $string['question'] = 'Pregunta';

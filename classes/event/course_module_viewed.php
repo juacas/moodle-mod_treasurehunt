@@ -34,7 +34,6 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class course_module_viewed extends \core\event\course_module_viewed {
 
     /**

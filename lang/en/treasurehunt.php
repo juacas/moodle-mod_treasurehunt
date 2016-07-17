@@ -202,9 +202,14 @@ $string['nouserroad'] = '{$a} has no road assigned.';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['play'] = 'Play';
+$string['playstagewithoutmoving'] = 'Discover stage without moving';
+$string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place. '
+        . 'To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
+        . 'if any, indicating the last desired point. Upon completion of the stage, the game will change to the default '
+        . 'settings of the activity';
 $string['playwithoutmoving'] = 'Playing without moving';
-$string['playwithoutmoving_help'] = 'If this option is enabled students may play from their computers without moving to '
-        . 'places. To do this every time the student takes a simple click on the map a mark is created, erasing the previous '
+$string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to '
+        . 'places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
         . 'if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';

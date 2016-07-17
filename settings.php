@@ -22,7 +22,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
@@ -34,7 +33,7 @@ if ($ADMIN->fulltree) {
     // Grading method.
     $settings->add(new mod_treasurehunt_admin_setting_grademethod('mod_treasurehunt/grademethod',
             get_string('grademethod', 'treasurehunt'), get_string('grademethod_help', 'treasurehunt'),
-            TREASUREHUNT_GRADEFROMstageS, null));
+            TREASUREHUNT_GRADEFROMSTAGES, null));
     // Location penalization.
     $settings->add(new admin_setting_configtext('mod_treasurehunt/penaltylocation',
             get_string('gradepenlocation', 'treasurehunt'), get_string('gradepenlocation_help', 'treasurehunt'), 0.00,

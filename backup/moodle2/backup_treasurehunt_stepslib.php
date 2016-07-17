@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die;
 
 /**
@@ -33,7 +32,6 @@ defined('MOODLE_INTERNAL') || die;
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class backup_treasurehunt_activity_structure_step extends backup_activity_structure_step {
 
     /**
@@ -42,39 +40,44 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
      * @return backup_nested_element
      */
     protected function define_structure() {
-        global $CFG,$DB;
+        global $CFG, $DB;
         // Needed for get_geometry_functions();
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define the root element describing the treasurehunt instance.
-        $treasurehunt = new backup_nested_element('treasurehunt', array('id'), array(
+        $treasurehunt = new backup_nested_element('treasurehunt', array('id'),
+                array(
             'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmoving',
             'groupmode', 'alwaysshowdescription', 'allowattemptsfromdate',
             'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer'));
 
         $roads = new backup_nested_element('roads');
 
-        $road = new backup_nested_element('road', array('id'), array(
+        $road = new backup_nested_element('road', array('id'),
+                array(
             'name', 'timecreated', 'timemodified', 'groupid', 'groupingid', 'validated'));
 
         $stages = new backup_nested_element('stages');
 
-        $stage = new backup_nested_element('stage', array('id'), array(
+        $stage = new backup_nested_element('stage', array('id'),
+                array(
             'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
-            'timecreated', 'timemodified', 'activitytoend', 'questiontext',
+            'timecreated', 'timemodified','playstagewithoutmoving', 'activitytoend', 'questiontext',
             'questiontextformat', 'questiontexttrust', 'geom'));
 
         $answers = new backup_nested_element('answers');
 
-        $answer = new backup_nested_element('answer', array('id'), array(
+        $answer = new backup_nested_element('answer', array('id'),
+                array(
             'answertext', 'answertextformat', 'answertexttrust', 'timecreated',
             'timemodified', 'correct'));
 
         $attempts = new backup_nested_element('attempts');
 
-        $attempt = new backup_nested_element('attempt', array('id'), array(
+        $attempt = new backup_nested_element('attempt', array('id'),
+                array(
             'timecreated', 'userid', 'groupid', 'success',
             'penalty', 'type', 'questionsolved', 'activitysolved',
             'geometrysolved', 'location'));

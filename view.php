@@ -22,7 +22,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once("$CFG->dirroot/mod/treasurehunt/renderable.php");
@@ -115,8 +114,8 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
                 }
             }
         }
-        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid, $cm->id,
-                $username, $teacherreview);
+        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid,
+                $cm->id, $username, $teacherreview);
     } catch (Exception $e) {
         echo $output->notification($e->getMessage());
     }

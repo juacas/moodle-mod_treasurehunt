@@ -21,7 +21,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
@@ -33,7 +32,6 @@ require_once("$CFG->libdir/formslib.php");
  * @copyright  2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class road_form extends moodleform {
 
     /**

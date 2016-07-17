@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 require_once(__DIR__ . "../../../config.php");
 
 $id = required_param('id', PARAM_INT); // Course module ID.

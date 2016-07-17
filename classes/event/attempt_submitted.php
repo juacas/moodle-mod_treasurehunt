@@ -40,7 +40,6 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class attempt_submitted extends \core\event\base {
 
     /**

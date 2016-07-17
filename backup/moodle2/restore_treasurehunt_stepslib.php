@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 global $CFG;
 // Needed for get_geometry_functions();
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
@@ -35,7 +34,6 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
 
     /**
