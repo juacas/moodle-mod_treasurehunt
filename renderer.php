@@ -36,7 +36,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param array $text Array with the text of each cell
      * @param bool $header If cells are header or not
      * @param array $class Array with the class of each cell
-     * @param array $colspan Array with the class of each cell
+     * @param array $colspan Array with the colspan of each cell
      * @return void
      */
     private function add_table_row(html_table $table, array $text, $header, array $class = null, array $colspan = null) {
@@ -62,7 +62,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     /**
      * Defer to template.                                                                                                           
      *                                                                                                                              
-     * @param index_page $page                                                                                                      
+     * @param treasurehunt_play_page $page                                                                                                      
      *                                                                                                                              
      * @return string html for the page                                                                                             
      */
@@ -72,7 +72,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Render a table containing the current status of the grading process.
+     * Render a table containing the current status of the user attempts.
      *
      * @param treasurehunt_user_historical_stages  $historical
      * @return string
@@ -125,7 +125,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Render a table containing the current status of the grading process.
+     * Render a table containing the current status of the users progress.
      *
      * @param treasurehunt_user_progress $progress
      * @return string
@@ -145,9 +145,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
                                 implode(",", $progress->duplicateusersingroups)));
             }
-            if (count($progress->noassignedusers) && $progress->managepermission) {
+            if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
-                                implode(",", $progress->noassignedusers)));
+                                implode(",", $progress->unassignedusers)));
             }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 if ($roadusersprogress->validated) {
@@ -233,9 +233,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Render a table containing the current status of the grading process.
+     * Render the info containing the current status of the treasure hunt.
      *
-     * @param treasurehunt_user_progress $progress
+     * @param render_treasurehunt_info $info
      * @return string
      */
     public function render_treasurehunt_info(treasurehunt_info $info) {

@@ -68,8 +68,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         })
                     });
                     var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-                    /**Initialize treasurehunt and selectedstageFeatures******************************************************
-                     */
+
 
                     /**Load the control pane, treasurehunt and road list ***************************************************
                      */
@@ -815,7 +814,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     function addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked) {
                         if ($('#stagelist li[stageid="' + stageid + '"]').length < 1) {
                             var li = $(
-                                    '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="' + stageposition
+                                    '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="'
+                                    + stageposition
                                     + '"/>')
                                     .appendTo($("#stagelist"));
                             li.addClass("ui-corner-all")
@@ -1068,7 +1068,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             vectorOfPolygons.changed();
                             return;
                         }
-                        // Agrego los polÃƒÆ’Ã‚Â­gonos a mi objecto que almacena los poligonos seleccionados 
+                        // Agrego los poligonos a mi objecto que almacena los poligonos seleccionados 
                         // y tambien agrego al vector al que se le aplica la animacion.
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {

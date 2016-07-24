@@ -49,6 +49,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the fetch_treasurehunt return values
+     * @return external_single_structure
+     */
     public static function fetch_treasurehunt_returns() {
         return new external_single_structure(
                 array(
@@ -101,12 +105,7 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function fetch_treasurehunt($treasurehuntid) { //Don't forget to set it as static
+    public static function fetch_treasurehunt($treasurehuntid) {
         $params = self::validate_parameters(self::fetch_treasurehunt_parameters(),
                         array('treasurehuntid' => $treasurehuntid));
         $status = array();
@@ -117,7 +116,7 @@ class mod_treasurehunt_external extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         $treasurehunt->roads = treasurehunt_get_all_roads_and_stages($params['treasurehuntid'], $context);
         $status['code'] = 0;
-        $status['msg'] = 'La caza del tesoro se ha cargado con Ã©xito';
+        $status['msg'] = 'La caza del tesoro se ha cargado con ÃƒÂ©xito';
 
         $result = array();
         $result['treasurehunt'] = $treasurehunt;
@@ -176,6 +175,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the update_stages return value
+     * @return external_single_structure
+     */
     public static function update_stages_returns() {
         return new external_single_structure(
                 array(
@@ -186,16 +189,10 @@ class mod_treasurehunt_external extends external_api {
         ));
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function update_stages($stages, $treasurehuntid, $lockid) { //Don't forget to set it as static
+    public static function update_stages($stages, $treasurehuntid, $lockid) {
         global $DB;
         $params = self::validate_parameters(self::update_stages_parameters(),
                         array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-        //Recojo todas las features
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -211,7 +208,7 @@ class mod_treasurehunt_external extends external_api {
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
-                $status['msg'] = 'La actualizaciÃ³n de las etapas se ha realizado con Ã©xito';
+                $status['msg'] = 'La actualizaciÃƒÂ³n de las etapas se ha realizado con ÃƒÂ©xito';
             } catch (Exception $e) {
                 $transaction->rollback($e);
                 $status['code'] = 1;
@@ -219,7 +216,7 @@ class mod_treasurehunt_external extends external_api {
             }
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
         }
         $result = array();
         $result['status'] = $status;
@@ -250,6 +247,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the delete_stage return value
+     * @return external_single_structure
+     */
     public static function delete_stage_returns() {
         return new external_single_structure(
                 array(
@@ -260,15 +261,10 @@ class mod_treasurehunt_external extends external_api {
         ));
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
+
     public static function delete_stage($stageid, $treasurehuntid, $lockid) { //Don't forget to set it as static
         $params = self::validate_parameters(self::delete_stage_parameters(),
                         array('stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-//Recojo todas las features
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -278,10 +274,10 @@ class mod_treasurehunt_external extends external_api {
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
-            $status['msg'] = 'La eliminaciÃ³n de la etapa se ha realizado con Ã©xito';
+            $status['msg'] = 'La eliminaciÃƒÂ³n de la etapa se ha realizado con ÃƒÂ©xito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
         }
 
         $result = array();
@@ -313,6 +309,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the delete_road return value
+     * @return external_single_structure
+     */
     public static function delete_road_returns() {
         return new external_single_structure(
                 array(
@@ -323,12 +323,7 @@ class mod_treasurehunt_external extends external_api {
         ));
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function delete_road($roadid, $treasurehuntid, $lockid) { //Don't forget to set it as static
+    public static function delete_road($roadid, $treasurehuntid, $lockid) { 
         global $DB;
         $params = self::validate_parameters(self::delete_road_parameters(),
                         array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
@@ -342,10 +337,10 @@ class mod_treasurehunt_external extends external_api {
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
-            $status['msg'] = 'El camino se ha eliminado con Ã©xito';
+            $status['msg'] = 'El camino se ha eliminado con ÃƒÂ©xito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
         }
 
         $result = array();
@@ -353,6 +348,12 @@ class mod_treasurehunt_external extends external_api {
         return $result;
     }
 
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
     public static function renew_lock_is_allowed_from_ajax() {
         return true;
     }
@@ -370,6 +371,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the renew_lock return values
+     * @return external_single_structure
+     */
     public static function renew_lock_returns() {
         return new external_single_structure(
                 array(
@@ -382,12 +387,7 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
-    public static function renew_lock($treasurehuntid, $lockid) { //Don't forget to set it as static
+    public static function renew_lock($treasurehuntid, $lockid) { 
         GLOBAL $USER;
         $params = self::validate_parameters(self::renew_lock_parameters(),
                         array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
@@ -403,7 +403,7 @@ class mod_treasurehunt_external extends external_api {
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
             } else {
                 $status['code'] = 1;
-                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃ¡gina';
+                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
             }
         } else {
             if (!treasurehunt_is_edition_loked($params['treasurehuntid'], $USER->id)) {
@@ -412,7 +412,7 @@ class mod_treasurehunt_external extends external_api {
                 $status['msg'] = 'Se ha creado el bloqueo con exito';
             } else {
                 $status['code'] = 1;
-                $status['msg'] = 'La caza del tesoro estÃ¡ siendo editada';
+                $status['msg'] = 'La caza del tesoro estÃƒÂ¡ siendo editada';
             }
         }
         $result = array();
@@ -461,6 +461,10 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
+    /**
+     * Describes the user_progress return values
+     * @return external_single_structure
+     */
     public static function user_progress_returns() {
         return new external_single_structure(
                 array(
@@ -561,13 +565,8 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
-    /**
-     * Create groups
-     * @param array $groups array of group description arrays (with keys groupname and courseid)
-     * @return array of newly created groups
-     */
     public static function user_progress($treasurehuntid, $attempttimestamp, $roadtimestamp, $playwithoutmoving,
-            $groupmode, $initialize, $selectedanswerid, $qoaremoved, $location) { //Don't forget to set it as static
+            $groupmode, $initialize, $selectedanswerid, $qoaremoved, $location) { 
         global $USER, $DB;
 
         $params = self::validate_parameters(self::user_progress_parameters(),
@@ -580,18 +579,19 @@ class mod_treasurehunt_external extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:play', $context, null, false);
-        // Recojo el grupo y camino al que pertenece
+        
+        // Get the group and road to which the user belongs.
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-        // Recojo el numero total de etapas del camino del usuario.
+        // Get the total number of stages of the road of the user.
         $nostages = treasurehunt_get_total_stages($userparams->roadid);
-        // Compruebo si el usuario ha finalizado el camino.
+        // Check if the user has finished the road.
         $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
         $qoaremoved = $params['qoaremoved'];
         if ($params['groupmode'] != $treasurehunt->groupmode) {
             $changesingroupmode = true;
         }
-        // Recojo la info de las nuevas etapas descubiertas en caso de existir y los nuevos timestamp si han variado.
+        // Get the info of the newly discovered stages if any , and the new timestamp if they have changed.
         $updates = treasurehunt_check_attempts_updates($params['attempttimestamp'], $userparams->groupid, $USER->id,
                 $userparams->roadid, $changesingroupmode);
         if ($updates->newroadtimestamp != $params['roadtimestamp']) {
@@ -599,15 +599,15 @@ class mod_treasurehunt_external extends external_api {
         } else {
             $updateroad = false;
         }
-        $changesinplaymode = false;
-        $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
-        if ($params['playwithoutmoving'] != $playmode) {
-            $changesinplaymode = true;
-        }
         $available = treasurehunt_is_available($treasurehunt);
-
-        if ($available->available) {
-            // Compruebo si se ha acertado la etapa y completado la actividad requerida.
+        $playmode = $params['playwithoutmoving'];
+        if ($available->available && !$roadfinished) {
+            $changesinplaymode = false;
+            $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
+            if ($params['playwithoutmoving'] != $playmode) {
+                $changesinplaymode = true;
+            }
+            // Check if the user has correctly completed the question and the required activity.
             $qocsolved = treasurehunt_check_question_and_activity_solved($params['selectedanswerid'], $USER->id,
                     $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $nostages,
                     $qoaremoved);
@@ -622,7 +622,6 @@ class mod_treasurehunt_external extends external_api {
             if (count($qocsolved->updates)) {
                 $updates->strings = array_merge($updates->strings, $qocsolved->updates);
             }
-            // Compruebo si se han producido cambios
             if ($qocsolved->newattempt) {
                 $updates->newattempttimestamp = $qocsolved->attempttimestamp;
             }
@@ -634,9 +633,7 @@ class mod_treasurehunt_external extends external_api {
             }
             $qoaremoved = $qocsolved->qoaremoved;
 
-            // Compruebo si se ha enviado una localizacion y a la vez otro usuario del grupo no ha acertado ya esa etapa. 
-            if (!$updates->geometrysolved && $location && !$updateroad && !$roadfinished
-                    && !$changesinplaymode && !$changesingroupmode) {
+            if (!$updates->geometrysolved && $location && !$updateroad && !$changesinplaymode && !$changesingroupmode) {
                 $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid, $userparams->roadid,
                         treasurehunt_geojson_to_object($location), $context, $treasurehunt, $nostages);
                 if ($checklocation->newattempt) {
@@ -662,25 +659,22 @@ class mod_treasurehunt_external extends external_api {
         }
 
         $historicalattempts = array();
-        // Si se ha producido cualquier nuevo intento recargo el historial de intentos.
+        // If there was any new attempt, reload the history of attempts.
         if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize']) {
             $historicalattempts = treasurehunt_get_user_historical_attempts($userparams->groupid, $USER->id,
                     $userparams->roadid);
         }
         $lastsuccessfulstage = array();
-        // Si se ha acertado una nueva localizacion, se ha modificado el camino, estÃ¡ fuera de tiempo,
-        // se esta inicializando,se ha resuelto una pregunta o actividad o se ha cambiado el modo grupo.
         if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved
                 || $params['initialize'] || $changesingroupmode) {
             $lastsuccessfulstage = treasurehunt_get_last_successful_stage($USER->id, $userparams->groupid,
                     $userparams->roadid, $nostages, $available->outoftime, $available->actnotavailableyet, $context);
         }
-        // Si se han realizado un nuevo intento de localizaciÃ³n o se esta inicializando
         if ($updates->newgeometry || $updateroad || $roadfinished || $params['initialize'] || $changesingroupmode) {
             list($userattempts, $firststagegeom) = treasurehunt_get_user_progress($userparams->roadid,
                     $userparams->groupid, $USER->id, $treasurehuntid, $context);
         }
-        // Si se ha editado el camino aviso.
+        // If the road has been edited, warning the user.
         if ($updateroad) {
             if ($location) {
                 $status['msg'] = get_string('errsendinglocation', 'treasurehunt');
@@ -691,11 +685,10 @@ class mod_treasurehunt_external extends external_api {
                 $status['code'] = 1;
             }
         }
-        // Si esta fuera de tiempo y no esta inicializando aviso.
+        // If the activity is out of time and not being initialized, warning the user.
         if ($available->outoftime && !$params['initialize']) {
             $updates->strings[] = get_string('timeexceeded', 'treasurehunt');
         }
-        // Si la fecha de inicio aun no ha comenzado
         if ($available->actnotavailableyet) {
             $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
@@ -717,12 +710,11 @@ class mod_treasurehunt_external extends external_api {
         $result['attempttimestamp'] = $updates->newattempttimestamp;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
         $result['status'] = $status;
-        if ($userattempts) {
+        if ($userattempts || $firststagegeom) {
             if ($firststagegeom) {
-                $result['firststagegeom'] = $userattempts;
-            } else {
-                $result['attempts'] = $userattempts;
+                $result['firststagegeom'] = $firststagegeom;
             }
+            $result['attempts'] = $userattempts;
         }
         if ($lastsuccessfulstage) {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;

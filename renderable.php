@@ -25,14 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Renderable grading summary
+ * Renderable user_historical_attempts
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class treasurehunt_user_historical_attempts implements renderable {
 
-    /** @var array participantcount - The number of users who can submit to this assignment */
     public $attempts = [];
     public $coursemoduleid = 0;
     public $username = '';
@@ -43,7 +42,6 @@ class treasurehunt_user_historical_attempts implements renderable {
     /**
      * constructor
      *
-     * @param array $attemptstrings
      */
     public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
         $this->attempts = $attempts;
@@ -57,14 +55,13 @@ class treasurehunt_user_historical_attempts implements renderable {
 }
 
 /**
- * Renderable grading summary
- * @package   mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * Renderable info
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class treasurehunt_info implements renderable {
 
-    /** @var array participantcount - The number of users who can submit to this assignment */
     public $treasurehunt = null;
     public $timenow = 0;
     public $courseid = 0;
@@ -72,7 +69,6 @@ class treasurehunt_info implements renderable {
     /**
      * constructor
      *
-     * @param array $attemptstrings
      */
     public function __construct($treasurehunt, $timenow, $courseid) {
         $this->treasurehunt = $treasurehunt;
@@ -83,9 +79,9 @@ class treasurehunt_info implements renderable {
 }
 
 /**
- * Renderable grading summary
- * @package   mod_assign
- * @copyright 2012 NetSpot {@link http://www.netspot.com.au}
+ * Renderable users_progress
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class treasurehunt_users_progress implements renderable {
@@ -96,32 +92,36 @@ class treasurehunt_users_progress implements renderable {
     public $coursemoduleid = 0;
     public $duplicategroupsingroupings = array();
     public $duplicateusersingroups = array();
-    public $noassignedusers = array();
+    public $unassignedusers = array();
     public $viewpermission = false;
     public $managepermission = false;
 
     /**
      * constructor
      *
-     * @param array $roadusersprogress
      */
     public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings,
-            $duplicateusersingroups, $noassignedusers, $viewpermission, $managepermission) {
+            $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
         $this->duplicategroupsingroupings = $duplicategroupsingroupings;
         $this->duplicateusersingroups = $duplicateusersingroups;
-        $this->noassignedusers = $noassignedusers;
+        $this->unassignedusers = $unassignedusers;
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
     }
 
 }
 
+/**
+ * Renderable, Templatable play_page
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class treasurehunt_play_page implements renderable, templatable {
 
-    /** @var string $sometext Some text to show how to pass data to a template. */
     var $treasurehunt = null;
     var $cmid = 0;
 
@@ -133,6 +133,7 @@ class treasurehunt_play_page implements renderable, templatable {
     /**
      * Export this data so it can be used as the context for a mustache template.
      *
+     * @param renderer_base $output
      * @return stdClass
      */
     public function export_for_template(renderer_base $output) {

@@ -76,7 +76,7 @@ class GeoJSON {
      * Deserializes a geojson array into an object
      *
      *
-     * @param string $array The GeoJSON string
+     * @param string $array The GeoJSON array
      *
      * @return object The PHP equivalent object
      */

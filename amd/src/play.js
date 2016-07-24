@@ -219,7 +219,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 })
             });
             layers = [layergroup, attemptslayer, userPosition, markerVector];
-            //Nuevo zoom personalizado
+            // New Custom zoom.
             var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
             var map = new ol.Map({
                 layers: layers,
@@ -230,19 +230,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                          loadTilesWhileInteracting: true*/
             });
             map.addInteraction(select);
-            // Inicializo
-            //Si quiero que se actualicen cada 20 seg
+            // It initializes the game
             renew_source(false, true);
+            // For the game is updated every gameupdatetime seconds.
             interval = setInterval(function () {
                 renew_source(false, false);
             }, gameupdatetime);
-            // Inicializo la pagina de capas
+            // Initialize the page layers.
             add_layergroup_to_list(layergroup);
 
 
             /*-------------------------------Functions-----------------------------------*/
             function style_function(feature, resolution) {
-                // get the incomeLevel from the feature properties
+                // Get the income level from the feature properties
                 var stageposition = feature.get('stageposition');
                 if (stageposition === 0) {
                     var fill = new ol.style.Fill({
@@ -378,14 +378,14 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     qoaremoved = response.qoaremoved;
                     roadfinished = response.roadfinished;
                     available = response.available;
-                    // Si he enviado una localización o una respuesta imprimo si es correcta o no.
+                    // Si he enviado una localizaciono una respuesta imprimo si es correcta o no.
                     if (location || selectedanswerid) {
                         $.mobile.loading("hide");
                         if (response.status !== null && available) {
                             toast(response.status.msg);
                         }
                     }
-                    // Si cambia el modo de juego (móvil o estático)
+                    // Si cambia el modo de juego (movil o estatico)
                     if (playwithoutmoving != response.playwithoutmoving) {
                         playwithoutmoving = response.playwithoutmoving;
                         if (!playwithoutmoving) {
@@ -406,12 +406,19 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         }
                         // Compruebo si es distinto de null, lo que indica que se ha actualizado.
                         if (response.attempts || response.firststagegeom) {
-                            var features = response.attempts ? response.attempts : response.firststagegeom;
                             source.clear();
-                            source.addFeatures(geoJSONFormat.readFeatures(features, {
-                                'dataProjection': "EPSG:4326",
-                                'featureProjection': "EPSG:3857"
-                            }));
+                            if (response.firststagegeom) {
+                                source.addFeatures(geoJSONFormat.readFeatures(response.firststagegeom, {
+                                    'dataProjection': "EPSG:4326",
+                                    'featureProjection': "EPSG:3857"
+                                }));
+                            }
+                            if (response.attempts.features.length > 0) {
+                                source.addFeatures(geoJSONFormat.readFeatures(response.attempts, {
+                                    'dataProjection': "EPSG:4326",
+                                    'featureProjection': "EPSG:3857"
+                                }));
+                            }
                         }
                         // Compruebo si existe, lo que indica que se ha actualizado.
                         if (response.lastsuccessfulstage) {
@@ -421,14 +428,13 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                             if (lastsuccessfulstage.question !== '') {
                                 changesinquestionstage = true;
                                 $('#validatelocation').hide();
-                            }
-                            else if (!lastsuccessfulstage.activitysolved) {
+                            } else if (!lastsuccessfulstage.activitysolved) {
                                 $('#validatelocation').hide();
                             } else {
                                 $('#validatelocation').show();
                             }
                         }
-                        // Compruebo si es la primera geometria o se está inicializando y centro el mapa.
+                        // Compruebo si es la primera geometria o se esta inicializando y centro el mapa.
                         if (response.firststagegeom || initialize) {
                             fitmap = true;
                         }
@@ -460,6 +466,8 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     }
                     if (roadfinished || !available) {
                         $('#validatelocation').hide();
+                        markerFeature.setGeometry(null);
+                        playwithoutmoving = false;
                         clearInterval(interval);
                     }
                 }).fail(function (error) {
@@ -833,9 +841,16 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         if (totalimg.length === imgloaded) {
                             open_popup(popup);
                             imgloaded = 0;
+                            // Clear the fallback
+                            clearTimeout(fallback);
                             $.mobile.loading("hide");
                         }
                     });
+                    // Fallback in case the browser doesn't fire a load event
+                    var fallback = setTimeout(function () {
+                        open_popup(popup);
+                        $.mobile.loading("hide");
+                    }, 2000);
                 } else {
                     open_popup(popup);
                 }

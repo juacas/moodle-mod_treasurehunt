@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual. '
         . 'Para que las actividades del curso se muestren en la lista debe estar habilitada '
-        . 'la terminación de actividad en la configuración de Moodle y en la propia actividad.';
+        . 'la terminación de actividad en la configuración de Moodle, en el curso y en la propia actividad.';
 $string['activitytoendovercome'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['activitytoendwarning'] = 'Debes completar primero la actividad a resolver';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
@@ -161,9 +161,9 @@ $string['invalidassignedroad'] = 'El camino asignado no está validado';
 $string['invalroadid'] = 'El camino no está validado';
 $string['layers'] = 'Capas';
 $string['loading'] = 'Cargando';
-$string['lockedcclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
+$string['lockedaclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
 $string['lockedclue'] = 'Pista bloqueada';
-$string['lockedqacclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente '
+$string['lockedaqclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente '
         . 'a la siguiente pregunta para desbloquear la pista';
 $string['lockedqclue'] = 'Debes responder correctamente a la siguiente pregunta para desbloquear la pista';
 $string['locktimeediting'] = 'Tiempo de bloqueo de edición';

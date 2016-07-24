@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['activitytoend'] = 'Complete selected activity before';
 $string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed. '
         . 'For the activities of the course to be displayed in the list it must be enabled the completion activity in '
-        . 'Moodle\'s configuration and the activity itself.';
+        . 'Moodle\'s configuration, in the course and the activity itself.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'You must complete first the activity to solve';
 $string['actnotavailableyet'] = 'The activity is not available yet';
@@ -160,8 +160,8 @@ $string['invalroadid'] = 'The road is not validated';
 $string['layers'] = 'Layers';
 $string['loading'] = 'Loading';
 $string['lockedclue'] = 'Locked clue';
-$string['lockedcpstage'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
-$string['lockedqacclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following '
+$string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
+$string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following '
         . 'question to unlock the clue';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
