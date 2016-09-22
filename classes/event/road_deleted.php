@@ -22,7 +22,7 @@
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 namespace mod_treasurehunt\event;
 
 defined('MOODLE_INTERNAL') || die();
@@ -40,7 +40,6 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class road_deleted extends \core\event\base {
 
     /**

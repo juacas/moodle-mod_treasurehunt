@@ -7,7 +7,7 @@
     position: relative;
 }
 .path-mod-treasurehunt #edition label {
-    display: inline-block; margin: 0 auto; /*width: 5%;*/ 
+    display: inline-block; margin: 0 auto;
 }
 /*Si no se me pone un background-image posterior*/
 .path-mod-treasurehunt .treasurehunt-editor button{

@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of TwitterCount activity for Moodle http://moodle.org/
 //
 // Questournament for Moodle is free software: you can redistribute it and/or modify

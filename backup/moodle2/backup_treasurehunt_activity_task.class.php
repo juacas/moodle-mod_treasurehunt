@@ -23,7 +23,7 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
@@ -36,7 +36,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehu
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
+
 class backup_treasurehunt_activity_task extends backup_activity_task {
 
     /**

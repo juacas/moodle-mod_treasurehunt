@@ -28,7 +28,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual. '
         . 'Para que las actividades del curso se muestren en la lista debe estar habilitada '
-        . 'la terminación de actividad en la configuración de Moodle y en la propia actividad.';
+        . 'la terminación de actividad en la configuración de Moodle, en el curso y en la propia actividad.';
 $string['activitytoendovercome'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['activitytoendwarning'] = 'Debes completar primero la actividad a resolver';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
@@ -161,9 +161,9 @@ $string['invalidassignedroad'] = 'El camino asignado no está validado';
 $string['invalroadid'] = 'El camino no está validado';
 $string['layers'] = 'Capas';
 $string['loading'] = 'Cargando';
-$string['lockedcclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
+$string['lockedaclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
 $string['lockedclue'] = 'Pista bloqueada';
-$string['lockedqacclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente '
+$string['lockedaqclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente '
         . 'a la siguiente pregunta para desbloquear la pista';
 $string['lockedqclue'] = 'Debes responder correctamente a la siguiente pregunta para desbloquear la pista';
 $string['locktimeediting'] = 'Tiempo de bloqueo de edición';
@@ -205,10 +205,15 @@ $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['play'] = 'Jugar';
+$string['playstagewithoutmoving'] = 'Descrubir etapa sin desplazarse';
+$string['playstagewithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán descubrir esta etapa sin tener '
+        . 'que desplazarse. Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
+        . 'borrando la anterior si existiese, indicando el último punto deseado. Al completar la etapa, el juego cambiará '
+        . 'a la configuración por defecto de la actividad';
 $string['playwithoutmoving'] = 'Jugar sin desplazarse';
-$string['playwithoutmoving_help'] = 'Si esta opción se habilita los alumnos podrán jugar sin desplazarse a los lugares. '
-        . 'Para ello cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
-        . 'borrando la anterior si existiese, indicando el último punto deseado.';
+$string['playwithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán jugar sin desplazarse a los lugares. '
+        . 'Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
+        . 'borrando la anterior si existiese, indicando el último punto deseado';
 $string['pluginadministration'] = 'Administración de la caza del tesoro';
 $string['pluginname'] = 'Caza del tesoro';
 $string['question'] = 'Pregunta';

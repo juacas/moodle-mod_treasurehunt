@@ -22,7 +22,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
@@ -67,13 +66,14 @@ class stage_form extends moodleform {
         $mform->addRule('name', null, 'required', null, 'client');
         //Aqui anadimos la regla del tamano maximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃ³n, si quieres 
+        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃƒÂ³n, si quieres 
         // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue', 'treasurehunt'), null,
-                $editoroptions);
+        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue', 'treasurehunt'), null, $editoroptions);
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
         $mform->addRule('cluetext_editor', null, 'required', null, 'client');
+        $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
+        $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
 
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));

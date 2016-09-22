@@ -168,7 +168,9 @@ class Feature {
         if (!is_null($this->id)) {
             $r['id'] = $this->id;
         }
-        $r['geometry'] = (is_null($this->geometry))?null:$this->geometry->getGeoInterface();
+        if (!is_null($this->geometry)) {
+            $r['geometry'] = $this->geometry->getGeoInterface();
+        }
         $r['properties'] = $this->properties;
         if (!is_null($this->bbox)) {
             $r['bbox'] = $this->bbox;

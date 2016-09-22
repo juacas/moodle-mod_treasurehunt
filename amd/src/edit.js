@@ -46,17 +46,17 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                 edittreasurehunt: function (idModule, treasurehuntid, strings, selectedroadid, lockid) {
                     /** Global var ***************************************************************
                      */
-                    var stage = {
+                    var treasurehunt = {
                         "roads": {}
                     };
-                    var dirtyStage = new ol.source.Vector({
+                    var dirtyStages = new ol.source.Vector({
                         projection: 'EPSG:3857'
                     });
-                    var originalStage = new ol.source.Vector({
+                    var originalStages = new ol.source.Vector({
                         projection: 'EPSG:3857'
                     });
                     var dirty = false;
-                    var nostage;
+                    var stageposition;
                     var roadid;
                     var stageid;
                     var selectedFeatures;
@@ -68,10 +68,9 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         })
                     });
                     var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-                    /**Initialize stage and selectedstageFeatures******************************************************
-                     */
 
-                    /**Load the control pane, stage and road list ***************************************************
+
+                    /**Load the control pane, treasurehunt and road list ***************************************************
                      */
                     $("#controlpanel").addClass('ui-widget-header ui-corner-all');
                     $('<span id="edition"/>').appendTo($("#controlpanel"));
@@ -174,31 +173,31 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             if (start_pos < end_pos) {
                                 for (i = start_pos; i <= end_pos; i++) {
                                     relocatestageList($listitems, $listlength, i,
-                                            dirtyStage, originalStage, stage.roads[roadid].vector);
+                                            dirtyStages, originalStages, treasurehunt.roads[roadid].vector);
                                 }
                             } else {
                                 for (i = end_pos; i <= start_pos; i++) {
                                     relocatestageList($listitems, $listlength, i,
-                                            dirtyStage, originalStage, stage.roads[roadid].vector);
+                                            dirtyStages, originalStages, treasurehunt.roads[roadid].vector);
                                 }
                             }
                             activateSaveButton();
                             dirty = true;
                         }
                     }).disableSelection();
-                    function relocatestageList($listitems, $listlength, i, dirtyStage, originalStage, vector) {
+                    function relocatestageList($listitems, $listlength, i, dirtyStages, originalStages, vector) {
                         var newVal;
                         var $item = $($listitems).get([i]);
                         var roadid = $($item).attr('roadid');
                         newVal = Math.abs($($item).index('li[roadid="' + roadid + '"]') - $listlength);
-                        $($item).attr('nostage', newVal);
+                        $($item).attr('stageposition', newVal);
                         $($item).find('.sortable-number').text(newVal);
-                        //Si esta seleccionado cambiamos el valor de nostage
+                        //Si esta seleccionado cambiamos el valor de stageposition
                         if ($($item).hasClass("ui-selected")) {
-                            nostage = newVal;
+                            stageposition = newVal;
                         }
                         relocatenostage(parseInt($($item).attr('stageid')),
-                                newVal, parseInt($($item).attr('roadid')), dirtyStage, originalStage, vector);
+                                newVal, parseInt($($item).attr('roadid')), dirtyStages, originalStages, vector);
                     }
 
                     //Creo el roadlistpanel
@@ -354,7 +353,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                             fill: fill,
                                             stroke: stroke,
                                             text: new ol.style.Text({
-                                                text: '' + feature.get('nostage'),
+                                                text: '' + feature.get('stageposition'),
                                                 textAlign: 'center',
                                                 scale: 1.3,
                                                 fill: new ol.style.Fill({
@@ -411,8 +410,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             //Activo el boton de guardar segun se haya modificado algo o no
                             this.modify.on('modifyend', function (e) {
                                 activateSaveButton();
-                                modifyFeatureToDirtySource(e.features, originalStage, dirtyStage,
-                                        stage.roads[roadid].vector);
+                                modifyFeatureToDirtySource(e.features, originalStages, dirtyStages,
+                                        treasurehunt.roads[roadid].vector);
                                 dirty = true;
                             });
                         },
@@ -457,22 +456,22 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             })
                         }),
                         setEvents: function () {
-                            //Fijo el stage al que pertenecen y activo el boton de guardar 
+                            //Fijo el treasurehunt al que pertenecen y activo el boton de guardar 
                             //segun se haya modificado algo o no
                             this.Polygon.on('drawend', function (e) {
 
                                 e.feature.setProperties({
                                     'roadid': roadid,
                                     'stageid': stageid,
-                                    'nostage': nostage
+                                    'stageposition': stageposition
                                 });
                                 selectedstageFeatures[idNewFeature] = true;
                                 e.feature.setId(idNewFeature);
                                 idNewFeature++;
                                 //Agrego la nueva feature a su correspondiente vector de poligonos
-                                stage.roads[roadid].vector.getSource().addFeature(e.feature);
+                                treasurehunt.roads[roadid].vector.getSource().addFeature(e.feature);
                                 //Agrego la feature a la coleccion de multipoligonos sucios
-                                addNewFeatureToDirtySource(e.feature, originalStage, dirtyStage);
+                                addNewFeatureToDirtySource(e.feature, originalStages, dirtyStages);
                                 //Limpio el vector de dibujo
                                 vectorDraw.getSource().clear();
                                 activateSaveButton();
@@ -510,14 +509,14 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     });
                     map.addInteraction(snap);
                     //Cargo las features
-                    fetchFeatures(treasurehuntid);
-                    function addNewFeatureToDirtySource(dirtyFeature, originalSource, dirtySource) {
+                    fetchTreasureHunt(treasurehuntid);
+                    function addNewFeatureToDirtySource(dirtyFeature, originalStages, dirtySource) {
 
                         var stageid = dirtyFeature.get('stageid');
                         var roadid = dirtyFeature.get('roadid');
                         var feature = dirtySource.getFeatureById(stageid);
                         if (!feature) {
-                            feature = originalSource.getFeatureById(stageid).clone();
+                            feature = originalStages.getFeatureById(stageid).clone();
                             feature.setId(stageid);
                             dirtySource.addFeature(feature);
                         }
@@ -536,14 +535,14 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     }
 
 
-                    function modifyFeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
+                    function modifyFeatureToDirtySource(dirtyFeatures, originalStages, dirtySource, vector) {
 
                         dirtyFeatures.forEach(function (dirtyFeature) {
                             var stageid = dirtyFeature.get('stageid');
                             var feature = dirtySource.getFeatureById(stageid);
                             var idFeaturesPolygons;
                             if (!feature) {
-                                feature = originalSource.getFeatureById(stageid).clone();
+                                feature = originalStages.getFeatureById(stageid).clone();
                                 feature.setId(stageid);
                                 dirtySource.addFeature(feature);
                             }
@@ -558,7 +557,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         });
                     }
 
-                    function removefeatureToDirtySource(dirtyFeatures, originalSource, dirtySource, vector) {
+                    function removefeatureToDirtySource(dirtyFeatures, originalStages, dirtySource, vector) {
 
                         dirtyFeatures.forEach(function (dirtyFeature) {
 
@@ -568,7 +567,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             var idFeaturesPolygons;
                             var remove;
                             if (!feature) {
-                                feature = originalSource.getFeatureById(stageid).clone();
+                                feature = originalStages.getFeatureById(stageid).clone();
                                 feature.setId(stageid);
                                 dirtySource.addFeature(feature);
                             }
@@ -602,10 +601,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
 
                     function styleFunction(feature) {
                         // get the incomeLevel from the feature properties
-                        var nostage = feature.get('nostage');
-                        if (!isNaN(nostage)) {
-                            selectedstageStyle.getText().setText('' + nostage);
-                            defaultstageStyle.getText().setText('' + nostage);
+                        var stageposition = feature.get('stageposition');
+                        if (!isNaN(stageposition)) {
+                            selectedstageStyle.getText().setText('' + stageposition);
+                            defaultstageStyle.getText().setText('' + stageposition);
                         }
                         // if there is no level or its one we don't recognize,
                         // return the default style (in an array!)
@@ -619,11 +618,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         return [defaultstageStyle];
                     }
 
-
-
-
-
-                    function fetchFeatures(treasurehuntid) {
+                    function fetchTreasureHunt(treasurehuntid) {
                         var geojson = ajax.call([{
                                 methodname: 'mod_treasurehunt_fetch_treasurehunt',
                                 args: {
@@ -632,88 +627,148 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             }]);
                         geojson[0].done(function (response) {
                             $('.treasurehunt-editor-loader').hide();
-                            console.log('json: ' + response.treasurehunt.stages + response.treasurehunt.roads);
+                            console.log('json: ' + response.treasurehunt.roads);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
                                 var vector;
                                 var geoJSONFeatures = response.treasurehunt.stages;
-                                var jsonRoads = response.treasurehunt.roads;
                                 var geoJSON = new ol.format.GeoJSON();
-                                var roads = JSON.parse(jsonRoads);
-                                if (roads.constructor !== Array) {
-                                    $.extend(stage.roads, roads);
-                                }
-                                //agrego los vectores a cada camino
-                                for (var road in stage.roads) {
-                                    if (stage.roads.hasOwnProperty(road)) {
-                                        addroad2ListPanel(stage.roads[road].id, stage.roads[road].name,
-                                                stage.roads[road].blocked);
-                                        vector = new ol.layer.Vector({
-                                            source: new ol.source.Vector({
-                                                projection: 'EPSG:3857'
-                                            }),
-                                            updateWhileAnimating: true,
-                                            style: styleFunction
-                                        });
-                                        stage.roads[road].vector = vector;
-                                        map.addLayer(vector);
-                                    }
-                                }
-                                //Add stage features to source originalStage
-                                originalStage.addFeatures(geoJSON.readFeatures(geoJSONFeatures, {
-                                    dataProjection: 'EPSG:4326',
-                                    featureProjection: 'EPSG:3857'
-                                }));
-                                originalStage.getFeatures().forEach(function (feature) {
-                                    if (feature.getGeometry() === null) {
-                                        feature.setGeometry(new ol.geom.MultiPolygon([]));
-                                    }
-                                    var polygons = feature.getGeometry().getPolygons();
-                                    var idNewFeatures = 'empty';
-                                    var stageid = feature.getId();
-                                    var roadid = feature.get('roadid');
-                                    var nostage = feature.get('nostage');
-                                    var name = feature.get('name');
-                                    var clue = feature.get('clue');
-                                    var blocked = stage.roads[roadid].blocked;
-                                    for (var i = 0; i < polygons.length; i++) {
-                                        var newFeature = new ol.Feature(feature.getProperties());
-                                        newFeature.setProperties({
-                                            'stageid': stageid
-                                        });
-                                        var polygon = polygons[i];
-                                        newFeature.setGeometry(polygon);
-                                        newFeature.setId(idNewFeature);
-                                        if (i === 0) {
-                                            idNewFeatures = idNewFeature;
-                                        } else {
-                                            idNewFeatures = idNewFeatures + ',' + idNewFeature;
-                                        }
-                                        idNewFeature++;
-                                        stage.roads[roadid].vector.getSource().addFeature(newFeature);
-                                    }
-                                    feature.setProperties({
-                                        idFeaturesPolygons: '' + idNewFeatures
+                                var features;
+                                var roads = response.treasurehunt.roads;
+                                /*var roads = JSON.parse(response.treasurehunt.roads);
+                                 if (roads.constructor !== Array) {
+                                 $.extend(treasurehunt.roads, roads);
+                                 }*/
+                                // Necesito indexar cada camino en el objeto global treasurehunt
+                                roads.forEach(function (road) {
+                                    //agrego los vectores a cada camino
+                                    addroad2ListPanel(road.id, road.name,
+                                            road.blocked);
+                                    features = geoJSON.readFeatures(road.stages, {
+                                        dataProjection: 'EPSG:4326',
+                                        featureProjection: 'EPSG:3857'
                                     });
-                                    addstage2ListPanel(stageid, roadid, nostage, name, clue, blocked);
-                                    if (polygons.length === 0) {
-                                        emptystage(stageid);
-                                    }
+                                    originalStages.addFeatures(features);
+                                    delete road.stages;
+                                    vector = new ol.layer.Vector({
+                                        source: new ol.source.Vector({
+                                            projection: 'EPSG:3857'
+                                        }),
+                                        updateWhileAnimating: true,
+                                        style: styleFunction
+                                    });
+                                    features.forEach(function (feature) {
+                                        if (feature.getGeometry() === null) {
+                                            feature.setGeometry(new ol.geom.MultiPolygon([]));
+                                        }
+                                        var polygons = feature.getGeometry().getPolygons();
+                                        var idNewFeatures = 'empty';
+                                        var stageposition = feature.get('stageposition');
+                                        var name = feature.get('name');
+                                        var clue = feature.get('clue');
+                                        var stageid = feature.getId();
+                                        var blocked = road.blocked;
+                                        for (var i = 0; i < polygons.length; i++) {
+                                            var newFeature = new ol.Feature(feature.getProperties());
+                                            newFeature.setProperties({
+                                                'stageid': stageid
+                                            });
+                                            var polygon = polygons[i];
+                                            newFeature.setGeometry(polygon);
+                                            newFeature.setId(idNewFeature);
+                                            if (i === 0) {
+                                                idNewFeatures = idNewFeature;
+                                            } else {
+                                                idNewFeatures = idNewFeatures + ',' + idNewFeature;
+                                            }
+                                            idNewFeature++;
+                                            vector.getSource().addFeature(newFeature);
+                                        }
+                                        feature.setProperties({
+                                            idFeaturesPolygons: '' + idNewFeatures
+                                        });
+                                        addstage2ListPanel(stageid, road.id, stageposition, name, clue, blocked);
+                                        if (polygons.length === 0) {
+                                            emptystage(stageid);
+                                        }
+                                    });
+                                    road.vector = vector;
+                                    map.addLayer(vector);
+                                    treasurehunt.roads[road.id] = road;
                                 });
+
+
+                                /*//agrego los vectores a cada camino
+                                 for (var road in treasurehunt.roads) {
+                                 if (treasurehunt.roads.hasOwnProperty(road)) {
+                                 addroad2ListPanel(treasurehunt.roads[road].id, treasurehunt.roads[road].name,
+                                 treasurehunt.roads[road].blocked);
+                                 vector = new ol.layer.Vector({
+                                 source: new ol.source.Vector({
+                                 projection: 'EPSG:3857'
+                                 }),
+                                 updateWhileAnimating: true,
+                                 style: styleFunction
+                                 });
+                                 treasurehunt.roads[road].vector = vector;
+                                 map.addLayer(vector);
+                                 }
+                                 }
+                                 //Add treasurehunt features to source originalStages
+                                 originalStages.addFeatures(geoJSON.readFeatures(geoJSONFeatures, {
+                                 dataProjection: 'EPSG:4326',
+                                 featureProjection: 'EPSG:3857'
+                                 }));
+                                 originalStages.getFeatures().forEach(function (feature) {
+                                 if (feature.getGeometry() === null) {
+                                 feature.setGeometry(new ol.geom.MultiPolygon([]));
+                                 }
+                                 var polygons = feature.getGeometry().getPolygons();
+                                 var idNewFeatures = 'empty';
+                                 var stageid = feature.getId();
+                                 var roadid = feature.get('roadid');
+                                 var stageposition = feature.get('stageposition');
+                                 var name = feature.get('name');
+                                 var clue = feature.get('clue');
+                                 var blocked = treasurehunt.roads[roadid].blocked;
+                                 for (var i = 0; i < polygons.length; i++) {
+                                 var newFeature = new ol.Feature(feature.getProperties());
+                                 newFeature.setProperties({
+                                 'stageid': stageid
+                                 });
+                                 var polygon = polygons[i];
+                                 newFeature.setGeometry(polygon);
+                                 newFeature.setId(idNewFeature);
+                                 if (i === 0) {
+                                 idNewFeatures = idNewFeature;
+                                 } else {
+                                 idNewFeatures = idNewFeatures + ',' + idNewFeature;
+                                 }
+                                 idNewFeature++;
+                                 treasurehunt.roads[roadid].vector.getSource().addFeature(newFeature);
+                                 }
+                                 feature.setProperties({
+                                 idFeaturesPolygons: '' + idNewFeatures
+                                 });
+                                 addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked);
+                                 if (polygons.length === 0) {
+                                 emptystage(stageid);
+                                 }
+                                 });*/
                                 // Ordeno la lista de etapas
                                 sortList();
-                                // Selecciono el camino seleccionado si existe o sino el primero.
-                                if (typeof stage.roads[selectedroadid] !== 'undefined') {
+                                // Selecciono el camino de la URL si existe o sino el primero.
+                                if (typeof treasurehunt.roads[selectedroadid] !== 'undefined') {
                                     roadid = selectedroadid;
-                                    if (stage.roads[roadid].blocked) {
+                                    if (treasurehunt.roads[roadid].blocked) {
                                         deactivateAddstage();
                                     } else {
                                         activateAddstage();
                                     }
-                                    selectRoad(roadid, stage.roads[roadid].vector, map);
+                                    selectRoad(roadid, treasurehunt.roads[roadid].vector, map);
                                 } else {
-                                    selectfirstroad(stage.roads, map);
+                                    selectfirstroad(treasurehunt.roads, map);
                                 }
 
                             }
@@ -736,7 +791,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     function selectfirstroad(roads, map) {
                         var noroads = 0;
                         for (var road in roads) {
-                            if (stage.roads.hasOwnProperty(road)) {
+                            if (treasurehunt.roads.hasOwnProperty(road)) {
                                 noroads = 1;
                                 roadid = road;
                                 if (roads[roadid].blocked) {
@@ -756,10 +811,11 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         }
                     }
 
-                    function addstage2ListPanel(stageid, roadid, nostage, name, clue, blocked) {
+                    function addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked) {
                         if ($('#stagelist li[stageid="' + stageid + '"]').length < 1) {
                             var li = $(
-                                    '<li stageid="' + stageid + '" roadid="' + roadid + '" nostage="' + nostage
+                                    '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="'
+                                    + stageposition
                                     + '"/>')
                                     .appendTo($("#stagelist"));
                             li.addClass("ui-corner-all")
@@ -774,11 +830,11 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 li.addClass("blocked")
                                         .prepend("<div class='nohandle validstage'>" +
                                                 "<span class='ui-icon ui-icon-locked'></span>" +
-                                                "<span class='sortable-number'>" + nostage + "</span></div>");
+                                                "<span class='sortable-number'>" + stageposition + "</span></div>");
                             } else {
                                 li.prepend("<div class='handle validstage'>" +
                                         "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>" +
-                                        "<span class='sortable-number'>" + nostage + "</span></div>");
+                                        "<span class='sortable-number'>" + stageposition + "</span></div>");
                                 li.children(".modifystage").prepend("<span class='ui-icon ui-icon-trash'></span>");
                             }
                             $('#dialoginfo' + stageid).dialog({
@@ -811,7 +867,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             $lis.remove();
                         }
                     }
-                    function deletestage2ListPanel(stageid, dirtySource, originalSource, vectorOfPolygons) {
+                    function deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons) {
                         var $li = $('#stagelist li[stageid="' + stageid + '"]');
                         if ($li.length > 0) {
                             var roadid = $li.attr('roadid');
@@ -824,7 +880,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             var $listlength = $stagelist.length;
                             //Recoloco el resto
                             for (var i = 0; i <= start_pos - 1; i++) {
-                                relocatestageList($stagelist, $listlength, i, dirtySource, originalSource,
+                                relocatestageList($stagelist, $listlength, i, dirtySource, originalStages,
                                         vectorOfPolygons);
                             }
                         }
@@ -832,15 +888,15 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     function sortList() {
                         //Ordeno la lista 
                         $('#stagelist li').sort(function (a, b) {
-                            var contentA = parseInt($(a).attr('nostage'));
-                            var contentB = parseInt($(b).attr('nostage'));
+                            var contentA = parseInt($(a).attr('stageposition'));
+                            var contentB = parseInt($(b).attr('stageposition'));
                             return (contentA < contentB) ? 1 : (contentA > contentB) ? -1 : 0;
                         }).appendTo($("#stagelist"));
                     }
 
                     function emptystage(stageid, roadid) {
-                        var $stage = $('#stagelist li[stageid="' + stageid + '"]');
-                        $stage.children(".handle,.nohandle").addClass('invalidstage').removeClass('validstage');
+                        var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
+                        $treasurehunt.children(".handle,.nohandle").addClass('invalidstage').removeClass('validstage');
                         // Compruebo si en este camino hay alguna etapa sin geometria.
                         if (roadid) {
                             $("label[for='radio1']").addClass('highlightbutton');
@@ -852,8 +908,9 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     }
 
                     function notEmptystage(stageid, roadid) {
-                        var $stage = $('#stagelist li[stageid="' + stageid + '"]');
-                        $stage.children(".handle, .nohandle").addClass('validstage').removeClass('invalidstage');
+                        var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
+                        $treasurehunt.children(".handle, .nohandle").addClass('validstage').removeClass(
+                                'invalidstage');
                         if (roadid) {
                             // Compruebo si en este camino hay alguna etapa sin geometria.
                             $("label[for='radio1']").removeClass('highlightbutton');
@@ -991,7 +1048,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
 
 
                     function selectstageFeatures(vectorOfPolygons, vectorSelected, selected,
-                            selectedFeatures, dirtySource, originalSource) {
+                            selectedFeatures, dirtySource, originalStages) {
                         vectorSelected.getSource().clear();
                         //Deselecciono cualquier feature anterior
                         selectedFeatures.clear();
@@ -999,7 +1056,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         selectedstageFeatures = {};
                         var feature = dirtySource.getFeatureById(selected);
                         if (!feature) {
-                            feature = originalSource.getFeatureById(selected);
+                            feature = originalStages.getFeatureById(selected);
                             if (!feature) {
                                 //Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente
                                 vectorOfPolygons.changed();
@@ -1011,7 +1068,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             vectorOfPolygons.changed();
                             return;
                         }
-                        // Agrego los polÃƒÆ’Ã‚Â­gonos a mi objecto que almacena los poligonos seleccionados 
+                        // Agrego los poligonos a mi objecto que almacena los poligonos seleccionados 
                         // y tambien agrego al vector al que se le aplica la animacion.
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -1028,22 +1085,22 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     }
 
 
-                    function relocatenostage(stageid, nostage, roadid, dirtySource, originalSource, vector) {
+                    function relocatenostage(stageid, stageposition, roadid, dirtySource, originalStages, vector) {
                         var feature = dirtySource.getFeatureById(stageid);
                         var idFeaturesPolygons;
                         if (!feature) {
-                            feature = originalSource.getFeatureById(stageid).clone();
+                            feature = originalStages.getFeatureById(stageid).clone();
                             feature.setId(stageid);
                             dirtySource.addFeature(feature);
                         }
                         feature.setProperties({
-                            'nostage': nostage
+                            'stageposition': stageposition
                         });
                         if (feature.get('idFeaturesPolygons') !== 'empty') {
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 vector.getSource().getFeatureById(idFeaturesPolygons[i]).setProperties({
-                                    'nostage': nostage
+                                    'stageposition': stageposition
                                 });
                             }
                         }
@@ -1070,7 +1127,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     }
 
 
-                    function deleteRoad(roadid, dirtySource, originalSource, treasurehuntid, lockid) {
+                    function deleteRoad(roadid, dirtySource, originalStages, treasurehuntid, lockid) {
                         $('.treasurehunt-editor-loader').show();
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_delete_road',
@@ -1089,12 +1146,12 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 //Elimino tanto el li del road como todos los li de stages asociados
                                 deleteRoad2ListPanel(roadid);
                                 // Elimino la feature de dirtySource si la tuviese, 
-                                // del originalSource y elimino el camino del stage y la capa del mapa
-                                map.removeLayer(stage.roads[roadid].vector);
-                                delete stage.roads[roadid];
-                                selectfirstroad(stage.roads, map);
+                                // del originalStages y elimino el camino del treasurehunt y la capa del mapa
+                                map.removeLayer(treasurehunt.roads[roadid].vector);
+                                delete treasurehunt.roads[roadid];
+                                selectfirstroad(treasurehunt.roads, map);
                                 deactivateEdition();
-                                var features = originalSource.getFeatures();
+                                var features = originalStages.getFeatures();
                                 for (var i = 0; i < features.length; i++) {
                                     if (roadid === features[i].get('roadid'))
                                     {
@@ -1102,7 +1159,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                         if (dirtyFeature) {
                                             dirtySource.removeFeature(dirtyFeature);
                                         }
-                                        originalSource.removeFeature(features[i]);
+                                        originalStages.removeFeature(features[i]);
                                     }
                                 }
                             }
@@ -1113,7 +1170,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         });
                     }
 
-                    function deletestage(stageid, dirtySource, originalSource, vectorOfPolygons, treasurehuntid,
+                    function deletestage(stageid, dirtySource, originalStages, vectorOfPolygons, treasurehuntid,
                             lockid) {
                         $('.treasurehunt-editor-loader').show();
                         var json = ajax.call([{
@@ -1134,14 +1191,14 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 var polygonFeature;
                                 var feature = dirtySource.getFeatureById(stageid);
                                 //Elimino y recoloco 
-                                deletestage2ListPanel(stageid, dirtySource, originalSource, vectorOfPolygons);
+                                deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons);
                                 //Elimino la feature de dirtySource si la tuviese y todos los poligonos del vector de poligonos
                                 if (!feature) {
-                                    feature = originalSource.getFeatureById(stageid);
+                                    feature = originalStages.getFeatureById(stageid);
                                     if (feature.get('idFeaturesPolygons') !== 'empty') {
                                         idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                                     }
-                                    originalSource.removeFeature(feature);
+                                    originalStages.removeFeature(feature);
                                 } else {
                                     if (feature.get('idFeaturesPolygons') !== 'empty') {
                                         idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
@@ -1164,18 +1221,30 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         });
                     }
 
-                    function savestages(dirtySource, originalSource, treasurehuntid, callback, options, lockid) {
+                    function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid) {
                         $('.treasurehunt-editor-loader').show();
-                        var geoJSONFormat = new ol.format.GeoJSON();
-                        var features = dirtySource.getFeatures();
-                        var geoJSON = geoJSONFormat.writeFeatures(features, {
+                        var geojsonformat = new ol.format.GeoJSON();
+                        var dirtyfeatures = dirtySource.getFeatures();
+                        var features = [];
+                        var auxfeature;
+                        // Remove unnecessary feature properties 
+                        dirtyfeatures.forEach(function (dirtyfeature) {
+                            auxfeature = dirtyfeature.clone();
+                            auxfeature.unset("idFeaturesPolygons");
+                            auxfeature.unset("name");
+                            auxfeature.unset("clue");
+                            auxfeature.unset("treasurehuntid");
+                            auxfeature.setId(dirtyfeature.getId());
+                            features.push(auxfeature);
+                        });
+                        var geojsonstages = geojsonformat.writeFeaturesObject(features, {
                             dataProjection: 'EPSG:4326',
                             featureProjection: 'EPSG:3857'
                         });
                         var json = ajax.call([{
                                 methodname: 'mod_treasurehunt_update_stages',
                                 args: {
-                                    stages: geoJSON,
+                                    stages: geojsonstages,
                                     treasurehuntid: treasurehuntid,
                                     lockid: lockid
                                 }
@@ -1189,7 +1258,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 var originalFeature;
                                 //Paso las features "sucias" al objeto con las features originales
                                 dirtySource.forEachFeature(function (feature) {
-                                    originalFeature = originalSource.getFeatureById(feature.getId());
+                                    originalFeature = originalStages.getFeatureById(feature.getId());
                                     originalFeature.setProperties(feature.getProperties());
                                     originalFeature.setGeometry(feature.getGeometry());
                                 });
@@ -1259,7 +1328,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     };
                     $("#addstage").on('click', function () {
                         if (dirty) {
-                            savestages(dirtyStage, originalStage, treasurehuntid, newFormstageEntry, [roadid,
+                            savestages(dirtyStages, originalStages, treasurehuntid, newFormstageEntry, [roadid,
                                 idModule], lockid);
                         } else {
                             newFormstageEntry(roadid, idModule);
@@ -1268,22 +1337,20 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     });
                     $("#addroad").on('click', function () {
                         if (dirty) {
-                            savestages(dirtyStage, originalStage, treasurehuntid, newFormRoadEntry, [idModule],
+                            savestages(dirtyStages, originalStages, treasurehuntid, newFormRoadEntry, [idModule],
                                     lockid);
                         } else {
                             newFormRoadEntry(idModule);
                         }
                     });
                     $("#removefeature").on('click', function () {
-
                         notification.confirm(strings['areyousure'],
                                 strings['removewarning'],
                                 strings['confirm'],
                                 strings['cancel'], function () {
-
-                            removefeatureToDirtySource(selectedFeatures, originalStage,
-                                    dirtyStage, stage.roads[roadid].vector);
-                            removefeatures(selectedFeatures, stage.roads[roadid].vector);
+                            removefeatureToDirtySource(selectedFeatures, originalStages,
+                                    dirtyStages, treasurehunt.roads[roadid].vector);
+                            removefeatures(selectedFeatures, treasurehunt.roads[roadid].vector);
                             //Desactivo el boton de borrar y activo el de guardar cambios
                             deactivateDeleteButton();
                             activateSaveButton();
@@ -1291,7 +1358,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         });
                     });
                     $("#savestage").on('click', function () {
-                        savestages(dirtyStage, originalStage, treasurehuntid, null, null, lockid);
+                        savestages(dirtyStages, originalStages, treasurehuntid, null, null, lockid);
                     });
                     $("#stagelist").on('click', '.ui-icon-info, .ui-icon-alert', function () {
                         var id = $(this).data('id');
@@ -1307,8 +1374,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 strings['confirm'],
                                 strings['cancel'], function () {
                             var stageid = parseInt($this_li.attr('stageid'));
-                            deletestage(stageid, dirtyStage, originalStage,
-                                    stage.roads[roadid].vector, treasurehuntid, lockid);
+                            deletestage(stageid, dirtyStages, originalStages,
+                                    treasurehunt.roads[roadid].vector, treasurehuntid, lockid);
                         });
                     });
                     $("#stagelist").on('click', '.ui-icon-pencil', function () {
@@ -1317,7 +1384,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         var stageid = parseInt($(this).parents('li').attr('stageid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            savestages(dirtyStage, originalStage, treasurehuntid,
+                            savestages(dirtyStages, originalStages, treasurehuntid,
                                     editFormstageEntry, [stageid, idModule], lockid);
                         } else {
                             editFormstageEntry(stageid, idModule);
@@ -1351,11 +1418,11 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         }
                         $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
                         //Selecciono el stageid de mi atributo custom
-                        nostage = parseInt($(this).attr('nostage'));
+                        stageposition = parseInt($(this).attr('stageposition'));
                         stageid = parseInt($(this).attr('stageid'));
                         //Borro la anterior seleccion de features y busco las del mismo tipo
-                        selectstageFeatures(stage.roads[roadid].vector, vectorSelected,
-                                stageid, selectedFeatures, dirtyStage, originalStage);
+                        selectstageFeatures(treasurehunt.roads[roadid].vector, vectorSelected,
+                                stageid, selectedFeatures, dirtyStages, originalStages);
                         activateEdition();
                         // Si la etapa no tiene geometrÃ­a resalto el boton de anadir.
                         if ($(this).find(".invalidstage").length > 0) {
@@ -1383,7 +1450,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         } else {
                             activateAddstage();
                         }
-                        selectRoad(roadid, stage.roads[roadid].vector, map);
+                        selectRoad(roadid, treasurehunt.roads[roadid].vector, map);
                         deactivateEdition();
                         // Scroll to editor.
                         var scrolltop;
@@ -1403,7 +1470,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
                         //Si esta sucio guardo el escenario
                         if (dirty) {
-                            savestages(dirtyStage, originalStage, treasurehuntid, editFormRoadEntry, [roadid, idModule
+                            savestages(dirtyStages, originalStages, treasurehuntid, editFormRoadEntry, [roadid,
+                                idModule
                             ], lockid);
                         } else {
                             editFormRoadEntry(roadid, idModule);
@@ -1417,7 +1485,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 strings['confirm'],
                                 strings['cancel'], function () {
                             var roadid = parseInt($this_li.attr('roadid'));
-                            deleteRoad(roadid, dirtyStage, originalStage, treasurehuntid, lockid);
+                            deleteRoad(roadid, dirtyStages, originalStages, treasurehuntid, lockid);
                         });
                     });
                     map.on('pointermove', function (evt) {

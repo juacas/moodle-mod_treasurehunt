@@ -22,7 +22,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/course/moodleform_mod.php');
@@ -35,7 +34,6 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * @copyright  2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 class mod_treasurehunt_mod_form extends moodleform_mod {
 
     /**

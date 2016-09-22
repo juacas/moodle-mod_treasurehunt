@@ -27,7 +27,7 @@ defined('MOODLE_INTERNAL') || die();
 $string['activitytoend'] = 'Complete selected activity before';
 $string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed. '
         . 'For the activities of the course to be displayed in the list it must be enabled the completion activity in '
-        . 'Moodle\'s configuration and the activity itself.';
+        . 'Moodle\'s configuration, in the course and the activity itself.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'You must complete first the activity to solve';
 $string['actnotavailableyet'] = 'The activity is not available yet';
@@ -160,8 +160,8 @@ $string['invalroadid'] = 'The road is not validated';
 $string['layers'] = 'Layers';
 $string['loading'] = 'Loading';
 $string['lockedclue'] = 'Locked clue';
-$string['lockedcpstage'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
-$string['lockedqacclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following '
+$string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
+$string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following '
         . 'question to unlock the clue';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
@@ -202,9 +202,14 @@ $string['nouserroad'] = '{$a} has no road assigned.';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['play'] = 'Play';
+$string['playstagewithoutmoving'] = 'Discover stage without moving';
+$string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place. '
+        . 'To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
+        . 'if any, indicating the last desired point. Upon completion of the stage, the game will change to the default '
+        . 'settings of the activity';
 $string['playwithoutmoving'] = 'Playing without moving';
-$string['playwithoutmoving_help'] = 'If this option is enabled students may play from their computers without moving to '
-        . 'places. To do this every time the student takes a simple click on the map a mark is created, erasing the previous '
+$string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to '
+        . 'places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
         . 'if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';

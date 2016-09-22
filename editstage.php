@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
@@ -69,7 +68,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $title = get_string('editingstage', 'treasurehunt');
         $sql = 'SELECT id,name,cluetext,cluetextformat,cluetexttrust,'
                 . 'activitytoend,roadid,questiontext,questiontextformat,'
-                . 'questiontexttrust FROM {treasurehunt_stages}  WHERE id=?';
+                . 'questiontexttrust,playstagewithoutmoving FROM {treasurehunt_stages}  WHERE id=?';
         $params = array($id);
         if (!$stage = $DB->get_record_sql($sql, $params)) {
             print_error('invalidentry');
@@ -233,7 +232,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,
+            treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editstage', 'treasurehunt'), $url);

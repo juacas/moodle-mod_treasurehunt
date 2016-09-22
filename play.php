@@ -20,7 +20,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 // Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -59,7 +58,8 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
 }
 // Get last timestamp 
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid,
+        $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 
 $PAGE->requires->jquery();

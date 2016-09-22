@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/treasurehunt/db" VERSION="20101203" COMMENT="XMLDB file for Moodle mod/treasurehunt"
+<XMLDB PATH="mod/treasurehunt/db" VERSION="20160718" COMMENT="XMLDB file for Moodle mod/treasurehunt"
        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
        xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -21,7 +21,7 @@
                 <FIELD NAME="grade" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="The maximum grade for this treasure hunt. Can be negative to indicate the use of a scale."/>
                 <FIELD NAME="gradepenlocation" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure a localization expressed in % of the grade."/>
                 <FIELD NAME="gradepenanswer" TYPE="number" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" DECIMALS="5" COMMENT="The penalty for failure an answer expressed in % of the grade."/>
-                <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMstageS, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
+                <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMSTAGES, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -57,7 +57,8 @@
                 <FIELD NAME="cluetexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" SEQUENCE="false" COMMENT="Activity to be completed before the clue show"/>
+                <FIELD NAME="playstagewithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true, students can play from their computers without moving to places only during the performance of the stage associated. Then it will continue using the game settings"/>
+                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Activity to be completed before the clue show"/>
                 <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question to be answered before the clue show"/>
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

@@ -23,7 +23,6 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 // Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
@@ -81,7 +80,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,
+            treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 
 
