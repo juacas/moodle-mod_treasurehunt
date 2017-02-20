@@ -169,14 +169,19 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $user->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $name = html_writer::link($url, $name);
+                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts','treasurehunt',$name));
+                                    $name = $name.' '.html_writer::link($url, $icon);
                                 }
                             } else {
-                                $name = fullname($user);
+                                $fullname = fullname($user);
+                                $userpic = $this->output->user_picture($user, array('size' => 32));
+                                $userurl = new moodle_url('/user/view.php', array('id'=>$user->id, 'courseid'=>$this->page->course->id));
+                                $name = $userpic. html_writer::link($userurl, $fullname);
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $user->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $name = html_writer::link($url, $name);
+                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts','treasurehunt',$fullname));
+                                    $name .= ' '. html_writer::link($url,$icon);
                                 }
                             }
                             $cells = array($name);
@@ -270,6 +275,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $gamemode = get_string('playwithoutmoving', 'treasurehunt');
         } else {
             $gamemode = get_string('movingplay', 'treasurehunt');
+        }
+         if ($info->treasurehunt->groupmode) {
+            $gamemode = get_string('groupmode', 'treasurehunt'). '. '. $gamemode;
         }
         $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
         $o .= html_writer::tag('p', $message) . "\n";

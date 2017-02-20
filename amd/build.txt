@@ -1,0 +1,5 @@
+Notes for minimize JS
+
+npm install
+npm install grunt-contrib-uglify grunt-contrib-jshint
+grunt amd --force

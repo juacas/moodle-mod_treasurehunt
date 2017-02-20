@@ -636,10 +636,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 var geoJSON = new ol.format.GeoJSON();
                                 var features;
                                 var roads = response.treasurehunt.roads;
-                                /*var roads = JSON.parse(response.treasurehunt.roads);
-                                 if (roads.constructor !== Array) {
-                                 $.extend(treasurehunt.roads, roads);
-                                 }*/
+                               // Moodle 2 returns an object with indexed properties instead an array...
+                                if (!Array.isArray(roads)){
+                                    roads = Object.values(roads);
+                                }
                                 // Necesito indexar cada camino en el objeto global treasurehunt
                                 roads.forEach(function (road) {
                                     //agrego los vectores a cada camino
