@@ -33,7 +33,7 @@ require.config({
         }
     },
     paths: {
-        openlayers: 'openlayers/ol',
+        openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch'
     }
@@ -56,6 +56,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         projection: 'EPSG:3857'
                     });
                     var dirty = false;
+                    var abortDrawing = false;
+                    var drawStarted = false;
                     var stageposition;
                     var roadid;
                     var stageid;
@@ -68,8 +70,6 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         })
                     });
                     var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-
-
                     /**Load the control pane, treasurehunt and road list ***************************************************
                      */
                     $("#controlpanel").addClass('ui-widget-header ui-corner-all');
@@ -83,7 +83,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($(
                             "#controlpanel"));
                     $('<div id="searchcontainer">').appendTo($("#controlpanel"));
-                    $('<input type="search" placeholder="' + strings['searchlocation'] + '" class="searchaddress"/>')
+                    $('<input type="search" placeholder="' + strings['searchlocation']
+                            + '" class="searchaddress"/>')
                             .appendTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($(
@@ -385,8 +386,9 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                     })
                                 }),
                                 deleteCondition: function (event) {
-                                    return ol.events.condition.shiftKeyOnly(event) && ol.events.condition.singleClick(
-                                            event);
+                                    return ol.events.condition.shiftKeyOnly(event)
+                                            && ol.events.condition.singleClick(
+                                                    event);
                                 }
                             });
                             map.addInteraction(this.modify);
@@ -459,23 +461,31 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             //Fijo el treasurehunt al que pertenecen y activo el boton de guardar 
                             //segun se haya modificado algo o no
                             this.Polygon.on('drawend', function (e) {
-
-                                e.feature.setProperties({
-                                    'roadid': roadid,
-                                    'stageid': stageid,
-                                    'stageposition': stageposition
-                                });
-                                selectedstageFeatures[idNewFeature] = true;
-                                e.feature.setId(idNewFeature);
-                                idNewFeature++;
-                                //Agrego la nueva feature a su correspondiente vector de poligonos
-                                treasurehunt.roads[roadid].vector.getSource().addFeature(e.feature);
-                                //Agrego la feature a la coleccion de multipoligonos sucios
-                                addNewFeatureToDirtySource(e.feature, originalStages, dirtyStages);
-                                //Limpio el vector de dibujo
-                                vectorDraw.getSource().clear();
-                                activateSaveButton();
-                                dirty = true;
+                                drawStarted = false;
+                                if (abortDrawing) {
+                                    vectorDraw.getSource().clear();
+                                    abortDrawing = false;
+                                } else {
+                                    e.feature.setProperties({
+                                        'roadid': roadid,
+                                        'stageid': stageid,
+                                        'stageposition': stageposition
+                                    });
+                                    selectedstageFeatures[idNewFeature] = true;
+                                    e.feature.setId(idNewFeature);
+                                    idNewFeature++;
+                                    //Agrego la nueva feature a su correspondiente vector de poligonos
+                                    treasurehunt.roads[roadid].vector.getSource().addFeature(e.feature);
+                                    //Agrego la feature a la coleccion de multipoligonos sucios
+                                    addNewFeatureToDirtySource(e.feature, originalStages, dirtyStages);
+                                    //Limpio el vector de dibujo
+                                    vectorDraw.getSource().clear();
+                                    activateSaveButton();
+                                    dirty = true;
+                                }
+                            });
+                            this.Polygon.on('drawstart', function (e) {
+                                drawStarted = true;
                             });
                         },
                         getActive: function () {
@@ -492,9 +502,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     };
                     $(document).keyup(function (e) {
                         //Si pulso la tecla esc dejo de dibujar
-                        if (e.keyCode === 27) // esc
+                        if (e.keyCode === 27 && drawStarted) // esc
                         {
-                            Draw.Polygon.abortDrawing();
+                            abortDrawing = true;
+                            Draw.Polygon.finishDrawing();
                         }
                     });
                     Draw.init();
@@ -593,7 +604,6 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                     'idFeaturesPolygons': 'empty'
                                 });
                                 emptystage(stageid, roadid);
-
                             }
 
                         });
@@ -636,8 +646,8 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 var geoJSON = new ol.format.GeoJSON();
                                 var features;
                                 var roads = response.treasurehunt.roads;
-                               // Moodle 2 returns an object with indexed properties instead an array...
-                                if (!Array.isArray(roads)){
+                                // Moodle 2 returns an object with indexed properties instead an array...
+                                if (!Array.isArray(roads)) {
                                     roads = Object.values(roads);
                                 }
                                 // Necesito indexar cada camino en el objeto global treasurehunt
@@ -697,8 +707,6 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                     map.addLayer(vector);
                                     treasurehunt.roads[road.id] = road;
                                 });
-
-
                                 /*//agrego los vectores a cada camino
                                  for (var road in treasurehunt.roads) {
                                  if (treasurehunt.roads.hasOwnProperty(road)) {
@@ -971,38 +979,20 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                     function deactivateSaveButton() {
                         $('#savestage').button("option", "disabled", true);
                     }
-
-
-                    function flyTo(map, extent) {
-                        var duration = 500;
+                    function flyTo(map, point, extent) {
+                        var duration = 700;
                         var view = map.getView();
-                        var size = map.getSize();
-                        var pan = ol.animation.pan({
-                            duration: duration,
-                            source: /** @type {ol.Coordinate} */
-                                    (view.getCenter()),
-                        });
-                        var zoom = ol.animation.zoom({
-                            duration: duration,
-                            resolution: view.getResolution(),
-                        });
-                        map.beforeRender(pan, zoom);
-                        view.fit(extent, size);
-                    }
-                    function flyToPoint(map, point) {
-                        var duration = 500;
-                        var view = map.getView();
-                        var pan = ol.animation.pan({
-                            duration: duration,
-                            source: /** @type {ol.Coordinate} */
-                                    (view.getCenter()),
-                        });
-                        var zoom = ol.animation.zoom({
-                            duration: duration,
-                            resolution: view.getResolution(),
-                        });
-                        map.beforeRender(pan, zoom);
-                        view.setCenter(point);
+                        if (extent) {
+                            view.fit(extent, {
+                                duration: duration
+                            });
+                        } else {
+                            view.animate({
+                                zoom: 19,
+                                center: point,
+                                duration: duration
+                            });
+                        }
                     }
                     function check_stage_list($stagelist) {
                         if ($stagelist.length > 0) {
@@ -1042,7 +1032,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         });
                         vectorOfPolygons.setVisible(true);
                         if (vectorOfPolygons.getSource().getFeatures().length > 0) {
-                            flyTo(map, vectorOfPolygons.getSource().getExtent());
+                            flyTo(map, null, vectorOfPolygons.getSource().getExtent());
                         }
                     }
 
@@ -1080,7 +1070,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         //Coloco el mapa en la posicion de las etapas seleccionadas si la etapa contiene alguna feature y 
                         //postergando el tiempo para que seleccione la nueva feature.
                         if (vectorSelected.getSource().getFeatures().length) {
-                            flyTo(map, vectorSelected.getSource().getExtent());
+                            flyTo(map, null, vectorSelected.getSource().getExtent());
                         }
                     }
 
@@ -1311,10 +1301,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                                 extend[2] = parseFloat(ui.item.boundingbox[3]);
                                 extend[3] = parseFloat(ui.item.boundingbox[1]);
                                 extend = ol.proj.transformExtent(extend, 'EPSG:4326', 'EPSG:3857');
-                                flyTo(map, extend);
+                                flyTo(map, null, extend);
                             } else {
                                 var point = ol.proj.fromLonLat([ui.item.longitude, ui.item.latitude]);
-                                flyToPoint(map, point);
+                                flyTo(map, point);
                             }
                         },
                         autoFocus: true
@@ -1431,7 +1421,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                             $("label[for='radio1']").removeClass('highlightbutton');
                         }
                         //Paro de dibujar si cambio de etapa
-                        Draw.Polygon.abortDrawing();
+                        if (drawStarted) {
+                            abortDrawing = true;
+                            Draw.Polygon.finishDrawing();
+                        }
                     });
                     $("#roadlist").on('click', 'li', function (e) {
                         if ($(e.target).is('.ui-icon')) {
@@ -1443,7 +1436,10 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         //Borro las etapas seleccionadas
                         selectedstageFeatures = {};
                         //Paro de dibujar si cambio de camino
-                        Draw.Polygon.abortDrawing();
+                        if (drawStarted) {
+                            abortDrawing = true;
+                            Draw.Polygon.finishDrawing();
+                        }
                         roadid = $(this).attr('roadid');
                         if (parseInt($(this).attr('blocked'))) {
                             deactivateAddstage();

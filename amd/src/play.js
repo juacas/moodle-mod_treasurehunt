@@ -31,7 +31,7 @@ require.config({
         'jquery.mobile': ['jquery', 'jquery.mobile-config']
     },
     paths: {
-        openlayers: 'openlayers/ol',
+        openlayers: 'openlayers/ol-debug',
         geocoderjs: 'geocoder/geocoder',
         'jquery.mobile-config': 'jquery-mobile/jquery.mobile-config',
         'jquery.mobile': 'jquery-mobile/jquerymobile'
@@ -307,38 +307,20 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     geolocation.setTracking(true);
                 }
             }
-
-            function fly_to_point(map, point) {
-                var duration = 500;
+            function fly_to(map, point, extent) {
+                var duration = 700;
                 var view = map.getView();
-                var pan = ol.animation.pan({
-                    duration: duration,
-                    source: /** @type {ol.Coordinate} */
-                            (view.getCenter()),
-                });
-                var zoom = ol.animation.zoom({
-                    duration: duration,
-                    resolution: view.getResolution(),
-                });
-                map.beforeRender(pan, zoom);
-                view.setCenter(point);
-                view.setResolution(2.388657133911758);
-            }
-            function fly_to_extent(map, extent) {
-                var duration = 500;
-                var view = map.getView();
-                var size = map.getSize();
-                var pan = ol.animation.pan({
-                    duration: duration,
-                    source: /** @type {ol.Coordinate} */
-                            (view.getCenter()),
-                });
-                var zoom = ol.animation.zoom({
-                    duration: duration,
-                    resolution: view.getResolution(),
-                });
-                map.beforeRender(pan, zoom);
-                view.fit(extent, size);
+                if (extent) {
+                    view.fit(extent, {
+                        duration: duration
+                    });
+                } else {
+                    view.animate({
+                        zoom: 19,
+                        center: point,
+                        duration: duration
+                    });
+                }
             }
             function renew_source(location, initialize, selectedanswerid) {
                 var position;
@@ -480,13 +462,9 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                 if (fitmap) {
                     var features = source.getFeatures();
                     if (features.length === 1 && features[0].getGeometry() instanceof ol.geom.Point) {
-                        setTimeout(function () {
-                            fly_to_point(map, features[0].getGeometry().getCoordinates());
-                        }, 500);
+                        fly_to(map, features[0].getGeometry().getCoordinates());
                     } else {
-                        setTimeout(function () {
-                            fly_to_extent(map, source.getExtent());
-                        }, 500);
+                        fly_to(map, null, source.getExtent());
                     }
 
                     fitmap = false;
@@ -583,7 +561,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
             geolocation.on('change:position', function () {
                 var coordinates = this.getPosition();
                 if (this.get("center")) {
-                    fly_to_point(map, coordinates);
+                    fly_to(map, coordinates);
                 }
                 positionFeature.setGeometry(coordinates ?
                         new ol.geom.Point(coordinates) : null);
@@ -628,12 +606,17 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                         }
                         create_popup('infostage', title, body);
                     }
-                } else {
-                    if (playwithoutmoving) {
-                        var coordinates = features.mapBrowserEvent.coordinate;
-                        markerFeature.setGeometry(coordinates ?
-                                new ol.geom.Point(coordinates) : null);
-                    }
+                }
+            });
+            map.on('singleclick', function (evt) {
+                var hasFeature = false;
+                map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function (feature, layer) {
+                    hasFeature = true;
+                });
+                if (playwithoutmoving && !hasFeature) {
+                    var coordinates = map.getEventCoordinate(evt.originalEvent);
+                    markerFeature.setGeometry(coordinates ?
+                            new ol.geom.Point(coordinates) : null);
                 }
             });
             $("#autocomplete").on("filterablebeforefilter", function (e, data) {
@@ -661,7 +644,7 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                                     extent[2] = parseFloat(place.boundingbox[3]);
                                     extent[3] = parseFloat(place.boundingbox[1]);
                                     extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
-                                    fly_to_extent(map, extent);
+                                    fly_to(map, null, extent);
                                     $('#searchpanel').panel("close");
                                 }).show();
                             });
