@@ -1322,7 +1322,7 @@ define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoder
                         $(this).autocomplete("search", $(this).value);
                     });
                     // Necesario para regular la anchura de los resultados de autocompletado
-                    jQuery.ui.autocomplete.prototype._resizeMenu = function () {
+                    $.ui.autocomplete.prototype._resizeMenu = function () {
                         var ul = this.menu.element;
                         ul.outerWidth(this.element.outerWidth());
                     };
