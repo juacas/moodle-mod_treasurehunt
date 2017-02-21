@@ -31,7 +31,7 @@ require.config({
         'jquery.mobile': ['jquery', 'jquery.mobile-config']
     },
     paths: {
-        openlayers: 'openlayers/ol-debug',
+        openlayers: 'openlayers/ol',
         geocoderjs: 'geocoder/geocoder',
         'jquery.mobile-config': 'jquery-mobile/jquery.mobile-config',
         'jquery.mobile': 'jquery-mobile/jquerymobile'

@@ -33,7 +33,7 @@ require.config({
         }
     },
     paths: {
-        openlayers: 'openlayers/ol-debug',
+        openlayers: 'openlayers/ol',
         geocoderjs: 'geocoder/geocoder',
         'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch'
     }
