@@ -20,26 +20,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require.config({
-    baseUrl: 'js',
-    waitSeconds: 15,
-    shim: {
-        openlayers: {
-            exports: 'OpenLayers'
-        },
-        'jquerytouch': {
-            deps: ['jquery'],
-            exports: '$'
-        }
-    },
-    paths: {
-        openlayers: 'openlayers/ol',
-        geocoderjs: 'geocoder/geocoder',
-        'jquerytouch': 'jquery-ui-touch-punch/jquery-ui-touch-punch'
-    }
-});
-define(['jquerytouch', 'core/notification', 'openlayers', 'core/ajax', 'geocoderjs'],
-        function ($, notification, ol, ajax, GeocoderJS) {
+define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder'],
+        function ($,jqui,touch, notification, ol, ajax, GeocoderJS) {
 
 
             var init = {

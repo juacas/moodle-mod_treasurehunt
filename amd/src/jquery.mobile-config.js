@@ -1,4 +1,4 @@
-define(['jquery','mod_treasurehunt/jquerymobile'], function ($) {
+define(['jquery'], function ($) {
     $(document).on('mobileinit', function () {
         console.log('mobileinit');
         $.mobile.autoInitializePage = false;
