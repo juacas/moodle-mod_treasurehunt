@@ -608,9 +608,12 @@ define(['jquery', 'core/notification', 'core/str', 'core/url', 'openlayers', 'co
                     }
                 }
             });
-            map.on('singleclick', function (evt) {
+            map.on('click', function (evt) {
                 var hasFeature = false;
                 map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function (feature, layer) {
+                    if (feature.get('stageposition') === 0) {
+                        return false;
+                    }
                     hasFeature = true;
                 });
                 if (playwithoutmoving && !hasFeature) {
