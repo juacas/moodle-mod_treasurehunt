@@ -1197,7 +1197,7 @@ function treasurehunt_get_strings_play() {
         "stageclue", "question", "noanswerselected", "timeexceeded",
         "searching", "continue", "noattempts", "aerialview", "roadview"
         , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-        "huntcompleted", "discoveredlocation", "answerwarning", "error"), "mod_treasurehunt");
+        "huntcompleted", "discoveredlocation", "answerwarning", "error","exit"), "mod_treasurehunt");
 }
 
 /**

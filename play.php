@@ -62,7 +62,7 @@ list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestam
         $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 
-$PAGE->requires->jquery();
+$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
         array(
     treasurehunt_get_strings_play(),
