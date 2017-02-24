@@ -635,6 +635,8 @@ define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notif
                                 // Necesito indexar cada camino en el objeto global treasurehunt
                                 roads.forEach(function (road) {
                                     //agrego los vectores a cada camino
+				    // cast string "0" or "1" to boolean
+				    road.blocked = road.blocked==true;
                                     addroad2ListPanel(road.id, road.name,
                                             road.blocked);
                                     features = geoJSON.readFeatures(road.stages, {
@@ -721,7 +723,7 @@ define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notif
                                  var stageposition = feature.get('stageposition');
                                  var name = feature.get('name');
                                  var clue = feature.get('clue');
-                                 var blocked = treasurehunt.roads[roadid].blocked;
+                                 var blocked = treasurehunt.roads[roadid].blocked==true;
                                  for (var i = 0; i < polygons.length; i++) {
                                  var newFeature = new ol.Feature(feature.getProperties());
                                  newFeature.setProperties({
