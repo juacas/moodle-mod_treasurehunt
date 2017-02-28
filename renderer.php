@@ -271,16 +271,37 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
+        // Type of geolocation: GPS or Desktop.
         if ($info->treasurehunt->playwithoutmoving) {
             $gamemode = get_string('playwithoutmoving', 'treasurehunt');
         } else {
             $gamemode = get_string('movingplay', 'treasurehunt');
         }
+        // Group or individual playing.
          if ($info->treasurehunt->groupmode) {
             $gamemode = get_string('groupmode', 'treasurehunt'). '. '. $gamemode;
         }
-        $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
-        $o .= html_writer::tag('p', $message) . "\n";
+        $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);      
+        // Information about the groups/groupings involved in the game.
+        $groupsmessages = [];
+        foreach ($info->roads as $road) {
+            if ($info->treasurehunt->groupmode == 0) {
+                if ($road->groupid > 0) {
+                    $gname = groups_get_group_name($road->groupid);
+                    $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => $road->groupid, 'grouping' => 0]);
+                }
+            } else if ($road->groupingid > 0) {
+                $gname = groups_get_grouping_name($road->groupingid);
+                $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => 0, 'grouping' => $road->groupingid]);
+            }
+            $groupsmessages[]= html_writer::link($link, $gname);
+        }
+        if (count($groupsmessages) != 0) {
+            $message .= '. ' . get_string('groups', 'treasurehunt') . ': ' . implode(', ', $groupsmessages);
+        }
+        $o .= html_writer::tag('p', $message);
+             
+        // Grading method.
         if ($info->treasurehunt->grade > 0) {
             $options = treasurehunt_get_grading_options();
             $message = get_string('grademethodinfo', 'treasurehunt', $options[$info->treasurehunt->grademethod]);

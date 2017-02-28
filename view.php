@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * This file is the entry point to the assign module. All pages are rendered from here
+ * This file is the entry point to the treasurehunt module. All pages are rendered from here
  *
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
@@ -26,7 +26,6 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once("$CFG->dirroot/mod/treasurehunt/renderable.php");
 require_once ($CFG->libdir . '/formslib.php');
-
 
 global $USER;
 $id = required_param('id', PARAM_INT);
@@ -41,8 +40,6 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:view', $context);
-
-
 
 $event = \mod_treasurehunt\event\course_module_viewed::create(array(
             'objectid' => $PAGE->cm->instance,
@@ -61,8 +58,6 @@ $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
-//$PAGE->set_pagelayout('embedded');
-
 
 /*
  * Other things you may want to set - remove if not needed.
@@ -74,10 +69,7 @@ $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 
 $output = $PAGE->get_renderer('mod_treasurehunt');
-// Output starts here.
 echo $output->header();
-// Replace the following lines with you own code.
-
 echo $output->heading(format_string($treasurehunt->name));
 // Conditions to show the intro can change to look for own settings or whatever.
 if (treasurehunt_view_intro($treasurehunt)) {

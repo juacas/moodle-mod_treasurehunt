@@ -66,7 +66,7 @@ $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
         array(
     treasurehunt_get_strings_play(),
-    $cm->id, $cm->instance,
+    $cm->id, $cm->instance, 
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
     $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime));

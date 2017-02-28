@@ -1102,7 +1102,8 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
     $duplicategroupsingroupings = array();
     $duplicateusersingroups = array();
     $unassignedusers = array();
-
+    $grouplist = array();
+    
     if ($cm->groupmode) {
         $grouptype = 'groupingid';
         $user = 'a.groupid';
@@ -1161,9 +1162,10 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:play');
             $roads = treasurehunt_add_road_userlist($roads, current($availablegroups), $totalparticipants, $attempts);
         } else {
-            foreach ($availablegroups as $groupid) {
-                if ($groupid->groupid) {
-                    $userlist = get_enrolled_users($context, 'mod/treasurehunt:play', $groupid->groupid);
+            foreach ($availablegroups as $group) {
+                if ($group->groupid) {
+                    $grouplist[]=$group;
+                    $userlist = get_enrolled_users($context, 'mod/treasurehunt:play', $group->groupid);
 
                     // Check if there is more than one road assigned to each user. 
                     list($totalparticipants,
@@ -1172,7 +1174,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                 } else {
                     $userlist = array();
                 }
-                $roads = treasurehunt_add_road_userlist($roads, $groupid, $userlist, $attempts);
+                $roads = treasurehunt_add_road_userlist($roads, $group, $userlist, $attempts);
             }
         }
     }
@@ -1182,7 +1184,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $unassignedusers = treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants,
                 $totalparticipantsincourse);
     }
-    return array($roads, $duplicategroupsingroupings, $duplicateusersingroups, $unassignedusers);
+    return array($roads, $duplicategroupsingroupings, $duplicateusersingroups, $unassignedusers, $grouplist);
 }
 
 
@@ -1648,11 +1650,12 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
  * @return string 
  */
 function treasurehunt_view_info($treasurehunt, $courseid) {
-    global $PAGE;
+    global $PAGE,$DB;
     $timenow = time();
-
+    // Get roads.
+    $roads = $DB->get_records('treasurehunt_roads',['treasurehuntid'=>$treasurehunt->id]);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid);
+    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid,$roads);
     return $output->render($renderable);
 }
 
@@ -1714,12 +1717,12 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
     global $PAGE;
 
     list($roads, $duplicategroupsingroupings, $duplicateusersingroups,
-            $unassignedusers) = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
+            $unassignedusers,$availablegroups) = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
     $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings,
-            $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission);
+            $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission,$availablegroups);
     return $output->render($renderable);
 }
 
