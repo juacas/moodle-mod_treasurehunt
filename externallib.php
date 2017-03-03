@@ -200,6 +200,7 @@ class mod_treasurehunt_external extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
         $features = treasurehunt_geojson_to_object($params['stages']);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             try {
                 $transaction = $DB->start_delegated_transaction();
@@ -271,6 +272,7 @@ class mod_treasurehunt_external extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
@@ -334,6 +336,7 @@ class mod_treasurehunt_external extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
@@ -396,6 +399,7 @@ class mod_treasurehunt_external extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
+        $status = array();
         if (isset($params['lockid'])) {
             if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
                 $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
@@ -579,7 +583,7 @@ class mod_treasurehunt_external extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:play', $context, null, false);
-        
+        $status = array();
         // Get the group and road to which the user belongs.
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
@@ -677,10 +681,12 @@ class mod_treasurehunt_external extends external_api {
         // If the road has been edited, warning the user.
         if ($updateroad) {
             if ($location) {
+                $status = array();
                 $status['msg'] = get_string('errsendinglocation', 'treasurehunt');
                 $status['code'] = 1;
             }
             if ($params['selectedanswerid']) {
+                $status = array();
                 $status['msg'] = get_string('errsendinganswer', 'treasurehunt');
                 $status['code'] = 1;
             }
@@ -692,7 +698,8 @@ class mod_treasurehunt_external extends external_api {
         if ($available->actnotavailableyet) {
             $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
-        if (!$status) {
+        if (!isset($status)) {
+            $status = array();
             $status['msg'] = get_string('userprogress', 'treasurehunt');
             $status['code'] = 0;
         }
@@ -710,8 +717,8 @@ class mod_treasurehunt_external extends external_api {
         $result['attempttimestamp'] = $updates->newattempttimestamp;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
         $result['status'] = $status;
-        if ($userattempts || $firststagegeom) {
-            if ($firststagegeom) {
+        if (isset($userattempts) || isset($firststagegeom)) {
+            if (isset($firststagegeom)) {
                 $result['firststagegeom'] = $firststagegeom;
             }
             $result['attempts'] = $userattempts;
