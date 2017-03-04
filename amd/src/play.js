@@ -342,7 +342,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             qoaremoved = response.qoaremoved;
                             roadfinished = response.roadfinished;
                             available = response.available;
-                            // Si he enviado una localizaciono una respuesta imprimo si es correcta o no.
+                            // Si he enviado una localizacion o una respuesta imprimo si es correcta o no.
                             if (location || selectedanswerid) {
                                 $.mobile.loading("hide");
                                 if (response.status !== null && available) {
