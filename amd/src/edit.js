@@ -1426,7 +1426,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             Draw.Polygon.finishDrawing();
                         }
                         roadid = $(this).attr('roadid');
-                        if (parseInt($(this).attr('blocked'))) {
+                        var blocked = $(this).attr('blocked');
+                        if (parseInt(blocked)|| blocked === 'true') {
                             deactivateAddstage();
                         } else {
                             activateAddstage();
