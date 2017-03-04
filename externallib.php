@@ -106,7 +106,8 @@ class mod_treasurehunt_external extends external_api {
     }
 
     public static function fetch_treasurehunt($treasurehuntid) {
-        $params = self::validate_parameters(self::fetch_treasurehunt_parameters(), array('treasurehuntid' => $treasurehuntid));
+        $params = self::validate_parameters(self::fetch_treasurehunt_parameters(),
+                        array('treasurehuntid' => $treasurehuntid));
         $status = array();
         $treasurehunt = new stdClass();
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
@@ -115,7 +116,7 @@ class mod_treasurehunt_external extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         $treasurehunt->roads = treasurehunt_get_all_roads_and_stages($params['treasurehuntid'], $context);
         $status['code'] = 0;
-        $status['msg'] = 'La caza del tesoro se ha cargado con ÃƒÂ©xito';
+        $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
 
         $result = array();
         $result['treasurehunt'] = $treasurehunt;
@@ -190,7 +191,8 @@ class mod_treasurehunt_external extends external_api {
 
     public static function update_stages($stages, $treasurehuntid, $lockid) {
         global $DB;
-        $params = self::validate_parameters(self::update_stages_parameters(), array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::update_stages_parameters(),
+                        array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -198,6 +200,7 @@ class mod_treasurehunt_external extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
         $features = treasurehunt_geojson_to_object($params['stages']);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             try {
                 $transaction = $DB->start_delegated_transaction();
@@ -206,7 +209,7 @@ class mod_treasurehunt_external extends external_api {
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
-                $status['msg'] = 'La actualizaciÃƒÂ³n de las etapas se ha realizado con ÃƒÂ©xito';
+                $status['msg'] = 'La actualización de las etapas se ha realizado con éxito';
             } catch (Exception $e) {
                 $transaction->rollback($e);
                 $status['code'] = 1;
@@ -214,7 +217,7 @@ class mod_treasurehunt_external extends external_api {
             }
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
         $result = array();
         $result['status'] = $status;
@@ -260,20 +263,22 @@ class mod_treasurehunt_external extends external_api {
     }
 
     public static function delete_stage($stageid, $treasurehuntid, $lockid) { //Don't forget to set it as static
-        $params = self::validate_parameters(self::delete_stage_parameters(), array('stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::delete_stage_parameters(),
+                        array('stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
-            $status['msg'] = 'La eliminaciÃƒÂ³n de la etapa se ha realizado con ÃƒÂ©xito';
+            $status['msg'] = 'La eliminación de la etapa se ha realizado con éxito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
 
         $result = array();
@@ -319,9 +324,10 @@ class mod_treasurehunt_external extends external_api {
         ));
     }
 
-    public static function delete_road($roadid, $treasurehuntid, $lockid) {
+    public static function delete_road($roadid, $treasurehuntid, $lockid) { 
         global $DB;
-        $params = self::validate_parameters(self::delete_road_parameters(), array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::delete_road_parameters(),
+                        array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -329,13 +335,14 @@ class mod_treasurehunt_external extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
+        $status = array();
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con ÃƒÂ©xito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
+            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
 
         $result = array();
@@ -382,14 +389,16 @@ class mod_treasurehunt_external extends external_api {
         );
     }
 
-    public static function renew_lock($treasurehuntid, $lockid) {
+    public static function renew_lock($treasurehuntid, $lockid) { 
         GLOBAL $USER;
-        $params = self::validate_parameters(self::renew_lock_parameters(), array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
+        $params = self::validate_parameters(self::renew_lock_parameters(),
+                        array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
 
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
+        $status = array();
         if (isset($params['lockid'])) {
             if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
                 $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
@@ -397,7 +406,7 @@ class mod_treasurehunt_external extends external_api {
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';
             } else {
                 $status['code'] = 1;
-                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta pÃƒÂ¡gina';
+                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
             }
         } else {
             if (!treasurehunt_is_edition_loked($params['treasurehuntid'], $USER->id)) {
@@ -406,7 +415,7 @@ class mod_treasurehunt_external extends external_api {
                 $status['msg'] = 'Se ha creado el bloqueo con exito';
             } else {
                 $status['code'] = 1;
-                $status['msg'] = 'La caza del tesoro estÃƒÂ¡ siendo editada';
+                $status['msg'] = 'La caza del tesoro está siendo editada';
             }
         }
         $result = array();
@@ -525,7 +534,8 @@ class mod_treasurehunt_external extends external_api {
             'attempttimestamp' => new external_value(PARAM_INT, 'Last updated timestamp attempt'),
             'roadtimestamp' => new external_value(PARAM_INT, 'Last updated timestamp road'),
             'infomsg' => new external_multiple_structure(
-                    new external_value(PARAM_RAW, 'The info text of attempt'), 'Array with all strings with attempts since the last stored timestamp'),
+                    new external_value(PARAM_RAW, 'The info text of attempt'),
+                    'Array with all strings with attempts since the last stored timestamp'),
             'lastsuccessfulstage' => new external_single_structure(
                     array(
                 'id' => new external_value(PARAM_INT, 'The id of the last successful stage.'),
@@ -570,7 +580,7 @@ class mod_treasurehunt_external extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:play', $context, null, false);
-
+        $status = array();
         // Get the group and road to which the user belongs.
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
@@ -658,10 +668,12 @@ class mod_treasurehunt_external extends external_api {
         // If the road has been edited, warning the user.
         if ($updateroad) {
             if ($params['location']) {
+                $status = array();
                 $status['msg'] = get_string('errsendinglocation', 'treasurehunt');
                 $status['code'] = 1;
             }
             if ($params['selectedanswerid']) {
+                $status = array();
                 $status['msg'] = get_string('errsendinganswer', 'treasurehunt');
                 $status['code'] = 1;
             }
@@ -674,6 +686,7 @@ class mod_treasurehunt_external extends external_api {
             $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
         if (!$status) {
+            $status = array();
             $status['msg'] = get_string('userprogress', 'treasurehunt');
             $status['code'] = 0;
         }
