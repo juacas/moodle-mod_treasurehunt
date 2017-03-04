@@ -20,11 +20,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder'],
-        function ($,jqui,touch, notification, ol, ajax, GeocoderJS) {
+define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder'],
+        function ($, jqui, touch, notification, ol, ajax, GeocoderJS) {
 
 
             var init = {
+                
                 edittreasurehunt: function (idModule, treasurehuntid, strings, selectedroadid, lockid) {
                     /** Global var ***************************************************************
                      */
@@ -71,8 +72,8 @@ define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notif
                     $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($(
                             "#searchcontainer"));
-                    $('<button id="addstage"/>').text(strings['stage']).prependTo($("#controlpanel"));
-                    $('<button id="addroad"/>').text(strings['road']).prependTo($("#controlpanel"));
+                    $('<button id="addstage" />').text(strings['stage']).prependTo($("#controlpanel"));
+                    $('<button id="addroad" />').text(strings['road']).prependTo($("#controlpanel"));
                     $("#radio1").button({
                         text: false,
                         icons: {
@@ -635,8 +636,8 @@ define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notif
                                 // Necesito indexar cada camino en el objeto global treasurehunt
                                 roads.forEach(function (road) {
                                     //agrego los vectores a cada camino
-				    // cast string "0" or "1" to boolean
-				    road.blocked = road.blocked==true;
+                                    // cast string "0" or "1" to boolean
+                                    road.blocked = road.blocked == true;
                                     addroad2ListPanel(road.id, road.name,
                                             road.blocked);
                                     features = geoJSON.readFeatures(road.stages, {
@@ -1519,6 +1520,7 @@ define(['jquery','jqueryui','mod_treasurehunt/jquery-ui-touch-punch','core/notif
                         }
                     };
                 } // End of function init
+
             }; // End of init var
             return init;
         });

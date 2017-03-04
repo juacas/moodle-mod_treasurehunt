@@ -296,3 +296,15 @@ $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un gru
 $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una agrupación: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún grupo/agrupación: {$a}, '
         . 'por lo que no son capaces de jugar la actividad.';
+
+// Initial tour help
+$string['addroad_tour']='Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
+$string['addstage_tour']='Añade varias etapas para que los estudiantes puedan seguir el camino. Cada estapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condisiones de desbloqueo.';
+$string['editend_tour']='¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
+$string['map_tour']='En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';
+$string['remove_tour']= 'Se pueden borrar los polígonos de las etapas. Símplemente selecciona un polígono en el mapa y pulsa este botón.';
+$string['roads_tour'] = 'En este área se muestran los caminos que has creado. Selecciona uno de los caminos para ver y gestionar sus etapas.';
+$string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides guardar tus cambios con este botón.';
+$string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
+$string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa.';
+$string['welcome_edit_tour']='Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';

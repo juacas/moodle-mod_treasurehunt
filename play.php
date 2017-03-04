@@ -70,6 +70,8 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
     $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime));
+//$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage',array(treasurehunt_get_strings_tour_edit()));
+
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
 
 $PAGE->set_pagelayout('embedded');

@@ -291,3 +291,16 @@ $string['warmatchanswer'] = 'The answer does not match the question';
 $string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
+
+// Initial tour help
+$string['addstage_tour']='Each road must have two or more stages. Each stage gives a clue to find out the next.';
+$string['addroad_tour']='Add one or more roads to be followed by your students.';
+$string['editend_tour']='Enjoy making exciting games for your students!';
+$string['map_tour']='In this map you can manage all the components of a funny geolocated game!';
+$string['remove_tour']= 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
+$string['roads_tour'] = 'In this area you will find the diferent roads of your game. Select one of them to edit the stages.';
+$string['save_tour'] = 'After drawing yout locations, don\'t forget to save your changes.';
+$string['searchlocation_tour'] = 'Whith this search area you can find your way rapidly';
+$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
+$string['welcome_edit_tour']='Welcome to the authoring page of TreasureHunt. ';
+

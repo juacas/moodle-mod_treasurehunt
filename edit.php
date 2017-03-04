@@ -77,6 +77,11 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->jquery_plugin('ui-css');
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
             array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
+   // if (treasurehunt_get_total_roads($treasurehunt->id)==0){
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage',array(treasurehunt_get_strings_tour_edit()));
+    //}
+    $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
+     $PAGE->requires->css('/mod/treasurehunt/css/introjs-rtl.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
@@ -92,7 +97,7 @@ if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
             'treasurehuntintro');
 }
-echo $OUTPUT->container_start("treasurehunt-editor");
+echo $OUTPUT->container_start("treasurehunt-editor","treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');
 echo $OUTPUT->box(null, 'loader-circle-inside');
