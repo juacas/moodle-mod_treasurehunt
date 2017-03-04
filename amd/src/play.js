@@ -19,7 +19,7 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/jquery.mobile-config','mod_treasurehunt/jquerymobile'],
+define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/jquery.mobile-config', 'mod_treasurehunt/jquerymobile'],
         function ($, url, ol, ajax, GeocoderJS) {
             var init = {
                 playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
@@ -324,16 +324,16 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         }
                         var geojson = ajax.call([{
                                 methodname: 'mod_treasurehunt_user_progress',
-                                args: {
-                                    treasurehuntid: treasurehuntid,
-                                    attempttimestamp: lastattempttimestamp,
-                                    roadtimestamp: lastroadtimestamp,
-                                    playwithoutmoving: playwithoutmoving,
-                                    groupmode: groupmode,
-                                    initialize: initialize,
-                                    location: position,
-                                    selectedanswerid: selectedanswerid,
-                                    qoaremoved: qoaremoved
+                                args: {userprogress: {
+                                        treasurehuntid: treasurehuntid,
+                                        attempttimestamp: lastattempttimestamp,
+                                        roadtimestamp: lastroadtimestamp,
+                                        playwithoutmoving: playwithoutmoving,
+                                        groupmode: groupmode,
+                                        initialize: initialize,
+                                        location: position,
+                                        selectedanswerid: selectedanswerid,
+                                        qoaremoved: qoaremoved}
                                 }
                             }]);
                         geojson[0].done(function (response) {
@@ -503,7 +503,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                             + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt')
                                             + "' style='position:relative'></span>" + attempt.string + "</li>")
                                             .appendTo(
-                                            $historylist);
+                                                    $historylist);
 
                                 });
                             }
@@ -773,7 +773,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     function create_popup(type, title, body) {
                         var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
                                 content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body
-                                + '</div>'),
+                                        + '</div>'),
                                 popup = $('<div data-role="popup" id="' + type + '"' +
                                         'data-theme="b" data-transition="slidedown"></div>');
                         if (type === 'infostage') {
