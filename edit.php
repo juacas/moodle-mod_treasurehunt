@@ -81,7 +81,6 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage',array(treasurehunt_get_strings_tour_edit()));
     //}
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
-     $PAGE->requires->css('/mod/treasurehunt/css/introjs-rtl.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));

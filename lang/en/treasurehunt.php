@@ -304,3 +304,13 @@ $string['searchlocation_tour'] = 'Whith this search area you can find your way r
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
 $string['welcome_edit_tour']='Welcome to the authoring page of TreasureHunt. ';
 
+$string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
+$string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
+$string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
+$string['mapplay_tour']='In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/parchment.png" width="28"/> and failed stages with <img src="pix/failure.png" width="28"/>';
+$string['playend_tour']='Enjoy pursuing the treasure with your mates!';
+$string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
+$string['nextstep']='Next';
+$string['prevstep']='Prev';
+$string['skiptutorial']='Quit';
+$string['donetutorial']='End';

@@ -30,6 +30,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro'],
                     //data-step="2" data-intro="Each road must have two or more stages. Each stage gives a clue to find out the next."
                     //data-step="1" data-intro="Add one or more roads to be followed by your students."
                     intro.setOptions({
+                        nextLabel: strings['nextstep'],
+                        prevLabel: strings['prevstep'],
+                        skipLabel: strings['skiptutorial'],
+                        doneLabel: strings['donetutorial'],
                         steps: [
                             {
                                 element: '#treasurehunt-editor',
@@ -42,7 +46,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro'],
                                 position: 'floating'
                             },
                             {
-                                element: '#roadlistpanel',
+                                element: '#roadlist',
                                 intro: strings['roads_tour'],
                                 position: 'top'
                             },
@@ -77,7 +81,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro'],
                         document.cookie = "introEditProgress = Done";
                     });
                     intro.onchange(function (target) {
-                        document.cookie = "introEditStep = "+target.name;
+                        document.cookie = "introEditStep = " + target.name;
                     });
                     var cook = {};
                     document.cookie.split(';').forEach(function (x) {
@@ -93,66 +97,72 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro'],
 
                 }, // end of editpage function
                 playpage: function (strings) {
-                    var intro = introJS();
-                    //data-step="2" data-intro="Each road must have two or more stages. Each stage gives a clue to find out the next."
-                    //data-step="1" data-intro="Add one or more roads to be followed by your students."
-                    intro.setOptions({
-                        steps: [
-                            {
-                                element: '#treasurehunt-editor',
-                                intro: strings['welcome_edit_tour'],
-                                position: 'floating'
-                            },
-                            {
-                                element: '#mapedit',
-                                intro: strings['map_tour'],
-                                position: 'floating'
-                            },
-                            {
-                                element: '#roadlistpanel',
-                                intro: strings['roads_tour'],
-                                position: 'top'
-                            },
-                            {
-                                element: '#stagelistpanel',
-                                intro: strings['stages_tour'],
-                                position: 'right'
-                            },
-                            {
-                                element: '#addroad',
-                                intro: strings['addroad_tour'],
-                                position: 'bottom'
-                            },
-                            {
-                                element: '#addstage',
-                                intro: strings['addstage_tour'],
-                                position: 'bottom'
-                            },
-                            {
-                                element: '#savestage',
-                                intro: strings['save_tour'],
-                                position: 'bottom'
-                            },
-                            {
-                                element: '#treasurehunt-editor',
-                                intro: strings['editend_tour'],
-                                position: 'floating'
-                            }
-                        ]
-                    });
-                    intro.oncomplete(function (target) {
-                        document.cookie = "introEditProgress = Done";
-                    });
-                    intro.onchange(function (target) {
-                        document.cookie = "introEditStep = "+target.name;
-                    });
+
                     var cook = {};
                     document.cookie.split(';').forEach(function (x) {
                         var arr = x.split('=');
                         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
                     });
-                    if (cook["introEditProgress"] != 'Done') {
+                    if (cook["introPlayProgress"] != 'Done') {
                         setTimeout(function () {
+                            var intro = introJS();
+                            intro.setOptions({
+                                nextLabel: strings['nextstep'],
+                                prevLabel: strings['prevstep'],
+                                skipLabel: strings['skiptutorial'],
+                                doneLabel: strings['donetutorial'],
+                                steps: [
+                                    {
+                                        intro: strings['welcome_play_tour'],
+                                        position: 'floating'
+                                    },
+
+                                    {
+                                        element: '#collapsibleset', //#lastsuccessfulstage',
+                                        intro: strings['lastsuccessfulstage_tour'],
+                                        position: 'top'
+                                    },
+
+                                    {
+                                        element: '#mapplay',
+                                        intro: strings['mapplay_tour'],
+                                        position: 'floating'
+                                    },
+                                    {
+                                        element: '#validatelocation',
+                                        intro: strings['validatelocation_tour'],
+                                        position: 'top'
+                                    },
+                                    {
+                                        element: '#autolocate',
+                                        intro: strings['autolocate_tour'],
+                                        position: 'top'
+                                    },
+
+                                    {
+                                        element: '#treasurehunt-editor',
+                                        intro: strings['playend_tour'],
+                                        position: 'floating'
+                                    }
+                                ]
+                            });
+                            intro.oncomplete(function (target) {
+                                document.cookie = "introPlayProgress = Done";
+                            });
+                            intro.onchange(function (target) {
+                                document.cookie = "introPlayStep = " + this._currentStep;
+                            });
+                            intro.onafterchange(function (target) {
+                                var parentElem = target.parentElement;
+                                while (parentElem != null) {
+                                    if (parentElem.dataset.role == 'panel') {
+                                        parentElem.style = "z-index: 1001 !important";
+                                        break;
+                                    } else {
+                                        parentElem = parentElem.parentElement;
+                                    }
+                                }
+                            });
                             intro.start();
                         }, 1000);
                     }
@@ -162,4 +172,4 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro'],
             }; // end of init var
             return init;
         }
- ); // end of module define function
+); // end of module define function

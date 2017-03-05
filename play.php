@@ -58,19 +58,18 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
 }
 // Get last timestamp 
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid,
-        $user->roadid);
+list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
-        array(
+$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     treasurehunt_get_strings_play(),
-    $cm->id, $cm->instance, 
+    $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
     $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime));
-//$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage',array(treasurehunt_get_strings_tour_edit()));
+$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage', array(treasurehunt_get_strings_tour_play()));
+$PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
 
