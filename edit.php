@@ -78,7 +78,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
             array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
    // if (treasurehunt_get_total_roads($treasurehunt->id)==0){
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage',array(treasurehunt_get_strings_tour_edit()));
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     //}
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');

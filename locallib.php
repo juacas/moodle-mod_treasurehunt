@@ -1212,23 +1212,7 @@ function treasurehunt_get_strings_edit() {
         'remove', 'searchlocation', 'savewarning', 'removewarning',
         'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
 }
-/**
- * Get all the strings used in the JavaScript of the initial tour of the edit page
- * 
- * @return array The strings
- */
-function treasurehunt_get_strings_tour_edit() {
-    return get_strings(array('addstage_tour', 'addroad_tour', 'stages_tour', 'roads_tour', 'save_tour',
-        'remove_tour', 'searchlocation_tour', 'map_tour','welcome_edit_tour','editend_tour','nextstep','prevstep','skiptutorial','donetutorial'), 'mod_treasurehunt');
-}/**
- * Get all the strings used in the JavaScript of the initial tour of the edit page
- * 
- * @return array The strings
- */
-function treasurehunt_get_strings_tour_play() {
-    return get_strings(array('autolocate_tour', 'validatelocation_tour', 'lastsuccessfulstage_tour', 'mapplay_tour', 'playend_tour',
-        'welcome_play_tour','nextstep','prevstep','skiptutorial','donetutorial'), 'mod_treasurehunt');
-}
+
 /**
  * Get the latest timestamp made by the group / user for the road and the last modification timestamp of the road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
