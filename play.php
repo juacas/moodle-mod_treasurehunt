@@ -68,7 +68,7 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
     $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime));
-$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage', array(treasurehunt_get_strings_tour_play()));
+$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
