@@ -21,6 +21,7 @@
  *
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace treasurehunt with the name of your module and remove this line.
@@ -77,9 +78,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->jquery_plugin('ui-css');
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
             array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
-   // if (treasurehunt_get_total_roads($treasurehunt->id)==0){
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
-    //}
+    $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 } else {

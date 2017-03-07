@@ -23,6 +23,7 @@
  *
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -115,6 +116,32 @@ function treasurehunt_get_grading_options() {
         TREASUREHUNT_GRADEFROMTIME => get_string('gradefromtime', 'treasurehunt'),
         TREASUREHUNT_GRADEFROMPOSITION => get_string('gradefromposition', 'treasurehunt')
     );
+}
+/**
+ * Creates a default road with a default stage to the treasurehunt if empty
+ * @param type $treasurehunt
+ */
+function treasurehunt_create_default_items($treasurehunt){
+    $roads = treasurehunt_get_total_roads($treasurehunt->id);
+    $context = context_module::instance($treasurehunt->coursemodule);
+    if ($roads == 0){
+        $road = new stdClass();
+        $road->name=get_string('road','treasurehunt');
+        treasurehunt_add_update_road($treasurehunt, $road,$context);
+        // Adds a default stage to the road
+        $stage = new stdClass();
+        $stage->id = null;
+        $stage->roadid = $road->id;
+        $stage->timecreated = time();
+        $stage->name = get_string('stage','treasurehunt');
+        $stage->cluetext = '';          // updated later
+        $stage->cluetextformat = FORMAT_HTML; // updated later
+        $stage->cluetexttrust = 0;           // updated later
+        $stage->questiontext = '';          // updated later
+        $stage->questiontextformat = FORMAT_HTML; // updated later
+        $stage->questiontexttrust = 0;           // updated later
+        $stage->id = treasurehunt_insert_stage_form($stage);
+    }
 }
 
 /**
@@ -1785,6 +1812,31 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             return get_string('useractivityovercome', 'treasurehunt', $attempt);
         }
     }
+}
+/**
+ * Adds a new road or update existing one
+ * @param stdClass $treassurehunt
+ * @param stdClass $road record for a row: name, treasurehuntid
+ * @param type $context
+ * @return \stdClass
+ */
+function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $context) {
+    global $DB;
+    $eventparams = array('context' => $context);
+    if (empty($road->id)) {
+        $road->treasurehuntid = $treasurehunt->id;
+        $road->timecreated = time();
+        $road->id = $DB->insert_record('treasurehunt_roads', $road);
+        $eventparams['objectid'] = $road->id;
+        $event = \mod_treasurehunt\event\road_created::create($eventparams);
+    } else {
+        $DB->update_record('treasurehunt_roads', $road);
+        $eventparams['objectid'] = $road->id;
+        $event = \mod_treasurehunt\event\road_updated::create($eventparams);
+    }
+    // Trigger event and update completion (if entry was created).
+    $event->trigger();
+    return $road;
 }
 
 /**

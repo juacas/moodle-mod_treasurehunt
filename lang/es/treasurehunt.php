@@ -205,7 +205,7 @@ $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['play'] = 'Jugar';
-$string['playstagewithoutmoving'] = 'Descrubir etapa sin desplazarse';
+$string['playstagewithoutmoving'] = 'Descubrir etapa sin desplazarse';
 $string['playstagewithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán descubrir esta etapa sin tener '
         . 'que desplazarse. Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, '
         . 'borrando la anterior si existiese, indicando el último punto deseado. Al completar la etapa, el juego cambiará '
@@ -299,7 +299,7 @@ $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún g
 
 // Initial tour help
 $string['addroad_tour']='Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
-$string['addstage_tour']='Añade varias etapas para que los estudiantes puedan seguir el camino. Cada estapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condisiones de desbloqueo.';
+$string['addstage_tour']='Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';
 $string['editend_tour']='¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
 $string['map_tour']='En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';
 $string['remove_tour']= 'Se pueden borrar los polígonos de las etapas. Símplemente selecciona un polígono en el mapa y pulsa este botón.';
@@ -309,12 +309,12 @@ $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidament
 $string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa.';
 $string['welcome_edit_tour']='Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
 
-$string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
-$string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
-$string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour']='In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/parchment.png" width="28"/> and failed stages with <img src="pix/failure.png" width="28"/>';
-$string['playend_tour']='Enjoy pursuing the treasure with your mates!';
-$string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
+$string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';
+$string['validatelocation_tour'] = 'Cuando estés seguro de la localización de una etapa del juego debes enviar tu posición para comprobar si has acertado. Pulsa este botón una vez que el mapa esté centrado en tu posición.';
+$string['lastsuccessfulstage_tour'] = 'En este panel encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
+$string['mapplay_tour']='En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/parchment.png" width="28"/> y las falladas con <img src="pix/failure.png" width="28"/>';
+$string['playend_tour']='¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
+$string['welcome_play_tour'] = 'Bienvenido a la pantalla de juego de la Caza del Tesoro. Este es el interfaz para buscar, investigar y conseguir tu tesoro.';
 $string['nextstep']='Sig.';
 $string['prevstep']='Ant.';
 $string['skiptutorial']='Salir';

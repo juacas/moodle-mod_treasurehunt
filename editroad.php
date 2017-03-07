@@ -107,28 +107,9 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         redirect($returnurl);
     } else if ($road = $mform->get_data()) {
         //Actualizamos los campos
-        $timenow = time();
+       
         $road->name = trim($road->name);
-
-        $eventparams = array(
-            'context' => $context,
-            'objectid' => $road->id,
-        );
-        if (empty($road->id)) {
-            $road->treasurehuntid = $treasurehunt->id;
-            $road->timecreated = $timenow;
-            $road->id = $DB->insert_record('treasurehunt_roads', $road);
-            $eventparams['objectid'] = $road->id;
-            $event = \mod_treasurehunt\event\road_created::create($eventparams);
-        } else {
-            $road->timemodified = $timenow;
-            $DB->update_record('treasurehunt_roads', $road);
-            $event = \mod_treasurehunt\event\road_updated::create($eventparams);
-        }
-        // store the updated value values
-        // Trigger event and update completion (if entry was created).
-
-        $event->trigger();
+        $road=treasurehunt_add_update_road($treasurehunt,$road,$context);
         $returnurl->param('roadid', $road->id);
         redirect($returnurl);
     }

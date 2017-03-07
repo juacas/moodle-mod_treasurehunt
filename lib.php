@@ -22,6 +22,7 @@
  *
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 require_once $CFG->libdir . '/filelib.php';
@@ -80,10 +81,11 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
     // You may have to add extra stuff in here.
 
     $treasurehunt->id = $DB->insert_record('treasurehunt', $treasurehunt);
+    if ($mform!==null){ // This indicates it is a manual creation. Do not create items when restoring backups.
+        treasurehunt_create_default_items($treasurehunt);
+    }
     treasurehunt_grade_item_update($treasurehunt);
-
     treasurehunt_update_events($treasurehunt);
-
     return $treasurehunt->id;
 }
 
