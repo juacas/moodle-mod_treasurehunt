@@ -20,12 +20,12 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder'],
-        function ($, jqui, touch, notification, ol, ajax, GeocoderJS) {
+define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/ol3-layerswitcher'],
+        function ($, jqui, touch, notification, ol, ajax, GeocoderJS, olLayerSwitcher) {
 
 
             var init = {
-                
+
                 edittreasurehunt: function (idModule, treasurehuntid, strings, selectedroadid, lockid) {
                     /** Global var ***************************************************************
                      */
@@ -282,11 +282,33 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }),
                         visible: false
                     });
-                    var map = new ol.Map({
+                    var basemaps = new ol.layer.Group({
+                        'title': strings['basemaps'],
                         layers: [
                             new ol.layer.Tile({
+                                title: strings['aerialmap'],
+                                type: 'base',
+                                visible: false,
+                                source: new ol.source.BingMaps({
+                                    key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
+                                    imagerySet: 'AerialWithLabels',
+                                    maxZoom: 19
+                                            // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                                            // "no photos at this zoom level" tiles
+                                            // maxZoom: 19
+                                })
+                            }), new ol.layer.Tile({
+                                title: strings['roadmap'],
+                                type: 'base',
+                                visible: true,
                                 source: new ol.source.OSM()
-                            }), vectorDraw],
+                            })
+                        ]
+                    });
+                    var layerSwitcher = new ol.control.LayerSwitcher();
+                    var map = new ol.Map({
+                        layers: [basemaps
+                                    , vectorDraw],
                         renderer: 'canvas',
                         target: 'mapedit',
                         view: new ol.View({
@@ -294,10 +316,11 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             zoom: 2,
                             minZoom: 2
                         }),
-                        controls: ol.control.defaults().extend([
+                        controls: ol.control.defaults().extend([layerSwitcher,
                             new app.generateResizableControl({target: document.getElementById("stagelistpanel")})
                         ])
                     });
+                    layerSwitcher.showPanel();
                     //Creo el resizable
                     $("#stagelistpanel").resizable({
                         handles: {'e': $('#egrip')},
@@ -1427,7 +1450,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                         roadid = $(this).attr('roadid');
                         var blocked = $(this).attr('blocked');
-                        if (parseInt(blocked)|| blocked === 'true') {
+                        if (parseInt(blocked) || blocked === 'true') {
                             deactivateAddstage();
                         } else {
                             activateAddstage();

@@ -1235,7 +1235,7 @@ function treasurehunt_get_strings_play() {
  * @return array The strings
  */
 function treasurehunt_get_strings_edit() {
-    return get_strings(array('stage', 'road', 'add', 'modify', 'save',
+    return get_strings(array('stage', 'road','aerialmap','roadmap','basemaps','add', 'modify', 'save',
         'remove', 'searchlocation', 'savewarning', 'removewarning',
         'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
 }
