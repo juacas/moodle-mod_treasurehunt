@@ -66,12 +66,7 @@ class stage_form extends moodleform {
         $mform->addRule('name', null, 'required', null, 'client');
         //Aqui anadimos la regla del tamano maximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-        // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripciÃƒÂ³n, si quieres 
-        // ... que aparezca en la portada, etc.
-        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue', 'treasurehunt'), null, $editoroptions);
-        $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
-        $mform->setType('cluetext_editor', PARAM_RAW);
-        $mform->addRule('cluetext_editor', null, 'required', null, 'client');
+
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
 
@@ -105,7 +100,14 @@ class stage_form extends moodleform {
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
                     $currentstage->noanswers, NUMBER_NEW_ANSWERS);
         }
-
+        
+        $mform->addElement('header', 'cluetextsection',
+                get_string('stageclue', 'treasurehunt'));
+        // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game
+        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
+        $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
+        $mform->setType('cluetext_editor', PARAM_RAW);
+        $mform->addRule('cluetext_editor', null, 'required', null, 'client');
         // Anado los campos ocultos.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);

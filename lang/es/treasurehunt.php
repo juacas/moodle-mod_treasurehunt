@@ -106,6 +106,8 @@ $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra. '
         . 'Cuanto más grande es, menos peticiones de actualización deben hacerse, pero más tiempo pasa en informar de un posible cambio. '
         . 'Debe ser mayor a 0 segundos, sino se fijará el tiempo por defecto.';
+$string['geolocation_needed_title']='Esta aplicación necesita geolocalización';
+$string['geolocation_needed']='Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.';
 $string['gradefromposition'] = 'Puntuación por posición';
 $string['gradefromstages'] = 'Puntuación por etapas';
 $string['gradefromtime'] = 'Puntuación por tiempo';

@@ -106,6 +106,8 @@ $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another. '
         . 'The larger, less update requests should be made, but more time passes to report a possible change. '
         . 'It must be greater than 0 seconds, but the time will be set by default.';
+$string['geolocation_needed_title']='This application needs geolocation.';
+$string['geolocation_needed']='To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
 $string['gradefromposition'] = 'Grade from position';
 $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from time';

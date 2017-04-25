@@ -122,6 +122,23 @@
             </div>
         </div>{{!Fin de Popup de aviso de envio.}}
 
+ {{!Popup de aviso de geolocalizacion.}}
+
+        <div data-role="popup" id="popupgeoloc" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+            <div data-role="header" data-theme="b">
+                <h1>{{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}</h1>
+            </div>
+            <div role="content" class="ui-content ui-overlay-b">
+                <p>{{#str}} geolocation_needed, mod_treasurehunt{{/str}}</p>
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
+                            {{#str}} cancel, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                </fieldset>
+            </div>
+        </div>{{!Fin de Popup de aviso de envio.}}
 
         {{!Cabecera y barra de herramientas.}}
 

@@ -335,7 +335,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                         groupmode: groupmode,
                                         initialize: initialize,
                                         location: position,
-                                        currentposition: tracking?currentposition:null, // for tracking.
+                                        currentposition: (tracking&&!playwithoutmoving)?currentposition:undefined, // only for tracking in mobility.
                                         selectedanswerid: selectedanswerid,
                                         qoaremoved: qoaremoved}
                                 }
@@ -578,9 +578,14 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         $.mobile.loading("hide");
                     });
                     geolocation.on('error', function (error) {
-                        this.setTracking(false);
                         $.mobile.loading("hide");
+                        geolocation.setProperties({"user_denied":true});
                         toast(error.message);
+                        if (error.code == error.PERMISSION_DENIED && tracking && !playwithoutmoving) {
+                            setInterval(function () {
+                                $('#popupgeoloc').popup("open", {positionTo: "window"});
+                            }, 500);
+                        }
                     });
                     geolocation.setTracking(tracking);// Start position tracking.
                     
@@ -715,7 +720,11 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     //Buttons events
                     $('#autolocate').on('click', function () {
+                        if (geolocation.get("user_denied")){
+                            $('#popupgeoloc').popup("open", {positionTo: "window"});
+                        }else{
                         autocentermap(true);
+                        }
                     });
                     $('#infopanel').panel({beforeclose: function () {
                             select.getFeatures().clear();
