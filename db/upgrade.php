@@ -26,13 +26,32 @@ defined('MOODLE_INTERNAL') || die();
 
 /**
  * Execute treasurehunt upgrade from the given old version
- *
+ * @global moodle_database $DB
  * @param int $oldversion
  * @return bool
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB, $CFG;
-
-
+  $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
+ if ($oldversion<2017042000){
+        $table = new xmldb_table('treasurehunt');
+        $field=new xmldb_field('tracking',XMLDB_TYPE_INTEGER,2,true, true, false,0);
+        $dbman->add_field($table, $field);
+        
+        $table = new xmldb_table('treasurehunt_track');
+        $table->addField(new xmldb_field('id',XMLDB_TYPE_INTEGER,10,XMLDB_UNSIGNED,XMLDB_NOTNULL,XMLDB_SEQUENCE));
+        $table->addField(new xmldb_field('treasurehuntid',XMLDB_TYPE_INTEGER,10,XMLDB_UNSIGNED,XMLDB_NOTNULL));
+        $table->addField(new xmldb_field('stageid',XMLDB_TYPE_INTEGER,10,XMLDB_UNSIGNED,!XMLDB_NOTNULL));
+        $table->addField(new xmldb_field('userid',XMLDB_TYPE_INTEGER,10,XMLDB_UNSIGNED,XMLDB_NOTNULL));
+        $table->addField(new xmldb_field('location',XMLDB_TYPE_TEXT,null,null,XMLDB_NOTNULL));
+        $table->addField(new xmldb_field('timestamp',XMLDB_TYPE_INTEGER,10,XMLDB_UNSIGNED,XMLDB_NOTNULL));
+        $table->addKey(new xmldb_key('primary', XMLDB_KEY_PRIMARY,['id']));
+        $table->addKey(new xmldb_key('user_fk', XMLDB_KEY_FOREIGN,['userid'],'user',['id']));
+        $table->addKey(new xmldb_key('treasurehunt_fk', XMLDB_KEY_FOREIGN,['treasurehuntid'],'treasurehunt',['id']));
+        $table->addKey(new xmldb_key('stage_fk', XMLDB_KEY_FOREIGN,['stageid'],'treasurehunt_stages',['id']));
+        $table->addIndex(new xmldb_index('timestamp_idx', XMLDB_INDEX_NOTUNIQUE, ['timestamp']));
+        
+        $dbman->create_table($table);
+    }
     return true;
 }

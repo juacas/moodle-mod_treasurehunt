@@ -52,4 +52,5 @@ if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_configtext('mod_treasurehunt/gameupdatetime',
             get_string('gameupdatetime', 'treasurehunt'), get_string('gameupdatetime_help', 'treasurehunt'),
             TREASUREHUNT_GAMEUPDATETIME, PARAM_INT));
+   
 }

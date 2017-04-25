@@ -461,6 +461,17 @@ class mod_treasurehunt_external extends external_api {
                         new external_value(PARAM_FLOAT, "Latitude")
                             ), 'Coordinates definition in geojson format for point'),
                         ), 'Geometry definition in geojson format', VALUE_OPTIONAL),
+                'currentposition' => new external_single_structure(
+                        array(
+                    'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                    'coordinates' =>
+                    new external_single_structure(
+                            array(
+                        new external_value(PARAM_FLOAT, "Longitude"),
+                        new external_value(PARAM_FLOAT, "Latitude")
+                            ), 'Coordinates definition in geojson format for point'),
+                        ), 'Geometry definition in geojson format', VALUE_OPTIONAL),      
+                  
                     )
             )
          )
@@ -573,9 +584,11 @@ class mod_treasurehunt_external extends external_api {
 
     public static function user_progress($userprogress) {
         global $USER, $DB;
-
+        $firststagegeom = null;
+        $userattempts = null;
         $params = self::validate_parameters(self::user_progress_parameters(), array('userprogress' => $userprogress))['userprogress'];
-        $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
+        $treasurehuntid = $params['treasurehuntid'];
+        $cm = get_coursemodule_from_instance('treasurehunt', $treasurehuntid);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -585,6 +598,20 @@ class mod_treasurehunt_external extends external_api {
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
         $nostages = treasurehunt_get_total_stages($userparams->roadid);
+         // Track path.
+         if ($treasurehunt->tracking && isset($params['currentposition'])) {
+            $location= treasurehunt_geojson_to_object($params['currentposition']);
+            $locationwkt = treasurehunt_geometry_to_wkt($location);
+            // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
+            $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid);
+            if ($currentstage) {
+                $nextnostage = $currentstage->position + 1;
+            } else {
+                $nextnostage = 1;
+            }
+            $currentworkingstage = $DB->get_record('treasurehunt_stages', array('position' => $nextnostage, 'roadid' => $userparams->roadid), '*', MUST_EXIST);
+            treasurehunt_track_user($USER->id, $treasurehunt,  $currentworkingstage->id, time(), $locationwkt);
+        }
         // Check if the user has finished the road.
         $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
@@ -630,7 +657,7 @@ class mod_treasurehunt_external extends external_api {
             }
             $qoaremoved = $qocsolved->qoaremoved;
 
-            if (!$updates->geometrysolved && $params['location'] && !$updateroad && !$changesinplaymode && !$changesingroupmode) {
+            if (!$updates->geometrysolved && isset($params['location']) && !$updateroad && !$changesinplaymode && !$changesingroupmode) {
                 $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid, $userparams->roadid, treasurehunt_geojson_to_object($params['location']), $context, $treasurehunt, $nostages);
                 if ($checklocation->newattempt) {
                     $updates->newattempttimestamp = $checklocation->attempttimestamp;
@@ -662,10 +689,11 @@ class mod_treasurehunt_external extends external_api {
         if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved || $params['initialize'] || $changesingroupmode) {
             $lastsuccessfulstage = treasurehunt_get_last_successful_stage($USER->id, $userparams->groupid, $userparams->roadid, $nostages, $available->outoftime, $available->actnotavailableyet, $context);
         }
+        
         if ($updates->newgeometry || $updateroad || $roadfinished || $params['initialize'] || $changesingroupmode) {
             list($userattempts, $firststagegeom) = treasurehunt_get_user_progress($userparams->roadid, $userparams->groupid, $USER->id, $treasurehuntid, $context);
         }
-        // If the road has been edited, warning the user.
+        // If the road has been edited, warn the user.
         if ($updateroad) {
             if ($params['location']) {
                 $status = array();
@@ -678,7 +706,7 @@ class mod_treasurehunt_external extends external_api {
                 $status['code'] = 1;
             }
         }
-        // If the activity is out of time and not being initialized, warning the user.
+        // If the activity is out of time and not being initialized, warn the user.
         if ($available->outoftime && !$params['initialize']) {
             $updates->strings[] = get_string('timeexceeded', 'treasurehunt');
         }

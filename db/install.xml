@@ -14,6 +14,7 @@
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playwithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true students may play from their computers without moving to places. If false they need to be on location."/>
+                <FIELD NAME="tracking" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the system saves a log with the location of every user during the game."/>
                 <FIELD NAME="groupmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the activity will be in groups."/>
                 <FIELD NAME="alwaysshowdescription" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If false the treasurehunt intro will only be displayed after the allowsubmissionsfrom date. If true it will always be displayed."/>
                 <FIELD NAME="allowattemptsfromdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, submissions will only be accepted after this date."/>
@@ -126,6 +127,25 @@
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
                 <KEY NAME="stageid" TYPE="foreign" FIELDS="stageid" REFTABLE="treasurehunt_stages" REFFIELDS="id"/>
             </KEYS>
+        </TABLE>
+         <TABLE NAME="treasurehunt_track" COMMENT="Stores position tracks of the participants.">
+            <FIELDS>
+                <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
+                <FIELD NAME="treasurehuntid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="false" COMMENT="Treasurehunt game that generated the trace."/>
+                <FIELD NAME="userid" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="false" COMMENT="User id"/>
+                <FIELD NAME="stageid" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifies the last stage that the user has solved "/>
+                <FIELD NAME="location" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="The location of user"/>
+                <FIELD NAME="timestamp" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
+            </FIELDS>
+            <KEYS>
+                <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+                <KEY NAME="user_fk" TYPE="foreign" FIELDS="userid" REFTABLE="user" REFFIELDS="id"/>
+                <KEY NAME="treasurehunt_fk" TYPE="foreign" FIELDS="treasurehuntid" REFTABLE="treasurehunt" REFFIELDS="id"/>
+                <KEY NAME="stage_fk" TYPE="foreign" FIELDS="stageid" REFTABLE="treasurehunt_stages" REFFIELDS="id"/>
+            </KEYS>
+             <INDEXES>
+                <INDEX NAME="timestamp_idx" UNIQUE="false" FIELDS="timestamp"/>
+            </INDEXES>
         </TABLE>
     </TABLES>
 </XMLDB>

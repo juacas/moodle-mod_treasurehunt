@@ -153,6 +153,8 @@ function treasurehunt_delete_instance($id) {
         $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', array($road->id));
     }
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
+    $DB->delete_records('treasurehunt_track', array('treasurehuntid' => $treasurehunt->id));
+
     $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
     treasurehunt_grade_item_delete($treasurehunt);
 

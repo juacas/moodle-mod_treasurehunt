@@ -24,7 +24,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
             var init = {
                 playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
                         lastattempttimestamp,
-                        lastroadtimestamp, gameupdatetime) {
+                        lastroadtimestamp, gameupdatetime,tracking) {
                     var parchmenturl = url.imageUrl('parchment', 'treasurehunt'),
                             failureurl = url.imageUrl('failure', 'treasurehunt'),
                             markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
@@ -175,14 +175,8 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             return true;
                         }
                     });
-                    var geolocation = new ol.Geolocation({
-                        projection: view.getProjection(),
-                        trackingOptions: {
-                            enableHighAccuracy: true,
-                            maximumAge: 0
-                        },
-                        tracking: false
-                    });
+                   
+                    
                     var accuracyFeature = new ol.Feature();
                     accuracyFeature.setStyle(accuracyFeatureStyle);
                     var positionFeature = new ol.Feature();
@@ -221,7 +215,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     // Initialize the page layers.
                     add_layergroup_to_list(layergroup);
 
-
+                   
                     /*-------------------------------Functions-----------------------------------*/
                     function style_function(feature, resolution) {
                         // Get the income level from the feature properties
@@ -274,20 +268,16 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         defaultSelectstageStyle.getText().setText('' + stageposition);
                         return [defaultSelectstageStyle];
                     }
-                    function autolocate(center, validate) {
-                        center = center || false;
-                        validate = validate || false;
-                        if (playwithoutmoving && validate) {
-                            if (markerFeature.getGeometry() !== null) {
-                                renew_source(true, false);
-                            } else {
-                                toast(strings["nomarks"]);
-                            }
+                    function validateposition() {
+                        if (playwithoutmoving && markerFeature.getGeometry() == null) {
+                            toast(strings["nomarks"]);
                         } else {
-                            $.mobile.loading("show");
-                            geolocation.setProperties({center: center, validate_location: validate});
-                            geolocation.setTracking(true);
+                            renew_source(true, false);
                         }
+                    }
+                    function autocentermap(){
+                         position = geolocation.getPosition();
+                         fly_to(map,position);
                     }
                     function fly_to(map, point, extent) {
                         var duration = 700;
@@ -304,23 +294,36 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             });
                         }
                     }
+                    /**
+                     * Updates the model of the game.
+                     * Notifies a new location for validation or a new answer to a question
+                     * @param {boolean} location requests a location validation
+                     * @param {boolean} initialize
+                     * @param {int} selectedanswerid submits an answer to a question
+                     * @returns {undefined}
+                     */
                     function renew_source(location, initialize, selectedanswerid) {
+                        // var position holds the potition to be evaluated. undef if no evaluation requested
                         var position;
+                        var currentposition;
+                        var coordinates;
+                        if (playwithoutmoving) {
+                            coordinates = markerFeature.getGeometry();
+                        } else {
+                            coordinates = positionFeature.getGeometry();
+                        }
+                        if (coordinates){
+                             currentposition = geoJSONFormat.writeGeometryObject(coordinates, {
+                                dataProjection: 'EPSG:4326',
+                                featureProjection: 'EPSG:3857'
+                            });
+                        }
                         if (selectedanswerid) {
                             $.mobile.loading("show");
                         }
                         if (location) {
-                            var coordinates;
-                            if (playwithoutmoving) {
-                                coordinates = markerFeature.getGeometry();
-                            } else {
-                                coordinates = positionFeature.getGeometry();
-                            }
-                            position = geoJSONFormat.writeGeometryObject(coordinates, {
-                                dataProjection: 'EPSG:4326',
-                                featureProjection: 'EPSG:3857'
-                            });
-                            $.mobile.loading("show");
+                           position=currentposition;
+                           $.mobile.loading("show");
                         }
                         var geojson = ajax.call([{
                                 methodname: 'mod_treasurehunt_user_progress',
@@ -332,6 +335,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                         groupmode: groupmode,
                                         initialize: initialize,
                                         location: position,
+                                        currentposition: tracking?currentposition:null, // for tracking.
                                         selectedanswerid: selectedanswerid,
                                         qoaremoved: qoaremoved}
                                 }
@@ -539,23 +543,38 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         });
 
                     }
-
-
+                    /**
+                     * Geolocation component
+                     * @type ol.Geolocation
+                     */
+                    var geolocation = new ol.Geolocation(/** @type {olx.GeolocationOptions} */({
+                                           projection: view.getProjection(),
+                                           trackingOptions: {
+                                               enableHighAccuracy: true,
+                                               maximumAge: 0,
+                                               timeout: 10000
+                                           }
+                                          // tracking: true // track changes in position.
+                                       }));
                     /*-------------------------------Events-----------------------------------*/
                     geolocation.on('change:position', function () {
                         var coordinates = this.getPosition();
+                        positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
+                        // The map must be re-centered in the new position
                         if (this.get("center")) {
                             fly_to(map, coordinates);
+                            this.setProperties({"center":false}); // Disable center request
                         }
-                        positionFeature.setGeometry(coordinates ?
-                                new ol.geom.Point(coordinates) : null);
+                        // the new position must be evaluated
                         if (this.get("validate_location")) {
                             renew_source(true, false);
+                            this.setProperties({"validate_location":false}); // Disable validate_location request
                         }
+                         $.mobile.loading("hide");
                     });
                     geolocation.on('change:accuracyGeometry', function () {
                         accuracyFeature.setGeometry(this.getAccuracyGeometry());
-                        this.setTracking(false);
+                        // JPC this.setTracking(false);
                         $.mobile.loading("hide");
                     });
                     geolocation.on('error', function (error) {
@@ -563,6 +582,8 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         $.mobile.loading("hide");
                         toast(error.message);
                     });
+                    geolocation.setTracking(tracking);// Start position tracking.
+                    
                     select.on("select", function (features) {
                         if (features.selected.length === 1) {
                             if (lastsuccessfulstage.position === features.selected[0].get('stageposition')
@@ -694,14 +715,14 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     //Buttons events
                     $('#autolocate').on('click', function () {
-                        autolocate(true);
+                        autocentermap(true);
                     });
                     $('#infopanel').panel({beforeclose: function () {
                             select.getFeatures().clear();
                         }
                     });
                     $('#sendLocation').on('click', function () {
-                        autolocate(false, true);
+                        validateposition(true);
                     });
                     $('#sendAnswer').on('click', function (event) {
                         //selecciono la respuesta

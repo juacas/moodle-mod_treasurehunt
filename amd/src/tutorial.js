@@ -128,7 +128,7 @@ function configureEditIntro(intro, strings,keys) {
     });
 }
 ; // end of configureEditIntro
-function configurePlayIntro(intro, string,keys) {
+function configurePlayIntro(intro, strings,keys) {
     intro.setOptions({
         nextLabel: strings[keys.indexOf('nextstep')],
         prevLabel: strings[keys.indexOf( 'prevstep')],
