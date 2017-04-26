@@ -437,6 +437,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                 markerFeature.setGeometry(null);
                                 playwithoutmoving = false;
                                 clearInterval(interval);
+                                $("#mapplay").css('opacity','0.6');
                             }
                         }).fail(function (error) {
                             console.log(error);
