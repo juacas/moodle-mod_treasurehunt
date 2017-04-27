@@ -1483,6 +1483,20 @@ function treasurehunt_insert_attempt($attempt, $context) {
 }
 
 /**
+ * Retrieve paths of a gameplay
+ * @global moodle_database $DB
+ * @param type $treasurehunt
+ */
+/*
+function treasurehunt_overview_geojson($treasurehunt){
+    global $DB;
+    $sql = 'select * from {treasurehunt_track} group by userid order by timestamp DESC';
+    $positions = $DB->get_records_sql($sql,[$treasurehunt->id]);
+    //JPC: Generate GeoJSON with positions
+    $featureColl = new FeatureCollection();
+    kjhjkhlkjh$feature = new Feature();
+}*/
+/**
  * Inserts one point in a tracked game.
  * @global moodle_database $DB
  * @param type $userid

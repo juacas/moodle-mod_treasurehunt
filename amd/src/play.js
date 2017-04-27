@@ -396,10 +396,13 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                     if (lastsuccessfulstage.question !== '') {
                                         changesinquestionstage = true;
                                         $('#validatelocation').hide();
+                                        $('#question_button').show();
                                     } else if (!lastsuccessfulstage.activitysolved) {
                                         $('#validatelocation').hide();
+                                        $('#question_button').show();
                                     } else {
                                         $('#validatelocation').show();
+                                        $('#question_button').hide();
                                     }
                                 }
                                 // Compruebo si es la primera geometria o se esta inicializando y centro el mapa.
@@ -432,8 +435,13 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                 });
                                 create_popup('displayupdates', strings["updates"], body);
                             }
+                            if (!roadfinished){
+                                $('#roadended').hide();
+                            }
                             if (roadfinished || !available) {
                                 $('#validatelocation').hide();
+                                $('#question_button').hide();
+                                $('#roadended').show();
                                 markerFeature.setGeometry(null);
                                 playwithoutmoving = false;
                                 clearInterval(interval);

@@ -232,6 +232,7 @@ $string['restrictionsdiscoverstage'] = 'Restrictions to discover stage';
 $string['reviewofplay'] = 'Review of play';
 $string['road'] = 'Road';
 $string['roadmap'] = 'Road';
+$string['roadended'] = 'This road is complete. Congratulations! You have done the treasure hunt. You can check your history in the map.';
 $string['roadname'] = 'Road\'s name';
 $string['roadview'] = 'Road';
 $string['save'] = 'Save';

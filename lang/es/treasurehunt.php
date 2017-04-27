@@ -236,6 +236,7 @@ $string['road'] = 'Camino';
 $string['roadmap'] = 'Callejero';
 $string['roadname'] = 'Nombre del camino';
 $string['roadview'] = 'Callejero';
+$string['roadended'] = 'Este camino está completado. ¡Enhorabuena! Ya has terminado la caza del tesoro. Puedes comprobar tu histórico en el mapa.';
 $string['save'] = 'Guardar';
 $string['saveemptyridle'] = 'Todas las etapas modificadas deben tener geometría antes de guardar';
 $string['savewarning'] = 'No ha guardado los cambios realizados.';
