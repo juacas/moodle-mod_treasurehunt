@@ -156,8 +156,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         } else {
                             $title = get_string('user', 'treasurehunt');
                         }
-                        $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages));
+                        $hasprogress = false;
                         foreach ($roadusersprogress->userlist as $user) {
+                            if (!count($user->ratings)) {
+                                continue;
+                            }
+                            if (!$hasprogress) {
+                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages));
+                                $hasprogress = true;
+                            }
                             $row = new html_table_row();
                             if ($progress->groupmode) {
                                 $name = $user->name;
@@ -192,9 +199,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             $row->cells = $cells;
                             $t->data[] = $row;
                         }
-                        // All done - write the table.
-                        $s .= html_writer::table($t);
-                        $s .= $this->output->box_end();
+                        if (!$hasprogress) {
+                            $s .= $this->output->notification(get_string('nousersprogress', 'treasurehunt'));
+                        } else {
+                            // All done - write the table.
+                            $s .= html_writer::table($t);
+                            $s .= $this->output->box_end();
+                        }
                     } else {
                         if ($progress->managepermission) {
                             $s .= $this->output->heading($roadusersprogress->name, 4);

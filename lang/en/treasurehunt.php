@@ -207,6 +207,7 @@ $string['notreasurehunts'] = 'There is no treasure hunt in this course';
 $string['nouserassigned'] = 'No user assigned to this road';
 $string['nouserattempts'] = '{$a} has not made any attempt';
 $string['nouserroad'] = '{$a} has no road assigned.';
+$string['nousersprogress'] = 'No user / group has progress on this road.';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['play'] = 'Play';

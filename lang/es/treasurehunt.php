@@ -209,6 +209,7 @@ $string['notreasurehunts'] = 'No existe ninguna caza del tesoro en este curso';
 $string['nouserassigned'] = 'Ningún usuario asignado a este camino';
 $string['nouserattempts'] = '{$a} no ha realizado ningún intento';
 $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
+$string['nousersprogress'] = 'Ningún usuario/grupo tiene progresos en este camino.';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['play'] = 'Jugar';
