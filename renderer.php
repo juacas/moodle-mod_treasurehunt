@@ -204,9 +204,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         } else {
                             // All done - write the table.
                             $s .= html_writer::table($t);
-                            $s .= $this->output->box_end();
                         }
-                    } else {
+	                        $s .= $this->output->box_end();
+                   } else {
                         if ($progress->managepermission) {
                             $s .= $this->output->heading($roadusersprogress->name, 4);
                             if ($progress->groupmode) {
