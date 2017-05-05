@@ -632,7 +632,6 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     map.on('click', function (evt) {
                         var hasFeature = false;
                         map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function (feature, layer) {
-                            debugger;
                             if (feature.get('stageposition') === 0 || feature.get('name') === "user_position" ||  feature.get('name') === "user_accuracy") {
                                 return false;
                             }
