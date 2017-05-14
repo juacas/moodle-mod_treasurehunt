@@ -605,7 +605,7 @@ class mod_treasurehunt_external extends external_api {
             // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
             $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid);
             if ($currentstage) {
-                $nextnostage = $currentstage->position + 1;
+                $nextnostage = min([$currentstage->position + 1,$nostages]);
             } else {
                 $nextnostage = 1;
             }
