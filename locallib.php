@@ -1229,6 +1229,14 @@ function treasurehunt_get_strings_edit() {
         'remove', 'searchlocation', 'savewarning', 'removewarning',
         'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
 }
+/**
+ * Get all the strings used in the JavaScript of the track viewer screen
+ * 
+ * @return array The strings
+ */
+function treasurehunt_get_strings_trackviewer() {
+    return get_strings(array('aerialmap','roadmap','basemaps','searchlocation','trackviewer'), 'mod_treasurehunt');
+}
 
 /**
  * Get the latest timestamp made by the group / user for the road and the last modification timestamp of the road.
@@ -1481,21 +1489,18 @@ function treasurehunt_insert_attempt($attempt, $context) {
     ));
     $event->trigger();
 }
-
 /**
- * Retrieve paths of a gameplay
+ * 
  * @global moodle_database $DB
  * @param type $treasurehunt
+ * @return array userids
  */
-/*
-function treasurehunt_overview_geojson($treasurehunt){
+function treasurehunt_get_users_with_tracks($treasurehunt){
     global $DB;
-    $sql = 'select * from {treasurehunt_track} group by userid order by timestamp DESC';
-    $positions = $DB->get_records_sql($sql,[$treasurehunt->id]);
-    //JPC: Generate GeoJSON with positions
-    $featureColl = new FeatureCollection();
-    kjhjkhlkjh$feature = new Feature();
-}*/
+    $sql = 'SELECT DISTINCT userid from {treasurehunt_track} WHERE treasurehuntid=?';
+    $results = $DB->get_records_sql($sql,[$treasurehunt]);
+    return array_keys($results);
+}
 /**
  * Inserts one point in a tracked game.
  * @global moodle_database $DB

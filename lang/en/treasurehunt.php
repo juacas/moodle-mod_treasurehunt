@@ -261,6 +261,7 @@ $string['timelabelfailed'] = 'Location sent on the date: ';
 $string['timelabelsuccess'] = 'Stage discovered on the date: ';
 $string['trackusers'] = 'Track trajectories';
 $string['trackusers_help'] = 'Register the paths made b the users while using playing mode.';
+$string['trackviewer'] = 'Track Viewer';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehunt:addroad'] = 'Add road';

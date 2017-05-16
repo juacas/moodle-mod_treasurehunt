@@ -715,64 +715,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     map.addLayer(vector);
                                     treasurehunt.roads[road.id] = road;
                                 });
-                                /*//agrego los vectores a cada camino
-                                 for (var road in treasurehunt.roads) {
-                                 if (treasurehunt.roads.hasOwnProperty(road)) {
-                                 addroad2ListPanel(treasurehunt.roads[road].id, treasurehunt.roads[road].name,
-                                 treasurehunt.roads[road].blocked);
-                                 vector = new ol.layer.Vector({
-                                 source: new ol.source.Vector({
-                                 projection: 'EPSG:3857'
-                                 }),
-                                 updateWhileAnimating: true,
-                                 style: styleFunction
-                                 });
-                                 treasurehunt.roads[road].vector = vector;
-                                 map.addLayer(vector);
-                                 }
-                                 }
-                                 //Add treasurehunt features to source originalStages
-                                 originalStages.addFeatures(geoJSON.readFeatures(geoJSONFeatures, {
-                                 dataProjection: 'EPSG:4326',
-                                 featureProjection: 'EPSG:3857'
-                                 }));
-                                 originalStages.getFeatures().forEach(function (feature) {
-                                 if (feature.getGeometry() === null) {
-                                 feature.setGeometry(new ol.geom.MultiPolygon([]));
-                                 }
-                                 var polygons = feature.getGeometry().getPolygons();
-                                 var idNewFeatures = 'empty';
-                                 var stageid = feature.getId();
-                                 var roadid = feature.get('roadid');
-                                 var stageposition = feature.get('stageposition');
-                                 var name = feature.get('name');
-                                 var clue = feature.get('clue');
-                                 var blocked = treasurehunt.roads[roadid].blocked==true;
-                                 for (var i = 0; i < polygons.length; i++) {
-                                 var newFeature = new ol.Feature(feature.getProperties());
-                                 newFeature.setProperties({
-                                 'stageid': stageid
-                                 });
-                                 var polygon = polygons[i];
-                                 newFeature.setGeometry(polygon);
-                                 newFeature.setId(idNewFeature);
-                                 if (i === 0) {
-                                 idNewFeatures = idNewFeature;
-                                 } else {
-                                 idNewFeatures = idNewFeatures + ',' + idNewFeature;
-                                 }
-                                 idNewFeature++;
-                                 treasurehunt.roads[roadid].vector.getSource().addFeature(newFeature);
-                                 }
-                                 feature.setProperties({
-                                 idFeaturesPolygons: '' + idNewFeatures
-                                 });
-                                 addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked);
-                                 if (polygons.length === 0) {
-                                 emptystage(stageid);
-                                 }
-                                 });*/
-                                // Ordeno la lista de etapas
+                                
+                                // Ordeno la lista de etapas.
                                 sortList();
                                 // Selecciono el camino de la URL si existe o sino el primero.
                                 if (typeof treasurehunt.roads[selectedroadid] !== 'undefined') {
@@ -938,25 +882,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
 
                     }
 
-                    /** TOOLTIPS 
-                     $("#stagelist").tooltip({
-                     track: true,
-                     items: '.ui-icon-alert, .ui-icon-info',
-                     position: {
-                     my: "left+15 center",
-                     at: "right center"
-                     },
-                     content: function () {
-                     return $(this).prop('title');
-                     }
-                     });
-                     
-                     $('.ol-zoom-in, .ol-zoom-out,.ol-rotate-reset, .ol-attribution').tooltip({
-                     position: {
-                     my: "left+15 center",
-                     at: "right center"
-                     }
-                     });**/
                     function activateDeleteButton() {
                         $('#removefeature').button("option", "disabled", false);
                     }

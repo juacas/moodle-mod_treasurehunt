@@ -228,8 +228,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         if ($progress->managepermission) {
             $urlparams = array('id' => $progress->coursemoduleid);
             $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
-            $urlparams = array('id' => $progress->coursemoduleid);
             $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/clearhunt.php', $urlparams), get_string('cleartreasurehunt', 'treasurehunt'), 'get');
+            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams), get_string('trackviewer', 'treasurehunt'), 'get');
         }
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');

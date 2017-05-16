@@ -23,7 +23,7 @@ date_default_timezone_set("UTC");
 
 $segments = [];
 $tracks = $DB->get_records('treasurehunt_track',['userid'=>$userid,'treasurehuntid'=>$treasurehunt->id]);
-
+$description = "Track for user:".fullname($DB->get_record('user', ['id'=>$userid]));
 $activity=new stdClass();
 $activity->trackPoints=[];
 foreach ($tracks as $track) {
@@ -39,12 +39,12 @@ $segment = new stdClass();
 $segment->activities = [$activity];
 $segment->type = 'tracks';
 $segments[]=$segment;
-$gpx = makeXml($segments);
+$gpx = makeXml($segments,$description);
 header('Content-type: application/gpx');
 header('Content-Disposition: attachment; filename="treasure_track.gpx"');
 echo $gpx;
 die;
-function makeXml($segments)
+function makeXml($segments, $description)
 {
 	$xml = '<?xml version="1.0" encoding="UTF-8"?>
             <gpx version="1.1" creator="TreasureHuntTrackExporter" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -54,7 +54,8 @@ function makeXml($segments)
 	        </link>
 	    </metadata>
 	    <trk>
-        <name>Treasurehunt trace</name>';
+        <name>Treasurehunt trace</name>
+         <desc>'.$description.'</desc>';
 
 	foreach ($segments as $segment)
 	{
@@ -101,7 +102,8 @@ function makeTrackPoint(&$data)
 	else
 	{
 		$time = getIsoTime($data->time);
-		$return .= "<trkpt lat=\"$data->lat\" lon=\"$data->lon\"><time>$time</time></trkpt>";
+		$return .= "<trkpt lat=\"$data->lat\" lon=\"$data->lon\"><time>$time</time>";
+                $return .="</trkpt>";
 	}
 
 	return $return;
