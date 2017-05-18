@@ -310,7 +310,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Grading method.
         if ($info->treasurehunt->grade > 0) {
             $options = treasurehunt_get_grading_options();
-            $message = get_string('grademethodinfo', 'treasurehunt', $options[$info->treasurehunt->grademethod]);
+            $a =new stdClass();
+            $a->type = $options[$info->treasurehunt->grademethod];
+            $a->gradepenlocation = number_format($info->treasurehunt->gradepenlocation);
+            $a->gradepenanswer = number_format($info->treasurehunt->gradepenanswer);
+            $message = get_string('grademethodinfo', 'treasurehunt', $a);
             $o .= html_writer::tag('p', $message . $this->help_icon('grademethod', 'treasurehunt')) . "\n";
         }
         if ($notavailable) {

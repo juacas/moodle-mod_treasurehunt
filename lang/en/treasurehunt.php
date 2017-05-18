@@ -130,7 +130,7 @@ hunt receive a grade under 50 calculated just by the number of stages solved.</U
 being 100% the score for the first player and 50% for the last player. 
 The players that did not finish the hunt receive a grade under 50% calculated 
 just by the number of stages solved.</UL>';
-$string['grademethodinfo'] = 'Grading method: {$a}';
+$string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation'] = 'Penalty for failure in location';
 $string['gradepenlocation_help'] = 'Penalization is expressed in % of the grade. '

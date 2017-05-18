@@ -130,7 +130,7 @@ siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron 
 la caza reciben una calificación por debajo del 50% calculado simplemente
 por el número de etapas resueltas.</UL>';
-$string['grademethodinfo'] = 'Método de calificación: {$a}';
+$string['grademethodinfo'] = 'Método de calificación: {$a->type}. Penaliza {$a->gradepenlocation}% por localización, {$a->gradepenanswer}% por respuestas';
 $string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation'] = 'Penalización por fallo en localización';
 $string['gradepenlocation_help'] = 'La penalización es expresada en % de la calificación. '
