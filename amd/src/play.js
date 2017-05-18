@@ -19,12 +19,12 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/jquery.mobile-config', 'mod_treasurehunt/jquerymobile'],
-        function ($, url, ol, ajax, GeocoderJS) {
+define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/viewgpx', 'mod_treasurehunt/jquery.mobile-config', 'mod_treasurehunt/jquerymobile'],
+        function ($, url, ol, ajax, GeocoderJS, viewgpx) {
             var init = {
                 playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
                         lastattempttimestamp,
-                        lastroadtimestamp, gameupdatetime, tracking) {
+                        lastroadtimestamp, gameupdatetime, tracking, user) {
                     var parchmenturl = url.imageUrl('parchment', 'treasurehunt'),
                             failureurl = url.imageUrl('failure', 'treasurehunt'),
                             markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
@@ -175,8 +175,6 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             return true;
                         }
                     });
-
-
                     var accuracyFeature = new ol.Feature();
                     accuracyFeature.setProperties({name: 'user_accuracy'});
                     accuracyFeature.setStyle(accuracyFeatureStyle);
@@ -215,9 +213,19 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         renew_source(false, false);
                     }, gameupdatetime);
                     // Initialize the page layers.
+
                     add_layergroup_to_list(layergroup);
-
-
+                    if (tracking && user) {
+                        var tracklayergroup = viewgpx.addgpxlayer(map, cmid, treasurehuntid, strings, user, "trackgroup");
+                        tracklayergroup.set("name", tracklayergroup.get("title"));
+                        
+                        var tracklayer = tracklayergroup.getLayers().item(0);
+                        var htmltitle = tracklayer.get("title"); // Has a picture and a link
+                        var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);
+                        tracklayer.set("name", plaintitle);
+                        tracklayer.setVisible(false);
+                        add_layer_to_list(tracklayer);
+                    }
                     /*-------------------------------Functions-----------------------------------*/
                     function style_function(feature, resolution) {
                         // Get the income level from the feature properties
@@ -343,7 +351,6 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                 }
                             }]);
                         geojson[0].done(function (response) {
-                            console.log(response);
                             var body = '';
                             qoaremoved = response.qoaremoved;
                             roadfinished = response.roadfinished;
@@ -447,7 +454,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                 markerFeature.setGeometry(null);
                                 playwithoutmoving = false;
                                 clearInterval(interval);
-                                $("#mapplay").css('opacity', '0.6');
+                                $("#mapplay").css('opacity', '0.8');
                             }
                         }).fail(function (error) {
                             console.log(error);
@@ -519,14 +526,49 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                                             + "' style='position:relative'></span>" + attempt.string + "</li>")
                                             .appendTo(
                                                     $historylist);
-
                                 });
                             }
                             $historylist.listview("refresh");
                             $historylist.trigger("updatelayout");
                         }
                     }
+                    function add_layer_to_list(layer) {
+                        var item = $('<li>', {
+                            "data-icon": "check",
+                            "class": layer.getVisible() ? "checked" : "unchecked"
+                        })
+                                .append($('<a />', {
+                                    text: layer.get("name"),
+                                    href: "#mappage"
+                                })
+                                        .click(function () {
+                                            layer.setVisible(!layer.getVisible());
+                                        })
+                                        );
+                        layer.on('change:visible', function () {
+                            $(item).toggleClass('checked unchecked');
+                        });
+                        item.insertAfter('#baseLayer');
+                    }
+                    function add_layer_to_list(layer) {
 
+                        var item = $('<li>', {
+                            "data-icon": "check",
+                            "class": layer.getVisible() ? "checked" : "unchecked"
+                        })
+                                .append($('<a />', {
+                                    text: layer.get("name"),
+                                    href: "#mappage"
+                                })
+                                        .click(function () {
+                                            layer.setVisible(!layer.getVisible());
+                                        })
+                                        );
+                        layer.on('change:visible', function () {
+                            $(item).toggleClass('checked unchecked');
+                        });
+                        item.insertAfter('#baseLayer');
+                    }
                     function add_layergroup_to_list(layergroup) {
                         layergroup.getLayers().forEach(function (layer) {
                             var item = $('<li>', {
@@ -598,7 +640,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             }, 500);
                         }
                     });
-                    geolocation.setTracking(tracking);// Start position tracking.
+                    geolocation.setTracking(tracking); // Start position tracking.
 
                     select.on("select", function (features) {
                         if (features.selected.length === 1) {
@@ -632,7 +674,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     map.on('click', function (evt) {
                         var hasFeature = false;
                         map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function (feature, layer) {
-                            if (feature.get('stageposition') === 0 || feature.get('name') === "user_position" ||  feature.get('name') === "user_accuracy") {
+                            if (feature.get('stageposition') === 0 || feature.get('name') === "user_position" || feature.get('name') === "user_accuracy") {
                                 return false;
                             }
                             hasFeature = true;

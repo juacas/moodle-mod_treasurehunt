@@ -60,15 +60,21 @@ if ($treasurehunt->allowattemptsfromdate > time()) {
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
+$output = $PAGE->get_renderer('mod_treasurehunt');
 
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+$user = new stdClass();
+$user->id = $USER->id;
+$user->fullname = fullname($USER);
+$user->pic = $output->user_picture($USER);
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
     treasurehunt_get_strings_play(),
     $cm->id, $cm->instance,
     intval($treasurehunt->playwithoutmoving),
     intval($treasurehunt->groupmode),
-    $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,$treasurehunt->tracking));
+    $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime, $treasurehunt->tracking, $user));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
@@ -81,10 +87,11 @@ $PAGE->set_pagelayout('embedded');
  * $PAGE->set_focuscontrol('some-html-id');
  * $PAGE->add_body_class('treasurehunt-'.$somevar);
  */
-$output = $PAGE->get_renderer('mod_treasurehunt');
+
 // Output starts here.
 echo $output->header();
-// Replace the following lines with you own code.
-echo treasurehunt_view_play_page($treasurehunt, $cm->id);
+
+
+echo treasurehunt_view_play_page($treasurehunt, $cm->id,$user);
 // Finish the page.
 echo $output->footer();

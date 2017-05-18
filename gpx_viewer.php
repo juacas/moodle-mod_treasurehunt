@@ -34,6 +34,7 @@ $PAGE->set_pagelayout('standard');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
+    $PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = array();
 $userrecords = $DB->get_records_list('user','id',$usersids);
@@ -44,13 +45,14 @@ foreach ($userrecords as $userrecord) {
     $user->pic = $output->user_picture($userrecord);
     $users[]=$user;
 }
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'viewgpx',  array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
+$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',  array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
 echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx","treasurehunt-gpx");
 echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
 echo $OUTPUT->box('', null, 'mapgpx');
-echo $OUTPUT->box('', null, 'info');
 echo $OUTPUT->container_end();
+echo $OUTPUT->box('', null, 'info');
+
 
 echo $output->footer();
