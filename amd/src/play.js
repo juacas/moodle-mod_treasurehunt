@@ -25,9 +25,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                 playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
                         lastattempttimestamp,
                         lastroadtimestamp, gameupdatetime, tracking, user) {
-                    var parchmenturl = url.imageUrl('parchment', 'treasurehunt'),
-                            failureurl = url.imageUrl('failure', 'treasurehunt'),
-                            markerurl = url.imageUrl('flagmarker', 'treasurehunt'),
+                    var parchmenturl = url.imageUrl('green-marker', 'treasurehunt'),
+                            failureurl = url.imageUrl('red-marker', 'treasurehunt'),
+                            markerurl = url.imageUrl('PEGMAN', 'treasurehunt'),
                             openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                             lastsuccessfulstage = {},
                             interval,
@@ -66,8 +66,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     var defaultstageStyle = new ol.style.Style({
                         image: new ol.style.Icon({
+                            anchor: [0.5, 1],
                             opacity: 1,
-                            scale: 0.2,
+                            scale: 0.5,
                             src: parchmenturl
                         }),
                         text: text,
@@ -75,9 +76,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     var failstageStyle = new ol.style.Style({
                         image: new ol.style.Icon({
-                            anchor: [0.2, 0.2],
+                            anchor: [0.5, 1],
                             opacity: 1,
-                            scale: 1,
+                            scale: 0.5,
                             src: failureurl
                         }),
                         text: text,
@@ -85,8 +86,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     var defaultSelectstageStyle = new ol.style.Style({
                         image: new ol.style.Icon({
+                            anchor: [0.5, 1],
                             opacity: 1,
-                            scale: 0.29,
+                            scale: 0.75,
                             src: parchmenturl
                         }),
                         text: selectText,
@@ -94,9 +96,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                     });
                     var failSelectstageStyle = new ol.style.Style({
                         image: new ol.style.Icon({
-                            anchor: [0.2, 0.2],
+                            anchor: [0.5, 1],
                             opacity: 1,
-                            scale: 0.6,
+                            scale: 0.75,
                             src: failureurl
                         }),
                         text: selectText,
@@ -128,7 +130,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         image: new ol.style.Icon({
                             anchor: [0.5, 1],
                             opacity: 1,
-                            scale: 0.3,
+                            scale: 0.35,
                             src: markerurl
                         })
                     });
@@ -261,11 +263,11 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                             return [styles];
                         }
                         if (!feature.get('geometrysolved')) {
-                            failstageStyle.getImage().setScale((view.getZoom() / 50));
+//                            failstageStyle.getImage().setScale((view.getZoom() / 30));
                             failstageStyle.getText().setText('' + stageposition);
                             return [failstageStyle];
                         }
-                        defaultstageStyle.getImage().setScale((view.getZoom() / 110));
+//                        defaultstageStyle.getImage().setScale((view.getZoom() / 100));
                         defaultstageStyle.getText().setText('' + stageposition);
                         return [defaultstageStyle];
                     }
