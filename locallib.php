@@ -655,7 +655,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
             $return->msg = get_string('mustcompleteactivity', 'treasurehunt');
         }
     }
-  // Track user's position
+    // Track user's position
     if ($treasurehunt->tracking) {
         $currentworkingstage = $nextstage ? $nextstage : $currentstage;
         treasurehunt_track_user($userid, $treasurehunt, $currentworkingstage->id, time(), $locationwkt);
@@ -1225,17 +1225,18 @@ function treasurehunt_get_strings_play() {
  * @return array The strings
  */
 function treasurehunt_get_strings_edit() {
-    return get_strings(array('stage', 'road','aerialmap','roadmap','basemaps','add', 'modify', 'save',
+    return get_strings(array('stage', 'road', 'aerialmap', 'roadmap', 'basemaps', 'add', 'modify', 'save',
         'remove', 'searchlocation', 'savewarning', 'removewarning',
         'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
 }
+
 /**
  * Get all the strings used in the JavaScript of the track viewer screen
  * 
  * @return array The strings
  */
 function treasurehunt_get_strings_trackviewer() {
-    return get_strings(array('aerialmap','roadmap','basemaps','searchlocation','trackviewer'), 'mod_treasurehunt');
+    return get_strings(array('aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer'), 'mod_treasurehunt');
 }
 
 /**
@@ -1489,18 +1490,20 @@ function treasurehunt_insert_attempt($attempt, $context) {
     ));
     $event->trigger();
 }
+
 /**
  * 
  * @global moodle_database $DB
  * @param type $treasurehunt
  * @return array userids
  */
-function treasurehunt_get_users_with_tracks($treasurehunt){
+function treasurehunt_get_users_with_tracks($treasurehunt) {
     global $DB;
     $sql = 'SELECT DISTINCT userid from {treasurehunt_track} WHERE treasurehuntid=?';
-    $results = $DB->get_records_sql($sql,[$treasurehunt]);
+    $results = $DB->get_records_sql($sql, [$treasurehunt]);
     return array_keys($results);
 }
+
 /**
  * Inserts one point in a tracked game.
  * @global moodle_database $DB
@@ -1997,28 +2000,39 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $users = '(' . join(",", $userarray) . ')';
     $orderby = '';
     $grademethodsql = '';
-    $usercompletiontimesql = "(SELECT max(at.timecreated) from {treasurehunt_attempts} at 
+    $usercompletiontimesql = "";
+    $usertimetable = "";
+    if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
+        $orderby = 'ORDER BY usertime ASC';
+        $usertimetable = "(SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
             at.success=1 AND ri.position=(select max(rid.position) from 
             {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
             roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-            AND $groupidwithin) as usertime";
-    if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
-        $grademethodsql = "(SELECT max(at.timecreated) from {treasurehunt_attempts}
-            at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
-            {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND 
-            ri.position=(select max(rid.position) from {treasurehunt_stages} 
-            rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
-            AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
-            (SELECT min(at.timecreated) from {treasurehunt_attempts} at 
+            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
+            at.success=1 AND ri.position=1 AND 
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            AND $groupidwithin) as usertime 
+            from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
+            r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON 
+            r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
+            AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby) as time,";
+        $grademethodsql = "max(time.usertime) as worsttime, min(time.usertime) as besttime,
+            (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
             at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) 
-            AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,";
-        $orderby = 'ORDER BY usertime ASC';
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
+            at.success=1 AND ri.position=1 AND 
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            AND $groupidwithin) as usertime,";
     }if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $grademethodsql = "(SELECT COUNT(*) from {treasurehunt_attempts} at
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER 
@@ -2026,8 +2040,14 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
             AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid 
             where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
             AND at.type='location' AND at.userid IN $users AND $groupid2) as lastposition,
-            $usercompletiontimesql,";
-        $orderby = 'ORDER BY usertime ASC';
+            (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
+            at.success=1 AND ri.position=(select max(rid.position) from 
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            AND $groupidwithin) as finishtime,";
+        $orderby = 'ORDER BY finishtime ASC';
     }
     $sql = "SELECT $user as user,$grademethodsql(SELECT COUNT(*) from 
         {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri 
@@ -2048,22 +2068,22 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
         (SELECT COUNT(*) from {treasurehunt_stages} ri INNER JOIN 
         {treasurehunt_roads} roa ON ri.roadid=roa.id where 
         roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as nostages
-        from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
+        from $usertimetable {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
         r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON 
         r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
         AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby";
-    $stats = $DB->get_records_sql($sql, array($treasurehunt->id));
+    $stats = $DB->get_records_sql($sql, array($treasurehunt->id,$treasurehunt->id));
 
     // If the grading method is by position.
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $i = 0;
         $grouptimes = array();
         foreach ($stats as $stat) {
-            if (isset($stat->usertime)) {
-                if (isset($grouptimes[$stat->usertime])) {
+            if (isset($stat->finishtime)) {
+                if (isset($grouptimes[$stat->finishtime])) {
                     $stat->position = $i;
                 } else {
-                    $grouptimes[$stat->usertime] = 1;
+                    $grouptimes[$stat->finishtime] = 1;
                     $stat->position = ++$i;
                 }
             }
