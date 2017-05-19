@@ -19,7 +19,9 @@
  * Strings for component 'treasurehunt', language 'en'
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -110,19 +112,31 @@ $string['geolocation_needed_title']='This application needs geolocation.';
 $string['geolocation_needed']='To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
 $string['gradefromposition'] = 'Grade from position';
 $string['gradefromstages'] = 'Grade from stages';
-$string['gradefromtime'] = 'Grade from time';
+$string['gradefromtime'] = 'Grade from finishing time';
+$string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['grademethod'] = 'Grading method';
 $string['grademethod_help'] = '<P><B>Grade from stages</B><P>
 <UL>
 <P>Each player (or team) scores proportionally by number of stages solved, 
 being 100% when a road is completely solved, and 0% when no stage is solved.</UL>
 
-<P><B>Grade from time</B><P>
+<P><B>Grade from duration of the hunt</B><P>
 <UL>
-<P>The winner of the hunt marks the best time. The grade is calculated 
-by interpolating the finishing time being 50% the end time of the hunt 
+<P>The hunter who ends the road in less time wins the hunt and marks the best time.
+The time is measured from the moment in which the starting stage of the road is unlocked.
+This means that the participants can play at different moments.
+The grade is calculated by interpolating the finishing time being 50% the end time of the hunt 
 and 100% the best finishing time. The players that did not finish the 
 hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
+
+<P><B>Grade from finishing time</B><P>
+<UL>
+<P>The hunter who ends first is the winner of the hunt.
+It is assumed that every hunter plays simultaneously.
+The grade is calculated by interpolating the finishing time being 50% the end time of the hunt 
+and 100% the best finishing time. The players that did not finish the 
+hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
+
 
 <P><B>Grade from position</B><P>
 <UL>

@@ -19,7 +19,9 @@
  * Defines the renderer for the quiz module.
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -145,6 +147,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->unassignedusers)));
             }
+
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
@@ -157,40 +160,44 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             $title = get_string('user', 'treasurehunt');
                         }
                         $hasprogress = false;
-                        foreach ($roadusersprogress->userlist as $user) {
-                            if (!count($user->ratings)) {
+                        foreach ($roadusersprogress->userlist as $userorgroup) {
+                            if (!count($userorgroup->ratings)) {
                                 continue;
                             }
                             if (!$hasprogress) {
-                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages));
+                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages + 1));
                                 $hasprogress = true;
                             }
                             $row = new html_table_row();
                             if ($progress->groupmode) {
-                                $name = $user->name;
+                                $name = $userorgroup->name;
                                 if ($progress->viewpermission) {
-                                    $params = array('id' => $progress->coursemoduleid, 'groupid' => $user->id);
+                                    $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
                                     $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
+                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid,null,$userorgroup->id);
                             } else {
-                                $fullname = fullname($user);
-                                $userpic = $this->output->user_picture($user, array('size' => 32));
-                                $userurl = new moodle_url('/user/view.php', array('id' => $user->id, 'courseid' => $this->page->course->id));
+                                $fullname = fullname($userorgroup);
+                                $userpic = $this->output->user_picture($userorgroup, array('size' => 32));
+                                $userurl = new moodle_url('/user/view.php', array('id' => $userorgroup->id, 'courseid' => $this->page->course->id));
                                 $name = $userpic . html_writer::link($userurl, $fullname);
                                 if ($progress->viewpermission) {
-                                    $params = array('id' => $progress->coursemoduleid, 'userid' => $user->id);
+                                    $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
                                     $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
+                                $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid,$userorgroup->id,null);
                             }
                             $cells = array($name);
+                           
+                            $cells[] = treasurehunt_get_nice_duration($elapsed);
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
-                                if (isset($user->ratings[$i])) {
-                                    $cell->attributes['class'] = $user->ratings[$i]->class;
+                                if (isset($userorgroup->ratings[$i])) {
+                                    $cell->attributes['class'] = $userorgroup->ratings[$i]->class;
                                 } else {
                                     $cell->attributes['class'] = 'noattempt';
                                 }
@@ -205,8 +212,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             // All done - write the table.
                             $s .= html_writer::table($t);
                         }
-	                        $s .= $this->output->box_end();
-                   } else {
+                        $s .= $this->output->box_end();
+                    } else {
                         if ($progress->managepermission) {
                             $s .= $this->output->heading($roadusersprogress->name, 4);
                             if ($progress->groupmode) {
@@ -310,7 +317,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Grading method.
         if ($info->treasurehunt->grade > 0) {
             $options = treasurehunt_get_grading_options();
-            $a =new stdClass();
+            $a = new stdClass();
             $a->type = $options[$info->treasurehunt->grademethod];
             $a->gradepenlocation = number_format($info->treasurehunt->gradepenlocation);
             $a->gradepenanswer = number_format($info->treasurehunt->gradepenanswer);

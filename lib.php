@@ -21,7 +21,7 @@
  * This contains functions that are called also from outside the treasurehunt module
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -129,17 +129,13 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
  * and any data that depends on it.
- *
+ * @global moodle_database $DB
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
  */
 function treasurehunt_delete_instance($id) {
     global $DB;
-
-    if (!$treasurehunt = $DB->get_record('treasurehunt', array('id' => $id))) {
-        return false;
-    }
-
+    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id),MUST_EXIST);        
     // Delete any dependent records here.
     $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));

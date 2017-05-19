@@ -16,7 +16,9 @@
 /**
  * @module    mod_treasurehunt/edit
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -715,7 +717,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     map.addLayer(vector);
                                     treasurehunt.roads[road.id] = road;
                                 });
-                                
+
                                 // Ordeno la lista de etapas.
                                 sortList();
                                 // Selecciono el camino de la URL si existe o sino el primero.

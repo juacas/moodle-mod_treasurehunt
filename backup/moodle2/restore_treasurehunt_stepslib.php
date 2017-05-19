@@ -20,7 +20,7 @@
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 global $CFG;
@@ -31,7 +31,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * Define the complete assignment structure for restore, with file and id annotations
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
@@ -49,11 +49,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $paths[] = new restore_path_element('treasurehunt', '/activity/treasurehunt');
         $paths[] = new restore_path_element('treasurehunt_road', '/activity/treasurehunt/roads/road');
         $paths[] = new restore_path_element('treasurehunt_stage', '/activity/treasurehunt/roads/road/stages/stage');
-        $paths[] = new restore_path_element('treasurehunt_answer',
-                '/activity/treasurehunt/roads/road/stages/stage/answers/answer');
+        $paths[] = new restore_path_element('treasurehunt_answer', '/activity/treasurehunt/roads/road/stages/stage/answers/answer');
+
         if ($userinfo) {
-            $paths[] = new restore_path_element('treasurehunt_attempt',
-                    '/activity/treasurehunt/roads/road/stages/stage/attempts/attempt');
+            $paths[] = new restore_path_element('treasurehunt_attempt', '/activity/treasurehunt/roads/road/stages/stage/attempts/attempt');
+            $paths[] = new restore_path_element('treasurehunt_track', '/activity/treasurehunt/tracks/track');
         }
 
         // Return the paths wrapped into standard activity structure.
@@ -141,6 +141,16 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $newitemid = $DB->insert_record('treasurehunt_attempts', $data);
         $this->set_mapping('treasurehunt_attempt', $oldid, $newitemid);
+    }
+
+    protected function process_treasurehunt_track($data) {
+        global $DB;
+
+        $data = (object) $data;
+        $data->treasurehuntid = $this->get_new_parentid('treasurehunt');
+        $data->stageid = $this->get_mappingid('treasurehunt_stage',$data->stageid);
+        $data->userid = $this->get_mappingid('user', $data->userid);
+        $newitemid = $DB->insert_record('treasurehunt_track', $data);
     }
 
     /**

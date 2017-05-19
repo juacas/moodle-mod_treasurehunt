@@ -19,7 +19,9 @@
  * Strings for component 'treasurehunt', language 'es'
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
  
@@ -110,16 +112,28 @@ $string['geolocation_needed_title']='Esta aplicación necesita geolocalización'
 $string['geolocation_needed']='Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.';
 $string['gradefromposition'] = 'Puntuación por posición';
 $string['gradefromstages'] = 'Puntuación por etapas';
-$string['gradefromtime'] = 'Puntuación por tiempo';
+$string['gradefromtime'] = 'Puntuación por tiempo total de caza';
+$string['gradefromabsolutetime'] = 'Puntuación por hora de finalización';
+
 $string['grademethod'] = 'Método de calificación';
 $string['grademethod_help'] = '<P><B>Puntuación por etapas</B><P>
 <UL>
 <P>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
 resueltas, siendo el 100% de la calificación máxima cuando se ha completado el camino
 y 0 cuando no se ha resuelto ninguna etapa.</UL>
-<P><B>Puntuación por tiempo</B><P>
+<P><B>Puntuación por tiempo de caza</B><P>
 <UL>
-<P>El ganador de la caza es el que marca el mejor tiempo. La calificación se calcula interpolando el tiempo 
+<P>El ganador de la caza es el que termina la caza en el menor tiempo 
+(medido desde el momento en que desbloqueó la etapa de salida, 
+por lo que los participantes pueden comenzar en momentos distintos). 
+La calificación se calcula interpolando el tiempo 
+de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor. 
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
+</UL>
+<P><B>Puntuación por hora de finalización</B><P>
+<UL>
+<P>El ganador de la caza es el que termina la caza antes (asume que todos los participantes juegan simultáneamente).
+La calificación se calcula interpolando el tiempo 
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor. 
 Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
 </UL>
