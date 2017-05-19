@@ -20,8 +20,9 @@
  * Page to edit instances
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
- * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace treasurehunt with the name of your module and remove this line.

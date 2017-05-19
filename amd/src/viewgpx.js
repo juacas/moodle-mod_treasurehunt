@@ -14,10 +14,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @module    mod_treasurehunt/gpx
+ * @module    mod_treasurehunt/viewgpx
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/ol3-layerswitcher'],
@@ -116,17 +118,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         if (evt.dragging) {
                             return;
                         }
-//                        var pixel = map.getEventPixel(evt.originalEvent);
-//                        displayFeatureInfo(pixel);
-//                        showpopup(evt);
                     });
                     map.on('click', function (evt) {
-
-//                        displayFeatureInfo(evt.pixel);
                         showpopup(evt);
                     });
-                } // End of function viewgpx
-            }; // End of init var
+                } // End of function viewgpx.
+            }; // End of init var.
             return init;
             function find_or_add_layergroup(map, trackgroupname) {
                 var layergroup = null;

@@ -14,9 +14,10 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @module    mod_treasurehunt/edit
+ * @module    mod_treasurehunt/tutorial
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 

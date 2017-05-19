@@ -19,7 +19,9 @@
  * Defines the renderer for the quiz module.
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -145,6 +147,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->unassignedusers)));
             }
+
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
@@ -162,7 +165,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 continue;
                             }
                             if (!$hasprogress) {
-                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages));
+                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages + 1));
                                 $hasprogress = true;
                             }
                             $row = new html_table_row();
@@ -187,6 +190,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 }
                             }
                             $cells = array($name);
+                            $elapsed = end($user->ratings)->timestamp - reset($user->ratings)->timestamp;
+                            $cells[] = treasurehunt_get_nice_duration($elapsed);
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($user->ratings[$i])) {
@@ -205,8 +210,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             // All done - write the table.
                             $s .= html_writer::table($t);
                         }
-	                        $s .= $this->output->box_end();
-                   } else {
+                        $s .= $this->output->box_end();
+                    } else {
                         if ($progress->managepermission) {
                             $s .= $this->output->heading($roadusersprogress->name, 4);
                             if ($progress->groupmode) {
@@ -310,7 +315,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Grading method.
         if ($info->treasurehunt->grade > 0) {
             $options = treasurehunt_get_grading_options();
-            $a =new stdClass();
+            $a = new stdClass();
             $a->type = $options[$info->treasurehunt->grademethod];
             $a->gradepenlocation = number_format($info->treasurehunt->gradepenlocation);
             $a->gradepenanswer = number_format($info->treasurehunt->gradepenanswer);

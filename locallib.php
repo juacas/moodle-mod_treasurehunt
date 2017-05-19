@@ -22,8 +22,10 @@
  * Functions that are also called by core Moodle are in {@link lib.php}
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -38,6 +40,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
 define('TREASUREHUNT_GRADEFROMSTAGES', '1');
 define('TREASUREHUNT_GRADEFROMTIME', '2');
 define('TREASUREHUNT_GRADEFROMPOSITION', '3');
+define('TREASUREHUNT_GRADEFROMABSOLUTETIME', '4');
 /* * #@- */
 
 /* * #@+
@@ -73,7 +76,30 @@ function treasurehunt_wkt_to_object($text) {
     $wkt = new WKT();
     return $wkt->read($text);
 }
+function treasurehunt_get_nice_duration($intervalmillis) {
+  $durationInSeconds = $intervalmillis/1000;
+  $durationstring = '';
+  $days = floor($durationInSeconds / 86400);
+  $durationInSeconds -= $days * 86400;
+  $hours = floor($durationInSeconds / 3600);
+  $durationInSeconds -= $hours * 3600;
+  $minutes = floor($durationInSeconds / 60);
+  $seconds = round($durationInSeconds - $minutes * 60);
 
+  if($days > 0) {
+    $durationstring .= $days . ' '. get_string('days');
+  }
+  if($hours > 0) {
+    $durationstring .= ' ' . $hours . ' '.get_string('hours');
+  }
+  if($minutes > 0) {
+    $durationstring .= ' ' . $minutes . ' '.get_string('minutes');
+  }
+  if($seconds > 0) {
+    $durationstring .= ' ' . $seconds . ' s.';
+  }
+  return $durationstring;
+}
 /**
  * Deserialize a JSON array in a compatible object with the library GeoJSON.
  *
@@ -114,6 +140,7 @@ function treasurehunt_get_grading_options() {
     return array(
         TREASUREHUNT_GRADEFROMSTAGES => get_string('gradefromstages', 'treasurehunt'),
         TREASUREHUNT_GRADEFROMTIME => get_string('gradefromtime', 'treasurehunt'),
+        TREASUREHUNT_GRADEFROMABSOLUTETIME => get_string('gradefromabsolutetime', 'treasurehunt'),
         TREASUREHUNT_GRADEFROMPOSITION => get_string('gradefromposition', 'treasurehunt')
     );
 }
@@ -1137,7 +1164,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $groupid = 'a.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
-    $attemptsquery = "SELECT a.id,$user as user,r.position, CASE WHEN EXISTS(SELECT 1 FROM "
+    $attemptsquery = "SELECT a.id,$user as user,r.position,a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
             . "{treasurehunt_stages} ri INNER JOIN {treasurehunt_attempts} at "
             . "ON at.stageid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
             . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
@@ -1939,6 +1966,7 @@ function treasurehunt_insert_stage_progress_in_road_userlist($road, $userlist, $
             if ($attempt->user === $user->id) {
                 $rating = new stdClass();
                 $rating->stagenum = $attempt->position;
+                $rating->timestamp = $attempt->timecreated;
                 if ($attempt->withfailures && $attempt->success) {
                     $rating->class = "successwithfailures";
                 } else if ($attempt->withfailures) {
@@ -2002,6 +2030,22 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $grademethodsql = '';
     $usercompletiontimesql = "";
     $usertimetable = "";
+    if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME) {
+        $grademethodsql = "(SELECT max(at.timecreated) from {treasurehunt_attempts}
+            at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
+            {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND 
+            ri.position=(select max(rid.position) from {treasurehunt_stages} 
+            rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
+            AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
+            (SELECT min(at.timecreated) from {treasurehunt_attempts} at 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
+            at.success=1 AND ri.position=(select max(rid.position) from 
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) 
+            AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,";
+        $orderby = 'ORDER BY usertime ASC';
+    }
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
         $orderby = 'ORDER BY usertime ASC';
         $usertimetable = "(SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
@@ -2115,7 +2159,7 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                         , $stats[$student->id]->lastposition
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->position);
-            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME && isset($stats[$student->id]->usertime)) {
+            } else if (($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME || $treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME )&& isset($stats[$student->id]->usertime)) {
                 $positiverate = treasurehunt_calculate_line_equation(
                         $stats[$student->id]->besttime
                         , $treasurehunt->grade

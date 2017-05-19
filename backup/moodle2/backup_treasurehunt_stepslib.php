@@ -20,7 +20,7 @@
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die;
@@ -29,7 +29,7 @@ defined('MOODLE_INTERNAL') || die;
  * Define the complete choice structure for backup, with file and id annotations
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class backup_treasurehunt_activity_structure_step extends backup_activity_structure_step {
@@ -81,7 +81,9 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
             'timecreated', 'userid', 'groupid', 'success',
             'penalty', 'type', 'questionsolved', 'activitysolved',
             'geometrysolved', 'location'));
-
+        $tracks = new backup_nested_element('tracks');
+        $track = new backup_nested_element('track',array('stageid','userid','timestamp'),array('location'));
+               
         // Build the tree
         $treasurehunt->add_child($roads);
         $roads->add_child($road);
@@ -94,8 +96,10 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
         $stage->add_child($attempts);
         $attempts->add_child($attempt);
-
-
+        
+        $treasurehunt->add_child($tracks); 
+        $tracks->add_child($track);
+        
         // Define sources
         $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
 
@@ -106,6 +110,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         // All the rest of elements only happen if we are including user info
         if ($userinfo) {
             $attempt->set_source_table('treasurehunt_attempts', array('stageid' => backup::VAR_PARENTID));
+            $track->set_source_table('treasurehunt_track', array('treasurehuntid' => backup::VAR_PARENTID));
         }
 
 
