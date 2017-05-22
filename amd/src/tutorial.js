@@ -38,7 +38,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                             return {key: term, component: 'treasurehunt'};
                         });
                         str.get_strings(stringQueried).done(function (strings) {
-                            configureEditIntro(intro, strings,terms);
+                            configureEditIntro(intro, strings, terms);
                             setTimeout(function () {
                                 intro.start();
                             }, 1000);
@@ -54,7 +54,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                     });
                     if (cook["introPlayProgress"] != 'Done') {
                         var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_play_tour', 'lastsuccessfulstage_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 'playend_tour'];
-                        var stringQueried = terms.map( function (term) {
+                        var stringQueried = terms.map(function (term) {
                             return {key: term, component: 'treasurehunt'};
                         });
                         str.get_strings(stringQueried).done(function (strings) {
@@ -65,14 +65,14 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                         }).fail(notification.exception);
                     }
 
-                }, // end of playpage function
+                }, // ...end of playpage function.
 
-            }; // end of init var
+            }; // ...end of init var.
             return init;
         }
-); // end of module define function
+); // ...end of module define function.
 
-function configureEditIntro(intro, strings,keys) {
+function configureEditIntro(intro, strings, keys) {
     intro.setOptions({
         nextLabel: strings[keys.indexOf('nextstep')],
         prevLabel: strings[keys.indexOf('prevstep')],
@@ -81,7 +81,7 @@ function configureEditIntro(intro, strings,keys) {
         steps: [
             {
                 element: '#treasurehunt-editor',
-                intro: strings[keys.indexOf('welcome_edit_tour')], 
+                intro: strings[keys.indexOf('welcome_edit_tour')],
                 position: 'floating'
             },
             {
@@ -129,10 +129,10 @@ function configureEditIntro(intro, strings,keys) {
     });
 }
 ; // end of configureEditIntro
-function configurePlayIntro(intro, strings,keys) {
+function configurePlayIntro(intro, strings, keys) {
     intro.setOptions({
         nextLabel: strings[keys.indexOf('nextstep')],
-        prevLabel: strings[keys.indexOf( 'prevstep')],
+        prevLabel: strings[keys.indexOf('prevstep')],
         skipLabel: strings[keys.indexOf('skiptutorial')],
         doneLabel: strings[keys.indexOf('donetutorial')],
         steps: [

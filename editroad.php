@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 
 /**
  * Page to edit road
@@ -39,7 +37,6 @@ global $COURSE, $PAGE, $CFG, $USER;
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID
 $id = optional_param('id', 0, PARAM_INT);           // EntryID
 
-
 list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
@@ -59,8 +56,7 @@ $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, '
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-            array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
     if ($id) { // if entry is specified
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
@@ -77,7 +73,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
     $road->cmid = $cmid;
 
-    //Compruebo el tipo de grupo
+    // Compruebo el tipo de grupo.
     if ($cm->groupmode) {
         $selectoptions = groups_get_all_groupings($course->id);
         $grouptype = "groupingid";
@@ -87,7 +83,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $grouptype = "groupid";
         $grouptypecond = "AND groupid != 0";
     }
-    //Elimino los grupos ocupados
+    // Elimino los grupos ocupados
     $sql = "SELECT $grouptype as busy FROM {treasurehunt_roads}  WHERE treasurehuntid=? AND id !=? $grouptypecond";
     $parms = array('treasurehuntid' => $treasurehunt->id, 'id' => $id);
     $busy = $DB->get_records_sql($sql, $parms);
@@ -95,8 +91,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         unset($selectoptions[$option->busy]);
     }
 
-    $mform = new road_form(null,
-            array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
+    $mform = new road_form(null, array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
 
     if ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form
@@ -108,17 +103,15 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         }
         redirect($returnurl);
     } else if ($road = $mform->get_data()) {
-        //Actualizamos los campos
-       
+        // Actualizamos los campos.
         $road->name = trim($road->name);
-        $road=treasurehunt_add_update_road($treasurehunt,$road,$context);
+        $road = treasurehunt_add_update_road($treasurehunt, $road, $context);
         $returnurl->param('roadid', $road->id);
         redirect($returnurl);
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,
-            treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editroad', 'treasurehunt'), $url);
@@ -129,7 +122,6 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 $mform->display();
 echo $OUTPUT->footer();
-
 
 
 

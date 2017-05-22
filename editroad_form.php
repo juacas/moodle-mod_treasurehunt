@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -55,7 +54,7 @@ class road_form extends moodleform {
             $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        //Aquí añadimos la regla del tamaño máximo de la cadena.
+        // Aquí añadimos la regla del tamaño máximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $options = array();
@@ -71,12 +70,11 @@ class road_form extends moodleform {
             $mform->addHelpButton('groupid', 'groupid', 'treasurehunt');
         }
 
-        //Añado los campos ocultos id y newFeature
+        // Añado los campos ocultos id y newFeature
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
-
 
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);

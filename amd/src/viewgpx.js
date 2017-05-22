@@ -19,19 +19,19 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
-  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/ol3-layerswitcher'],
         function ($, jqui, touch, notification, ol, ajax, olLayerSwitcher) {
 
             var init = {
-                addgpxlayer: function (map,cmid, treasurehuntid, strings, user, trackgroupname) {
-                    
-                     var trackgroup = find_or_add_layergroup(map, trackgroupname);
-                     
-                     load_gpx([user], cmid, map, trackgroup, null);
-                     return trackgroup;
+                addgpxlayer: function (map, cmid, treasurehuntid, strings, user, trackgroupname) {
+
+                    var trackgroup = find_or_add_layergroup(map, trackgroupname);
+
+                    load_gpx([user], cmid, map, trackgroup, null);
+                    return trackgroup;
                 },
                 creategpxviewer: function (cmid, treasurehuntid, strings, users) {
                     var basemaps = new ol.layer.Group({
@@ -45,9 +45,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
                                     imagerySet: 'AerialWithLabels',
                                     maxZoom: 19
-                                            // use maxZoom 19 to see stretched tiles instead of the BingMaps
+                                            // Use maxZoom 19 to see stretched tiles instead of the BingMaps
                                             // "no photos at this zoom level" tiles
-                                            // maxZoom: 19
+                                            // maxZoom: 19.
                                 })
                             }), new ol.layer.Tile({
                                 title: strings['roadmap'],
@@ -76,7 +76,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
 
                     layerSwitcher.showPanel();
                     load_gpx(users, cmid, map, tracks, layerSwitcher);
-                    // Popup showing the position the user clicked
+                    // Popup showing the position the user clicked.
                     var popup = new ol.Overlay({
                         element: document.getElementById('info')
                     });
@@ -196,10 +196,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
             }
             function styleFunction(feature, icon) {
                 var styles = [
-                    // shadow
+                    // ...shadow.
                     new ol.style.Style({
                         stroke: new ol.style.Stroke({
-                            color: 'white', //[0, 0, 127, 0.25],
+                            color: 'white',
                             width: 8
                         }),
                         //zIndex: 1

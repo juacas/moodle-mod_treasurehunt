@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the GeoJSON package.
  * (c) Camptocamp <info@camptocamp.com>

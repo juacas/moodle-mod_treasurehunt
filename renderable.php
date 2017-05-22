@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -70,13 +69,12 @@ class treasurehunt_info implements renderable {
      * constructor
      *
      */
-    public function __construct($treasurehunt, $timenow, $courseid,$roads) {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads) {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;
         $this->roads = $roads;
     }
-
 }
 
 /**
@@ -101,8 +99,7 @@ class treasurehunt_users_progress implements renderable {
      * constructor
      *
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings,
-            $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission) {
+    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid, $duplicategroupsingroupings, $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
@@ -123,8 +120,8 @@ class treasurehunt_users_progress implements renderable {
  */
 class treasurehunt_play_page implements renderable, templatable {
 
-    var $treasurehunt = null;
-    var $cmid = 0;
+    private $treasurehunt = null;
+    private $cmid = 0;
 
     public function __construct($treasurehunt, $cmid) {
         $this->treasurehunt = $treasurehunt;

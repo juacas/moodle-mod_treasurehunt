@@ -88,5 +88,4 @@ abstract class Collection extends Geometry implements Iterator
     return $this->current() !== false;
   }
 
-
 }

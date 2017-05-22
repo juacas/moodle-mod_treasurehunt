@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -54,7 +53,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        //Aquí añadimos la regla del tamaño máximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         // Adding the standard "intro" and "introformat" fields. Esto sirve para poner la descripción, si quieres 
@@ -63,8 +61,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'playwithoutmoving', get_string('playwithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playwithoutmoving', 'playwithoutmoving', 'treasurehunt');
         // Track users.
-        $mform->addElement('advcheckbox','tracking',get_string('trackusers', 'treasurehunt'));
-        $mform->addHelpButton('tracking','trackusers','treasurehunt');
+        $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
+        $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
 
@@ -90,7 +88,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'groupmode', get_string('groupmode', 'treasurehunt'));
         $mform->addHelpButton('groupmode', 'groupmode', 'treasurehunt');
 
-
         // Add standard grading elements. Calificación.
         $this->standard_grading_coursemodule_elements();
         // If is not an update.
@@ -101,8 +98,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $mform->setDefault('grade[modgrade_point]', $treasurehuntconfig->maximumgrade);
         }
         // Grading method.
-        $mform->addElement('select', 'grademethod', get_string('grademethod', 'treasurehunt'),
-                treasurehunt_get_grading_options());
+        $mform->addElement('select', 'grademethod', get_string('grademethod', 'treasurehunt'), treasurehunt_get_grading_options());
         $mform->addHelpButton('grademethod', 'grademethod', 'treasurehunt');
         $mform->setDefault('grademethod', $treasurehuntconfig->grademethod);
         $mform->disabledIf('grademethod', 'grade[modgrade_type]', 'neq', 'point');
@@ -121,9 +117,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->disabledIf('gradepenanswer', 'grade[modgrade_type]', 'neq', 'point');
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
-
-
-
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons($cancel = true);
     }

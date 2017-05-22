@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -58,13 +58,13 @@ $segment = new stdClass();
 $segment->activities = [$activity];
 $segment->type = 'tracks';
 $segments[] = $segment;
-$gpx = makeXml($segments, $description);
+$gpx = makexml($segments, $description);
 header('Content-type: application/gpx');
 header('Content-Disposition: attachment; filename="treasure_track.gpx"');
 echo $gpx;
 die;
 
-function makeXml($segments, $description) {
+function makexml($segments, $description) {
     $xml = '<?xml version="1.0" encoding="UTF-8"?>
             <gpx version="1.1" creator="TreasureHuntTrackExporter" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
 			<metadata>
@@ -79,12 +79,14 @@ function makeXml($segments, $description) {
     foreach ($segments as $segment) {
         $xml .= "<trkseg>";
         if ($segment->type == 'place') {
-            $xml .= makeTrackPoint($segment);
+            $xml .= maketrackpoint($segment);
         } else {
             foreach ($segment->activities as $activity) {
-                if ($activity->trackPoints)
-                    foreach ($activity->trackPoints as $point)
-                        $xml .= makeTrackPoint($point);
+                if ($activity->trackPoints) {
+                    foreach ($activity->trackPoints as $point) {
+                        $xml .= maketrackpoint($point);
+                    }
+                }
             }
         }
         $xml .= "</trkseg>";
@@ -95,22 +97,22 @@ function makeXml($segments, $description) {
     return $xml;
 }
 
-function getIsoTime($date) {
-    $dateObj = new DateTime();
-    $dateObj->setTimestamp($date);
-    return $dateObj->format('c');
+function getisotime($date) {
+    $dateobj = new DateTime();
+    $dateobj->setTimestamp($date);
+    return $dateobj->format('c');
 }
 
-function makeTrackPoint(&$data) {
+function maketrackpoint(&$data) {
     $return = '';
     if ($data->type == 'place') {
-        $startTime = getIsoTime($data->startTime);
-        $endTime = getIsoTime($data->endTime);
+        $starttime = getisotime($data->startTime);
+        $endtime = getisotime($data->endTime);
 
-        $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon . "\"><time>$startTime</time><location>" . $data->place->name . "</location></trkpt>";
-        $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon . "\"><time>$endTime</time><location>" . $data->place->name . "</location></trkpt>";
+        $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon . "\"><time>$starttime</time><location>" . $data->place->name . "</location></trkpt>";
+        $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon . "\"><time>$endtime</time><location>" . $data->place->name . "</location></trkpt>";
     } else {
-        $time = getIsoTime($data->time);
+        $time = getisotime($data->time);
         $return .= "<trkpt lat=\"$data->lat\" lon=\"$data->lon\"><time>$time</time>";
         $return .= "</trkpt>";
     }

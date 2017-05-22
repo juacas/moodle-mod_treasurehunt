@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -62,11 +61,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     }
 
     /**
-     * Defer to template.                                                                                                           
-     *                                                                                                                              
-     * @param treasurehunt_play_page $page                                                                                                      
-     *                                                                                                                              
-     * @return string html for the page                                                                                             
+     * Defer to template.
+     *
+     * @param treasurehunt_play_page $page
+     *
+     * @return string html for the page
      */
     public function render_treasurehunt_play_page(treasurehunt_play_page $page) {
         $data = $page->export_for_template($this);
@@ -177,7 +176,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                     $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
-                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid,null,$userorgroup->id);
+                                $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
                             } else {
                                 $fullname = fullname($userorgroup);
                                 $userpic = $this->output->user_picture($userorgroup, array('size' => 32));
@@ -189,10 +188,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                     $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
-                                $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid,$userorgroup->id,null);
+                                $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
                             }
                             $cells = array($name);
-                           
+
                             $cells[] = treasurehunt_get_nice_duration($elapsed);
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
@@ -245,7 +244,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             // Close the container and insert a spacer.
             $o .= $this->output->container_end();
         }
-
 
         return $o;
     }

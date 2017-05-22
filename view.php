@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -26,7 +25,7 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once("$CFG->dirroot/mod/treasurehunt/renderable.php");
-require_once ($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 global $USER;
 $id = required_param('id', PARAM_INT);

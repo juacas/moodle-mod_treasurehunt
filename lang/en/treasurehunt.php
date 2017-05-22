@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -108,8 +107,8 @@ $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another. '
         . 'The larger, less update requests should be made, but more time passes to report a possible change. '
         . 'It must be greater than 0 seconds, but the time will be set by default.';
-$string['geolocation_needed_title']='This application needs geolocation.';
-$string['geolocation_needed']='To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
+$string['geolocation_needed_title'] = 'This application needs geolocation.';
+$string['geolocation_needed'] = 'To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
 $string['gradefromposition'] = 'Grade from position';
 $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from finishing time';
@@ -136,7 +135,6 @@ It is assumed that every hunter plays simultaneously.
 The grade is calculated by interpolating the finishing time being 50% the end time of the hunt 
 and 100% the best finishing time. The players that did not finish the 
 hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
-
 
 <P><B>Grade from position</B><P>
 <UL>
@@ -321,24 +319,24 @@ $string['warnusersgrouping'] = 'The following groups belong to more than one gro
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
 
 // Initial tour help
-$string['addstage_tour']='Each road must have two or more stages. Each stage gives a clue to find out the next.';
-$string['addroad_tour']='Add one or more roads to be followed by your students.';
-$string['editend_tour']='Enjoy making exciting games for your students!';
-$string['map_tour']='In this map you can manage all the components of a funny geolocated game!';
-$string['remove_tour']= 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
+$string['addstage_tour'] = 'Each road must have two or more stages. Each stage gives a clue to find out the next.';
+$string['addroad_tour'] = 'Add one or more roads to be followed by your students.';
+$string['editend_tour'] = 'Enjoy making exciting games for your students!';
+$string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
+$string['remove_tour'] = 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
 $string['roads_tour'] = 'In this area you will find the diferent roads of your game. Select one of them to edit the stages.';
 $string['save_tour'] = 'After drawing yout locations, don\'t forget to save your changes.';
 $string['searchlocation_tour'] = 'Whith this search area you can find your way rapidly';
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
-$string['welcome_edit_tour']='Welcome to the authoring page of TreasureHunt. ';
+$string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 
 $string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
 $string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour']='In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/parchment.png" width="28"/> and failed stages with <img src="pix/failure.png" width="28"/>';
-$string['playend_tour']='Enjoy pursuing the treasure with your mates!';
+$string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/parchment.png" width="28"/> and failed stages with <img src="pix/failure.png" width="28"/>';
+$string['playend_tour'] = 'Enjoy pursuing the treasure with your mates!';
 $string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
-$string['nextstep']='Next';
-$string['prevstep']='Prev';
-$string['skiptutorial']='Quit';
-$string['donetutorial']='End';
+$string['nextstep'] = 'Next';
+$string['prevstep'] = 'Prev';
+$string['skiptutorial'] = 'Quit';
+$string['donetutorial'] = 'End';

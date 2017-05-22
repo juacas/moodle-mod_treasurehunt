@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +23,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once ($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 global $USER;
 
@@ -37,7 +36,6 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:play', $context, null, false);
 
-//Poner evento de edicion o algo asi
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
   'objectid' => $PAGE->cm->instance,
   'context' => $PAGE->context,
@@ -47,16 +45,14 @@ require_capability('mod/treasurehunt:play', $context, null, false);
   $event->trigger(); */
 
 // Print the page header.
-
 $PAGE->set_url('/mod/treasurehunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
-//$PAGE->set_pagelayout('standard');
 if ($treasurehunt->allowattemptsfromdate > time()) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
     print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
 }
-// Get last timestamp 
+// Get last timestamp.
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
@@ -91,7 +87,6 @@ $PAGE->set_pagelayout('embedded');
 // Output starts here.
 echo $output->header();
 
-
-echo treasurehunt_view_play_page($treasurehunt, $cm->id,$user);
+echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
 // Finish the page.
 echo $output->footer();

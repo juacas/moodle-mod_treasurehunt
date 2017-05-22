@@ -1,33 +1,31 @@
-// This file is part of Moodle - http://moodle.org/
+//  This file is part of Moodle - http:// moodle.org/.
 //
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
+//  Moodle is free software: you can redistribute it and/or modify.
+//  it under the terms of the GNU General Public License as published by.
+//  the Free Software Foundation, either version 3 of the License, or.
 // (at your option) any later version.
 //
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//  Moodle is distributed in the hope that it will be useful,.
+//  but WITHOUT ANY WARRANTY; without even the implied warranty of.
+//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the.
 // GNU General Public License for more details.
 //
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
+//  You should have received a copy of the GNU General Public License.
+//  along with Moodle.  If not, see <http:// www.gnu.org/licenses/>.
+.
 /**
  * @module    mod_treasurehunt/edit
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>* @license   http://  www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
+ * @license   http://  www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 
 define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/ol3-layerswitcher'],
         function ($, jqui, touch, notification, ol, ajax, GeocoderJS, olLayerSwitcher) {
 
-
             var init = {
-
                 edittreasurehunt: function (idModule, treasurehuntid, strings, selectedroadid, lockid) {
                     /** Global var ***************************************************************
                      */
@@ -55,8 +53,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         })
                     });
                     var openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
-                    /**Load the control pane, treasurehunt and road list ***************************************************
-                     */
+                    // Load the control pane, treasurehunt and road list.
                     $("#controlpanel").addClass('ui-widget-header ui-corner-all');
                     $('<span id="edition"/>').appendTo($("#controlpanel"));
                     $('<input type="radio" name="controlpanel" id="radio1" value="add">').appendTo($("#edition"));
@@ -68,8 +65,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     $('<button id="removefeature"/>').attr('disabled', true).text(strings['remove']).appendTo($(
                             "#controlpanel"));
                     $('<div id="searchcontainer">').appendTo($("#controlpanel"));
-                    $('<input type="search" placeholder="' + strings['searchlocation']
-                            + '" class="searchaddress"/>')
+                    $('<input type="search" placeholder="' + strings['searchlocation'] + '" class="searchaddress"/>')
                             .appendTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo($("#searchcontainer"));
                     $('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>').appendTo($(
@@ -110,13 +106,13 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             primary: "ui-icon-circle-plus"
                         }
                     });
-                    //Lo cargo como un buttonset
+                    // Lo cargo como un buttonset.
                     $("#edition").buttonset();
-                    //Hago visible el controlpanel
+                    // Hago visible el controlpanel.
                     $("#controlpanel").removeClass('invisible');
-                    //Creo el stagelist
+                    // Creo el stagelist.
                     $('<ul id="stagelist"/>').prependTo($("#stagelistpanel"));
-                    //Lo cargo como un sortable
+                    // Lo cargo como un sortable.
                     $("#stagelist").sortable({
                         handle: ".handle",
                         tolerance: "pointer",
@@ -132,14 +128,14 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             var roadid = ui.item.attr('roadid');
                             var start_pos = ui.item.index('li[roadid="' + roadid + '"]');
                             ui.item.data('start_pos', start_pos);
-                            //set max scrollTop for sortable scrolling
+                            // Set max scrollTop for sortable scrolling.
                             var scrollParent = $(this).data("ui-sortable").scrollParent;
                             var maxScrollTop = scrollParent[0].scrollHeight - scrollParent[0].clientHeight
                                     - ui.helper.height();
                             $(this).data('maxScrollTop', maxScrollTop);
                         },
                         sort: function (e, ui) {
-                            //check if scrolling is out of boundaries
+                            // Check if scrolling is out of boundaries.
                             var scrollParent = $(this).data("ui-sortable").scrollParent,
                                     maxScrollTop = $(this).data('maxScrollTop');
                             if (scrollParent.scrollTop() > maxScrollTop) {
@@ -178,7 +174,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         newVal = Math.abs($($item).index('li[roadid="' + roadid + '"]') - $listlength);
                         $($item).attr('stageposition', newVal);
                         $($item).find('.sortable-number').text(newVal);
-                        //Si esta seleccionado cambiamos el valor de stageposition
+                        //  Si esta seleccionado cambiamos el valor de stageposition.
                         if ($($item).hasClass("ui-selected")) {
                             stageposition = newVal;
                         }
@@ -186,10 +182,11 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 newVal, parseInt($($item).attr('roadid')), dirtyStages, originalStages, vector);
                     }
 
-                    //Creo el roadlistpanel
+                    //  Creo el roadlistpanel.
                     $('<ul id="roadlist"/>').appendTo($("#roadlistpanel"));
-                    //Anado los handle custom
-                    /*Set control
+                    // Anado los handle custom.
+                    /*
+                     * Set control
                      * 
                      * @type edit_L27.ol.style.Style
                      */
@@ -214,8 +211,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         });
                     };
                     ol.inherits(app.generateResizableControl, ol.control.Control);
-                    /** Get style, vectors, map and interactions ***************************************************************
-                     */
+                    // Get style, vectors, map and interactions.
                     var defaultstageStyle = new ol.style.Style({
                         fill: new ol.style.Fill({
                             color: 'rgba(0, 0, 0, 0.1)'
@@ -246,7 +242,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             })
                         })
                     });
-                    //Estilo etapa seleccionada
+                    // Estilo etapa seleccionada.
                     var selectedstageStyle = new ol.style.Style({
                         fill: new ol.style.Fill({
                             color: 'rgba(0, 0, 0, 0.05)'
@@ -295,9 +291,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
                                     imagerySet: 'AerialWithLabels',
                                     maxZoom: 19
-                                            // use maxZoom 19 to see stretched tiles instead of the BingMaps
-                                            // "no photos at this zoom level" tiles
-                                            // maxZoom: 19
+                                            //  Use maxZoom 19 to see stretched tiles instead of the BingMaps.
+                                            //  "no photos at this zoom level" tiles.
+                                            //  maxZoom: 19.
                                 })
                             }), new ol.layer.Tile({
                                 title: strings['roadmap'],
@@ -323,7 +319,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         ])
                     });
                     layerSwitcher.showPanel();
-                    //Creo el resizable
+                    // Creo el resizable.
                     $("#stagelistpanel").resizable({
                         handles: {'e': $('#egrip')},
                         resize: function (event, ui) {
@@ -337,7 +333,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     var Modify = {
                         init: function () {
                             this.select = new ol.interaction.Select({
-                                //Si una feature puede ser seleccionada o no
+                                // Si una feature puede ser seleccionada o no.
                                 filter: function (feature) {
                                     if (selectedstageFeatures[feature.getId()]) {
                                         return true;
@@ -403,13 +399,13 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             this.setEvents();
                         },
                         setEvents: function () {
-                            //Elimino la seleccion de features cuando cambia a off
+                            //  Elimino la seleccion de features cuando cambia a off.
                             selectedFeatures = this.select.getFeatures();
                             this.select.on('change:active', function () {
                                 selectedFeatures.clear();
                                 deactivateDeleteButton();
                             });
-                            //Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no
+                            // Activo o desactivo el boton de borrar segun tenga una feature seleccionada o no.
                             this.select.on('select', function () {
                                 if (selectedFeatures.getLength() > 0) {
                                     activateDeleteButton();
@@ -417,7 +413,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     deactivateDeleteButton();
                                 }
                             });
-                            //Activo el boton de guardar segun se haya modificado algo o no
+                            // Activo el boton de guardar segun se haya modificado algo o no.
                             this.modify.on('modifyend', function (e) {
                                 activateSaveButton();
                                 modifyFeatureToDirtySource(e.features, originalStages, dirtyStages,
@@ -466,8 +462,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             })
                         }),
                         setEvents: function () {
-                            //Fijo el treasurehunt al que pertenecen y activo el boton de guardar 
-                            //segun se haya modificado algo o no
+                            //  Fijo el treasurehunt al que pertenecen y activo el boton de guardar .
+                            // segun se haya modificado algo o no.
                             this.Polygon.on('drawend', function (e) {
                                 drawStarted = false;
                                 if (abortDrawing) {
@@ -482,11 +478,11 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                     selectedstageFeatures[idNewFeature] = true;
                                     e.feature.setId(idNewFeature);
                                     idNewFeature++;
-                                    //Agrego la nueva feature a su correspondiente vector de poligonos
+                                    //  Agrego la nueva feature a su correspondiente vector de poligonos.
                                     treasurehunt.roads[roadid].vector.getSource().addFeature(e.feature);
-                                    //Agrego la feature a la coleccion de multipoligonos sucios
+                                    //  Agrego la feature a la coleccion de multipoligonos sucios.
                                     addNewFeatureToDirtySource(e.feature, originalStages, dirtyStages);
-                                    //Limpio el vector de dibujo
+                                    //  Limpio el vector de dibujo.
                                     vectorDraw.getSource().clear();
                                     activateSaveButton();
                                     dirty = true;
@@ -509,8 +505,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                     };
                     $(document).keyup(function (e) {
-                        //Si pulso la tecla esc dejo de dibujar
-                        if (e.keyCode === 27 && drawStarted) // esc
+                        // Si pulso la tecla esc dejo de dibujar.
+                        if (e.keyCode === 27 && drawStarted) // Esc.
                         {
                             abortDrawing = true;
                             Draw.Polygon.finishDrawing();
@@ -520,14 +516,14 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     Draw.setActive(false);
                     Modify.setActive(false);
                     deactivateEdition();
-                    // The snap interaction must be added after the Modify and Draw interactions
-                    // in order for its map browser event handlers to be fired first. Its handlers
+                    //  The snap interaction must be added after the Modify and Draw interactions.
+                    //  in order for its map browser event handlers to be fired first. Its handlers.
                     // are responsible of doing the snapping.
                     var snap = new ol.interaction.Snap({
                         source: vectorDraw.getSource()
                     });
                     map.addInteraction(snap);
-                    //Cargo las features
+                    //  Cargo las features.
                     fetchTreasureHunt(treasurehuntid);
                     function addNewFeatureToDirtySource(dirtyFeature, originalStages, dirtySource) {
 
@@ -543,7 +539,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             feature.setProperties({
                                 'idFeaturesPolygons': '' + dirtyFeature.getId()
                             });
-                            //Quito la advertencia
+                            //  Quito la advertencia.
                             notEmptystage(stageid, roadid);
                         } else {
                             feature.setProperties({
@@ -566,7 +562,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 dirtySource.addFeature(feature);
                             }
                             var multipolygon = new ol.geom.MultiPolygon([]);
-                            //Get those multipolygons of vector layer 
+                            //  Get those multipolygons of vector layer .
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 multipolygon.appendPolygon(vector.getSource().getFeatureById(idFeaturesPolygons[i]).
@@ -591,7 +587,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 dirtySource.addFeature(feature);
                             }
                             var multipolygon = new ol.geom.MultiPolygon([]);
-                            //Get those multipolygons of vector layer which stageid isn't id of dirtyFeature
+                            //  Get those multipolygons of vector layer which stageid isn't id of dirtyFeature.
                             idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                             for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
                                 if (idFeaturesPolygons[i] != dirtyFeature.getId()) {
@@ -618,21 +614,21 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
 
                     function styleFunction(feature) {
-                        // get the incomeLevel from the feature properties
+                        // Get the incomeLevel from the feature properties.
                         var stageposition = feature.get('stageposition');
                         if (!isNaN(stageposition)) {
                             selectedstageStyle.getText().setText('' + stageposition);
                             defaultstageStyle.getText().setText('' + stageposition);
                         }
-                        // if there is no level or its one we don't recognize,
-                        // return the default style (in an array!)
+                        //  if there is no level or its one we don't recognize,.
+                        // return the default style (in an array!).
                         if (selectedstageFeatures[feature.getId()]) {
                             return [selectedstageStyle];
                         }
-                        // check the cache and create a new style for the income
+                        //  check the cache and create a new style for the income.
                         // level if its not been created before.
-                        // at this point, the style for the current level is in the cache
-                        // so return it (as an array!)
+                        //  at this point, the style for the current level is in the cache.
+                        // so return it (as an array!).
                         return [defaultstageStyle];
                     }
 
@@ -658,10 +654,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 if (!Array.isArray(roads)) {
                                     roads = Object.values(roads);
                                 }
-                                // Necesito indexar cada camino en el objeto global treasurehunt
+                                //  Necesito indexar cada camino en el objeto global treasurehunt.
                                 roads.forEach(function (road) {
-                                    //agrego los vectores a cada camino
-                                    // cast string "0" or "1" to boolean
+                                    //  agrego los vectores a cada camino.
+                                    //  cast string "0" or "1" to boolean.
                                     road.blocked = road.blocked == true;
                                     addroad2ListPanel(road.id, road.name,
                                             road.blocked);
@@ -742,8 +738,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
 
 
-                    /** Panel functions ***************************************************************
-                     */
+                    // Panel functions .
                     function removefeatures(selectedFeatures, vector) {
                         selectedFeatures.forEach(function (feature) {
                             vector.getSource().removeFeature(feature);
@@ -809,7 +804,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
 
                     function addroad2ListPanel(roadid, name, blocked) {
-                        //Si no existe lo agrego
+                        // Si no existe lo agrego.
                         if ($('#roadlist li[roadid="' + roadid + '"]').length < 1) {
                             var li = $('<li roadid="' + roadid + '" blocked="' + blocked + '"/>').appendTo($(
                                     "#roadlist"));
@@ -823,9 +818,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         var $li = $('#roadlist li[roadid="' + roadid + '"]');
                         if ($li.length > 0) {
                             var $lis = $('#stagelist li[roadid="' + roadid + '"]');
-                            //Elimino el li del roadlist
+                            // Elimino el li del roadlist.
                             $li.remove();
-                            //Elimino todos los li del stagelist
+                            // Elimino todos los li del stagelist.
                             $lis.remove();
                         }
                     }
@@ -834,13 +829,13 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         if ($li.length > 0) {
                             var roadid = $li.attr('roadid');
                             var start_pos = $li.index('li[roadid="' + roadid + '"]');
-                            //Elimino el li
+                            // Elimino el li.
                             $li.remove();
                             var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
                             // Compruebo el resto de etapas de la lista.
                             check_stage_list($stagelist);
                             var $listlength = $stagelist.length;
-                            //Recoloco el resto
+                            //  Recoloco el resto.
                             for (var i = 0; i <= start_pos - 1; i++) {
                                 relocatestageList($stagelist, $listlength, i, dirtySource, originalStages,
                                         vectorOfPolygons);
@@ -848,7 +843,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                     }
                     function sortList() {
-                        //Ordeno la lista 
+                        //  Ordeno la lista .
                         $('#stagelist li').sort(function (a, b) {
                             var contentA = parseInt($(a).attr('stageposition'));
                             var contentB = parseInt($(b).attr('stageposition'));
@@ -952,14 +947,14 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                     }
                     function selectRoad(roadid, vectorOfPolygons, map) {
-                        //Limpio todas las features seleccionadas,oculto todos los li y solo muestro los que tengan el roadid 
+                        // Limpio todas las features seleccionadas,oculto todos los li y solo muestro los que tengan el roadid .
                         $("#stagelist li").removeClass("ui-selected").hide();
                         var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
                         $stagelist.show();
                         check_stage_list($stagelist);
-                        //Si no esta marcado el li road lo marco
+                        //  Si no esta marcado el li road lo marco.
                         $("#roadlist li[roadid='" + roadid + "']").addClass("ui-selected");
-                        //Dejo visible solo el vector con el roadid
+                        //  Dejo visible solo el vector con el roadid.
                         map.getLayers().forEach(function (layer) {
                             if (layer instanceof ol.layer.Vector) {
                                 layer.setVisible(false);
@@ -975,25 +970,25 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     function selectstageFeatures(vectorOfPolygons, vectorSelected, selected,
                             selectedFeatures, dirtySource, originalStages) {
                         vectorSelected.getSource().clear();
-                        //Deselecciono cualquier feature anterior
+                        // Deselecciono cualquier feature anterior.
                         selectedFeatures.clear();
-                        //Reinicio el objeto
+                        // Reinicio el objeto.
                         selectedstageFeatures = {};
                         var feature = dirtySource.getFeatureById(selected);
                         if (!feature) {
                             feature = originalStages.getFeatureById(selected);
                             if (!feature) {
-                                //Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente
+                                // Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente.
                                 vectorOfPolygons.changed();
                                 return;
                             }
                         }
                         if (feature.get('idFeaturesPolygons') === 'empty') {
-                            //Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente
+                            // Incremento la version para que se recargue el mapa y se deseleccione la marcada anteriormente.
                             vectorOfPolygons.changed();
                             return;
                         }
-                        // Agrego los poligonos a mi objecto que almacena los poligonos seleccionados 
+                        //  Agrego los poligonos a mi objecto que almacena los poligonos seleccionados .
                         // y tambien agrego al vector al que se le aplica la animacion.
                         var idFeaturesPolygons = feature.get('idFeaturesPolygons').split(",");
                         for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -1002,8 +997,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                             clone());
                             selectedstageFeatures[idFeaturesPolygons[i]] = true;
                         }
-                        //Coloco el mapa en la posicion de las etapas seleccionadas si la etapa contiene alguna feature y 
-                        //postergando el tiempo para que seleccione la nueva feature.
+                        //  Coloco el mapa en la posicion de las etapas seleccionadas si la etapa contiene alguna feature y .
+                        // postergando el tiempo para que seleccione la nueva feature.
                         if (vectorSelected.getSource().getFeatures().length) {
                             flyTo(map, null, vectorSelected.getSource().getExtent());
                         }
@@ -1068,10 +1063,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
-                                //Elimino tanto el li del road como todos los li de stages asociados
+                                // Elimino tanto el li del road como todos los li de stages asociados.
                                 deleteRoad2ListPanel(roadid);
-                                // Elimino la feature de dirtySource si la tuviese, 
-                                // del originalStages y elimino el camino del treasurehunt y la capa del mapa
+                                //  Elimino la feature de dirtySource si la tuviese, .
+                                // del originalStages y elimino el camino del treasurehunt y la capa del mapa.
                                 map.removeLayer(treasurehunt.roads[roadid].vector);
                                 delete treasurehunt.roads[roadid];
                                 selectfirstroad(treasurehunt.roads, map);
@@ -1115,9 +1110,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 var idFeaturesPolygons = false;
                                 var polygonFeature;
                                 var feature = dirtySource.getFeatureById(stageid);
-                                //Elimino y recoloco 
+                                // Elimino y recoloco.
                                 deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons);
-                                //Elimino la feature de dirtySource si la tuviese y todos los poligonos del vector de poligonos
+                                // Elimino la feature de dirtySource si la tuviese y todos los poligonos del vector de poligonos.
                                 if (!feature) {
                                     feature = originalStages.getFeatureById(stageid);
                                     if (feature.get('idFeaturesPolygons') !== 'empty') {
@@ -1152,7 +1147,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         var dirtyfeatures = dirtySource.getFeatures();
                         var features = [];
                         var auxfeature;
-                        // Remove unnecessary feature properties 
+                        //  Remove unnecessary feature properties .
                         dirtyfeatures.forEach(function (dirtyfeature) {
                             auxfeature = dirtyfeature.clone();
                             auxfeature.unset("idFeaturesPolygons");
@@ -1181,15 +1176,15 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
                                 var originalFeature;
-                                //Paso las features "sucias" al objeto con las features originales
+                                // Paso las features "sucias" al objeto con las features originales.
                                 dirtySource.forEachFeature(function (feature) {
                                     originalFeature = originalStages.getFeatureById(feature.getId());
                                     originalFeature.setProperties(feature.getProperties());
                                     originalFeature.setGeometry(feature.getGeometry());
                                 });
-                                //Limpio mi objeto que guarda las features sucias
+                                // Limpio mi objeto que guarda las features sucias.
                                 dirtySource.clear();
-                                //Desactivo el boton de guardar
+                                //  Desactivo el boton de guardar.
                                 deactivateSaveButton();
                                 dirty = false;
                                 if (typeof callback === "function" && options instanceof Array) {
@@ -1246,7 +1241,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }).on("click", function () {
                         $(this).autocomplete("search", $(this).value);
                     });
-                    // Necesario para regular la anchura de los resultados de autocompletado
+                    // Necesario para regular la anchura de los resultados de autocompletado.
                     $.ui.autocomplete.prototype._resizeMenu = function () {
                         var ul = this.menu.element;
                         ul.outerWidth(this.element.outerWidth());
@@ -1276,7 +1271,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             removefeatureToDirtySource(selectedFeatures, originalStages,
                                     dirtyStages, treasurehunt.roads[roadid].vector);
                             removefeatures(selectedFeatures, treasurehunt.roads[roadid].vector);
-                            //Desactivo el boton de borrar y activo el de guardar cambios
+                            // Desactivo el boton de borrar y activo el de guardar cambios.
                             deactivateDeleteButton();
                             activateSaveButton();
                             dirty = true;
@@ -1304,10 +1299,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         });
                     });
                     $("#stagelist").on('click', '.ui-icon-pencil', function () {
-                        //Busco el stageid del li que contiene la papelera seleccionada
-
+                        //  Busco el stageid del li que contiene la papelera seleccionada.
+.
                         var stageid = parseInt($(this).parents('li').attr('stageid'));
-                        //Si esta sucio guardo el escenario
+                        // Si esta sucio guardo el escenario.
                         if (dirty) {
                             savestages(dirtyStages, originalStages, treasurehuntid,
                                     editFormstageEntry, [stageid, idModule], lockid);
@@ -1342,10 +1337,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             return;
                         }
                         $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
-                        //Selecciono el stageid de mi atributo custom
+                        // Selecciono el stageid de mi atributo custom.
                         stageposition = parseInt($(this).attr('stageposition'));
                         stageid = parseInt($(this).attr('stageid'));
-                        //Borro la anterior seleccion de features y busco las del mismo tipo
+                        // Borro la anterior seleccion de features y busco las del mismo tipo.
                         selectstageFeatures(treasurehunt.roads[roadid].vector, vectorSelected,
                                 stageid, selectedFeatures, dirtyStages, originalStages);
                         activateEdition();
@@ -1355,7 +1350,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         } else {
                             $("label[for='radio1']").removeClass('highlightbutton');
                         }
-                        //Paro de dibujar si cambio de etapa
+                        // Paro de dibujar si cambio de etapa.
                         if (drawStarted) {
                             abortDrawing = true;
                             Draw.Polygon.finishDrawing();
@@ -1367,10 +1362,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             return;
                         }
                         $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
-                        //Selecciono el stageid de mi atributo custom
-                        //Borro las etapas seleccionadas
+                        // Selecciono el stageid de mi atributo custom.
+                        // Borro las etapas seleccionadas.
                         selectedstageFeatures = {};
-                        //Paro de dibujar si cambio de camino
+                        // Paro de dibujar si cambio de camino.
                         if (drawStarted) {
                             abortDrawing = true;
                             Draw.Polygon.finishDrawing();
@@ -1397,10 +1392,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }, 500);
                     });
                     $("#roadlist").on('click', '.ui-icon-pencil', function () {
-                        //Busco el roadid del li que contiene el lapicero seleccionado
-
+                        //  Busco el roadid del li que contiene el lapicero seleccionado.
+.
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
-                        //Si esta sucio guardo el escenario
+                        // Si esta sucio guardo el escenario.
                         if (dirty) {
                             savestages(dirtyStages, originalStages, treasurehuntid, editFormRoadEntry, [roadid,
                                 idModule
@@ -1439,12 +1434,11 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         });
                         map.getTargetElement().style.cursor = hit ? 'pointer' : '';
                     });
-                    // Evento para que funcione bien el boton de cerrar en dispositivos tactiles
+                    // Evento para que funcione bien el boton de cerrar en dispositivos tactiles.
                     $(document).on('touchend', '.ui-dialog-titlebar-close', function () {
                         $(this).parent().siblings('.ui-dialog-content').dialog("close");
                     });
-                    // /////
-                    // CLEARABLE INPUT
+                    // CLEARABLE INPUT.
                     function tog(v) {
                         return v ? 'removeClass' : 'addClass';
                     }
@@ -1456,22 +1450,22 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         $(this).addClass('invisible');
                         $('.searchaddress').val('').change().autocomplete("close");
                     });
-                    //Al salirse
+                    // Al salirse.
                     window.onbeforeunload = function (e) {
                         var message = strings['savewarning'],
                                 e = e || window.event;
                         if (dirty) {
-                            // For IE and Firefox
+                            // For IE and Firefox.
                             if (e) {
                                 e.returnValue = message;
                             }
 
-                            // For Safari
+                            // For Safari.
                             return message;
                         }
                     };
-                } // End of function init
-
-            }; // End of init var
+                } //  End of function init.
+.
+            }; // End of init var.
             return init;
         });

@@ -21,14 +21,14 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 (function (root, factory) {
-  if(typeof define === "function" && define.amd) {
-    define(["mod_treasurehunt/ol"], factory);
-  } else if(typeof module === "object" && module.exports) {
-    module.exports = factory(require("mod_treasurehunt/ol"));
-  } else {
-    root.LayerSwitcher = factory(root.ol);
-  }
-}(this, function(ol) {
+    if (typeof define === "function" && define.amd) {
+        define(["mod_treasurehunt/ol"], factory);
+    } else if (typeof module === "object" && module.exports) {
+        module.exports = factory(require("mod_treasurehunt/ol"));
+    } else {
+        root.LayerSwitcher = factory(root.ol);
+    }
+}(this, function (ol) {
     /**
      * OpenLayers v3/v4 Layer Switcher Control.
      * See [the examples](./examples) for usage.
@@ -37,12 +37,12 @@
      * @param {Object} opt_options Control options, extends olx.control.ControlOptions adding:
      *                              **`tipLabel`** `String` - the button tooltip.
      */
-    ol.control.LayerSwitcher = function(opt_options) {
+    ol.control.LayerSwitcher = function (opt_options) {
 
         var options = opt_options || {};
 
         var tipLabel = options.tipLabel ?
-          options.tipLabel : 'Legend';
+                options.tipLabel : 'Legend';
 
         this.mapListeners = [];
 
@@ -66,17 +66,17 @@
 
         var this_ = this;
 
-        button.onmouseover = function(e) {
+        button.onmouseover = function (e) {
             this_.showPanel();
         };
 
-        button.onclick = function(e) {
+        button.onclick = function (e) {
             e = e || window.event;
             this_.showPanel();
             e.preventDefault();
         };
 
-        this_.panel.onmouseout = function(e) {
+        this_.panel.onmouseout = function (e) {
             e = e || window.event;
             if (!this_.panel.contains(e.toElement || e.relatedTarget)) {
                 this_.hidePanel();
@@ -95,7 +95,7 @@
     /**
      * Show the layer panel.
      */
-    ol.control.LayerSwitcher.prototype.showPanel = function() {
+    ol.control.LayerSwitcher.prototype.showPanel = function () {
         if (!this.element.classList.contains(this.shownClassName)) {
             this.element.classList.add(this.shownClassName);
             this.renderPanel();
@@ -105,7 +105,7 @@
     /**
      * Hide the layer panel.
      */
-    ol.control.LayerSwitcher.prototype.hidePanel = function() {
+    ol.control.LayerSwitcher.prototype.hidePanel = function () {
         if (this.element.classList.contains(this.shownClassName)) {
             this.element.classList.remove(this.shownClassName);
         }
@@ -114,11 +114,11 @@
     /**
      * Re-draw the layer panel to represent the current state of the layers.
      */
-    ol.control.LayerSwitcher.prototype.renderPanel = function() {
+    ol.control.LayerSwitcher.prototype.renderPanel = function () {
 
         this.ensureTopVisibleBaseLayerShown_();
 
-        while(this.panel.firstChild) {
+        while (this.panel.firstChild) {
             this.panel.removeChild(this.panel.firstChild);
         }
 
@@ -132,17 +132,17 @@
      * Set the map instance the control is associated with.
      * @param {ol.Map} map The map instance.
      */
-    ol.control.LayerSwitcher.prototype.setMap = function(map) {
-        // Clean up listeners associated with the previous map
+    ol.control.LayerSwitcher.prototype.setMap = function (map) {
+        // Clean up listeners associated with the previous map.
         for (var i = 0, key; i < this.mapListeners.length; i++) {
             ol.Observable.unByKey(this.mapListeners[i]);
         }
         this.mapListeners.length = 0;
-        // Wire up listeners etc. and store reference to new map
+        // Wire up listeners etc. and store reference to new map.
         ol.control.Control.prototype.setMap.call(this, map);
         if (map) {
             var this_ = this;
-            this.mapListeners.push(map.on('pointerdown', function() {
+            this.mapListeners.push(map.on('pointerdown', function () {
                 this_.hidePanel();
             }));
             this.renderPanel();
@@ -153,14 +153,16 @@
      * Ensure only the top-most base layer is visible if more than one is visible.
      * @private
      */
-    ol.control.LayerSwitcher.prototype.ensureTopVisibleBaseLayerShown_ = function() {
+    ol.control.LayerSwitcher.prototype.ensureTopVisibleBaseLayerShown_ = function () {
         var lastVisibleBaseLyr;
-        ol.control.LayerSwitcher.forEachRecursive(this.getMap(), function(l, idx, a) {
+        ol.control.LayerSwitcher.forEachRecursive(this.getMap(), function (l, idx, a) {
             if (l.get('type') === 'base' && l.getVisible()) {
                 lastVisibleBaseLyr = l;
             }
         });
-        if (lastVisibleBaseLyr) this.setVisible_(lastVisibleBaseLyr, true);
+        if (lastVisibleBaseLyr){
+            this.setVisible_(lastVisibleBaseLyr, true);
+        }
     };
 
     /**
@@ -170,12 +172,12 @@
      * @private
      * @param {ol.layer.Base} The layer whos visibility will be toggled.
      */
-    ol.control.LayerSwitcher.prototype.setVisible_ = function(lyr, visible) {
+    ol.control.LayerSwitcher.prototype.setVisible_ = function (lyr, visible) {
         var map = this.getMap();
         lyr.setVisible(visible);
         if (visible && lyr.get('type') === 'base') {
-            // Hide all other base layers regardless of grouping
-            ol.control.LayerSwitcher.forEachRecursive(map, function(l, idx, a) {
+            // Hide all other base layers regardless of grouping.
+            ol.control.LayerSwitcher.forEachRecursive(map, function (l, idx, a) {
                 if (l != lyr && l.get('type') === 'base') {
                     l.setVisible(false);
                 }
@@ -189,7 +191,7 @@
      * @param {ol.layer.Base} lyr Layer to be rendered (should have a title property).
      * @param {Number} idx Position in parent group list.
      */
-    ol.control.LayerSwitcher.prototype.renderLayer_ = function(lyr, idx) {
+    ol.control.LayerSwitcher.prototype.renderLayer_ = function (lyr, idx) {
 
         var this_ = this;
 
@@ -222,7 +224,7 @@
             }
             input.id = lyrId;
             input.checked = lyr.get('visible');
-            input.onchange = function(e) {
+            input.onchange = function (e) {
                 this_.setVisible_(lyr, e.target.checked);
             };
             li.appendChild(input);
@@ -231,7 +233,7 @@
             label.innerHTML = lyrTitle;
 
             var rsl = this.getMap().getView().getResolution();
-            if (rsl > lyr.getMaxResolution() || rsl < lyr.getMinResolution()){
+            if (rsl > lyr.getMaxResolution() || rsl < lyr.getMinResolution()) {
                 label.className += ' disabled';
             }
 
@@ -249,7 +251,7 @@
      * @param {ol.layer.Group} lyr Group layer whos children will be rendered.
      * @param {Element} elm DOM element that children will be appended to.
      */
-    ol.control.LayerSwitcher.prototype.renderLayers_ = function(lyr, elm) {
+    ol.control.LayerSwitcher.prototype.renderLayers_ = function (lyr, elm) {
         var lyrs = lyr.getLayers().getArray().slice().reverse();
         for (var i = 0, l; i < lyrs.length; i++) {
             l = lyrs[i];
@@ -266,8 +268,8 @@
      * @param {Function} fn Callback which will be called for each `ol.layer.Base`
      * found under `lyr`. The signature for `fn` is the same as `ol.Collection#forEach`
      */
-    ol.control.LayerSwitcher.forEachRecursive = function(lyr, fn) {
-        lyr.getLayers().forEach(function(lyr, idx, a) {
+    ol.control.LayerSwitcher.forEachRecursive = function (lyr, fn) {
+        lyr.getLayers().forEach(function (lyr, idx, a) {
             fn(lyr, idx, a);
             if (lyr.getLayers) {
                 ol.control.LayerSwitcher.forEachRecursive(lyr, fn);
@@ -281,28 +283,28 @@
      *
      * Adapted from http://stackoverflow.com/a/2117523/526860
      */
-    ol.control.LayerSwitcher.uuid = function() {
-        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
-            var r = Math.random()*16|0, v = c == 'x' ? r : (r&0x3|0x8);
+    ol.control.LayerSwitcher.uuid = function () {
+        return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
             return v.toString(16);
         });
     }
 
     /**
-    * @private
-    * @desc Apply workaround to enable scrolling of overflowing content within an
-    * element. Adapted from https://gist.github.com/chrismbarr/4107472
-    */
-    ol.control.LayerSwitcher.enableTouchScroll_ = function(elm) {
-       if(ol.control.LayerSwitcher.isTouchDevice_()){
-           var scrollStartPos = 0;
-           elm.addEventListener("touchstart", function(event) {
-               scrollStartPos = this.scrollTop + event.touches[0].pageY;
-           }, false);
-           elm.addEventListener("touchmove", function(event) {
-               this.scrollTop = scrollStartPos - event.touches[0].pageY;
-           }, false);
-       }
+     * @private
+     * @desc Apply workaround to enable scrolling of overflowing content within an
+     * element. Adapted from https://gist.github.com/chrismbarr/4107472
+     */
+    ol.control.LayerSwitcher.enableTouchScroll_ = function (elm) {
+        if (ol.control.LayerSwitcher.isTouchDevice_()) {
+            var scrollStartPos = 0;
+            elm.addEventListener("touchstart", function (event) {
+                scrollStartPos = this.scrollTop + event.touches[0].pageY;
+            }, false);
+            elm.addEventListener("touchmove", function (event) {
+                this.scrollTop = scrollStartPos - event.touches[0].pageY;
+            }, false);
+        }
     };
 
     /**
@@ -310,11 +312,11 @@
      * @desc Determine if the current browser supports touch events. Adapted from
      * https://gist.github.com/chrismbarr/4107472
      */
-    ol.control.LayerSwitcher.isTouchDevice_ = function() {
+    ol.control.LayerSwitcher.isTouchDevice_ = function () {
         try {
             document.createEvent("TouchEvent");
             return true;
-        } catch(e) {
+        } catch (e) {
             return false;
         }
     };

@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -76,32 +75,33 @@ function treasurehunt_wkt_to_object($text) {
     $wkt = new WKT();
     return $wkt->read($text);
 }
+
 /**
  * Format a human-readable format for a duration.
  * calculates from seconds to days
  * trim the details to the two more significant units
- * @param type $durationInSeconds
+ * @param int $durationinseconds
  * @return string
  */
-function treasurehunt_get_nice_duration($durationInSeconds) {
+function treasurehunt_get_nice_duration($durationinseconds) {
     $durationstring = '';
-    $days = floor($durationInSeconds / 86400);
-    $durationInSeconds -= $days * 86400;
-    $hours = floor($durationInSeconds / 3600);
-    $durationInSeconds -= $hours * 3600;
-    $minutes = floor($durationInSeconds / 60);
-    $seconds = round($durationInSeconds - $minutes * 60);
+    $days = floor($durationinseconds / 86400);
+    $durationinseconds -= $days * 86400;
+    $hours = floor($durationinseconds / 3600);
+    $durationinseconds -= $hours * 3600;
+    $minutes = floor($durationinseconds / 60);
+    $seconds = round($durationinseconds - $minutes * 60);
 
     if ($days > 0) {
         $durationstring .= $days . ' ' . get_string('days');
         // Trim details less significant.
-        $minutes=false;
-        $days=false;
-        $seconds=false;
+        $minutes = false;
+        $days = false;
+        $seconds = false;
     }
     if ($hours > 0) {
         $durationstring .= ' ' . $hours . ' ' . get_string('hours');
-        $seconds=false;
+        $seconds = false;
     }
     if ($minutes > 0) {
         $durationstring .= ' ' . $minutes . ' ' . get_string('minutes');
@@ -126,7 +126,7 @@ function treasurehunt_geojson_to_object($array) {
 
 /**
  * Check if a point is inside a multipolygon geometry.
- * 
+ *
  * @param MultiPolygon $mpolygon
  * @param Point $point
  * @return bool 
@@ -207,7 +207,7 @@ function treasurehunt_insert_stage_form(stdClass $stage) {
 }
 
 /**
- * Updates the position and/or geometry of a stage in a road by updating 
+ * Updates the position and/or geometry of a stage in a road by updating
  * treasurehunt_stages table. Then, check if road is valid.
  *
  * @see treasurehunt_set_valid_road()
@@ -248,18 +248,17 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
 }
 
 /**
- * Delete a treasure hunt stage in a road and all fields associated. Then, 
+ * Delete a treasure hunt stage in a road and all fields associated. Then,
  * repositions the other stages in the road and checks if road is valid.
- * 
+ *
  * @param int $id The stage id.
  * @param stdClass $context The context object.
  */
 function treasurehunt_delete_stage($id, $context) {
     GLOBAL $DB;
-    $stage_result = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST);
-
+    $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST); 
     // It can not be delete a stage of a started road.
-    if (treasurehunt_check_road_is_blocked($stage_result->roadid)) {
+    if (treasurehunt_check_road_is_blocked($stageresult->roadid)) {
         print_error('notdeletestage', 'treasurehunt');
     }
 
@@ -267,20 +266,17 @@ function treasurehunt_delete_stage($id, $context) {
     $DB->delete_records('treasurehunt_attempts', array('stageid' => $id));
     $sql = 'UPDATE {treasurehunt_stages} '
             . 'SET position = position - 1 WHERE roadid = (?) AND position > (?)';
-    $params = array($stage_result->roadid, $stage_result->position);
-    $DB->execute($sql, $params);
-
+    $params = array($stageresult->roadid, $stageresult->position);
+    $DB->execute($sql, $params); 
     // Check if road is valid.
-    treasurehunt_set_valid_road($stage_result->roadid);
-
+    treasurehunt_set_valid_road($stageresult->roadid); 
     // Trigger deleted stage event.
     $eventparams = array(
         'context' => $context,
         'objectid' => $id,
     );
     \mod_treasurehunt\event\stage_deleted::create($eventparams)->trigger();
-}
-
+} 
 /**
  * Delete a treasure hunt road and all fields associated. 
  * 
@@ -289,19 +285,16 @@ function treasurehunt_delete_stage($id, $context) {
  * @param stdClass $context The context object.
  */
 function treasurehunt_delete_road($roadid, $treasurehunt, $context) {
-    GLOBAL $DB;
-
+    GLOBAL $DB; 
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
     $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
-            , $params);
-
+            , $params); 
     foreach ($stages as $stage) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
         $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
-    $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
-
+    $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params); 
     treasurehunt_update_grades($treasurehunt);
 
     // Trigger deleted road event.
@@ -417,8 +410,8 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context) {
     // Get all stages from the instance of treasure hunt.
     $stagessql = "SELECT stage.id, "
             . "stage.name, stage.cluetext, roadid, position,"
-            . "geom as geometry FROM {treasurehunt_stages} AS stage"
-            . " inner join {treasurehunt_roads} AS roads on stage.roadid = roads.id"
+            . "geom as geometry FROM {treasurehunt_stages}  stage"
+            . " inner join {treasurehunt_roads} roads on stage.roadid = roads.id"
             . " WHERE treasurehuntid = ? ORDER BY position DESC";
     $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
 
@@ -427,7 +420,7 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context) {
             . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri "
             . "ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} r "
             . "ON ri.roadid=r.id WHERE r.id= road.id) > 0 THEN 1 ELSE 0 "
-            . "END AS blocked FROM {treasurehunt_roads} AS road where treasurehuntid = ?";
+            . "END AS blocked FROM {treasurehunt_roads} road where treasurehuntid = ?";
     $roads = $DB->get_records_sql($roadssql, array($treasurehuntid));
 
     foreach ($roads as $road) {
@@ -854,8 +847,8 @@ function treasurehunt_get_hunt_duration($cmid, $userid, $groupid) {
     global $DB;
     list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
     $sql = <<<SQL
-select (max(a.timecreated)-min(a.timecreated)) as duration, max(a.timecreated) as last, min(a.timecreated) as first from mdl_treasurehunt_attempts a 
-left join mdl_treasurehunt_stages s on (a.stageid=s.id) 
+select (max(a.timecreated)-min(a.timecreated)) as duration, max(a.timecreated) as last, min(a.timecreated) as first from mdl_treasurehunt_attempts a
+left join mdl_treasurehunt_stages s on (a.stageid=s.id)
 left join mdl_treasurehunt_roads r on (r.id=s.roadid)
 left join mdl_treasurehunt t on (r.treasurehuntid = t.id)
 where t.id=?
@@ -870,13 +863,13 @@ SQL;
         $params[] = $groupid;
     }
     $result = $DB->get_record_sql($sql, $params);
-    return $result?$result->duration:false;
+    return $result ? $result->duration : false;
 }
 
 /**
  * Get the user or group progress for a given road of an instance.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $roadid The identifier of the road of user or group.
  * @param int $groupid The identifier of group.
  * @param int $userid The identifier of user.
@@ -886,8 +879,6 @@ SQL;
  */
 function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context) {
     global $DB;
-
-
     $firststagegeomgeojson = false;
     // Get discovered stages and mistakes made by the user / group for this instance.
     if ($groupid) {
@@ -930,7 +921,7 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
 }
 
 /**
- * Check if a road is valid. For a road to be valid, 
+ * Check if a road is valid. For a road to be valid,
  * it must contain more than two stages, and they all have a geometry.
  * 
  * @param int $roadid The road id.
@@ -956,7 +947,7 @@ function treasurehunt_is_valid_road($roadid) {
 /**
  * Check whether a user or a component of a group has completed an activity
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $cmid The identifier of course module activity.
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
@@ -993,7 +984,7 @@ function treasurehunt_check_completion_activity($cmid, $userid, $groupid, $conte
 
 /**
  * Checks if an activity has enabled completion
- * 
+ *
  * @param int $cmid The identifier of course module activity.
  * @return bool True/false.
  */
@@ -1013,7 +1004,7 @@ function treasurehunt_check_activity_completion($cmid) {
 
 /**
  * Get the road assigned to a group
- * 
+ *
  * @param int $groupid The identifier of group.
  * @param int $treasurehuntid The identifier of treasure hunt instance.
  * @param string $groupname The group name.
@@ -1044,7 +1035,7 @@ function treasurehunt_get_group_road($groupid, $treasurehuntid, $groupname = '')
 
 /**
  * Get the road and the group assigned to an user.
- * 
+ *
  * @param int $userid The identifier of user to check.
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $cmid The identifier of treasure hunt course module activity.
@@ -1133,7 +1124,7 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
 
 /**
  * Check all duplicate users or groups from a list
- * 
+ *
  * @param array $totalparticipants The total list of participants.
  * @param array $userlist The total list of users/groups.
  * @param array $duplicated The list of users/groups names duplicate.
@@ -1157,7 +1148,7 @@ function treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipa
 
 /**
  * Check all users who do not have an assigned road
- * 
+ *
  * @param array $totalparticipants The total list of participants.
  * @param array $userlist The total list of users.
  * @return array The list of users names who do not have an assigned road
@@ -1177,7 +1168,7 @@ function treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants
 /**
  * Get the full list of participants and their attempts for all the roads
  * of the treasure hunt instance
- * 
+ *
  * @param stdClass $cm The treasure hunt course module activity.
  * @param array $courseid The identifier of the course.
  * @param stdClass $context The context object.
@@ -1231,13 +1222,13 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             }
             $grouplist = groups_get_all_groups($courseid, null, $groupingid->groupingid);
 
-            // Check if there is more than one road assigned to each group. 
+            // Check if there is more than one road assigned to each group.
             list($totalparticipantsgroups,
                     $duplicategroupsingroupings) = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
             $roads = treasurehunt_add_road_userlist($roads, $groupingid, $grouplist, $attempts);
         }
 
-        // Check if there are participants in more than one group in the same road. 
+        // Check if there are participants in more than one group in the same road.
         foreach ($totalparticipantsgroups as $group) {
             list($totalparticipants,
                     $duplicateusersingroups) = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups, false);
@@ -1255,7 +1246,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                     $grouplist[] = $group;
                     $userlist = get_enrolled_users($context, 'mod/treasurehunt:play', $group->groupid);
 
-                    // Check if there is more than one road assigned to each user. 
+                    // Check if there is more than one road assigned to each user.
                     list($totalparticipants,
                             $duplicateusersingroups) = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipants, $userlist, $duplicateusersingroups, false);
                 } else {
@@ -1275,7 +1266,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
 
 /**
  * Get all the strings used in the JavaScript of the game screen
- * 
+ *
  * @return array The strings
  */
 function treasurehunt_get_strings_play() {
@@ -1289,7 +1280,7 @@ function treasurehunt_get_strings_play() {
 
 /**
  * Get all the strings used in the JavaScript of the edit screen
- * 
+ *
  * @return array The strings
  */
 function treasurehunt_get_strings_edit() {
@@ -1300,7 +1291,7 @@ function treasurehunt_get_strings_edit() {
 
 /**
  * Get all the strings used in the JavaScript of the track viewer screen
- * 
+ *
  * @return array The strings
  */
 function treasurehunt_get_strings_trackviewer() {
@@ -1310,7 +1301,7 @@ function treasurehunt_get_strings_trackviewer() {
 /**
  * Get the latest timestamp made by the group / user for the road and the last modification timestamp of the road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
@@ -1341,7 +1332,7 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid) {
 /**
  * Get the latest attempt with geometry solved by the user / group for the given road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
@@ -1374,7 +1365,7 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid) {
 /**
  * Check if the user or group has correctly answered the question and complete the required activity.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $selectedanswerid The identifier of the answer selected by the user.
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of the group to which the user belongs.
@@ -1544,7 +1535,7 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
 
 /**
  * Inserts one attempt and create the event of attempt sumitted.
- * 
+ *
  * @param stdClass $attempt The attempt object.
  * @param stdClass $context The context object.
  */
@@ -1560,7 +1551,7 @@ function treasurehunt_insert_attempt($attempt, $context) {
 }
 
 /**
- * 
+ *
  * @global moodle_database $DB
  * @param type $treasurehunt
  * @return array userids
@@ -1577,7 +1568,7 @@ function treasurehunt_get_users_with_tracks($treasurehunt) {
  * @global moodle_database $DB
  * @param type $userid
  * @param type $treasurehunt
- * @param type $currentstageid 
+ * @param type $currentstageid
  * @param type $time
  * @param type $locationwkt The point in WKT format.
  */
@@ -1595,7 +1586,7 @@ function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time,
 /**
  * Get the last stage of the user or group for the given road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of the group to which the user belongs.
  * @param int $roadid The identifier of the road of user.
@@ -1653,7 +1644,7 @@ function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nos
 /**
  * Checks for updates of attempts from timestamp given.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $timestamp The last known timestamp since user progress has not been updated.
  * @param int $groupid The identifier of the group to which the user belongs.
  * @param int $userid The identifier of user.
@@ -1730,7 +1721,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
 /**
  * Get all attempts of a user or group for a given road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $groupid The identifier of the group to which the user belongs.
  * @param int $userid The identifier of user.
  * @param int $roadid The identifier of the road of user.
@@ -1791,10 +1782,10 @@ function treasurehunt_clear_activities($treasurehuntid) {
 
 /**
  * Gets the HTML view format of the information displayed on the main screen.
- * 
+ *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $courseid The identifier of course.
- * @return string 
+ * @return string
  */
 function treasurehunt_view_info($treasurehunt, $courseid) {
     global $PAGE, $DB;
@@ -1807,10 +1798,10 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
 }
 
 /**
- * Gets the table with the historical attempts of the user or group in HTML format 
+ * Gets the table with the historical attempts of the user or group in HTML format
  * displayed on the main screen.If the group identifier provided is not 0, the group is checked,
  * else the user is checked.
- * 
+ *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $groupid The identifier of the group to which the user belongs.
  * @param int $userid The identifier of user.
@@ -1818,7 +1809,7 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
  * @param int $cmid The identifier of course module activity.
  * @param string $username The user name.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
- * @return string 
+ * @return string
  */
 function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview) {
     global $PAGE;
@@ -1836,10 +1827,10 @@ function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $us
 
 /**
  * Gets the view in HTML format of game interface.
- * 
+ *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $cmid The identifier of course module activity.
- * @return string 
+ * @return string
  */
 function treasurehunt_view_play_page($treasurehunt, $cmid) {
     global $PAGE;
@@ -1852,11 +1843,11 @@ function treasurehunt_view_play_page($treasurehunt, $cmid) {
 /**
  * Gets the table with the progress of users or groups with assigned roads,
  * belonging to the instance treasure hunt, in HTML format.
- * 
+ *
  * @param stdClass $cm The treasure hunt course module activity.
  * @param int $courseid The identifier of course.
  * @param stdClass $context The context object.
- * @return string 
+ * @return string
  */
 function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
     global $PAGE;
@@ -1872,10 +1863,10 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
 
 /**
  * Set attempt in a text string with the date
- * 
+ *
  * @param stdClass $attempt The treasure hunt course module activity.
  * @param bool $groupmode If instance is in group mode or not.
- * @return string 
+ * @return string
  */
 function treasurehunt_set_string_attempt($attempt, $groupmode) {
 
@@ -1959,12 +1950,12 @@ function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $c
 
 /**
  * Add the list of users with their attempts to their road assigned.
- * 
+ *
  * @param array $roads The collection of roads.
  * @param stdClass $data The road information.
  * @param array $userlist The list of users assigned to the road.
  * @param array $attempts The collection of attempts.
- * @return array The collection of roads 
+ * @return array The collection of roads
  */
 function treasurehunt_add_road_userlist($roads, $data, $userlist, $attempts) {
     $road = new stdClass();
@@ -1979,7 +1970,7 @@ function treasurehunt_add_road_userlist($roads, $data, $userlist, $attempts) {
 
 /**
  * Checks whether the intro of the activity may be shown or not.
- * 
+ *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @return bool True/false
  */
@@ -1992,7 +1983,7 @@ function treasurehunt_view_intro($treasurehunt) {
 
 /**
  * Add the list of users with their attempts to their road assigned.
- * 
+ *
  * @param stdClass $road The road object.
  * @param array $userlist The list of users assigned to the road.
  * @param array $attempts The collection of attempts.
@@ -2028,7 +2019,7 @@ function treasurehunt_insert_stage_progress_in_road_userlist($road, $userlist, $
 
 /**
  * Gets the full name of a user from its identifier.
- * 
+ *
  * @param int $id The identifier of user.
  * @return string The full name of user.
  */
@@ -2041,7 +2032,7 @@ function treasurehunt_get_user_fullname_from_id($id) {
 
 /**
  * Get all attempts statistics for restricted users list.
- * 
+ *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param array $restrictedusers The list of restricted users to collect their attempts statistics.
  * @return array All stats.
@@ -2073,88 +2064,88 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $usertimetable = "";
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME) {
         $grademethodsql = "(SELECT max(at.timecreated) from {treasurehunt_attempts}
-            at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
-            {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND 
-            ri.position=(select max(rid.position) from {treasurehunt_stages} 
-            rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
+            at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
+            {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND
+            ri.position=(select max(rid.position) from {treasurehunt_stages}
+            rid where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid
             AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
-            (SELECT min(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) 
+            (SELECT min(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=(select max(rid.position) from
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid)
             AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
             AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,";
         $orderby = 'ORDER BY usertime ASC';
     }
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
         $orderby = 'ORDER BY usertime ASC';
-        $usertimetable = "(SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=1 AND 
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-            AND $groupidwithin) as usertime 
-            from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
-            r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON 
+        $usertimetable = "(SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=(select max(rid.position) from
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=1 AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND $groupidwithin) as usertime
+            from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages}
+            r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON
             r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
             AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby) as time,";
         $grademethodsql = "max(time.usertime) as worsttime, min(time.usertime) as besttime,
-            (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
-            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=1 AND 
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=(select max(rid.position) from
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=1 AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
             AND $groupidwithin) as usertime,";
     }if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $grademethodsql = "(SELECT COUNT(*) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER 
-            JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 
-            AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid 
-            where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid 
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER
+            JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1
+            AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid
+            where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid
             AND at.type='location' AND at.userid IN $users AND $groupid2) as lastposition,
-            (SELECT max(at.timecreated) from {treasurehunt_attempts} at 
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid 
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-            at.success=1 AND ri.position=(select max(rid.position) from 
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND 
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+            (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=(select max(rid.position) from
+            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
             AND $groupidwithin) as finishtime,";
         $orderby = 'ORDER BY finishtime ASC';
     }
-    $sql = "SELECT $user as user,$grademethodsql(SELECT COUNT(*) from 
-        {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri 
-        ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON 
-        ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND 
-        at.type='location' AND at.penalty=1 AND $groupidwithin) as  
+    $sql = "SELECT $user as user,$grademethodsql(SELECT COUNT(*) from
+        {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri
+        ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON
+        ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND
+        at.type='location' AND at.penalty=1 AND $groupidwithin) as 
         nolocationsfailed,
-        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN 
-        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-        roa.treasurehuntid=ro.treasurehuntid AND at.type='question' AND 
+        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN
+        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
+        {treasurehunt_roads} roa ON ri.roadid=roa.id where
+        roa.treasurehuntid=ro.treasurehuntid AND at.type='question' AND
         at.penalty=1 AND $groupidwithin) as noanswersfailed,
-        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN 
-        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN 
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where 
-        roa.treasurehuntid=ro.treasurehuntid AND at.type='location' 
+        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN
+        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
+        {treasurehunt_roads} roa ON ri.roadid=roa.id where
+        roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
         AND at.success=1 AND $groupidwithin) as nosuccessfulstages,
-        (SELECT COUNT(*) from {treasurehunt_stages} ri INNER JOIN 
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where 
+        (SELECT COUNT(*) from {treasurehunt_stages} ri INNER JOIN
+        {treasurehunt_roads} roa ON ri.roadid=roa.id where
         roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as nostages
-        from $usertimetable {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} 
-        r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON 
+        from $usertimetable {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages}
+        r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON
         r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
         AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby";
     $stats = $DB->get_records_sql($sql, array($treasurehunt->id, $treasurehunt->id));
@@ -2184,7 +2175,7 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
  * @param array $stats Aggregated statistics of the attempts.
  * @param array $students The list of users to check.
  * @see treasurehunt_calculate_line_equation
- * @return array grade struct 
+ * @return array grade struct
  */
 function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
     $grades = array();
@@ -2226,11 +2217,11 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
 /**
  * Apply a eqution of the line with the 5 variables introduced.
  *
- * @param int $x1 
- * @param int $y1 
- * @param int $x2 
- * @param int $y2 
- * @param int $x3 
+ * @param int $x1
+ * @param int $y1
+ * @param int $x2
+ * @param int $y2
+ * @param int $x3
  * @return int y3
  */
 function treasurehunt_calculate_line_equation($x1, $y1, $x2, $y2, $x3) {

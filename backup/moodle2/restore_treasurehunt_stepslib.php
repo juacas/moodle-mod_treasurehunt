@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of TreasureHunt activity for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * Define all the restore steps that will be used by the restore_treasurehunt_activity_task
  *
@@ -24,6 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 global $CFG;
+defined('MOODLE_INTERNAL') || die();
+
 // Needed for get_geometry_functions();
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
@@ -72,10 +72,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $oldid = $data->id;
         $data->course = $this->get_courseid();
 
-
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
-
 
         if ($data->grade < 0) {
             // Scale found, get mapping.

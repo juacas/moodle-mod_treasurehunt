@@ -1,5 +1,5 @@
 <?php
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +24,7 @@
  */
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-/** @var $DB database_manager Database */
+// @var $DB database_manager Database
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);
@@ -42,30 +42,30 @@ $url = new moodle_url('/mod/treasurehunt/gpx_viewer.php', array('id' => $cm->id)
 $output = $PAGE->get_renderer('mod_treasurehunt');
 
 $PAGE->set_url($url);
-$PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name). ' : '.get_string('trackviewer','treasurehunt'));
+$PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name) . ' : ' . get_string('trackviewer', 'treasurehunt'));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
-    $PAGE->requires->jquery();
-    $PAGE->requires->jquery_plugin('ui');
-    $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
-    $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
-    $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
-    $PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
+$PAGE->requires->jquery();
+$PAGE->requires->jquery_plugin('ui');
+$PAGE->requires->jquery_plugin('ui-css');
+$PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
+$PAGE->requires->css('/mod/treasurehunt/css/ol.css');
+$PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
+$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = array();
-$userrecords = $DB->get_records_list('user','id',$usersids);
+$userrecords = $DB->get_records_list('user', 'id', $usersids);
 foreach ($userrecords as $userrecord) {
     $user = new stdClass();
     $user->id = $userrecord->id;
     $user->fullname = fullname($userrecord);
     $user->pic = $output->user_picture($userrecord);
-    $users[]=$user;
+    $users[] = $user;
 }
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',  array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
+$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer', array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
 echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
-echo $OUTPUT->container_start("treasurehunt-gpx","treasurehunt-gpx");
+echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
 echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
 echo $OUTPUT->box('', null, 'mapgpx');
 echo $OUTPUT->container_end();

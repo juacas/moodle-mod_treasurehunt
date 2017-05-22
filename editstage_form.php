@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -19,7 +18,7 @@
  * The main treasurehunt configuration form
  *
  * @package   mod_treasurehunt
-  *@author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -66,7 +65,7 @@ class stage_form extends moodleform {
             $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        //Aqui anadimos la regla del tamano maximo de la cadena.
+        // Aqui anadimos la regla del tamano maximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
@@ -86,7 +85,7 @@ class stage_form extends moodleform {
         // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco: llamo al cancel que no necesita comprobar la validacion
         // ... y le doy un valor a una variable escondida.
         $form = "document.forms['" . $formid . "']";
-        $javascript = "$form.reloaded.value='1';$form.cancel.click();"; //create javascript: set reloaded field to "1" 
+        $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // create javascript: set reloaded field to "1" 
         $attributes = array("onChange" => $javascript); // set onChange attribute
         $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'),
                 $attributes);
@@ -121,8 +120,6 @@ class stage_form extends moodleform {
         $mform->addElement('hidden', 'reloaded');
         $mform->setType('reloaded', PARAM_INT);
         $mform->setConstant('reloaded', 0);
-
-
 
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons();

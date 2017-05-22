@@ -32,7 +32,7 @@
 /*Selectable y sortable*/
 .path-mod-treasurehunt #stagelistpanel {
     float:left; 
-    width: 150px;
+    width: 250px;
     max-width: 60%; 
     min-width: 100px; 
     position: relative; 

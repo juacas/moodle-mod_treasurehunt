@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -24,7 +23,6 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
- 
 defined('MOODLE_INTERNAL') || die();
 
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
@@ -108,8 +106,8 @@ $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra. '
         . 'Cuanto más grande es, menos peticiones de actualización deben hacerse, pero más tiempo pasa en informar de un posible cambio. '
         . 'Debe ser mayor a 0 segundos, sino se fijará el tiempo por defecto.';
-$string['geolocation_needed_title']='Esta aplicación necesita geolocalización';
-$string['geolocation_needed']='Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.';
+$string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
+$string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.';
 $string['gradefromposition'] = 'Puntuación por posición';
 $string['gradefromstages'] = 'Puntuación por etapas';
 $string['gradefromtime'] = 'Puntuación por tiempo total de caza';
@@ -325,24 +323,24 @@ $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún g
         . 'por lo que no son capaces de jugar la actividad.';
 
 // Initial tour help
-$string['addroad_tour']='Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
-$string['addstage_tour']='Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';
-$string['editend_tour']='¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
-$string['map_tour']='En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';
-$string['remove_tour']= 'Se pueden borrar los polígonos de las etapas. Símplemente selecciona un polígono en el mapa y pulsa este botón.';
+$string['addroad_tour'] = 'Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
+$string['addstage_tour'] = 'Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';
+$string['editend_tour'] = '¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
+$string['map_tour'] = 'En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';
+$string['remove_tour'] = 'Se pueden borrar los polígonos de las etapas. Símplemente selecciona un polígono en el mapa y pulsa este botón.';
 $string['roads_tour'] = 'En este área se muestran los caminos que has creado. Selecciona uno de los caminos para ver y gestionar sus etapas.';
 $string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides guardar tus cambios con este botón.';
 $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
 $string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa.';
-$string['welcome_edit_tour']='Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
+$string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
 
 $string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';
 $string['validatelocation_tour'] = 'Cuando estés seguro de la localización de una etapa del juego debes enviar tu posición para comprobar si has acertado. Pulsa este botón una vez que el mapa esté centrado en tu posición.';
 $string['lastsuccessfulstage_tour'] = 'En este panel encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
-$string['mapplay_tour']='En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/parchment.png" width="28"/> y las falladas con <img src="pix/failure.png" width="28"/>';
-$string['playend_tour']='¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
+$string['mapplay_tour'] = 'En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/parchment.png" width="28"/> y las falladas con <img src="pix/failure.png" width="28"/>';
+$string['playend_tour'] = '¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
 $string['welcome_play_tour'] = 'Bienvenido a la pantalla de juego de la Caza del Tesoro. Este es el interfaz para buscar, investigar y conseguir tu tesoro.';
-$string['nextstep']='Sig.';
-$string['prevstep']='Ant.';
-$string['skiptutorial']='Salir';
-$string['donetutorial']='¡Visto!';
+$string['nextstep'] = 'Sig.';
+$string['prevstep'] = 'Ant.';
+$string['skiptutorial'] = 'Salir';
+$string['donetutorial'] = '¡Visto!';

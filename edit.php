@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 /**
  * Page to edit instances
  *
@@ -23,13 +21,13 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace treasurehunt with the name of your module and remove this line.
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once ($CFG->libdir . '/formslib.php');
+require_once($CFG->libdir . '/formslib.php');
 
 GLOBAL $USER;
 
@@ -44,7 +42,7 @@ $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-//Poner evento de edicion o algo asi
+// Poner evento de edicion o algo asi
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
   'objectid' => $PAGE->cm->instance,
   'context' => $PAGE->context,
@@ -63,7 +61,6 @@ $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 
-
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     // Si no hay ningún camino redirijo para crearlo.
     if (treasurehunt_get_total_roads($treasurehunt->id) == 0) {
@@ -72,32 +69,27 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-            array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
-            array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
     $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl,
-            treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
-
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($treasurehunt->intro) {
-    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
-            'treasurehuntintro');
+    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
-echo $OUTPUT->container_start("treasurehunt-editor","treasurehunt-editor");
+echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');
 echo $OUTPUT->box(null, 'loader-circle-inside');

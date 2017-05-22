@@ -1,6 +1,5 @@
 <?php
-
-// This file is part of Moodle - http://moodle.org/
+// This file is part of TreasureHunt activity for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -27,7 +26,6 @@
  * @see upgrade_plugins_modules()
  */
 function xmldb_treasurehunt_install() {
-    
 }
 
 /**
@@ -36,5 +34,4 @@ function xmldb_treasurehunt_install() {
  * @see upgrade_plugins_modules()
  */
 function xmldb_treasurehunt_install_recovery() {
-    
 }

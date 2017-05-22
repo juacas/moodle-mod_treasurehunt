@@ -1,6 +1,6 @@
 <?php
 
-// This file is part of Moodle - http://moodle.org/
+// This file is part of TreasureHunt activity for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -47,47 +47,42 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define the root element describing the treasurehunt instance.
-        $treasurehunt = new backup_nested_element('treasurehunt', array('id'),
-                array(
+        $treasurehunt = new backup_nested_element('treasurehunt', array('id'), array(
             'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmoving',
             'groupmode', 'alwaysshowdescription', 'allowattemptsfromdate',
             'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer'));
 
         $roads = new backup_nested_element('roads');
 
-        $road = new backup_nested_element('road', array('id'),
-                array(
+        $road = new backup_nested_element('road', array('id'), array(
             'name', 'timecreated', 'timemodified', 'groupid', 'groupingid', 'validated'));
 
         $stages = new backup_nested_element('stages');
 
-        $stage = new backup_nested_element('stage', array('id'),
-                array(
+        $stage = new backup_nested_element('stage', array('id'), array(
             'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
-            'timecreated', 'timemodified','playstagewithoutmoving', 'activitytoend', 'questiontext',
+            'timecreated', 'timemodified', 'playstagewithoutmoving', 'activitytoend', 'questiontext',
             'questiontextformat', 'questiontexttrust', 'geom'));
 
         $answers = new backup_nested_element('answers');
 
-        $answer = new backup_nested_element('answer', array('id'),
-                array(
+        $answer = new backup_nested_element('answer', array('id'), array(
             'answertext', 'answertextformat', 'answertexttrust', 'timecreated',
             'timemodified', 'correct'));
 
         $attempts = new backup_nested_element('attempts');
 
-        $attempt = new backup_nested_element('attempt', array('id'),
-                array(
+        $attempt = new backup_nested_element('attempt', array('id'), array(
             'timecreated', 'userid', 'groupid', 'success',
             'penalty', 'type', 'questionsolved', 'activitysolved',
             'geometrysolved', 'location'));
         $tracks = new backup_nested_element('tracks');
-        $track = new backup_nested_element('track',array('stageid','userid','timestamp'),array('location'));
-               
+        $track = new backup_nested_element('track', array('stageid', 'userid', 'timestamp'), array('location'));
+
         // Build the tree
         $treasurehunt->add_child($roads);
         $roads->add_child($road);
-
+        
         $road->add_child($stages);
         $stages->add_child($stage);
 
@@ -96,10 +91,10 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
         $stage->add_child($attempts);
         $attempts->add_child($attempt);
-        
-        $treasurehunt->add_child($tracks); 
+
+        $treasurehunt->add_child($tracks);
         $tracks->add_child($track);
-        
+
         // Define sources
         $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
 
@@ -113,15 +108,14 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
             $track->set_source_table('treasurehunt_track', array('treasurehuntid' => backup::VAR_PARENTID));
         }
 
-
-        // Define id annotations
+        // Define id annotations.
         $road->annotate_ids('group', 'groupid');
         $road->annotate_ids('grouping', 'groupingid');
         $stage->annotate_ids('course_module', 'activitytoend');
         $attempt->annotate_ids('user', 'userid');
         $attempt->annotate_ids('group', 'groupid');
 
-        // Define file annotations
+        // Define file annotations.
         $treasurehunt->annotate_files('mod_treasurehunt', 'intro', null);
         $stage->annotate_files('mod_treasurehunt', 'cluetext', 'id');
         $stage->annotate_files('mod_treasurehunt', 'questiontext', 'id');
