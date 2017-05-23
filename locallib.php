@@ -2034,7 +2034,7 @@ function treasurehunt_get_user_fullname_from_id($id) {
  * Get all attempts statistics for restricted users list.
  *
  * @param stdClass $treasurehunt The treasurehunt instance.
- * @param array $restrictedusers The list of restricted users to collect their attempts statistics.
+ * @param array $restrictedusers The list of users to collect their attempts statistics for.
  * @return array All stats.
  */
 function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
@@ -2063,6 +2063,12 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $usercompletiontimesql = "";
     $usertimetable = "";
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME) {
+        $usercompletiontimesql="(SELECT max(at.timecreated) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
+            at.success=1 AND ri.position=1 AND
+            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
+            AND $groupidwithin) as usertime";
         $grademethodsql = "(SELECT max(at.timecreated) from {treasurehunt_attempts}
             at INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
             {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1 AND
@@ -2178,12 +2184,24 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
  * @return array grade struct
  */
 function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
-    $grades = array();
+    $grades = array(); 
     foreach ($students as $student) {
+        $feedback = '';
         $grade = new stdClass();
         $grade->userid = $student->id;
         $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
+            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation) + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);  
+            $msgparams = (object) [
+                'grademax' => $treasurehunt->grade,
+                'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
+                'noanswersfailed' => $stats[$student->id]->noanswersfailed,
+                'nosuccessfulstages' => $stats[$student->id]->nosuccessfulstages,
+                'nostages' =>   $stats[$student->id]->nostages,
+                'penalization' => number_format(1-$negativepercentage,1),
+                'treasurehunt' => $treasurehunt
+            ];
+      
             if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION && isset($stats[$student->id]->position)) {
                 $positiverate = treasurehunt_calculate_line_equation(
                         1
@@ -2191,21 +2209,49 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                         , $stats[$student->id]->lastposition
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->position);
-            } else if (($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME || $treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME ) && isset($stats[$student->id]->usertime)) {
+                $msgparams->rawscore = $positiverate;
+                $msgparams->lastposition=$stats[$student->id]->lastposition;
+                $msgparams->position=$stats[$student->id]->position;
+                $feedback = get_string('grade_explaination_fromposition','treasurehunt',$msgparams);              
+            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME  && isset($stats[$student->id]->usertime)) {
                 $positiverate = treasurehunt_calculate_line_equation(
                         $stats[$student->id]->besttime
                         , $treasurehunt->grade
                         , $stats[$student->id]->worsttime
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->usertime);
-            } else if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMSTAGES) {
-                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / (2 * $stats[$student->id]->nostages);
+                $msgparams->rawscore = $positiverate;    
+                $msgparams->besttime = treasurehunt_get_nice_duration($stats[$student->id]->besttime);
+                $msgparams->worsttime = treasurehunt_get_nice_duration($stats[$student->id]->worsttime);
+                $msgparams->yourtime = treasurehunt_get_nice_duration($stats[$student->id]->usertime);
+                $feedback = get_string('grade_explaination_fromtime','treasurehunt',$msgparams);         
+            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME && isset($stats[$student->id]->usertime)) {
+                $positiverate = treasurehunt_calculate_line_equation(
+                        $stats[$student->id]->besttime
+                        , $treasurehunt->grade
+                        , $stats[$student->id]->worsttime
+                        , $treasurehunt->grade / 2
+                        , $stats[$student->id]->usertime);
+                $msgparams->rawscore = number_format($positiverate,1);    
+                $msgparams->besttime = userdate($stats[$student->id]->besttime);
+                $msgparams->worsttime = userdate($stats[$student->id]->worsttime);
+                $msgparams->yourtime = userdate($stats[$student->id]->usertime);
+                $feedback = get_string('grade_explaination_fromabsolutetime','treasurehunt',$msgparams);         
+            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMSTAGES) {
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / ($stats[$student->id]->nostages);
+                $msgparams->rawscore = $positiverate;               
+                $feedback = get_string('grade_explaination_fromstages','treasurehunt',$msgparams);
             } else {
-                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / $stats[$student->id]->nostages;
+                // Default grading when there is no data for calculation
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / (2* $stats[$student->id]->nostages);
+                $msgparams->rawscore = $positiverate;               
+                $feedback = get_string('grade_explaination_temporary','treasurehunt',$msgparams);
             }
-            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation) + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
+
             $grade->rawgrade = max($positiverate * $negativepercentage, 0);
             $grades[$student->id] = $grade;
+            $grade->feedbackformat = FORMAT_PLAIN;
+            $grade->feedback = $feedback;
         } else {
             $grade->rawgrade = null;
             $grades[$student->id] = $grade;
