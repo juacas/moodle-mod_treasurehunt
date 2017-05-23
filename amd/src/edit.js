@@ -12,7 +12,6 @@
 //
 //  You should have received a copy of the GNU General Public License.
 //  along with Moodle.  If not, see <http:// www.gnu.org/licenses/>.
-.
 /**
  * @module    mod_treasurehunt/edit
  * @package   mod_treasurehunt
@@ -1300,7 +1299,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
                     $("#stagelist").on('click', '.ui-icon-pencil', function () {
                         //  Busco el stageid del li que contiene la papelera seleccionada.
-.
+
                         var stageid = parseInt($(this).parents('li').attr('stageid'));
                         // Si esta sucio guardo el escenario.
                         if (dirty) {
@@ -1393,7 +1392,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
                     $("#roadlist").on('click', '.ui-icon-pencil', function () {
                         //  Busco el roadid del li que contiene el lapicero seleccionado.
-.
                         var roadid = parseInt($(this).parents('li').attr('roadid'));
                         // Si esta sucio guardo el escenario.
                         if (dirty) {
@@ -1465,7 +1463,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                     };
                 } //  End of function init.
-.
             }; // End of init var.
             return init;
         });
