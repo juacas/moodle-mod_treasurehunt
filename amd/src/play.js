@@ -21,15 +21,21 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/geocoder', 'mod_treasurehunt/viewgpx', 'mod_treasurehunt/jquery.mobile-config', 'mod_treasurehunt/jquerymobile'],
+define(['jquery', 'core/url',
+    'mod_treasurehunt/ol',
+    'core/ajax',
+    'mod_treasurehunt/geocoder',
+    'mod_treasurehunt/viewgpx',
+    'mod_treasurehunt/jquery.mobile-config',
+    'mod_treasurehunt/jquerymobile'],
         function ($, url, ol, ajax, GeocoderJS, viewgpx) {
             var init = {
                 playtreasurehunt: function (strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
                         lastattempttimestamp,
                         lastroadtimestamp, gameupdatetime, tracking, user) {
-                    var parchmenturl = url.imageUrl('green-marker', 'treasurehunt'),
-                            failureurl = url.imageUrl('red-marker', 'treasurehunt'),
-                            markerurl = url.imageUrl('PEGMAN', 'treasurehunt'),
+                    var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
+                            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
+                            markerurl = url.imageUrl('my_location', 'treasurehunt'),
                             openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
                             lastsuccessfulstage = {},
                             interval,
@@ -205,9 +211,9 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         layers: layers,
                         controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
                         target: 'mapplay',
-                        view: view
-                                /*loadTilesWhileAnimating: true,
-                                 loadTilesWhileInteracting: true*/
+                        view: view,
+                        loadTilesWhileAnimating: true,
+                        loadTilesWhileInteracting: true
                     });
                     map.addInteraction(select);
                     // It initializes the game.
@@ -836,6 +842,7 @@ define(['jquery', 'core/url', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasureh
                         var viewport = document.querySelector("meta[name=viewport]");
                         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
                                 'maximum-scale=1.0, user-scalable=0,target-densitydpi=medium-dpi');
+                        $("#infopanel .ui-panel-inner").niceScroll();
                     }
 
                     /*-------------------------------Help functions -------------*/

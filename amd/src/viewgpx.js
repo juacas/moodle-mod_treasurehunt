@@ -61,6 +61,17 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     var tracks = new ol.layer.Group({
                         'title': strings['trackviewer'],
                         layers: []});
+                    // TODO: test and include heatmap layer.
+                    var heatmap = new ol.layer.Heatmap({
+                        title: 'Heatmap',
+                        source: new ol.source.Vector({
+                            url: 'gpx.php?id=' + cmid + '&userid=24', // + users.map(function(e){return e.id;}),
+                            format: new ol.format.GPX()
+                        }),
+                        blur: 20,
+                        radius: 10
+                    });
+
                     var layerSwitcher = new ol.control.LayerSwitcher();
                     var map = new ol.Map({
                         layers: [basemaps, tracks],
@@ -171,8 +182,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         source: gpxsource,
                         title: user.pic + '' + user.fullname,
                         style: function (feature) {
-
-                            var selectedstyle = styleFunction(feature, iconurl);
+                            var selectedstyle = trackStyleFunction(feature, iconurl);
                             return selectedstyle;
                         }
                     });
@@ -194,12 +204,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
                 });
             }
-            function styleFunction(feature, icon) {
+            function trackStyleFunction(feature, icon) {
                 var styles = [
                     // ...shadow.
                     new ol.style.Style({
                         stroke: new ol.style.Stroke({
-                            color: 'white',
+                            color: 'rgba(255,255,255,0.8)',
                             width: 8
                         }),
                         //zIndex: 1
@@ -207,8 +217,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     new ol.style.Style({
                         stroke: new ol.style.Stroke({
                             color: '#ff0000',
-                            width: 4,
-                            lineDash: [10, 10],
+                            width: 2,
+                            lineDash: [10, 8],
                         }),
                         fill: new ol.style.Fill({
                             color: 'rgba(255,0,0,0.5)'

@@ -28,55 +28,88 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);
-$userid = required_param('userid', PARAM_INT);
+$userid = required_param('userid', PARAM_SEQUENCE);
+$userids = explode(',', $userid);
+
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
-
 $context = context_module::instance($cm->id);
-if ($USER->id != $userid) {
+if (count($userids) > 1 || $USER->id != $userid) {
     require_capability('mod/treasurehunt:managetreasurehunt', $context);
 }
 date_default_timezone_set("UTC");
-
-$segments = [];
-$tracks = $DB->get_records('treasurehunt_track', ['userid' => $userid, 'treasurehuntid' => $treasurehunt->id]);
-$description = "Track for user:" . fullname($DB->get_record('user', ['id' => $userid]));
-$activity = new stdClass();
-$activity->trackPoints = [];
-foreach ($tracks as $track) {
-    $trackpoint = new stdClass();
-    $trackpoint->time = $track->timestamp;
-    $coords = explode(' ', substr($track->location, 6, -1));
-    $trackpoint->lon = $coords[0];
-    $trackpoint->lat = $coords[1];
-    $trackpoint->type = 'trackpoint';
-    $activity->trackPoints[] = $trackpoint;
+foreach ($userids as $userid) {
+    $trackpoints = $DB->get_records('treasurehunt_track', ['userid' => $userid, 'treasurehuntid' => $treasurehunt->id]);
+    $description = "Track for user:" . fullname($DB->get_record('user', ['id' => $userid]));
+    $segment = makesegment($trackpoints);
+    $segments[] = $segment;
+    $tracks[] = maketrack($description, $segments);
 }
-$segment = new stdClass();
-$segment->activities = [$activity];
-$segment->type = 'tracks';
-$segments[] = $segment;
-$gpx = makexml($segments, $description);
+$gpx = makegpx($tracks);
 header('Content-type: application/gpx');
 header('Content-Disposition: attachment; filename="treasure_track.gpx"');
 echo $gpx;
 die;
 
-function makexml($segments, $description) {
+/**
+ * 
+ * @param array $trackpoint  from table treasurehunt_track
+ * @return \stdClass $segment
+ */
+function makesegment($trackpoints) {
+    $activity = new stdClass();
+    $activity->trackPoints = [];
+
+    foreach ($trackpoints as $trackpoint) {
+        $gpxtrackpoint = new stdClass();
+        $gpxtrackpoint->time = $trackpoint->timestamp;
+        $coords = explode(' ', substr($trackpoint->location, 6, -1));
+        $gpxtrackpoint->lon = $coords[0];
+        $gpxtrackpoint->lat = $coords[1];
+        $gpxtrackpoint->type = 'trackpoint';
+        $activity->trackPoints[] = $gpxtrackpoint;
+    }
+    $segment = new stdClass();
+    $segment->activities = [$activity];
+    $segment->type = 'tracks';
+    return $segment;
+}
+
+/**
+ * 
+ * @param array(string) $tracks tracks xml sections
+ * @return string xml format for gpx
+ */
+function makegpx($tracks) {
     $xml = '<?xml version="1.0" encoding="UTF-8"?>
-            <gpx version="1.1" creator="TreasureHuntTrackExporter" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
-			<metadata>
-	        <link href="https://github.com/juacas/moodle-mod_treasurehunt">
-	            <text>Treasurehunt track</text>
-	        </link>
-	    </metadata>
-	    <trk>
+<gpx version="1.1" creator="TreasureHuntTrackExporter" xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd" xmlns="http://www.topografix.com/GPX/1/1" xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1" xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<metadata>
+	    <link href="https://github.com/juacas/moodle-mod_treasurehunt">
+	        <text>Treasurehunt track</text>
+	    </link>
+	</metadata>';
+    $xml .= "\n";
+    $xml .= join("\n", $tracks);
+    $xml .= "\n";
+    $xml .= '</gpx>';
+    return $xml;
+}
+
+/**
+ * 
+ * @param string $description
+ * @param array(\stdClass) array of $segments
+ * @return string xmlsection for a track. From <trk> to </trk>
+ */
+function maketrack($description, $segments) {
+    $xml = '<trk>
         <name>Treasurehunt trace</name>
          <desc>' . $description . '</desc>';
 
     foreach ($segments as $segment) {
+        $xml .= "\n";
         $xml .= "<trkseg>";
         if ($segment->type == 'place') {
             $xml .= maketrackpoint($segment);
@@ -84,16 +117,16 @@ function makexml($segments, $description) {
             foreach ($segment->activities as $activity) {
                 if ($activity->trackPoints) {
                     foreach ($activity->trackPoints as $point) {
+                        $xml .= "\n";
                         $xml .= maketrackpoint($point);
                     }
                 }
             }
         }
+        $xml .= "\n";
         $xml .= "</trkseg>";
     }
-    $xml .= '</trk>
-	</gpx>';
-
+    $xml .= '</trk>';
     return $xml;
 }
 

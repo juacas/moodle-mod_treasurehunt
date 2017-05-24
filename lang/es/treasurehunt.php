@@ -215,7 +215,7 @@ $string['nogroupassigned'] = 'Ningún grupo asignado a este camino';
 $string['nogroupingplay'] = 'No tienes ningún grupo asignado a un camino, por lo que no puedes jugar la actividad.';
 $string['nogroupplay'] = 'No tienes ningún camino asignado, por lo que no puedes jugar la actividad.';
 $string['nogrouproad'] = '{$a} no tiene ningún camino asignado.';
-$string['nomarks'] = 'Marca primero en el mapa el punto deseado.';
+$string['nomarks'] = 'Marca primero en el mapa el punto deseado. Sitúa el <img src="pix/my_location.png" width="28"/>';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['notchangeorderstage'] = 'No puedes cambiar el orden de las etapas una vez que se han realizado intentos sobre el camino.';
@@ -342,7 +342,7 @@ $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la
 $string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';
 $string['validatelocation_tour'] = 'Cuando estés seguro de la localización de una etapa del juego debes enviar tu posición para comprobar si has acertado. Pulsa este botón una vez que el mapa esté centrado en tu posición.';
 $string['lastsuccessfulstage_tour'] = 'En este panel encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
-$string['mapplay_tour'] = 'En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/parchment.png" width="28"/> y las falladas con <img src="pix/failure.png" width="28"/>';
+$string['mapplay_tour'] = 'En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/success_mark.png" width="28"/> y las falladas con <img src="pix/failure_mark.png" width="28"/>';
 $string['playend_tour'] = '¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
 $string['welcome_play_tour'] = 'Bienvenido a la pantalla de juego de la Caza del Tesoro. Este es el interfaz para buscar, investigar y conseguir tu tesoro.';
 $string['nextstep'] = 'Sig.';

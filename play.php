@@ -59,6 +59,7 @@ $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
 
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+$PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
