@@ -241,6 +241,7 @@ module.exports = function(grunt) {
 
     // Register JS tasks.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
+    grunt.registerTask('amdonly', ['uglify']);
     grunt.registerTask('amd', ['jshint', 'uglify']);
     grunt.registerTask('js', ['amd', 'shifter']);
 

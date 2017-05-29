@@ -13,6 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+/**
+ * Clear the activity registered in this module instance.
+ * This resets the state of the trasurehunt and allows the number of roads and stages to be
+ * edited again.
+ */
 require_once("../../config.php");
 require_once("locallib.php");
 

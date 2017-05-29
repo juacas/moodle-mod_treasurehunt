@@ -22,7 +22,7 @@
     "laxbreak":     true,
     "laxcomma":     false,
     "loopfunc":     false,
-    "maxerr":       500,
+    "maxerr":       5000,
     "maxlen":       132,
     "multistr":     false,
     "newcap":       true,
@@ -47,7 +47,7 @@
     "sub":          false,
     "supernew":     false,
     "trailing":     true,
-    "undef":        true,
+    "undef":        false,
     "unused":       true,
     "white":        false,
     "yui":          true

@@ -35,9 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *      - string concept: (optional) the concept of deleted stage.
  * }
  *
- * @package    mod_treasurethunt
- * @copyright  2015 Adrian Rodriguez
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stage_deleted extends \core\event\base {
 

@@ -45,9 +45,10 @@ class stage_form extends moodleform {
 
     /**
      * Defines forms elements
+     * @global type $CFG
      */
     public function definition() {
-
+        global $CFG;
         $mform = $this->_form;
         $formid = $mform->_attributes['id'];
         $editoroptions = $this->_customdata['editoroptions'];
@@ -82,29 +83,29 @@ class stage_form extends moodleform {
         $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'treasurehunt'), $options);
         $mform->addHelpButton('activitytoend', 'activitytoend', 'treasurehunt');
 
-        // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco: llamo al cancel que no necesita comprobar la validacion
+        // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco:
+        // llamo al cancel que no necesita comprobar la validacion
         // ... y le doy un valor a una variable escondida.
         $form = "document.forms['" . $formid . "']";
-        $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // create javascript: set reloaded field to "1" 
-        $attributes = array("onChange" => $javascript); // set onChange attribute
+        $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // Create javascript: set reloaded field to "1".
+        $attributes = array("onChange" => $javascript); // Set onChange attribute.
         $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'),
                 $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
 
         if ($currentstage->addsimplequestion) {
-            // Imprimo el editor de preguntas
+            // Questions fields.
             $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null,
                     $editoroptions);
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
-            // Imprimo las respuestas
+            // Answer fields.
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
                     $currentstage->noanswers, NUMBER_NEW_ANSWERS);
         }
-        
         $mform->addElement('header', 'cluetextsection',
                 get_string('stageclue', 'treasurehunt'));
-        // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game
+        // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
         $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
@@ -116,7 +117,7 @@ class stage_form extends moodleform {
         $mform->setType('id', PARAM_INT);
         $mform->addElement('hidden', 'roadid');
         $mform->setType('roadid', PARAM_INT);
-        // Necesario para recargar la pagina
+        // Needed to reload the page.
         $mform->addElement('hidden', 'reloaded');
         $mform->setType('reloaded', PARAM_INT);
         $mform->setConstant('reloaded', 0);
@@ -191,7 +192,7 @@ class stage_form extends moodleform {
                 $errors['answertext_editor[1]'] = get_string('notenoughanswers', 'qtype_multichoice', 2);
             }
 
-            // Check if have correct choice
+            // Check if have correct choice.
             if ($correctcount === 0) {
                 $errors['correct[0]'] = get_string('errcorrectanswers', 'treasurehunt');
             } else if ($correctcount > 1) {

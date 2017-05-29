@@ -70,14 +70,14 @@ class road_form extends moodleform {
             $mform->addHelpButton('groupid', 'groupid', 'treasurehunt');
         }
 
-        // Añado los campos ocultos id y newFeature
+        // Añado los campos ocultos id y newFeature.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
         $mform->setType('id', PARAM_INT);
 
         // Add standard buttons, common to all modules. Botones.
-        $this->add_action_buttons($cancel = true);
+        $this->add_action_buttons(true);
 
         $this->set_data($currentroad);
     }

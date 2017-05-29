@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Web service for mod treasurehunt.
@@ -24,72 +24,72 @@
 defined('MOODLE_INTERNAL') || die();
 
 $services = array(
-    'treasurehuntservices' => array(// the name of the web service.
+    'treasurehuntservices' => array(// The name of the web service.
         'functions' => array('mod_treasurehunt_fetch_treasurehunt',
             'mod_treasurehunt_update_stages', 'mod_treasurehunt_delete_stage',
             'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock',
-            'mod_treasurehunt_user_progress'), // web service functions of this service.
-        'requiredcapability' => '', // if set, the web service user need this capability to access .
-        // any function of this service. For example: 'some/capability:specified'                 
-        'restrictedusers' => 0, // if enabled, the Moodle administrator must link some user to this service.
-        // into the administration.
-        'enabled' => true, // if enabled, the service can be reachable on a default installation.
+            'mod_treasurehunt_user_progress'), // Web service functions of this service.
+        'requiredcapability' => '', // If set, the web service user need this capability to access .
+        // Any function of this service. For example: 'some/capability:specified'.  
+        'restrictedusers' => 0, // If enabled, the Moodle administrator must link some user to this service.
+        // Into the administration.
+        'enabled' => true, // If enabled, the service can be reachable on a default installation.
     )
 );
 
 $functions = array(
-    'mod_treasurehunt_fetch_treasurehunt' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'fetch_treasurehunt', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Fetch all the roads and stages of instance.', // human readable description of the web service function
-        'type' => 'read', // database rights of the web service function (read, write)
+    'mod_treasurehunt_fetch_treasurehunt' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'fetch_treasurehunt', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Fetch all the roads and stages of instance.', // Human readable description of the web service function.
+        'type' => 'read', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
-    'mod_treasurehunt_update_stages' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'update_stages', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Updates all stages position and geometry given.', // human readable description of the web service function
-        'type' => 'write', // database rights of the web service function (read, write)
+    'mod_treasurehunt_update_stages' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'update_stages', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Updates all stages position and geometry given.', // Human readable description of the web service function.
+        'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
-    'mod_treasurehunt_delete_stage' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'delete_stage', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Delete a stage given.', // human readable description of the web service function
-        'type' => 'write', // database rights of the web service function (read, write)
+    'mod_treasurehunt_delete_stage' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'delete_stage', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Delete a stage given.', // Human readable description of the web service function.
+        'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
-    'mod_treasurehunt_delete_road' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'delete_road', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Delete a road given.', // human readable description of the web service function
-        'type' => 'write', // database rights of the web service function (read, write)
+    'mod_treasurehunt_delete_road' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'delete_road', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Delete a road given.', // Human readable description of the web service function.
+        'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editroad',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
-    'mod_treasurehunt_renew_lock' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'renew_lock', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Renew user edition lock of instance.', // human readable description of the web service function
-        'type' => 'write', // database rights of the web service function (read, write)
+    'mod_treasurehunt_renew_lock' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'renew_lock', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Renew user edition lock of instance.', // Human readable description of the web service function.
+        'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
-    'mod_treasurehunt_user_progress' => array(// web service function name
-        'classname' => 'mod_treasurehunt_external', // class containing the external function
-        'methodname' => 'user_progress', // external function name
-        'classpath' => 'mod/treasurehunt/externallib.php', // file containing the class/external function
-        'description' => 'Check user progress in a game.', // human readable description of the web service function
-        'type' => 'write', // database rights of the web service function (read, write)
+    'mod_treasurehunt_user_progress' => array(// Web service function name.
+        'classname' => 'mod_treasurehunt_external', // Class containing the external function.
+        'methodname' => 'user_progress', // External function name.
+        'classpath' => 'mod/treasurehunt/externallib.php', // File containing the class/external function.
+        'description' => 'Check user progress in a game.', // Human readable description of the web service function.
+        'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:play',
-        'ajax' => true, // allowed from ajax.
+        'ajax' => true, // Allowed from ajax.
     ),
 );

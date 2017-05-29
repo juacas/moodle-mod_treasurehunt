@@ -32,8 +32,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // which pass these variables from page to page.
 // Setup $PAGE here.
 // Print the page header.
-$cmid = required_param('cmid', PARAM_INT); // Course_module ID
-$id = optional_param('id', 0, PARAM_INT);           // EntryID
+$cmid = required_param('cmid', PARAM_INT); // Course_module ID.
+$id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
 
@@ -57,9 +57,10 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+                                array($treasurehunt->id, $lockid, $renewlocktime));
 
-    if ($id) { // if entry is specified
+    if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
         $sql = 'SELECT id,name,cluetext,cluetextformat,cluetexttrust,'
@@ -84,13 +85,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
                 $stage->noanswers += NUMBER_NEW_ANSWERS;
             }
         }
-    } else { // new entry
+    } else { // New entry.
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = "id = ?";
         $params = array($roadid);
-        // Compruebo si existe el camino
+        // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             print_error('invalidentry');
         }
@@ -113,16 +114,19 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $stage->roadid));
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
-    $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
-        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
-    // List activities with Completion enabled
+    $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,
+                            'context' => $context,
+                            'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
+    // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
 
-    $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); // name of the form you defined in file above.
+    $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions,
+                                    'completionactivities' => $completionactivities)); // Name of the form you defined in file above.
 
     if ($mform->is_reloaded()) {
-        // Si se ha recargado es porque hemos cambiado algo
+        // Ignore this event. Some data may be changes.
+        echo " ";
     } else if ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form
         // here you tell php what to do if your user presses cancel
@@ -131,15 +135,15 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         redirect($returnurl);
     } else if ($stage = $mform->get_data()) {
 
-        // Actualizamos los campos
+        // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);
-        $stage->cluetext = '';          // updated later
-        $stage->cluetextformat = FORMAT_HTML; // updated later
-        $stage->cluetexttrust = 0;           // updated later
-        $stage->questiontext = '';          // updated later
-        $stage->questiontextformat = FORMAT_HTML; // updated later
-        $stage->questiontexttrust = 0;           // updated later
+        $stage->cluetext = '';          // Updated later
+        $stage->cluetextformat = FORMAT_HTML; // Updated later
+        $stage->cluetexttrust = 0;           // Updated later
+        $stage->questiontext = '';          // Updated later
+        $stage->questiontextformat = FORMAT_HTML; // Updated later
+        $stage->questiontexttrust = 0;           // Updated later
 
         if (empty($stage->id)) {
             $stage->timecreated = $timenow;
@@ -156,12 +160,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         // can see what they did.
         // save and relink embedded images and save attachments
         $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context, 'mod_treasurehunt', 'cluetext', $stage->id);
-        // store the updated value values
+        // Store the updated value values.
         if ($stage->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
-            $stage = file_postupdate_standard_editor($stage, 'questiontext', $editoroptions, $context, 'mod_treasurehunt', 'questiontext', $stage->id);
+            $stage = file_postupdate_standard_editor($stage, 'questiontext', $editoroptions, $context,
+                                                    'mod_treasurehunt', 'questiontext', $stage->id);
             if (isset($stage->answertext_editor)) {
-                // Proceso los editores de respuesta y guardo las respuestas.
+                // Process answer texts and save answers.
                 foreach ($stage->answertext_editor as $key => $answertext) {
                     if (isset($answers) && count($answers) > 0) {
                         $answer = array_shift($answers);
@@ -176,16 +181,17 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
                             continue;
                         }
                         $answer = new stdClass();
-                        $answer->answertext = '';          // updated later
-                        $answer->answertextformat = FORMAT_HTML; // updated later
-                        $answer->answertexttrust = 0;           // updated later
+                        $answer->answertext = '';          // Updated later.
+                        $answer->answertextformat = FORMAT_HTML; // Updated later.
+                        $answer->answertexttrust = 0;           // Updated later.
                         $answer->timecreated = $timenow;
                         $answer->stageid = $stage->id;
                         $answer->correct = $stage->correct[$key];
                         $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
                     }
                     $answer->answertext_editor = $answertext;
-                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context, 'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context,
+                                                                'mod_treasurehunt', 'answertext', $answer->id);
                     $DB->update_record('treasurehunt_answers', $answer);
                 }
             }

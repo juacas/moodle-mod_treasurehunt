@@ -21,19 +21,11 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-global $CFG;
 defined('MOODLE_INTERNAL') || die();
-
-// Needed for get_geometry_functions();
+global $CFG;
+// Needed for get_geometry_functions().
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
-/**
- * Define the complete assignment structure for restore, with file and id annotations
- *
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
 
     /**
@@ -69,7 +61,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         global $DB;
 
         $data = (object) $data;
-        $oldid = $data->id;
+        
         $data->course = $this->get_courseid();
 
         $data->timecreated = $this->apply_date_offset($data->timecreated);
@@ -84,7 +76,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $newitemid = $DB->insert_record('treasurehunt', $data);
         $this->apply_activity_instance($newitemid);
     }
-
+    /**
+     *
+     * @global moodle_database $DB
+     * @param object $data
+     */
     protected function process_treasurehunt_road($data) {
         global $DB;
 
@@ -146,16 +142,16 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data = (object) $data;
         $data->treasurehuntid = $this->get_new_parentid('treasurehunt');
-        $data->stageid = $this->get_mappingid('treasurehunt_stage',$data->stageid);
+        $data->stageid = $this->get_mappingid('treasurehunt_stage', $data->stageid);
         $data->userid = $this->get_mappingid('user', $data->userid);
-        $newitemid = $DB->insert_record('treasurehunt_track', $data);
+        $DB->insert_record('treasurehunt_track', $data);
     }
 
     /**
      * Post-execution actions
      */
     protected function after_execute() {
-        // Add treasurehunt related files
+        // Add treasurehunt related files.
         $this->add_related_files('mod_treasurehunt', 'intro', null);
         $this->add_related_files('mod_treasurehunt', 'cluetext', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_stage');

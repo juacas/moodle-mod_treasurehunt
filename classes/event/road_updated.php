@@ -35,9 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *      - string concept: (optional) the concept of created road.
  * }
  *
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class road_updated extends \core\event\base {
 

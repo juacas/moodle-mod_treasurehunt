@@ -34,21 +34,22 @@ define(['jquery', 'core/url',
                         lastattempttimestamp,
                         lastroadtimestamp, gameupdatetime, tracking, user) {
                     var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
-                            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
-                            markerurl = url.imageUrl('my_location', 'treasurehunt'),
-                            openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
-                            lastsuccessfulstage = {},
-                            interval,
-                            imgloaded = 0, totalimg = 0,
-                            infomsgs = [],
-                            attemptshistory = [],
-                            changesinattemptshistory = false,
-                            changesinlastsuccessfulstage = false,
-                            changesinquestionstage = false,
-                            fitmap = false,
-                            roadfinished = false,
-                            available = true,
-                            qoaremoved = false;
+                        failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
+                        markerurl = url.imageUrl('my_location', 'treasurehunt'),
+                        openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
+                        lastsuccessfulstage = {},
+                        interval,
+                        imgloaded = 0,
+                        totalimg = 0,
+                        infomsgs = [],
+                        attemptshistory = [],
+                        changesinattemptshistory = false,
+                        changesinlastsuccessfulstage = false,
+                        changesinquestionstage = false,
+                        fitmap = false,
+                        roadfinished = false,
+                        available = true,
+                        qoaremoved = false;
                     /*-------------------------------Styles-----------------------------------*/
                     var text = new ol.style.Text({
                         textAlign: 'center',
@@ -271,11 +272,11 @@ define(['jquery', 'core/url',
                             return [styles];
                         }
                         if (!feature.get('geometrysolved')) {
-//  Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
+// Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
                             failstageStyle.getText().setText('' + stageposition);
                             return [failstageStyle];
                         }
-//   Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
+// Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
                         defaultstageStyle.getText().setText('' + stageposition);
                         return [defaultstageStyle];
                     }
@@ -917,7 +918,6 @@ define(['jquery', 'core/url',
                         } else {
                             open_popup(popup);
                         }
-
 
                     }
                     function open_popup(popup) {

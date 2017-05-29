@@ -28,8 +28,6 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->dirroot . '/calendar/lib.php');
 
-
-
 /* Moodle core API */
 
 /**
@@ -108,7 +106,11 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
-    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0) || $oldtreasurehunt->grademethod != $treasurehunt->grademethod || $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation || $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer || $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
+    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0)
+            || $oldtreasurehunt->grademethod != $treasurehunt->grademethod
+            || $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation
+            || $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer
+            || $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
         treasurehunt_update_grades($treasurehunt);
     }
     treasurehunt_grade_item_update($treasurehunt);
@@ -181,6 +183,7 @@ function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
  * a given particular instance of this module, for user activity reports.
  *
  * It is supposed to echo directly without returning a value.
+ * TODO
  *
  * @param stdClass $course the current course record
  * @param stdClass $user the record of the user we are generating report for
@@ -188,7 +191,6 @@ function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
  * @param stdClass $treasurehunt the module instance record
  */
 function treasurehunt_user_complete($course, $user, $mod, $treasurehunt) {
-    
 }
 
 /**
@@ -210,7 +212,7 @@ function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart)
  * This callback function is supposed to populate the passed array with
  * custom activity records. These records are then rendered into HTML via
  * {@link treasurehunt_print_recent_mod_activity()}.
- *
+ * TODO
  * Returns void, it adds items into $activities and increases $index.
  *
  * @param array $activities sequentially indexed array of objects with added 'cmid' property
@@ -222,12 +224,12 @@ function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart)
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
 function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
-    
+
 }
 
 /**
  * Prints single activity item prepared by {@link treasurehunt_get_recent_mod_activity()}
- *
+ * TODO
  * @param stdClass $activity activity record with added 'cmid' property
  * @param int $courseid the id of the course we produce the report for
  * @param bool $detail print detailed report
@@ -235,7 +237,7 @@ function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart,
  * @param bool $viewfullnames display users' full names
  */
 function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
-    
+
 }
 
 /**
@@ -250,7 +252,7 @@ function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $
  *                        will know about (most noticeably, an icon).
  */
 function treasurehunt_get_coursemodule_info($coursemodule) {
-    global $CFG, $DB;
+    global $DB;
 
     $dbparams = array('id' => $coursemodule->instance);
     $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat';
@@ -381,7 +383,8 @@ function treasurehunt_grade_item_delete($treasurehunt) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, null, array('deleted' => 1));
+    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod',
+                        'treasurehunt', $treasurehunt->id, 0, null, array('deleted' => 1));
 }
 
 /**
@@ -461,7 +464,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
         send_file_not_found();
     }
 
-    // finally send the file
+    // Finally send the file.
     send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
@@ -489,7 +492,9 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
     }
 
     if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->cm->context)) {
-        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'), new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)), navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
+        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'),
+                new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)),
+                navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
         $treasurehuntnode->add_node($node, $beforekey);
     }
 }
@@ -522,12 +527,12 @@ function treasurehunt_reset_course_form_defaults($course) {
 function treasurehunt_reset_gradebook($courseid, $type = '') {
     global $DB;
 
-    $treasurehunts = $DB->get_records_sql("
-            SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid
-            FROM {modules} m
-            JOIN {course_modules} cm ON m.id = cm.module
-            JOIN {treasurehunt} t ON cm.instance = t.id
-            WHERE m.name = 'treasurehunt' AND cm.course = ?", array($courseid));
+    $treasurehunts = $DB->get_records_sql(
+            "SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid " .
+            "FROM {modules} m " .
+            "JOIN {course_modules} cm ON m.id = cm.module" .
+            "JOIN {treasurehunt} t ON cm.instance = t.id" .
+            "WHERE m.name = 'treasurehunt' AND cm.course = ?", array($courseid));
 
     foreach ($treasurehunts as $treasurehunt) {
         treasurehunt_grade_item_update($treasurehunt, 'reset');

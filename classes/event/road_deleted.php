@@ -35,9 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *      - string concept: (optional) the concept of deleted road.
  * }
  *
- * @package    mod_treasurethunt
- * @copyright  2015 Adrian Rodriguez
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class road_deleted extends \core\event\base {
 
@@ -77,7 +74,10 @@ class road_deleted extends \core\event\base {
     public function get_url() {
         return null;
     }
-
+    /**
+     *
+     * @return \core\event\base::NOT_MAPPED
+     */
     public static function get_objectid_mapping() {
         return \core\event\base::NOT_MAPPED;
     }

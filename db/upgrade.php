@@ -1,6 +1,6 @@
 <?php
 // This file is part of Treasurehunt for Moodle
-// 
+//
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
@@ -30,7 +30,7 @@ defined('MOODLE_INTERNAL') || die();
  * @return bool
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
-    global $DB, $CFG;
+    global $DB;
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -51,6 +51,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $table->addIndex(new xmldb_index('timestamp_idx', XMLDB_INDEX_NOTUNIQUE, ['timestamp']));
 
         $dbman->create_table($table);
+        upgrade_mod_savepoint(true, 2017042000, 'treasurehunt');
     }
     return true;
 }

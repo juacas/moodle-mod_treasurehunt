@@ -29,14 +29,6 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_settingslib.php');
 
-/**
- * assign backup task that provides all the settings and steps to perform one complete backup of the activity
- *
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-
 class backup_treasurehunt_activity_task extends backup_activity_task {
 
     /**

@@ -34,8 +34,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // which pass these variables from page to page.
 // Setup $PAGE here.
 // Print the page header.
-$cmid = required_param('cmid', PARAM_INT); // Course_module ID
-$id = optional_param('id', 0, PARAM_INT);           // EntryID
+$cmid = required_param('cmid', PARAM_INT); // Course_module ID.
+$id = optional_param('id', 0, PARAM_INT);  // EntryID.
 
 list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
@@ -56,8 +56,9 @@ $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, '
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
-    if ($id) { // if entry is specified
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+                            array($treasurehunt->id, $lockid, $renewlocktime));
+    if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
         $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
@@ -65,7 +66,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         if (!$road = $DB->get_record_sql($sql, $parms)) {
             print_error('invalidentry');
         }
-    } else { // new entry
+    } else { // New entry.
         require_capability('mod/treasurehunt:addroad', $context);
         $title = get_string('addingroad', 'treasurehunt');
         $road = new stdClass();
@@ -73,7 +74,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
     $road->cmid = $cmid;
 
-    // Compruebo el tipo de grupo.
+    // Check the type of group.
     if ($cm->groupmode) {
         $selectoptions = groups_get_all_groupings($course->id);
         $grouptype = "groupingid";
@@ -83,15 +84,15 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $grouptype = "groupid";
         $grouptypecond = "AND groupid != 0";
     }
-    // Elimino los grupos ocupados
+    // Delete busy groups.
     $sql = "SELECT $grouptype as busy FROM {treasurehunt_roads}  WHERE treasurehuntid=? AND id !=? $grouptypecond";
     $parms = array('treasurehuntid' => $treasurehunt->id, 'id' => $id);
     $busy = $DB->get_records_sql($sql, $parms);
     foreach ($busy as $option) {
         unset($selectoptions[$option->busy]);
     }
-
-    $mform = new road_form(null, array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode)); //name of the form you defined in file above.
+    // Name of the form you defined in file above.
+    $mform = new road_form(null, array('current' => $road, 'selectoptions' => $selectoptions, 'groups' => $cm->groupmode));
 
     if ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form

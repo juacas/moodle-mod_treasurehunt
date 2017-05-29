@@ -27,11 +27,16 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 if ($ADMIN->fulltree) {
     $settings->add(new admin_setting_heading('treasurehuntintro', '', get_string('configintro', 'treasurehunt')));
     // Maximum grade.
-    $settings->add(new admin_setting_configtext('mod_treasurehunt/maximumgrade', get_string('maximumgrade'), get_string('configmaximumgrade', 'treasurehunt'), 10,
+    $settings->add(new admin_setting_configtext('mod_treasurehunt/maximumgrade',
+                                                    get_string('maximumgrade'),
+                                                    get_string('configmaximumgrade', 'treasurehunt'), 10,
             PARAM_INT));
     // Grading method.
-    $settings->add(new mod_treasurehunt_admin_setting_grademethod('mod_treasurehunt/grademethod', get_string('grademethod', 'treasurehunt'),
-            get_string('grademethod_help', 'treasurehunt'), TREASUREHUNT_GRADEFROMSTAGES, null));
+    $settings->add(new mod_treasurehunt_admin_setting_grademethod('mod_treasurehunt/grademethod',
+                                                    get_string('grademethod', 'treasurehunt'),
+                                                    get_string('grademethod_help', 'treasurehunt'),
+                                                    TREASUREHUNT_GRADEFROMSTAGES,
+                                                    null));
     // Location penalization.
     $settings->add(new admin_setting_configtext('mod_treasurehunt/penaltylocation', get_string('gradepenlocation', 'treasurehunt'),
             get_string('gradepenlocation_help', 'treasurehunt'), 0.00, PARAM_FLOAT));

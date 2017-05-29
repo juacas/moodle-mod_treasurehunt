@@ -26,13 +26,6 @@ namespace mod_treasurehunt\event;
 
 defined('MOODLE_INTERNAL') || die();
 
-/**
- * The mod_treasurehunt instance list viewed event class.
- *
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
-    
+
 }

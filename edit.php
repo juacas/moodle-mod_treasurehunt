@@ -42,7 +42,7 @@ $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-// Poner evento de edicion o algo asi
+// TODO : launch edition event
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
   'objectid' => $PAGE->cm->instance,
   'context' => $PAGE->context,
@@ -69,11 +69,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
+                                array($treasurehunt->id, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
-    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt', array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
+    $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
+                                array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
     $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
