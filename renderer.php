@@ -106,7 +106,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'));
             }
         }
-        // Si no ha finalizado pongo el botón de jugar
+        // Si no ha finalizado pongo el botón de jugar.
         $urlparams = array('id' => $historical->coursemoduleid);
         if ($historical->outoftime || $historical->roadfinished) {
             $string = get_string('reviewofplay', 'treasurehunt');
@@ -324,7 +324,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         }
         if ($notavailable) {
             $urlparams = array('id' => $info->courseid);
-            $o .= $this->output->single_button(new moodle_url('/course/view.php', $urlparams), get_string('backtocourse', 'treasurehunt'), 'get', array('class' => 'continuebutton'));
+            $o .= $this->output->single_button(new moodle_url('/course/view.php', $urlparams),
+                                                get_string('backtocourse', 'treasurehunt'), 'get',
+                                                array('class' => 'continuebutton'));
         }
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();

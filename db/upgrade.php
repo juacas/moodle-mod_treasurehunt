@@ -51,6 +51,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $table->addIndex(new xmldb_index('timestamp_idx', XMLDB_INDEX_NOTUNIQUE, ['timestamp']));
 
         $dbman->create_table($table);
+        upgrade_mod_savepoint(true, 2017042000, 'treasurehunt');
     }
     return true;
 }

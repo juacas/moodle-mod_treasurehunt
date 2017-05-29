@@ -129,7 +129,7 @@ function treasurehunt_geojson_to_object($array) {
  *
  * @param MultiPolygon $mpolygon
  * @param Point $point
- * @return bool 
+ * @return bool
  */
 function treasurehunt_check_point_in_multipolygon($mpolygon, $point) {
     $polygons = $mpolygon->getComponents();
@@ -168,26 +168,26 @@ function treasurehunt_create_default_items($treasurehunt) {
         $road = new stdClass();
         $road->name = get_string('road', 'treasurehunt');
         treasurehunt_add_update_road($treasurehunt, $road, $context);
-        // Adds a default stage to the road
+        // Adds a default stage to the road.
         $stage = new stdClass();
         $stage->id = null;
         $stage->roadid = $road->id;
         $stage->timecreated = time();
         $stage->name = get_string('stage', 'treasurehunt');
-        $stage->cluetext = '';          // updated later
-        $stage->cluetextformat = FORMAT_HTML; // updated later
-        $stage->cluetexttrust = 0;           // updated later
-        $stage->questiontext = '';          // updated later
-        $stage->questiontextformat = FORMAT_HTML; // updated later
-        $stage->questiontexttrust = 0;           // updated later
+        $stage->cluetext = '';          // Updated later.
+        $stage->cluetextformat = FORMAT_HTML; // Updated later.
+        $stage->cluetexttrust = 0;           // Updated later.
+        $stage->questiontext = '';          // Updated later.
+        $stage->questiontextformat = FORMAT_HTML; // Updated later.
+        $stage->questiontexttrust = 0;           // Updated later.
         $stage->id = treasurehunt_insert_stage_form($stage);
     }
 }
 
 /**
  * Adds a stage without geometry to a road by updating treasurehunt_stages table.
- * Then set the road as invalid.  
- * 
+ * Then set the road as invalid.
+ *
  * @param stdClass $stage The extended stage object as used by edit_stage.php
  * @return int The id of the new stage.
  */
@@ -256,7 +256,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
  */
 function treasurehunt_delete_stage($id, $context) {
     GLOBAL $DB;
-    $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST); 
+    $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST);
     // It can not be delete a stage of a started road.
     if (treasurehunt_check_road_is_blocked($stageresult->roadid)) {
         print_error('notdeletestage', 'treasurehunt');
@@ -267,34 +267,35 @@ function treasurehunt_delete_stage($id, $context) {
     $sql = 'UPDATE {treasurehunt_stages} '
             . 'SET position = position - 1 WHERE roadid = (?) AND position > (?)';
     $params = array($stageresult->roadid, $stageresult->position);
-    $DB->execute($sql, $params); 
+    $DB->execute($sql, $params);
     // Check if road is valid.
-    treasurehunt_set_valid_road($stageresult->roadid); 
+    treasurehunt_set_valid_road($stageresult->roadid);
     // Trigger deleted stage event.
     $eventparams = array(
         'context' => $context,
         'objectid' => $id,
     );
     \mod_treasurehunt\event\stage_deleted::create($eventparams)->trigger();
-} 
+}
+
 /**
- * Delete a treasure hunt road and all fields associated. 
- * 
+ * Delete a treasure hunt road and all fields associated.
+ *
  * @param int $roadid The road id.
  * @param object $treasurehunt The treasure hunt object.
  * @param stdClass $context The context object.
  */
 function treasurehunt_delete_road($roadid, $treasurehunt, $context) {
-    GLOBAL $DB; 
+    GLOBAL $DB;
     $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
     $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
-            , $params); 
+            , $params);
     foreach ($stages as $stage) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
         $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
-    $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params); 
+    $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
     treasurehunt_update_grades($treasurehunt);
 
     // Trigger deleted road event.
@@ -319,7 +320,7 @@ function treasurehunt_get_total_roads($treasurehuntid) {
 
 /**
  * Count the total number of stages belonging to road.
- * 
+ *
  * @param int $roadid The identifier of road to check.
  * @return int The number of stages in the road.
  */
@@ -332,7 +333,7 @@ function treasurehunt_get_total_stages($roadid) {
 /**
  * Check if a user or group has completed the assigned road of treasure hunt.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
- * 
+ *
  * @param int $userid The user id.
  * @param int $groupid The group id.
  * @param int $roadid The road id.
@@ -704,7 +705,6 @@ function treasurehunt_get_activity_to_end_link($activitytoendid) {
     if ($activitytoendid != 0) {
         $modinfo = get_fast_modinfo($COURSE);
         $cmactivitytoend = $modinfo->get_cm($activitytoendid);
-        //
         return '<a title="' . $cmactivitytoend->name . '" data-ajax="false" '
                 . 'href="' . $cmactivitytoend->url->__toString() . '">' . $cmactivitytoend->name . '</a>';
     } else {
@@ -1881,9 +1881,7 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             } else {
                 return get_string('groupquestionfailed', 'treasurehunt', $attempt);
             }
-        }
-        // If it is an attempt at a location.
-        else if ($attempt->type === 'location') {
+        } else if ($attempt->type === 'location') { // If it is an attempt at a location.
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('grouplocationovercome', 'treasurehunt', $attempt);
@@ -1904,9 +1902,7 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             } else {
                 return get_string('userquestionfailed', 'treasurehunt', $attempt);
             }
-        }
-        // If it is an attempt at a location.
-        else if ($attempt->type === 'location') {
+        } else if ($attempt->type === 'location') { // If it is an attempt at a location.
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('userlocationovercome', 'treasurehunt', $attempt);
@@ -2063,7 +2059,7 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     $usercompletiontimesql = "";
     $usertimetable = "";
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME) {
-        $usercompletiontimesql="(SELECT max(at.timecreated) from {treasurehunt_attempts} at
+        $usercompletiontimesql = "(SELECT max(at.timecreated) from {treasurehunt_attempts} at
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
             at.success=1 AND ri.position=1 AND
@@ -2184,24 +2180,24 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
  * @return array grade struct
  */
 function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
-    $grades = array(); 
+    $grades = array();
     foreach ($students as $student) {
         $feedback = '';
         $grade = new stdClass();
         $grade->userid = $student->id;
         $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
-            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation) + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);  
+            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation) + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
             $msgparams = (object) [
-                'grademax' => $treasurehunt->grade,
-                'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
-                'noanswersfailed' => $stats[$student->id]->noanswersfailed,
-                'nosuccessfulstages' => $stats[$student->id]->nosuccessfulstages,
-                'nostages' =>   $stats[$student->id]->nostages,
-                'penalization' => number_format(1-$negativepercentage,1),
-                'treasurehunt' => $treasurehunt
+                        'grademax' => $treasurehunt->grade,
+                        'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
+                        'noanswersfailed' => $stats[$student->id]->noanswersfailed,
+                        'nosuccessfulstages' => $stats[$student->id]->nosuccessfulstages,
+                        'nostages' => $stats[$student->id]->nostages,
+                        'penalization' => number_format(1 - $negativepercentage, 1),
+                        'treasurehunt' => $treasurehunt
             ];
-      
+
             if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION && isset($stats[$student->id]->position)) {
                 $positiverate = treasurehunt_calculate_line_equation(
                         1
@@ -2210,42 +2206,34 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                         , $treasurehunt->grade / 2
                         , $stats[$student->id]->position);
                 $msgparams->rawscore = $positiverate;
-                $msgparams->lastposition=$stats[$student->id]->lastposition;
-                $msgparams->position=$stats[$student->id]->position;
-                $feedback = get_string('grade_explaination_fromposition','treasurehunt',$msgparams);              
-            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME  && isset($stats[$student->id]->usertime)) {
+                $msgparams->lastposition = $stats[$student->id]->lastposition;
+                $msgparams->position = $stats[$student->id]->position;
+                $feedback = get_string('grade_explaination_fromposition', 'treasurehunt', $msgparams);
+            } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME && isset($stats[$student->id]->usertime)) {
                 $positiverate = treasurehunt_calculate_line_equation(
-                        $stats[$student->id]->besttime
-                        , $treasurehunt->grade
-                        , $stats[$student->id]->worsttime
-                        , $treasurehunt->grade / 2
-                        , $stats[$student->id]->usertime);
-                $msgparams->rawscore = $positiverate;    
+                        $stats[$student->id]->besttime, $treasurehunt->grade, $stats[$student->id]->worsttime, $treasurehunt->grade / 2, $stats[$student->id]->usertime);
+                $msgparams->rawscore = $positiverate;
                 $msgparams->besttime = treasurehunt_get_nice_duration($stats[$student->id]->besttime);
                 $msgparams->worsttime = treasurehunt_get_nice_duration($stats[$student->id]->worsttime);
                 $msgparams->yourtime = treasurehunt_get_nice_duration($stats[$student->id]->usertime);
-                $feedback = get_string('grade_explaination_fromtime','treasurehunt',$msgparams);         
+                $feedback = get_string('grade_explaination_fromtime', 'treasurehunt', $msgparams);
             } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMABSOLUTETIME && isset($stats[$student->id]->usertime)) {
                 $positiverate = treasurehunt_calculate_line_equation(
-                        $stats[$student->id]->besttime
-                        , $treasurehunt->grade
-                        , $stats[$student->id]->worsttime
-                        , $treasurehunt->grade / 2
-                        , $stats[$student->id]->usertime);
-                $msgparams->rawscore = number_format($positiverate,1);    
+                        $stats[$student->id]->besttime, $treasurehunt->grade, $stats[$student->id]->worsttime, $treasurehunt->grade / 2, $stats[$student->id]->usertime);
+                $msgparams->rawscore = number_format($positiverate, 1);
                 $msgparams->besttime = userdate($stats[$student->id]->besttime);
                 $msgparams->worsttime = userdate($stats[$student->id]->worsttime);
                 $msgparams->yourtime = userdate($stats[$student->id]->usertime);
-                $feedback = get_string('grade_explaination_fromabsolutetime','treasurehunt',$msgparams);         
+                $feedback = get_string('grade_explaination_fromabsolutetime', 'treasurehunt', $msgparams);
             } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMSTAGES) {
                 $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / ($stats[$student->id]->nostages);
-                $msgparams->rawscore = $positiverate;               
-                $feedback = get_string('grade_explaination_fromstages','treasurehunt',$msgparams);
+                $msgparams->rawscore = $positiverate;
+                $feedback = get_string('grade_explaination_fromstages', 'treasurehunt', $msgparams);
             } else {
-                // Default grading when there is no data for calculation
-                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / (2* $stats[$student->id]->nostages);
-                $msgparams->rawscore = $positiverate;               
-                $feedback = get_string('grade_explaination_temporary','treasurehunt',$msgparams);
+                // Default grading when there is no data for calculation.
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / (2 * $stats[$student->id]->nostages);
+                $msgparams->rawscore = $positiverate;
+                $feedback = get_string('grade_explaination_temporary', 'treasurehunt', $msgparams);
             }
 
             $grade->rawgrade = max($positiverate * $negativepercentage, 0);

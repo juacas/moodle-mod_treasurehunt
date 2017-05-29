@@ -119,9 +119,10 @@ $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from finishing time';
 $string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['grademethod'] = 'Grading method';
-$string['grademethod_help'] = '<P><B>Grade from stages</B><P>
+$string['grademethod_help'] = <<< 'STR'
+<P><B>Grade from stages</B><P>
 <UL>
-<P>Each player (or team) scores proportionally by number of stages solved, 
+<P>Each player (or team) scores proportionally by number of stages solved,
 being 100% when a road is completely solved, and 0% when no stage is solved.</UL>
 
 <P><B>Grade from duration of the hunt</B><P>
@@ -146,7 +147,8 @@ hunt receive a grade under 50 calculated just by the number of stages solved.</U
 <P>The score is calculated by interpolating the position in the ranking, 
 being 100% the score for the first player and 50% for the last player. 
 The players that did not finish the hunt receive a grade under 50% calculated 
-just by the number of stages solved.</UL>';
+just by the number of stages solved.</UL>
+STR;
 $string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation'] = 'Penalty for failure in location';
@@ -323,7 +325,7 @@ $string['warnusersgroup'] = 'The following users belong to more than one group: 
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
 
-// Initial tour help
+// Initial tour help.
 $string['addstage_tour'] = 'Each road must have two or more stages. Each stage gives a clue to find out the next.';
 $string['addroad_tour'] = 'Add one or more roads to be followed by your students.';
 $string['editend_tour'] = 'Enjoy making exciting games for your students!';

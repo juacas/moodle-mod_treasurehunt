@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of TreasureHunt activity for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -35,13 +34,13 @@ defined('MOODLE_INTERNAL') || die;
 class backup_treasurehunt_activity_structure_step extends backup_activity_structure_step {
 
     /**
-     * Defines the backup structure of the module
+     * Defines the backup structure of the module.
      *
      * @return backup_nested_element
      */
     protected function define_structure() {
         global $CFG, $DB;
-        // Needed for get_geometry_functions();
+        // Needed for get_geometry_functions().
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
@@ -82,7 +81,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         // Build the tree
         $treasurehunt->add_child($roads);
         $roads->add_child($road);
-        
+      
         $road->add_child($stages);
         $stages->add_child($stage);
 
@@ -95,14 +94,14 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $treasurehunt->add_child($tracks);
         $tracks->add_child($track);
 
-        // Define sources
+        // Define sources.
         $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
 
         $road->set_source_table('treasurehunt_roads', array('treasurehuntid' => backup::VAR_PARENTID), 'id ASC');
         $stage->set_source_table('treasurehunt_stages', array('roadid' => backup::VAR_PARENTID));
         $answer->set_source_table('treasurehunt_answers', array('stageid' => backup::VAR_PARENTID), 'id ASC');
 
-        // All the rest of elements only happen if we are including user info
+        // All the rest of elements only happen if we are including user info.
         if ($userinfo) {
             $attempt->set_source_table('treasurehunt_attempts', array('stageid' => backup::VAR_PARENTID));
             $track->set_source_table('treasurehunt_track', array('treasurehuntid' => backup::VAR_PARENTID));

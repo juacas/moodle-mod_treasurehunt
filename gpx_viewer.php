@@ -22,9 +22,9 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once('../../config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-// @var $DB database_manager Database
+// @var $DB database_manager Database.
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);
@@ -62,7 +62,8 @@ foreach ($userrecords as $userrecord) {
     $user->pic = $output->user_picture($userrecord);
     $users[] = $user;
 }
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer', array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
+$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',
+                    array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users));
 echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");

@@ -21,10 +21,9 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-global $CFG;
 defined('MOODLE_INTERNAL') || die();
-
-// Needed for get_geometry_functions();
+global $CFG;
+// Needed for get_geometry_functions().
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 /**
@@ -146,7 +145,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
 
         $data = (object) $data;
         $data->treasurehuntid = $this->get_new_parentid('treasurehunt');
-        $data->stageid = $this->get_mappingid('treasurehunt_stage',$data->stageid);
+        $data->stageid = $this->get_mappingid('treasurehunt_stage', $data->stageid);
         $data->userid = $this->get_mappingid('user', $data->userid);
         $newitemid = $DB->insert_record('treasurehunt_track', $data);
     }

@@ -640,7 +640,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             }]);
                         geojson[0].done(function (response) {
                             $('.treasurehunt-editor-loader').hide();
-                            console.log('json: ' + response.treasurehunt.roads);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
@@ -1058,7 +1057,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             }]);
                         json[0].done(function (response) {
                             $('.treasurehunt-editor-loader').hide();
-                            console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
@@ -1102,7 +1100,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             }]);
                         json[0].done(function (response) {
                             $('.treasurehunt-editor-loader').hide();
-                            console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {
@@ -1170,7 +1167,6 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             }]);
                         json[0].done(function (response) {
                             $('.treasurehunt-editor-loader').hide();
-                            console.log(response);
                             if (response.status.code) {
                                 notification.alert('Error', response.status.msg, 'Continue');
                             } else {

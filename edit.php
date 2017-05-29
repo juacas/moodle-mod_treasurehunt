@@ -42,7 +42,7 @@ $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-// Poner evento de edicion o algo asi
+// TODO:launch edition event
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
   'objectid' => $PAGE->cm->instance,
   'context' => $PAGE->context,

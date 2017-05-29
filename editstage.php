@@ -32,8 +32,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // which pass these variables from page to page.
 // Setup $PAGE here.
 // Print the page header.
-$cmid = required_param('cmid', PARAM_INT); // Course_module ID
-$id = optional_param('id', 0, PARAM_INT);           // EntryID
+$cmid = required_param('cmid', PARAM_INT); // Course_module ID.
+$id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
 
@@ -59,7 +59,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock', array($treasurehunt->id, $lockid, $renewlocktime));
 
-    if ($id) { // if entry is specified
+    if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
         $sql = 'SELECT id,name,cluetext,cluetextformat,cluetexttrust,'
@@ -84,13 +84,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
                 $stage->noanswers += NUMBER_NEW_ANSWERS;
             }
         }
-    } else { // new entry
+    } else { // New entry.
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = "id = ?";
         $params = array($roadid);
-        // Compruebo si existe el camino
+        // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             print_error('invalidentry');
         }
@@ -115,14 +115,15 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes, 'context' => $context,
         'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
-    // List activities with Completion enabled
+    // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
 
-    $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); // name of the form you defined in file above.
+    $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions, 'completionactivities' => $completionactivities)); // Name of the form you defined in file above.
 
     if ($mform->is_reloaded()) {
-        // Si se ha recargado es porque hemos cambiado algo
+        // Ignore this event. Some data may be changes.
+        echo " ";
     } else if ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form
         // here you tell php what to do if your user presses cancel

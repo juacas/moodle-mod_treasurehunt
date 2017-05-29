@@ -119,7 +119,8 @@ $string['gradefromtime'] = 'Puntuación por tiempo total de caza';
 $string['gradefromabsolutetime'] = 'Puntuación por hora de finalización';
 
 $string['grademethod'] = 'Método de calificación';
-$string['grademethod_help'] = '<P><B>Puntuación por etapas</B><P>
+$string['grademethod_help'] = <<< 'STR'
+<P><B>Puntuación por etapas</B><P>
 <UL>
 <P>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
 resueltas, siendo el 100% de la calificación máxima cuando se ha completado el camino
@@ -146,7 +147,8 @@ Los jugadores que no terminaron la caza reciben una calificación por debajo del
 siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron 
 la caza reciben una calificación por debajo del 50% calculado simplemente
-por el número de etapas resueltas.</UL>';
+por el número de etapas resueltas.</UL>
+STR;
 $string['grademethodinfo'] = 'Método de calificación: {$a->type}. Penaliza {$a->gradepenlocation}% por localización, {$a->gradepenanswer}% por respuestas';
 $string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation'] = 'Penalización por fallo en localización';

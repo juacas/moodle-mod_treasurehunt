@@ -193,7 +193,6 @@ class mod_treasurehunt_external extends external_api {
     public static function update_stages($stages, $treasurehuntid, $lockid) {
         global $DB;
         $params = self::validate_parameters(self::update_stages_parameters(), array('stages' => $stages, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -264,7 +263,6 @@ class mod_treasurehunt_external extends external_api {
 
     public static function delete_stage($stageid, $treasurehuntid, $lockid) {
         $params = self::validate_parameters(self::delete_stage_parameters(), array('stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -326,7 +324,6 @@ class mod_treasurehunt_external extends external_api {
     public static function delete_road($roadid, $treasurehuntid, $lockid) {
         global $DB;
         $params = self::validate_parameters(self::delete_road_parameters(), array('roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
@@ -390,7 +387,6 @@ class mod_treasurehunt_external extends external_api {
     public static function renew_lock($treasurehuntid, $lockid) {
         GLOBAL $USER;
         $params = self::validate_parameters(self::renew_lock_parameters(), array('treasurehuntid' => $treasurehuntid, 'lockid' => $lockid));
-
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
@@ -438,38 +434,36 @@ class mod_treasurehunt_external extends external_api {
     public static function user_progress_parameters() {
         return new external_function_parameters(
                 array(
-            'userprogress' => new external_single_structure(
-                    array(
-                'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-                'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
-                'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
-                'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
-                'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
-                'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
-                'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
-                'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
-                'location' => new external_single_structure(
+                'userprogress' => new external_single_structure(
                         array(
-                    'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                    'coordinates' =>
-                    new external_single_structure(
+                    'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
+                    'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+                    'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
+                    'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
+                    'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
+                    'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
+                    'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
+                    'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
+                    'location' => new external_single_structure(
                             array(
-                        new external_value(PARAM_FLOAT, "Longitude"),
-                        new external_value(PARAM_FLOAT, "Latitude")
-                            ), 'Coordinates definition in geojson format for point'),
-                        ), 'Geometry definition in geojson format', VALUE_OPTIONAL),
-                'currentposition' => new external_single_structure(
-                        array(
-                    'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                    'coordinates' =>
-                    new external_single_structure(
+                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                        'coordinates' => new external_single_structure(
+                                array(
+                            new external_value(PARAM_FLOAT, "Longitude"),
+                            new external_value(PARAM_FLOAT, "Latitude")
+                                ), 'Coordinates definition in geojson format for point'),
+                            ), 'Geometry definition in geojson format', VALUE_OPTIONAL),
+                    'currentposition' => new external_single_structure(
                             array(
-                        new external_value(PARAM_FLOAT, "Longitude"),
-                        new external_value(PARAM_FLOAT, "Latitude")
-                            ), 'Coordinates definition in geojson format for point'),
-                        ), 'Geometry definition in geojson format', VALUE_OPTIONAL),
-                    )
-            )
+                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                        'coordinates' => new external_single_structure(
+                                array(
+                            new external_value(PARAM_FLOAT, "Longitude"),
+                            new external_value(PARAM_FLOAT, "Latitude")
+                                ), 'Coordinates definition in geojson format for point'),
+                            ), 'Geometry definition in geojson format', VALUE_OPTIONAL),
+                        )
+                )
                 )
         );
     }
@@ -630,7 +624,9 @@ class mod_treasurehunt_external extends external_api {
                 $changesinplaymode = true;
             }
             // Check if the user has correctly completed the question and the required activity.
-            $qocsolved = treasurehunt_check_question_and_activity_solved($params['selectedanswerid'], $USER->id, $userparams->groupid, $userparams->roadid, $updateroad, $context, $treasurehunt, $nostages, $qoaremoved);
+            $qocsolved = treasurehunt_check_question_and_activity_solved($params['selectedanswerid'],
+                            $USER->id, $userparams->groupid, $userparams->roadid,
+                            $updateroad, $context, $treasurehunt, $nostages, $qoaremoved);
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
@@ -653,7 +649,9 @@ class mod_treasurehunt_external extends external_api {
             $qoaremoved = $qocsolved->qoaremoved;
 
             if (!$updates->geometrysolved && isset($params['location']) && !$updateroad && !$changesinplaymode && !$changesingroupmode) {
-                $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid, $userparams->roadid, treasurehunt_geojson_to_object($params['location']), $context, $treasurehunt, $nostages);
+                $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid,
+                                    $userparams->roadid, treasurehunt_geojson_to_object($params['location']),
+                                    $context, $treasurehunt, $nostages);
                 if ($checklocation->newattempt) {
                     $updates->newattempttimestamp = $checklocation->attempttimestamp;
                     $updates->newgeometry = true;
@@ -682,7 +680,9 @@ class mod_treasurehunt_external extends external_api {
         }
         $lastsuccessfulstage = array();
         if ($updates->geometrysolved || !$available->available || $updateroad || $updates->attemptsolved || $params['initialize'] || $changesingroupmode) {
-            $lastsuccessfulstage = treasurehunt_get_last_successful_stage($USER->id, $userparams->groupid, $userparams->roadid, $nostages, $available->outoftime, $available->actnotavailableyet, $context);
+            $lastsuccessfulstage = treasurehunt_get_last_successful_stage($USER->id, $userparams->groupid,
+                                        $userparams->roadid, $nostages, $available->outoftime,
+                                        $available->actnotavailableyet, $context);
         }
 
         if ($updates->newgeometry || $updateroad || $roadfinished || $params['initialize'] || $changesingroupmode) {
