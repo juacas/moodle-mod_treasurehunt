@@ -138,13 +138,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $s .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt', implode(",", $progress->duplicategroupsingroupings)));
+                $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt',
+                        implode(",", $progress->duplicategroupsingroupings)));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt', implode(",", $progress->duplicateusersingroups)));
+                $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
+                        implode(",", $progress->duplicateusersingroups)));
             }
             if (count($progress->unassignedusers) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt', implode(",", $progress->unassignedusers)));
+                $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
+                        implode(",", $progress->unassignedusers)));
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
@@ -164,7 +167,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 continue;
                             }
                             if (!$hasprogress) {
-                                $this->add_table_row($t, array($title, get_string('stages', 'treasurehunt')), true, null, array(null, $roadusersprogress->totalstages + 1));
+                                $this->add_table_row(
+                                                        $t,
+                                                        array($title,
+                                                        get_string('stages', 'treasurehunt')),
+                                                        true,
+                                                        null,
+                                                        array(null, $roadusersprogress->totalstages + 1));
                                 $hasprogress = true;
                             }
                             $row = new html_table_row();

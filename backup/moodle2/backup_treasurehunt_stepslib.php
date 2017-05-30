@@ -72,7 +72,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $tracks = new backup_nested_element('tracks');
         $track = new backup_nested_element('track', array('stageid', 'userid', 'timestamp'), array('location'));
 
-        // Build the tree
+        // Build the tree.
         $treasurehunt->add_child($roads);
         $roads->add_child($road);
 

@@ -24,7 +24,7 @@
  */
 require_once('../../config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-/** @var $DB database_manager Database.*/
+// @var $DB database_manager Database.
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);

@@ -327,7 +327,7 @@ $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una a
 $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún grupo/agrupación: {$a}, '
         . 'por lo que no son capaces de jugar la actividad.';
 
-// Initial tour help
+// Initial tour help.
 $string['addroad_tour'] = 'Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
 $string['addstage_tour'] = 'Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';
 $string['editend_tour'] = '¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';

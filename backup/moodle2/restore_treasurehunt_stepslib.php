@@ -59,11 +59,8 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
      */
     protected function process_treasurehunt($data) {
         global $DB;
-
-        $data = (object) $data;
-        
+        $data = (object) $data; 
         $data->course = $this->get_courseid();
-
         $data->timecreated = $this->apply_date_offset($data->timecreated);
         $data->timemodified = $this->apply_date_offset($data->timemodified);
 

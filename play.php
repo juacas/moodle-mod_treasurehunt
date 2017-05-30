@@ -36,7 +36,7 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:play', $context, null, false);
 
-/* TODO : Create event for game started.
+/* TODO: Create event for game started.
  * $event = \mod_treasurehunt\event\course_module_viewed::create(array(
   'objectid' => $PAGE->cm->instance,
   'context' => $PAGE->context,
