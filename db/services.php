@@ -30,7 +30,7 @@ $services = array(
             'mod_treasurehunt_delete_road', 'mod_treasurehunt_renew_lock',
             'mod_treasurehunt_user_progress'), // Web service functions of this service.
         'requiredcapability' => '', // If set, the web service user need this capability to access .
-        // Any function of this service. For example: 'some/capability:specified'.  
+        // Any function of this service. For example: 'some/capability:specified'.
         'restrictedusers' => 0, // If enabled, the Moodle administrator must link some user to this service.
         // Into the administration.
         'enabled' => true, // If enabled, the service can be reachable on a default installation.

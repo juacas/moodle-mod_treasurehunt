@@ -120,9 +120,9 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
-
+    // Name of the form you defined in file above.
     $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions,
-                                    'completionactivities' => $completionactivities)); // Name of the form you defined in file above.
+                                    'completionactivities' => $completionactivities));
 
     if ($mform->is_reloaded()) {
         // Ignore this event. Some data may be changes.
@@ -138,12 +138,12 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);
-        $stage->cluetext = '';          // Updated later
-        $stage->cluetextformat = FORMAT_HTML; // Updated later
-        $stage->cluetexttrust = 0;           // Updated later
-        $stage->questiontext = '';          // Updated later
-        $stage->questiontextformat = FORMAT_HTML; // Updated later
-        $stage->questiontexttrust = 0;           // Updated later
+        $stage->cluetext = '';          // Updated later.
+        $stage->cluetextformat = FORMAT_HTML;  // Updated later.
+        $stage->cluetexttrust = 0;            // Updated later.
+        $stage->questiontext = '';           // Updated later.
+        $stage->questiontextformat = FORMAT_HTML;  // Updated later.
+        $stage->questiontexttrust = 0;            // Updated later.
 
         if (empty($stage->id)) {
             $stage->timecreated = $timenow;
@@ -159,7 +159,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
         // save and relink embedded images and save attachments
-        $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context, 'mod_treasurehunt', 'cluetext', $stage->id);
+        $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context,
+                                                'mod_treasurehunt', 'cluetext', $stage->id);
         // Store the updated value values.
         if ($stage->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
