@@ -8,7 +8,7 @@
   border: 1px solid #cccccc;
   bottom: 12px;
   left: -50px;
-  min-width: 210px;
+  /*min-width: 220px;*/
 }
 .ol-popup:after, .ol-popup:before {
   top: 100%;
@@ -38,5 +38,5 @@
   right: 8px;
 }
 .ol-popup-closer:after {
-  content: "✖";
+  content: "X";
 }

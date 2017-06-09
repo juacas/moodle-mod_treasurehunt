@@ -407,7 +407,6 @@ define(
 																			.getElementById("stagelistpanel")
 																}) ])
 							});
-
 					function showpopup(evt) {
 						var coordinate = evt.coordinate;
 						var latlon = ol.proj.toLonLat(coordinate, map.getView()
@@ -418,10 +417,11 @@ define(
 								+ ','
 								+ latlon[0]
 								+ '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" /></a>';
-						content.innerHTML = '<code>' + pegman + '' + hdms
-								+ '</code>';
+						content.innerHTML = '<code>' + pegman + ''
+								+ hdms + '</code>';
 						overlay.setPosition(coordinate);
 					}
+
 					map.on('click', function(evt) {
 						showpopup(evt);
 					});
