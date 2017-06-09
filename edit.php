@@ -80,11 +80,13 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
+    $PAGE->requires->css('/mod/treasurehunt/css/ol-popup.css');
+    
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
     print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
-
+/** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Conditions to show the intro can change to look for own settings or whatever.
@@ -103,6 +105,10 @@ echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
 echo $OUTPUT->container_end();
+echo '<div id="popup" class="ol-popup">
+<a href="#" id="popup-closer" class="ol-popup-closer"></a>
+<div id="popup-content"></div>
+</div>';
 
 // Finish the page.
 echo $OUTPUT->footer();
