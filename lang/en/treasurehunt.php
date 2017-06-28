@@ -26,9 +26,9 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['activitytoend'] = 'Complete selected activity before';
-$string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed. '
-        . 'For the activities of the course to be displayed in the list it must be enabled the completion activity in '
-        . 'Moodle\'s configuration, in the course and the activity itself.';
+$string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed.
+For the activities of the course to be displayed in the list it must be enabled the completion activity in
+Moodle\'s configuration, in the course and the activity itself.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'You must complete first the activity to solve';
 $string['actnotavailableyet'] = 'The activity is not available yet';
@@ -40,11 +40,11 @@ $string['addsimplequestion_help'] = 'Adds a simple question before displaying th
 $string['aerialmap'] = 'Aerial';
 $string['aerialview'] = 'Aerial';
 $string['allowattemptsfromdate'] = 'Allow attempts from';
-$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. '
-        . 'If disabled, students will be able to start play right away.';
+$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. 
+If disabled, students will be able to start play right away.';
 $string['alwaysshowdescription'] = 'Always show description';
-$string['alwaysshowdescription_help'] = 'If disabled, the Treasure hunt Description above will only become visible to students '
-        . 'at the "Allow attempts from" date.';
+$string['alwaysshowdescription_help'] = 'If disabled, the Treasure hunt Description above will only become visible to students
+at the "Allow attempts from" date.';
 $string['answerwarning'] = 'You must first answer the question';
 $string['areyousure'] = 'Are you sure?';
 $string['attempt'] = 'Attempt';
@@ -58,8 +58,8 @@ $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
-$string['configintro'] = 'The values you set here define the default values that are used in the settings form when you '
-        . 'create a new treasure hunt.';
+$string['configintro'] = 'The values you set here define the default values that are used in the settings form when you
+create a new treasure hunt.';
 $string['configmaximumgrade'] = 'The default grade that the treasure hunt grade is scaled to be out of.';
 $string['confirm'] = 'Confirm';
 $string['confirmdeletestage'] = 'The stage was successfully removed';
@@ -104,9 +104,9 @@ $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
-$string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another. '
-        . 'The larger, less update requests should be made, but more time passes to report a possible change. '
-        . 'It must be greater than 0 seconds, but the time will be set by default.';
+$string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
+The larger, less update requests should be made, but more time passes to report a possible change.
+It must be greater than 0 seconds, but the time will be set by default.';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
 $string['grade_explaination_fromposition'] = '{$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} stages in position {$a->position}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
@@ -150,24 +150,24 @@ just by the number of stages solved.</UL>';
 $string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation'] = 'Penalty for failure in location';
-$string['gradepenlocation_help'] = 'Penalization is expressed in % of the grade. '
-        . 'Per example, if penalization is 5.4, a player with 3 failures will penalize '
-        . 'his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the rest of the criteria.';
+$string['gradepenlocation_help'] = 'Penalization is expressed in % of the grade.
+Per example, if penalization is 5.4, a player with 3 failures will penalize
+his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the rest of the criteria.';
 $string['gradesdeleted'] = 'Treasure hunt grades deleted';
 $string['gradingsummary'] = 'Grading summary';
 $string['group'] = 'Group';
 $string['groupactivityovercome'] = 'Activity to end successfully completed by {$a->user} for stage {$a->position} on the date: {$a->date}';
 $string['groupid'] = 'Group assigned to the road';
-$string['groupid_help'] = 'Users in this group are assigned to this road when the game starts. '
-        . 'If there is only one road and the selected option is "none", all participants in the activity will play for it';
+$string['groupid_help'] = 'Users in this group are assigned to this road when the game starts.
+If there is only one road and the selected option is "none", all participants in the activity will play for it';
 $string['groupingid'] = 'Grouping assigned to the road';
 $string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
 $string['groupinvalidroad'] = '{$a} has assigned an invalid road.';
 $string['grouplocationfailed'] = 'Failed location by {$a->user} of stage {$a->position} on the date: {$a->date}';
 $string['grouplocationovercome'] = 'Succesful location by {$a->user} of stage {$a->position} on the date: {$a->date}';
 $string['groupmode'] = 'Students play in groups';
-$string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups. '
-        . 'A group game will be shared among group members and they will see the changes in the game.';
+$string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups.
+A group game will be shared among group members and they will see the changes in the game.';
 $string['groupmultipleroads'] = '{$a} has more than one road assigned.';
 $string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
 $string['groupquestionovercome'] = 'Succesful answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
@@ -186,13 +186,13 @@ $string['layers'] = 'Layers';
 $string['loading'] = 'Loading';
 $string['lockedclue'] = 'Locked clue';
 $string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
-$string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following '
-        . 'question to unlock the clue';
+$string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following
+question to unlock the clue';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
-$string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock. '
-        . 'The larger, fewer requests for renewal lock must be made, but more time is locked the edit page once the user has finished. '
-        . 'It must be greater than 5 seconds, but the time will be set by default.';
+$string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock.
+The larger, fewer requests for renewal lock must be made, but more time is locked the edit page once the user has finished.
+It must be greater than 5 seconds, but the time will be set by default.';
 $string['mapview'] = 'Map view';
 $string['modify'] = 'Modify';
 $string['modulename'] = 'Treasure Hunt';
@@ -229,14 +229,14 @@ $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['play'] = 'Play';
 $string['playstagewithoutmoving'] = 'Discover stage without moving';
-$string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place. '
-        . 'To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
-        . 'if any, indicating the last desired point. Upon completion of the stage, the game will change to the default '
-        . 'settings of the activity';
+$string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place.
+To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
+if any, indicating the last desired point. Upon completion of the stage, the game will change to the default
+settings of the activity';
 $string['playwithoutmoving'] = 'Playing without moving';
-$string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to '
-        . 'places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous '
-        . 'if any, indicating the last desired point.';
+$string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to
+places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
+if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
 $string['question'] = 'Question';
@@ -264,8 +264,8 @@ $string['sendlotacioncontent'] = 'This action can not be undone.';
 $string['sendlotaciontitle'] = 'Are you sure you want to send this location?';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
-$string['stageclue_help'] = 'Here you should describe the clue to reach the next location. '
-        . 'In case it is the last stage, must leave a feedback message indicating that the treasure hunt has ended.';
+$string['stageclue_help'] = 'Here you should describe the clue to reach the next location.
+In case it is the last stage, must leave a feedback message indicating that the treasure hunt has ended.';
 $string['stagename'] = 'Stage\'s name';
 $string['stageovercome'] = 'Stage overcome';
 $string['stages'] = 'Stages';
@@ -311,11 +311,11 @@ $string['userprogress'] = 'User progress successfully updated';
 $string['userquestionfailed'] = 'Failed answer to the question of stage {$a->position} on the date: {$a->date}';
 $string['userquestionovercome'] = 'Succesful answer to the question of stage {$a->position} on the date: {$a->date}';
 $string['usersprogress'] = 'Progress users';
-$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors: '
-        . '<P>The color <B> green </B> indicates that the stage has been overcome without failures.</P>'
-        . '<P>The color <B> yellow </B> indicates that the stage has been oavercome with failures.</P>'
-        . '<P>The color <B> red </B> indicates that the stage has not been overcome and failures have been made.</P>'
-        . '<P>The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.</P>';
+$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:
+<P>The color <B> green </B> indicates that the stage has been overcome without failures.</P>
+<P>The color <B> yellow </B> indicates that the stage has been oavercome with failures.</P>
+<P>The color <B> red </B> indicates that the stage has not been overcome and failures have been made.</P>
+<P>The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.</P>';
 $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['warmatchanswer'] = 'The answer does not match the question';
