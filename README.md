@@ -26,6 +26,6 @@ See also
 =========
 
  - [Moodle plugins entry page](http://moodle.org/plugins/view.php?plugin=mod_treasurehunt)
- - [Moodle.org forum discussion thread](To be created)
+ - [Moodle.org forum discussion thread](https://moodle.org/mod/forum/discuss.php?d=354875)
 
 (c) 2016 onwards. EDUVALab. University of Valladolid.
