@@ -12,7 +12,30 @@ var v=null;
 
 var vidhtml = '<video width="320px" id="qr_viewport" autoplay></video>';
 
-
+function enableForm() {
+	$('#id_generateQR')
+			.click(
+					function() {
+						unloadQR();
+						var val = $('#id_qrtext').val();
+						if (val != '') {
+							var qrurl = 'https://chart.googleapis.com/chart?cht=qr&chs=500x500&chl='
+									+ $('#id_qrtext').val();
+							$('#outdiv').prepend($('<img>', {
+								id : 'theQRImg',
+								src : qrurl,
+								width : '150px',
+								align : 'left'
+							}))
+						}
+					});
+	$('#id_scanQR').click(function() {
+		loadQR(function(value) {
+			$('#id_qrtext').val(value);
+			unloadQR();
+		})
+	});
+}
 
 function initCanvas(w,h)
 {
@@ -91,6 +114,7 @@ function unloadQR(){
 }
 function loadQR(callback)
 {
+	stype=0;
 	if(isCanvasSupported() && window.File && window.FileReader)
 	{
 		initCanvas(800, 600);

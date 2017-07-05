@@ -75,6 +75,19 @@ class stage_form extends moodleform {
         $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), array('size' => '64'));
         $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
         $mform->setType('qrtext', PARAM_RAW);
+        // QR reader area.
+        $mform->addElement('html',' <div  id="previewQR">
+                <div align="center" width="300px" height="300px" id="outdiv">
+			        </div>
+		        </div>
+		        <canvas id="qr-canvas" style="display:none;"> </canvas>');
+        $buttonarray=array();
+        $buttonarray[] = $mform->createElement('button', 'scanQR','Scan QRCode');
+        $buttonarray[] = $mform->createElement('button', 'generateQR','Generate a QRCode');
+        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
+        $mform->closeHeaderBefore('buttonar');
+        
+       
         
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));

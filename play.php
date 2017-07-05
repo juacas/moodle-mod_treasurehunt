@@ -82,7 +82,6 @@ $PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js',false);
 $PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js',false);
 $PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js',false);
 $PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js',false);
-
 // End QR.
 $user = new stdClass();
 $user->id = $USER->id;

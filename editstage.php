@@ -53,7 +53,28 @@ if (!empty($roadid)) {
 $PAGE->set_url($url);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
-
+// Support for QR scan.
+$PAGE->requires->js('/mod/treasurehunt/js/qr/grid.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/version.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/detector.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/formatinf.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/bitmat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/datablock.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/bmparser.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/datamask.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/rsdecoder.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256poly.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/decoder.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/qrcode.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/findpat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js',false);
+$PAGE->requires->jquery();
+$PAGE->requires->js_init_call('enableForm');
+// End QR.
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;

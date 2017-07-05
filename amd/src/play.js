@@ -325,7 +325,7 @@ define(['jquery',
                      * @param {string} qrtext submits a text scanned from a QRCode
                      * @returns {undefined}
                      */
-                    function renew_source(location, initialize, selectedanswerid, qrtext='') {
+                    function renew_source(location, initialize, selectedanswerid, qrtext) {
                         // var position holds the potition to be evaluated. undef if no evaluation requested
                         var position;
                         var currentposition;
