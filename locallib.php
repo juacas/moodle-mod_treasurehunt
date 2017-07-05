@@ -667,7 +667,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
         $attempt->userid = $userid;
         $attempt->groupid = $groupid;
         $attempt->success = $success;
-        $attempt->type = $inside?'location':'qr';
+        $attempt->type = $qrguessed?'qr':'location';
         $attempt->activitysolved = $activitysolved;
         $attempt->questionsolved = $questionsolved;
         $attempt->geometrysolved = $inside||$qrguessed;

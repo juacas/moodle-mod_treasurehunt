@@ -595,7 +595,3 @@
     width: 270px;
     background-color: black;
 }
-/* Loader for jquerymobile*/
-.ui-icon-loading {
-    background: url(pix/ajax-loader.gif) !important;
-}

@@ -25,11 +25,12 @@ $confirm = optional_param('confirm', false, PARAM_BOOL);
 
 $PAGE->set_url('/mod/trasurehunt/clearhunt.php');
 
-// Do not autologin guest..
-require_login(null, false);
-$context = context_user::instance($USER->id);
-$PAGE->set_context($context);
+
+
+
 list ($course, $cm) = get_course_and_cm_from_cmid(required_param('id', PARAM_INTEGER), 'treasurehunt');
+$context = context_module::instance($cm->id);
+require_login($course, true, $cm);
 $treasurehuntid = $cm->instance;
 $return = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
 
