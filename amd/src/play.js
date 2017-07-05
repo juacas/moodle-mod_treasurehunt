@@ -22,7 +22,7 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery',
-	'core/url',
+    'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
@@ -35,22 +35,22 @@ define(['jquery',
                         lastattempttimestamp,
                         lastroadtimestamp, gameupdatetime, tracking, user) {
                     var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
-                        failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
-                        markerurl = url.imageUrl('my_location', 'treasurehunt'),
-                        openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
-                        lastsuccessfulstage = {},
-                        interval,
-                        imgloaded = 0,
-                        totalimg = 0,
-                        infomsgs = [],
-                        attemptshistory = [],
-                        changesinattemptshistory = false,
-                        changesinlastsuccessfulstage = false,
-                        changesinquestionstage = false,
-                        fitmap = false,
-                        roadfinished = false,
-                        available = true,
-                        qoaremoved = false;
+                            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
+                            markerurl = url.imageUrl('my_location', 'treasurehunt'),
+                            openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
+                            lastsuccessfulstage = {},
+                            interval,
+                            imgloaded = 0,
+                            totalimg = 0,
+                            infomsgs = [],
+                            attemptshistory = [],
+                            changesinattemptshistory = false,
+                            changesinlastsuccessfulstage = false,
+                            changesinquestionstage = false,
+                            fitmap = false,
+                            roadfinished = false,
+                            available = true,
+                            qoaremoved = false;
                     /*-------------------------------Styles-----------------------------------*/
                     var text = new ol.style.Text({
                         textAlign: 'center',
@@ -230,7 +230,7 @@ define(['jquery',
                     if (tracking && user) {
                         var tracklayergroup = viewgpx.addgpxlayer(map, cmid, treasurehuntid, strings, user, "trackgroup");
                         tracklayergroup.set("name", tracklayergroup.get("title"));
-                        
+
                         var tracklayer = tracklayergroup.getLayers().item(0);
                         var htmltitle = tracklayer.get("title"); // Has a picture and a link.
                         var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);
@@ -330,7 +330,7 @@ define(['jquery',
                         var position;
                         var currentposition;
                         var coordinates;
-                        
+
                         if (playwithoutmoving) {
                             coordinates = markerFeature.getGeometry();
                         } else {
@@ -344,8 +344,8 @@ define(['jquery',
                         }
                         if (selectedanswerid) {
                             $.mobile.loading("show");
-                            var answerid = selectedanswerid; 
-                        } 
+                            var answerid = selectedanswerid;
+                        }
                         if (location) {
                             position = currentposition;
                             $.mobile.loading("show");
@@ -363,7 +363,7 @@ define(['jquery',
                                         currentposition: (tracking && !playwithoutmoving) ? currentposition : undefined, // only for tracking in mobility.
                                         selectedanswerid: answerid,
                                         qoaremoved: qoaremoved,
-                                        qrtext:qrtext}
+                                        qrtext: qrtext}
                                 }
                             }]);
                         geojson[0].done(function (response) {
@@ -378,10 +378,10 @@ define(['jquery',
                                     toast(response.status.msg);
                                 }
                             }
-                            if (response.qrexpected){
-                            	$('#validateqr').show();
-                            }else{
-                            	$('#validateqr').hide();
+                            if (response.qrexpected) {
+                                $('#validateqr').show();
+                            } else {
+                                $('#validateqr').hide();
                             }
                             // Si cambia el modo de juego (movil o estatico)
                             if (playwithoutmoving != response.playwithoutmoving) {
@@ -524,7 +524,7 @@ define(['jquery',
                                         + answer.id + '">' +
                                         '<label for="' + id + '">' + answer.answertext + '</label>');
                                 counter++;
-                            });                           
+                            });
                             $('#questionform').enhanceWithin().controlgroup("refresh");
                             changesinquestionstage = false;
                         }
@@ -754,11 +754,11 @@ define(['jquery',
                         $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
                     });
                     // Remove the popup after it has been closed to manage DOM size.
-//                    $(document).on("popupafterclose", ".ui-popup:not(#popupdialog) not(#QRdialog)", function () {
-//                        $(this).remove();
-//                        select.getFeatures().clear();
-//                    });
-                    
+                    $(document).on("popupafterclose", ".ui-popup:not(#QRdialog)", function () {
+                        $(this).remove();
+                        select.getFeatures().clear();
+                    });
+
                     $(document).on("click", "#acceptupdates", function () {
                         infomsgs = [];
                     });
@@ -857,27 +857,27 @@ define(['jquery',
                         $("#infopanel .ui-panel-inner").niceScroll();
 
                         $("#QRdialog").popup({
-                        	beforeposition: function(event,ui){
-		                        		loadQR(qrReaded);
-		                        		$(this).css({
-		                                    width: window.innerWidth-20,
-		                                    height: 400,
-		                                    top: 0,
-		                                    left: 0
-		                                });
-		                        		},
-                        	afterclose: function(event,ui){
-                        				unloadQR();
-                        				}
-                        		});
+                            beforeposition: function (event, ui) {
+                                loadQR(qrReaded);
+                                $(this).css({
+                                    width: window.innerWidth - 20,
+                                    height: 400,
+                                    top: 0,
+                                    left: 0
+                                });
+                            },
+                            afterclose: function (event, ui) {
+                                unloadQR();
+                            }
+                        });
                     }
-                  
+
                     // Scan QR.
-                    function qrReaded(value){
-                    	close_popup($('#QRdialog'));
-                    	console.log(value);
-                    	toast("QR code readed: "+value);
-                    	renew_source(false, false,null,value);
+                    function qrReaded(value) {
+                        close_popup($('#QRdialog'));
+                        console.log(value);
+                        toast("QR code readed: " + value);
+                        renew_source(false, false, null, value);
                     }
                     /*-------------------------------Help functions -------------*/
                     function toast(msg) {
@@ -965,8 +965,8 @@ define(['jquery',
                         }
 
                     }
-                    function close_popup(popup){
-                    	popup.popup("close")
+                    function close_popup(popup) {
+                        popup.popup("close")
                     }
                     function get_block_text(title, body) {
                         return '<div class="ui-bar ui-bar-a">' + title +
