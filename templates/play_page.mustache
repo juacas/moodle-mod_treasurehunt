@@ -39,6 +39,7 @@
     }                                                                                                                               
                                                                                                                                     
 }}
+
 <div class="ui-loader ui-corner-all ui-body-b ui-loader-verbose" id="loader" style="display:block">
     <span class="ui-icon-loading"></span>
     <h1>{{#str}} loading, mod_treasurehunt{{/str}}</h1>
@@ -96,9 +97,28 @@
 
         </div>
 
+        {{!Popup for QR scanner}}
 
-
-
+		<div data-role="popup" id="QRdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+	        <div data-role="header" data-theme="b">
+			    <h1>SCAN QR</h1>
+		    </div>
+            <div role="content" class="ui-content ui-overlay-b">
+			    <div  id="previewQR">
+			        <div width="300px" height="300px" id="outdiv">
+			        </div>
+		        </div>
+		        <canvas id="qr-canvas" style="display:none;"> </canvas>
+				<fieldset class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
+                            {{#str}} cancel, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>   
+                </fieldset>		    
+            </div>
+		</div>
+ 
         {{!Popup de aviso de envio}}
 
         <div data-role="popup" id="popupdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
@@ -159,6 +179,10 @@
                class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validatelocation">
                 {{#str}} validatelocation, mod_treasurehunt{{/str}}
             </a>
+            <a href="#QRdialog" data-rel="popup" data-position-to="window" data-transition="none" 
+               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validateqr">
+                {{#str}} validateqr, mod_treasurehunt{{/str}}
+            </a>
             <a href="#questionpage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment" id="question_button">
                                         {{#str}}question, mod_treasurehunt{{/str}}
             </a>
@@ -174,6 +198,7 @@
             <div id="navigation"></div>
         </div>
         {{!Fin de Cabecera y barra de herramientas.}}
+        
     </div>
     {{! end mappage }}
     {{!Pagina de capas.}}
@@ -225,6 +250,7 @@
                 </div>
             </fieldset>
         </div>
+        
     </div>
     {{!Fin de pagina de reponder pregunta.}}
     {{#js}}

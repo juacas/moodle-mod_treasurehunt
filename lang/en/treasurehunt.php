@@ -233,6 +233,9 @@ $string['playstagewithoutmoving_help'] = 'If this option is enabled, students ca
 To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
 if any, indicating the last desired point. Upon completion of the stage, the game will change to the default
 settings of the activity';
+$string['playstagewithqr'] = 'Discover stage by reading this QR text';
+$string['playstagewithqr_help'] = 'If this option has a value, students can discover this stage by scanning a QR code available at that location.';
+
 $string['playwithoutmoving'] = 'Playing without moving';
 $string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to
 places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
@@ -318,6 +321,7 @@ $string['usersprogress_help'] = 'Indicates the progress of the stages of each st
 <P>The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.</P>';
 $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
 $string['validatelocation'] = 'Validate location';
+$string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';
 $string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';

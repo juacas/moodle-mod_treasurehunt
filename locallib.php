@@ -51,7 +51,27 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 
 // Load classes needed for GeoJSON library.
 spl_autoload_register(array('GeoJSON', 'autoload'));
-
+/**
+ * @param Geometry $geom
+ */
+function treasurehunt_geometry_centroid(Geometry $geom){
+    $coords = [];
+    $geomarray = $geom->getCoordinates();
+    foreach ($geomarray as $polys){
+        foreach ($polys as $line){
+            foreach ($line as $point){
+                $coords[]=$point;
+            }
+        }
+    }
+    $sumx=0;
+    $sumy=0;
+    foreach ($coords as $coord){
+        $sumx+=$coord[0];
+        $sumy+=$coord[1];
+    }
+    return new Point($sumx/count($coords), $sumy/count($coords));
+}
 /**
  * Serialize geometries into a WKT string.
  *
@@ -120,6 +140,9 @@ function treasurehunt_get_nice_duration($durationinseconds) {
  * @return Feature|FeatureCollection The PHP equivalent object.
  */
 function treasurehunt_geojson_to_object($array) {
+    if ($array===null){
+        return null;
+    }
     $geojson = new GeoJSON();
     return $geojson->loadArray($array);
 }
@@ -576,6 +599,7 @@ function treasurehunt_get_play_mode($userid, $groupid, $roadid, $treasurehunt) {
 
 /**
  * Checks if the point sent by the user or the group is within the geometry of the corresponding stage.
+ * Also checks the qrtext param.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
  *
  * @param int $userid The identifier of user.
@@ -587,14 +611,13 @@ function treasurehunt_get_play_mode($userid, $groupid, $roadid, $treasurehunt) {
  * @param int $nostages The total number of stages in the road.
  * @return stdClass The control parameters.
  */
-function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $context, $treasurehunt, $nostages) {
+function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $qrtext, $context, $treasurehunt, $nostages) {
     global $DB;
     $return = new stdClass();
     $return->update = '';
     $return->roadfinished = false;
     $return->success = false;
-
-    $locationwkt = treasurehunt_geometry_to_wkt($point);
+    
     // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
     $currentstage = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid);
     if ($currentstage->success || !$currentstage) {
@@ -606,9 +629,12 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
         }
         $nextstage = $DB->get_record('treasurehunt_stages',
                 array('position' => $nextnostage, 'roadid' => $roadid), '*', MUST_EXIST);
-        $inside = treasurehunt_check_point_in_multipolygon(treasurehunt_wkt_to_object($nextstage->geom), $point);
-        // If point is within stage geometry.
-        if ($inside) {
+        // Check qrtext or location
+        $nextstagegeom = treasurehunt_wkt_to_object($nextstage->geom);
+        $inside = $point==null?false:treasurehunt_check_point_in_multipolygon($nextstagegeom, $point);
+        $qrguessed = $qrtext==''?false:$nextstage->qrtext === $qrtext;
+        // If point is within stage geometry or qrguessed.
+        if ($inside || $qrguessed ) {
             $questionsolved = ($nextstage->questiontext === '' ? true : false);
             $activitysolved = (treasurehunt_check_activity_completion($nextstage->activitytoend) == 0 ? true : false);
             if ($questionsolved && $activitysolved) {
@@ -627,6 +653,13 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
             $return->msg = get_string('faillocation', 'treasurehunt');
             $return->newstage = false;
         }
+        if ($inside){
+            $locationgeom=$point;
+        } else if ($qrguessed){
+            $locationgeom = treasurehunt_geometry_centroid($nextstagegeom);
+        } else {
+            $locationgeom = $point;
+        }
         // Create the attempt.
         $attempt = new stdClass();
         $attempt->stageid = $nextstage->id;
@@ -634,12 +667,13 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
         $attempt->userid = $userid;
         $attempt->groupid = $groupid;
         $attempt->success = $success;
-        $attempt->type = 'location';
+        $attempt->type = $inside?'location':'qr';
         $attempt->activitysolved = $activitysolved;
         $attempt->questionsolved = $questionsolved;
-        $attempt->geometrysolved = $inside;
-        $attempt->location = $locationwkt;
+        $attempt->geometrysolved = $inside||$qrguessed;
+        $attempt->location = treasurehunt_geometry_to_wkt($locationgeom);
         $attempt->penalty = $penalty;
+      
         treasurehunt_insert_attempt($attempt, $context);
         // If the attempt succeeds the location and there is an activity to overcome, it is checked if it is exceeded.
         if ($inside && !$activitysolved) {
@@ -691,9 +725,9 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $c
         }
     }
     // Track user's position.
-    if ($treasurehunt->tracking) {
+    if ($treasurehunt->tracking && $point!=null) {
         $currentworkingstage = $nextstage ? $nextstage : $currentstage;
-        treasurehunt_track_user($userid, $treasurehunt, $currentworkingstage->id, time(), $locationwkt);
+        treasurehunt_track_user($userid, $treasurehunt, $currentworkingstage->id, time(), treasurehunt_geometry_to_wkt($point));
     }
     return $return;
 }
@@ -777,7 +811,7 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         }
         $attr = array('roadid' => intval($feature->roadid),
             'stageposition' => intval($feature->position),
-            'name' => $feature->name,
+            'name' => isset($feature->name)?$feature->name:'',
             'treasurehuntid' => $treasurehuntid,
             'clue' => $cluetext);
         if (property_exists($feature, 'geometrysolved') && property_exists($feature, 'success')) {

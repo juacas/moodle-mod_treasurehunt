@@ -235,6 +235,9 @@ $string['playstagewithoutmoving_help'] = 'Si esta opción se habilita, los alumn
 que desplazarse. Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, 
 borrando la anterior si existiese, indicando el último punto deseado. Al completar la etapa, el juego cambiará 
 a la configuración por defecto de la actividad';
+$string['playstagewithqr'] = 'Descubrir etapa escaneando este QR';
+$string['playstagewithqr_help'] = 'Si se rellena, los estudiantes pueden descubrir esta etapa escaneando este QR.';
+
 $string['playwithoutmoving'] = 'Jugar sin desplazarse';
 $string['playwithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán jugar sin desplazarse a los lugares. 
 Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca, 
@@ -321,6 +324,7 @@ $string['usersprogress_help'] = 'Indica el progreso de las etapas de cada alumno
 <P>El color <B>gris</B> indica que la etapa no se ha superado y no se han cometido fallos.</P>';
 $string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->date}';
 $string['validatelocation'] = 'Validar ubicación';
+$string['validateqr'] = 'Escanea QR';
 $string['warmatchanswer'] = 'La respuesta no corresponde con la pregunta';
 $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un grupo: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una agrupación: {$a}, por lo que no son capaces de jugar la actividad.';

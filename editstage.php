@@ -63,13 +63,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
-        $sql = 'SELECT id,name,cluetext,cluetextformat,cluetexttrust,'
-                . 'activitytoend,roadid,questiontext,questiontextformat,'
-                . 'questiontexttrust,playstagewithoutmoving FROM {treasurehunt_stages}  WHERE id=?';
-        $params = array($id);
-        if (!$stage = $DB->get_record_sql($sql, $params)) {
-            print_error('invalidentry');
-        }
+
+        $stage = $DB->get_record('treasurehunt_stages', ['id'=>$id],'*',MUST_EXIST);
         // Si existe la pregunta recojo las respuestas.
         if ($stage->questiontext !== '') {
             // Hago que se muestre la pregunta.

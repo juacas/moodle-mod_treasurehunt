@@ -71,7 +71,11 @@ class stage_form extends moodleform {
 
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
-
+        
+        $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), array('size' => '64'));
+        $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
+        $mform->setType('qrtext', PARAM_RAW);
+        
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));
         // Add restrict access completion activity.

@@ -55,7 +55,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $stage = new backup_nested_element('stage', array('id'), array(
             'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
             'timecreated', 'timemodified', 'playstagewithoutmoving', 'activitytoend', 'questiontext',
-            'questiontextformat', 'questiontexttrust', 'geom'));
+            'questiontextformat', 'questiontexttrust', 'qrtext', 'geom'));
 
         $answers = new backup_nested_element('answers');
 

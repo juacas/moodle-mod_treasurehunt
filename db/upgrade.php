@@ -53,5 +53,19 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $dbman->create_table($table);
         upgrade_mod_savepoint(true, 2017042000, 'treasurehunt');
     }
+    if ($oldversion < 2017070100) {
+        
+        // Define field qrtext to be added to treasurehunt_stages.
+        $table = new xmldb_table('treasurehunt_stages');
+        $field = new xmldb_field('qrtext', XMLDB_TYPE_TEXT, null, null, null, null, null, 'questiontexttrust');
+        
+        // Conditionally launch add field qrtext.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2017070100, 'treasurehunt');
+    }
     return true;
 }

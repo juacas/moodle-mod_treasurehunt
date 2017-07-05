@@ -52,4 +52,12 @@
 		<licenseversion>2013</licenseversion>
 		<!-- jquery.nicescroll 3.2.0 InuYaksa*2013 MIT http://areaaperta.com/nicescroll -->
 	</library>
+	<library>
+		<location>js/webqr.js</location>
+		<name>QRCODE reader</name>
+		<version>1.0.0</version>
+		<license>APACHE</license>
+		<licenseversion>2</licenseversion>
+		<!--   Copyright 2011 Lazar Laszlo (lazarsoft@gmail.com, www.lazarsoft.info) -->
+	</library>
 </libraries>

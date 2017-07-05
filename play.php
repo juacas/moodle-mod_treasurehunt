@@ -8,27 +8,28 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ *
+ * @package mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro
+ *            <jpdecastro@tel.uva.es>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace treasurehunt with the name of your module and remove this line.
-
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once($CFG->libdir . '/formslib.php');
+require_once (dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once ("$CFG->dirroot/mod/treasurehunt/locallib.php");
+require_once ($CFG->libdir . '/formslib.php');
 
 global $USER;
 
 $id = required_param('id', PARAM_INT);
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
@@ -36,14 +37,16 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:play', $context, null, false);
 
-/* TODO: Create event for game started.
+/*
+ * TODO: Create event for game started.
  * $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-  'objectid' => $PAGE->cm->instance,
-  'context' => $PAGE->context,
-  ));
-  $event->add_record_snapshot('course', $PAGE->course);
-  $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
-  $event->trigger(); */
+ * 'objectid' => $PAGE->cm->instance,
+ * 'context' => $PAGE->context,
+ * ));
+ * $event->add_record_snapshot('course', $PAGE->course);
+ * $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
+ * $event->trigger();
+ */
 
 // Print the page header.
 $PAGE->set_url('/mod/treasurehunt/play.php', array('id' => $cm->id));
@@ -58,19 +61,37 @@ $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
-
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
+// Support for QR scan.
+$PAGE->requires->js('/mod/treasurehunt/js/qr/grid.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/version.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/detector.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/formatinf.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/bitmat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/datablock.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/bmparser.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/datamask.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/rsdecoder.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256poly.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/decoder.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/qrcode.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/findpat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js',false);
+$PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js',false);
+
+// End QR.
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
 $user->pic = $output->user_picture($USER);
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', array(
-    treasurehunt_get_strings_play(),
-    $cm->id, $cm->instance,
-    intval($treasurehunt->playwithoutmoving),
-    intval($treasurehunt->groupmode),
-    $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime, $treasurehunt->tracking, $user));
+$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', 
+        array(treasurehunt_get_strings_play(), $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving), 
+                        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime, 
+                        $treasurehunt->tracking, $user));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');

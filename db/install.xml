@@ -63,6 +63,7 @@
                 <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question to be answered before the clue show"/>
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="qrtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Text to be readed by a QR scanner."/>
                 <FIELD NAME="geom" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep stage geometry"/>                
             </FIELDS>
             <KEYS>

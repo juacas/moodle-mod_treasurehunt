@@ -21,7 +21,8 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/url',
+define(['jquery',
+	'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
@@ -321,13 +322,15 @@ define(['jquery', 'core/url',
                      * @param {boolean} location requests a location validation
                      * @param {boolean} initialize
                      * @param {int} selectedanswerid submits an answer to a question
+                     * @param {string} qrtext submits a text scanned from a QRCode
                      * @returns {undefined}
                      */
-                    function renew_source(location, initialize, selectedanswerid) {
+                    function renew_source(location, initialize, selectedanswerid, qrtext='') {
                         // var position holds the potition to be evaluated. undef if no evaluation requested
                         var position;
                         var currentposition;
                         var coordinates;
+                        
                         if (playwithoutmoving) {
                             coordinates = markerFeature.getGeometry();
                         } else {
@@ -341,7 +344,8 @@ define(['jquery', 'core/url',
                         }
                         if (selectedanswerid) {
                             $.mobile.loading("show");
-                        }
+                            var answerid = selectedanswerid; 
+                        } 
                         if (location) {
                             position = currentposition;
                             $.mobile.loading("show");
@@ -357,8 +361,9 @@ define(['jquery', 'core/url',
                                         initialize: initialize,
                                         location: position,
                                         currentposition: (tracking && !playwithoutmoving) ? currentposition : undefined, // only for tracking in mobility.
-                                        selectedanswerid: selectedanswerid,
-                                        qoaremoved: qoaremoved}
+                                        selectedanswerid: answerid,
+                                        qoaremoved: qoaremoved,
+                                        qrtext:qrtext}
                                 }
                             }]);
                         geojson[0].done(function (response) {
@@ -372,6 +377,11 @@ define(['jquery', 'core/url',
                                 if (response.status !== null && available) {
                                     toast(response.status.msg);
                                 }
+                            }
+                            if (response.qrexpected){
+                            	$('#validateqr').show();
+                            }else{
+                            	$('#validateqr').hide();
                             }
                             // Si cambia el modo de juego (movil o estatico)
                             if (playwithoutmoving != response.playwithoutmoving) {
@@ -514,7 +524,7 @@ define(['jquery', 'core/url',
                                         + answer.id + '">' +
                                         '<label for="' + id + '">' + answer.answertext + '</label>');
                                 counter++;
-                            });
+                            });                           
                             $('#questionform').enhanceWithin().controlgroup("refresh");
                             changesinquestionstage = false;
                         }
@@ -744,10 +754,11 @@ define(['jquery', 'core/url',
                         $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
                     });
                     // Remove the popup after it has been closed to manage DOM size.
-                    $(document).on("popupafterclose", ".ui-popup:not(#popupdialog)", function () {
-                        $(this).remove();
-                        select.getFeatures().clear();
-                    });
+//                    $(document).on("popupafterclose", ".ui-popup:not(#popupdialog) not(#QRdialog)", function () {
+//                        $(this).remove();
+//                        select.getFeatures().clear();
+//                    });
+                    
                     $(document).on("click", "#acceptupdates", function () {
                         infomsgs = [];
                     });
@@ -844,8 +855,30 @@ define(['jquery', 'core/url',
                         viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
                                 'maximum-scale=1.0, user-scalable=0,target-densitydpi=medium-dpi');
                         $("#infopanel .ui-panel-inner").niceScroll();
-                    }
 
+                        $("#QRdialog").popup({
+                        	beforeposition: function(event,ui){
+		                        		loadQR(qrReaded);
+		                        		$(this).css({
+		                                    width: window.innerWidth-20,
+		                                    height: 400,
+		                                    top: 0,
+		                                    left: 0
+		                                });
+		                        		},
+                        	afterclose: function(event,ui){
+                        				unloadQR();
+                        				}
+                        		});
+                    }
+                  
+                    // Scan QR.
+                    function qrReaded(value){
+                    	close_popup($('#QRdialog'));
+                    	console.log(value);
+                    	toast("QR code readed: "+value);
+                    	renew_source(false, false,null,value);
+                    }
                     /*-------------------------------Help functions -------------*/
                     function toast(msg) {
                         if ($(".toast").length > 0) {
@@ -931,6 +964,9 @@ define(['jquery', 'core/url',
                             $(popup).popup("open", {positionTo: "window"});
                         }
 
+                    }
+                    function close_popup(popup){
+                    	popup.popup("close")
                     }
                     function get_block_text(title, body) {
                         return '<div class="ui-bar ui-bar-a">' + title +

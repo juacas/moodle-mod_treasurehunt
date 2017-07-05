@@ -450,6 +450,7 @@ class mod_treasurehunt_external extends external_api {
                     'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
                     'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
                     'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
+                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned'),
                     'location' => new external_single_structure(
                             array(
                         'type' => new external_value(PARAM_TEXT, 'Geometry type'),
@@ -561,6 +562,7 @@ class mod_treasurehunt_external extends external_api {
                 'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
                 'available' => new external_value(PARAM_BOOL, 'If true the hunt is available.'),
                 'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
+                'qrexpected' => new external_value(PARAM_BOOL, 'If true the QRScanner can be used.'),
                 'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
                 'historicalattempts' => new external_multiple_structure(
                     new external_single_structure(
@@ -582,6 +584,7 @@ class mod_treasurehunt_external extends external_api {
         global $USER, $DB;
         $firststagegeom = null;
         $userattempts = null;
+        $qrmode = false;
         $params = self::validate_parameters(self::user_progress_parameters(),
                 array('userprogress' => $userprogress))['userprogress'];
         $treasurehuntid = $params['treasurehuntid'];
@@ -595,19 +598,20 @@ class mod_treasurehunt_external extends external_api {
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
         $nostages = treasurehunt_get_total_stages($userparams->roadid);
+        // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
+        $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid);
+        if ($currentstage) {
+            $nextnostage = min([$currentstage->position + 1, $nostages]);
+        } else {
+            $nextnostage = 1;
+        }
+        $currentworkingstage = $DB->get_record('treasurehunt_stages',
+                array('position' => $nextnostage, 'roadid' => $userparams->roadid), '*', MUST_EXIST);
         // Track path.
         if ($treasurehunt->tracking && isset($params['currentposition'])) {
             $location = treasurehunt_geojson_to_object($params['currentposition']);
             $locationwkt = treasurehunt_geometry_to_wkt($location);
-            // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
-            $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid);
-            if ($currentstage) {
-                $nextnostage = min([$currentstage->position + 1, $nostages]);
-            } else {
-                $nextnostage = 1;
-            }
-            $currentworkingstage = $DB->get_record('treasurehunt_stages',
-                    array('position' => $nextnostage, 'roadid' => $userparams->roadid), '*', MUST_EXIST);
+            
             treasurehunt_track_user($USER->id, $treasurehunt, $currentworkingstage->id, time(), $locationwkt);
         }
         // Check if the user has finished the road.
@@ -660,15 +664,24 @@ class mod_treasurehunt_external extends external_api {
                 $roadfinished = true;
             }
             $qoaremoved = $qocsolved->qoaremoved;
-
+           
             if (!$updates->geometrysolved
-                    && isset($params['location'])
+                    && (isset($params['location']) || $params['qrtext']!='')
                     && !$updateroad
                     && !$changesinplaymode
                     && !$changesingroupmode) {
-                $checklocation = treasurehunt_check_user_location($USER->id, $userparams->groupid,
-                                    $userparams->roadid, treasurehunt_geojson_to_object($params['location']),
-                                    $context, $treasurehunt, $nostages);
+                $qrtextparam =isset($params['qrtext'])?$params['qrtext']:null;
+                $locationparam =isset($params['location'])?treasurehunt_geojson_to_object($params['location']):null;
+                $checklocation = treasurehunt_check_user_location(
+                                    $USER->id,
+                                    $userparams->groupid,
+                                    $userparams->roadid,
+                                    $locationparam,
+                                    $qrtextparam,
+                                    $context,
+                                    $treasurehunt,
+                                    $nostages);
+                
                 if ($checklocation->newattempt) {
                     $updates->newattempttimestamp = $checklocation->attempttimestamp;
                     $updates->newgeometry = true;
@@ -685,6 +698,7 @@ class mod_treasurehunt_external extends external_api {
                 if ($checklocation->update !== '') {
                     $updates->strings[] = $checklocation->update;
                 }
+                
                 $status['msg'] = $checklocation->msg;
                 $status['code'] = 0;
             }
@@ -747,7 +761,9 @@ class mod_treasurehunt_external extends external_api {
                 $updates->strings[] = get_string('changetoplaywithoutmoving', 'treasurehunt');
             }
         }
-
+        if (!$updates->geometrysolved && $currentworkingstage->qrtext!=''){
+            $qrmode=true;
+        }
         $result = array();
         $result['infomsg'] = $updates->strings;
         $result['attempttimestamp'] = $updates->newattempttimestamp;
@@ -765,6 +781,7 @@ class mod_treasurehunt_external extends external_api {
         $result['roadfinished'] = $roadfinished;
         $result['available'] = $available->available;
         $result['playwithoutmoving'] = intval($playmode);
+        $result['qrexpected'] = intval($qrmode);
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['historicalattempts'] = $historicalattempts;
         $result['qoaremoved'] = $qoaremoved;

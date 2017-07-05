@@ -423,7 +423,9 @@ define(
 					}
 
 					map.on('click', function(evt) {
-						showpopup(evt);
+						if (!Draw.getActive() && !Modify.getActive()){
+							showpopup(evt);
+						}
 					});
 					layerSwitcher.showPanel();
 					// Creo el resizable.
@@ -1720,22 +1722,23 @@ define(
 								}
 
 							});
+					var editstatus = 'off';
 					$("input[name=controlpanel]:radio")
 							.on(
 									'click',
 									function() {
-										if ($(this).attr('previousValue') === 'true') {
-											$(this).attr('checked', false)
-													.button("refresh");
-										} else {
-											$("input[name=controlpanel]:radio")
-													.attr('previousValue',
-															false);
+										
+										var prevval = editstatus;
+										var value = $(this).val();
+										
+										if (value==prevval){
+											// Toggle.
+											$(this).prop('checked',value!=prevval).button("refresh");
+
+											value = 'off';
 										}
-										$(this).attr('previousValue',
-												$(this).is(':checked'));
-										var selected = $("input[type='radio'][name='controlpanel']:checked");
-										var value = selected.val();
+										editstatus = value;
+															
 										if (value === 'add') {
 											Draw.setActive(true);
 											Modify.setActive(false);
