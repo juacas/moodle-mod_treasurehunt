@@ -667,7 +667,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
         $attempt->userid = $userid;
         $attempt->groupid = $groupid;
         $attempt->success = $success;
-        $attempt->type = $qrguessed?'qr':'location';
+        $attempt->type = $qrtext!=null?'qr':'location';
         $attempt->activitysolved = $activitysolved;
         $attempt->questionsolved = $questionsolved;
         $attempt->geometrysolved = $inside||$qrguessed;
@@ -676,7 +676,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
       
         treasurehunt_insert_attempt($attempt, $context);
         // If the attempt succeeds the location and there is an activity to overcome, it is checked if it is exceeded.
-        if ($inside && !$activitysolved) {
+        if ($attempt->geometrysolved && !$activitysolved) {
             if ($usercompletion = treasurehunt_check_completion_activity($nextstage->activitytoend, $userid, $groupid, $context)) {
                 $attempt->type = 'activity';
                 $attempt->activitysolved = 1;
