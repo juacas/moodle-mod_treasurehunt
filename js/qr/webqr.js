@@ -55,6 +55,8 @@ function captureToCanvas() {
     if(gUM)
     {
         try{
+			initCanvas(v.videoWidth,v.videoHeight);
+			gCanvas = document.getElementById("qr-canvas");
             gCtx.drawImage(v,0,0);
             try{
                 qrcode.decode();
