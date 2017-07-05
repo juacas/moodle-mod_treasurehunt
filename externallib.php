@@ -450,7 +450,7 @@ class mod_treasurehunt_external extends external_api {
                     'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
                     'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
                     'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
-                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned'),
+                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned',VALUE_OPTIONAL),
                     'location' => new external_single_structure(
                             array(
                         'type' => new external_value(PARAM_TEXT, 'Geometry type'),
@@ -666,7 +666,7 @@ class mod_treasurehunt_external extends external_api {
             $qoaremoved = $qocsolved->qoaremoved;
            
             if (!$updates->geometrysolved
-                    && (isset($params['location']) || $params['qrtext']!='')
+                    && (isset($params['location']) || isset($params['qrtext']))
                     && !$updateroad
                     && !$changesinplaymode
                     && !$changesingroupmode) {
