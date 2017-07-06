@@ -121,6 +121,9 @@ function configureEditIntro(intro, strings, keys) {
             }
         ]
     });
+    intro.onexit(function (target) {
+        document.cookie = "introEditProgress = Done";
+    });
     intro.oncomplete(function (target) {
         document.cookie = "introEditProgress = Done";
     });
@@ -166,6 +169,9 @@ function configurePlayIntro(intro, strings, keys) {
                 position: 'floating'
             }
         ]
+    });
+    intro.onexit(function (target) {
+        document.cookie = "introPlayProgress = Done";
     });
     intro.oncomplete(function (target) {
         document.cookie = "introPlayProgress = Done";
