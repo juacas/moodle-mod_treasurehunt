@@ -754,7 +754,7 @@ define(['jquery',
                         $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
                     });
                     // Remove the popup after it has been closed to manage DOM size.
-                    $(document).on("popupafterclose", ".ui-popup:not(#QRdialog)", function () {
+                    $(document).on("popupafterclose", ".ui-popup:not(#QRdialog):not(#popupdialog)", function () {
                         $(this).remove();
                         select.getFeatures().clear();
                     });
