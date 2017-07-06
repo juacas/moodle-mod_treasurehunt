@@ -323,6 +323,11 @@ $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';
+$string['warnqrscanner'] = '<table><tr><td> This Treasurehunt includes {$a} stages with QRCodes.
+Please be sure your device can scan codes from the web browser.
+Test it in <a href="https://webqr.com">this website</a> and try to read a qrcode
+like this.</td><td> <a href="pix/qr.png">
+ <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
 $string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';

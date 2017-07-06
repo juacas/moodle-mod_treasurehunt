@@ -289,6 +289,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
+        // Warn about the use of QR scanner.
+        if ($info->numqrs>0){
+            $warnqr = get_string('warnqrscanner','treasurehunt',$info->numqrs);
+            $o .= $this->output->notification($warnqr) . "\n";
+        } 
         // Type of geolocation: GPS or Desktop.
         if ($info->treasurehunt->playwithoutmoving) {
             $gamemode = get_string('playwithoutmoving', 'treasurehunt');

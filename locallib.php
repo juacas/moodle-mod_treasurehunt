@@ -1840,7 +1840,10 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
     // Get roads.
     $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid, $roads);
+    list($select,$params) = $DB->get_in_or_equal(array_keys($roads));
+    $select ="roadid $select and qrtext <> ''";
+    $hasqr = $DB->count_records_select('treasurehunt_stages',$select,$params,'count(qrtext)');
+    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid, $roads,$hasqr);
     return $output->render($renderable);
 }
 
