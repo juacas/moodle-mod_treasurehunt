@@ -330,10 +330,10 @@ $string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->
 $string['validatelocation'] = 'Validar ubicación';
 $string['validateqr'] = 'Escanea QR';
 $string['warmatchanswer'] = 'La respuesta no corresponde con la pregunta';
-$string['warnqrscanner'] = '<table><tr><td> Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
+$string['warnqrscanner'] = '<table><tr><td> Esta Caza del Tesoro tiene {$a} etapas que pueden necesitar escanear códigos QR.
 Comprueba que tu dispositivo puede escanear códigos QR desde el navegador Web.
 La imagen de tu cámara debería aparecer más abajo; intenta leer con ella un código como
-este.</td><td><a href="pix/qr.png"><img align="top" src="pix/qr.png" width="100"></a></td></tr></table>';
+éste.</td><td><a href="pix/qr.png"><img align="top" src="pix/qr.png" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
 Parece que ya has pasado una prueba de escaneo y puedes usar este dispositivo para esa parte.';
 $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un grupo: {$a}, por lo que no son capaces de jugar la actividad.';
