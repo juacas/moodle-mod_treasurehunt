@@ -67,7 +67,7 @@ $PAGE->set_pagelayout('standard');
  */
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
-
+$PAGE->requires->jquery();
 $output = $PAGE->get_renderer('mod_treasurehunt');
 echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
@@ -78,7 +78,6 @@ if (treasurehunt_view_intro($treasurehunt)) {
 }
 
 $viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
-
 echo treasurehunt_view_info($treasurehunt, $course->id);
 if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > $treasurehunt->allowattemptsfromdate
         && $userid == $USER->id && $groupid == -1) || (has_capability('mod/treasurehunt:play', $context, $userid, false)

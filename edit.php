@@ -81,7 +81,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol-popup.css');
-    
+
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
     print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));

@@ -450,7 +450,7 @@ class mod_treasurehunt_external extends external_api {
                     'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
                     'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
                     'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
-                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned',VALUE_OPTIONAL),
+                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned', VALUE_OPTIONAL),
                     'location' => new external_single_structure(
                             array(
                         'type' => new external_value(PARAM_TEXT, 'Geometry type'),
@@ -611,7 +611,7 @@ class mod_treasurehunt_external extends external_api {
         if ($treasurehunt->tracking && isset($params['currentposition'])) {
             $location = treasurehunt_geojson_to_object($params['currentposition']);
             $locationwkt = treasurehunt_geometry_to_wkt($location);
-            
+
             treasurehunt_track_user($USER->id, $treasurehunt, $currentworkingstage->id, time(), $locationwkt);
         }
         // Check if the user has finished the road.
@@ -664,14 +664,14 @@ class mod_treasurehunt_external extends external_api {
                 $roadfinished = true;
             }
             $qoaremoved = $qocsolved->qoaremoved;
-           
+
             if (!$updates->geometrysolved
                     && (isset($params['location']) || isset($params['qrtext']))
                     && !$updateroad
                     && !$changesinplaymode
                     && !$changesingroupmode) {
-                $qrtextparam =isset($params['qrtext'])?$params['qrtext']:null;
-                $locationparam =isset($params['location'])?treasurehunt_geojson_to_object($params['location']):null;
+                $qrtextparam = isset($params['qrtext']) ? $params['qrtext'] : null;
+                $locationparam = isset($params['location']) ? treasurehunt_geojson_to_object($params['location']) : null;
                 $checklocation = treasurehunt_check_user_location(
                                     $USER->id,
                                     $userparams->groupid,
@@ -681,7 +681,7 @@ class mod_treasurehunt_external extends external_api {
                                     $context,
                                     $treasurehunt,
                                     $nostages);
-                
+
                 if ($checklocation->newattempt) {
                     $updates->newattempttimestamp = $checklocation->attempttimestamp;
                     $updates->newgeometry = true;
@@ -698,7 +698,7 @@ class mod_treasurehunt_external extends external_api {
                 if ($checklocation->update !== '') {
                     $updates->strings[] = $checklocation->update;
                 }
-                
+
                 $status['msg'] = $checklocation->msg;
                 $status['code'] = 0;
             }
@@ -761,8 +761,8 @@ class mod_treasurehunt_external extends external_api {
                 $updates->strings[] = get_string('changetoplaywithoutmoving', 'treasurehunt');
             }
         }
-        if (!$updates->geometrysolved && $currentworkingstage->qrtext!=''){
-            $qrmode=true;
+        if (!$updates->geometrysolved && $currentworkingstage->qrtext != '') {
+            $qrmode = true;
         }
         $result = array();
         $result['infomsg'] = $updates->strings;

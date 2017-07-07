@@ -68,9 +68,8 @@ class treasurehunt_info implements renderable {
 
     /**
      * constructor
-     *
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads,$numqrs) {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs) {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;

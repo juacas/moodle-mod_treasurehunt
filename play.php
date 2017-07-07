@@ -22,9 +22,9 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 // Replace treasurehunt with the name of your module and remove this line.
-require_once (dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once ("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once ($CFG->libdir . '/formslib.php');
+require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
+require_once($CFG->libdir . '/formslib.php');
 
 global $USER;
 
@@ -61,35 +61,19 @@ $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
+$PAGE->requires->jquery();
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Support for QR scan.
-$PAGE->requires->js('/mod/treasurehunt/js/qr/grid.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/version.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/detector.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/formatinf.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/bitmat.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/datablock.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/bmparser.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/datamask.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/rsdecoder.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256poly.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/gf256.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/decoder.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/qrcode.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/findpat.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js',false);
-$PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js',false);
+treasurehunt_qr_support($PAGE);
 // End QR.
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
 $user->pic = $output->user_picture($USER);
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt', 
-        array(treasurehunt_get_strings_play(), $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving), 
-                        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime, 
+$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
+        array(treasurehunt_get_strings_play(), $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
+                        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
                         $treasurehunt->tracking, $user));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 

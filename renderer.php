@@ -290,10 +290,21 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
         }
         // Warn about the use of QR scanner.
-        if ($info->numqrs>0){
-            $warnqr = get_string('warnqrscanner','treasurehunt',$info->numqrs);
+        if ($info->numqrs > 0) {
+            global $PAGE;
+            $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
+            treasurehunt_qr_support($PAGE, 'enableTest', $params);
+            $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
+            $o .= '<div id="QRStatusDiv">';
             $o .= $this->output->notification($warnqr) . "\n";
-        } 
+            $o .= '<div  id="previewQR">
+                <div id="QRvalue"></div>
+                <div align="center" width="100px" height="100px" id="outdiv">
+			        </div>
+		     </div>
+		     <canvas id="qr-canvas" style="display:none;"> </canvas>';
+            $o .= '</div>';
+        }
         // Type of geolocation: GPS or Desktop.
         if ($info->treasurehunt->playwithoutmoving) {
             $gamemode = get_string('playwithoutmoving', 'treasurehunt');

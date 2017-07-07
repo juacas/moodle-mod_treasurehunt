@@ -11,7 +11,23 @@ var moz=false;
 var v=null;
 
 var vidhtml = '<video width="320px" id="qr_viewport" autoplay></video>';
-
+function enableTest(Y,successString){
+	 var cook = {};
+     document.cookie.split(';').forEach(function (x) {
+         var arr = x.split('=');
+         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
+     });
+     if (cook["QRScanPassed"] != 'Done') {
+		loadQR(function (value){
+			
+    	 document.cookie = "QRScanPassed = Done";
+    	 unloadQR();
+    	 $('#QRStatusDiv').html(successString);	        
+		});
+     } else {
+    	$('#QRStatusDiv').html(successString);
+     }
+}
 function enableForm() {
 	$('#id_generateQR')
 			.click(

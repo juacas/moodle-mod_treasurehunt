@@ -40,7 +40,7 @@ $string['addsimplequestion_help'] = 'Adds a simple question before displaying th
 $string['aerialmap'] = 'Aerial';
 $string['aerialview'] = 'Aerial';
 $string['allowattemptsfromdate'] = 'Allow attempts from';
-$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date. 
+$string['allowattemptsfromdate_help'] = 'If enabled, students will not be able to play before this date.
 If disabled, students will be able to start play right away.';
 $string['alwaysshowdescription'] = 'Always show description';
 $string['alwaysshowdescription_help'] = 'If disabled, the Treasure hunt Description above will only become visible to students
@@ -129,23 +129,23 @@ being 100% when a road is completely solved, and 0% when no stage is solved.</UL
 <P>The hunter who ends the road in less time wins the hunt and marks the best time.
 The time is measured from the moment in which the starting stage of the road is unlocked.
 This means that the participants can play at different moments.
-The grade is calculated by interpolating the finishing time being 50% the end time of the hunt 
-and 100% the best finishing time. The players that did not finish the 
+The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
+and 100% the best finishing time. The players that did not finish the
 hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
 
 <P><B>Grade from finishing time</B><P>
 <UL>
 <P>The hunter who ends first is the winner of the hunt.
 It is assumed that every hunter plays simultaneously.
-The grade is calculated by interpolating the finishing time being 50% the end time of the hunt 
-and 100% the best finishing time. The players that did not finish the 
+The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
+and 100% the best finishing time. The players that did not finish the
 hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
 
 <P><B>Grade from position</B><P>
 <UL>
-<P>The score is calculated by interpolating the position in the ranking, 
-being 100% the score for the first player and 50% for the last player. 
-The players that did not finish the hunt receive a grade under 50% calculated 
+<P>The score is calculated by interpolating the position in the ranking,
+being 100% the score for the first player and 50% for the last player.
+The players that did not finish the hunt receive a grade under 50% calculated
 just by the number of stages solved.</UL>';
 $string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
@@ -259,6 +259,8 @@ $string['roadview'] = 'Road';
 $string['save'] = 'Save';
 $string['saveemptyridle'] = 'All modified stages must have geometry before saving';
 $string['savewarning'] = 'You have not saved changes.';
+$string['scanQR_scanbutton'] = 'Scan QRCode';
+$string['scanQR_generatebutton'] = 'Generate a QRCode';
 $string['search'] = 'Search';
 $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
@@ -324,10 +326,11 @@ $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';
 $string['warnqrscanner'] = '<table><tr><td> This Treasurehunt includes {$a} stages with QRCodes.
-Please be sure your device can scan codes from the web browser.
-Test it in <a href="https://webqr.com">this website</a> and try to read a qrcode
+Please be sure your device can scan codes from the web browser. A view of your cam should be appeared bellow. Try to read any qrcode
 like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
+$string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
+It seems that you have passed a QR test with this device.';
 $string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';

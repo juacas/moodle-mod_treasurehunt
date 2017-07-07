@@ -71,24 +71,22 @@ class stage_form extends moodleform {
 
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
-        
+
         $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), array('size' => '64'));
         $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
         $mform->setType('qrtext', PARAM_RAW);
         // QR reader area.
-        $mform->addElement('html',' <div  id="previewQR">
+        $mform->addElement('html', '<div  id="previewQR">
                 <div align="center" width="300px" height="300px" id="outdiv">
 			        </div>
 		        </div>
 		        <canvas id="qr-canvas" style="display:none;"> </canvas>');
-        $buttonarray=array();
-        $buttonarray[] = $mform->createElement('button', 'scanQR','Scan QRCode');
-        $buttonarray[] = $mform->createElement('button', 'generateQR','Generate a QRCode');
+        $buttonarray = array();
+        $buttonarray[] = $mform->createElement('button', 'scanQR', get_string('scanQR_scanbutton', 'treasurehunt'));
+        $buttonarray[] = $mform->createElement('button', 'generateQR', get_string('scanQR_generatebutton', 'treasurehunt'));
         $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
         $mform->closeHeaderBefore('buttonar');
-        
-       
-        
+
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));
         // Add restrict access completion activity.

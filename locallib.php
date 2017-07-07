@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -807,7 +806,8 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
     foreach ($features as $feature) {
         $geometry = treasurehunt_wkt_to_object($feature->geometry);
         if (isset($feature->cluetext)) {
-            $cluetext = file_rewrite_pluginfile_urls($feature->cluetext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'cluetext', $feature->stageid ? $feature->stageid : $feature->id);
+            $cluetext = file_rewrite_pluginfile_urls($feature->cluetext, 'pluginfile.php', $context->id, 'mod_treasurehunt',
+                    'cluetext', $feature->stageid ? $feature->stageid : $feature->id);
         } else {
             $cluetext = null;
         }
@@ -1271,8 +1271,9 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
 
         // Check if there are participants in more than one group in the same road.
         foreach ($totalparticipantsgroups as $group) {
-            list($totalparticipants,
-                    $duplicateusersingroups) = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups, false);
+            list($totalparticipants, $duplicateusersingroups) = treasurehunt_get_all_users_has_multiple_groups_or_roads(
+                    $totalparticipants, get_enrolled_users($context, 'mod/treasurehunt:play', $group->id), $duplicateusersingroups,
+                    false);
         }
     } else {
         // Individual mode.
@@ -1653,9 +1654,10 @@ function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nos
         $lastsuccessfulstage->position = intval($attempt->position);
         $lastsuccessfulstage->activitysolved = intval($attempt->activitysolved);
         if (!$attempt->questionsolved) {
-            // Get the questions and answers.
+                // Get the questions and answers.
             $lastsuccessfulstage->answers = treasurehunt_get_stage_answers($attempt->stageid, $context);
-            $lastsuccessfulstage->question = file_rewrite_pluginfile_urls($attempt->questiontext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'questiontext', $attempt->stageid);
+            $lastsuccessfulstage->question = file_rewrite_pluginfile_urls($attempt->questiontext, 'pluginfile.php', $context->id,
+                    'mod_treasurehunt', 'questiontext', $attempt->stageid);
         }
     } else {
         $lastsuccessfulstage->id = 0;
@@ -1826,7 +1828,34 @@ function treasurehunt_clear_activities($treasurehuntid) {
     };
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehuntid]);
 }
-
+/**
+ * Initialices the javascript needed to use QRScanner
+ * @param moodle_page $PAGE
+ * @param string global function name to initialice the code.
+ */
+function treasurehunt_qr_support($PAGE, $initfunction = '', $params = null) {
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/grid.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/version.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/detector.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/formatinf.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/bitmat.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/datablock.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/bmparser.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/datamask.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/rsdecoder.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/gf256poly.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/gf256.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/decoder.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/qrcode.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/findpat.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js', false);
+    $PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js', false);
+    if ($initfunction) {
+        $PAGE->requires->js_init_call($initfunction, $params);
+    }
+}
 /**
  * Gets the HTML view format of the information displayed on the main screen.
  *
@@ -1840,10 +1869,10 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
     // Get roads.
     $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    list($select,$params) = $DB->get_in_or_equal(array_keys($roads));
-    $select ="roadid $select and qrtext <> ''";
-    $hasqr = $DB->count_records_select('treasurehunt_stages',$select,$params,'count(qrtext)');
-    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid, $roads,$hasqr);
+    list($select, $params) = $DB->get_in_or_equal(array_keys($roads));
+    $select = "roadid $select and qrtext <> ''";
+    $hasqr = $DB->count_records_select('treasurehunt_stages', $select, $params, 'count(qrtext)');
+    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid, $roads, $hasqr);
     return $output->render($renderable);
 }
 
@@ -1907,7 +1936,8 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
     $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings, $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission, $availablegroups);
+    $renderable = new treasurehunt_users_progress($roads, $cm->groupmode, $cm->id, $duplicategroupsingroupings,
+            $duplicateusersingroups, $unassignedusers, $viewpermission, $managepermission, $availablegroups);
     return $output->render($renderable);
 }
 
@@ -2126,7 +2156,7 @@ SQL;
     INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
 where at.success=1 AND
     ri.position=(select max(rid.position) from {treasurehunt_stages} rid
-                 where 
+                 where
                     rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid
                     AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
                 (SELECT min(at.timecreated) from {treasurehunt_attempts} at
@@ -2198,7 +2228,7 @@ SQL;
         {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri
         ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON
         ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND
-        at.type='location' AND at.penalty=1 AND $groupidwithin) as 
+        at.type='location' AND at.penalty=1 AND $groupidwithin) as
         nolocationsfailed,
         (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN
         {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
@@ -2255,8 +2285,8 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
         $grade->userid = $student->id;
         $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
-            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation) +
-                    ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
+            $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation)
+                    + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
             $msgparams = (object) [
                         'grademax' => $treasurehunt->grade,
                         'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
