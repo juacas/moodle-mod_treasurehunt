@@ -31,7 +31,7 @@ class GeoJSON {
         $i = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__)));
         foreach ($i as $file) {
             if ($className === basename($file->getFileName(), '.class.php')) {
-                require_once $file->getPathName();
+                require_once($file->getPathName());
             }
         }
     }

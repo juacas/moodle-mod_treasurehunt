@@ -8,23 +8,25 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 
 /**
  * Upgrade script for the treasurehunt module.
  *
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro
+ *            <jpdecastro@tel.uva.es>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
 /**
  * Execute treasurehunt upgrade from the given old version
+ *
  * @global moodle_database $DB
  * @param int $oldversion
  * @return bool
@@ -54,16 +56,16 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2017042000, 'treasurehunt');
     }
     if ($oldversion < 2017070100) {
-        
+
         // Define field qrtext to be added to treasurehunt_stages.
         $table = new xmldb_table('treasurehunt_stages');
         $field = new xmldb_field('qrtext', XMLDB_TYPE_TEXT, null, null, null, null, null, 'questiontexttrust');
-        
+
         // Conditionally launch add field qrtext.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        
+
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2017070100, 'treasurehunt');
     }

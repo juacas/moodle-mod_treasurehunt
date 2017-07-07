@@ -1,4 +1,6 @@
 <?php
+
+
 /*
  * This file is part of the GeoJSON package.
  * (c) Camptocamp <info@camptocamp.com>
@@ -10,28 +12,24 @@
 /**
  * LineString : a LineString geometry.
  *
- * @package    GeoJSON
+ * @package GeoJSON
  * @subpackage Geometry
- * @author     Camptocamp <info@camptocamp.com>
+ * @author Camptocamp <info@camptocamp.com>
  */
-class LinearRing extends LineString
-{
-  protected $geom_type = 'LinearRing';
+class LinearRing extends LineString {
 
-  /**
-   * Constructor
-   *
-   * @param array $positions The Point array
-   */
-  public function __construct(array $positions)
-  {
-    if (count($positions) > 1)
-    {
-      parent::__construct($positions);
+    protected $geom_type = 'LinearRing';
+
+    /**
+     * Constructor
+     *
+     * @param array $positions The Point array
+     */
+    public function __construct(array $positions) {
+        if (count($positions) > 1) {
+            parent::__construct($positions);
+        } else {
+            throw new Exception("Linestring with less than two points");
+        }
     }
-    else
-    {
-      throw new Exception("Linestring with less than two points");
-    }
-  }
 }
