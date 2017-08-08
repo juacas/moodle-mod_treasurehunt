@@ -888,10 +888,10 @@ function treasurehunt_get_hunt_duration($cmid, $userid, $groupid) {
     list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
     $sql = <<<SQL
 select (max(a.timecreated)-min(a.timecreated)) as duration,
-        max(a.timecreated) as last, min(a.timecreated) as first from mdl_treasurehunt_attempts a
-left join mdl_treasurehunt_stages s on (a.stageid=s.id)
-left join mdl_treasurehunt_roads r on (r.id=s.roadid)
-left join mdl_treasurehunt t on (r.treasurehuntid = t.id)
+        max(a.timecreated) as last, min(a.timecreated) as first from {treasurehunt_attempts} a
+left join {treasurehunt_stages} s on (a.stageid=s.id)
+left join {treasurehunt_roads} r on (r.id=s.roadid)
+left join {treasurehunt} t on (r.treasurehuntid = t.id)
 where t.id=?
 SQL;
     $params = [$cm->instance];
@@ -1805,10 +1805,10 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
 function treasurehunt_get_all_attempts($treasurehuntid) {
     global $DB;
     $query = <<< 'SQL'
-select a.*, r.id as roadid, t.id as treasurehuntid from mdl_treasurehunt_attempts a
-    left join mdl_treasurehunt_stages s on (s.id = a.stageid)
-    left join mdl_treasurehunt_roads r on (r.id = s.roadid)
-    left join mdl_treasurehunt t on (t.id = r.treasurehuntid) where t.id = ?
+select a.*, r.id as roadid, t.id as treasurehuntid from {treasurehunt_attempts} a
+    left join {treasurehunt_stages} s on (s.id = a.stageid)
+    left join {treasurehunt_roads} r on (r.id = s.roadid)
+    left join {treasurehunt} t on (t.id = r.treasurehuntid) where t.id = ?
 SQL;
     $params = [$treasurehuntid];
     $results = $DB->get_records_sql($query, $params);
