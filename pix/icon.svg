@@ -9,13 +9,16 @@
    xmlns="http://www.w3.org/2000/svg"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="9.5249996mm"
-   height="9.5249996mm"
-   viewBox="0 0 9.5249996 9.5249996"
+   width="47.624996mm"
+   height="47.624996mm"
+   viewBox="0 0 47.624996 47.624996"
    version="1.1"
    id="svg8"
    inkscape:version="0.92.1 r15371"
-   sodipodi:docname="iconx.svg">
+   sodipodi:docname="icon.svg"
+   inkscape:export-filename="D:\desarrollo\workspaces\PHP\moodle-mod_treasurehunt\pix\icon.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
   <defs
      id="defs2" />
   <sodipodi:namedview
@@ -25,16 +28,16 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="3.6203867"
-     inkscape:cx="-3.8901231"
-     inkscape:cy="-75.881431"
+     inkscape:zoom="1.28"
+     inkscape:cx="-136.27645"
+     inkscape:cy="6.4012909"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
      inkscape:window-width="1536"
      inkscape:window-height="801"
-     inkscape:window-x="-8"
-     inkscape:window-y="170"
+     inkscape:window-x="1528"
+     inkscape:window-y="207"
      inkscape:window-maximized="1" />
   <metadata
      id="metadata5">
@@ -44,7 +47,7 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title></dc:title>
+        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -52,13 +55,13 @@
      inkscape:label="Layer 1"
      inkscape:groupmode="layer"
      id="layer1"
-     transform="translate(-93.464062,-144.11808)">
+     transform="translate(-74.414062,-125.06808)">
     <g
        id="g3714"
-       transform="matrix(0.26458333,0,0,0.26458333,91.876562,142.53058)">
+       transform="matrix(1.3229166,0,0,1.3229166,66.476562,117.13058)">
       <polygon
          id="polygon3680"
-         points="42,25 6,25 9,18 6,13 42,13 39,18 "
+         points="6,13 42,13 39,18 42,25 6,25 9,18 "
          style="fill:#4e342e" />
       <path
          id="path3682"
@@ -77,7 +80,7 @@
          style="fill:#ffab00" />
       <polygon
          id="polygon3688"
-         points="6,13 42,13 39,18 9,18 "
+         points="9,18 6,13 42,13 39,18 "
          style="fill:#212121" />
       <path
          id="path3690"
