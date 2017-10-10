@@ -694,7 +694,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
                 treasurehunt_insert_attempt($attempt, $context);
                 // If it has already exceeded the location attempt is inserted.
                 if ($questionsolved) {
-                    $attempt->type = 'location';
+                    $attempt->type = isset($qrtext) ? 'qr' : 'location';
                     // To follow a chronological order.
                     $attempt->timecreated += 1;
                     treasurehunt_insert_attempt($attempt, $context);
@@ -1982,7 +1982,7 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             } else {
                 return get_string('userquestionfailed', 'treasurehunt', $attempt);
             }
-        } else if ($attempt->type === 'location') { // If it is an attempt at a location.
+        } else if ($attempt->type === 'location' || $attempt->type === 'qr') { // If it is an attempt at a location.
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('userlocationovercome', 'treasurehunt', $attempt);
