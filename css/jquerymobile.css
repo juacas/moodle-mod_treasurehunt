@@ -1008,7 +1008,7 @@ html .ui-bar-a .ui-btn:visited,
 html .ui-body-a .ui-btn:visited,
 html body .ui-group-theme-a .ui-btn:visited,
 html head + body .ui-btn.ui-btn-a:visited {
-    background-color:             #f6f6f6 /*{a-bup-background-color}*/;
+    background-color:             #f6f6f6 !important /*{a-bup-background-color}*/;
     border-color:             #ddd /*{a-bup-border}*/;
     color:                     #333 /*{a-bup-color}*/;
     text-shadow: 0 /*{a-bup-shadow-x}*/ 1px /*{a-bup-shadow-y}*/ 0 /*{a-bup-shadow-radius}*/ #f3f3f3 /*{a-bup-shadow-color}*/;
@@ -1487,6 +1487,7 @@ div.ui-mobile-viewport {
     overflow: visible;
     overflow-x: hidden;
     padding: 1em;
+    background-color: rgba(0,0,0,0) !important;
 }
 /* Corner styling for dialogs and popups */
 .ui-corner-all > .ui-header:first-child,
