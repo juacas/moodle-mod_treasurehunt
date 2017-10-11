@@ -993,7 +993,7 @@ function treasurehunt_is_valid_road($roadid) {
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param stdClass $context The context object.
- * @return bool True/false.
+ * @return int|bool userid that meets the completion/false if nobody in the group has completed.
  */
 function treasurehunt_check_completion_activity($cmid, $userid, $groupid, $context) {
     global $COURSE;
@@ -1016,7 +1016,7 @@ function treasurehunt_check_completion_activity($cmid, $userid, $groupid, $conte
         // Check if a user has complete that activity.
         $completioninfo = new completion_info($COURSE);
         $current = $completioninfo->get_data($cmactivitytoend, false, $user->id);
-        if ($current->completionstate == 1) {
+        if ($current->completionstate !== 0) {
             return $user->id;
         }
     }
