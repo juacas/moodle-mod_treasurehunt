@@ -71,10 +71,11 @@ $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
 $user->pic = $output->user_picture($USER);
+$custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
-        array(treasurehunt_get_strings_play(), $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
+        array( $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
                         intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
-                        $treasurehunt->tracking, $user));
+                        $treasurehunt->tracking, $user, $custommapping));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');

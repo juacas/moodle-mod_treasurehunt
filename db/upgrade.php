@@ -56,7 +56,6 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2017042000, 'treasurehunt');
     }
     if ($oldversion < 2017070100) {
-
         // Define field qrtext to be added to treasurehunt_stages.
         $table = new xmldb_table('treasurehunt_stages');
         $field = new xmldb_field('qrtext', XMLDB_TYPE_TEXT, null, null, null, null, null, 'questiontexttrust');
@@ -69,5 +68,17 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2017070100, 'treasurehunt');
     }
+    if ($oldversion < 2017101904) {
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('custommapconfig', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'tracking');
+
+        // Conditionally launch add field custombbox.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2017101904, 'treasurehunt');
+    }
+
     return true;
 }

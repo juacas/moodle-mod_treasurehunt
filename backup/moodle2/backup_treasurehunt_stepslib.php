@@ -43,7 +43,8 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $treasurehunt = new backup_nested_element('treasurehunt', array('id'), array(
             'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmoving',
             'groupmode', 'alwaysshowdescription', 'allowattemptsfromdate',
-            'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer'));
+            'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer', 'tracking', 'custommapconfig'));
+        $treasurehunt->annotate_files('mod_treasurehunt', 'custombackground', null); // This file areas haven't itemid
 
         $roads = new backup_nested_element('roads');
 

@@ -168,7 +168,30 @@ function treasurehunt_check_point_in_multipolygon($mpolygon, $point) {
     }
     return false;
 }
-
+/**
+ *
+ * @param unknown $treasurehunt
+ */
+function treasurehunt_get_custommappingconfig($treasurehunt, $context) {
+    if (!isset($treasurehunt->custommapconfig)) {
+        return null;
+    }
+    $custommapconfig = json_decode($treasurehunt->custommapconfig);
+    $custommapconfig->bbox = array_map(function ($item) {
+                                return floatval($item);
+    }, $custommapconfig->bbox);
+    $fs = get_file_storage();
+    $files = $fs->get_area_files($context->id, 'mod_treasurehunt', 'custombackground', 0, 'sortorder DESC, id ASC', false, 0, 0, 1);
+    $file = reset($files);
+    if ($file) {
+        $path = '/'.$context->id.'/mod_treasurehunt/custombackground/0/' . $file->get_filename();
+        $moodleurl = new moodle_url('/pluginfile.php' . $path);
+        $custommapconfig->custombackgroundurl = $moodleurl->out();
+    } else {
+        $custommapconfig = null;
+    }
+    return $custommapconfig;
+}
 /**
  * @return array int => lang string the options for calculating the treasure hunt grade
  *      from the individual attempt grades.
@@ -856,7 +879,28 @@ function treasurehunt_get_name_and_clue($attempt, $context) {
     }
     return $return;
 }
+/**
+ *
+ * @param unknown $data
+ */
+function treasurehunt_set_custombackground($data) {
+    global $DB;
+    $fs = get_file_storage();
+    $cmid = $data->coursemodule;
+    $draftitemid = $data->custombackground;
 
+    $context = context_module::instance($cmid);
+    if ($draftitemid) {
+        $options = array('subdirs' => false, 'embed' => false);
+        file_save_draft_area_files($draftitemid, $context->id, 'mod_treasurehunt', 'custombackground', 0, $options);
+    }
+    $files = $fs->get_area_files($context->id, 'mod_treasurehunt', 'custombackground', 0, 'sortorder', false);
+    if (count($files) == 1) {
+        // Only one file attached, set it as main file automatically.
+        $file = reset($files);
+        file_set_sortorder($context->id, 'mod_treasurehunt', 'custombackground', 0, $file->get_filepath(), $file->get_filename(), 1);
+    }
+}
 /**
  * Set a grade to a user or group for a given treasure hunt instance.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
@@ -1307,30 +1351,6 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
     return array($roads, $duplicategroupsingroupings, $duplicateusersingroups, $unassignedusers, $grouplist);
 }
 
-/**
- * Get all the strings used in the JavaScript of the game screen
- *
- * @return array The strings
- */
-function treasurehunt_get_strings_play() {
-
-    return get_strings(array("stageovercome", "failedlocation", "stagename",
-        "stageclue", "question", "noanswerselected", "timeexceeded",
-        "searching", "continue", "noattempts", "aerialview", "roadview"
-        , "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-        "huntcompleted", "discoveredlocation", "answerwarning", "error"), "mod_treasurehunt");
-}
-
-/**
- * Get all the strings used in the JavaScript of the edit screen
- *
- * @return array The strings
- */
-function treasurehunt_get_strings_edit() {
-    return get_strings(array('stage', 'road', 'aerialmap', 'roadmap', 'basemaps', 'add', 'modify', 'save',
-        'remove', 'searchlocation', 'savewarning', 'removewarning',
-        'areyousure', 'removeroadwarning', 'confirm', 'cancel'), 'mod_treasurehunt');
-}
 
 /**
  * Get all the strings used in the JavaScript of the track viewer screen

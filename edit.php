@@ -74,8 +74,10 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
+    $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
-                                array($id, $treasurehunt->id, treasurehunt_get_strings_edit(), $roadid, $lockid));
+                                array($id, $treasurehunt->id, $roadid, $lockid,
+                                $custommapping ));
     $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');

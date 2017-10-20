@@ -117,6 +117,46 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setDefault('gradepenanswer', $treasurehuntconfig->penaltyanswer);
         $mform->addRule('gradepenanswer', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('gradepenanswer', 'grade[modgrade_type]', 'neq', 'point');
+
+        // Custom background.
+        $mform->addElement('header', 'custommaps', get_string('custommapping', 'treasurehunt'));
+        $mform->setExpanded('custommaps', false);
+        $mform->addElement('filemanager', 'custombackground',  get_string('custommapimagefile', 'treasurehunt'), null,
+                            array('subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
+                                'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL));
+        $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
+
+        $layertypes = ['base' => get_string('custommapbaselayer', 'treasurehunt'),
+                        'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
+                        'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt') ];
+        $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
+        $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
+        $mform->setDefault('customlayertype', 'base');
+
+        $mform->addElement('text', 'customlayername', get_string('customlayername', 'treasurehunt'));
+        $mform->addHelpButton('customlayername', 'customlayername', 'treasurehunt');
+        $mform->setType('customlayername', PARAM_TEXT);
+
+        $mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
+        $mform->addHelpButton('custommapminlon', 'custommapminlon', 'treasurehunt');
+        $mform->setType('custommapminlon', PARAM_FLOAT);
+        $mform->addRule('custommapminlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
+        $mform->addHelpButton('custommapminlat', 'custommapminlat', 'treasurehunt');
+        $mform->setType('custommapminlat', PARAM_FLOAT);
+        $mform->addRule('custommapminlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapmaxlon', get_string('custommapmaxlon', 'treasurehunt'));
+        $mform->addHelpButton('custommapmaxlon', 'custommapmaxlon', 'treasurehunt');
+        $mform->setType('custommapmaxlon', PARAM_FLOAT);
+        $mform->addRule('custommapmaxlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapmaxlat', get_string('custommapmaxlat', 'treasurehunt'));
+        $mform->addHelpButton('custommapmaxlat', 'custommapmaxlat', 'treasurehunt');
+        $mform->setType('custommapmaxlat', PARAM_FLOAT);
+        $mform->addRule('custommapmaxlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
         // Add standard buttons, common to all modules. Botones.
@@ -148,8 +188,72 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-
+        if ($data['custombackground']) {
+            if ($data['customlayername'] < 0) {
+                $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
+            }
+            if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                $errors['custommapminlat'] = get_string('custommapminlat_help', 'treasurehunt');
+            }
+            if ($data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                $errors['custommapmaxlat'] = get_string('custommapmaxlat_help', 'treasurehunt');
+            }
+            if ($data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                $errors['custommapminlon'] = get_string('custommapminlon_help', 'treasurehunt');
+            }
+            if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
+            }
+        }
         return $errors;
+    }
+    public function data_preprocessing(&$defaultvalues) {
+        $draftitemid = file_get_submitted_draft_itemid('custombackground');
+        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_treasurehunt', 'custombackground',
+                                0, array('subdirs' => false));
+        $defaultvalues['custombackground'] = $draftitemid;
+        $custommapconfig = isset($this->current->custommapconfig) ? json_decode($this->current->custommapconfig) : null;
+        if ($custommapconfig) {
+            $defaultvalues['custommapminlon'] = $custommapconfig->bbox[0];
+            $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
+            $defaultvalues['custommapmaxlon'] = $custommapconfig->bbox[2];
+            $defaultvalues['custommapmaxlat'] = $custommapconfig->bbox[3];
+            if ($custommapconfig->onlybase) {
+                $defaultvalues['customlayertype'] = 'onlybase';
+            } else {
+                $defaultvalues['customlayertype'] = $custommapconfig->layertype;
+            }
+            $defaultvalues['customlayername'] = isset($custommapconfig->layername) ? $custommapconfig->layername : null;
+        }
+    }
+    /**
+     * Allows modules to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data passed by reference
+     */
+    public function data_postprocessing($data) {
+        $mapconfig = new stdClass();
+        $bbox = [floatval($data->custommapminlon) ,
+                 floatval($data->custommapminlat),
+                 floatval($data->custommapmaxlon),
+                 floatval($data->custommapmaxlat)];
+        $mapconfig->bbox = $bbox;
+        if ($data->customlayertype == 'onlybase') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+        } else {
+            $mapconfig->layertype = $data->customlayertype;
+            $mapconfig->onlybase = false;
+        }
+        $mapconfig->layername = $data->customlayername;
+        $data->custommapconfig = json_encode($mapconfig);
     }
 
 }

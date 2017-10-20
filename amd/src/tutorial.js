@@ -129,6 +129,7 @@ function configureEditIntro(intro, strings, keys) {
     });
     intro.onchange(function (target) {
         document.cookie = "introEditStep = " + target.name;
+        document.cookie = "introEditProgress = Done"; // Skip the tutorial if visited.
     });
 }
 ; // end of configureEditIntro
@@ -178,6 +179,7 @@ function configurePlayIntro(intro, strings, keys) {
     });
     intro.onchange(function (target) {
         document.cookie = "introPlayStep = " + this._currentStep;
+        document.cookie = "introPlayProgress = Done"; // Skip the tutorial if visited.
     });
     intro.onafterchange(function (target) {
         var parentElem = target.parentElement;
