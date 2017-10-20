@@ -33,7 +33,25 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     load_gpx([user], cmid, map, trackgroup, null);
                     return trackgroup;
                 },
-                creategpxviewer: function (cmid, treasurehuntid, strings, users) {
+                creategpxviewer: function (cmid, treasurehuntid, strings, users, custommapconfig) {
+    				var mapprojection = 'EPSG:3857';
+    				var custombaselayer = null;
+    				var geographictools = true;
+    				// Support customized base layers.
+    				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
+    					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+    					custombaselayer = new ol.layer.Image({
+    						  title : custommapconfig.layername,
+    						  type: custommapconfig.layertype,
+    					      source: new ol.source.ImageStatic({
+    					        url: custommapconfig.custombackgroundurl,
+    					        imageExtent: customimageextent,
+    					      }),
+    					      opacity: 1.0
+    					    });
+    					geographictools = custommapconfig.geographic;
+    				}
+
                     var basemaps = new ol.layer.Group({
                         'title': strings['basemaps'],
                         layers: [
@@ -57,7 +75,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             })
                         ]
                     });
-
+                    if (custombaselayer != null) {
+    					if (custommapconfig.onlybase) {
+    						basemaps.getLayers().clear();
+    					}
+    					basemaps.getLayers().push(custombaselayer);
+    				}
                     var tracks = new ol.layer.Group({
                         'title': strings['trackviewer'],
                         layers: []});
