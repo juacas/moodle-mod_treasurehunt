@@ -231,6 +231,28 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         }
     }
     /**
+     * Return submitted data if properly submitted or returns NULL if validation fails or
+     * if there is no submitted data.
+     *
+     * Do not override this method, override data_postprocessing() instead.
+     * JPC: Method introduced in moodleform_mod.php  Moodle 3.3
+     * @return object submitted data; NULL if not valid or not submitted or cancelled
+     */
+    public function get_data() {
+        $data = parent::get_data();
+        if ($data) {
+            // Convert the grade pass value - we may be using a language which uses commas,
+            // rather than decimal points, in numbers. These need to be converted so that
+            // they can be added to the DB.
+            if (isset($data->gradepass)) {
+                $data->gradepass = unformat_float($data->gradepass);
+            }
+
+            $this->data_postprocessing($data);
+        }
+        return $data;
+    }
+    /**
      * Allows modules to modify the data returned by form get_data().
      * This method is also called in the bulk activity completion form.
      *
