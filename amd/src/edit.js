@@ -55,6 +55,7 @@ define(
 
 				var mapprojection = 'EPSG:3857';
 				var custombaselayer = null;
+				var geographictools = true;
 				// Support customized base layers.
 				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
 					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
@@ -66,7 +67,8 @@ define(
 					        imageExtent: customimageextent,
 					      }),
 					      opacity: 1.0
-					    })
+					    });
+					geographictools = custommapconfig.geographic;
 				}
 				
 				var treasurehunt = {
@@ -102,19 +104,21 @@ define(
 				$('<button id="removefeature"/>').attr('disabled', true)
 						.text(strings['remove']).appendTo(
 								$("#controlpanel"));
-				$('<div id="searchcontainer">')
-						.appendTo($("#controlpanel"));
-				$(
-						'<input type="search" placeholder="'
-								+ strings['searchlocation']
-								+ '" class="searchaddress"/>').appendTo(
-						$("#searchcontainer"));
-				$(
-						'<span class="ui-icon  ui-icon-search searchicon"></span>')
-						.prependTo($("#searchcontainer"));
-				$(
-						'<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
-						.appendTo($("#searchcontainer"));
+				if (geographictools) {
+					$('<div id="searchcontainer">')
+							.appendTo($("#controlpanel"));
+					$(
+							'<input type="search" placeholder="'
+									+ strings['searchlocation']
+									+ '" class="searchaddress"/>').appendTo(
+							$("#searchcontainer"));
+					$(
+							'<span class="ui-icon  ui-icon-search searchicon"></span>')
+							.prependTo($("#searchcontainer"));
+					$(
+							'<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
+							.appendTo($("#searchcontainer"));
+				}
 				$('<button id="addstage" />').text(strings['stage'])
 						.prependTo($("#controlpanel"));
 				$('<button id="addroad" />').text(strings['road'])
@@ -464,7 +468,7 @@ define(
 				}
 
 				map.on('click', function(evt) {
-					if (!Draw.getActive() && !Modify.getActive()){
+					if (!Draw.getActive() && !Modify.getActive() && custommapconfig.geographic) {
 						showpopup(evt);
 					}
 				});

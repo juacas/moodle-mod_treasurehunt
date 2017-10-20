@@ -128,7 +128,9 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
 
         $layertypes = ['base' => get_string('custommapbaselayer', 'treasurehunt'),
                         'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
-                        'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt') ];
+                        'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
+                        'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
+                      ];
         $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
         $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
         $mform->setDefault('customlayertype', 'base');
@@ -270,9 +272,15 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data->customlayertype == 'onlybase') {
             $mapconfig->layertype = 'base';
             $mapconfig->onlybase = true;
+            $mapconfig->geographic = true;
+        } if ($data->customlayertype == 'nongeographic') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = false;
         } else {
             $mapconfig->layertype = $data->customlayertype;
             $mapconfig->onlybase = false;
+            $mapconfig->geographic = true;
         }
         $mapconfig->layername = $data->customlayername;
         $data->custommapconfig = json_encode($mapconfig);

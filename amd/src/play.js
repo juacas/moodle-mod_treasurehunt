@@ -62,13 +62,13 @@ define(['jquery',
 		
 		// Initialization function.
 		function initplaytreasurehunt(strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
-		        lastattempttimestamp,
-		        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig){
+		        lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig){
 		
 			// I18n support.
 			
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
+			var geographictools = true;
 			// Support customized base layers.
 			if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
 				var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
@@ -81,8 +81,14 @@ define(['jquery',
 				        imageExtent: customimageextent,
 				      }),
 				      opacity: 1.0
-				    })
+				    });
+				geographictools = custommapconfig.geographic;
 			}
+			if (geographictools == false) {
+				playwithoutmoving = true;
+				$('#autolocate').hide();
+			}
+			
 		    var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
 		            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
 		            markerurl = url.imageUrl('my_location', 'treasurehunt'),
@@ -770,6 +776,9 @@ define(['jquery',
 		        }
 		    });
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {
+		    	if (!geographictools) {
+		    		return;
+		    	}
 		        var $ul = $(this),
 		                value = $(data.input).val(),
 		                html = "";
@@ -857,13 +866,15 @@ define(['jquery',
 		
 		    });
 		    //Buttons events.
-		    $('#autolocate').on('click', function () {
-		        if (geolocation.get("user_denied")) {
-		            $('#popupgeoloc').popup("open", {positionTo: "window"});
-		        } else {
-		            autocentermap(true);
-		        }
-		    });
+		    if (geographictools) {
+			    $('#autolocate').on('click', function () {
+			        if (geolocation.get("user_denied")) {
+			            $('#popupgeoloc').popup("open", {positionTo: "window"});
+			        } else {
+			            autocentermap(true);
+			        }
+			    });
+			}
 		    $('#infopanel').panel({beforeclose: function () {
 		            select.getFeatures().clear();
 		        }
