@@ -300,7 +300,9 @@ define(['jquery',
 		            features: [markerFeature]
 		        })
 		    });
-		    layers = [layergroup, attemptslayer, userPosition, markerVector];
+		    layers.push(layergroup);
+		    layers = layers.concat(layersoverlay);
+		    layers = layers.concat([ attemptslayer, userPosition, markerVector]);
 		    // New Custom zoom.
 		    var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
 		    var map = new ol.Map({
@@ -322,7 +324,6 @@ define(['jquery',
 		
 		    add_layergroup_to_list(layergroup);
 		    layersoverlay.forEach(function (overlay) {
-		    	map.addLayer(overlay);
 		    	add_layer_to_list(overlay);
 		    });
 		    if (tracking && user) {
