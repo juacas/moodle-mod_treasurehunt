@@ -8,3 +8,5 @@
 /org.eclipse.wst.jsdt.ui.superType.name
 /org.eclipse.wst.validation.prefs
 /org.phpsrc.eclipse.pti.tools.codesniffer.prefs
+/org.eclipse.php.debug.core.Debug_Process_Preferences.prefs
+/org.eclipse.php.server.core.phpServersPrefs.prefs

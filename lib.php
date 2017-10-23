@@ -81,6 +81,7 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
     if ($mform !== null) { // This indicates it is a manual creation. Do not create items when restoring backups.
         treasurehunt_create_default_items($treasurehunt);
     }
+    treasurehunt_set_custombackground($treasurehunt);
     treasurehunt_grade_item_update($treasurehunt);
     treasurehunt_update_events($treasurehunt);
     return $treasurehunt->id;
@@ -113,8 +114,8 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
             || $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
         treasurehunt_update_grades($treasurehunt);
     }
+    treasurehunt_set_custombackground($treasurehunt);
     treasurehunt_grade_item_update($treasurehunt);
-
     treasurehunt_update_events($treasurehunt);
 
     return $result;
@@ -429,7 +430,21 @@ function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
     $grades = treasurehunt_calculate_user_grades($treasurehunt, $userid);
     return $grades;
 }
-
+/**
+ * Lists all browsable file areas
+ *
+ * @package  mod_treasurehunt
+ * @category files
+ * @param stdClass $course course object
+ * @param stdClass $cm course module object
+ * @param stdClass $context context object
+ * @return array
+ */
+function treasurehunt_get_file_areas($course, $cm, $context) {
+    $areas = array();
+    $areas['custombackground'] = get_string('custombackground', 'treasurehunt');
+    return $areas;
+}
 /**
  * Serves the files from the treasurehunt file areas
  *
@@ -452,7 +467,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
-    $fileareas = array('cluetext', 'questiontext', 'answertext');
+    $fileareas = array('cluetext', 'questiontext', 'answertext', 'custombackground');
     if (!in_array($filearea, $fileareas)) {
         return false;
     }

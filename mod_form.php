@@ -117,6 +117,58 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setDefault('gradepenanswer', $treasurehuntconfig->penaltyanswer);
         $mform->addRule('gradepenanswer', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('gradepenanswer', 'grade[modgrade_type]', 'neq', 'point');
+
+        // Custom background.
+        $mform->addElement('header', 'custommaps', get_string('custommapping', 'treasurehunt'));
+        $mform->setExpanded('custommaps', false);
+
+        // WMS layer.
+        $mform->addElement('text', 'customlayername', get_string('customlayername', 'treasurehunt'));
+        $mform->addHelpButton('customlayername', 'customlayername', 'treasurehunt');
+        $mform->setType('customlayername', PARAM_TEXT);
+
+        $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));
+        $mform->addHelpButton('customlayerwms', 'customlayerwms', 'treasurehunt');
+        $mform->setType('customlayerwms', PARAM_TEXT);
+        $mform->addElement('text', 'customwmsparams', get_string('customwmsparams', 'treasurehunt'));
+        $mform->addHelpButton('customwmsparams', 'customwmsparams', 'treasurehunt');
+        $mform->setType('customwmsparams', PARAM_TEXT);
+
+        // Local file overlay.
+        $mform->addElement('filemanager', 'custombackground',  get_string('custommapimagefile', 'treasurehunt'), null,
+                            array('subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
+                                'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL));
+        $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
+
+        $layertypes = ['base' => get_string('custommapbaselayer', 'treasurehunt'),
+                        'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
+                        'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
+                        'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
+                      ];
+        $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
+        $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
+        $mform->setDefault('customlayertype', 'base');
+
+        $mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
+        $mform->addHelpButton('custommapminlon', 'custommapminlon', 'treasurehunt');
+        $mform->setType('custommapminlon', PARAM_FLOAT);
+        $mform->addRule('custommapminlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
+        $mform->addHelpButton('custommapminlat', 'custommapminlat', 'treasurehunt');
+        $mform->setType('custommapminlat', PARAM_FLOAT);
+        $mform->addRule('custommapminlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapmaxlon', get_string('custommapmaxlon', 'treasurehunt'));
+        $mform->addHelpButton('custommapmaxlon', 'custommapmaxlon', 'treasurehunt');
+        $mform->setType('custommapmaxlon', PARAM_FLOAT);
+        $mform->addRule('custommapmaxlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
+        $mform->addElement('text', 'custommapmaxlat', get_string('custommapmaxlat', 'treasurehunt'));
+        $mform->addHelpButton('custommapmaxlat', 'custommapmaxlat', 'treasurehunt');
+        $mform->setType('custommapmaxlat', PARAM_FLOAT);
+        $mform->addRule('custommapmaxlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
+
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
         // Add standard buttons, common to all modules. Botones.
@@ -148,8 +200,127 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-
+        if ($data['custombackground'] || $data['customlayerwms']) {
+            if ($data['customlayername'] == '') {
+                $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
+            }
+            if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                $errors['custommapminlat'] = get_string('custommapminlat_help', 'treasurehunt');
+            }
+            if ($data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                $errors['custommapmaxlat'] = get_string('custommapmaxlat_help', 'treasurehunt');
+            }
+            if ($data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                $errors['custommapminlon'] = get_string('custommapminlon_help', 'treasurehunt');
+            }
+            if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
+            }
+        }
+        if ($data['customlayerwms']) {
+            if ($data['customwmsparams'] == '') {
+                $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
+            }
+        }
         return $errors;
+    }
+    public function data_preprocessing(&$defaultvalues) {
+        $draftitemid = file_get_submitted_draft_itemid('custombackground');
+        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_treasurehunt', 'custombackground',
+                                0, array('subdirs' => false));
+        $defaultvalues['custombackground'] = $draftitemid;
+        $custommapconfig = isset($this->current->custommapconfig) ? json_decode($this->current->custommapconfig) : null;
+        if ($custommapconfig) {
+            $defaultvalues['custommapminlon'] = $custommapconfig->bbox[0];
+            $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
+            $defaultvalues['custommapmaxlon'] = $custommapconfig->bbox[2];
+            $defaultvalues['custommapmaxlat'] = $custommapconfig->bbox[3];
+            if ($custommapconfig->onlybase) {
+                $defaultvalues['customlayertype'] = 'onlybase';
+            } else {
+                $defaultvalues['customlayertype'] = $custommapconfig->layertype;
+            }
+            $defaultvalues['customlayername'] = isset($custommapconfig->layername) ? $custommapconfig->layername : null;
+            if (isset($custommapconfig->wmsurl)) {
+                $defaultvalues['customlayerwms'] = $custommapconfig->wmsurl;
+            }
+            if (isset($custommapconfig->wmsparams)) {
+                $paramstr = (array) $custommapconfig->wmsparams;
+                $params = http_build_query($paramstr, '', ';');
+                $defaultvalues['customwmsparams'] = $params;
+            }
+        }
+    }
+    /**
+     * Return submitted data if properly submitted or returns NULL if validation fails or
+     * if there is no submitted data.
+     *
+     * Do not override this method, override data_postprocessing() instead.
+     * JPC: Method introduced in moodleform_mod.php  Moodle 3.3
+     * @return object submitted data; NULL if not valid or not submitted or cancelled
+     */
+    public function get_data() {
+        $data = parent::get_data();
+        if ($data) {
+            // Convert the grade pass value - we may be using a language which uses commas,
+            // rather than decimal points, in numbers. These need to be converted so that
+            // they can be added to the DB.
+            if (isset($data->gradepass)) {
+                $data->gradepass = unformat_float($data->gradepass);
+            }
+
+            $this->data_postprocessing($data);
+        }
+        return $data;
+    }
+    /**
+     * Allows modules to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data passed by reference
+     */
+    public function data_postprocessing($data) {
+        $mapconfig = new stdClass();
+        $bbox = [floatval($data->custommapminlon) ,
+                 floatval($data->custommapminlat),
+                 floatval($data->custommapmaxlon),
+                 floatval($data->custommapmaxlat)];
+        $mapconfig->bbox = $bbox;
+        if ($data->customlayertype == 'onlybase') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = true;
+        } if ($data->customlayertype == 'nongeographic') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = false;
+        } else {
+            $mapconfig->layertype = $data->customlayertype;
+            $mapconfig->onlybase = false;
+            $mapconfig->geographic = true;
+        }
+
+        $mapconfig->wmsurl = $data->customlayerwms;
+        if ($data->customwmsparams) {
+            $params = explode(';', $data->customwmsparams);
+            $parmsobj = new stdClass();
+            foreach ($params as $param) {
+                $parts = explode('=', $param);
+                $parmsobj->{$parts[0]} = $parts[1];
+            }
+            $mapconfig->wmsparams = $parmsobj;
+        } else {
+            $mapconfig->wmsparams = [];
+        }
+
+        $mapconfig->layername = $data->customlayername;
+        $data->custommapconfig = json_encode($mapconfig);
     }
 
 }
