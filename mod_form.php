@@ -239,7 +239,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
             $defaultvalues['custommapmaxlon'] = $custommapconfig->bbox[2];
             $defaultvalues['custommapmaxlat'] = $custommapconfig->bbox[3];
-            if ($custommapconfig->onlybase) {
+            if (isset($custommapconfig->onlybase)) {
                 $defaultvalues['customlayertype'] = 'onlybase';
             } else {
                 $defaultvalues['customlayertype'] = $custommapconfig->layertype;

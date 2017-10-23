@@ -45,7 +45,22 @@ define(
 	            		for (var i=0; i < terms.length; i++) {
 	            			i18n[terms[i]] = strings[i];
 	            		}
-	            		initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+	            		// Detect custom image.
+	            		if (typeof(custommapconfig) != 'undefined' &&
+	            				custommapconfig !== null && 
+	            				custommapconfig.custombackgroundurl !== null) {
+	            			
+	            			// Detect image size.
+	    						var img = new Image();
+	    					    img.addEventListener("load", function(){
+	    					    	custommapconfig.imgwidth =  this.naturalWidth;
+	    					    	custommapconfig.imgheight = this.naturalHeight;
+	    	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);	    					        
+	    					    });
+	    					    img.src = custommapconfig.custombackgroundurl;
+	            		} else {
+	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+	            		}
 	                })
 				} // End of function init.
 			}; // End of init var.
@@ -54,12 +69,29 @@ define(
 			function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
 
 				var mapprojection = 'EPSG:3857';
+				var mapprojobj = new ol.proj.Projection(mapprojection);
 				var custombaselayer = null;
 				var geographictools = true;
 				// Support customized base layers.
 				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
 					if (custommapconfig.custombackgroundurl != null) {
 						var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+						if (!custommapconfig.geographic) {
+							// Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
+							var bboxwidth = customimageextent[2] - customimageextent[0];
+							var bboxheight = customimageextent[3] - customimageextent[1];
+							var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
+							var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
+							
+							var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
+							var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
+							var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
+							customimageextent = [centerwidth - adjwidth/2,
+								centerheight - adjheight/2,
+								centerwidth + adjwidth/2,
+								centerheight + adjheight/2];
+						}
+						
 						custombaselayer = new ol.layer.Image({
 							  title : custommapconfig.layername,
 							  type: custommapconfig.layertype,
@@ -452,7 +484,7 @@ define(
 						{
 							layers : [ basemaps, vectorDraw ],
 							overlays : [ overlay ],
-							projection : mapprojection,
+							projection : mapprojobj,
 							renderer : 'canvas',
 							target : 'mapedit',
 							view : new ol.View({
