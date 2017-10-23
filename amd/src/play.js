@@ -50,9 +50,26 @@ define(['jquery',
 	            		for (var i=0; i < terms.length; i++) {
 	            			i18n[terms[i]] = strings[i];
 	            		}
-	            		initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-	                	        lastattempttimestamp,
-	                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);
+	            		// Detect custom image.
+	            		if (typeof(custommapconfig) != 'undefined' &&
+	            				custommapconfig !== null && 
+	            				custommapconfig.custombackgroundurl !== null) {
+	            			
+	            			// Detect image size.
+	    						var img = new Image();
+	    					    img.addEventListener("load", function(){
+	    					    	custommapconfig.imgwidth =  this.naturalWidth;
+	    					    	custommapconfig.imgheight = this.naturalHeight;
+	    					    	initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
+	    		                	        lastattempttimestamp,
+	    		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);        
+	    					    });
+	    					    img.src = custommapconfig.custombackgroundurl;
+	            		} else {
+	            			initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
+		                	        lastattempttimestamp,
+		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);	            		}
+	            		
 	                });
 	            } // End of function playtreasurehunt.
 	        };
@@ -70,6 +87,21 @@ define(['jquery',
 			if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
 				if (custommapconfig.custombackgroundurl != null) {
 					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+					if (!custommapconfig.geographic) {
+						// Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
+						var bboxwidth = customimageextent[2] - customimageextent[0];
+						var bboxheight = customimageextent[3] - customimageextent[1];
+						var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
+						var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
+						
+						var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
+						var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
+						var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
+						customimageextent = [centerwidth - adjwidth/2,
+							centerheight - adjheight/2,
+							centerwidth + adjwidth/2,
+							centerheight + adjheight/2];
+					}
 					custombaselayer = new ol.layer.Image({
 						  title : custommapconfig.layername,
 						  name : custommapconfig.layername,
