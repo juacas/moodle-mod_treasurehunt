@@ -22,8 +22,9 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax', 'mod_treasurehunt/ol3-layerswitcher'],
-        function ($, jqui, touch, notification, ol, ajax, olLayerSwitcher) {
+define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification',
+		'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher'],
+        function ($, jqui, touch, notification, ol, olLayerSwitcher) {
 
             var init = {
                 addgpxlayer: function (map, cmid, treasurehuntid, strings, user, trackgroupname) {
@@ -38,7 +39,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
     				var custombaselayer = null;
     				var geographictools = true;
     				// Support customized base layers.
-    				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
+    				if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
     					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
     					custombaselayer = new ol.layer.Image({
     						  title : custommapconfig.layername,
@@ -75,7 +76,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             })
                         ]
                     });
-                    if (custombaselayer != null) {
+                    if (custombaselayer !== null) {
     					if (custommapconfig.onlybase) {
     						basemaps.getLayers().clear();
     					}
@@ -134,7 +135,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }
                         return msg;
                     }
-                    ;
+                    
                     function showpopup(evt) {
                         var element = popup.getElement();
                         var coordinate = evt.coordinate;
@@ -162,7 +163,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
             function find_or_add_layergroup(map, trackgroupname) {
                 var layergroup = null;
                 var layers = map.getLayers();
-                layers.forEach(function (layer, i) {
+                layers.forEach(function (layer) {
                     if (layer.get('title') == trackgroupname) {
                         layergroup = layer;
                     }
@@ -211,7 +212,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
                     gpxsource.on('change', function () {
                         var extent = gpxsource.getExtent();
-                        if (max_extent == null) {
+                        if (max_extent === null) {
                             max_extent = extent;
                         } else {
                             max_extent[0] = Math.min(max_extent[0], extent[0]);
@@ -260,5 +261,4 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                 }));
                 return styles;
             }
-            ;
         });

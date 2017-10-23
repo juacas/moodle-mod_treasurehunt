@@ -121,6 +121,20 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         // Custom background.
         $mform->addElement('header', 'custommaps', get_string('custommapping', 'treasurehunt'));
         $mform->setExpanded('custommaps', false);
+
+        // WMS layer.
+        $mform->addElement('text', 'customlayername', get_string('customlayername', 'treasurehunt'));
+        $mform->addHelpButton('customlayername', 'customlayername', 'treasurehunt');
+        $mform->setType('customlayername', PARAM_TEXT);
+
+        $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));
+        $mform->addHelpButton('customlayerwms', 'customlayerwms', 'treasurehunt');
+        $mform->setType('customlayerwms', PARAM_TEXT);
+        $mform->addElement('text', 'customwmsparams', get_string('customwmsparams', 'treasurehunt'));
+        $mform->addHelpButton('customwmsparams', 'customwmsparams', 'treasurehunt');
+        $mform->setType('customwmsparams', PARAM_TEXT);
+
+        // Local file overlay.
         $mform->addElement('filemanager', 'custombackground',  get_string('custommapimagefile', 'treasurehunt'), null,
                             array('subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
                                 'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL));
@@ -134,10 +148,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
         $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
         $mform->setDefault('customlayertype', 'base');
-
-        $mform->addElement('text', 'customlayername', get_string('customlayername', 'treasurehunt'));
-        $mform->addHelpButton('customlayername', 'customlayername', 'treasurehunt');
-        $mform->setType('customlayername', PARAM_TEXT);
 
         $mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
         $mform->addHelpButton('custommapminlon', 'custommapminlon', 'treasurehunt');
@@ -190,8 +200,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-        if ($data['custombackground']) {
-            if ($data['customlayername'] < 0) {
+        if ($data['custombackground'] || $data['customlayerwms']) {
+            if ($data['customlayername'] == '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
             }
             if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
@@ -209,6 +219,11 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
                     $data['custommapminlon'] >= $data['custommapmaxlon']) {
                 $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
+            }
+        }
+        if ($data['customlayerwms']) {
+            if ($data['customwmsparams'] == '') {
+                $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
             }
         }
         return $errors;
@@ -230,6 +245,14 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                 $defaultvalues['customlayertype'] = $custommapconfig->layertype;
             }
             $defaultvalues['customlayername'] = isset($custommapconfig->layername) ? $custommapconfig->layername : null;
+            if (isset($custommapconfig->wmsurl)) {
+                $defaultvalues['customlayerwms'] = $custommapconfig->wmsurl;
+            }
+            if (isset($custommapconfig->wmsparams)) {
+                $paramstr = (array) $custommapconfig->wmsparams;
+                $params = http_build_query($paramstr, '', ';');
+                $defaultvalues['customwmsparams'] = $params;
+            }
         }
     }
     /**
@@ -282,6 +305,20 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $mapconfig->onlybase = false;
             $mapconfig->geographic = true;
         }
+
+        $mapconfig->wmsurl = $data->customlayerwms;
+        if ($data->customwmsparams) {
+            $params = explode(';', $data->customwmsparams);
+            $parmsobj = new stdClass();
+            foreach ($params as $param) {
+                $parts = explode('=', $param);
+                $parmsobj->{$parts[0]} = $parts[1];
+            }
+            $mapconfig->wmsparams = $parmsobj;
+        } else {
+            $mapconfig->wmsparams = [];
+        }
+
         $mapconfig->layername = $data->customlayername;
         $data->custommapconfig = json_encode($mapconfig);
     }

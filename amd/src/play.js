@@ -53,13 +53,10 @@ define(['jquery',
 	            		initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
 	                	        lastattempttimestamp,
 	                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);
-	                })
-	            	
+	                });
 	            } // End of function playtreasurehunt.
 	        };
-	        return init;
-	    
-		
+	    return init;
 		// Initialization function.
 		function initplaytreasurehunt(strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
 		        lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig){
@@ -70,21 +67,42 @@ define(['jquery',
 			var custombaselayer = null;
 			var geographictools = true;
 			// Support customized base layers.
-			if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
-				var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
-				custombaselayer = new ol.layer.Image({
-					  title : custommapconfig.layername,
-					  name : custommapconfig.layername,
-					  type: custommapconfig.layertype,
-				      source: new ol.source.ImageStatic({
-				        url: custommapconfig.custombackgroundurl,
-				        imageExtent: customimageextent,
-				      }),
-				      opacity: 1.0
-				    });
+			if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
+				if (custommapconfig.custombackgroundurl != null) {
+					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+					custombaselayer = new ol.layer.Image({
+						  title : custommapconfig.layername,
+						  name : custommapconfig.layername,
+						  type: custommapconfig.layertype,
+					      source: new ol.source.ImageStatic({
+					        url: custommapconfig.custombackgroundurl,
+					        imageExtent: customimageextent,
+					      }),
+					      opacity: 1.0
+					    });
+				} else if (custommapconfig.wmsurl !== null) {
+					var options = {
+								source: new ol.source.TileWMS({
+						            url: custommapconfig.wmsurl,
+						            params: custommapconfig.wmsparams,
+						          }),
+								type: custommapconfig.layertype,
+								title: custommapconfig.layername,
+								name: custommapconfig.layername,
+					        };
+					if (custommapconfig.bbox[0] !== null &&
+							custommapconfig.bbox[1] !== null &&
+							custommapconfig.bbox[2] !== null &&
+							custommapconfig.bbox[3] !== null) {
+						var customwmsextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+						options.extent = customwmsextent;
+					}
+					custombaselayer = new ol.layer.Tile(options);
+				}
+				
 				geographictools = custommapconfig.geographic;
 			}
-			if (geographictools == false) {
+			if (geographictools === false) {
 				playwithoutmoving = true;
 				$('#autolocate').hide();
 			}
@@ -227,12 +245,17 @@ define(['jquery',
 		    });
 		    roadlayer.set("name", strings["roadview"]);
 		    
-		    var layersbase = []
+		    var layersbase = [];
+		    var layersoverlay = [];
 		    if (!custommapconfig.onlybase) {
 		    	layersbase = [aeriallayer, roadlayer];
 		    }
-		    if (custombaselayer != null) {
+		    if (custombaselayer !== null) {
+		    	if (custommapconfig.layertype != 'overlay') {
 		    		layersbase.push(custombaselayer);
+		    	} else {
+		    		layersoverlay.push(custombaselayer);
+		    	}
 			}
 		    var layergroup = new ol.layer.Group({layers: layersbase});
 		    // All layers hidden except last one.
@@ -298,6 +321,10 @@ define(['jquery',
 		    // Initialize the page layers.
 		
 		    add_layergroup_to_list(layergroup);
+		    layersoverlay.forEach(function (overlay) {
+		    	map.addLayer(overlay);
+		    	add_layer_to_list(overlay);
+		    });
 		    if (tracking && user) {
 		        var tracklayergroup = viewgpx.addgpxlayer(map, cmid, treasurehuntid, strings, user, "trackgroup");
 		        tracklayergroup.set("name", tracklayergroup.get("title"));
@@ -362,7 +389,7 @@ define(['jquery',
 		        return [defaultSelectstageStyle];
 		    }
 		    function validateposition() {
-		        if (playwithoutmoving && markerFeature.getGeometry() == null) {
+		        if (playwithoutmoving && markerFeature.getGeometry() === null) {
 		            toast(strings["nomarks"]);
 		        } else {
 		            renew_source(true, false);
@@ -401,7 +428,8 @@ define(['jquery',
 		        var position;
 		        var currentposition;
 		        var coordinates;
-		
+		        var answerid;
+		        
 		        if (playwithoutmoving) {
 		            coordinates = markerFeature.getGeometry();
 		        } else {
@@ -415,7 +443,7 @@ define(['jquery',
 		        }
 		        if (selectedanswerid) {
 		            $.mobile.loading("show");
-		            var answerid = selectedanswerid;
+		            answerid = selectedanswerid;
 		        }
 		        if (location) {
 		            position = currentposition;
@@ -642,25 +670,7 @@ define(['jquery',
 		        });
 		        item.insertAfter('#baseLayer');
 		    }
-		    function add_layer_to_list(layer) {
-		
-		        var item = $('<li>', {
-		            "data-icon": "check",
-		            "class": layer.getVisible() ? "checked" : "unchecked"
-		        })
-		                .append($('<a />', {
-		                    text: layer.get("name"),
-		                    href: "#mappage"
-		                })
-		                        .click(function () {
-		                            layer.setVisible(!layer.getVisible());
-		                        })
-		                        );
-		        layer.on('change:visible', function () {
-		            $(item).toggleClass('checked unchecked');
-		        });
-		        item.insertAfter('#baseLayer');
-		    }
+
 		    function add_layergroup_to_list(layergroup) {
 		        layergroup.getLayers().forEach(function (layer) {
 		            var item = $('<li>', {
@@ -675,7 +685,7 @@ define(['jquery',
 		                                layergroup.getLayers().forEach(function (l) {
 		                                    if (l === layer) {
 		                                        l.setVisible(true);
-		                                    } else {
+		                                    } else if (l.getType()){
 		                                        l.setVisible(false);
 		                                    }
 		                                });
@@ -764,7 +774,9 @@ define(['jquery',
 		    map.on('click', function (evt) {
 		        var hasFeature = false;
 		        map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function (feature, layer) {
-		            if (feature.get('stageposition') === 0 || feature.get('name') === "user_position" || feature.get('name') === "user_accuracy") {
+		            if (feature.get('stageposition') === 0 ||
+		            		feature.get('name') === "user_position" ||
+		            		feature.get('name') === "user_accuracy") {
 		                return false;
 		            }
 		            hasFeature = true;

@@ -188,7 +188,7 @@ function treasurehunt_get_custommappingconfig($treasurehunt, $context) {
         $moodleurl = new moodle_url('/pluginfile.php' . $path);
         $custommapconfig->custombackgroundurl = $moodleurl->out();
     } else {
-        $custommapconfig = null;
+        $custommapconfig->custombackgroundurl = null;
     }
     return $custommapconfig;
 }

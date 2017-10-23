@@ -58,16 +58,35 @@ define(
 				var geographictools = true;
 				// Support customized base layers.
 				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
-					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
-					custombaselayer = new ol.layer.Image({
-						  title : custommapconfig.layername,
-						  type: custommapconfig.layertype,
-					      source: new ol.source.ImageStatic({
-					        url: custommapconfig.custombackgroundurl,
-					        imageExtent: customimageextent,
-					      }),
-					      opacity: 1.0
-					    });
+					if (custommapconfig.custombackgroundurl != null) {
+						var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+						custombaselayer = new ol.layer.Image({
+							  title : custommapconfig.layername,
+							  type: custommapconfig.layertype,
+						      source: new ol.source.ImageStatic({
+						        url: custommapconfig.custombackgroundurl,
+						        imageExtent: customimageextent,
+						      }),
+						      opacity: 1.0
+						    });
+					} else if (custommapconfig.wmsurl != null) {
+						var options = {
+									source: new ol.source.TileWMS({
+							            url: custommapconfig.wmsurl,
+							            params: custommapconfig.wmsparams,
+							          }),
+									type: custommapconfig.layertype,
+									title: custommapconfig.layername,
+						        };
+						if (custommapconfig.bbox[0] != null &&
+								custommapconfig.bbox[1] != null &&
+								custommapconfig.bbox[2] != null &&
+								custommapconfig.bbox[3] != null) {
+							var customwmsextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+							options.extent = customwmsextent;
+						}
+						custombaselayer = new ol.layer.Tile(options);
+					}
 					geographictools = custommapconfig.geographic;
 				}
 				

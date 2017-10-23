@@ -32,7 +32,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
                     });
                     if (cook["introEditProgress"] != 'Done') {
-                        var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_edit_tour', 'map_tour', 'mapplay_tour', 'roads_tour',
+                        var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_edit_tour',
+                        	'map_tour', 'mapplay_tour', 'roads_tour',
                             'stages_tour', 'addroad_tour', 'addstage_tour', 'save_tour', 'editend_tour'];
                         var stringQueried = terms.map(function (term) {
                             return {key: term, component: 'treasurehunt'};
@@ -45,7 +46,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                         }).fail(notification.exception);
                     }
                 }, // end of editpage function
-                playpage: function (strings) {
+                playpage: function () {
                     var intro = introJS();
                     var cook = {};
                     document.cookie.split(';').forEach(function (x) {
@@ -132,7 +133,7 @@ function configureEditIntro(intro, strings, keys) {
         document.cookie = "introEditProgress = Done"; // Skip the tutorial if visited.
     });
 }
-; // end of configureEditIntro
+// end of configureEditIntro
 function configurePlayIntro(intro, strings, keys) {
     intro.setOptions({
         nextLabel: strings[keys.indexOf('nextstep')],
@@ -183,7 +184,7 @@ function configurePlayIntro(intro, strings, keys) {
     });
     intro.onafterchange(function (target) {
         var parentElem = target.parentElement;
-        while (parentElem != null) {
+        while (parentElem !== null) {
             if (parentElem.dataset.role == 'panel') {
                 parentElem.style = "z-index: 1001 !important";
                 break;
