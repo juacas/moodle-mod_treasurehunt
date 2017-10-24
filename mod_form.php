@@ -239,10 +239,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
             $defaultvalues['custommapmaxlon'] = $custommapconfig->bbox[2];
             $defaultvalues['custommapmaxlat'] = $custommapconfig->bbox[3];
-            if (isset($custommapconfig->onlybase)) {
+            if (isset($custommapconfig->geographic) && $custommapconfig->geographic === false) {
+                $defaultvalues['customlayertype'] = 'nongeographic';
+            } else if (isset($custommapconfig->onlybase) && $custommapconfig->onlybase == true ) {
                 $defaultvalues['customlayertype'] = 'onlybase';
             } else {
-                $defaultvalues['customlayertype'] = $custommapconfig->layertype;
+                $defaultvalues['customlayertype'] = $custommapconfig->layertype; // Or base or overlay.
             }
             $defaultvalues['customlayername'] = isset($custommapconfig->layername) ? $custommapconfig->layername : null;
             if (isset($custommapconfig->wmsurl)) {
@@ -255,6 +257,52 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             }
         }
     }
+    /**
+     * Allows modules to modify the data returned by form get_data().
+     * This method is also called in the bulk activity completion form.
+     *
+     * Only available on moodleform_mod.
+     *
+     * @param stdClass $data passed by reference
+     */
+    public function data_postprocessing($data) {
+        $mapconfig = new stdClass();
+        $bbox = [floatval($data->custommapminlon) ,
+                        floatval($data->custommapminlat),
+                        floatval($data->custommapmaxlon),
+                        floatval($data->custommapmaxlat)];
+        $mapconfig->bbox = $bbox;
+        if ($data->customlayertype == 'onlybase') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = true;
+        } if ($data->customlayertype == 'nongeographic') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = false;
+        } else {
+            $mapconfig->layertype = $data->customlayertype; // Or base or overlay.
+            $mapconfig->onlybase = false;
+            $mapconfig->geographic = true;
+        }
+
+        $mapconfig->wmsurl = $data->customlayerwms;
+        if ($data->customwmsparams) {
+            $params = explode(';', $data->customwmsparams);
+            $parmsobj = new stdClass();
+            foreach ($params as $param) {
+                $parts = explode('=', $param);
+                $parmsobj->{$parts[0]} = $parts[1];
+            }
+            $mapconfig->wmsparams = $parmsobj;
+        } else {
+            $mapconfig->wmsparams = [];
+        }
+
+        $mapconfig->layername = $data->customlayername;
+        $data->custommapconfig = json_encode($mapconfig);
+    }
+
     /**
      * Return submitted data if properly submitted or returns NULL if validation fails or
      * if there is no submitted data.
@@ -276,51 +324,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $this->data_postprocessing($data);
         }
         return $data;
-    }
-    /**
-     * Allows modules to modify the data returned by form get_data().
-     * This method is also called in the bulk activity completion form.
-     *
-     * Only available on moodleform_mod.
-     *
-     * @param stdClass $data passed by reference
-     */
-    public function data_postprocessing($data) {
-        $mapconfig = new stdClass();
-        $bbox = [floatval($data->custommapminlon) ,
-                 floatval($data->custommapminlat),
-                 floatval($data->custommapmaxlon),
-                 floatval($data->custommapmaxlat)];
-        $mapconfig->bbox = $bbox;
-        if ($data->customlayertype == 'onlybase') {
-            $mapconfig->layertype = 'base';
-            $mapconfig->onlybase = true;
-            $mapconfig->geographic = true;
-        } if ($data->customlayertype == 'nongeographic') {
-            $mapconfig->layertype = 'base';
-            $mapconfig->onlybase = true;
-            $mapconfig->geographic = false;
-        } else {
-            $mapconfig->layertype = $data->customlayertype;
-            $mapconfig->onlybase = false;
-            $mapconfig->geographic = true;
-        }
-
-        $mapconfig->wmsurl = $data->customlayerwms;
-        if ($data->customwmsparams) {
-            $params = explode(';', $data->customwmsparams);
-            $parmsobj = new stdClass();
-            foreach ($params as $param) {
-                $parts = explode('=', $param);
-                $parmsobj->{$parts[0]} = $parts[1];
-            }
-            $mapconfig->wmsparams = $parmsobj;
-        } else {
-            $mapconfig->wmsparams = [];
-        }
-
-        $mapconfig->layername = $data->customlayername;
-        $data->custommapconfig = json_encode($mapconfig);
     }
 
 }
