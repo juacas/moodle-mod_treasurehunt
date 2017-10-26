@@ -200,9 +200,19 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-        if ($data['custombackground'] || $data['customlayerwms']) {
+        $draftitemid = $data['custombackground'];
+        global $USER;
+        $usercontext = context_user::instance($USER->id);
+        $fs = get_file_storage();
+        $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
+
+        if (count($draftfiles) > 0 || $data['customlayerwms'] || $data['customlayername']) {
             if ($data['customlayername'] == '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
+            }
+            if (count($draftfiles) == 0 && $data['customlayerwms'] == '') {
+                $errors['customlayerwms'] = get_string('customlayerwms_help', 'treasurehunt');
+                $errors['custombackground'] = get_string('custombackground_help', 'treasurehunt');
             }
             if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
                     $data['custommapminlat'] >= $data['custommapmaxlat']) {
@@ -220,10 +230,10 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                     $data['custommapminlon'] >= $data['custommapmaxlon']) {
                 $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
             }
-        }
-        if ($data['customlayerwms']) {
-            if ($data['customwmsparams'] == '') {
-                $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
+            if ($data['customlayerwms']) {
+                if ($data['customwmsparams'] == '') {
+                    $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
+                }
             }
         }
         return $errors;
