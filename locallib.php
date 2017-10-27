@@ -975,13 +975,14 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         $grouptypewithin = 'at.groupid=0 AND at.userid=?';
         $params = array($roadid, $userid, $roadid, $userid);
     }
-    $query = "SELECT a.id as id,a.timecreated,a.userid as user,a.stageid,CASE WHEN a.success = 0 "
+    $query = "SELECT a.id as id,a.timecreated,a.userid as 'user',a.stageid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
             . "r.cluetext END AS cluetext,a.geometrysolved,r.position,a.location as geometry,"
             . "r.roadid,r.id AS stageid,a.success FROM (SELECT MAX(at.id) AS id,"
             . "at.location AS geometry FROM {treasurehunt_attempts} "
             . "at INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
-            . "AND $grouptypewithin group by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON "
+//             . "AND $grouptypewithin group by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON " // ISSUE mssql
+            . "AND $grouptypewithin order by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON "
             . "a.id = apt.id INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE "
             . "r.roadid=? AND $grouptype";
     $userprogress = $DB->get_records_sql($query, $params);
@@ -1140,10 +1141,11 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
         // Individual mode.
         $cond = "{groups_members} gm ON gm.groupid = r.groupid";
     }
-    $query = "SELECT r.id as roadid,count(r.id) as groupsnumber, "
-            . "gm.groupid,r.validated FROM {treasurehunt_roads} r "
+    $query = "SELECT r.id as roadid, count(r.id) as groupsnumber, "
+            . "gm.groupid, r.validated FROM {treasurehunt_roads} r "
             . "INNER JOIN  $cond WHERE gm.userid =? AND "
-            . "r.treasurehuntid=? group by roadid,gm.groupid";
+            // . "r.treasurehuntid=? group by roadid,gm.groupid"; // ISSUE [juacas/moodle-mod_treasurehunt] Incorrect sql queries for mssql server (#18)
+            . "r.treasurehuntid=? group by r.id, gm.groupid, r.validated";
     $params = array($userid, $treasurehunt->id);
     $userdata = $DB->get_records_sql($query, $params);
 
@@ -1281,7 +1283,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $groupid = 'a.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
-    $attemptsquery = "SELECT a.id,$user as user,r.position,a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
+    $attemptsquery = "SELECT a.id, $user as 'user', r.position, a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
             . "{treasurehunt_stages} ri INNER JOIN {treasurehunt_attempts} at "
             . "ON at.stageid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
             . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
@@ -1290,7 +1292,9 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             . "AND ri.roadid=r.roadid AND $groupidwithin AND at.success=1 AND "
             . "at.type='location') THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
             . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
-            . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid group by r.position,user,a.id,r.roadid";
+            . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid "
+            //             . "group by r.position,user,a.id,r.roadid"; // ISSUE [juacas/moodle-mod_treasurehunt] Incorrect sql queries for mssql server (#18)
+            . "order by r.position, 'user',a.id,r.roadid";
     $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
             . "(SELECT MAX(position) FROM {treasurehunt_stages} where roadid "
             . "= r.id) as totalstages from {treasurehunt_roads} r where treasurehuntid=?";
@@ -1739,7 +1743,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
             $return->strings[] = get_string('changetoindividualmode', 'treasurehunt');
         }
         $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
-                . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as user "
+                . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as 'user' "
                 . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
                 . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
                 . "a.timecreated ASC";
@@ -1757,7 +1761,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
             $params = array($timestamp, $userid, $roadid);
         }
         $query = "SELECT a.id,a.type,a.questionsolved,a.activitysolved,a.timecreated,"
-                . "a.success,r.position,a.userid as user,a.geometrysolved "
+                . "a.success,r.position,a.userid as 'user',a.geometrysolved "
                 . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
                 . "ON a.stageid=r.id WHERE a.timecreated >? AND $grouptype "
                 . "AND r.roadid=? ORDER BY a.timecreated ASC";
@@ -1803,7 +1807,7 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
         $params = array($userid, $roadid);
     }
     $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
-            . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as user "
+            . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as 'user' "
             . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
             . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
             . "a.timecreated ASC";
@@ -2244,7 +2248,7 @@ SQL;
         $orderby = 'ORDER BY finishtime ASC';
     }
     $sql = <<<SQL
-        SELECT $user as user,$grademethodsql(SELECT COUNT(*) from
+        SELECT $user as 'user', $grademethodsql(SELECT COUNT(*) from
         {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri
         ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON
         ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND
