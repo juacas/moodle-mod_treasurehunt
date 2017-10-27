@@ -981,7 +981,6 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
             . "r.roadid,r.id AS stageid,a.success FROM (SELECT MAX(at.id) AS id,"
             . "at.location AS geometry FROM {treasurehunt_attempts} "
             . "at INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
-//             . "AND $grouptypewithin group by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON " // ISSUE mssql
             . "AND $grouptypewithin order by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON "
             . "a.id = apt.id INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE "
             . "r.roadid=? AND $grouptype";
@@ -1144,7 +1143,6 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
     $query = "SELECT r.id as roadid, count(r.id) as groupsnumber, "
             . "gm.groupid, r.validated FROM {treasurehunt_roads} r "
             . "INNER JOIN  $cond WHERE gm.userid =? AND "
-            // . "r.treasurehuntid=? group by roadid,gm.groupid"; // ISSUE [juacas/moodle-mod_treasurehunt] Incorrect sql queries for mssql server (#18)
             . "r.treasurehuntid=? group by r.id, gm.groupid, r.validated";
     $params = array($userid, $treasurehunt->id);
     $userdata = $DB->get_records_sql($query, $params);
@@ -1293,7 +1291,6 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             . "at.type='location') THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
             . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
             . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid "
-            //             . "group by r.position,user,a.id,r.roadid"; // ISSUE [juacas/moodle-mod_treasurehunt] Incorrect sql queries for mssql server (#18)
             . "order by r.position, 'user',a.id,r.roadid";
     $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
             . "(SELECT MAX(position) FROM {treasurehunt_stages} where roadid "
