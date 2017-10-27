@@ -279,7 +279,7 @@ define(['jquery',
 		    
 		    var layersbase = [];
 		    var layersoverlay = [];
-		    if (!custommapconfig.onlybase) {
+		    if ( custommapconfig === null || custommapconfig.onlybase === false) {
 		    	layersbase = [aeriallayer, roadlayer];
 		    }
 		    if (custombaselayer !== null) {
