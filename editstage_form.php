@@ -81,11 +81,8 @@ class stage_form extends moodleform {
 			        </div>
 		        </div>
 		        <canvas id="qr-canvas" style="display:none;"> </canvas>');
-        $buttonarray = array();
-        $buttonarray[] = $mform->createElement('button', 'scanQR', get_string('scanQR_scanbutton', 'treasurehunt'));
-        $buttonarray[] = $mform->createElement('button', 'generateQR', get_string('scanQR_generatebutton', 'treasurehunt'));
-        $mform->addGroup($buttonarray, 'buttonar', '', array(' '), false);
-        $mform->closeHeaderBefore('buttonar');
+        $mform->addElement('button', 'scanQR', get_string('scanQR_scanbutton', 'treasurehunt'));
+        $mform->addElement('button', 'generateQR', get_string('scanQR_generatebutton', 'treasurehunt'));
 
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));
