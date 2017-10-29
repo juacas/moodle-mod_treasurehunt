@@ -279,7 +279,7 @@ define(['jquery',
 		    
 		    var layersbase = [];
 		    var layersoverlay = [];
-		    if (!custommapconfig.onlybase) {
+		    if ( custommapconfig === null || custommapconfig.onlybase === false) {
 		    	layersbase = [aeriallayer, roadlayer];
 		    }
 		    if (custombaselayer !== null) {
@@ -718,7 +718,7 @@ define(['jquery',
 		                                layergroup.getLayers().forEach(function (l) {
 		                                    if (l === layer) {
 		                                        l.setVisible(true);
-		                                    } else if (l.getType()){
+		                                    } else {
 		                                        l.setVisible(false);
 		                                    }
 		                                });
