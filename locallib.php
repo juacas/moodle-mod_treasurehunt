@@ -190,6 +190,9 @@ function treasurehunt_get_custommappingconfig($treasurehunt, $context) {
     } else {
         $custommapconfig->custombackgroundurl = null;
     }
+    if (trim($custommapconfig->wmsurl) === "") {
+        $custommapconfig->wmsurl = null;
+    }
     return $custommapconfig;
 }
 /**

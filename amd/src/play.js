@@ -718,7 +718,7 @@ define(['jquery',
 		                                layergroup.getLayers().forEach(function (l) {
 		                                    if (l === layer) {
 		                                        l.setVisible(true);
-		                                    } else if (l.getType()){
+		                                    } else {
 		                                        l.setVisible(false);
 		                                    }
 		                                });

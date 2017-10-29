@@ -137,7 +137,6 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setType('customwmsparams', PARAM_TEXT);
         $mform->disabledIf('customwmsparams', 'customlayerwms', 'eq', '');
 
-
         // Local file overlay.
         $mform->addElement('filemanager', 'custombackground',  get_string('custommapimagefile', 'treasurehunt'), null,
                             array('subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
@@ -296,7 +295,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $mapconfig->layertype = 'base';
             $mapconfig->onlybase = true;
             $mapconfig->geographic = true;
-        } if ($data->customlayertype == 'nongeographic') {
+        } else if ($data->customlayertype == 'nongeographic') {
             $mapconfig->layertype = 'base';
             $mapconfig->onlybase = true;
             $mapconfig->geographic = false;
