@@ -54,6 +54,7 @@ $url = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
 if ($userid != $USER->id) {
     $url->param('userid', $userid);
 }
+$output = $PAGE->get_renderer('mod_treasurehunt');
 $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
@@ -68,9 +69,8 @@ $PAGE->set_pagelayout('standard');
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
-$output = $PAGE->get_renderer('mod_treasurehunt');
 echo $output->header();
-echo $output->heading(format_string($treasurehunt->name));
+echo $output->heading(format_string($treasurehunt->name) . $output->help_icon('modulename', 'treasurehunt'));
 // Conditions to show the intro can change to look for own settings or whatever.
 if (treasurehunt_view_intro($treasurehunt)) {
     echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',

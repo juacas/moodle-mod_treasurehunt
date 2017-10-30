@@ -170,16 +170,71 @@ function treasurehunt_check_point_in_multipolygon($mpolygon, $point) {
 }
 /**
  *
- * @param unknown $treasurehunt
+ * @param stdClass $data form data.
+ * @return stdClass
  */
-function treasurehunt_get_custommappingconfig($treasurehunt, $context) {
-    if (!isset($treasurehunt->custommapconfig)) {
+function treasurehunt_build_custommappingconfig($data) {
+    $mapconfig = new stdClass();
+    if (empty($data->customlayername)) {
+        $mapconfig = null;
+    } else {
+        if ($data->customlayertype !== 'nongeographic') {
+            $bbox = [floatval($data->custommapminlon),
+                            floatval($data->custommapminlat),
+                            floatval($data->custommapmaxlon),
+                            floatval($data->custommapmaxlat)];
+            $mapconfig->bbox = $bbox;
+        }
+        if ($data->customlayertype == 'onlybase') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = true;
+        } else if ($data->customlayertype == 'nongeographic') {
+            $mapconfig->layertype = 'base';
+            $mapconfig->onlybase = true;
+            $mapconfig->geographic = false;
+        } else {
+            $mapconfig->layertype = $data->customlayertype; // Or base or overlay.
+            $mapconfig->onlybase = false;
+            $mapconfig->geographic = true;
+        }
+
+        $mapconfig->wmsurl = $data->customlayerwms;
+        if (!empty($data->customwmsparams)) {
+            $params = explode(';', $data->customwmsparams);
+            $parmsobj = new stdClass();
+            foreach ($params as $param) {
+                $parts = explode('=', $param);
+                $parmsobj->{$parts[0]} = $parts[1];
+            }
+            $mapconfig->wmsparams = $parmsobj;
+        } else {
+            $mapconfig->wmsparams = [];
+        }
+        $mapconfig->layername = $data->customlayername;
+    }
+    return $mapconfig;
+}
+/**
+ *
+ * @param \stdClass $treasurehunt Treasurehunt record.
+ * @param context_module $context
+ * @return NULL|mixed
+ */
+function treasurehunt_get_custommappingconfig($treasurehunt, $context = null) {
+    if (empty($treasurehunt->custommapconfig)) {
         return null;
     }
+    $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id);
+    $context = context_module::instance($cm->id);
     $custommapconfig = json_decode($treasurehunt->custommapconfig);
-    $custommapconfig->bbox = array_map(function ($item) {
-                                return floatval($item);
-    }, $custommapconfig->bbox);
+    if ($custommapconfig->geographic === true) {
+        $custommapconfig->bbox = array_map(function ($item) {
+                                    return floatval($item);
+        }, $custommapconfig->bbox);
+    } else {
+        $custommapconfig->bbox = [null, -50, null, 50];
+    }
     $fs = get_file_storage();
     $files = $fs->get_area_files($context->id, 'mod_treasurehunt', 'custombackground', 0, 'sortorder DESC, id ASC', false, 0, 0, 1);
     $file = reset($files);
@@ -1356,14 +1411,6 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
 }
 
 
-/**
- * Get all the strings used in the JavaScript of the track viewer screen
- *
- * @return array The strings
- */
-function treasurehunt_get_strings_trackviewer() {
-    return get_strings(array('aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer'), 'mod_treasurehunt');
-}
 
 /**
  * Get the latest timestamp made by the group / user for the road and the last modification timestamp of the road.

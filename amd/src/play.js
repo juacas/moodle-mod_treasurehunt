@@ -83,6 +83,7 @@ define(['jquery',
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
 			var geographictools = true;
+			var defaultzoom = 19;
 			// Support customized base layers.
 			if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
 				if (custommapconfig.custombackgroundurl != null) {
@@ -101,6 +102,7 @@ define(['jquery',
 							centerheight - adjheight/2,
 							centerwidth + adjwidth/2,
 							centerheight + adjheight/2];
+						defaultzoom = 5;
 					}
 					custombaselayer = new ol.layer.Image({
 						  title : custommapconfig.layername,
@@ -441,7 +443,7 @@ define(['jquery',
 		            });
 		        } else {
 		            view.animate({
-		                zoom: 19,
+		                zoom: defaultzoom,
 		                center: point,
 		                duration: duration
 		            });

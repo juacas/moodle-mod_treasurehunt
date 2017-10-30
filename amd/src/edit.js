@@ -62,7 +62,7 @@ define(
 	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
 	            		}
 	                })
-				} // End of function init.
+				} // End of function edittreasurehunt.
 			}; // End of init var.
 			return init;
 			

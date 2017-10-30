@@ -218,8 +218,14 @@ It must be greater than 5 seconds, but the time will be set by default.';
 $string['mapview'] = 'Map view';
 $string['modify'] = 'Modify';
 $string['modulename'] = 'Treasure Hunt';
-$string['modulename_help'] = 'This module will be used to perform an activity geolocation';
-$string['modulenameplural'] = 'Treasures Hunt';
+$string['modulename_help'] = 'This module will be used to perform an activity geolocation.
+Outdoor, indoor and virtual-map treasure-chases with geolocation and QR codes.
+This module for Moodle allows to organize outdoor-serious-games with your students.
+TreasureHunt implements a browser-based play application (no need to install any native app) and a geographical editor for encoding the stages of the game.
+The game can be configured with a range of options that make the module to be very flexible and useful in many situations: individual/team,
+moving/desktop-marking, scoring from time, position, completion, etc.
+<a href = "https://juacas.github.io/moodle-mod_treasurehunt/index.html">More info in online presentation and tutorial.</a>';
+$string['modulenameplural'] = 'Treasure Hunts';
 $string['movingplay'] = 'Moving play';
 $string['multiplegroupingsplay'] = 'Your group has assigned more than one road, so you can not play the activity.';
 $string['multiplegroupsplay'] = 'You have assigned more than one road, so you can not play the activity.';
