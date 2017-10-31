@@ -1036,10 +1036,12 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
     $query = "SELECT a.id as id,a.timecreated,a.userid as 'user',a.stageid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
             . "r.cluetext END AS cluetext,a.geometrysolved,r.position,a.location as geometry,"
-            . "r.roadid,r.id AS stageid,a.success FROM (SELECT MAX(at.id) AS id,"
-            . "at.location AS geometry FROM {treasurehunt_attempts} "
-            . "at INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
-            . "AND $grouptypewithin order by at.stageid, geometry) apt INNER JOIN {treasurehunt_attempts} a ON "
+            . "r.roadid,r.id AS stageid,a.success FROM ("
+            . "SELECT MAX(at.id) AS id,"
+            . "at.location AS geometry FROM {treasurehunt_attempts} at "
+            . "INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
+            . "AND $grouptypewithin group by at.stageid, geometry) apt "
+            . "INNER JOIN {treasurehunt_attempts} a ON "
             . "a.id = apt.id INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE "
             . "r.roadid=? AND $grouptype";
     $userprogress = $DB->get_records_sql($query, $params);
@@ -1670,10 +1672,10 @@ function treasurehunt_insert_attempt($attempt, $context) {
  * @param type $treasurehunt
  * @return array userids
  */
-function treasurehunt_get_users_with_tracks($treasurehunt) {
+function treasurehunt_get_users_with_tracks($treasurehuntid) {
     global $DB;
     $sql = 'SELECT DISTINCT userid from {treasurehunt_track} WHERE treasurehuntid=?';
-    $results = $DB->get_records_sql($sql, [$treasurehunt]);
+    $results = $DB->get_records_sql($sql, [$treasurehuntid]);
     return array_keys($results);
 }
 
