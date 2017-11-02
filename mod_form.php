@@ -213,13 +213,13 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-        $draftitemid = $data['custombackground'];
-        global $USER;
-        $usercontext = context_user::instance($USER->id);
-        $fs = get_file_storage();
-        $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
-
-        if (count($draftfiles) > 0 || !empty($data['customlayerwms']) || !empty($data['customlayername'])) {
+        // Layer name is the only lock field of the customlayer section.
+        if (!empty($data['customlayername'])) {
+            $draftitemid = $data['custombackground'];
+            global $USER;
+            $usercontext = context_user::instance($USER->id);
+            $fs = get_file_storage();
+            $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
             if ($data['customlayername'] == '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
             }
