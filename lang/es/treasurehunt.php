@@ -84,7 +84,7 @@ $string['custommapmaxlon_help'] = 'Longitud este de la imagen. Use "." para los 
 $string['customlayertype'] = 'Tipo de capa';
 $string['customlayertype_help'] = 'La imagen puede usarse como fondo del mapa o mostrarse por encima de los mapas usuales de carreteras o satélite.';
 $string['customlayerwms'] = 'Servicio WMS';
-$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS.';
+$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS. (Por ejemplo, la capa de ecosistemas de bosques EUNIS Forest Ecosystems WMS se configura con: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'Parámetros adicionales WMS';
 $string['customwmsparams_help'] = 'Los parámetros que definen el aspecto del mapa. Con formato análogo a: "LAYERS=fondo,calles;STYLES=azul,callejero"';
 $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de mapa base.';

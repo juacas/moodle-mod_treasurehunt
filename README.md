@@ -29,5 +29,6 @@ See also
 
  - [Moodle plugins entry page](http://moodle.org/plugins/view.php?plugin=mod_treasurehunt)
  - [Moodle.org forum discussion thread](https://moodle.org/mod/forum/discuss.php?d=354875)
+ - [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
 (c) 2016 onwards. EDUVALab. University of Valladolid.

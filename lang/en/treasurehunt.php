@@ -84,9 +84,9 @@ $string['custommapmaxlon_help'] = 'East longitude of the image. Use "." as decim
 $string['customlayertype'] = 'Layer type';
 $string['customlayertype_help'] = 'The layer can be the only visible in the background or can be layered above the standard base maps.';
 $string['customlayerwms'] = 'WMS service';
-$string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service.';
+$string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service. (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'WMS params';
-$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets;STYLES=blue,default"';
+$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets;STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['custommapbaselayer'] = 'The image is shown as an ADITIONAL map background option';
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
