@@ -159,24 +159,28 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setType('custommapminlon', PARAM_FLOAT);
         $mform->addRule('custommapminlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('custommapminlon', 'customlayername', 'eq', '');
+        $mform->disabledIf('custommapminlon', 'customlayertype', 'eq', 'nongeographic');
 
         $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
         $mform->addHelpButton('custommapminlat', 'custommapminlat', 'treasurehunt');
         $mform->setType('custommapminlat', PARAM_FLOAT);
         $mform->addRule('custommapminlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('custommapminlat', 'customlayername', 'eq', '');
+        $mform->disabledIf('custommapminlat', 'customlayertype', 'eq', 'nongeographic');
 
         $mform->addElement('text', 'custommapmaxlon', get_string('custommapmaxlon', 'treasurehunt'));
         $mform->addHelpButton('custommapmaxlon', 'custommapmaxlon', 'treasurehunt');
         $mform->setType('custommapmaxlon', PARAM_FLOAT);
         $mform->addRule('custommapmaxlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('custommapmaxlon', 'customlayername', 'eq', '');
+        $mform->disabledIf('custommapmaxlon', 'customlayertype', 'eq', 'nongeographic');
 
         $mform->addElement('text', 'custommapmaxlat', get_string('custommapmaxlat', 'treasurehunt'));
         $mform->addHelpButton('custommapmaxlat', 'custommapmaxlat', 'treasurehunt');
         $mform->setType('custommapmaxlat', PARAM_FLOAT);
         $mform->addRule('custommapmaxlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->disabledIf('custommapmaxlat', 'customlayername', 'eq', '');
+        $mform->disabledIf('custommapmaxlat', 'customlayertype', 'eq', 'nongeographic');
 
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
@@ -215,7 +219,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $fs = get_file_storage();
         $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
 
-        if (count($draftfiles) > 0 || $data['customlayerwms'] || $data['customlayername']) {
+        if (count($draftfiles) > 0 || !empty($data['customlayerwms']) || !empty($data['customlayername'])) {
             if ($data['customlayername'] == '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
             }
@@ -223,23 +227,25 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                 $errors['customlayerwms'] = get_string('customlayerwms_help', 'treasurehunt');
                 $errors['custombackground'] = get_string('custombackground_help', 'treasurehunt');
             }
-            if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
-                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
-                $errors['custommapminlat'] = get_string('custommapminlat_help', 'treasurehunt');
+            if ($data['customlayertype'] !== 'nongeographic') {
+                if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
+                        $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                    $errors['custommapminlat'] = get_string('custommapminlat_help', 'treasurehunt');
+                }
+                if ($data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
+                        $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                    $errors['custommapmaxlat'] = get_string('custommapmaxlat_help', 'treasurehunt');
+                }
+                if ($data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
+                        $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                    $errors['custommapminlon'] = get_string('custommapminlon_help', 'treasurehunt');
+                }
+                if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
+                        $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                    $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
+                }
             }
-            if ($data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
-                    $data['custommapminlat'] >= $data['custommapmaxlat']) {
-                $errors['custommapmaxlat'] = get_string('custommapmaxlat_help', 'treasurehunt');
-            }
-            if ($data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
-                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
-                $errors['custommapminlon'] = get_string('custommapminlon_help', 'treasurehunt');
-            }
-            if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
-                    $data['custommapminlon'] >= $data['custommapmaxlon']) {
-                $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
-            }
-            if ($data['customlayerwms']) {
+            if (!empty($data['customlayerwms'])) {
                 if ($data['customwmsparams'] == '') {
                     $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
                 }
@@ -252,7 +258,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         file_prepare_draft_area($draftitemid, $this->context->id, 'mod_treasurehunt', 'custombackground',
                                 0, array('subdirs' => false));
         $defaultvalues['custombackground'] = $draftitemid;
-        $custommapconfig = isset($this->current->custommapconfig) ? json_decode($this->current->custommapconfig) : null;
+        $custommapconfig = treasurehunt_get_custommappingconfig($this->current);
         if ($custommapconfig) {
             $defaultvalues['custommapminlon'] = $custommapconfig->bbox[0];
             $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
@@ -260,6 +266,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $defaultvalues['custommapmaxlat'] = $custommapconfig->bbox[3];
             if (isset($custommapconfig->geographic) && $custommapconfig->geographic === false) {
                 $defaultvalues['customlayertype'] = 'nongeographic';
+                // Adjust vertical frame for canvas on the map.
+                $defaultvalues['custommapminlon'] = null;
+                $defaultvalues['custommapminlat'] = -80;
+                $defaultvalues['custommapmaxlon'] = null;
+                $defaultvalues['custommapmaxlat'] = 80;
+
             } else if (isset($custommapconfig->onlybase) && $custommapconfig->onlybase == true ) {
                 $defaultvalues['customlayertype'] = 'onlybase';
             } else {
@@ -285,41 +297,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * @param stdClass $data passed by reference
      */
     public function data_postprocessing($data) {
-        $mapconfig = new stdClass();
-        $bbox = [floatval($data->custommapminlon) ,
-                        floatval($data->custommapminlat),
-                        floatval($data->custommapmaxlon),
-                        floatval($data->custommapmaxlat)];
-        $mapconfig->bbox = $bbox;
-        if ($data->customlayertype == 'onlybase') {
-            $mapconfig->layertype = 'base';
-            $mapconfig->onlybase = true;
-            $mapconfig->geographic = true;
-        } else if ($data->customlayertype == 'nongeographic') {
-            $mapconfig->layertype = 'base';
-            $mapconfig->onlybase = true;
-            $mapconfig->geographic = false;
-        } else {
-            $mapconfig->layertype = $data->customlayertype; // Or base or overlay.
-            $mapconfig->onlybase = false;
-            $mapconfig->geographic = true;
-        }
-
-        $mapconfig->wmsurl = $data->customlayerwms;
-        if ($data->customwmsparams) {
-            $params = explode(';', $data->customwmsparams);
-            $parmsobj = new stdClass();
-            foreach ($params as $param) {
-                $parts = explode('=', $param);
-                $parmsobj->{$parts[0]} = $parts[1];
-            }
-            $mapconfig->wmsparams = $parmsobj;
-        } else {
-            $mapconfig->wmsparams = [];
-        }
-
-        $mapconfig->layername = $data->customlayername;
-        $data->custommapconfig = json_encode($mapconfig);
+        $mapconfig = treasurehunt_build_custommappingconfig($data);
+        $data->custommapconfig = $mapconfig === null ? null : json_encode($mapconfig);
     }
 
     /**

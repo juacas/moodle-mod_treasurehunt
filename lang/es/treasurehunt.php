@@ -84,7 +84,7 @@ $string['custommapmaxlon_help'] = 'Longitud este de la imagen. Use "." para los 
 $string['customlayertype'] = 'Tipo de capa';
 $string['customlayertype_help'] = 'La imagen puede usarse como fondo del mapa o mostrarse por encima de los mapas usuales de carreteras o satélite.';
 $string['customlayerwms'] = 'Servicio WMS';
-$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS.';
+$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS. (Por ejemplo, la capa de ecosistemas de bosques EUNIS Forest Ecosystems WMS se configura con: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'Parámetros adicionales WMS';
 $string['customwmsparams_help'] = 'Los parámetros que definen el aspecto del mapa. Con formato análogo a: "LAYERS=fondo,calles;STYLES=azul,callejero"';
 $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de mapa base.';
@@ -223,7 +223,12 @@ Debe ser mayor a 5 segundos, sino se fijará el tiempo por defecto.';
 $string['mapview'] = 'Vista del mapa';
 $string['modify'] = 'Modificar';
 $string['modulename'] = 'Caza del tesoro';
-$string['modulename_help'] = 'Este módulo servirá para realizar una actividad de geolocalización';
+$string['modulename_help'] = 'Caza del tesoro al aire libre, en interiores y con mapas virtuales con geolocalización y códigos QR.
+Este módulo para Moodle permite organizar juegos serios al aire libre con sus alumnos.
+TreasureHunt incluye una aplicación de navegador (no es necesario instalar ninguna aplicación nativa) para el juego y un editor geográfico
+para codificar las etapas del juego. El juego se puede configurar con una amplia gama de opciones que hacen que el módulo sea muy flexible y
+útil en muchas situaciones: individual / equipo, movimiento / marcado manual en escritorio, puntuación de tiempo, posición, finalización, etc.
+<a href = "https://juacas.github.io/moodle-mod_treasurehunt/es/index.html">Más información e instrucciones online.</a>';
 $string['modulenameplural'] = 'Cazas del tesoro';
 $string['movingplay'] = 'Jugar en movimiento';
 $string['multiplegroupingsplay'] = 'Tu grupo tiene asignados más de un camino, por lo que no puedes jugar la actividad.';

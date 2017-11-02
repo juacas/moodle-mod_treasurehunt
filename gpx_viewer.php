@@ -64,8 +64,7 @@ foreach ($userrecords as $userrecord) {
     $users[] = $user;
 }
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',
-        array($id, $treasurehunt->id, treasurehunt_get_strings_trackviewer(), $users, $custommapping));
+$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer', array($id, $treasurehunt->id, $users, $custommapping));
 echo $output->header();
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
