@@ -1040,7 +1040,7 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
             . "SELECT MAX(at.id) AS id,"
             . "at.location AS geometry FROM {treasurehunt_attempts} at "
             . "INNER JOIN {treasurehunt_stages} ri ON ri.id=at.stageid WHERE ri.roadid=? "
-            . "AND $grouptypewithin group by at.stageid, geometry) apt "
+            . "AND $grouptypewithin group by at.stageid, at.location) apt "
             . "INNER JOIN {treasurehunt_attempts} a ON "
             . "a.id = apt.id INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE "
             . "r.roadid=? AND $grouptype";
