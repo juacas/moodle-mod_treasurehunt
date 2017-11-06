@@ -31,4 +31,14 @@ See also
  - [Moodle.org forum discussion thread](https://moodle.org/mod/forum/discuss.php?d=354875)
  - [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
+Change log
+==========
+v1.2.7 Compatibility with MSSQL
+v1.2.6 Custom image maps. Validation form fixed.
+v1.2.5 Non-geographic images as base of the game.
+v1.2.4 Fixed conflict with Essential theme.
+v1.2.3 Custom image maps. Support for WMS and uploaded images.
+v1.2.1 SVG images render with vector quality.
+v1.2.0 Custom uploaded images.
+
 (c) 2016 onwards. EDUVALab. University of Valladolid.
