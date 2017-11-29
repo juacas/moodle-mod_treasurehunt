@@ -66,12 +66,13 @@ foreach ($userrecords as $userrecord) {
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 $PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer', array($id, $treasurehunt->id, $users, $custommapping));
 echo $output->header();
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+echo '<script src="https://cdn.polyfill.io/v2/polyfill.js?features=requestAnimationFrame"></script>';
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
 echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
 echo $OUTPUT->box('', null, 'mapgpx');
 echo $OUTPUT->container_end();
 echo $OUTPUT->box('', null, 'info');
-
 
 echo $output->footer();

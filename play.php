@@ -64,6 +64,7 @@ $output = $PAGE->get_renderer('mod_treasurehunt');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
+// $PAGE->requires->js('/mod/treasurehunt/js/polyfill.js');
 // Support for QR scan.
 treasurehunt_qr_support($PAGE);
 // End QR.
@@ -93,6 +94,8 @@ $PAGE->set_pagelayout('embedded');
 
 // Output starts here.
 echo $output->header();
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+echo '<script src="https://cdn.polyfill.io/v2/polyfill.js?features=requestAnimationFrame"></script>';
 
 echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
 // Finish the page.

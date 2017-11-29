@@ -888,7 +888,7 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         $geometry = treasurehunt_wkt_to_object($feature->geometry);
         if (isset($feature->cluetext)) {
             $cluetext = file_rewrite_pluginfile_urls($feature->cluetext, 'pluginfile.php', $context->id, 'mod_treasurehunt',
-                    'cluetext', $feature->stageid ? $feature->stageid : $feature->id);
+                    'cluetext', isset($feature->stageid) ? $feature->stageid : $feature->id);
         } else {
             $cluetext = null;
         }

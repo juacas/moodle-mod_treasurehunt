@@ -519,7 +519,8 @@ define(
 				}
 
 				map.on('click', function(evt) {
-					if (!Draw.getActive() && !Modify.getActive() && custommapconfig.geographic) {
+					if (!Draw.getActive() && !Modify.getActive() &&
+						custommapconfig !== null && custommapconfig.geographic) {
 						showpopup(evt);
 					}
 				});
@@ -1098,38 +1099,34 @@ define(
 										+ roadid + '" stageposition="'
 										+ stageposition + '"/>').appendTo(
 								$("#stagelist"));
-						li
-								.addClass("ui-corner-all")
-								.append(
-										"<div class='stagename'>" + name
-												+ "</div>")
-								.append(
-										"<div class='modifystage'>"
-												+ "<span class='ui-icon ui-icon-pencil'></span>"
-												+ "<span class='ui-icon ui-icon-info' data-id='#dialoginfo"
-												+ stageid + "'>"
-												+ "<div id='dialoginfo"
-												+ stageid + "' title='"
-												+ name + "'>" + clue
-												+ "</div></span></div>");
+						li.addClass("ui-corner-all")
+							.append(
+									"<div class='stagename'>" + name
+											+ "</div>")
+							.append(
+									"<div class='modifystage'>"
+											+ "<span class='ui-icon ui-icon-pencil'></span>"
+											+ "<span class='ui-icon ui-icon-info' data-id='#dialoginfo"
+											+ stageid + "'>"
+											+ "<div id='dialoginfo"
+											+ stageid + "' title='"
+											+ name + "'>" + clue
+											+ "</div></span></div>");
 						if (blocked) {
-							li
-									.addClass("blocked")
-									.prepend(
-											"<div class='nohandle validstage'>"
-													+ "<span class='ui-icon ui-icon-locked'></span>"
-													+ "<span class='sortable-number'>"
-													+ stageposition
-													+ "</span></div>");
+							li.addClass("blocked")
+								.prepend(
+										"<div class='nohandle validstage'>"
+												+ "<span class='ui-icon ui-icon-locked'></span>"
+												+ "<span class='sortable-number'>"
+												+ stageposition
+												+ "</span></div>");
 						} else {
-							li
-									.prepend("<div class='handle validstage'>"
-											+ "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>"
-											+ "<span class='sortable-number'>"
-											+ stageposition
-											+ "</span></div>");
-							li
-									.children(".modifystage")
+							li.prepend("<div class='handle validstage'>"
+										+ "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>"
+										+ "<span class='sortable-number'>"
+										+ stageposition
+										+ "</span></div>");
+							li.children(".modifystage")
 									.prepend(
 											"<span class='ui-icon ui-icon-trash'></span>");
 						}
@@ -1138,8 +1135,7 @@ define(
 							autoOpen : false
 						});
 					} else {
-						console
-								.log('El li con '
+						console.log('El li con '
 										+ stageid
 										+ ' no ha podido crearse porque ya existia uno');
 					}
@@ -1464,11 +1460,9 @@ define(
 											// del originalStages y elimino
 											// el camino del treasurehunt y
 											// la capa del mapa.
-											map
-													.removeLayer(treasurehunt.roads[roadid].vector);
+											map.removeLayer(treasurehunt.roads[roadid].vector);
 											delete treasurehunt.roads[roadid];
-											selectfirstroad(
-													treasurehunt.roads, map);
+											selectfirstroad(treasurehunt.roads, map);
 											deactivateEdition();
 											var features = originalStages
 													.getFeatures();
