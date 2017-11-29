@@ -37,7 +37,7 @@ define(['jquery',
 	                    lastattempttimestamp,
 	                    lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig) {
 	            	// I18n strings.
-	            	var terms = ["stageovercome", "failedlocation", "stagename",
+	            	var terms = ["stageovercome", "failedlocation", "stage", "stagename",
 									        "stageclue", "question", "noanswerselected", "timeexceeded",
 									        "searching", "continue", "noattempts", "aerialview", "roadview", 
 									        "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
@@ -631,12 +631,26 @@ define(['jquery',
 		    }
 		    function set_lastsuccessfulstage() {
 		        if (changesinlastsuccessfulstage) {
-		            $("#lastsuccessfulstagename").text(lastsuccessfulstage.name);
+		            $("#lastsuccessfulstagename").text(strings['stage'] + ':' + lastsuccessfulstage.name);
 		            $("#lastsuccesfulstagepos").text(lastsuccessfulstage.position +
 		                    " / " + lastsuccessfulstage.totalnumber);
-		            $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+		            var briefing = lastsuccessfulstage.clue.substring(0, Math.min(100, lastsuccessfulstage.clue.length));
+		            briefing += '[...]';
+		            briefing += ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            $("#lastsuccessfulstageclue").html(briefing);
+		            
+		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
+		            $("#lastsuccesfulstagepos2").text(lastsuccessfulstage.position +
+		                    " / " + lastsuccessfulstage.totalnumber);
+		            $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
+
 		            if (lastsuccessfulstage.question !== '') {
 		                $("#lastsuccessfulstageclue").append("<a href='#questionpage' " +
+		                        "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
+		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
+		                        + strings['question']
+		                        + "</a>");
+		                $("#lastsuccessfulstageclue2").append("<a href='#questionpage' " +
 		                        "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
 		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
 		                        + strings['question']
