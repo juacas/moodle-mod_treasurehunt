@@ -90,6 +90,8 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 }
 /** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+echo '<script src="https://cdn.polyfill.io/v2/polyfill.js?features=requestAnimationFrame"></script>';
 echo $OUTPUT->heading($title);
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($treasurehunt->intro) {
