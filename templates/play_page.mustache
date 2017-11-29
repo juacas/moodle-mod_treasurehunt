@@ -221,9 +221,21 @@
             <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
         </div>
         <div data-role="content">
-            <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
-                <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
-            </ol>
+        	  <div id="lastsuccessfulstage2" data-role="collapsible" data-collapsed="false" >
+                    <h3>
+                        <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>
+                        {{#str}} stageclue, mod_treasurehunt{{/str}} : <span id="lastsuccessfulstagename2"></span>
+                    </h3>
+                    <div>
+                        <p id="lastsuccessfulstageclue2"></p>
+                    </div>
+              </div>
+              <div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
+	                <h3>{{#str}} history, mod_treasurehunt{{/str}}</h3>
+			            <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
+			                <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
+			            </ol>
+	          </div>
         </div>
     </div>
     {{!Fin de pagina de historial de intentos.}}

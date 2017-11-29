@@ -95,7 +95,7 @@ $PAGE->set_pagelayout('embedded');
 // Output starts here.
 echo $output->header();
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
-echo '<script src="https://cdn.polyfill.io/v2/polyfill.js?features=requestAnimationFrame"></script>';
+echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
 echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
 // Finish the page.

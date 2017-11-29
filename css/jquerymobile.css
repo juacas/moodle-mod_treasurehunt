@@ -3353,12 +3353,14 @@ fieldset.ui-controlgroup {
 }
 .ui-popup-arrow-container.ie .ui-popup-arrow {
     -ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.7071067811865474, M12=-0.7071067811865477, M21=0.7071067811865477, M22=0.7071067811865474, SizingMethod='auto expand')";
-    filter: progid:DXImageTransform.Microsoft.Matrix(
+
+/* This filter conflicts with IOS browsers. Is for IES6-7
+   filter: progid:DXImageTransform.Microsoft.Matrix(
         M11=0.7071067811865474,
         M12=-0.7071067811865477,
         M21=0.7071067811865477,
         M22=0.7071067811865474,
-        SizingMethod='auto expand');
+        SizingMethod='auto expand');*/
 }
 .ui-checkbox,
 .ui-radio {
