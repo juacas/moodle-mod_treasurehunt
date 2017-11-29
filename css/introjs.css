@@ -245,7 +245,7 @@ tr.introjs-showElement > th {
   border-radius: 0.2em;
   /* IE hacks */
   zoom: 1;
-  display: inline;
+  *display: inline;
   margin-top: 10px;
 }
 
