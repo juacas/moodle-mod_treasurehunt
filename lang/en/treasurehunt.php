@@ -130,7 +130,12 @@ $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s gam
 The larger, less update requests should be made, but more time passes to report a possible change.
 It must be greater than 0 seconds, but the time will be set by default.';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
-$string['geolocation_needed'] = 'To play this game your geolocation is needed. <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.';
+$string['geolocation_needed'] = 'To play this game your geolocation is needed.
+<p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.
+<p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.
+<p>In order to use the GPS to locate this device during the Treasurehunt, the server must be accessed by secure HTTPS URLs.
+In other case, only "Play without moving" mode can be used and the players need to point manually each stage on the map.
+Please contact your administrator if you can\'t solve this problem.';
 $string['grade_explaination_fromposition'] = '{$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} stages in position {$a->position}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
 $string['grade_explaination_fromtime'] = '{$a->rawscore}-{$a->penalization}%: You needed {$a->yourtime} to complete the hunt. The best time was {$a->besttime}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
 $string['grade_explaination_fromabsolutetime'] = '{$a->rawscore}-{$a->penalization}%: You ended the huntg at {$a->yourtime}. The best time was at{$a->besttime}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
@@ -359,6 +364,12 @@ like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that you have passed a QR test with this device.';
+$string['warnunsecuregeolocation'] = 'Geolocation may not work in your server. This is a <b>SEVERE misconfiguration</b> caused by your
+server configuration. Geolocation is forbidden for non-Secure servers that use HTTP instead of HTTPS. In order to use the GPS of
+to locate the students during the Treasurehunt the server must be accessed by secure HTTPS URLs. In other case, only "Play without moving" mode
+can be used and the players need to point manually each stage on the map.
+Please contact your administrator.
+(References <a href="https://www.chromestatus.com/feature/5636088701911040">Chrome</a>, <a href="https://blog.mozilla.org/security/2015/04/30/deprecating-non-secure-http/">Firefox</a>)';
 $string['warnusersgroup'] = 'The following users belong to more than one group: {$a}, so are unable to play the activity.';
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';

@@ -63,8 +63,7 @@ $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
 $PAGE->requires->jquery();
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
-$PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
-// $PAGE->requires->js('/mod/treasurehunt/js/polyfill.js');
+// Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Support for QR scan.
 treasurehunt_qr_support($PAGE);
 // End QR.
@@ -94,7 +93,7 @@ $PAGE->set_pagelayout('embedded');
 
 // Output starts here.
 echo $output->header();
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
 echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);

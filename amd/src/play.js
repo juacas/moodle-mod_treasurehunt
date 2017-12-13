@@ -32,6 +32,7 @@ define(['jquery',
     'mod_treasurehunt/jquerymobile', 
     ],
 	    function ($, url, ol, ajax, GeocoderJS, viewgpx, str) {
+			console.log('loading play.js');
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
 	                    lastattempttimestamp,
@@ -42,6 +43,7 @@ define(['jquery',
 									        "searching", "continue", "noattempts", "aerialview", "roadview", 
 									        "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
 									        "huntcompleted", "discoveredlocation", "answerwarning", "error"];
+					console.log('loading i18n strings');
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
 	                });
@@ -54,12 +56,13 @@ define(['jquery',
 	            		if (typeof(custommapconfig) != 'undefined' &&
 	            				custommapconfig !== null && 
 	            				custommapconfig.custombackgroundurl !== null) {
-	            			
+	    						console.log('detecting custom background image dimensions.');
 	            			// Detect image size.
 	    						var img = new Image();
 	    					    img.addEventListener("load", function(){
 	    					    	custommapconfig.imgwidth =  this.naturalWidth;
 	    					    	custommapconfig.imgheight = this.naturalHeight;
+	    							console.log('image is ' + this.naturalWidth + 'x' + this.naturalHeight + 'pixels');
 	    					    	initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
 	    		                	        lastattempttimestamp,
 	    		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);        
@@ -79,7 +82,7 @@ define(['jquery',
 		        lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig){
 		
 			// I18n support.
-			
+			console.log('init player Openlayers');
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
 			var geographictools = true;
@@ -87,6 +90,7 @@ define(['jquery',
 			// Support customized base layers.
 			if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
 				if (custommapconfig.custombackgroundurl != null) {
+					console.log('config custom background image');
 					var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
 					if (!custommapconfig.geographic) {
 						// Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
@@ -115,6 +119,7 @@ define(['jquery',
 					      opacity: 1.0
 					    });
 				} else if (custommapconfig.wmsurl !== null) {
+					console.log('config custom wms server: ' + custommapconfig.wmsurl);
 					var options = {
 								source: new ol.source.TileWMS({
 						            url: custommapconfig.wmsurl,
@@ -137,6 +142,7 @@ define(['jquery',
 				geographictools = custommapconfig.geographic;
 			}
 			if (geographictools === false) {
+				console.log('geographic tools disabled');
 				playwithoutmoving = true;
 				$('#autolocate').hide();
 			}
@@ -634,9 +640,15 @@ define(['jquery',
 		            $("#lastsuccessfulstagename").text(strings['stage'] + ':' + lastsuccessfulstage.name);
 		            $("#lastsuccesfulstagepos").text(lastsuccessfulstage.position +
 		                    " / " + lastsuccessfulstage.totalnumber);
-		            var briefing = lastsuccessfulstage.clue.substring(0, Math.min(100, lastsuccessfulstage.clue.length));
-		            briefing += '[...]';
-		            briefing += ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            var maxchars = 100;
+		            var briefing;
+		            if (lastsuccessfulstage.clue.length > maxchars*2 ) {
+		            	briefing = lastsuccessfulstage.clue.substring(0, Math.min(maxchars, lastsuccessfulstage.clue.length));
+		            	briefing += '[...]';
+		            	briefing += ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            } else {
+		            	briefing = lastsuccessfulstage.clue;
+		            }
 		            $("#lastsuccessfulstageclue").html(briefing);
 		            
 		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
@@ -779,13 +791,15 @@ define(['jquery',
 		        accuracyFeature.setGeometry(this.getAccuracyGeometry());
 		        $.mobile.loading("hide");
 		    });
+		    var trackinggeolocationwarndispatched = false;
 		    geolocation.on('error', function (error) {
 		        $.mobile.loading("hide");
 		        geolocation.setProperties({"user_denied": true});
 		        toast(error.message);
-		        if (error.code == error.PERMISSION_DENIED && tracking && !playwithoutmoving) {
-		            setInterval(function () {
+		        if (error.code == error.PERMISSION_DENIED && tracking && !playwithoutmoving && trackinggeolocationwarndispatched == false) {
+		            setTimeout(function () {
 		                $('#popupgeoloc').popup("open", {positionTo: "window"});
+		                trackinggeolocationwarndispatched = true;
 		            }, 500);
 		        }
 		    });
@@ -889,7 +903,7 @@ define(['jquery',
 		        $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
 		    });
 		    // Remove the popup after it has been closed to manage DOM size.
-		    $(document).on("popupafterclose", ".ui-popup:not(#QRdialog):not(#popupdialog)", function () {
+		    $(document).on("popupafterclose", ".ui-popup:not(#QRdialog):not(#popupdialog):not(#popupgeoloc)", function () {
 		        $(this).remove();
 		        select.getFeatures().clear();
 		    });
