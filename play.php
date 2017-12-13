@@ -62,11 +62,12 @@ list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestam
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
 $PAGE->requires->jquery();
+// jquerymobile is tied to jquery 2.
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 // Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
-// Support for QR scan.
+// Adds support for QR scan.
 treasurehunt_qr_support($PAGE);
-// End QR.
+// End QR support.
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
@@ -77,7 +78,6 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
                         intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
                         $treasurehunt->tracking, $user, $custommapping));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
-
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
