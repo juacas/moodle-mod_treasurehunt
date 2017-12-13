@@ -23,6 +23,8 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+use core\output\notification;
+
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
@@ -305,6 +307,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
 		     <canvas id="qr-canvas" style="display:none;"> </canvas>';
             $o .= '</div>';
         }
+
         // Type of geolocation: GPS or Desktop.
         if ($info->treasurehunt->playwithoutmoving) {
             $gamemode = get_string('playwithoutmoving', 'treasurehunt');

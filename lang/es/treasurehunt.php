@@ -130,7 +130,11 @@ $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actu
 Cuanto más grande es, menos peticiones de actualización deben hacerse, pero más tiempo pasa en informar de un posible cambio.
 Debe ser mayor a 0 segundos, sino se fijará el tiempo por defecto.';
 $string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
-$string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.';
+$string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.
+<p>Para poder usar el GPS para localizar este dispositivo durante la Caza del Tesoro, se debe acceder al servidor mediante
+URLs seguras con HTTPS. En caso contrario, sólo se podrá usar el modo "Jugar sin moverse" en el que los jugadores
+tienen que marcar manualmente en el mapa cada una de las etapas.
+Por favor contacte con su administrador si no puede resolver este problema.';
 $string['grade_explaination_fromposition'] = '{$a->rawscore}-{$a->penalization}%: Has superado {$a->nosuccessfulstages} pistas en la posición {$a->position}. Penalizas un {$a->penalization}% por {$a->nolocationsfailed} lugares mal, y {$a->noanswersfailed} fallos de respuesta.';
 $string['grade_explaination_fromtime'] = '{$a->rawscore}-{$a->penalization}%: Has tardado {$a->yourtime} en terminar la caza. El mejor tiempo ha sido {$a->besttime}. Penalizas un {$a->penalization}% por {$a->nolocationsfailed} lugares mal y {$a->noanswersfailed} fallos de respuesta.';
 $string['grade_explaination_fromabsolutetime'] = '{$a->rawscore}-{$a->penalization}%: Has terminado la caza el {$a->yourtime}. El mejor terminó el {$a->besttime}. Penalizas un {$a->penalization}% por {$a->nolocationsfailed} lugares mal y {$a->noanswersfailed} fallos de respuesta.';
@@ -368,6 +372,14 @@ $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un gru
 $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una agrupación: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún grupo/agrupación: {$a},
 por lo que no son capaces de jugar la actividad.';
+$string['warnunsecuregeolocation'] = 'Es muy posible que la geolocalización NO FUNCIONE en este servidor.
+Esto es un <b>error de configuración muy GRAVE</b> provocada por la configuración de su servidor:
+Las funciones de Geolocalización están prohibidas cuando se usa un servidor no seguro (que use HTTP en lugar de HTTPS).
+Para poder usar el GPS para localizar a los estudiantes durante la Caza del Tesoro se debe acceder al servidor mediante
+URLs seguras con HTTPS. En caso contrario, sólo se podrá usar el modo "Jugar sin moverse" en el que los jugadores
+tienen que marcar manualmente en el mapa cada una de las etapas.
+Por favor contacte con su administrador.
+(Referencias: <a href="https://www.chromestatus.com/feature/5636088701911040">Chrome</a>, <a href="https://blog.mozilla.org/security/2015/04/30/deprecating-non-secure-http/">Firefox</a> announces.';
 
 // Initial tour help.
 $string['addroad_tour'] = 'Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
