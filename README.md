@@ -33,12 +33,14 @@ See also
 
 Change log
 ==========
-v1.2.7 Compatibility with MSSQL
-v1.2.6 Custom image maps. Validation form fixed.
-v1.2.5 Non-geographic images as base of the game.
-v1.2.4 Fixed conflict with Essential theme.
-v1.2.3 Custom image maps. Support for WMS and uploaded images.
-v1.2.1 SVG images render with vector quality.
-v1.2.0 Custom uploaded images.
+ - v1.2.9 Incompatibility with IOS 11 fixed.
+ - v1.2.8 Clues with long text were not readable in lateral panel in the player. Text moved to History Page.
+ - v1.2.7 Compatibility with MSSQL
+ - v1.2.6 Custom image maps. Validation form fixed.
+ - v1.2.5 Non-geographic images as base of the game.
+ - v1.2.4 Fixed conflict with Essential theme.
+ - v1.2.3 Custom image maps. Support for WMS and uploaded images.
+ - v1.2.1 SVG images render with vector quality.
+ - v1.2.0 Custom uploaded images.
 
 (c) 2016 onwards. EDUVALab. University of Valladolid.
