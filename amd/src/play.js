@@ -1005,7 +1005,7 @@ define(['jquery',
 		        var viewport = document.querySelector("meta[name=viewport]");
 		        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
 		                'maximum-scale=1.0, user-scalable=0');
-		        $("#infopanel .ui-panel-inner").niceScroll();
+//		        $("#infopanel .ui-panel-inner").niceScroll();
 		
 		        $("#QRdialog").popup({
 		            beforeposition: function (event, ui) {
