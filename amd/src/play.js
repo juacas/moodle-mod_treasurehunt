@@ -28,6 +28,7 @@ define(['jquery',
     'mod_treasurehunt/geocoder',
     'mod_treasurehunt/viewgpx',
     'core/str',
+    'mod_treasurehunt/jquery.truncate', 
     'mod_treasurehunt/jquery.mobile-config',
     'mod_treasurehunt/jquerymobile', 
     ],
@@ -635,6 +636,13 @@ define(['jquery',
 		            fitmap = false;
 		        }
 		    }
+		    function truncate( n, useWordBoundary ){
+		        if (this.length <= n) { return this; }
+		        var subString = this.substr(0, n-1);
+		        return (useWordBoundary 
+		           ? subString.substr(0, subString.lastIndexOf(' ')) 
+		           : subString) + "&hellip";
+		    };
 		    function set_lastsuccessfulstage() {
 		        if (changesinlastsuccessfulstage) {
 		            $("#lastsuccessfulstagename").text(strings['stage'] + ':' + lastsuccessfulstage.name);
@@ -642,14 +650,17 @@ define(['jquery',
 		                    " / " + lastsuccessfulstage.totalnumber);
 		            var maxchars = 100;
 		            var briefing;
-		            if (lastsuccessfulstage.clue.length > maxchars*2 ) {
-		            	briefing = lastsuccessfulstage.clue.substring(0, Math.min(maxchars, lastsuccessfulstage.clue.length));
-		            	briefing += '[...]';
-		            	briefing += ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            // Clean color styles from clue.
+		            lastsuccessfulstage.clue = lastsuccessfulstage.clue.replace(/color/gm, 'color-disabled');
+		            $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+		            var clueplaintext = lastsuccessfulstage.clue.replace(/<(?:.|\n)*?>/gm, '');
+		            if (clueplaintext.length > maxchars*2 ) {
+		            	$("#lastsuccessfulstageclue").truncate(maxchars*2);
+		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            	$("#lastsuccessfulstageclue").append(briefing);
 		            } else {
 		            	briefing = lastsuccessfulstage.clue;
 		            }
-		            $("#lastsuccessfulstageclue").html(briefing);
 		            
 		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
 		            $("#lastsuccesfulstagepos2").text(lastsuccessfulstage.position +
@@ -676,10 +687,16 @@ define(['jquery',
 		    }
 		    function set_question() {
 		        if (changesinquestionstage) {
+		        	// Clean color tag.
+		        	lastsuccessfulstage.question = lastsuccessfulstage.question.replace(/color/gm, 'color-disabled');
+
 		            $('#questionform').html("<legend>" + lastsuccessfulstage.question + "</legend>");
 		            var counter = 1;
 		            $.each(lastsuccessfulstage.answers, function (key, answer) {
 		                var id = 'answer' + counter;
+			        	// Clean color tag.
+		                answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
+
 		                $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
 		                        + answer.id + '">' +
 		                        '<label for="' + id + '">' + answer.answertext + '</label>');
@@ -1005,7 +1022,7 @@ define(['jquery',
 		        var viewport = document.querySelector("meta[name=viewport]");
 		        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
 		                'maximum-scale=1.0, user-scalable=0');
-		        $("#infopanel .ui-panel-inner").niceScroll();
+//		        $("#infopanel .ui-panel-inner").niceScroll();
 		
 		        $("#QRdialog").popup({
 		            beforeposition: function (event, ui) {

@@ -53,6 +53,14 @@
 		<!-- jquery.nicescroll 3.2.0 InuYaksa*2013 MIT http://areaaperta.com/nicescroll -->
 	</library>
 	<library>
+		<location>amd/src/jquery.truncate.js</location>
+		<name>jquery.truncate</name>
+		<version>0.0.1</version>
+		<license>MIT</license>
+		<licenseversion>2012</licenseversion>
+		<!-- Pathable	https://github.com/pathable/truncate -->
+	</library>
+	<library>
 		<location>js/webqr.js</location>
 		<name>QRCODE reader</name>
 		<version>1.0.0</version>

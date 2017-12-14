@@ -33,6 +33,7 @@ See also
 
 Change log
 ==========
+ - v1.2.10 Fix support to long texts in clues. Left panel shows a truncated text.
  - v1.2.9 Incompatibility with IOS 11 fixed.
  - v1.2.8 Clues with long text were not readable in lateral panel in the player. Text moved to History Page.
  - v1.2.7 Compatibility with MSSQL
