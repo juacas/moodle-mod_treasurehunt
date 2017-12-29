@@ -99,7 +99,8 @@ $string['editingroad'] = 'Editando camino';
 $string['editingstage'] = 'Editando etapa';
 $string['editingtreasurehunt'] = 'Editando caza del tesoro';
 $string['edition'] = 'Panel de edición';
-$string['edition_help'] = 'Para habilitar el panel de creación y edición de geometrías debe seleccionar la etapa que desea editar';
+$string['edition_help'] = 'Para habilitar el panel de creación y edición de geometrías debe seleccionar previamente la etapa que desea editar';
+$string['editactivity_help'] = 'Puede encontrar un tutorial para crear una caza del tesoro paso a paso en <a href="http://juacas.github.io/moodle-mod_treasurehunt/es/crear_actividad.html"> esta página.</a>';
 $string['editroad'] = 'Editar camino';
 $string['editstage'] = 'Editar etapa';
 $string['edittreasurehunt'] = 'Cambiar caminos y pistas';
@@ -232,7 +233,7 @@ Este módulo para Moodle permite organizar juegos serios al aire libre con sus a
 TreasureHunt incluye una aplicación de navegador (no es necesario instalar ninguna aplicación nativa) para el juego y un editor geográfico
 para codificar las etapas del juego. El juego se puede configurar con una amplia gama de opciones que hacen que el módulo sea muy flexible y
 útil en muchas situaciones: individual / equipo, movimiento / marcado manual en escritorio, puntuación de tiempo, posición, finalización, etc.
-<a href = "https://juacas.github.io/moodle-mod_treasurehunt/es/index.html">Más información e instrucciones online.</a>';
+<p><b><a href = "https://juacas.github.io/moodle-mod_treasurehunt/es/index.html">Más información e instrucciones online.</a></b></p>';
 $string['modulenameplural'] = 'Cazas del tesoro';
 $string['movingplay'] = 'Jugar en movimiento';
 $string['multiplegroupingsplay'] = 'Tu grupo tiene asignados más de un camino, por lo que no puedes jugar la actividad.';

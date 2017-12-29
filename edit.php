@@ -1,4 +1,6 @@
 <?php
+use core\notification;
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -90,13 +92,14 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 }
 /** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $OUTPUT->heading($title);
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
+notification::info(get_string('editactivity_help', 'treasurehunt'));
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');
