@@ -22,8 +22,6 @@
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-use core\notification;
-
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once("$CFG->dirroot/mod/treasurehunt/renderable.php");
@@ -77,7 +75,7 @@ echo $output->heading(format_string($treasurehunt->name) . $output->help_icon('m
 // Warn about the geolocation with no HTTPS.
 if ($treasurehunt->playwithoutmoving == false &&
         (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
-            core\notification::error(get_string('warnunsecuregeolocation', 'treasurehunt'));
+            treasurehunt_notify_error(get_string('warnunsecuregeolocation', 'treasurehunt'));
 }
 // Conditions to show the intro can change to look for own settings or whatever.
 if (treasurehunt_view_intro($treasurehunt)) {
@@ -116,7 +114,7 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
         echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid,
                 $cm->id, $username, $teacherreview);
     } catch (Exception $e) {
-        core\notification::error($e->getMessage());
+        treasurehunt_notify_error($e->getMessage());
     }
 }
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
