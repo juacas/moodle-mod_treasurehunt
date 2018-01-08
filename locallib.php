@@ -1,4 +1,6 @@
 <?php
+use core\notification;
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -52,6 +54,43 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 // Load classes needed for GeoJSON library.
 spl_autoload_register(array('GeoJSON', 'autoload'));
 
+/**
+ * Compatibility with Moodle 2.9 notifications.
+ *
+ * @param string $message
+ */
+function treasurehunt_notify_info($message) {
+    if (class_exists('\core\notification')) {
+        \core\notification::info($message);
+    } else {
+        global $OUTPUT;
+        echo $OUTPUT->notification($message , 'notifymessage');
+    }
+}
+/**
+ * Compatibility with Moodle 2.9 notifications
+ * @param unknown $message
+ */
+function treasurehunt_notify_error($message) {
+    if (class_exists('\core\notification')) {
+        \core\notification::error($message);
+    } else {
+        global $OUTPUT;
+        echo $OUTPUT->notification($message , 'notifyproblem');
+    }
+}
+/**
+ * Compatibility with Moodle 2.9 notifications
+ * @param unknown $message
+ */
+function treasurehunt_notify_warning($message) {
+    if (class_exists('\core\notification')) {
+        \core\notification::warning($message);
+    } else {
+        global $OUTPUT;
+        echo $OUTPUT->notification($message , 'notifyproblem');
+    }
+}
 /**
  * @param Geometry $geom
  */
