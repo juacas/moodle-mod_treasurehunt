@@ -1,6 +1,4 @@
 <?php
-use core\notification;
-
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -99,7 +97,7 @@ echo $OUTPUT->heading($title);
 if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
 }
-notification::info(get_string('editactivity_help', 'treasurehunt'));
+treasurehunt_notify_info(get_string('editactivity_help', 'treasurehunt'), 'info');
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');

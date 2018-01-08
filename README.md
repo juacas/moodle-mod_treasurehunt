@@ -1,5 +1,5 @@
 # moodle-mod_treasure
-Activity module for Moodle that allows to run outdoor, indoor (QRCodes), virtual maps (canvas) treasure-chases with geolocation.
+Activity module for Moodle that allows to run outdoor, indoor (QRCodes), virtual maps (canvas) treasure-chases with geolocation. [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
 
 Installation
@@ -33,6 +33,8 @@ See also
 
 Change log
 ==========
+ - v1.2.12 Fix for compatibility with Moodle 2.9.x.
+ - v1.2.11 Link to online tutorial added to edit page.
  - v1.2.10 Fix support to long texts in clues. Left panel shows a truncated text.
  - v1.2.9 Incompatibility with IOS 11 fixed.
  - v1.2.8 Clues with long text were not readable in lateral panel in the player. Text moved to History Page.
