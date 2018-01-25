@@ -141,15 +141,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt',
-                        implode(",", $progress->duplicategroupsingroupings)));
+                        implode(", ", $progress->duplicategroupsingroupings)));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
-                        implode(",", $progress->duplicateusersingroups)));
+                        implode(", ", $progress->duplicateusersingroups)));
             }
             if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
-                        implode(",", $progress->unassignedusers)));
+                        implode(", ", $progress->unassignedusers)));
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
