@@ -387,9 +387,11 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
     // Trigger update stage event.
     $eventparams = array(
         'context' => $context,
-        'objectid' => $stage->id
+        'objectid' => $stage->id,
     );
-    \mod_treasurehunt\event\stage_updated::create($eventparams)->trigger();
+    $event  = \mod_treasurehunt\event\stage_updated::create($eventparams);
+    $event->add_record_snapshot('treasurehunt_stages', $stage);
+    $event->trigger();
 }
 
 /**
@@ -420,7 +422,9 @@ function treasurehunt_delete_stage($id, $context) {
         'context' => $context,
         'objectid' => $id,
     );
-    \mod_treasurehunt\event\stage_deleted::create($eventparams)->trigger();
+    $event = \mod_treasurehunt\event\stage_deleted::create($eventparams);
+    $event->add_record_snapshot('treasurehunt_stages', $stageresult);
+    $event->trigger();
 }
 
 /**
@@ -446,9 +450,11 @@ function treasurehunt_delete_road($roadid, $treasurehunt, $context) {
     // Trigger deleted road event.
     $eventparams = array(
         'context' => $context,
-        'objectid' => $roadid
+        'objectid' => $roadid,
     );
-    \mod_treasurehunt\event\road_deleted::create($eventparams)->trigger();
+    $event = \mod_treasurehunt\event\road_deleted::create($eventparams);
+    $event->add_record_snapshot('treasurehunt_roads', $road);
+    $event->trigger();
 }
 
 /**
@@ -827,11 +833,8 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
         }
 
         if ($attempt->success && $nextnostage == $nostages) {
-            if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMSTAGES) {
-                treasurehunt_update_grades($treasurehunt);
-            } else {
-                treasurehunt_set_grade($treasurehunt, $groupid, $userid);
-            }
+            treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context);
+
             $return->roadfinished = true;
         } else {
             treasurehunt_set_grade($treasurehunt, $groupid, $userid);
@@ -975,6 +978,38 @@ function treasurehunt_get_name_and_clue($attempt, $context) {
         $return->clue = file_rewrite_pluginfile_urls($attempt->cluetext, 'pluginfile.php', $context->id, 'mod_treasurehunt', 'cluetext', $attempt->stageid);
     }
     return $return;
+}
+/**
+ *
+ * @param stdClass $treasurehunt
+ * @param int $groupid
+ * @param int $userid
+ */
+function treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context) {
+    if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMSTAGES) {
+        treasurehunt_update_grades($treasurehunt);
+    } else {
+        treasurehunt_set_grade($treasurehunt, $groupid, $userid);
+    }
+
+    // Launch events about the finishing the trasurehunt.
+    if ($groupid) {
+        $users = get_enrolled_users($context, 'mod/treasurehunt:play', $groupid, 'u.id');
+    } else {
+        $user = new stdClass();
+        $user->id = $userid;
+        $users [] = $user;
+    }
+    foreach ($users as $user) {
+        $event = \mod_treasurehunt\event\hunt_succeded::create(array(
+                        'objectid' => $treasurehunt->id,
+                        'context' => $context,
+                        'other' => array('groupid' => $groupid),
+                        'userid' => $user->id,
+        ));
+        $event->add_record_snapshot("treasurehunt", $treasurehunt);
+        $event->trigger();
+    }
 }
 /**
  *
@@ -1532,7 +1567,8 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid) {
  * @param bool $qoaremoved If the question or activity to end has been removed or not.
  * @return stdClass The control parameters.
  */
-function treasurehunt_check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad, $context, $treasurehunt, $nostages, $qoaremoved) {
+function treasurehunt_check_question_and_activity_solved($selectedanswerid, $userid, $groupid, $roadid, $updateroad,
+                                                            $context, $treasurehunt, $nostages, $qoaremoved) {
     global $DB;
 
     $return = new stdClass();
@@ -1672,11 +1708,7 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
                 $return->success = true;
             }
             if ($lastattempt->success && $lastattempt->position == $nostages) {
-                if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMSTAGES) {
-                    treasurehunt_update_grades($treasurehunt);
-                } else {
-                    treasurehunt_set_grade($treasurehunt, $groupid, $userid);
-                }
+                treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context);
                 $return->roadfinished = true;
             } else {
                 treasurehunt_set_grade($treasurehunt, $groupid, $userid);
@@ -1689,7 +1721,7 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
 }
 
 /**
- * Inserts one attempt and create the event of attempt sumitted.
+ * Inserts one attempt and create the event of attempt submitted.
  *
  * @param stdClass $attempt The attempt object.
  * @param stdClass $context The context object.
@@ -1697,12 +1729,24 @@ function treasurehunt_check_question_and_activity_solved($selectedanswerid, $use
 function treasurehunt_insert_attempt($attempt, $context) {
     global $DB;
     $id = $DB->insert_record("treasurehunt_attempts", $attempt);
+    $attempt->id = $id;
     $event = \mod_treasurehunt\event\attempt_submitted::create(array(
                 'objectid' => $id,
                 'context' => $context,
                 'other' => array('groupid' => $attempt->groupid)
     ));
+    $event->add_record_snapshot("treasurehunt_attempts", $attempt);
     $event->trigger();
+    // Event stage succeded.
+    if ($attempt->success == 1 && $attempt->type == 'location') {
+        $event = \mod_treasurehunt\event\attempt_succeded::create(array(
+                        'objectid' => $id,
+                        'context' => $context,
+                        'other' => array('groupid' => $attempt->groupid)
+        ));
+        $event->add_record_snapshot("treasurehunt_attempts", $attempt);
+        $event->trigger();
+    }
 }
 
 /**
@@ -2131,7 +2175,8 @@ function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $c
         $eventparams['objectid'] = $road->id;
         $event = \mod_treasurehunt\event\road_updated::create($eventparams);
     }
-    // Trigger event and update completion (if entry was created).
+    // Trigger event and update or creation of a road.
+    $event->add_record_snapshot('treasurehunt_roads', $road);
     $event->trigger();
     return $road;
 }

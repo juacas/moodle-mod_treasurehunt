@@ -97,5 +97,14 @@ echo $output->header();
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
 echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
+
+// Log event.
+$event = \mod_treasurehunt\event\player_entered::create(array(
+                'objectid' => $id,
+                'context' => $context,
+));
+$event->add_record_snapshot("treasurehunt", $treasurehunt);
+$event->trigger();
+
 // Finish the page.
 echo $output->footer();
