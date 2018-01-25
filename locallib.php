@@ -388,6 +388,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
     $eventparams = array(
         'context' => $context,
         'objectid' => $stage->id,
+        'other' => $stage->name
     );
     $event  = \mod_treasurehunt\event\stage_updated::create($eventparams);
     $event->add_record_snapshot('treasurehunt_stages', $stage);
@@ -421,6 +422,7 @@ function treasurehunt_delete_stage($id, $context) {
     $eventparams = array(
         'context' => $context,
         'objectid' => $id,
+        'other' => $stageresult->name
     );
     $event = \mod_treasurehunt\event\stage_deleted::create($eventparams);
     $event->add_record_snapshot('treasurehunt_stages', $stageresult);
@@ -2176,7 +2178,6 @@ function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $c
         $event = \mod_treasurehunt\event\road_updated::create($eventparams);
     }
     // Trigger event and update or creation of a road.
-    $event->add_record_snapshot('treasurehunt_roads', $road);
     $event->trigger();
     return $road;
 }

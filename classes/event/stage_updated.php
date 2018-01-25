@@ -59,7 +59,8 @@ class stage_updated extends \core\event\base {
     }
 
     public function get_description() {
-        return "The user with id '$this->userid' has updated the stage with id '$this->objectid' for " .
+
+        return "The user with id '$this->userid' has updated the stage '$this->other' with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 

@@ -210,6 +210,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $eventparams = array(
             'context' => $context,
             'objectid' => $stage->id,
+            'other' => $stage->name,
         );
         if ($isnewentry) {
             $event = \mod_treasurehunt\event\stage_created::create($eventparams);
