@@ -72,7 +72,7 @@ function unloadQR(errorcallback){
 function loadQR(callback, errorcallback)
 {
 	let videopreview = $('#previewQRvideo');
-    scanner = new Instascan.Scanner({ video: videopreview.get(0) });
+    scanner = new Instascan.Scanner({ video: videopreview.get(0) , mirror: false});
 	scanner.addListener('scan',callback);
 	try {
 		setnextwebcam(errorcallback);
