@@ -506,7 +506,8 @@ function treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid) {
             . "ON r.id = a.stageid WHERE a.success=1 AND r.position=(SELECT "
             . "max(ri.position) FROM {treasurehunt_stages} ri where "
             . "ri.roadid=r.roadid) AND r.roadid = ? "
-            . "AND a.type='location' AND  $grouptype";
+            . "AND (a.type='location' OR a.type='qr') "
+            . "AND  $grouptype";
     $finished = $DB->get_record_sql($sql, $params);
     if (isset($finished->finished)) {
         return true;
@@ -1423,7 +1424,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             . "CASE WHEN EXISTS(SELECT 1 FROM {treasurehunt_stages} ri INNER JOIN "
             . "{treasurehunt_attempts} at ON at.stageid=ri.id WHERE ri.position=r.position "
             . "AND ri.roadid=r.roadid AND $groupidwithin AND at.success=1 AND "
-            . "at.type='location') THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
+            . "(at.type='location' OR at.type='qr')) THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
             . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
             . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid "
             . "order by r.position, 'user',a.id,r.roadid";
@@ -2101,7 +2102,7 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             } else {
                 return get_string('groupquestionfailed', 'treasurehunt', $attempt);
             }
-        } else if ($attempt->type === 'location') { // If it is an attempt at a location.
+        } else if ($attempt->type === 'location' || $attempt->type === 'qr') { // If it is an attempt at a location.
             if ($attempt->geometrysolved) {
                 if (!$attempt->success) {
                     return get_string('grouplocationovercome', 'treasurehunt', $attempt);
@@ -2287,106 +2288,130 @@ function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
         at.success=1 AND
         ri.position=1 AND
         roa.treasurehuntid=ro.treasurehuntid
-        AND at.type='location'
+        AND (at.type='location' OR at.type='qr')
         AND $groupidwithin) as usertime
 SQL;
         $grademethodsql = <<<SQL
 (SELECT max(at.timecreated) from {treasurehunt_attempts} at
     INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
     INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
-where at.success=1 AND
-    ri.position=(select max(rid.position) from {treasurehunt_stages} rid
-                 where
-                    rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid
-                    AND at.type='location' AND at.userid IN $users AND $groupid2) as worsttime,
-                (SELECT min(at.timecreated) from {treasurehunt_attempts} at
-                    INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-                    INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
-                        where
-                            at.success=1 AND ri.position=(select max(rid.position) from
-                            {treasurehunt_stages} rid where rid.roadid=ri.roadid)
-                            AND roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-                            AND at.userid IN $users AND $groupid2) as besttime,$usercompletiontimesql,
+where at.success=1
+    AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+    AND roa.treasurehuntid=ro.treasurehuntid
+    AND at.type='location'
+    AND at.userid IN $users AND $groupid2) as worsttime,
+(SELECT min(at.timecreated) from {treasurehunt_attempts} at
+    INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+    INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+where
+    at.success=1
+    AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+    AND roa.treasurehuntid=ro.treasurehuntid
+    AND (at.type='location' OR at.type='qr')
+    AND at.userid IN $users
+    AND $groupid2) as besttime, $usercompletiontimesql,
 SQL;
         $orderby = 'ORDER BY usertime ASC';
     }
     if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMTIME) {
         $orderby = 'ORDER BY usertime ASC';
         $usertimetable = <<<SQL
-            (SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
-            at.success=1 AND ri.position=(select max(rid.position) from
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
-            at.success=1 AND ri.position=1 AND
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND $groupidwithin) as usertime
-            from {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages}
-            r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON
-            r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
-            AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby) as time,
+(SELECT (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+    INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+    INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+where   at.success=1
+        AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+        AND roa.treasurehuntid=ro.treasurehuntid
+        AND at.type='location'
+        AND $groupidwithin) -
+(SELECT max(at.timecreated) from {treasurehunt_attempts} at
+    INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+    INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+where   at.success=1
+        AND ri.position=1
+        AND roa.treasurehuntid=ro.treasurehuntid
+        AND (at.type='location' OR at.type='qr')
+        AND $groupidwithin) as usertime
+            from {treasurehunt_attempts} a
+            INNER JOIN {treasurehunt_stages} r ON r.id=a.stageid
+            INNER JOIN {treasurehunt_roads} ro ON r.roadid=ro.id $groupsmembers
+            WHERE ro.treasurehuntid=?
+                AND a.userid IN $users
+                AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby) as time,
 SQL;
         $grademethodsql = <<<SQL
             max(time.usertime) as worsttime, min(time.usertime) as besttime,
             (SELECT max(at.timecreated) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
-            at.success=1 AND ri.position=(select max(rid.position) from
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND $groupidwithin)- (SELECT max(at.timecreated) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
-            at.success=1 AND ri.position=1 AND
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND $groupidwithin) as usertime,
+                INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+                INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+                where at.success=1
+                    AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+                    AND roa.treasurehuntid=ro.treasurehuntid
+                    AND (at.type='location' OR at.type='qr')
+                    AND $groupidwithin) -
+            (SELECT max(at.timecreated) from {treasurehunt_attempts} at
+                    INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+                    INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+                    where at.success=1
+                        AND ri.position=1
+                        AND roa.treasurehuntid=ro.treasurehuntid
+                        AND (at.type='location' OR at.type='qr')
+                        AND $groupidwithin) as usertime,
 SQL;
     } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMPOSITION) {
         $grademethodsql = <<<SQL
             (SELECT COUNT(*) from {treasurehunt_attempts} at
-            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid INNER
-            JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where at.success=1
-            AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid
-            where rid.roadid=ri.roadid) AND roa.treasurehuntid=ro.treasurehuntid
-            AND at.type='location' AND at.userid IN $users AND $groupid2) as lastposition,
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+            where at.success=1
+                AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+                AND roa.treasurehuntid=ro.treasurehuntid
+                AND (at.type='location' OR at.type='qr')
+                AND at.userid IN $users
+                AND $groupid2) as lastposition,
             (SELECT max(at.timecreated) from {treasurehunt_attempts} at
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
-            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id where
-            at.success=1 AND ri.position=(select max(rid.position) from
-            {treasurehunt_stages} rid where rid.roadid=ri.roadid) AND
-            roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-            AND $groupidwithin) as finishtime,
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+            where at.success=1
+                AND ri.position=(select max(rid.position) from {treasurehunt_stages} rid where rid.roadid=ri.roadid)
+                AND roa.treasurehuntid=ro.treasurehuntid
+                AND (at.type='location' OR at.type='qr')
+                AND $groupidwithin) as finishtime,
 SQL;
         $orderby = 'ORDER BY finishtime ASC';
     }
     $sql = <<<SQL
-        SELECT $user as 'user', $grademethodsql(SELECT COUNT(*) from
-        {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri
-        ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} roa ON
-        ri.roadid=roa.id where roa.treasurehuntid=ro.treasurehuntid AND
-        at.type='location' AND at.penalty=1 AND $groupidwithin) as
-        nolocationsfailed,
-        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN
-        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where
-        roa.treasurehuntid=ro.treasurehuntid AND at.type='question' AND
-        at.penalty=1 AND $groupidwithin) as noanswersfailed,
-        (SELECT COUNT(*) from {treasurehunt_attempts} at INNER JOIN
-        {treasurehunt_stages} ri ON ri.id = at.stageid INNER JOIN
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where
-        roa.treasurehuntid=ro.treasurehuntid AND at.type='location'
-        AND at.success=1 AND $groupidwithin) as nosuccessfulstages,
-        (SELECT COUNT(*) from {treasurehunt_stages} ri INNER JOIN
-        {treasurehunt_roads} roa ON ri.roadid=roa.id where
-        roa.treasurehuntid=ro.treasurehuntid AND roa.id=ro.id) as nostages
-        from $usertimetable {treasurehunt_attempts} a INNER JOIN {treasurehunt_stages}
-        r ON r.id=a.stageid INNER JOIN {treasurehunt_roads} ro ON
-        r.roadid=ro.id $groupsmembers WHERE ro.treasurehuntid=?  AND a.userid IN $users
-        AND $groupid group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby
+        SELECT $user as 'user', $grademethodsql(SELECT COUNT(*) from {treasurehunt_attempts} at
+        INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+        INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+        where roa.treasurehuntid=ro.treasurehuntid
+            AND (at.type='location' OR at.type='qr')
+            AND at.penalty=1 AND $groupidwithin) as nolocationsfailed,
+        (SELECT COUNT(*) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+            where roa.treasurehuntid=ro.treasurehuntid
+                AND at.type='question'
+                AND at.penalty=1
+                AND $groupidwithin) as noanswersfailed,
+        (SELECT COUNT(*) from {treasurehunt_attempts} at
+            INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+            where roa.treasurehuntid=ro.treasurehuntid
+                AND (at.type='location' or at.type='qr')
+                AND at.success=1
+                AND $groupidwithin) as nosuccessfulstages,
+        (SELECT COUNT(*) from {treasurehunt_stages} ri
+            INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
+            where roa.treasurehuntid=ro.treasurehuntid
+                AND roa.id=ro.id) as nostages
+        from $usertimetable {treasurehunt_attempts} a
+            INNER JOIN {treasurehunt_stages} r ON r.id=a.stageid
+            INNER JOIN {treasurehunt_roads} ro ON r.roadid=ro.id $groupsmembers
+            WHERE ro.treasurehuntid=?
+                AND a.userid IN $users
+                AND $groupid
+            group by $user,ro.treasurehuntid,a.groupid,ro.id $orderby
 SQL;
     $stats = $DB->get_records_sql($sql, array($treasurehunt->id, $treasurehunt->id));
 
