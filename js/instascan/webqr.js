@@ -43,16 +43,29 @@ function enableForm() {
 								width : '150px',
 								align : 'left'
 							}))
+						} else {
+							$('#QRStatusDiv').text("Enter text in QRText field.");
 						}
+						return false;
 					});
+	$('#id_stopQR').click(function(){
+						unloadQR();
+						$('#id_stopQR').hide();
+						$('#id_scanQR').show();
+						return false;});
 	$('#id_scanQR').click(function() {
 		loadQR(function(value) {
-			$('#id_qrtext').val(value);
-			unloadQR();
-			$('#QRStatusDiv')
+				$('#id_qrtext').val(value);
+				unloadQR();
+				$('#QRStatusDiv').text("");
+				$('#id_stopQR').hide();
+				$('#id_scanQR').show();
 		}, function(msg){
-			$('#QRStatusDiv').append("<p>" + msg + "</p>");
+			$('#QRStatusDiv').text("<p>" + msg + "</p>");
 		})
+		$('#id_stopQR').show();
+		$('#id_scanQR').hide();
+		return false;
 	});
 }
 	
@@ -61,13 +74,18 @@ function error(error) {
     return;
 }
 function unloadQR(errorcallback){
+	if (typeof(scanner) == 'undefined') {
+		return;
+	}
 	scanner.stop().then(function(){
 		console.info("camera stopped");
 	});
 	camera = -1;
 	let videopreview = $('#previewQRvideo');
 	videopreview.hide();
-	errorcallback("");
+	if (typeof(errorcallback) == 'function') {
+		errorcallback("");
+	}
 }
 function loadQR(callback, errorcallback)
 {

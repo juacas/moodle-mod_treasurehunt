@@ -80,10 +80,12 @@ class stage_form extends moodleform {
                 <div align="center" width="300px" height="300px" id="outdiv">
                 <video id="previewQRvideo" style="display:none" height="200"/>
 			        </div>
-		        </div>
-		        <canvas id="qr-canvas" style="display:none;"> </canvas>');
-        $mform->addElement('button', 'scanQR', get_string('scanQR_scanbutton', 'treasurehunt'));
-        $mform->addElement('button', 'generateQR', get_string('scanQR_generatebutton', 'treasurehunt'));
+		        <div id="QRStatusDiv"> </div>' .
+                '<center>' .
+                '<button id="id_generateQR" style="display:inline">' . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
+                '<button id="id_scanQR" style="display:inline">' . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
+                '<button id="id_stopQR" style="display:none">Stop</button>' .
+                '</center></div>');
 
         $mform->addElement('header', 'restrictionsdiscoverstage',
                 get_string('restrictionsdiscoverstage', 'treasurehunt'));
