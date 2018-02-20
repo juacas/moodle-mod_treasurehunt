@@ -61,11 +61,11 @@
 		<!-- Pathable	https://github.com/pathable/truncate -->
 	</library>
 	<library>
-		<location>js/webqr.js</location>
-		<name>QRCODE reader</name>
+		<location>js/instascan/instascan.js</location>
+		<name>INSTASCAN</name>
 		<version>1.0.0</version>
-		<license>APACHE</license>
-		<licenseversion>2</licenseversion>
-		<!--   Copyright 2011 Lazar Laszlo (lazarsoft@gmail.com, www.lazarsoft.info) -->
+		<license>MIT</license>
+		<licenseversion>2016</licenseversion>
+		<!--   Copyright 2016 Chris Schmich https://github.com/schmich/instascan -->
 	</library>
 </libraries>
