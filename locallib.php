@@ -1990,29 +1990,6 @@ function treasurehunt_clear_activities($treasurehuntid) {
  * @param moodle_page $PAGE
  * @param string global function name to initialice the code.
  */
-function treasurehunt_qr_support2($PAGE, $initfunction = '', $params = null) {
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/grid.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/version.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/detector.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/formatinf.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/bitmat.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/datablock.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/bmparser.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/datamask.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/rsdecoder.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/gf256poly.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/gf256.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/decoder.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/qrcode.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/findpat.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/alignpat.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/databr.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/webqr.js', false);
-    $PAGE->requires->js('/mod/treasurehunt/js/qr/errorlevel.js', false);
-    if ($initfunction) {
-        $PAGE->requires->js_init_call($initfunction, $params);
-    }
-}
 function treasurehunt_qr_support($PAGE, $initfunction = '', $params = null) {
     $PAGE->requires->js('/mod/treasurehunt/js/instascan/webqr.js', false);
     if ($initfunction) {
