@@ -788,7 +788,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
             if ($qrguessed) {
                 $locationgeom = treasurehunt_geometry_centroid($nextstagegeom);
             } else {
-                $locationgeom = $currentstage->location;
+                $locationgeom = treasurehunt_wkt_to_object($currentstage->location);
             }
         } else {
             $locationgeom = $point;
@@ -2015,7 +2015,6 @@ function treasurehunt_qr_support2($PAGE, $initfunction = '', $params = null) {
     }
 }
 function treasurehunt_qr_support($PAGE, $initfunction = '', $params = null) {
-//     $PAGE->requires->js('/mod/treasurehunt/js/instascan/instascan.js', false);
     $PAGE->requires->js('/mod/treasurehunt/js/instascan/webqr.js', false);
     if ($initfunction) {
         $PAGE->requires->js_init_call($initfunction, $params);
