@@ -23,6 +23,16 @@ function enableTest(Y,successString){
 		unloadQR(function () {
 			$('#QRStatusDiv').html(successString);	        			
 			});
+		}, function (info) {
+			let camera = info.camera;
+			$('#QRvalue').append(info.cameras[camera].name);
+			let nextcamera = (camera+1) % info.cameras.length;
+			if (nextcamera != camera) {
+				$('#idbuttonnextcam').text(info.cameras[camera+1].name);
+				$('#idbuttonnextcam').show();
+			} else {
+				$('#idbuttonnextcam').hide();
+			}
 		});
      } else {
     	$('#QRStatusDiv').html(successString);
@@ -103,12 +113,7 @@ var camera = -1;
 var numcameras = 0;
 function setnextwebcam(errorcallback)
 {
-	var nextcamera = -1;
-	if (numcameras > camera +1) {
-		nextcamera++;
-	} else {
-		nextcamera = 0;
-	}
+	let nextcamera = camera == -1 ? 0 : (camera+1) % numcameras;
 	if (camera != nextcamera) {
 		scanner.stop().then(function () {
 			Instascan.Camera.getCameras().then(function (cameras) {
@@ -122,6 +127,7 @@ function setnextwebcam(errorcallback)
 		          let maxheight = videopreview.parent().height();
 		          videopreview.width(maxwidth - 10);//.height(maxheight - 10);
 		      	  videopreview.css('display','inline-block');
+		      	  errorcallback({camera:camera, cameras: cameras});
 		          });
 		        } else {
 		          console.error('No cameras found.');
