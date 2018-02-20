@@ -20,8 +20,9 @@ function enableTest(Y,successString){
      if (cook["QRScanPassed"] != 'Done') {
 		loadQR(function (value){
 		document.cookie = "QRScanPassed = Done";
-		unloadQR();
-		$('#QRStatusDiv').html(successString);	        
+		unloadQR(function () {
+			$('#QRStatusDiv').html(successString);	        			
+			});
 		});
      } else {
     	$('#QRStatusDiv').html(successString);
@@ -48,6 +49,9 @@ function enableForm() {
 		loadQR(function(value) {
 			$('#id_qrtext').val(value);
 			unloadQR();
+			$('#QRStatusDiv')
+		}, function(msg){
+			$('#QRStatusDiv').append("<p>" + msg + "</p>");
 		})
 	});
 }

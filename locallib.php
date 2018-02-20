@@ -747,7 +747,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
     $return->update = '';
     $return->roadfinished = false;
     $return->success = false;
-
+xdebug_break();
     // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
     $currentstage = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid);
     if ($currentstage->success || !$currentstage) {
