@@ -62,7 +62,8 @@ class stage_deleted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has deleted the stage with id '$this->objectid' for " .
+
+        return "The user with id '$this->userid' has deleted the stage '$this->other' with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 

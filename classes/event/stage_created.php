@@ -62,7 +62,8 @@ class stage_created extends \core\event\base {
      * @return string
      */
     public function get_description() {
-        return "The user with id '$this->userid' has created the stage with id '$this->objectid' for " .
+
+        return "The user with id '$this->userid' has created the stage '$this->other' with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
 

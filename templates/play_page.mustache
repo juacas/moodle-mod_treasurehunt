@@ -104,18 +104,16 @@
 			    <h1>SCAN QR</h1>
 		    </div>
             <div role="content" class="ui-content ui-overlay-b">
-			    <div  id="previewQR">
-			        <div width="300px" height="300px" id="outdiv">
-			        </div>
+			    <div id="previewQR">
+			    <div id="errorQR"></div>
+		           <script type="text/javascript" src="js/instascan/instascan.js"></script>
+		           <video id="previewQRvideo" style="display:none"></video>
 		        </div>
-		        <canvas id="qr-canvas" style="display:none;"> </canvas>
-				<fieldset class="ui-grid-a">
-                    <div class="ui-block-a">
-                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
-                            {{#str}} cancel, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>   
-                </fieldset>		    
+                <div class="ui-block-a">
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
+                        {{#str}} cancel, mod_treasurehunt{{/str}}
+                    </a><a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="nextcamera"></a>
+                </div>   
             </div>
 		</div>
  

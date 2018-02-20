@@ -54,10 +54,7 @@ $PAGE->set_url($url);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 $PAGE->requires->jquery();
-// Support for QR scan.
-treasurehunt_qr_support($PAGE, 'enableForm');
 
-// End QR.
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
@@ -210,6 +207,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $eventparams = array(
             'context' => $context,
             'objectid' => $stage->id,
+            'other' => $stage->name,
         );
         if ($isnewentry) {
             $event = \mod_treasurehunt\event\stage_created::create($eventparams);
@@ -237,6 +235,10 @@ $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
+// Support for QR scan.
+treasurehunt_qr_support($PAGE, 'enableForm');
+echo '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
+// End QR.
 $mform->display();
 echo $OUTPUT->footer();
 

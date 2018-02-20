@@ -141,15 +141,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt',
-                        implode(",", $progress->duplicategroupsingroupings)));
+                        implode( ", ", $progress->duplicategroupsingroupings)));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
-                        implode(",", $progress->duplicateusersingroups)));
+                        implode( ", ", $progress->duplicateusersingroups)));
             }
             if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
-                        implode(",", $progress->unassignedusers)));
+                        implode( ", ", $progress->unassignedusers)));
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
@@ -300,11 +300,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $o .= '<div id="QRStatusDiv">';
             $o .= $this->output->notification($warnqr) . "\n";
             $o .= '<div  id="previewQR">
+                <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
+                <video id="previewQRvideo" style="display:none" height="200"></video>
+                <button onclick="setnextwebcam()">Next camara</button>
                 <div id="QRvalue"></div>
-                <div align="center" width="100px" height="100px" id="outdiv">
-			        </div>
-		     </div>
-		     <canvas id="qr-canvas" style="display:none;"> </canvas>';
+                    <div align="center" width="100px" height="100px" id="outdiv">
+    			    </div>
+		        </div>';
             $o .= '</div>';
         }
 

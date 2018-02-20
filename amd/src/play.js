@@ -1026,7 +1026,7 @@ define(['jquery',
 		
 		        $("#QRdialog").popup({
 		            beforeposition: function (event, ui) {
-		                loadQR(qrReaded);
+		                loadQR(qrReaded, qrError);
 		                $(this).css({
 		                    width: window.innerWidth - 20,
 		                    height: 400,
@@ -1035,17 +1035,22 @@ define(['jquery',
 		                });
 		            },
 		            afterclose: function (event, ui) {
-		                unloadQR();
+		                unloadQR(qrError);
 		            }
 		        });
 		    }
-		
+		    $("#nextcamera").on('click', function(){
+		    	setnextwebcam(qrError);
+		    });
 		    // Scan QR.
 		    function qrReaded(value) {
 		        close_popup($('#QRdialog'));
 		        console.log(value);
 		        toast("QR code readed: " + value);
 		        renew_source(false, false, null, value);
+		    }
+		    function qrError(message) {
+		    	$('#errorQR').text(message);
 		    }
 		    /*-------------------------------Help functions -------------*/
 		    function toast(msg) {
