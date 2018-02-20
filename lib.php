@@ -228,6 +228,7 @@ function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart,
 
 }
 
+
 /**
  * Prints single activity item prepared by {@link treasurehunt_get_recent_mod_activity()}
  * TODO
@@ -238,7 +239,6 @@ function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart,
  * @param bool $viewfullnames display users' full names
  */
 function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
-
 }
 
 /**

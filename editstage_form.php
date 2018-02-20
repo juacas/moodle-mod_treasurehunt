@@ -78,6 +78,7 @@ class stage_form extends moodleform {
         // QR reader area.
         $mform->addElement('html', '<div  id="previewQR">
                 <div align="center" width="300px" height="300px" id="outdiv">
+                <video id="previewQRvideo" style="display:none" height="200"/>
 			        </div>
 		        </div>
 		        <canvas id="qr-canvas" style="display:none;"> </canvas>');
