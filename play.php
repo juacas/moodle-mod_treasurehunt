@@ -99,6 +99,7 @@ echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,req
 echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
 
 // Log event.
+require_once('classes/event/player_entered.php');
 $event = \mod_treasurehunt\event\player_entered::create(array(
                 'objectid' => $id,
                 'context' => $context,
