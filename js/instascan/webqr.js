@@ -23,20 +23,21 @@ function enableTest(Y,successString){
 		unloadQR(function () {
 			$('#QRStatusDiv').html(successString);	        			
 			});
-		}, function (info) {
-			let camera = info.camera;
-			$('#QRvalue').append(info.cameras[camera].name);
-			let nextcamera = (camera+1) % info.cameras.length;
-			if (nextcamera != camera) {
-				$('#idbuttonnextcam').text(info.cameras[camera+1].name);
-				$('#idbuttonnextcam').show();
-			} else {
-				$('#idbuttonnextcam').hide();
-			}
-		});
+		}, testFormReport );
      } else {
     	$('#QRStatusDiv').html(successString);
      }
+}
+function testFormReport(info) {
+	let camera = info.camera;
+	$('#QRvalue').text(camera + ":" + info.cameras[camera].name);
+	let nextcamera = (camera+1) % info.cameras.length;
+	if (nextcamera != camera) {
+		$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+		$('#idbuttonnextcam').show();
+	} else {
+		$('#idbuttonnextcam').hide();
+	}
 }
 function enableForm() {
 	$('#id_generateQR')
@@ -97,21 +98,21 @@ function unloadQR(errorcallback){
 		errorcallback("");
 	}
 }
-function loadQR(callback, errorcallback)
+function loadQR(scancallback, reportcallback)
 {
 	let videopreview = $('#previewQRvideo');
     scanner = new Instascan.Scanner({ video: videopreview.get(0) , mirror: false});
-	scanner.addListener('scan',callback);
+	scanner.addListener('scan',scancallback);
 	try {
-		setnextwebcam(errorcallback);
+		setnextwebcam(reportcallback);
 	} catch (e){
-		errorcallback(e);
+		reportcallback(e);
 	};
 }
 
 var camera = -1;
 var numcameras = 0;
-function setnextwebcam(errorcallback)
+function setnextwebcam(reportcallback)
 {
 	let nextcamera = camera == -1 ? 0 : (camera+1) % numcameras;
 	if (camera != nextcamera) {
@@ -127,15 +128,15 @@ function setnextwebcam(errorcallback)
 		          let maxheight = videopreview.parent().height();
 		          videopreview.width(maxwidth - 10);//.height(maxheight - 10);
 		      	  videopreview.css('display','inline-block');
-		      	  errorcallback({camera:camera, cameras: cameras});
+		      	  reportcallback({camera:camera, cameras: cameras});
 		          });
 		        } else {
 		          console.error('No cameras found.');
-		          errorcallback("No cameras found.");
+		          reportcallback("No cameras found.");
 		        }
 		      }).catch(function (e) {
 		          console.error(e);
-		          errorcallback(e.message);
+		          reportcallback(e.message);
 		      });	
 		});
 	}
