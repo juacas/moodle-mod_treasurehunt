@@ -56,39 +56,30 @@ function error(error) {
     gUM=false;
     return;
 }
-function unloadQR(){
+function unloadQR(errorcallback){
 	scanner.stop().then(function(){
 		console.info("camera stopped");
 	});
 	camera = -1;
-	let videopreview = document.getElementById('previewQRvideo');
-	videopreview.style.display = 'none';
+	let videopreview = $('#previewQRvideo');
+	videopreview.hide();
+	errorcallback("");
 }
-function loadQR(callback)
+function loadQR(callback, errorcallback)
 {
-	let videopreview = document.getElementById('previewQRvideo');
-	videopreview.style.display = 'inline';
-    scanner = new Instascan.Scanner({ video: videopreview });
+	let videopreview = $('#previewQRvideo');
+    scanner = new Instascan.Scanner({ video: videopreview.get(0) });
 	scanner.addListener('scan',callback);
-	setnextwebcam();
+	try {
+		setnextwebcam(errorcallback);
+	} catch (e){
+		errorcallback(e);
+	};
 }
 
-
-function setwebcam()
-{
-	Instascan.Camera.getCameras().then(function (cameras) {
-        if (cameras.length > 0) {
-          scanner.start(cameras[0]);
-        } else {
-          console.error('No cameras found.');
-        }
-      }).catch(function (e) {
-        console.error(e);
-      });	
-}
 var camera = -1;
 var numcameras = 0;
-function setnextwebcam()
+function setnextwebcam(errorcallback)
 {
 	var nextcamera = -1;
 	if (numcameras > camera +1) {
@@ -102,12 +93,21 @@ function setnextwebcam()
 				numcameras = cameras.length;
 		        if (cameras.length > 0) {
 		          camera = nextcamera;
-		          scanner.start(cameras[camera]);
+		          scanner.start(cameras[camera]).then(function() {
+		        	  
+		          let videopreview = $('#previewQRvideo');
+		          let maxwidth = videopreview.parent().width();
+		          let maxheight = videopreview.parent().height();
+		          videopreview.width(maxwidth - 10);//.height(maxheight - 10);
+		      	  videopreview.css('display','inline-block');
+		          });
 		        } else {
 		          console.error('No cameras found.');
+		          errorcallback("No cameras found.");
 		        }
 		      }).catch(function (e) {
-		        console.error(e);
+		          console.error(e);
+		          errorcallback(e.message);
 		      });	
 		});
 	}
