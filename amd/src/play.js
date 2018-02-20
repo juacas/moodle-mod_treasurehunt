@@ -1026,21 +1026,35 @@ define(['jquery',
 		
 		        $("#QRdialog").popup({
 		            beforeposition: function (event, ui) {
-		                loadQR(qrReaded, qrError);
-		                $(this).css({
-		                    width: window.innerWidth - 20,
-		                    height: 400,
-		                    top: 0,
-		                    left: 0
-		                });
+//		                $(this).css({
+//		                    width: window.innerWidth * 0.8,
+//		                    height: window.innerHeight * 0.8,
+//		                    top: 0,
+//		                    left: 0
+//		                });
+		            	$(this).width(window.innerWidth * 0.9);
+		            	$(this).height(window.innerHeight * 0.9);
+		               
+		            },
+		            afteropen: function (event, ui) {
+		            	var contentdiv =  $(this).find("div[data-role='content']").first();
+		            	var headerdiv = $(this).find("div[data-role='header']").first();
+		            	var padding = parseInt(contentdiv.css('padding-top')) + parseInt(contentdiv.css('padding-bottom'));
+		            	contentdiv.css('max-height', "1000px");
+		            	$('#previewVideoDiv').width($(this).width() - padding)
+	                						  .height($(this).height() 
+	                								  - $('#previewQRbuttons').height() 
+	                								  - headerdiv.height()
+	                								  - padding * 2 );
+		            	 loadQR(qrReaded, qrReport);
 		            },
 		            afterclose: function (event, ui) {
-		                unloadQR(qrError);
+		                unloadQR(qrReport);
 		            }
 		        });
 		    }
 		    $("#nextcamera").on('click', function(){
-		    	setnextwebcam(qrError);
+		    	setnextwebcam(qrReport);
 		    });
 		    // Scan QR.
 		    function qrReaded(value) {
@@ -1049,8 +1063,18 @@ define(['jquery',
 		        toast("QR code readed: " + value);
 		        renew_source(false, false, null, value);
 		    }
-		    function qrError(message) {
-		    	$('#errorQR').text(message);
+		    function qrReport(message) {
+		    	if (typeof(message) == 'string') {
+		    		$('#errorQR').text(message);		    		
+		    	} else {
+		    		$('#errorQR').text(message.cameras[message.camera].name);
+		    		// hide/show next camera button.
+		    		if (message.cameras.length > 1) {
+		    			$('#nextcamera').show();
+		    		} else {
+		    			$('#nextcamera').hide();
+		    		}
+		    	}
 		    }
 		    /*-------------------------------Help functions -------------*/
 		    function toast(msg) {
