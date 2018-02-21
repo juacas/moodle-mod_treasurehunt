@@ -152,7 +152,9 @@ function setnextwebcam(reportcallback)
 		          // Try to select back camera.
 		          if (camera == -1 && cameras.length > 1) {
 		        	  for(var i = 0; i < cameras.length; i++) {
-		        		  if (cameras[i].name.indexOf('back') != -1) {
+		        		  
+		        		  if (cameras[i].name !== null
+		        			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
 		        			  nextcamera = i;
 		        		  }
 		        	  }
