@@ -99,20 +99,18 @@
 
         {{!Popup for QR scanner}}
 
-		<div data-role="popup" id="QRdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+		<div data-role="popup" id="QRdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" >
 	        <div data-role="header" data-theme="b">
-			    <h1>SCAN QR</h1>
+			    <h2>SCAN QR</h2>
 		    </div>
-            <div role="content" class="ui-content ui-overlay-b">
-			    <div id="previewQR">
-			    <div id="errorQR"></div>
+            <div data-role="content" class="ui-content ui-overlay-b">			    
 		           <script type="text/javascript" src="js/instascan/instascan.js"></script>
-		           <video id="previewQRvideo" style="display:none"></video>
-		        </div>
-                <div class="ui-block-a">
+		        <div id="previewVideoDiv"><center><video id="previewQRvideo" style="display:none"></video><center></div>
+                <div id="previewQRbuttons" class="ui-block-a">
                     <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
                         {{#str}} cancel, mod_treasurehunt{{/str}}
                     </a><a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="nextcamera"></a>
+	                <div id="errorQR" style="display:inline">Camera</div>
                 </div>   
             </div>
 		</div>

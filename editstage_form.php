@@ -76,15 +76,16 @@ class stage_form extends moodleform {
         $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
         $mform->setType('qrtext', PARAM_RAW);
         // QR reader area.
-        $mform->addElement('html', '<div  id="previewQR">
-                <div align="center" width="300px" height="300px" id="outdiv">
-                <video id="previewQRvideo" style="display:none" height="200"/>
-			        </div>
-		        <div id="QRStatusDiv"> </div>' .
+        $mform->addElement('html',
+                '<div id="outQRCode"></div><button id="id_generateQR" onclick="return false;" style="display:inline">' . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
+                '<button id="id_scanQR" onclick="return false;" style="display:inline">' . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
+                '<div  id="previewQR" style="display:none">' .
+                '<div  id="previewQRdiv" width = "100%" style="min-height:200px; max-height:500px">
+                <center><video id="previewQRvideo" style="display:none" height="200"></video></center>
+                </div>' .
                 '<center>' .
-                '<button id="id_generateQR" style="display:inline">' . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
-                '<button id="id_scanQR" style="display:inline">' . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
-                '<button id="id_stopQR" style="display:none">Stop</button>' .
+                '<div id="QRvalue"></div><button style="display:none" onclick="setnextwebcam(testFormReport); return false;" id="idbuttonnextcam">Next camara</button>' .
+                '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
                 '</center></div>');
 
         $mform->addElement('header', 'restrictionsdiscoverstage',

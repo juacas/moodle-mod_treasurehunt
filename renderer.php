@@ -299,14 +299,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
             $o .= '<div id="QRStatusDiv">';
             $o .= $this->output->notification($warnqr) . "\n";
-            $o .= '<div  id="previewQR">
-                <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
-                <video id="previewQRvideo" style="display:none" height="200"></video>
-                <button onclick="setnextwebcam()">Next camara</button>
-                <div id="QRvalue"></div>
-                    <div align="center" width="100px" height="100px" id="outdiv">
-    			    </div>
-		        </div>';
+            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>' .
+            '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
+            <center><video id="previewQRvideo" style="display:none" height="200"></video></center>
+            </div>
+            <div id="QRvalue"></div><button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">Next camara</button>';
             $o .= '</div>';
         }
 
