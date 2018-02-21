@@ -37,6 +37,7 @@ See also
 
 Change log
 ==========
+ - v1.2.14 Fix camera preview sizes. Implement switching cameras.
  - v1.2.13 Change QR scanning library to fix the firefox regression.
  - v1.2.12 Fix for compatibility with Moodle 2.9.x.
  - v1.2.11 Link to online tutorial added to edit page.
