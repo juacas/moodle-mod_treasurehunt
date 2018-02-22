@@ -161,48 +161,63 @@ function setnextwebcam(reportcallback)
 	let nextcamera = getnextwebCam();
 	if (camera != nextcamera) {
 		scanner.stop().then(function () {
-			Instascan.Camera.getCameras().then(function (cameras) {
-//	For testing camera switching use: 	cameras[1] = cameras[0];
-				camerasDetected = cameras;
-				numcameras = cameras.length;
-		        if (cameras.length > 0) {
-		          // Try to select back camera by name.
-		          if (camera == -1 && cameras.length > 1) {
-		        	  for(var i = 0; i < cameras.length; i++) {
-		        		  if (cameras[i].name !== null
-		        			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
-		        			  nextcamera = i;
-		        		  }
-		        	  }
-		          }
-		          camera = nextcamera;
-		          scanner.start(cameras[camera]).then(function() {		        	  
-			          let videopreview = $('#previewQRvideo');
-			          let parent = videopreview.closest('div');
-			          let maxwidth = parent.width();
-			          let maxheight = parent.height();
-			          
-			          let width = videopreview.width();
-			          let height = videopreview.height();
-			          if (width/height > maxwidth/maxheight) {
-			        	  videopreview.width(maxwidth);
-			          } else {
-			        	  videopreview.height(maxheight);		        	  
-			          }
-			      	  videopreview.css('display','block');
-			      	  reportcallback({camera:camera, cameras: cameras});
-		          }).catch(function (e) {
-			          reportcallback(e.message);
-		          });
-		        } else {
-		          console.error('No cameras found.');
-		          reportcallback("No cameras found.");
-		        }
-		      }).catch(function (e) {
+			if (camerasDetected !== null) {
+				try {
+					selectCamera(camerasDetected, nextcamera, reportcallback);
+				} catch (e) {
+					console.error(e);
+			        reportcallback(e.message);
+				}
+			} else {
+				Instascan.Camera.getCameras().then(function (cameras) {selectCamera(cameras, nextcamera, reportcallback);})
+				.catch(function (e) {
 		          console.error(e);
 		          reportcallback(e.message);
 		      });	
+			}
 		});
 	}
 }
-
+/**
+ * TODO don't use global var camera
+ * @param cameras
+ * @returns
+ */
+function selectCamera(cameras, nextcamera, reportcallback) {
+//	For testing camera switching use: 	cameras[1] = cameras[0];
+camerasDetected = cameras;
+numcameras = cameras.length;
+if (cameras.length > 0) {
+  // Try to select back camera by name.
+  if (camera == -1 && cameras.length > 1) {
+	  for(var i = 0; i < cameras.length; i++) {
+		  if (cameras[i].name !== null
+			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
+			  nextcamera = i;
+		  }
+	  }
+  }
+  camera = nextcamera;
+  scanner.start(cameras[camera]).then(function() {		        	  
+      let videopreview = $('#previewQRvideo');
+      let parent = videopreview.closest('div');
+      let maxwidth = parent.width();
+      let maxheight = parent.height();
+      
+      let width = videopreview.width();
+      let height = videopreview.height();
+      if (width/height > maxwidth/maxheight) {
+    	  videopreview.width(maxwidth);
+      } else {
+    	  videopreview.height(maxheight);		        	  
+      }
+  	  videopreview.css('display','block');
+  	  reportcallback({camera:camera, cameras: cameras});
+  }).catch(function (e) {
+      reportcallback(e.message);
+  });
+} else {
+  console.error('No cameras found.');
+  reportcallback("No cameras found.");
+    }
+  }
