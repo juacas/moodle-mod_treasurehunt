@@ -1067,7 +1067,9 @@ define(['jquery',
 		    	if (typeof(message) == 'string') {
 		    		$('#errorQR').text(message);		    		
 		    	} else {
-		    		$('#errorQR').text(message.cameras[message.camera].name);
+		    		if (message.cameras[message.camera].name !== null) {
+		    			$('#errorQR').text(message.cameras[message.camera].name);
+		    		}
 		    		// hide/show next camera button.
 		    		if (message.cameras.length > 1) {
 		    			$('#nextcamera').show();
