@@ -151,13 +151,19 @@ function loadQR(scancallback, reportcallback)
 
 var camera = -1;
 var numcameras = 0;
+var camerasDetected = null;
+
+function getnextwebCam() {
+	return camera == -1 ? 0 : (camera+1) % numcameras;
+}
 function setnextwebcam(reportcallback)
 {
-	let nextcamera = camera == -1 ? 0 : (camera+1) % numcameras;
+	let nextcamera = getnextwebCam();
 	if (camera != nextcamera) {
 		scanner.stop().then(function () {
 			Instascan.Camera.getCameras().then(function (cameras) {
 //	For testing camera switching use: 	cameras[1] = cameras[0];
+				camerasDetected = cameras;
 				numcameras = cameras.length;
 		        if (cameras.length > 0) {
 		          // Try to select back camera by name.

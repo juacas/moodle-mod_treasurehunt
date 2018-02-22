@@ -1053,7 +1053,11 @@ define(['jquery',
 		            }
 		        });
 		    }
-		    $("#nextcamera").on('click', function(){
+		    $("#nextcamera").on('click', function() {
+		    	if (camerasDetected !== null) {
+			    	var nextcam = getnextwebCam();
+			    	toast('Give access to:' + camerasDetected[nextcam].name);
+		    	}
 		    	setnextwebcam(qrReport);
 		    });
 		    // Scan QR.

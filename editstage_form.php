@@ -85,7 +85,7 @@ class stage_form extends moodleform {
                 </div>' .
                 '<center>' .
                 '<div id="QRvalue"></div>' .
-                '<button style="display:none" onclick="setnextwebcam(testFormReport); reurn false;" id="idbuttonnextcam"' .
+                '<button style="display:none" onclick="setnextwebcam(testFormReport); return false;" id="idbuttonnextcam"' .
                 get_string('changecamera', 'treasurehunt') . '</button>' .
                 '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
                 '</center></div>');
