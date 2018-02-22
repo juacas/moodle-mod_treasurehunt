@@ -34,11 +34,16 @@ function testFormReport(info) {
 		$('#previewQR').hide();
 	} else {
 		let camera = info.camera;
-		$('#QRvalue').text(camera + ":" + info.cameras[camera].name);
+		
+		if (info.cameras[camera].name !== null) {
+			$('#QRvalue').text(info.cameras[camera].name);			
+		}
 		$('#previewQR').show();
 		let nextcamera = (camera+1) % info.cameras.length;
 		if (nextcamera != camera) {
-			$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+			if (info.cameras[nextcamera].name !== null) {
+				$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+			}
 			$('#idbuttonnextcam').show();
 		} else {
 			$('#idbuttonnextcam').hide();
@@ -149,10 +154,9 @@ function setnextwebcam(reportcallback)
 //	For testing camera switching use: 	cameras[1] = cameras[0];
 				numcameras = cameras.length;
 		        if (cameras.length > 0) {
-		          // Try to select back camera.
+		          // Try to select back camera by name.
 		          if (camera == -1 && cameras.length > 1) {
 		        	  for(var i = 0; i < cameras.length; i++) {
-		        		  
 		        		  if (cameras[i].name !== null
 		        			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
 		        			  nextcamera = i;
