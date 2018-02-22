@@ -1,16 +1,26 @@
-// QRCODE reader Copyright 2011 Lazar Laszlo
-// http://www.webqr.com
+// This file is part of Treasurehunt for Moodle
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-var gCtx = null;
-var gCanvas = null;
-var c=0;
-var stype=0;
-var gUM=false;
-var webkit=false;
-var moz=false;
-var v=null;
-
-var vidhtml = '<video width="320px" id="qr_viewport" autoplay></video>';
+/**
+ * integrates teh QRSCanner.
+ *
+ * @package   mod_treasurehunt
+ * @copyright 2018 Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 function enableTest(Y,successString){
 	 var cook = {};
      document.cookie.split(';').forEach(function (x) {
@@ -34,11 +44,16 @@ function testFormReport(info) {
 		$('#previewQR').hide();
 	} else {
 		let camera = info.camera;
-		$('#QRvalue').text(camera + ":" + info.cameras[camera].name);
+		
+		if (info.cameras[camera].name !== null) {
+			$('#QRvalue').text(info.cameras[camera].name);			
+		}
 		$('#previewQR').show();
 		let nextcamera = (camera+1) % info.cameras.length;
 		if (nextcamera != camera) {
-			$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+			if (info.cameras[nextcamera].name !== null) {
+				$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+			}
 			$('#idbuttonnextcam').show();
 		} else {
 			$('#idbuttonnextcam').hide();
@@ -108,10 +123,6 @@ function editFormReport(info) {
 		}
 	}
 }	
-function error(error) {
-    gUM=false;
-    return;
-}
 function unloadQR(errorcallback){
 	if (typeof(scanner) == 'undefined') {
 		return;
@@ -140,54 +151,76 @@ function loadQR(scancallback, reportcallback)
 
 var camera = -1;
 var numcameras = 0;
+var camerasDetected = null;
+
+function getnextwebCam() {
+	return camera == -1 ? 0 : (camera+1) % numcameras;
+}
 function setnextwebcam(reportcallback)
 {
-	let nextcamera = camera == -1 ? 0 : (camera+1) % numcameras;
+	let nextcamera = getnextwebCam();
 	if (camera != nextcamera) {
 		scanner.stop().then(function () {
-			Instascan.Camera.getCameras().then(function (cameras) {
-//	For testing camera switching use: 	cameras[1] = cameras[0];
-				numcameras = cameras.length;
-		        if (cameras.length > 0) {
-		          // Try to select back camera.
-		          if (camera == -1 && cameras.length > 1) {
-		        	  for(var i = 0; i < cameras.length; i++) {
-		        		  
-		        		  if (cameras[i].name !== null
-		        			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
-		        			  nextcamera = i;
-		        		  }
-		        	  }
-		          }
-		          camera = nextcamera;
-		          scanner.start(cameras[camera]).then(function() {		        	  
-			          let videopreview = $('#previewQRvideo');
-			          let parent = videopreview.closest('div');
-			          let maxwidth = parent.width();
-			          let maxheight = parent.height();
-			          
-			          let width = videopreview.width();
-			          let height = videopreview.height();
-			          if (width/height > maxwidth/maxheight) {
-			        	  videopreview.width(maxwidth);
-			          } else {
-			        	  videopreview.height(maxheight);		        	  
-			          }
-			      	  videopreview.css('display','block');
-			      	  reportcallback({camera:camera, cameras: cameras});
-		          }).catch(function (e) {
-			          reportcallback(e.message);
-		          });
-		        } else {
-		          console.error('No cameras found.');
-		          reportcallback("No cameras found.");
-		        }
-		      }).catch(function (e) {
+			if (camerasDetected !== null) {
+				try {
+					selectCamera(camerasDetected, nextcamera, reportcallback);
+				} catch (e) {
+					console.error(e);
+			        reportcallback(e.message);
+				}
+			} else {
+				Instascan.Camera.getCameras().then(function (cameras) {
+					selectCamera(cameras, nextcamera, reportcallback);
+					}).catch(function (e) {
 		          console.error(e);
 		          reportcallback(e.message);
 		      });	
+			}
 		});
 	}
-		
 }
-
+/**
+ * TODO don't use global var camera
+ * @param cameras
+ * @returns
+ */
+function selectCamera(cameras, nextcamera, reportcallback) {
+//	For testing camera switching use: cameras[1] = cameras[0];
+camerasDetected = cameras;
+numcameras = cameras.length;
+if (cameras.length > 0) {
+  // Try to select back camera by name.
+  if (camera == -1 && cameras.length > 1) {
+	  for(var i = 0; i < cameras.length; i++) {
+		  if (cameras[i].name !== null
+			  && cameras[i].name.toLowerCase().indexOf('back') != -1) {
+			  nextcamera = i;
+		  }
+	  }
+  }
+  camera = nextcamera;
+  scanner.start(cameras[camera]).then(function() {		        	  
+      let videopreview = $('#previewQRvideo');
+      let parent = videopreview.closest('div');
+      let maxwidth = parent.width();
+      let maxheight = parent.height();
+      
+      let width = videopreview.width();
+      let height = videopreview.height();
+      if (width/height > maxwidth/maxheight) {
+    	  videopreview.width(maxwidth);
+      } else {
+    	  videopreview.height(maxheight);		        	  
+      }
+  	  videopreview.css('display','block');
+  	  reportcallback({camera:camera, cameras: cameras});
+  }).catch(function (e) {
+	  scanner.stop();
+	  console.error(e);
+      reportcallback("Error activating camera: " + e.message);
+  });
+} else {
+  console.error('No cameras found.');
+  reportcallback("No cameras found.");
+    }
+  }

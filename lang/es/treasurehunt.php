@@ -54,6 +54,7 @@ $string['back'] = 'Atrás';
 $string['backtocourse'] = 'Volver al curso';
 $string['basemaps'] = 'Mapas base';
 $string['cancel'] = 'Cancelar';
+$string['changecamera'] = 'Cambiar cámara';
 $string['changetogroupmode'] = 'El modo de juego ha cambiado a jugar en grupos';
 $string['changetoindividualmode'] = 'El modo de juego ha cambiado a jugar individual';
 $string['changetoplaywithmove'] = 'El modo de juego ha cambiado a jugar desplazándose';

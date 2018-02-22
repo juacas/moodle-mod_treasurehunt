@@ -1053,7 +1053,11 @@ define(['jquery',
 		            }
 		        });
 		    }
-		    $("#nextcamera").on('click', function(){
+		    $("#nextcamera").on('click', function() {
+		    	if (camerasDetected !== null) {
+			    	var nextcam = getnextwebCam();
+			    	toast('Give access to:' + camerasDetected[nextcam].name);
+		    	}
 		    	setnextwebcam(qrReport);
 		    });
 		    // Scan QR.
@@ -1067,7 +1071,9 @@ define(['jquery',
 		    	if (typeof(message) == 'string') {
 		    		$('#errorQR').text(message);		    		
 		    	} else {
-		    		$('#errorQR').text(message.cameras[message.camera].name);
+		    		if (message.cameras[message.camera].name !== null) {
+		    			$('#errorQR').text(message.cameras[message.camera].name);
+		    		}
 		    		// hide/show next camera button.
 		    		if (message.cameras.length > 1) {
 		    			$('#nextcamera').show();
