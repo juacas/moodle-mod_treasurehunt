@@ -37,6 +37,7 @@ See also
 
 Change log
 ==========
+ - v1.2.15 Full compatibility of QRScanner with IOS 11 (iPhone && iPad).
  - v1.2.14 Fix camera preview sizes. Implement switching cameras.
  - v1.2.13 Change QR scanning library to fix the firefox regression.
  - v1.2.12 Fix for compatibility with Moodle 2.9.x.
