@@ -169,8 +169,9 @@ function setnextwebcam(reportcallback)
 			        reportcallback(e.message);
 				}
 			} else {
-				Instascan.Camera.getCameras().then(function (cameras) {selectCamera(cameras, nextcamera, reportcallback);})
-				.catch(function (e) {
+				Instascan.Camera.getCameras().then(function (cameras) {
+					selectCamera(cameras, nextcamera, reportcallback);
+					}).catch(function (e) {
 		          console.error(e);
 		          reportcallback(e.message);
 		      });	
@@ -184,7 +185,7 @@ function setnextwebcam(reportcallback)
  * @returns
  */
 function selectCamera(cameras, nextcamera, reportcallback) {
-//	For testing camera switching use: 	cameras[1] = cameras[0];
+//	For testing camera switching use: cameras[1] = cameras[0];
 camerasDetected = cameras;
 numcameras = cameras.length;
 if (cameras.length > 0) {
@@ -214,7 +215,9 @@ if (cameras.length > 0) {
   	  videopreview.css('display','block');
   	  reportcallback({camera:camera, cameras: cameras});
   }).catch(function (e) {
-      reportcallback(e.message);
+	  scanner.stop();
+	  console.error(e);
+      reportcallback("Error activating camera: " + e.message);
   });
 } else {
   console.error('No cameras found.');
