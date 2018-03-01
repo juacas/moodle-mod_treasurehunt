@@ -59,6 +59,8 @@ $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
+$string['completionfinish'] = 'Require to finish road.';
+$string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
 $string['configintro'] = 'The values you set here define the default values that are used in the settings form when you
 create a new treasure hunt.';
 $string['configmaximumgrade'] = 'The default grade that the treasure hunt grade is scaled to be out of.';
