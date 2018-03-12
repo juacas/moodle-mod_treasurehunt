@@ -2464,7 +2464,7 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
         $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
             $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation)
-                    + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
+                     + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
             $msgparams = (object) [
                         'grademax' => $treasurehunt->grade,
                         'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
@@ -2555,7 +2555,7 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
     $context = context_module::instance($cm->id);
     $enrolledusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
     if ($userid == 0) {
-        $students = $restrictedusers;
+        $students = $enrolledusers;
     } else {
         $student = new stdClass();
         $student->id = $userid;
