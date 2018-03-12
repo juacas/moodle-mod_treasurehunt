@@ -136,7 +136,6 @@ function treasurehunt_delete_instance($id) {
     global $DB;
     $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id), MUST_EXIST);
     // Delete any dependent records here.
-    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads as $road) {
         $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
@@ -149,7 +148,6 @@ function treasurehunt_delete_instance($id) {
     }
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     $DB->delete_records('treasurehunt_track', array('treasurehuntid' => $treasurehunt->id));
-
     $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
     treasurehunt_grade_item_delete($treasurehunt);
 
@@ -158,6 +156,7 @@ function treasurehunt_delete_instance($id) {
         $event = calendar_event::load($event);
         $event->delete();
     }
+    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
 
     return true;
 }

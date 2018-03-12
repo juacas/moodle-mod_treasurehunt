@@ -2267,7 +2267,9 @@ function treasurehunt_get_user_fullname_from_id($id) {
  */
 function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     global $DB;
-
+    if (count($restrictedusers) == 0 ) {
+        return [];
+    }
     if ($treasurehunt->groupmode) {
         $user = 'gr.userid';
         $groupsmembers = "INNER JOIN {groups_members} gr ON a.groupid=gr.groupid";
@@ -2551,7 +2553,7 @@ function treasurehunt_calculate_line_equation($x1, $y1, $x2, $y2, $x3) {
 function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
     $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id, 0, false, MUST_EXIST);
     $context = context_module::instance($cm->id);
-    $restrictedusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
+    $enrolledusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
     if ($userid == 0) {
         $students = $restrictedusers;
     } else {
@@ -2559,8 +2561,7 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
         $student->id = $userid;
         $students = array($student);
     }
-
-    $stats = treasurehunt_calculate_stats($treasurehunt, $restrictedusers);
+    $stats = treasurehunt_calculate_stats($treasurehunt, $enrolledusers);
     $grades = treasurehunt_calculate_grades($treasurehunt, $stats, $students);
     return $grades;
 }
