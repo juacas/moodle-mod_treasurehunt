@@ -520,7 +520,7 @@ define(
 
 				map.on('click', function(evt) {
 					if (!Draw.getActive() && !Modify.getActive() &&
-						custommapconfig !== null && custommapconfig.geographic) {
+						(custommapconfig === null || custommapconfig.geographic)) {
 						showpopup(evt);
 					}
 				});
