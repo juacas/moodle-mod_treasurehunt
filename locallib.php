@@ -1,5 +1,6 @@
 <?php
 use core\notification;
+use core\session\exception;
 
 // This file is part of Treasurehunt for Moodle
 //
@@ -986,6 +987,7 @@ function treasurehunt_get_name_and_clue($attempt, $context) {
  * @param stdClass $treasurehunt
  * @param int $groupid
  * @param int $userid
+ * @param context_module $context
  */
 function treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context) {
     if ($treasurehunt->grademethod != TREASUREHUNT_GRADEFROMSTAGES) {
@@ -1002,6 +1004,11 @@ function treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context) 
         $user->id = $userid;
         $users [] = $user;
     }
+    // Completion.
+    $cm = get_fast_modinfo($treasurehunt->course)->instances['treasurehunt'][$treasurehunt->id];
+    $course = get_course($cm->course);
+    $completion = new completion_info($course);
+
     foreach ($users as $user) {
         $event = \mod_treasurehunt\event\hunt_succeded::create(array(
                         'objectid' => $treasurehunt->id,
@@ -1011,6 +1018,10 @@ function treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context) 
         ));
         $event->add_record_snapshot("treasurehunt", $treasurehunt);
         $event->trigger();
+        // Notify that this user entitles for finishing completion.
+        if ($completion->is_enabled($cm) && $cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
+            $completion->update_state($cm, COMPLETION_UNKNOWN, $userid);
+        }
     }
 }
 /**
@@ -1303,7 +1314,7 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
             $errormsg = 'nouserroad';
         }
         // The user does not belong to any group.
-        print_error($errormsg, 'treasurehunt', $returnurl, $username);
+        throw new exception($errormsg, 'treasurehunt', $returnurl, $username);
     } else if (count($userdata) > 1) {
         if ($treasurehunt->groupmode) {
             $errormsg = 'multiplegroupingsplay';
@@ -1314,7 +1325,7 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
             $errormsg = 'usermultipleroads';
         }
         // The user belongs to more than one group.
-        print_error($errormsg, 'treasurehunt', $returnurl, $username);
+        throw new exception($errormsg, 'treasurehunt', $returnurl, $username);
     } else {
         if ($treasurehunt->groupmode) {
             if (current($userdata)->groupsnumber > 1) {
@@ -1324,7 +1335,7 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
                     $errormsg = 'multiplegroupssameroadplay';
                 }
                 // The user belongs to more than one group within a grouping.
-                print_error($errormsg, 'treasurehunt', $returnurl, $username);
+                throw new exception($errormsg, 'treasurehunt', $returnurl, $username);
             }
         } else {
             current($userdata)->groupid = 0;
@@ -1336,7 +1347,7 @@ function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $te
                 $errormsg = 'invalidassignedroad';
             }
             // The road is not valid.
-            print_error($errormsg, 'treasurehunt', $returnurl, $username);
+            throw new exception($errormsg, 'treasurehunt', $returnurl, $username);
         } else {
             return current($userdata);
         }
@@ -2256,7 +2267,9 @@ function treasurehunt_get_user_fullname_from_id($id) {
  */
 function treasurehunt_calculate_stats($treasurehunt, $restrictedusers) {
     global $DB;
-
+    if (count($restrictedusers) == 0 ) {
+        return [];
+    }
     if ($treasurehunt->groupmode) {
         $user = 'gr.userid';
         $groupsmembers = "INNER JOIN {groups_members} gr ON a.groupid=gr.groupid";
@@ -2451,7 +2464,7 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
         $grade->itemname = 'treasurehuntscore';
         if (isset($stats[$student->id])) {
             $negativepercentage = 1 - ((($stats[$student->id]->nolocationsfailed * $treasurehunt->gradepenlocation)
-                    + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
+                     + ($stats[$student->id]->noanswersfailed * $treasurehunt->gradepenanswer) ) / 100);
             $msgparams = (object) [
                         'grademax' => $treasurehunt->grade,
                         'nolocationsfailed' => $stats[$student->id]->nolocationsfailed,
@@ -2540,16 +2553,15 @@ function treasurehunt_calculate_line_equation($x1, $y1, $x2, $y2, $x3) {
 function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
     $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id, 0, false, MUST_EXIST);
     $context = context_module::instance($cm->id);
-    $restrictedusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
+    $enrolledusers = get_enrolled_users($context, 'mod/treasurehunt:play', 0, 'u.id');
     if ($userid == 0) {
-        $students = $restrictedusers;
+        $students = $enrolledusers;
     } else {
         $student = new stdClass();
         $student->id = $userid;
         $students = array($student);
     }
-
-    $stats = treasurehunt_calculate_stats($treasurehunt, $restrictedusers);
+    $stats = treasurehunt_calculate_stats($treasurehunt, $enrolledusers);
     $grades = treasurehunt_calculate_grades($treasurehunt, $stats, $students);
     return $grades;
 }

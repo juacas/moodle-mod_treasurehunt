@@ -59,6 +59,8 @@ $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
+$string['completionfinish'] = 'Require to finish road.';
+$string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
 $string['configintro'] = 'The values you set here define the default values that are used in the settings form when you
 create a new treasure hunt.';
 $string['configmaximumgrade'] = 'The default grade that the treasure hunt grade is scaled to be out of.';
@@ -68,7 +70,7 @@ $string['continue'] = 'Continue';
 $string['correctanswer'] = 'Correct answer.';
 $string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
 $string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has benn deleted.';
-$string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number og roads or stages but the activity is blocked because someone has started to play the game.';
+$string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
 $string['customlayername'] = 'Layer title';
 $string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
 $string['custommapimagefile'] = 'Custom image for map';

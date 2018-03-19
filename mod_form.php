@@ -323,5 +323,34 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         }
         return $data;
     }
+    /**
+     * Add any custom completion rules to the form.
+     *
+     * @return array Contains the names of the added form elements
+     */
+    public function add_completion_rules() {
+        $mform =& $this->_form;
+        $mform->addElement('advcheckbox', 'completionpass', '', get_string('completionpass', 'quiz'));
+        $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
+        $mform->addHelpButton('completionpass', 'completionpass', 'quiz');
+        // Enable this completion rule by default.
+        $mform->setDefault('completionpass', 1);
+
+        $mform->addElement('advcheckbox', 'completionfinish', '', get_string('completionfinish', 'treasurehunt'));
+        $mform->addHelpButton('completionfinish', 'completionfinish', 'treasurehunt');
+        // Enable this completion rule by default.
+        $mform->setDefault('completionfinish', 1);
+        return array('completionpass', 'completionfinish');
+    }
+
+    /**
+     * Determines if completion is enabled for this module.
+     *
+     * @param array $data
+     * @return bool
+     */
+    public function completion_rule_enabled($data) {
+        return !empty($data['completionfinish']) || !empty($data['completionpass']);
+    }
 
 }

@@ -13,7 +13,6 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-
 /**
  * Library of functions for the treasurehunt module.
  *
@@ -49,6 +48,8 @@ function treasurehunt_supports($feature) {
             return true;
         case FEATURE_GRADE_HAS_GRADE:
             return true;
+        case FEATURE_COMPLETION_HAS_RULES:
+            return true;
         case FEATURE_BACKUP_MOODLE2:
             return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
@@ -74,9 +75,6 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
     global $DB;
     $timenow = time();
     $treasurehunt->timecreated = $timenow;
-
-    // You may have to add extra stuff in here.
-
     $treasurehunt->id = $DB->insert_record('treasurehunt', $treasurehunt);
     if ($mform !== null) { // This indicates it is a manual creation. Do not create items when restoring backups.
         treasurehunt_create_default_items($treasurehunt);
@@ -100,20 +98,23 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
  */
 function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
     global $DB;
-
     // Get the current value, so we can see what changed.
     $oldtreasurehunt = $DB->get_record('treasurehunt', array('id' => $treasurehunt->instance));
     // Update the database.
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
+    $gradeitem = grade_item::fetch(array('itemtype' => 'mod', 'itemmodule' => 'treasurehunt',
+                    'iteminstance' => $treasurehunt->instance, 'itemnumber' => 0, 'courseid' => $treasurehunt->course));
     if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0)
             || $oldtreasurehunt->grademethod != $treasurehunt->grademethod
             || $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation
             || $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer
-            || $oldtreasurehunt->groupmode != $treasurehunt->groupmode) {
+            || $oldtreasurehunt->groupmode != $treasurehunt->groupmode
+            || $gradeitem->gradepass != $treasurehunt->gradepass) {
         treasurehunt_update_grades($treasurehunt);
     }
+
     treasurehunt_set_custombackground($treasurehunt);
     treasurehunt_grade_item_update($treasurehunt);
     treasurehunt_update_events($treasurehunt);
@@ -135,7 +136,6 @@ function treasurehunt_delete_instance($id) {
     global $DB;
     $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id), MUST_EXIST);
     // Delete any dependent records here.
-    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads as $road) {
         $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
@@ -148,7 +148,6 @@ function treasurehunt_delete_instance($id) {
     }
     $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     $DB->delete_records('treasurehunt_track', array('treasurehuntid' => $treasurehunt->id));
-
     $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
     treasurehunt_grade_item_delete($treasurehunt);
 
@@ -157,6 +156,7 @@ function treasurehunt_delete_instance($id) {
         $event = calendar_event::load($event);
         $event->delete();
     }
+    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
 
     return true;
 }
@@ -192,6 +192,7 @@ function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
  * @param stdClass $treasurehunt the module instance record
  */
 function treasurehunt_user_complete($course, $user, $mod, $treasurehunt) {
+    // TODO: implement user briefing.
 }
 
 /**
@@ -370,7 +371,17 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) 
         $item['reset'] = true;
         $grades = null;
     }
-
+    // Update completion state.
+    if (is_array($grades)) {
+        $cm = get_fast_modinfo($treasurehunt->course)->instances['treasurehunt'][$treasurehunt->id];
+        $course = get_course($cm->course);
+        $completion = new completion_info($course);
+        if ($completion->is_enabled($cm) && $cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
+            foreach ($grades as $grade) {
+                $completion->update_state($cm, COMPLETION_UNKNOWN, $grade->userid);
+            }
+        }
+    }
     grade_update('mod/treasurehunt', $treasurehunt->course, 'mod', 'treasurehunt', $treasurehunt->id, 0, $grades, $item);
 }
 
@@ -665,4 +676,49 @@ function treasurehunt_update_events($treasurehunt) {
         $badevent = calendar_event::load($badevent);
         $badevent->delete();
     }
+}
+/**
+ * Obtains the automatic completion state for this module based on any conditions in game settings.
+ *
+ * @param object $course Course
+ * @param object $cm Course-module
+ * @param int $userid User ID
+ * @param bool $type Type of comparison (or/and; can be used as return value if no conditions)
+ *
+ * @return bool True if completed, false if not, $type if conditions not set.
+ */
+function treasurehunt_get_completion_state($course, $cm, $userid, $type) {
+    global $CFG, $DB;
+    if (($cm->completion == COMPLETION_TRACKING_NONE) or ($cm->completion == COMPLETION_TRACKING_MANUAL)) {
+        // Completion option is not enabled so just return $type.
+        return $type;
+    }
+
+    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+    // Check for finish state.
+    if ($treasurehunt->completionfinish) {
+        try {
+            $userdata = treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cm->id);
+            $groupid = $userdata->groupid;
+            $roadid = $userdata->roadid;
+            return treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
+        } catch (Exception $ex) {
+            // Ignore exception. This user has no completion information. Probably is not in a group or a road.
+            return false;
+        }
+    }
+    // Check for passing grade.
+    if ($treasurehunt->completionpass) {
+        require_once($CFG->libdir . '/gradelib.php');
+        $item = grade_item::fetch(array('courseid' => $course->id, 'itemtype' => 'mod',
+                        'itemmodule' => 'treasurehunt', 'iteminstance' => $cm->instance, 'outcomeid' => null));
+        if ($item) {
+            $grades = grade_grade::fetch_users_grades($item, array($userid), false);
+            if (!empty($grades[$userid])) {
+                $passed = $grades[$userid]->is_passed($item);
+                return $passed;
+            }
+        }
+    }
+    return $type;
 }

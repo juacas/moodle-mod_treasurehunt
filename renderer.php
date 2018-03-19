@@ -297,7 +297,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
             treasurehunt_qr_support($PAGE, 'enableTest', $params);
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
-            $o .= '<div id="QRStatusDv">';
+            $o .= '<div id="QRStatusDiv">';
             $o .= $this->output->notification($warnqr) . "\n";
             $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>' .
             '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">

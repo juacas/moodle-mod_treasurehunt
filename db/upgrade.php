@@ -79,6 +79,24 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2017101904, 'treasurehunt');
     }
+    if ($oldversion < 2018022800) {
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('completionfinish', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+                                XMLDB_NOTNULL, null, 0, 'custommapconfig');
 
+        // Conditionally launch add field custombbox.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field('completionpass', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
+                XMLDB_NOTNULL, null, 0, 'completionfinish');
+
+        // Conditionally launch add field custombbox.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2018022800, 'treasurehunt');
+    }
     return true;
 }
