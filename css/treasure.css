@@ -1,7 +1,8 @@
 /*
-    Created on : 17-may-2017, 14:18:15
-    Author     : juacas
+	CSS fixes for Themes' interactions.
+    Created on : 19-mar-2018,
+    @Author     : juacas
 */
-.popover-content {
-        min-width: 180px;
-      }
+*, *::before, *::after {
+	box-sizing: unset !important;
+}
