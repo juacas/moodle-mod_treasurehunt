@@ -1019,7 +1019,7 @@ function treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context) 
         $event->add_record_snapshot("treasurehunt", $treasurehunt);
         $event->trigger();
         // Notify that this user entitles for finishing completion.
-        if ($completion->is_enabled($cm)) {
+        if ($completion->is_enabled($cm) && $cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
             $completion->update_state($cm, COMPLETION_UNKNOWN, $userid);
         }
     }

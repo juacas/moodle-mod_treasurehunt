@@ -376,28 +376,9 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) 
         $cm = get_fast_modinfo($treasurehunt->course)->instances['treasurehunt'][$treasurehunt->id];
         $course = get_course($cm->course);
         $completion = new completion_info($course);
-        if ($completion->is_enabled($cm)) {
+        if ($completion->is_enabled($cm) && $cm->completion == COMPLETION_TRACKING_AUTOMATIC) {
             foreach ($grades as $grade) {
-//                 {message: "Se ha producido un error interno en el sistema de …información de seguimiento para ver más detalles)", errorcode: "err_system", backtrace: "* line 1368 of /lib/completionlib.php: moodle_exce…: call to external_api::call_external_function()↵", link: "https://itastdevserver.tel.uva.es/moodle3/course/view.php?id=37", moreinfourl: "http://docs.moodle.org/34/es/error/completion/err_system", …}
-//                 backtrace
-//                 :
-//                 "* line 1368 of /lib/completionlib.php: moodle_exception thrown↵* line 609 of /lib/completionlib.php: call to completion_info->internal_systemerror()↵* line 381 of /mod/treasurehunt/lib.php: call to completion_info->update_state()↵* line 417 of /mod/treasurehunt/lib.php: call to treasurehunt_grade_item_update()↵* line 1060 of /mod/treasurehunt/locallib.php: call to treasurehunt_update_grades()↵* line 843 of /mod/treasurehunt/locallib.php: call to treasurehunt_set_grade()↵* line 683 of /mod/treasurehunt/externallib.php: call to treasurehunt_check_user_location()↵* line 228 of /lib/externallib.php: call to mod_treasurehunt_external::user_progress()↵* line 59 of /lib/ajax/service.php: call to external_api::call_external_function()↵"
-//                 debuginfo
-//                 :
-//                 "Unexpected manual completion state for 544: -1↵Error code: err_system"
-//                 errorcode
-//                 :
-//                 "err_system"
-//                 link
-//                 :
-//                 "https://itastdevserver.tel.uva.es/moodle3/course/view.php?id=37"
-//                 message
-//                 :
-//                 "Se ha producido un error interno en el sistema de finalización. (Los administradores del sistema pueden habilitar la información de seguimiento para ver más detalles)"
-//                 moreinfourl
-//                 :
-//                 "http://docs.moodle.org/34/es/error/completion/err_system"
-                //$completion->update_state($cm, COMPLETION_UNKNOWN, $grade->userid);
+                $completion->update_state($cm, COMPLETION_UNKNOWN, $grade->userid);
             }
         }
     }
@@ -708,7 +689,7 @@ function treasurehunt_update_events($treasurehunt) {
  */
 function treasurehunt_get_completion_state($course, $cm, $userid, $type) {
     global $CFG, $DB;
-    if (($cm->completion == 0) or ($cm->completion == 1)) {
+    if (($cm->completion == COMPLETION_TRACKING_NONE) or ($cm->completion == COMPLETION_TRACKING_MANUAL)) {
         // Completion option is not enabled so just return $type.
         return $type;
     }
