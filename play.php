@@ -79,8 +79,8 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
                         $treasurehunt->tracking, $user, $custommapping));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
-
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
+$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 
 $PAGE->set_pagelayout('embedded');
 
