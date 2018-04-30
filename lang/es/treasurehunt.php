@@ -326,6 +326,7 @@ $string['timelabelsuccess'] = 'Etapa descubierta en la fecha: ';
 $string['trackusers'] = 'Almacenar itinerarios';
 $string['trackusers_help'] = 'Almacena el itinerario que realizan los usuarios mientras usan el modo de juego.';
 $string['trackviewer'] = 'Visor de rastreo';
+$string['trackviewerrefreshtracks'] = 'Actualizar las rutas cada {$a} segundos.';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['treasurehunt:addroad'] = 'Añadir camino';
