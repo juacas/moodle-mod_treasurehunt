@@ -25,7 +25,8 @@
 define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification',
 		'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
         function ($, jqui, touch, notification, ol, olLayerSwitcher, str) {
-
+			var refreshTracksInterval = 30;
+			var refreshCounter = 0;
             var init = {
                 addgpxlayer: function (map, cmid, treasurehuntid, strings, user, trackgroupname) {
 
@@ -34,11 +35,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     load_gpx([user], cmid, map, trackgroup, null);
                     return trackgroup;
                 },
-                creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig) {					// I18n strings.
+                creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig, refreshinterval) {					// I18n strings.
 	            	var terms = ['aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer'];
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
 	                });
+	            	refreshTracksInterval = refreshinterval;
 	            	str.get_strings(stringsqueried).done(function (strings) {
 	            		var i18n = [];
 	            		for (var i=0; i < terms.length; i++) {
@@ -175,6 +177,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
 
                     layerSwitcher.showPanel();
+                    
                     load_gpx(users, cmid, map, tracks, layerSwitcher);
                     // Popup showing the position the user clicked.
                     var popup = new ol.Overlay({
@@ -221,6 +224,19 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
                     map.on('click', function (evt) {
                         showpopup(evt);
+                    });
+                    var interval = null;
+                    $('#refreshtracks').change(function() {
+                    	if ($(this).is(':checked')) {
+                    		refreshCounter = 0;
+                    		$("#timecircle").show();
+                    		interval = setInterval(function() {
+                    			$("#timecircle").text(refreshTracksInterval - (refreshCounter++) % refreshTracksInterval);
+							}, 1000);
+                    	} else {
+                    		$("#timecircle").hide();
+                    		clearInterval(interval);
+                    	}
                     });
                 } // End of function initcreategpxviewer.
             
@@ -274,7 +290,23 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                             return selectedstyle;
                         }
                     });
+                    setInterval(function() {
+                    	if ($('#refreshtracks').is(':checked')) {
+                    		refreshCounter = 0;
+                    		gpxsource.clear();
+                    		gpxsource.refresh();                    		
+                    	}
+                    }, refreshTracksInterval * 1000);
+                    vector.on('change:visible', function() {
+                    	if (this.getVisible()) {
+                    		var extent = this.getSource().getExtent();
+                    		flyTo(map, null, extent);
+                    	}
+                    });
                     gpxsource.on('change', function () {
+                    	if ($('#refreshtracks').is(':checked')) {
+                    		return;
+                    	} 
                         var extent = gpxsource.getExtent();
                         if (max_extent === null) {
                             max_extent = extent;

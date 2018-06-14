@@ -63,14 +63,19 @@ foreach ($userrecords as $userrecord) {
     $user->pic = $output->user_picture($userrecord);
     $users[] = $user;
 }
+$refreshtracksinterval = 60;
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer', array($id, $treasurehunt->id, $users, $custommapping));
+$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',
+                        array($id, $treasurehunt->id, $users, $custommapping, $refreshtracksinterval));
 echo $output->header();
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame
+// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
-echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
+$controls = '<label><input type="checkbox" value="refresh" id="refreshtracks"></input>' .
+            get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval) .
+            ' <span id="timecircle"></span></label>';
+echo $OUTPUT->box($controls, 'visible', 'controlpanel');
 echo $OUTPUT->box('', null, 'mapgpx');
 echo $OUTPUT->container_end();
 echo $OUTPUT->box('', null, 'info');
