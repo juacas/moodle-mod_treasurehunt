@@ -209,7 +209,7 @@ define(
 					}
 				});
 				// Lo cargo como un buttonset.
-				$("#edition").buttonset();
+				$("#edition").controlgroup({disabled: true});
 				// Hago visible el controlpanel.
 				$("#controlpanel").removeClass('invisible');
 				// Creo el stagelist.
@@ -1255,17 +1255,18 @@ define(
 					$('#addstage').button("option", "disabled", true);
 				}
 				function deactivateEdition() {
-					var radioButton = $("#edition").find("input:radio");
-					radioButton.attr('checked', false).button("refresh");
-					radioButton.button("option", "disabled", true);
-					$("label[for='radio1']").removeClass('highlightbutton');
+
+					var radioButtons = $("#edition").find("input:radio");
+					$("#edition").find("input:radio").prop("checked", false).end()
+			           .controlgroup("refresh");
+					$("#edition").controlgroup("disable");
+
 					Draw.setActive(false);
 					Modify.setActive(false);
 				}
 
 				function activateEdition() {
-					$("#edition").find("input:radio").button("option",
-							"disabled", false);
+					$("#edition").controlgroup("enable");
 				}
 				function activateSaveButton() {
 					$('#savestage').button("option", "disabled", false);
@@ -1823,8 +1824,7 @@ define(
 									
 									if (value==prevval){
 										// Toggle.
-										$(this).prop('checked',value!=prevval).button("refresh");
-
+										$("#edition").find("input:radio").checkboxradio().prop('checked', false).end().controlgroup('refresh');
 										value = 'off';
 									}
 									editstatus = value;
