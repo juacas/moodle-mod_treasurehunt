@@ -177,7 +177,15 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     });
 
                     layerSwitcher.showPanel();
-                    
+                    var selectSingleClick = new ol.interaction.Select({
+                    	style: function (feature) {
+                    		var layer = selectSingleClick.getLayer(feature);
+                    		var iconurl = layer.iconurl;
+                            var selectedstyle = trackStyleFunction(feature, iconurl, true);
+                            return selectedstyle;
+                        }
+                    });
+                    map.addInteraction(selectSingleClick);
                     load_gpx(users, cmid, map, tracks, layerSwitcher);
                     // Popup showing the position the user clicked.
                     var popup = new ol.Overlay({
@@ -282,14 +290,16 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     var a = user.pic.indexOf('<img src="') + 10;
                     var b = user.pic.indexOf('"', a);
                     var iconurl = user.pic.substring(a, b);
+                    
                     var vector = new ol.layer.Vector({
                         source: gpxsource,
                         title: user.pic + '' + user.fullname,
                         style: function (feature) {
-                            var selectedstyle = trackStyleFunction(feature, iconurl);
+                            var selectedstyle = trackStyleFunction(feature, iconurl, false);
                             return selectedstyle;
                         }
                     });
+                    vector.iconurl = iconurl;
                     setInterval(function() {
                     	if ($('#refreshtracks').is(':checked')) {
                     		refreshCounter = 0;
@@ -324,26 +334,45 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
                 });
             }
-            function trackStyleFunction(feature, icon) {
+            function trackStyleFunction(feature, icon, selected) {
                 var styles = [
                     // ...shadow.
                     new ol.style.Style({
                         stroke: new ol.style.Stroke({
                             color: 'rgba(255,255,255,0.8)',
-                            width: 8
+                            width: 6 + 2 * selected
                         }),
-                        //zIndex: 1
+                        zIndex: 1 + selected * 4
                     }),
                     new ol.style.Style({
                         stroke: new ol.style.Stroke({
                             color: '#ff0000',
-                            width: 2,
+                            width: 1 + selected,
                             lineDash: [10, 8],
                         }),
                         fill: new ol.style.Fill({
                             color: 'rgba(255,0,0,0.5)'
-                        })
+                        }),
+                        zIndex: 2 + selected * 4
                     }),
+                    new ol.style.Style({
+                        image: new ol.style.Circle({
+                          radius: 3 + 2 * selected,
+                          stroke: new ol.style.Stroke({
+                        	  color: 'white',
+                        	  width: 1 + selected
+                          }),
+                          fill: new ol.style.Fill({
+                            color: 'red'
+                          })
+                        }),
+                        geometry: function(feature) {
+                          // return the coordinates of the first ring of the polygon
+                          var coordinates = feature.getGeometry().getCoordinates()[0];
+                          return new ol.geom.MultiPoint(coordinates);
+                        },
+                        zIndex: 3 + selected * 4
+                      })
                 ];
                 var geometry = feature.getGeometry();
                 var coord = geometry.getLastCoordinate();
@@ -353,7 +382,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         src: icon,
                         anchor: [0.75, 0.5],
                         rotateWithView: false,
-                    })
+                    }),
+                    zIndex: 4 + selected * 4
                 }));
                 return styles;
             }
