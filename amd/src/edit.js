@@ -1824,7 +1824,7 @@ define(
 									
 									if (value==prevval){
 										// Toggle.
-										$("#edition").find("input:radio").checkboxradio().prop('checked', false).end().buttonset('refresh');
+										$("#edition").find("input:radio").buttonset().prop('checked', false).end().buttonset('refresh');
 										value = 'off';
 									}
 									editstatus = value;
