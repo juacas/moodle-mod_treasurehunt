@@ -141,14 +141,14 @@ define(
 						'ui-widget-header ui-corner-all');
 				$('<span id="edition"/>').appendTo($("#controlpanel"));
 				$(
-						'<input type="radio" name="controlpanel" id="radio1" value="add">')
+						'<input type="radio" name="controlpanel" id="addradio" value="add">')
 						.appendTo($("#edition"));
-				$("<label>").attr('for', "radio1").text(strings['add'])
+				$("<label>").attr('for', "addradio").text(strings['add'])
 						.appendTo($("#edition"));
 				$(
-						'<input type="radio" name="controlpanel" id="radio2" value="modify">')
+						'<input type="radio" name="controlpanel" id="modifyradio" value="modify">')
 						.appendTo($("#edition"));
-				$("<label>").attr('for', "radio2").text(strings['modify'])
+				$("<label>").attr('for', "modifyradio").text(strings['modify'])
 						.appendTo($("#edition"));
 				$('<button id="savestage"/>').attr('disabled', true).text(
 						strings['save']).appendTo($("#controlpanel"));
@@ -174,13 +174,13 @@ define(
 						.prependTo($("#controlpanel"));
 				$('<button id="addroad" />').text(strings['road'])
 						.prependTo($("#controlpanel"));
-				$("#radio1").button({
+				$("#addradio").button({
 					text : false,
 					icons : {
 						primary : "ui-icon-plusthick"
 					}
 				});
-				$("#radio2").button({
+				$("#modifyradio").button({
 					text : false,
 					icons : {
 						primary : "ui-icon-pencil"
@@ -1213,7 +1213,7 @@ define(
 					// Compruebo si en este camino hay alguna etapa sin
 					// geometria.
 					if (roadid) {
-						$("label[for='radio1']")
+						$("label[for='addradio']")
 								.addClass('highlightbutton');
 						var $stagelist = $("#stagelist li[roadid='"
 								+ roadid + "']");
@@ -1231,7 +1231,7 @@ define(
 					if (roadid) {
 						// Compruebo si en este camino hay alguna etapa sin
 						// geometria.
-						$("label[for='radio1']").removeClass(
+						$("label[for='addradio']").removeClass(
 								'highlightbutton');
 						var $stagelist = $("#stagelist li[roadid='"
 								+ roadid + "']");
@@ -1820,7 +1820,7 @@ define(
 								function() {
 									
 									var prevval = editstatus;
-									var value = $(this).val();
+									var value = $(this).prop('id');
 									
 									if (value==prevval){
 										// Toggle.
@@ -1829,10 +1829,10 @@ define(
 									}
 									editstatus = value;
 														
-									if (value === 'add') {
+									if (value === 'addradio') {
 										Draw.setActive(true);
 										Modify.setActive(false);
-									} else if (value === 'modify') {
+									} else if (value === 'modifyradio') {
 										Draw.setActive(false);
 										Modify.setActive(true);
 									} else {
@@ -1871,10 +1871,10 @@ define(
 									// Si la etapa no tiene geometrÃ­a
 									// resalto el boton de anadir.
 									if ($(this).find(".invalidstage").length > 0) {
-										$("label[for='radio1']").addClass(
+										$("label[for='addradio']").addClass(
 												'highlightbutton');
 									} else {
-										$("label[for='radio1']")
+										$("label[for='addradio']")
 												.removeClass(
 														'highlightbutton');
 									}
