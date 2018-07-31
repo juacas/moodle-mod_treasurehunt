@@ -225,7 +225,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             }
             if (count($draftfiles) == 0 && $data['customlayerwms'] == '') {
                 $errors['customlayerwms'] = get_string('customlayerwms_help', 'treasurehunt');
-                $errors['custombackground'] = get_string('custombackground_help', 'treasurehunt');
+                $errors['custombackground'] = get_string('custommapimagefile_help', 'treasurehunt');
             }
             if ($data['customlayertype'] !== 'nongeographic') {
                 if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
@@ -310,16 +310,24 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * @return object submitted data; NULL if not valid or not submitted or cancelled
      */
     public function get_data() {
+        global $CFG;
+        $mform = $this->_form;
+        // JPC workaround #24: In Moodle 3.5 when filemanager is disabled, no value is submitted and
+        // form validation fails in filemanager.php.
+        if ($mform->getSubmitValue('custombackground') == null) {
+            $mform->_submitValues['custombackground'] = 0;
+        }
         $data = parent::get_data();
-        if ($data) {
-            // Convert the grade pass value - we may be using a language which uses commas,
-            // rather than decimal points, in numbers. These need to be converted so that
-            // they can be added to the DB.
-            if (isset($data->gradepass)) {
-                $data->gradepass = unformat_float($data->gradepass);
+        if ($CFG->version < 2017051500) {
+            if ($data) {
+                // Convert the grade pass value - we may be using a language which uses commas,
+                // rather than decimal points, in numbers. These need to be converted so that
+                // they can be added to the DB.
+                if (isset($data->gradepass)) {
+                    $data->gradepass = unformat_float($data->gradepass);
+                }
+                $this->data_postprocessing($data);
             }
-
-            $this->data_postprocessing($data);
         }
         return $data;
     }
