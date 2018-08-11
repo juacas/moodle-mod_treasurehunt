@@ -1120,7 +1120,7 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         $grouptypewithin = 'at.groupid=0 AND at.userid=?';
         $params = array($roadid, $userid, $roadid, $userid);
     }
-    $query = "SELECT a.id as id,a.timecreated,a.userid as 'user',a.stageid,CASE WHEN a.success = 0 "
+    $query = "SELECT a.id as id,a.timecreated,a.userid as \"user\",a.stageid,CASE WHEN a.success = 0 "
             . "THEN NULL ELSE r.name END AS name, CASE WHEN a.success=0 THEN NULL ELSE "
             . "r.cluetext END AS cluetext,a.geometrysolved,r.position,a.location as geometry,"
             . "r.roadid,r.id AS stageid,a.success FROM ("
@@ -1428,7 +1428,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $groupid = 'a.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
-    $attemptsquery = "SELECT a.id, $user as 'user', r.position, a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
+    $attemptsquery = "SELECT a.id, $user as \"user\", r.position, a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
             . "{treasurehunt_stages} ri INNER JOIN {treasurehunt_attempts} at "
             . "ON at.stageid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
             . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
@@ -1438,7 +1438,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             . "(at.type='location' OR at.type='qr')) THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
             . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
             . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid "
-            . "order by r.position, 'user',a.id,r.roadid";
+            . "order by r.position, \"user\", a.id, r.roadid";
     $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
             . "(SELECT MAX(position) FROM {treasurehunt_stages} where roadid "
             . "= r.id) as totalstages from {treasurehunt_roads} r where treasurehuntid=?";
@@ -1888,7 +1888,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
             $return->strings[] = get_string('changetoindividualmode', 'treasurehunt');
         }
         $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
-                . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as 'user' "
+                . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as \"user\" "
                 . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
                 . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
                 . "a.timecreated ASC";
@@ -1906,7 +1906,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
             $params = array($timestamp, $userid, $roadid);
         }
         $query = "SELECT a.id,a.type,a.questionsolved,a.activitysolved,a.timecreated,"
-                . "a.success,r.position,a.userid as 'user',a.geometrysolved "
+                . "a.success,r.position,a.userid as \"user\",a.geometrysolved "
                 . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
                 . "ON a.stageid=r.id WHERE a.timecreated >? AND $grouptype "
                 . "AND r.roadid=? ORDER BY a.timecreated ASC";
@@ -1952,7 +1952,7 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
         $params = array($userid, $roadid);
     }
     $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
-            . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as 'user' "
+            . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as \"user\" "
             . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
             . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "
             . "a.timecreated ASC";
@@ -2394,7 +2394,7 @@ SQL;
         $orderby = 'ORDER BY finishtime ASC';
     }
     $sql = <<<SQL
-        SELECT $user as 'user', $grademethodsql(SELECT COUNT(*) from {treasurehunt_attempts} at
+        SELECT $user as \"user\", $grademethodsql(SELECT COUNT(*) from {treasurehunt_attempts} at
         INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
         INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
         where roa.treasurehuntid=ro.treasurehuntid
