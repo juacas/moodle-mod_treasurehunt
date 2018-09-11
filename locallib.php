@@ -384,7 +384,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
 
     // Check if road is valid.
     treasurehunt_set_valid_road($stage->roadid);
-
+    $stage  = $DB->get_record('treasurehunt_stages', $parms);
     // Trigger update stage event.
     $eventparams = array(
         'context' => $context,
@@ -405,7 +405,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
  */
 function treasurehunt_delete_stage($id, $context) {
     GLOBAL $DB;
-    $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), 'position,roadid', MUST_EXIST);
+    $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), '*', MUST_EXIST);
     // It can not be delete a stage of a started road.
     if (treasurehunt_check_road_is_blocked($stageresult->roadid)) {
         print_error('notdeletestage', 'treasurehunt');
