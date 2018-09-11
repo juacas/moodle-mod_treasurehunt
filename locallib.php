@@ -2394,7 +2394,7 @@ SQL;
         $orderby = 'ORDER BY finishtime ASC';
     }
     $sql = <<<SQL
-        SELECT $user as \"user\", $grademethodsql(SELECT COUNT(*) from {treasurehunt_attempts} at
+        SELECT $user as "user", $grademethodsql(SELECT COUNT(*) from {treasurehunt_attempts} at
         INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
         INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
         where roa.treasurehuntid=ro.treasurehuntid
