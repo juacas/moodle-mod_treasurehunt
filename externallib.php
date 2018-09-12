@@ -368,7 +368,7 @@ class mod_treasurehunt_external extends external_api {
         return new external_function_parameters(
                 array(
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-            'lockid' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL)
+            'lockid' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL, null, NULL_ALLOWED)
                 )
         );
     }
