@@ -21,8 +21,13 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+function enableTest3(Y, successString){
+	$(document).ready(function () {
+			enableTest2(Y, successString);
+			});
+}
 function enableTest(Y,successString){
-	 var cook = {};
+     var cook = {};
      document.cookie.split(';').forEach(function (x) {
          var arr = x.split('=');
          arr[1] && (cook[arr[0].trim()] = arr[1].trim());
@@ -43,13 +48,30 @@ function testFormReport(info) {
 		$('#QRvalue').text(info);
 		$('#previewQR').hide();
 	} else {
+
+		      let videopreview = $('#previewQRvideo');
+		      let parent = videopreview.closest('div');
+		      let maxwidth = parent.width();
+		      let maxheight = parent.height();
+
+		      let width = videopreview.width();
+		      let height = videopreview.height();
+		      if (width/height > maxwidth/maxheight) {
+		          videopreview.width(maxwidth);
+		      } else {
+		          videopreview.height(maxheight);
+		      }
+      		      videopreview.css('display','block');
+
+
+
 		let camera = info.camera;
 		
 		if (info.cameras[camera].name !== null) {
 			$('#QRvalue').text(info.cameras[camera].name);			
 		}
 		$('#previewQR').show();
-		let nextcamera = (camera+1) % info.cameras.length;
+		let nextcamera = getnextwebCam();
 		if (nextcamera != camera) {
 			if (info.cameras[nextcamera].name !== null) {
 				$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
@@ -140,43 +162,65 @@ function unloadQR(errorcallback){
 function loadQR(scancallback, reportcallback)
 {
 	let videopreview = $('#previewQRvideo');
-    scanner = new Instascan.Scanner({ video: videopreview.get(0) , mirror: false});
+	scanner = new Instascan.Scanner({ video: videopreview.get(0) , mirror: false});
 	scanner.addListener('scan',scancallback);
-	try {
-		setnextwebcam(reportcallback);
-	} catch (e){
-		reportcallback(e);
-	};
+  	Instascan.Camera.getCameras().then(function (cameras) {
+		detectedCameras = cameras;
+        	if (detectedCameras.length > 0) {
+		   camera = 0; //getbackCam(); JPC: Some devices can't initialize first the back camera.
+		   scanner.start(detectedCameras[camera])
+ 			.then(function() {
+ 	           		reportcallback({camera:camera, cameras: detectedCameras});			    
+			})
+			.catch(function(e) {
+ 	           		reportcallback(e);			    
+			});
+	        } else {
+        	  console.error('No cameras found.');
+       		 }
+      }).catch(function (e) {
+        console.error(e);
+      });
 }
 
-var camera = -1;
-var numcameras = 0;
-var camerasDetected = null;
+camera = -1;
+detectedCameras = null;
 
 function getnextwebCam() {
-	return camera == -1 ? 0 : (camera+1) % numcameras;
+	return detectedCameras === null || camera === -1 ? 0 : (camera+1) % detectedCameras.length;
+}
+function getbackCam() {
+  var nextcamera = getnextwebCam();
+ // Try to select back camera by name.
+  if (detectedCameras !== null && detectedCameras.length > 1) {
+          for(var i = 0; i < detectedCameras.length; i++) {
+                  if (detectedCameras[i].name !== null
+                          && detectedCameras[i].name.toLowerCase().indexOf('back') != -1) {
+                          nextcamera = i;
+                  }
+          }
+  }
+  return nextcamera;
 }
 function setnextwebcam(reportcallback)
 {
 	let nextcamera = getnextwebCam();
 	if (camera != nextcamera) {
-		scanner.stop().then(function () {
-			if (camerasDetected !== null) {
-				try {
-					selectCamera(camerasDetected, nextcamera, reportcallback);
-				} catch (e) {
-					console.error(e);
+		if (detectedCameras !== null) {
+			try {
+				selectCamera(detectedCameras, nextcamera, reportcallback);
+			} catch (e) {
+				console.error(e);
 			        reportcallback(e.message);
 				}
-			} else {
-				Instascan.Camera.getCameras().then(function (cameras) {
-					selectCamera(cameras, nextcamera, reportcallback);
-					}).catch(function (e) {
-		          console.error(e);
-		          reportcallback(e.message);
-		      });	
+		} else {
+			Instascan.Camera.getCameras().then(function (cameras) {
+				selectCamera(cameras, nextcamera, reportcallback);
+				}).catch(function (e) {
+			          console.error(e);
+		        	  reportcallback(e.message);
+		      		});	
 			}
-		});
 	}
 }
 /**
@@ -186,8 +230,6 @@ function setnextwebcam(reportcallback)
  */
 function selectCamera(cameras, nextcamera, reportcallback) {
 //	For testing camera switching use: cameras[1] = cameras[0];
-camerasDetected = cameras;
-numcameras = cameras.length;
 if (cameras.length > 0) {
   // Try to select back camera by name.
   if (camera == -1 && cameras.length > 1) {
@@ -199,6 +241,7 @@ if (cameras.length > 0) {
 	  }
   }
   camera = nextcamera;
+
   scanner.start(cameras[camera]).then(function() {		        	  
       let videopreview = $('#previewQRvideo');
       let parent = videopreview.closest('div');
@@ -212,15 +255,17 @@ if (cameras.length > 0) {
       } else {
     	  videopreview.height(maxheight);		        	  
       }
-  	  videopreview.css('display','block');
+      videopreview.css('display','block');
   	  reportcallback({camera:camera, cameras: cameras});
   }).catch(function (e) {
 	  scanner.stop();
 	  console.error(e);
       reportcallback("Error activating camera: " + e.message);
   });
+
 } else {
   console.error('No cameras found.');
   reportcallback("No cameras found.");
     }
   }
+
