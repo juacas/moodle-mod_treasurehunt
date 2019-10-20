@@ -23,13 +23,15 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 use core\output\notification;
 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
-class mod_treasurehunt_renderer extends plugin_renderer_base {
+class mod_treasurehunt_renderer extends plugin_renderer_base
+{
 
     /**
      * Utility function to add a row of data to a table with 2 columns. Modified
@@ -42,7 +44,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param array $colspan Array with the colspan of each cell
      * @return void
      */
-    private function add_table_row(html_table $table, array $text, $header, array $class = null, array $colspan = null) {
+    private function add_table_row(html_table $table, array $text, $header, array $class = null, array $colspan = null)
+    {
         $row = new html_table_row();
         $cells = array();
         for ($i = 0, $f = count($text); $i < $f; $i++) {
@@ -69,9 +72,23 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      *
      * @return string html for the page
      */
-    public function render_treasurehunt_play_page(treasurehunt_play_page $page) {
+    public function render_treasurehunt_play_page(treasurehunt_play_page $page)
+    {
         $data = $page->export_for_template($this);
         return parent::render_from_template('mod_treasurehunt/play_page', $data);
+    }
+
+    /**
+     * Defer to template.
+     *
+     * @param treasurehunt_play_page $page
+     *
+     * @return string html for the page
+     */
+    public function render_treasurehunt_edit_page(treasurehunt_edit_page $page)
+    {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('mod_treasurehunt/edit_page', $data);
     }
 
     /**
@@ -80,7 +97,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param treasurehunt_user_historical_stages  $historical
      * @return string
      */
-    public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical) {
+    public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical)
+    {
         // Create a table for the data.
         $o = '';
         $o .= $this->output->container_start('historicalattempts');
@@ -132,7 +150,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param treasurehunt_user_progress $progress
      * @return string
      */
-    public function render_treasurehunt_users_progress(treasurehunt_users_progress $progress) {
+    public function render_treasurehunt_users_progress(treasurehunt_users_progress $progress)
+    {
         // Create a table for the data.
         $o = '';
         $s = '';
@@ -140,16 +159,25 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $s .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgrouping', 'treasurehunt',
-                        implode( ", ", $progress->duplicategroupsingroupings)));
+                $s .= $this->output->notification(get_string(
+                    'warnusersgrouping',
+                    'treasurehunt',
+                    implode(", ", $progress->duplicategroupsingroupings)
+                ));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersgroup', 'treasurehunt',
-                        implode( ", ", $progress->duplicateusersingroups)));
+                $s .= $this->output->notification(get_string(
+                    'warnusersgroup',
+                    'treasurehunt',
+                    implode(", ", $progress->duplicateusersingroups)
+                ));
             }
             if (count($progress->unassignedusers) && $progress->managepermission) {
-                $s .= $this->output->notification(get_string('warnusersoutside', 'treasurehunt',
-                        implode( ", ", $progress->unassignedusers)));
+                $s .= $this->output->notification(get_string(
+                    'warnusersoutside',
+                    'treasurehunt',
+                    implode(", ", $progress->unassignedusers)
+                ));
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
@@ -170,12 +198,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                             }
                             if (!$hasprogress) {
                                 $this->add_table_row(
-                                                        $t,
-                                                        array($title,
-                                                        get_string('stages', 'treasurehunt')),
-                                                        true,
-                                                        null,
-                                                        array(null, $roadusersprogress->totalstages + 1));
+                                    $t,
+                                    array(
+                                        $title,
+                                        get_string('stages', 'treasurehunt')
+                                    ),
+                                    true,
+                                    null,
+                                    array(null, $roadusersprogress->totalstages + 1)
+                                );
                                 $hasprogress = true;
                             }
                             $row = new html_table_row();
@@ -265,7 +296,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param render_treasurehunt_info $info
      * @return string
      */
-    public function render_treasurehunt_info(treasurehunt_info $info) {
+    public function render_treasurehunt_info(treasurehunt_info $info)
+    {
         // Create a table for the data.
         $o = '';
         $notavailable = false;
@@ -300,12 +332,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $o .= '<div id="QRStatusDiv">';
             $o .= $this->output->notification($warnqr) . "\n";
             $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>' .
-            '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
+                '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
             <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
             </div>
             <div id="QRvalue"></div>' .
-            '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
-            get_string('changecamera', 'treasurehunt') . '</button>';
+                '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
+                get_string('changecamera', 'treasurehunt') . '</button>';
             $o .= '</div>';
         }
 
@@ -353,14 +385,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         }
         if ($notavailable) {
             $urlparams = array('id' => $info->courseid);
-            $o .= $this->output->single_button(new moodle_url('/course/view.php', $urlparams),
-                                                get_string('backtocourse', 'treasurehunt'), 'get',
-                                                array('class' => 'continuebutton'));
+            $o .= $this->output->single_button(
+                new moodle_url('/course/view.php', $urlparams),
+                get_string('backtocourse', 'treasurehunt'),
+                'get',
+                array('class' => 'continuebutton')
+            );
         }
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();
 
         return $o;
     }
-
 }

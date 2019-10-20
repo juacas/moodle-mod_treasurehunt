@@ -73,10 +73,15 @@ $user->id = $USER->id;
 $user->fullname = fullname($USER);
 $user->pic = $output->user_picture($USER);
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
-        array( $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
-                        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
-                        $treasurehunt->tracking, $user, $custommapping));
+$PAGE->requires->js_call_amd(
+    'mod_treasurehunt/play',
+    'playtreasurehunt',
+    array(
+        $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
+        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
+        $treasurehunt->tracking, $user, $custommapping
+    )
+);
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
@@ -101,8 +106,8 @@ echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
 // Log event.
 require_once('classes/event/player_entered.php');
 $event = \mod_treasurehunt\event\player_entered::create(array(
-                'objectid' => $id,
-                'context' => $context,
+    'objectid' => $id,
+    'context' => $context,
 ));
 $event->add_record_snapshot("treasurehunt", $treasurehunt);
 $event->trigger();

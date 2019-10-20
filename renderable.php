@@ -29,7 +29,8 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_user_historical_attempts implements renderable {
+class treasurehunt_user_historical_attempts implements renderable
+{
 
     public $attempts = [];
     public $coursemoduleid = 0;
@@ -42,7 +43,8 @@ class treasurehunt_user_historical_attempts implements renderable {
      * constructor
      *
      */
-    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
+    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview)
+    {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
         $this->username = $username;
@@ -59,7 +61,8 @@ class treasurehunt_user_historical_attempts implements renderable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_info implements renderable {
+class treasurehunt_info implements renderable
+{
 
     public $treasurehunt = null;
     public $timenow = 0;
@@ -69,7 +72,8 @@ class treasurehunt_info implements renderable {
     /**
      * constructor
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs) {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs)
+    {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;
@@ -84,7 +88,8 @@ class treasurehunt_info implements renderable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_users_progress implements renderable {
+class treasurehunt_users_progress implements renderable
+{
 
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $roadsusersprogress = array();
@@ -101,8 +106,8 @@ class treasurehunt_users_progress implements renderable {
      *
      */
     public function __construct($roadsusersprogress, $groupmode, $coursemoduleid,
-                                $duplicategroupsingroupings, $duplicateusersingroups,
-                                $unassignedusers, $viewpermission, $managepermission) {
+        $duplicategroupsingroupings, $duplicateusersingroups,
+        $unassignedusers, $viewpermission, $managepermission) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
@@ -121,12 +126,14 @@ class treasurehunt_users_progress implements renderable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_play_page implements renderable, templatable {
+class treasurehunt_play_page implements renderable, templatable
+{
 
     private $treasurehunt = null;
     private $cmid = 0;
 
-    public function __construct($treasurehunt, $cmid) {
+    public function __construct($treasurehunt, $cmid)
+    {
         $this->treasurehunt = $treasurehunt;
         $this->cmid = $cmid;
     }
@@ -137,8 +144,54 @@ class treasurehunt_play_page implements renderable, templatable {
      * @param renderer_base $output
      * @return stdClass
      */
-    public function export_for_template(renderer_base $output) {
-        GLOBAL $USER;
+    public function export_for_template(renderer_base $output)
+    {
+        global $USER;
+        $data = new stdClass();
+        $user = new stdClass();
+        $user->name = fullname($USER);
+        $user->picture = $output->user_picture($USER, array('link' => false));
+        $data->user = $user;
+        $data->cmid = $this->cmid;
+        $data->treasurehunt = $this->treasurehunt;
+        if (empty($this->treasurehunt->description)) {
+            $hasdescription = false;
+        } else {
+            $hasdescription = true;
+        }
+        $data->hasdescription = $hasdescription;
+        return $data;
+    }
+
+}
+
+/**
+ * Renderable, Templatable edit_page
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class treasurehunt_edit_page implements renderable, templatable
+{
+
+    private $treasurehunt = null;
+    private $cmid = 0;
+
+    public function __construct($treasurehunt, $cmid)
+    {
+        $this->treasurehunt = $treasurehunt;
+        $this->cmid = $cmid;
+    }
+
+    /**
+     * Export this data so it can be used as the context for a mustache template.
+     *
+     * @param renderer_base $output
+     * @return stdClass
+     */
+    public function export_for_template(renderer_base $output)
+    {
+        global $USER;
         $data = new stdClass();
         $user = new stdClass();
         $user->name = fullname($USER);

@@ -25,15 +25,15 @@
  */
 // Replace treasurehunt with the name of your module and remove this line.
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once($CFG->libdir . '/formslib.php');
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+require_once "$CFG->dirroot/mod/treasurehunt/locallib.php";
+require_once $CFG->libdir . '/formslib.php';
 
-GLOBAL $USER;
+global $USER;
 
 $id = required_param('id', PARAM_INT);
 $roadid = optional_param('roadid', 0, PARAM_INT);
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
@@ -44,12 +44,12 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 // TODO : launch edition event
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-  'objectid' => $PAGE->cm->instance,
-  'context' => $PAGE->context,
-  ));
-  $event->add_record_snapshot('course', $PAGE->course);
-  $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
-  $event->trigger(); */
+'objectid' => $PAGE->cm->instance,
+'context' => $PAGE->context,
+));
+$event->add_record_snapshot('course', $PAGE->course);
+$event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
+$event->trigger(); */
 $url = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
 if (!empty($roadid)) {
     $url->param('roadid', $roadid);
@@ -70,14 +70,14 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-                                array($treasurehunt->id, $lockid, $renewlocktime));
+        array($treasurehunt->id, $lockid, $renewlocktime));
     $PAGE->requires->jquery();
     $PAGE->requires->jquery_plugin('ui');
     $PAGE->requires->jquery_plugin('ui-css');
     $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
     $PAGE->requires->js_call_amd('mod_treasurehunt/edit', 'edittreasurehunt',
-                                array($id, $treasurehunt->id, $roadid, $lockid,
-                                $custommapping ));
+        array($id, $treasurehunt->id, $roadid, $lockid,
+            $custommapping));
     $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
@@ -114,6 +114,7 @@ echo '<div id="popup" class="ol-popup">
 <a href="#" id="popup-closer" class="ol-popup-closer"></a>
 <div id="popup-content"></div>
 </div>';
+echo treasurehunt_view_edit_page($treasurehunt, $cm->id, $user);
 
 // Finish the page.
 echo $OUTPUT->footer();

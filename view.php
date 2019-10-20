@@ -22,17 +22,17 @@
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once("$CFG->dirroot/mod/treasurehunt/renderable.php");
-require_once($CFG->libdir . '/formslib.php');
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+require_once "$CFG->dirroot/mod/treasurehunt/locallib.php";
+require_once "$CFG->dirroot/mod/treasurehunt/renderable.php";
+require_once $CFG->libdir . '/formslib.php';
 
 global $USER;
 $id = required_param('id', PARAM_INT);
 $userid = optional_param('userid', $USER->id, PARAM_INT);
 $groupid = optional_param('groupid', -1, PARAM_INT);
 
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
@@ -42,9 +42,9 @@ $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:view', $context);
 
 $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-            'objectid' => $PAGE->cm->instance,
-            'context' => $PAGE->context,
-        ));
+    'objectid' => $PAGE->cm->instance,
+    'context' => $PAGE->context,
+));
 $event->add_record_snapshot('course', $PAGE->course);
 $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
 $event->trigger();
@@ -73,23 +73,27 @@ echo $output->header();
 echo $output->heading(format_string($treasurehunt->name) . $output->help_icon('modulename', 'treasurehunt'));
 
 // Warn about the geolocation with no HTTPS.
-if ($treasurehunt->playwithoutmoving == false &&
-        (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
-            treasurehunt_notify_error(get_string('warnunsecuregeolocation', 'treasurehunt'));
+if ($treasurehunt->playwithoutmoving == false && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
+    treasurehunt_notify_error(get_string('warnunsecuregeolocation', 'treasurehunt'));
 }
 // Conditions to show the intro can change to look for own settings or whatever.
 if (treasurehunt_view_intro($treasurehunt)) {
-    echo $output->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox',
-            'treasurehuntintro');
+    echo $output->box(
+        format_module_intro('treasurehunt', $treasurehunt, $cm->id),
+        'generalbox mod_introbox',
+        'treasurehuntintro'
+    );
 }
 
 $viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 echo treasurehunt_view_info($treasurehunt, $course->id);
-if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > $treasurehunt->allowattemptsfromdate
+if ((has_capability('mod/treasurehunt:play', $context, null, false)
+        && time() > $treasurehunt->allowattemptsfromdate
         && $userid == $USER->id && $groupid == -1) || (has_capability('mod/treasurehunt:play', $context, $userid, false)
         && $viewusersattemptscap && $groupid == -1 && $userid != $USER->id)
-        || (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) && $viewusersattemptscap
-        && $treasurehunt->groupmode)) {
+    || (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) && $viewusersattemptscap
+        && $treasurehunt->groupmode)
+) {
     try {
         $teacherreview = true;
         $username = '';
@@ -111,15 +115,24 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
                 }
             }
         }
-        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid,
-                $cm->id, $username, $teacherreview);
+        echo treasurehunt_view_user_historical_attempts(
+            $treasurehunt,
+            $params->groupid,
+            $userid,
+            $params->roadid,
+            $cm->id,
+            $username,
+            $teacherreview
+        );
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
     }
 }
-if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
-        || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
-        || time() > $treasurehunt->allowattemptsfromdate) {
+if (
+    has_capability('mod/treasurehunt:managetreasurehunt', $context)
+    || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
+    || time() > $treasurehunt->allowattemptsfromdate
+) {
     echo treasurehunt_view_users_progress_table($cm, $course->id, $context);
 }
 
