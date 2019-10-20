@@ -22,17 +22,54 @@
  */
 (function(t) {
     t.mod_treasurehunt = {};
+    debugger;
 
     class MobilePlay {
         constructor() {}
 
-        loadOlScript() {
+        init() {
+            const baseUrlScript = this.getIndexUrl() + "/appjs/ol/ol.js";
+            debugger;
+            // Si no está cargada ya, cargo la librería ol
+            if (this.isOlScriptLoaded(baseUrlScript)) {
+                this.initMap();
+            } else {
+                this.loadOlScript(baseUrlScript).then(as => {
+                    this.initMap();
+                });
+            }
+        }
+
+        initMap() {
+            const map = new ol.Map({
+                target: "map",
+                layers: [
+                    new ol.layer.Tile({
+                        source: new ol.source.OSM()
+                    })
+                ],
+                view: new ol.View({
+                    center: ol.proj.fromLonLat([37.41, 8.82]),
+                    zoom: 4
+                })
+            });
+        }
+
+        isOlScriptLoaded(url) {
+            let scripts = document.getElementsByTagName("script");
+            for (let i = scripts.length; i--; ) {
+                if (scripts[i].src == url) return true;
+            }
+            return false;
+        }
+
+        loadOlScript(url) {
             return new Promise((resolve, reject) => {
                 //load script
                 let script = document.createElement("script");
                 script.type = "text/javascript";
-                script.src = "http://localhost/moodle/mod/treasurehunt/appjs/ol.js";
-                debugger;
+                // script.src = "https://cdn.rawgit.com/openlayers/openlayers.github.io/master/en/v6.0.1/build/ol.js";
+                script.src = url;
                 if (script.readyState) {
                     //IE
                     script.onreadystatechange = () => {
@@ -51,24 +88,14 @@
                 document.getElementsByTagName("head")[0].appendChild(script);
             });
         }
+
+        getIndexUrl() {
+            return t.module.url.substr(0, t.module.url.indexOf("/mod/treasurehunt") + 17);
+        }
     }
 
-    let mobilePlay = new MobilePlay();
-    mobilePlay.loadOlScript().then(as => {
-        debugger;
-        var map = new ol.Map({
-            target: "map",
-            layers: [
-                new ol.layer.Tile({
-                    source: new ol.source.OSM()
-                })
-            ],
-            view: new ol.View({
-                center: ol.proj.fromLonLat([37.41, 8.82]),
-                zoom: 4
-            })
-        });
-    });
+    const mobilePlay = new MobilePlay();
+    mobilePlay.init();
 })(this);
 
 // import Map from "ol/Map";
