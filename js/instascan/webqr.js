@@ -86,11 +86,12 @@ function enableForm() {
 	$('#id_generateQR')
 			.click(
 					function() {
-						unloadQR();
+						// unloadQR();
 						var val = $('#id_qrtext').val();
 						if (val != '') {
 							var qrurl = 'https://chart.googleapis.com/chart?cht=qr&chs=500x500&chl='
 									+ $('#id_qrtext').val();
+							$('#outQRCode').text('');
 							$('#outQRCode').prepend($('<img>', {
 								id : 'theQRImg',
 								src : qrurl,

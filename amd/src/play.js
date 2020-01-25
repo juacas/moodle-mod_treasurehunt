@@ -511,12 +511,12 @@ define(['jquery',
 		            var body = '';
 		            qoaremoved = response.qoaremoved;
 		            roadfinished = response.roadfinished;
-		            available = response.available;
+					available = response.available;
 		            // Si he enviado una localizacion o una respuesta imprimo si es correcta o no.
 		            if (location || selectedanswerid) {
 		                $.mobile.loading("hide");
 		                if (response.status !== null && available) {
-		                    toast(response.status.msg);
+		                    console.log(response.status.msg);
 		                }
 		            }
 		            if (response.qrexpected) {
@@ -702,7 +702,8 @@ define(['jquery',
 		                        '<label for="' + id + '">' + answer.answertext + '</label>');
 		                counter++;
 		            });
-		            $('#questionform').enhanceWithin().controlgroup("refresh");
+				   // This decoration renders with problems.
+				   // $('#questionform').enhanceWithin().controlgroup("refresh");
 		            changesinquestionstage = false;
 		        }
 		
