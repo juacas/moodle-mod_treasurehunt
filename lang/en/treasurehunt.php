@@ -89,7 +89,7 @@ $string['customlayertype_help'] = 'The layer can be the only visible in the back
 $string['customlayerwms'] = 'WMS service';
 $string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service. (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'WMS params';
-$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets;STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
+$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets&STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['custommapbaselayer'] = 'The image is shown as an ADITIONAL map background option';
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
@@ -404,3 +404,15 @@ $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';
 $string['donetutorial'] = 'End';
+// Privacy strings.
+$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by an user during the activity.';
+$string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';
+$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user if playing in.';
+$string['privacy:metadata_treasurehunt_track_location'] = 'The location of the user at a particular time.';
+$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the track point of the user.';
+
+$string['privacy:metadata_treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
+$string['privacy:metadata_treasurehunt_attempts_userid'] = 'The ID of the user that made an attempt.';
+$string['privacy:metadata_treasurehunt_attempts_timecreated'] = 'The time at which the user made an attempt.';
+$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user play the activity.';
+$string['privacy:metadata_treasurehunt_attempts_stageid'] = 'The stage ID the user was trying to solve.';

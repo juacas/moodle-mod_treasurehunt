@@ -241,7 +241,7 @@ function treasurehunt_build_custommappingconfig($data) {
 
         $mapconfig->wmsurl = $data->customlayerwms;
         if (!empty($data->customwmsparams)) {
-            $params = explode(';', $data->customwmsparams);
+            $params = explode('&', $data->customwmsparams);
             $parmsobj = new stdClass();
             foreach ($params as $param) {
                 $parts = explode('=', $param);
@@ -305,7 +305,7 @@ function treasurehunt_get_grading_options() {
 
 /**
  * Creates a default road with a default stage to the treasurehunt if empty
- * @param type $treasurehunt
+ * @param stdClass $treasurehunt
  */
 function treasurehunt_create_default_items($treasurehunt) {
     $roads = treasurehunt_get_total_roads($treasurehunt->id);
@@ -365,6 +365,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
     $stage = new stdClass();
     $stage->position = $feature->getProperty('stageposition');
     $stage->roadid = $feature->getProperty('roadid');
+    /** @var Multipolygon $geometry */
     $geometry = $feature->getGeometry();
     $stage->geom = treasurehunt_geometry_to_wkt($geometry);
     $stage->timemodified = time();
@@ -439,15 +440,16 @@ function treasurehunt_delete_stage($id, $context) {
  */
 function treasurehunt_delete_road($roadid, $treasurehunt, $context) {
     GLOBAL $DB;
-    $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
     $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
-            , $params);
+    , $params);
     foreach ($stages as $stage) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
         $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
     $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
+    $road = $DB->get_record('treasurehunt_roads', array('id' => $roadid));
+    $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     treasurehunt_update_grades($treasurehunt);
 
     // Trigger deleted road event.
@@ -1969,7 +1971,7 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
 /**
  * @global moodle_database $DB
  * @param type $treasurehuntid record id in table treasurehunt
- * @return type
+ * @return array
  */
 function treasurehunt_get_all_attempts($treasurehuntid) {
     global $DB;

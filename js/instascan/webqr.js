@@ -162,6 +162,7 @@ function unloadQR(errorcallback){
 function loadQR(scancallback, reportcallback)
 {
 	let videopreview = $('#previewQRvideo');
+	videopreview.show();
 	scanner = new Instascan.Scanner({ video: videopreview.get(0) , mirror: false});
 	scanner.addListener('scan',scancallback);
   	Instascan.Camera.getCameras().then(function (cameras) {
