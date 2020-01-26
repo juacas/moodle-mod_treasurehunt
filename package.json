@@ -1,6 +1,6 @@
- {
+{
 	"name": "moodle-mod_treasurehunt",
-	"version": "1.0.2",
+	"version": "1.2.22",
 	"description": "Treasure Hunt activity for Moodle",
 	"repository": {
 		"type": "git",
@@ -8,5 +8,12 @@
 	},
 	"author": "Adrián Rodríguez <huorwhisp@gmail.com>",
 	"contributor": "Juan Pablo de Castro <jpdecastro@tel.uva.es>",
-	"license": "GPL-3.0"
+	"license": "GPL-3.0",
+	"dependencies": {
+		"grunt": "^1.0.4",
+		"grunt-contrib-jshint": "^2.1.0",
+		"grunt-contrib-less": "^2.0.0",
+		"grunt-contrib-uglify": "^4.0.1",
+		"grunt-contrib-watch": "^1.1.0"
+	}
 }

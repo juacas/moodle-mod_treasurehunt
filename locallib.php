@@ -122,8 +122,12 @@ function treasurehunt_geometry_centroid(Geometry $geom) {
  * @return string The WKT string representation of the input geometries
  */
 function treasurehunt_geometry_to_wkt($geometry) {
-    $wkt = new WKT();
-    return $wkt->write($geometry);
+    if (!$geometry) {
+        return 'GEOMETRY EMPTY';
+    } else {
+        $wkt = new WKT();
+        return $wkt->write($geometry);
+    }
 }
 
 /**
@@ -241,7 +245,7 @@ function treasurehunt_build_custommappingconfig($data) {
 
         $mapconfig->wmsurl = $data->customlayerwms;
         if (!empty($data->customwmsparams)) {
-            $params = explode(';', $data->customwmsparams);
+            $params = explode('&', $data->customwmsparams);
             $parmsobj = new stdClass();
             foreach ($params as $param) {
                 $parts = explode('=', $param);
@@ -305,7 +309,7 @@ function treasurehunt_get_grading_options() {
 
 /**
  * Creates a default road with a default stage to the treasurehunt if empty
- * @param type $treasurehunt
+ * @param stdClass $treasurehunt
  */
 function treasurehunt_create_default_items($treasurehunt) {
     $roads = treasurehunt_get_total_roads($treasurehunt->id);
@@ -365,6 +369,7 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
     $stage = new stdClass();
     $stage->position = $feature->getProperty('stageposition');
     $stage->roadid = $feature->getProperty('roadid');
+    /** @var Multipolygon $geometry */
     $geometry = $feature->getGeometry();
     $stage->geom = treasurehunt_geometry_to_wkt($geometry);
     $stage->timemodified = time();
@@ -439,15 +444,16 @@ function treasurehunt_delete_stage($id, $context) {
  */
 function treasurehunt_delete_road($roadid, $treasurehunt, $context) {
     GLOBAL $DB;
-    $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     $params = array($roadid);
     $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
-            , $params);
+    , $params);
     foreach ($stages as $stage) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
         $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
     }
     $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', $params);
+    $road = $DB->get_record('treasurehunt_roads', array('id' => $roadid));
+    $DB->delete_records('treasurehunt_roads', array('id' => $roadid));
     treasurehunt_update_grades($treasurehunt);
 
     // Trigger deleted road event.
@@ -746,6 +752,7 @@ function treasurehunt_get_play_mode($userid, $groupid, $roadid, $treasurehunt) {
 function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $qrtext, $context, $treasurehunt, $nostages) {
     global $DB;
     $return = new stdClass();
+    $locationgeom = null;
     $return->update = '';
     $return->roadfinished = false;
     $return->success = false;
@@ -783,13 +790,24 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
             $return->msg = $return->update = get_string('faillocation', 'treasurehunt');
             $return->newstage = false;
         }
+        // Get a reasonable location for reporting.
         if ($inside) {
             $locationgeom = $point;
-        } else if (isset($qrtext)) {
+        } else if (isset($qrtext)) { // This is a QR scan.
             if ($qrguessed) {
                 $locationgeom = treasurehunt_geometry_centroid($nextstagegeom);
             } else {
-                $locationgeom = treasurehunt_wkt_to_object($currentstage->location);
+                // Get last known location in the tracking.
+                $locationgeom = treasurehunt_get_last_location($treasurehunt, $userid);
+                if ($locationgeom === null) { // If not, report an approximation.
+                    if ($currentstage == false ) {
+                        // If this is previous of the first stage, it is safe to report the initial point.
+                        $locationgeom = treasurehunt_geometry_centroid($nextstagegeom);
+                    } else {
+                        // Report the location of current stage (already discovered).
+                        $locationgeom = treasurehunt_wkt_to_object($currentstage->location);
+                    }     
+                }
             }
         } else {
             $locationgeom = $point;
@@ -1765,7 +1783,7 @@ function treasurehunt_insert_attempt($attempt, $context) {
 /**
  *
  * @global moodle_database $DB
- * @param type $treasurehunt
+ * @param int $treasurehuntid
  * @return array userids
  */
 function treasurehunt_get_users_with_tracks($treasurehuntid) {
@@ -1773,6 +1791,23 @@ function treasurehunt_get_users_with_tracks($treasurehuntid) {
     $sql = 'SELECT DISTINCT userid from {treasurehunt_track} WHERE treasurehuntid=?';
     $results = $DB->get_records_sql($sql, [$treasurehuntid]);
     return array_keys($results);
+}
+/**
+ * Get last recorded track location.
+ * @global moodle_database $DB
+ * @param stdClass $treasurehunt
+ * @param int $userid
+ * @return Geometry|null
+ */
+function treasurehunt_get_last_location($treasurehunt, $userid) {
+    global $DB;
+    $sql = 'SELECT location from {treasurehunt_track} WHERE treasurehuntid=? and userid=? order by timestamp desc limit 1';
+    $location = $DB->get_record_sql($sql, ['treasurehuntid' => $treasurehunt->id, 'userid' => $userid]);
+    if ($location) {
+        return treasurehunt_wkt_to_object($location);
+    } else {
+        return null;
+    }
 }
 
 /**
@@ -1969,7 +2004,7 @@ function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid) {
 /**
  * @global moodle_database $DB
  * @param type $treasurehuntid record id in table treasurehunt
- * @return type
+ * @return array
  */
 function treasurehunt_get_all_attempts($treasurehuntid) {
     global $DB;

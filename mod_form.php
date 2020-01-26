@@ -129,12 +129,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
 
         $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));
         $mform->addHelpButton('customlayerwms', 'customlayerwms', 'treasurehunt');
-        $mform->setType('customlayerwms', PARAM_TEXT);
+        $mform->setType('customlayerwms', PARAM_URL);
         $mform->disabledIf('customlayerwms', 'customlayername', 'eq', '');
 
         $mform->addElement('text', 'customwmsparams', get_string('customwmsparams', 'treasurehunt'));
         $mform->addHelpButton('customwmsparams', 'customwmsparams', 'treasurehunt');
-        $mform->setType('customwmsparams', PARAM_TEXT);
+        $mform->setType('customwmsparams', PARAM_RAW);
         $mform->disabledIf('customwmsparams', 'customlayerwms', 'eq', '');
 
         // Local file overlay.

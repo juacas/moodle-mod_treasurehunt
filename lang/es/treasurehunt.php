@@ -87,7 +87,7 @@ $string['customlayertype_help'] = 'La imagen puede usarse como fondo del mapa o 
 $string['customlayerwms'] = 'Servicio WMS';
 $string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS. (Por ejemplo, la capa de ecosistemas de bosques EUNIS Forest Ecosystems WMS se configura con: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'Parámetros adicionales WMS';
-$string['customwmsparams_help'] = 'Los parámetros que definen el aspecto del mapa. Con formato análogo a: "LAYERS=fondo,calles;STYLES=azul,callejero"';
+$string['customwmsparams_help'] = 'Los parámetros que definen el aspecto del mapa. Con formato análogo a: "LAYERS=fondo,calles&STYLES=azul,callejero"';
 $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de mapa base.';
 $string['custommaponlybaselayer'] = 'La imagen se usa como ÚNICO mapa base.';
 $string['custommapoverlaylayer'] = 'La imagen se coloca por encima de los mapas';
@@ -409,3 +409,6 @@ $string['nextstep'] = 'Sig.';
 $string['prevstep'] = 'Ant.';
 $string['skiptutorial'] = 'Salir';
 $string['donetutorial'] = '¡Visto!';
+// Privacy strings.
+$string['privacy:metadata_treasurehunt_track_userid'] = 'Treasure hunt almacena la secuencia de posiciones del usuario durante la actividad (si el profesor ha activado esa opción).';
+$string['privacy:metadata_treasurehunt_attempts_userid'] = 'Treasure hunt almacena el histórico de los intentos realizados por cada usuario incluyendo tiempo, tipo y éxito o fracaso en cada intento.';

@@ -31,40 +31,7 @@ define(
 		function($, jqui, touch, notification, ol, ajax, GeocoderJS,
 				olLayerSwitcher, str) {
 
-			var init = {
-				edittreasurehunt : function(idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {
-					// I18n strings.
-	            	var terms = ['stage', 'road', 'aerialmap', 'roadmap', 'basemaps', 'add', 'modify', 'save',
-			                    'remove', 'searchlocation', 'savewarning', 'removewarning',
-			                    'areyousure', 'removeroadwarning', 'confirm', 'cancel'];
-	            	var stringsqueried = terms.map(function (term) {
-	                     return {key: term, component: 'treasurehunt'};
-	                });
-	            	str.get_strings(stringsqueried).done(function (strings) {
-	            		var i18n = [];
-	            		for (var i=0; i < terms.length; i++) {
-	            			i18n[terms[i]] = strings[i];
-	            		}
-	            		// Detect custom image.
-	            		if (typeof(custommapconfig) != 'undefined' &&
-	            				custommapconfig !== null && 
-	            				custommapconfig.custombackgroundurl !== null) {
-	            			
-	            			// Detect image size.
-	    						var img = new Image();
-	    					    img.addEventListener("load", function(){
-	    					    	custommapconfig.imgwidth =  this.naturalWidth;
-	    					    	custommapconfig.imgheight = this.naturalHeight;
-	    	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);	    					        
-	    					    });
-	    					    img.src = custommapconfig.custombackgroundurl;
-	            		} else {
-	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
-	            		}
-	                })
-				} // End of function edittreasurehunt.
-			}; // End of init var.
-			return init;
+			
 			
 			function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
 
@@ -411,7 +378,7 @@ define(
 						projection : 'EPSG:3857'
 					}),
 					visible : false
-				})
+				});
 				var basemaps = new ol.layer.Group(
 						{
 							'title' : strings['basemaps'],
@@ -2033,4 +2000,38 @@ define(
 					}
 				};
 			}
+			var init = {
+				edittreasurehunt : function(idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {
+					// I18n strings.
+	            	var terms = ['stage', 'road', 'aerialmap', 'roadmap', 'basemaps', 'add', 'modify', 'save',
+			                    'remove', 'searchlocation', 'savewarning', 'removewarning',
+			                    'areyousure', 'removeroadwarning', 'confirm', 'cancel'];
+	            	var stringsqueried = terms.map(function (term) {
+	                     return {key: term, component: 'treasurehunt'};
+	                });
+	            	str.get_strings(stringsqueried).done(function (strings) {
+	            		var i18n = [];
+	            		for (var i=0; i < terms.length; i++) {
+	            			i18n[terms[i]] = strings[i];
+	            		}
+	            		// Detect custom image.
+	            		if (typeof(custommapconfig) != 'undefined' &&
+	            				custommapconfig !== null && 
+	            				custommapconfig.custombackgroundurl !== null) {
+	            			
+	            			// Detect image size.
+	    						var img = new Image();
+	    					    img.addEventListener("load", function(){
+	    					    	custommapconfig.imgwidth =  this.naturalWidth;
+	    					    	custommapconfig.imgheight = this.naturalHeight;
+	    	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);	    					        
+	    					    });
+	    					    img.src = custommapconfig.custombackgroundurl;
+	            		} else {
+	            			initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+	            		}
+	                });
+				} // End of function edittreasurehunt.
+			}; // End of init var.
+			return init;
 		});
