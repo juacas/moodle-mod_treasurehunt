@@ -37,6 +37,7 @@ See also
 
 Change log
 ==========
+ - v1.2.22 UI for QR Scanner in edit form improved. QR scanner fixed for Xiaomi Redmi S2. Player UI improved in question section.
  - v1.2.21 Fixed a minor bug in event reporting in play mode. Icons resized.
  - v1.2.20 Fixed compatibility with PostgreSQL.
  - v1.2.19 Fixed validation error when filemanager is conditionally disabled.
