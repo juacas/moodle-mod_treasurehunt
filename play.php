@@ -145,7 +145,10 @@ foreach ($disable as $module) {
 
 // Create a requirejs context for using jquery 1.2.4 needed for jQueryMobile.
 $pagefiltered = str_replace('var require = {', "var require, reqmoodle; \n require = reqmoodleconfig = {", $pagefiltered);
-$pos_require = strpos($pagefiltered,   '/lib/requirejs/require.js"></script>');
+$pos_require = strpos($pagefiltered, '/lib/requirejs/require.min.js"></script>');
+if ($pos_require) {
+    $pos_require = strpos($pagefiltered, '/lib/requirejs/require.js"></script>');
+}
 $pos_jquery = strpos( $pagefiltered, '<script type="text/javascript">', $pos_require);
 $requireurl = new moodle_url('/lib/requirejs.php/-1/');
 $jqueryuiurl = new moodle_url('/lib/javascript.php/-1/lib/jquery/ui-1.12.1/jquery-ui');
