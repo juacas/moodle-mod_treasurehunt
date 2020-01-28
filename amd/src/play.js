@@ -21,23 +21,24 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery',
+define(['jquery',  
     'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
     'mod_treasurehunt/viewgpx',
-    'core/str',
+    // 'core/str',
     'mod_treasurehunt/jquery.truncate', 
     'mod_treasurehunt/jquery.mobile-config',
     'mod_treasurehunt/jquerymobile', 
     ],
-	    function ($, url, ol, ajax, GeocoderJS, viewgpx, str) {
-			console.log('loading play.js');
+	    function ($, url, ol, ajax, GeocoderJS, viewgpx /*, str*/) {
+			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
 	                    lastattempttimestamp,
 	                    lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig) {
+					
 	            	// I18n strings.
 	            	var terms = ["stageovercome", "failedlocation", "stage", "stagename",
 									        "stageclue", "question", "noanswerselected", "timeexceeded",
@@ -47,17 +48,19 @@ define(['jquery',
 					console.log('loading i18n strings');
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
-	                });
-	            	str.get_strings(stringsqueried).done(function (strings) {
-	            		var i18n = [];
-	            		for (var i=0; i < terms.length; i++) {
-	            			i18n[terms[i]] = strings[i];
-	            		}
+					});
+					i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
+	            	//str.get_strings(stringsqueried).done(function (strings) {
+	            		// var i18n = [];
+	            		// for (var i=0; i < terms.length; i++) {
+	            		// 	i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
+						// }
+						// i18n = i18nplay;
 	            		// Detect custom image.
 	            		if (typeof(custommapconfig) != 'undefined' &&
 	            				custommapconfig !== null && 
 	            				custommapconfig.custombackgroundurl !== null) {
-	    						console.log('detecting custom background image dimensions.');
+	    						console.log('Detecting custom background image dimensions.');
 	            			// Detect image size.
 	    						var img = new Image();
 	    					    img.addEventListener("load", function(){
@@ -74,7 +77,7 @@ define(['jquery',
 		                	        lastattempttimestamp,
 		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);	            		}
 	            		
-	                });
+	                // });
 	            } // End of function playtreasurehunt.
 	        };
 	    return init;
@@ -940,7 +943,7 @@ define(['jquery',
 		                }, 200);
 		            } else {
 		                map.updateSize();
-		                set_lastsuccessfulstage();
+		                //set_lastsuccessfulstage();
 		                fit_map_to_source();
 		            }
 		        } else if (pageId === 'historypage') {

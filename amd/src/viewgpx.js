@@ -25,6 +25,7 @@
 define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification',
 		'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
         function ($, jqui, touch, notification, ol, olLayerSwitcher, str) {
+            console.log('Loading viewgpx.js with jquery ' + $().jquery);
 			var refreshTracksInterval = 30;
 			var refreshCounter = 0;
             var init = {
@@ -35,13 +36,21 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     load_gpx([user], cmid, map, trackgroup, null);
                     return trackgroup;
                 },
-                creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig, refreshinterval) {					// I18n strings.
+                // @param users = "global" obtain data from users_param. The list of user structures.
+                creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig, refreshinterval) {
+                    console.log('Creating gpxviewer.');
+                    // I18n strings.
 	            	var terms = ['aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer'];
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
 	                });
-	            	refreshTracksInterval = refreshinterval;
+                    refreshTracksInterval = refreshinterval;
+                    if (users == 'global') {
+                        // Get users from global (due to excessive size for AMD api).
+                        var users = users_param;
+                    }
 	            	str.get_strings(stringsqueried).done(function (strings) {
+                        console.log('I18N strings loaded.');
 	            		var i18n = [];
 	            		for (var i=0; i < terms.length; i++) {
 	            			i18n[terms[i]] = strings[i];
@@ -68,6 +77,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
             return init;
             
             function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconfig) {
+                    console.log('Init gpx viewer.');
     				var mapprojection = 'EPSG:3857';
     				var custombaselayer = null;
     				var geographictools = true;
@@ -175,7 +185,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         }),
                         controls: ol.control.defaults().extend([layerSwitcher])
                     });
-
+                    console.log('Map created in mapgpx!');
                     layerSwitcher.showPanel();
                     var selectSingleClick = new ol.interaction.Select({
                     	style: function (feature) {
