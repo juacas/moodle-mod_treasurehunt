@@ -63,6 +63,8 @@ $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
 //$PAGE->requires->jquery();
 // jquerymobile is tied to jquery 2.1.4.
+//$PAGE->requires->jquery();
+$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 
 // Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Adds support for QR scan.
@@ -146,10 +148,11 @@ foreach ($disable as $module) {
 // Create a requirejs context for using jquery 1.2.4 needed for jQueryMobile.
 $pagefiltered = str_replace('var require = {', "var require, reqmoodle; \n require = reqmoodleconfig = {", $pagefiltered);
 $pos_require = strpos($pagefiltered, '/lib/requirejs/require.min.js"></script>');
-if ($pos_require) {
+if ($pos_require === FALSE) {
     $pos_require = strpos($pagefiltered, '/lib/requirejs/require.js"></script>');
 }
 $pos_jquery = strpos( $pagefiltered, '<script type="text/javascript">', $pos_require);
+
 $requireurl = new moodle_url('/lib/requirejs.php/-1/');
 $jqueryuiurl = new moodle_url('/lib/javascript.php/-1/lib/jquery/ui-1.12.1/jquery-ui');
 
@@ -167,8 +170,9 @@ reqLegacy = require.config({
 // Restore Moodle's require config.
 window.reqMoodle = require.config(reqmoodleconfig);
 </script>
+
 REQ;
 $pagefiltered = substr_replace($pagefiltered, $fragment, $pos_jquery, 0);
-$pagefiltered = str_replace("require(['mod_treasurehunt/play']","reqLegacy(['mod_treasurehunt/play']", $pagefiltered);
+//$pagefiltered = str_replace("require(['mod_treasurehunt/play']","reqLegacy(['mod_treasurehunt/play']", $pagefiltered);
 
 echo $pagefiltered;
