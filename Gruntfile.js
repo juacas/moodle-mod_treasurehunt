@@ -74,6 +74,10 @@ module.exports = function(grunt) {
             amd: { src: jshintfiles }
         },
         uglify: {
+            options : {
+                sourceMap : true,
+                //sourceMapIncludeSources : true,
+              },
             amd: {
                 files: [{
                     expand: true,
@@ -243,7 +247,7 @@ module.exports = function(grunt) {
     // Register JS tasks.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
     grunt.registerTask('amdonly', ['uglify']);
-    grunt.registerTask('amd', ['jshint', 'uglify']);
+    grunt.registerTask('amd', [/*'jshint',*/ 'uglify']);
     grunt.registerTask('js', ['amdonly', 'shifter']);
 
     // Register CSS taks.

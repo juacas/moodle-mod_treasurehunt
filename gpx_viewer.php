@@ -52,7 +52,7 @@ $PAGE->requires->jquery_plugin('ui-css');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
-$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
+//$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = array();
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
@@ -65,9 +65,15 @@ foreach ($userrecords as $userrecord) {
 }
 $refreshtracksinterval = 60;
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
+
 $PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',
-                        array($id, $treasurehunt->id, $users, $custommapping, $refreshtracksinterval));
+                        array($id, $treasurehunt->id, 'global', $custommapping, $refreshtracksinterval));
+
 echo $output->header();
+// Pass large data $users via Javascript.
+echo "\n<script>\n";
+echo "users_param = " . json_encode($users) . ";\n";
+echo "</script>\n";
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $output->heading(format_string($treasurehunt->name));

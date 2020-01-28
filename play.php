@@ -61,9 +61,9 @@ $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
-$PAGE->requires->jquery();
-// jquerymobile is tied to jquery 2.
-$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+//$PAGE->requires->jquery();
+// jquerymobile is tied to jquery 2.1.4.
+
 // Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Adds support for QR scan.
 treasurehunt_qr_support($PAGE);
@@ -108,4 +108,64 @@ $event->add_record_snapshot("treasurehunt", $treasurehunt);
 $event->trigger();
 
 // Finish the page.
-echo $output->footer();
+$page = $output->footer();
+
+// JPC: Generate a global variable with strings. Moodle 3.8 broke compatibility of core/str with jquery 2.1.4.
+$terms = ["stageovercome", "failedlocation", "stage", "stagename",
+                             "stageclue", "question", "noanswerselected", "timeexceeded",
+                             "searching", "continue", "noattempts", "aerialview", "roadview", 
+                             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
+                             "huntcompleted", "discoveredlocation", "answerwarning", "error"];
+$strings = [];
+foreach($terms as $term) {
+    $strings[$term] = get_string($term, 'treasurehunt');
+}
+$i18n = json_encode($strings);
+echo <<<I18N
+<!-- Internationalization strings for the player -->
+<script type="text/javascript">
+i18nplay = $i18n;
+</script>
+
+I18N;
+
+// Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
+$disable = [
+    'core/notification',
+    'block_navigation/navblock',
+    'block_settings/settingsblock',
+    // 'theme_boost/loader',
+    'core/log',
+    'core/page_global',
+];
+$pagefiltered= $page;
+foreach ($disable as $module) {
+    $pagefiltered = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefiltered);
+}
+
+// Create a requirejs context for using jquery 1.2.4 needed for jQueryMobile.
+$pagefiltered = str_replace('var require = {', "var require, reqmoodle; \n require = reqmoodleconfig = {", $pagefiltered);
+$pos_require = strpos($pagefiltered,   '/lib/requirejs/require.js"></script>');
+$pos_jquery = strpos( $pagefiltered, '<script type="text/javascript">', $pos_require);
+$requireurl = new moodle_url('/lib/requirejs.php/-1/');
+$jqueryuiurl = new moodle_url('/lib/javascript.php/-1/lib/jquery/ui-1.12.1/jquery-ui');
+
+$fragment =
+<<<REQ
+<script type="text/javascript">
+reqLegacy = require.config({
+    context: "version2",
+    baseUrl : '$requireurl',
+    paths: {
+        jquery: 'mod_treasurehunt/jquery-2.1.4',
+        jqueryui: '$jqueryuiurl',
+    }
+});
+// Restore Moodle's require config.
+window.reqMoodle = require.config(reqmoodleconfig);
+</script>
+REQ;
+$pagefiltered = substr_replace($pagefiltered, $fragment, $pos_jquery, 0);
+$pagefiltered = str_replace("require(['mod_treasurehunt/play']","reqLegacy(['mod_treasurehunt/play']", $pagefiltered);
+
+echo $pagefiltered;
