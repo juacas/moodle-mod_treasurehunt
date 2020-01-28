@@ -29,7 +29,7 @@
     * cmid
     * courseid
     * treasurehunt
-    * options
+    * info
 
     Example context (json):
     {
@@ -108,15 +108,144 @@
     }
 }}
 
-{{=<% %>=}}
-<div>
-    <core-course-module-description description="<% treasurehunt.intro %>" component="mod_treasurehunt" componentId="<% cmid %>"></core-course-module-description>
-
-    <core-navbar-buttons #content end>
+    {{! <core-navbar-buttons #content end>
         <button ion-button icon-only (click)="action()">
             <ion-icon name="funnel"></ion-icon>
         </button>
-    </core-navbar-buttons>
+    </core-navbar-buttons> }}
 
-    <div id="map"></div>
+{{=<% %>=}}
+<div>
+
+    <!-- User treasurehunt exceptions -->
+    <ion-list *ngIf="CONTENT_OTHERDATA.exception">
+        <ion-item text-wrap>
+            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+            <p>{{CONTENT_OTHERDATA.exception}}</p>
+        </ion-item>
+    </ion-list>
+
+    <core-course-module-description description="<% treasurehunt.intro %>" component="mod_treasurehunt" componentId="<% cmid %>"></core-course-module-description>
+
+    <ion-list class="treasurehunt-no-margin">
+
+        <!-- Open/End dates -->
+        <ion-item text-wrap *ngIf="(<% treasurehunt.allowattemptsfromdate %> && CONTENT_OTHERDATA.timenow < <% treasurehunt.allowattemptsfromdate %>) || <% treasurehunt.cutoffdate %>">
+            <ion-icon item-start name="clock"></ion-icon>
+            <ng-container *ngIf="<% treasurehunt.allowattemptsfromdate %> && CONTENT_OTHERDATA.timenow < <% treasurehunt.allowattemptsfromdate %>">
+                <p> 
+                    {{ 'plugin.mod_treasurehunt.treasurehuntnotavailable' | translate : {$a:  (<% treasurehunt.allowattemptsfromdate %> * 1000 | coreFormatDate: "strftimerecentfull") } }}
+                </p>
+            </ng-container>
+            <ng-container *ngIf="<% treasurehunt.cutoffdate %> && CONTENT_OTHERDATA.timenow < <% treasurehunt.cutoffdate %>">
+                <p>
+                    {{ 'plugin.mod_treasurehunt.treasurehuntcloseson' | translate : {$a:  (<% treasurehunt.cutoffdate %> * 1000 | coreFormatDate: "strftimerecentfull") } }}
+                </p>
+            </ng-container>
+            <ng-container *ngIf="<% treasurehunt.cutoffdate %> && CONTENT_OTHERDATA.timenow > <% treasurehunt.cutoffdate %>">
+                <p>
+                    {{ 'plugin.mod_treasurehunt.treasurehuntclosed' | translate : {$a:  (<% treasurehunt.cutoffdate %> * 1000 | coreFormatDate: "strftimerecentfull") } }}
+                </p>
+            </ng-container>
+        </ion-item>
+
+        <!-- Game mode -->
+        <ion-item text-wrap>
+            <ion-icon item-start name="flag"></ion-icon>
+            <h2>{{ 'plugin.mod_treasurehunt.gamemode' | translate }}</h2>
+            <p> 
+                <ng-container *ngIf="<% treasurehunt.groupmode %>">
+                    <ion-icon name="people"></ion-icon>
+                    <!-- {{ 'plugin.mod_treasurehunt.groupmode' | translate}}. -->
+                 </ng-container>
+                <ng-container *ngIf="<% treasurehunt.playwithoutmoving %>">
+                    {{ 'plugin.mod_treasurehunt.playwithoutmoving' | translate}}
+                </ng-container>
+                <ng-container *ngIf="<% !treasurehunt.playwithoutmoving %>">
+                    {{ 'plugin.mod_treasurehunt.movingplay' | translate}}
+                </ng-container>
+            </p>
+        </ion-item>
+
+        <!-- Grade Method -->
+        <ion-item text-wrap (click)="showGradeMethodHelp()">
+            <ion-icon item-start name="ribbon"></ion-icon>
+            <h2>{{ 'plugin.mod_treasurehunt.grademethod' | translate }}             
+                <ion-icon name="help-circle"></ion-icon>
+            </h2>
+            <p>
+                <ng-container *ngIf="<% treasurehunt.grademethod %> === 1">
+                    {{ 'plugin.mod_treasurehunt.gradefromstages' | translate}}
+                 </ng-container>
+                <ng-container *ngIf="<% treasurehunt.grademethod %>  === 2">
+                    {{ 'plugin.mod_treasurehunt.gradefromtime' | translate}}
+                </ng-container>
+                <ng-container *ngIf="<% treasurehunt.grademethod %> === 3">
+                    {{ 'plugin.mod_treasurehunt.gradefromposition' | translate}}
+                </ng-container>
+                <ng-container *ngIf="<% treasurehunt.grademethod %> === 4">
+                    {{ 'plugin.mod_treasurehunt.gradefromabsolutetime' | translate}}
+                </ng-container>
+            </p>
+            <p>
+                <ion-grid no-padding>
+                    <ion-row>
+                        <ion-col col-6>
+                            -{{<% treasurehunt.gradepenlocation %> | number:'1.0-2'}}% <ion-icon name="locate"></ion-icon>
+                        </ion-col>
+                        <ion-col col-6>                
+                            -{{<% treasurehunt.gradepenanswer %> | number:'1.0-2'}}% <ion-icon name="thumbs-down"></ion-icon>
+                        </ion-col>
+                    </ion-row>
+                </ion-grid>                   
+            </p>
+        </ion-item>
+    </ion-list>
+
+     <!-- Tabs: see the user/group attempts or users progress. -->
+    <core-tabs>
+        <!-- View the user/group attempts tab. -->
+        <core-tab [show]="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception && CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>" icon="podium" [title]="'Historial de intentos'">
+            <ng-template>
+                <ion-list class="treasurehunt-no-margin">
+                    <ion-list-header class="treasurehunt-no-margin">
+                        {{ 'plugin.mod_treasurehunt.historicalattempts' | translate : {$a: CONTENT_OTHERDATA.username} }}
+                    </ion-list-header>
+
+                     <!-- User historical attempts -->
+                    <ion-item *ngIf="!CONTENT_OTHERDATA.attempts.length">
+                        <ion-icon item-start name="information-circle"></ion-icon>
+                        <p> {{ 'plugin.mod_treasurehunt.noattempts' | translate }} </p>
+                    </ion-item>
+                    <ion-item text-wrap *ngFor="let attempt of CONTENT_OTHERDATA.attempts">
+                        <ion-icon class="treasurehunt-success-attempt" *ngIf="!attempt.penalty" item-start name="checkmark-circle"></ion-icon>
+                        <ion-icon class="treasurehunt-failed-attempt" *ngIf="attempt.penalty" item-start name="close-circle"></ion-icon>
+                        <p>{{attempt.string}}</p>
+                    </ion-item>
+                    <!-- Play or review button. -->
+                    <ion-item>
+                        <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
+                            Jugar
+                            <ion-icon name="play"></ion-icon>
+                        </button>
+                    </ion-item>
+                </ion-list>
+            </ng-template>
+        </core-tab>
+
+        <!-- View users progress tab. -->
+        <core-tab icon="people" [title]="'Progreso total'">
+            <ng-template>
+                <ion-list>
+                    <ion-item text-wrap *ngIf="!CONTENT_OTHERDATA.usersprogress.roads.length && CONTENT_OTHERDATA.managepermission">
+                        <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                        <p> {{ 'plugin.mod_treasurehunt.noroads' | translate }} </p>
+                    </ion-item>
+                </ion-list>
+            </ng-template>
+        </core-tab>
+    </core-tabs>
+ 
+    
 </div>
+

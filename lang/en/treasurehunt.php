@@ -131,6 +131,7 @@ $string['eventstageupdated'] = 'Stage updated';
 $string['exit'] = 'Back to Course';
 $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
+$string['gamemode'] = 'Game mode';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
@@ -153,34 +154,27 @@ $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from finishing time';
 $string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['grademethod'] = 'Grading method';
-$string['grademethod_help'] = '<P><B>Grade from stages</B><P>
-<UL>
-<P>Each player (or team) scores proportionally by number of stages solved,
-being 100% when a road is completely solved, and 0% when no stage is solved.</UL>
-
-<P><B>Grade from duration of the hunt</B><P>
-<UL>
-<P>The hunter who ends the road in less time wins the hunt and marks the best time.
+$string['grademethod_help'] = '<p><b>Grade from stages</b></p>
+<p>Each player (or team) scores proportionally by number of stages solved,
+being 100% when a road is completely solved, and 0% when no stage is solved.</p>
+<p><b>Grade from duration of the hunt</b></p>
+<p>The hunter who ends the road in less time wins the hunt and marks the best time.
 The time is measured from the moment in which the starting stage of the road is unlocked.
 This means that the participants can play at different moments.
 The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
 and 100% the best finishing time. The players that did not finish the
-hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
-
-<P><B>Grade from finishing time</B><P>
-<UL>
-<P>The hunter who ends first is the winner of the hunt.
+hunt receive a grade under 50 calculated just by the number of stages solved.</p>
+<p><b>Grade from finishing time</b></p>
+<p>The hunter who ends first is the winner of the hunt.
 It is assumed that every hunter plays simultaneously.
 The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
 and 100% the best finishing time. The players that did not finish the
-hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
-
-<P><B>Grade from position</B><P>
-<UL>
-<P>The score is calculated by interpolating the position in the ranking,
+hunt receive a grade under 50 calculated just by the number of stages solved.</p>
+<p><b>Grade from position</b></p>
+<p>The score is calculated by interpolating the position in the ranking,
 being 100% the score for the first player and 50% for the last player.
 The players that did not finish the hunt receive a grade under 50% calculated
-just by the number of stages solved.</UL>';
+just by the number of stages solved.</p>';
 $string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation'] = 'Penalty for failure in location';
@@ -321,6 +315,7 @@ $string['successlocation'] = 'It is the right place!';
 $string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
 $string['timelabelfailed'] = 'Location sent on the date: ';
 $string['timelabelsuccess'] = 'Stage discovered on the date: ';
+$string['totaltime'] = 'Total time';
 $string['trackusers'] = 'Track trajectories';
 $string['trackusers_help'] = 'Register the paths made by the users while using playing mode.';
 $string['trackviewer'] = 'Track Viewer';
@@ -358,10 +353,10 @@ $string['userquestionfailed'] = 'Failed answer to the question of stage {$a->pos
 $string['userquestionovercome'] = 'Succesful answer to the question of stage {$a->position} on the date: {$a->date}';
 $string['usersprogress'] = 'Progress users';
 $string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:
-<P>The color <B> green </B> indicates that the stage has been overcome without failures.</P>
-<P>The color <B> yellow </B> indicates that the stage has been oavercome with failures.</P>
-<P>The color <B> red </B> indicates that the stage has not been overcome and failures have been made.</P>
-<P>The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.</P>';
+<p>The color <b> green </b> indicates that the stage has been overcome without failures.</p>
+<p>The color <b> yellow </b> indicates that the stage has been oavercome with failures.</p>
+<p>The color <b> red </b> indicates that the stage has not been overcome and failures have been made.</p>
+<p>The color <b> grey </b> indicates that the stage has not been overcome and no failures have been made.</p>';
 $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';

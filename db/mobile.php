@@ -19,9 +19,9 @@
 /**
  * Choice group module capability definition
  *
- * @package    mod_choicegroup
- * @copyright  2018 Sara Arjona <sara@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_choicegroup
+ * @copyright 2018 Sara Arjona <sara@moodle.com>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $addons = array(
@@ -34,25 +34,51 @@ $addons = array(
                     'class' => '',
                 ),
                 'delegate' => 'CoreCourseModuleDelegate', // Delegate (where to display the link to the add-on)
-                'method' => 'mobile_course_view', // Main function in \mod_choicegroup\output\mobile
+                'method' => 'mobile_treasurehunt_view', // Main function in \mod_choicegroup\output\mobile
+                'init' => 'mobile_treasurehunt_init',
                 'offlinefunctions' => array(
                     'mobile_course_view' => array(),
                 ), // Function needs caching for offline.
                 'styles' => array(
-                    'url' => $CFG->wwwroot . '/mod/treasurehunt/styles_app.css',
-                    'version' => '1.0',
-                )
+                    'url' => $CFG->wwwroot . '/mod/treasurehunt/mobile/mobile_css.css',
+                    'version' => '2.0',
+                ),
+                'displayrefresh' => true,
+                'displayprefetch' => false
             ),
         ),
         'lang' => array(
-            array('group', 'moodle'),
-            array('choice', 'choicegroup'),
-            array('choicegroupsaved', 'choicegroup'),
-            array('members/', 'choicegroup'),
-            array('members/max', 'choicegroup'),
-            array('pluginname', 'choicegroup'),
-            array('removemychoicegroup', 'choicegroup'),
-            array('savemychoicegroup', 'choicegroup'),
-        ),
+            array('playwithoutmoving', 'treasurehunt'),
+            array('movingplay', 'treasurehunt'),
+            array('groupmode', 'treasurehunt'),
+            array('gamemode', 'treasurehunt'),
+            array('groups', 'treasurehunt'),
+            array('grademethod', 'treasurehunt'),
+            array('gradefromstages', 'treasurehunt'),
+            array('gradefromtime', 'treasurehunt'),
+            array('gradefromposition', 'treasurehunt'),
+            array('gradefromabsolutetime', 'treasurehunt'),
+            array('grademethod_help', 'treasurehunt'),
+            array('treasurehuntnotavailable', 'treasurehunt'),
+            array('treasurehuntclosed', 'treasurehunt'),
+            array('treasurehuntopenedon', 'treasurehunt'),
+            array('treasurehuntcloseson', 'treasurehunt'),
+            array('historicalattempts', 'treasurehunt'),
+            array('noattempts', 'treasurehunt'),
+            array('noroads', 'treasurehunt'),
+            array('warnusersgrouping', 'treasurehunt'),
+            array('warnusersgroup', 'treasurehunt'),
+            array('warnusersoutside', 'treasurehunt'),
+            array('group', 'treasurehunt'),
+            array('user', 'treasurehunt'),
+            array('totaltime', 'treasurehunt'),
+            array('stages', 'treasurehunt'),
+            array('nousersprogress', 'treasurehunt'),
+            array('nogroupassigned', 'treasurehunt'),
+            array('nouserassigned', 'treasurehunt'),
+            array('invalroadid', 'treasurehunt'),
+            array('trackviewer', 'treasurehunt'),
+            array('usersprogress', 'treasurehunt'),
+        )
     ),
 );

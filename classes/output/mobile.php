@@ -27,10 +27,15 @@
 
 namespace mod_treasurehunt\output;
 
+require_once $CFG->dirroot . '/mod/treasurehunt/locallib.php';
+
+
 defined('MOODLE_INTERNAL') || die();
 
 use context_module;
 use completion_info;
+use core\session\exception;
+
 
 /**
  * Mobile output class for Choice group
@@ -42,12 +47,29 @@ class mobile
 {
 
     /**
+     * Returns shared (global) templates and information for the mobile app feature.
+     *
+     * @param array $args Arguments (empty)
+     * @return array Array with information required by app
+     */
+    public static function mobile_treasurehunt_init(array $args): array
+    {
+        global $CFG;
+        return [
+            'templates' => [],
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/mobile_init.js'),
+            'otherdata' => '',
+            'files' => []
+        ];
+    }
+
+    /**
      * Returns the choice group course view for the mobile app.
      * @param  array $args Arguments from tool_mobile_get_content WS
      *
      * @return array HTML, javascript and otherdata
      */
-    public static function mobile_course_view($args)
+    public static function mobile_treasurehunt_view($args)
     {
         global  $CFG, $OUTPUT, $USER, $DB, $PAGE;
 
@@ -76,58 +98,117 @@ class mobile
         $completion = new completion_info($course);
         $completion->set_module_viewed($cm);
 
+        // Conditions to show the intro can change to look for own settings or whatever.
+        if (treasurehunt_view_intro($treasurehunt)) {
+            $treasurehunt->intro = format_module_intro('treasurehunt', $treasurehunt, $cm->id);
+        } else {
+            $treasurehunt->intro = '';
+        }
 
-        // // Check if the activity is open.
-        // $timenow = time();
+        // User/group historical attempts
+        $playpermission = has_capability('mod/treasurehunt:play', $context, null, false);
+        $timenow = time();
+        $username = '';
+        $roadfinished = false;
+        $attempts = [];
+        $exception = '';
+        if ($playpermission && $timenow > $treasurehunt->allowattemptsfromdate) {
+            try {
+                $params = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, null);
+                $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $params->groupid, $params->roadid);
+                $attempts = treasurehunt_get_user_historical_attempts($params->groupid, $USER->id, $params->roadid);
+                if ($params->groupid) {
+                    $username = groups_get_group_name($params->groupid);
+                } else {
+                    $username = treasurehunt_get_user_fullname_from_id($USER->id);
+                }
+            } catch (Exception $e) {
+                $exception = $e->getMessage();
+            }
+        }
 
-        // if (!empty($choicegroup->timeopen) && $choicegroup->timeopen > $timenow) {
-        //     $choicegroup->open = false;
-        //     $choicegroup->message = get_string("notopenyet", "choicegroup", userdate($choicegroup->timeopen));
-        // } else {
-        //     $choicegroup->open = true;
-        // }
-        // if (!empty($choicegroup->timeclose) && $timenow > $choicegroup->timeclose) {
-        //     $choicegroup->expired = true;
-        //     $choicegroup->message = get_string("expired", "choicegroup", userdate($choicegroup->timeclose));
-        // } else {
-        //     $choicegroup->expired = false;
-        // }
+        // Progress users
+        $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
+        $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
+        list(
+            $roads, $duplicategroupsingroupings, $duplicateusersingroups,
+            $unassignedusers, $availablegroups
+        ) = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $course->id, $context);
 
-        // // The user has made her choice and updates are not allowed or choicegroup is not open.
-        // $choicegroup->answergiven = choicegroup_get_user_answer($choicegroup, $USER->id);
-        // $choicegroup->alloptionsdisabled = (!$choicegroup->open || $choicegroup->expired
-        //     || ($choicegroup->answergiven && !$choicegroup->allowupdate)
-        //     || !is_enrolled($context, null, 'mod/choicegroup:choose'));
+        $usersprogress = array(
+            'roads' => $roads,
+            'duplicategroupsingroupings' => $duplicategroupsingroupings,
+            'duplicateusersingroups' => $duplicateusersingroups,
+            'unassignedusers' => $unassignedusers,
+            'availablegroups' => $availablegroups
+        );
 
-        // // Get choicegroup options from external.
-        // try {
-        //     $returnedoptions = mod_choicegroup_external::get_choicegroup_options(
-        //         $cm->instance,
-        //         $USER->id,
-        //         $choicegroup->alloptionsdisabled
-        //     );
-        //     $options = array_values($returnedoptions['options']); // Make it mustache compatible.
-        //     $responses = array();
-        //     foreach ($options as $option) {
-        //         if ($choicegroup->multipleenrollmentspossible) {
-        //             $responses['responses_' . $option['id']] = $option['checked'];
-        //         } else if ($option['checked']) {
-        //             $responses['responses'] = $option['id'];
-        //         }
-        //     }
-        // } catch (Exception $e) {
-        //     $options = array();
-        // }
+        $data = array(
+            'cmid' => $cm->id,
+            'courseid' => $args->courseid,
+            'treasurehunt' => $treasurehunt
+        );
 
-        // // Format name and intro.
-        // $choicegroup->name = format_string($choicegroup->name);
-        // list($choicegroup->intro, $choicegroup->introformat) = external_format_text(
-        //     $choicegroup->intro,
-        //     $choicegroup->introformat,
-        //     $context->id,
-        //     'mod_choicegroup',
-        //     'intro'
-        // );
+        return array(
+            'templates' => array(
+                array(
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_view_page', $data),
+                ),
+            ),
+            'javascript' => 'setTimeout(()=>window.treasurehuntViewPageInit(this))',
+            // 'javascript' => "",
+            'otherdata' => array(
+                'timenow' => $timenow,
+                'roadfinished' => $roadfinished,
+                'attempts' => json_encode($attempts), // Cannot put arrays in otherdata.
+                'username' => $username,
+                'playpermission' => $playpermission,
+                'viewpermission' => $viewpermission,
+                'managepermission' => $managepermission,
+                'exception' => $exception,
+                'usersprogress' => json_encode(
+                    $usersprogress
+                )
+            ),
+        );
+    }
+
+    /**
+     * Returns the play view for the mobile app.
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     *
+     * @return array       HTML, javascript and otherdata
+     */
+    public static function mobile_treasurehunt_play($args)
+    {
+        global  $CFG, $OUTPUT, $DB, $PAGE;
+
+        $args = (object) $args;
+
+        $cm = get_coursemodule_from_id('treasurehunt', $args->cmid);
+        $course = $DB->get_record('course', array('id' => $cm->course));
+        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+
+
+        // Capabilities check.
+        require_login($args->courseid, false, $cm, true, true);
+        $context = context_module::instance($cm->id);
+        require_capability('mod/treasurehunt:play', $context);
+
+        $event = \mod_treasurehunt\event\course_module_viewed::create(
+            array(
+                'objectid' => $PAGE->cm->instance,
+                'context' => $PAGE->context,
+            )
+        );
+        $event->add_record_snapshot('course', $PAGE->course);
+        $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
+        $event->trigger();
+
+        $completion = new completion_info($course);
+        $completion->set_module_viewed($cm);
+
         $data = array(
             'cmid' => $cm->id,
             'courseid' => $args->courseid,
@@ -139,10 +220,10 @@ class mobile
             'templates' => array(
                 array(
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_view_page', $data),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_page', $data),
                 ),
             ),
-            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/appjs/mobile-play.js'),
+            'javascript' => 'setTimeout(()=>window.treasurehuntPlayPageInit(this))',
             // 'javascript' => "",
             'otherdata' => array(),
         );

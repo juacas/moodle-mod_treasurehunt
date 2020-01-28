@@ -129,6 +129,7 @@ $string['eventstageupdated'] = 'Etapa actualizada';
 $string['exit'] = 'Volver al curso';
 $string['failedlocation'] = 'Localización fallada';
 $string['faillocation'] = 'No es el lugar correcto';
+$string['gamemode'] = 'Modo de juego';
 $string['gamemodeinfo'] = 'Modo de juego: {$a}';
 $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra.
@@ -151,36 +152,29 @@ $string['gradefromposition'] = 'Puntuación por posición';
 $string['gradefromstages'] = 'Puntuación por etapas';
 $string['gradefromtime'] = 'Puntuación por tiempo total de caza';
 $string['gradefromabsolutetime'] = 'Puntuación por hora de finalización';
-
 $string['grademethod'] = 'Método de calificación';
-$string['grademethod_help'] = '<P><B>Puntuación por etapas</B><P>
-<UL>
-<P>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
+$string['grademethod_help'] = '<p><b>Puntuación por etapas</b></p>
+<p>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
 resueltas, siendo el 100% de la calificación máxima cuando se ha completado el camino
-y 0 cuando no se ha resuelto ninguna etapa.</UL>
-<P><B>Puntuación por tiempo de caza</B><P>
-<UL>
-<P>El ganador de la caza es el que termina la caza en el menor tiempo
+y 0 cuando no se ha resuelto ninguna etapa.</p>
+<p><b>Puntuación por tiempo de caza</b></p>
+<p>El ganador de la caza es el que termina la caza en el menor tiempo
 (medido desde el momento en que desbloqueó la etapa de salida,
 por lo que los participantes pueden comenzar en momentos distintos).
 La calificación se calcula interpolando el tiempo
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor.
-Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
-</UL>
-<P><B>Puntuación por hora de finalización</B><P>
-<UL>
-<P>El ganador de la caza es el que termina la caza antes (asume que todos los participantes juegan simultáneamente).
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.</p>
+<p><b>Puntuación por hora de finalización</b></p>
+<p>El ganador de la caza es el que termina la caza antes (asume que todos los participantes juegan simultáneamente).
 La calificación se calcula interpolando el tiempo
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor.
-Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
-</UL>
-<P><B>Puntuación por posición</B><P>
-<UL>
-<P>La puntuación se calcula interpolando la posición en el ranking,
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.</p>
+<p><b>Puntuación por posición</b></p>
+<p>La puntuación se calcula interpolando la posición en el ranking,
 siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron
 la caza reciben una calificación por debajo del 50% calculado simplemente
-por el número de etapas resueltas.</UL>';
+por el número de etapas resueltas.</p>';
 $string['grademethodinfo'] = 'Método de calificación: {$a->type}. Penaliza {$a->gradepenlocation}% por localización, {$a->gradepenanswer}% por respuestas';
 $string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation'] = 'Penalización por fallo en localización';
@@ -323,6 +317,7 @@ $string['successlocation'] = '¡Es el lugar correcto!';
 $string['timeexceeded'] = 'Se ha superado el tiempo limite para realizar la actividad. Esta pantalla solo sirve para revisar el juego';
 $string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
 $string['timelabelsuccess'] = 'Etapa descubierta en la fecha: ';
+$string['totaltime'] = 'Tiempo total';
 $string['trackusers'] = 'Almacenar itinerarios';
 $string['trackusers_help'] = 'Almacena el itinerario que realizan los usuarios mientras usan el modo de juego.';
 $string['trackviewer'] = 'Visor de rastreo';
@@ -360,10 +355,10 @@ $string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la etapa {$a
 $string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
 $string['usersprogress'] = 'Progreso de los usuarios';
 $string['usersprogress_help'] = 'Indica el progreso de las etapas de cada alumno/grupo en función de los colores:
-<P>El color <B>verde</B> indica que la etapa se ha superado sin fallos.</P>
-<P>El color <B>amarillo</B> indica que la etapa se ha superado con fallos.</P>
-<P>El color <B>rojo</B> indica que la etapa no se ha superado y se han cometido fallos.</P>
-<P>El color <B>gris</B> indica que la etapa no se ha superado y no se han cometido fallos.</P>';
+<p>El color <b>verde</b> indica que la etapa se ha superado sin fallos.</p>
+<p>El color <b>amarillo</b> indica que la etapa se ha superado con fallos.</p>
+<p>El color <b>rojo</b> indica que la etapa no se ha superado y se han cometido fallos.</p>
+<p>El color <b>gris</b> indica que la etapa no se ha superado y no se han cometido fallos.</p>';
 $string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->date}';
 $string['validatelocation'] = 'Validar ubicación';
 $string['validateqr'] = 'Escanea QR';
