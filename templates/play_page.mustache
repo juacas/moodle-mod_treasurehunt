@@ -48,42 +48,44 @@
     {{! Pagina principal de la aplicacion }}
     <div data-role="page" id="mappage"  data-quicklinks="true" data-theme="b">
         {{!Panel principal de informacion}}
-        <div data-role="panel" data-position="left" data-position-fixed="true" data-display="overlay" id="infopanel">
-            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <div data-role="panel" data-position="left" data-display="overlay" id="infopanel">
+            <div data-role="header" data-tap-toggle="false">
                 <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn 
                    ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
                 <h1>{{#str}} info, mod_treasurehunt{{/str}}</h1>
             </div>
-            <div class="ui-bar ui-bar-b">
-                <h1>{{{user.picture}}} {{user.name}}</h1>
-                <a href="view.php?id={{cmid}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">
-                    {{#str}} exit, mod_treasurehunt{{/str}}
-                </a>
-            </div>
-            <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" 
-                 data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
-                {{#hasdescription}}
-                <div data-role="collapsible" data-theme="a" data-iconpos="right">
-                    <h3>{{treasurehunt.name}}</h3>
-                    <div>
-                        <p>{{{treasurehunt.description}}}</p>
-                    </div>
+            <div role="main" class="ui-content">
+                <div class="ui-bar ui-bar-b">
+                    <h1>{{{user.picture}}} {{user.name}}</h1>
+                    <a href="view.php?id={{cmid}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">
+                        {{#str}} exit, mod_treasurehunt{{/str}}
+                    </a>
                 </div>
-                {{/hasdescription}}
-                <div id="lastsuccessfulstage" data-role="collapsible">
-                    <h3>
-                        <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos"></div>
-                        <span id="lastsuccessfulstagename"></span>
-                    </h3>
-                    <div>
-                        <p id="lastsuccessfulstageclue"></p>
+                <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" 
+                    data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
+                    {{#hasdescription}}
+                    <div data-role="collapsible" data-theme="a" data-iconpos="right">
+                        <h3>{{treasurehunt.name}}</h3>
+                        <div>
+                            <p>{{{treasurehunt.description}}}</p>
+                        </div>
+                    </div>
+                    {{/hasdescription}}
+                    <div id="lastsuccessfulstage" data-role="collapsible">
+                        <h3>
+                            <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos"></div>
+                            <span id="lastsuccessfulstagename"></span>
+                        </h3>
+                        <div>
+                            <p id="lastsuccessfulstageclue"></p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
         {{!Panel de busqueda de informacion}}
-        <div data-role="panel" data-position="right" data-position-fixed="true" data-display="overlay" id="searchpanel">
-            <div data-role="header" data-position="fixed" data-tap-toggle="false">
+        <div data-role="panel" data-position="right" data-display="overlay" id="searchpanel">
+            <div data-role="header" data-tap-toggle="false">
                 <a href="#" data-role="button" data-rel="close" class="ui-btn-right ui-nodisc-icon ui-btn 
                    ui-icon-carat-r ui-btn-icon-notext ui-corner-all"></a>
                 <h1>{{#str}} search, mod_treasurehunt{{/str}}</h1>
@@ -93,8 +95,9 @@
                     </form>
                 </div>
             </div>
-            <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
-
+            <div role="main" class="ui-content">
+                <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
+            </div>
         </div>
 
         {{!Popup for QR scanner}}
@@ -105,7 +108,7 @@
 		    </div>
             <div data-role="content" class="ui-content ui-overlay-b">			    
 		           <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
-		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none"></video><center></div>
+		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
                 <div id="previewQRbuttons" class="ui-block-a">
                     <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
                         {{#str}} cancel, mod_treasurehunt{{/str}}

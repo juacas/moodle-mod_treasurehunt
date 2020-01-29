@@ -33,13 +33,15 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * @copyright  2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_treasurehunt_mod_form extends moodleform_mod {
+class mod_treasurehunt_mod_form extends moodleform_mod
+{
 
     /**
      * Defines forms elements
      * @global type $CFG
      */
-    public function definition() {
+    public function definition()
+    {
         global $CFG;
         $treasurehuntconfig = get_config('mod_treasurehunt');
         $mform = $this->_form;
@@ -138,17 +140,26 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->disabledIf('customwmsparams', 'customlayerwms', 'eq', '');
 
         // Local file overlay.
-        $mform->addElement('filemanager', 'custombackground',  get_string('custommapimagefile', 'treasurehunt'), null,
-                            array('subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
-                                'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL));
+        $mform->addElement(
+            'filemanager',
+            'custombackground',
+            get_string('custommapimagefile', 'treasurehunt'),
+            null,
+            array(
+                'subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
+                'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL
+            )
+        );
         $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
         $mform->disabledIf('custombackground', 'customlayername', 'eq', '');
 
-        $layertypes = ['base' => get_string('custommapbaselayer', 'treasurehunt'),
-                        'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
-                        'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
-                        'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
-                      ];
+
+        $layertypes = [
+            'base' => get_string('custommapbaselayer', 'treasurehunt'),
+            'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
+            'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
+            'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
+        ];
         $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
         $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
         $mform->setDefault('customlayertype', 'base');
@@ -185,7 +196,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
         // Add standard buttons, common to all modules. Botones.
-        $this->add_action_buttons( true);
+        $this->add_action_buttons(true);
     }
 
     /**
@@ -193,7 +204,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * @param array $data
      * @param array $files
      */
-    public function validation($data, $files) {
+    public function validation($data, $files)
+    {
         $errors = parent::validation($data, $files);
 
         if ($data['allowattemptsfromdate'] && $data['cutoffdate']) {
@@ -228,20 +240,28 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                 $errors['custombackground'] = get_string('custommapimagefile_help', 'treasurehunt');
             }
             if ($data['customlayertype'] !== 'nongeographic') {
-                if ($data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
-                        $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                if (
+                    $data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']
+                ) {
                     $errors['custommapminlat'] = get_string('custommapminlat_help', 'treasurehunt');
                 }
-                if ($data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
-                        $data['custommapminlat'] >= $data['custommapmaxlat']) {
+                if (
+                    $data['custommapmaxlat'] === '' || $data['custommapmaxlat'] > 85 ||
+                    $data['custommapminlat'] >= $data['custommapmaxlat']
+                ) {
                     $errors['custommapmaxlat'] = get_string('custommapmaxlat_help', 'treasurehunt');
                 }
-                if ($data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
-                        $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                if (
+                    $data['custommapminlon'] === '' || $data['custommapminlon'] < -180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']
+                ) {
                     $errors['custommapminlon'] = get_string('custommapminlon_help', 'treasurehunt');
                 }
-                if ($data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
-                        $data['custommapminlon'] >= $data['custommapmaxlon']) {
+                if (
+                    $data['custommapmaxlon'] === '' || $data['custommapmaxlon'] > 180 ||
+                    $data['custommapminlon'] >= $data['custommapmaxlon']
+                ) {
                     $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
                 }
             }
@@ -253,10 +273,17 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         }
         return $errors;
     }
-    public function data_preprocessing(&$defaultvalues) {
+    public function data_preprocessing(&$defaultvalues)
+    {
         $draftitemid = file_get_submitted_draft_itemid('custombackground');
-        file_prepare_draft_area($draftitemid, $this->context->id, 'mod_treasurehunt', 'custombackground',
-                                0, array('subdirs' => false));
+        file_prepare_draft_area(
+            $draftitemid,
+            $this->context->id,
+            'mod_treasurehunt',
+            'custombackground',
+            0,
+            array('subdirs' => false)
+        );
         $defaultvalues['custombackground'] = $draftitemid;
         $custommapconfig = treasurehunt_get_custommappingconfig($this->current);
         if ($custommapconfig) {
@@ -271,8 +298,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                 $defaultvalues['custommapminlat'] = -80;
                 $defaultvalues['custommapmaxlon'] = null;
                 $defaultvalues['custommapmaxlat'] = 80;
-
-            } else if (isset($custommapconfig->onlybase) && $custommapconfig->onlybase == true ) {
+            } else if (isset($custommapconfig->onlybase) && $custommapconfig->onlybase == true) {
                 $defaultvalues['customlayertype'] = 'onlybase';
             } else {
                 $defaultvalues['customlayertype'] = $custommapconfig->layertype; // Or base or overlay.
@@ -296,9 +322,13 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      *
      * @param stdClass $data passed by reference
      */
-    public function data_postprocessing($data) {
+    public function data_postprocessing($data)
+    {
         $mapconfig = treasurehunt_build_custommappingconfig($data);
         $data->custommapconfig = $mapconfig === null ? null : json_encode($mapconfig);
+        if ($data->customlayertype === 'nongeographic') {
+            $data->playwithoutmoving = "1";
+        }
     }
 
     /**
@@ -309,7 +339,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * JPC: Method introduced in moodleform_mod.php  Moodle 3.3
      * @return object submitted data; NULL if not valid or not submitted or cancelled
      */
-    public function get_data() {
+    public function get_data()
+    {
         global $CFG;
         $mform = $this->_form;
         // JPC workaround #24: In Moodle 3.5 when filemanager is disabled, no value is submitted and
@@ -336,8 +367,9 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      *
      * @return array Contains the names of the added form elements
      */
-    public function add_completion_rules() {
-        $mform =& $this->_form;
+    public function add_completion_rules()
+    {
+        $mform = &$this->_form;
         $mform->addElement('advcheckbox', 'completionpass', '', get_string('completionpass', 'quiz'));
         $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
         $mform->addHelpButton('completionpass', 'completionpass', 'quiz');
@@ -357,8 +389,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * @param array $data
      * @return bool
      */
-    public function completion_rule_enabled($data) {
+    public function completion_rule_enabled($data)
+    {
         return !empty($data['completionfinish']) || !empty($data['completionpass']);
     }
-
 }

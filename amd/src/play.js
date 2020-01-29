@@ -21,23 +21,24 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery',
+define(['jquery',  
     'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
     'mod_treasurehunt/viewgpx',
-    'core/str',
+    // 'core/str',
     'mod_treasurehunt/jquery.truncate', 
     'mod_treasurehunt/jquery.mobile-config',
     'mod_treasurehunt/jquerymobile', 
     ],
-	    function ($, url, ol, ajax, GeocoderJS, viewgpx, str) {
-			console.log('loading play.js');
+	    function ($, url, ol, ajax, GeocoderJS, viewgpx /*, str*/) {
+			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
 	                    lastattempttimestamp,
 	                    lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig) {
+					
 	            	// I18n strings.
 	            	var terms = ["stageovercome", "failedlocation", "stage", "stagename",
 									        "stageclue", "question", "noanswerselected", "timeexceeded",
@@ -47,17 +48,19 @@ define(['jquery',
 					console.log('loading i18n strings');
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
-	                });
-	            	str.get_strings(stringsqueried).done(function (strings) {
-	            		var i18n = [];
-	            		for (var i=0; i < terms.length; i++) {
-	            			i18n[terms[i]] = strings[i];
-	            		}
+					});
+					i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
+	            	//str.get_strings(stringsqueried).done(function (strings) {
+	            		// var i18n = [];
+	            		// for (var i=0; i < terms.length; i++) {
+	            		// 	i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
+						// }
+						// i18n = i18nplay;
 	            		// Detect custom image.
 	            		if (typeof(custommapconfig) != 'undefined' &&
 	            				custommapconfig !== null && 
 	            				custommapconfig.custombackgroundurl !== null) {
-	    						console.log('detecting custom background image dimensions.');
+	    						console.log('Detecting custom background image dimensions.');
 	            			// Detect image size.
 	    						var img = new Image();
 	    					    img.addEventListener("load", function(){
@@ -74,7 +77,7 @@ define(['jquery',
 		                	        lastattempttimestamp,
 		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);	            		}
 	            		
-	                });
+	                // });
 	            } // End of function playtreasurehunt.
 	        };
 	    return init;
@@ -84,6 +87,7 @@ define(['jquery',
 		
 			// I18n support.
 			console.log('init player Openlayers');
+			$.mobile.loading("show");
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
 			var geographictools = true;
@@ -413,11 +417,11 @@ define(['jquery',
 		            return [styles];
 		        }
 		        if (!feature.get('geometrysolved')) {
-		//Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
+		// Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
 		            failstageStyle.getText().setText('' + stageposition);
 		            return [failstageStyle];
 		        }
-		//Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
+		// Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
 		        defaultstageStyle.getText().setText('' + stageposition);
 		        return [defaultstageStyle];
 		    }
@@ -490,7 +494,7 @@ define(['jquery',
 		        if (location) {
 		            position = currentposition;
 		            $.mobile.loading("show");
-		        }
+				}				
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -512,9 +516,9 @@ define(['jquery',
 		            qoaremoved = response.qoaremoved;
 		            roadfinished = response.roadfinished;
 					available = response.available;
-		            // Si he enviado una localizacion o una respuesta imprimo si es correcta o no.
+					$.mobile.loading("hide");
+		            // If I have sent a location or an answer I print out whether it is correct or not.
 		            if (location || selectedanswerid) {
-		                $.mobile.loading("hide");
 		                if (response.status !== null && available) {
 		                    console.log(response.status.msg);
 		                }
@@ -524,14 +528,14 @@ define(['jquery',
 		            } else {
 		                $('#validateqr').hide();
 		            }
-		            // Si cambia el modo de juego (movil o estatico)
+		            // If you change the game mode (mobile or static).
 		            if (playwithoutmoving != response.playwithoutmoving) {
 		                playwithoutmoving = response.playwithoutmoving;
 		                if (!playwithoutmoving) {
 		                    markerFeature.setGeometry(null);
 		                }
 		            }
-		            // Si cambia el modo grupo
+		            // If you change the group mode. 
 		            if (groupmode != response.groupmode) {
 		                groupmode = response.groupmode;
 		            }
@@ -559,11 +563,11 @@ define(['jquery',
 		                        }));
 		                    }
 		                }
-		                // Compruebo si existe, lo que indica que se ha actualizado.
+		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
-		                    // Si la etapa no esta solucionada aviso de que hay cambios.
+		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
 		                        changesinquestionstage = true;
 		                        $('#validatelocation').hide();
@@ -576,22 +580,24 @@ define(['jquery',
 		                        $('#question_button').hide();
 		                    }
 		                }
-		                // Compruebo si es la primera geometria o se esta inicializando y centro el mapa.
+		                // Check if it is the first geometry or it is being initialized and center the map.
 		                if (response.firststagegeom || initialize) {
 		                    fitmap = true;
 		                }
-		                // Compruebo la pagina en la que nos encontramos.
-		                var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
+		                // Check the page we're on.
+						var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
+						// Update the page model wherever the page we are.
+						set_lastsuccessfulstage();
+						fit_map_to_source();
+						set_question();
 		                if (pageId === 'mappage') {
-		                    set_lastsuccessfulstage();
-		                    fit_map_to_source();
+							// Nothing special.
 		                } else if (pageId === 'historypage') {
-		                    set_attempts_history();
+							set_attempts_history();
 		                } else if (pageId === 'questionpage') {
 		                    if (lastsuccessfulstage.question === '') {
 		                        $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                    } else {
-		                        set_question();
 		                        $.mobile.resetActivePageHeight();
 		                    }
 		                }
@@ -940,7 +946,7 @@ define(['jquery',
 		                }, 200);
 		            } else {
 		                map.updateSize();
-		                set_lastsuccessfulstage();
+		                //set_lastsuccessfulstage();
 		                fit_map_to_source();
 		            }
 		        } else if (pageId === 'historypage') {

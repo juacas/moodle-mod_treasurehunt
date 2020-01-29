@@ -74,7 +74,23 @@ module.exports = function(grunt) {
             amd: { src: jshintfiles }
         },
         uglify: {
+            options : {
+                sourceMap : true,
+                sourceMapIncludeSources : true,
+                mangle: true,
+                compress: true,
+                beautify: false
+              },
             amd: {
+                files: [{
+                    expand: true,
+                    src: amdSrc,
+                    rename: uglify_rename
+                }]
+            }
+        },
+        copy: {
+            js:{
                 files: [{
                     expand: true,
                     src: amdSrc,
@@ -99,8 +115,9 @@ module.exports = function(grunt) {
             },
             amd: {
                 files: ['**/amd/src/**/*.js'],
-                tasks: ['amd']
+                tasks: ['copy:js']
             },
+            
             yui: {
                 files: ['**/yui/src/**/*.js'],
                 tasks: ['shifter']
@@ -225,6 +242,7 @@ module.exports = function(grunt) {
           var files = Object.keys(changedFiles);
           grunt.config('jshint.amd.src', files);
           grunt.config('uglify.amd.files', [{ expand: true, src: files, rename: uglify_rename }]);
+          grunt.config('copy.js.files', [{ expand: true, src: files, rename: uglify_rename }]);
           grunt.config('shifter.options.paths', files);
           changedFiles = Object.create(null);
     }, 200);
@@ -239,13 +257,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
+    grunt.loadNpmTasks('grunt-contrib-copy');
     // Register JS tasks.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
     grunt.registerTask('amdonly', ['uglify']);
-    grunt.registerTask('amd', ['jshint', 'uglify']);
+    grunt.registerTask('amd', [/*'jshint',*/ 'uglify']);
     grunt.registerTask('js', ['amdonly', 'shifter']);
-
     // Register CSS taks.
     grunt.registerTask('css', ['less:bootstrapbase']);
 
