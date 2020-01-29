@@ -87,6 +87,7 @@ define(['jquery',
 		
 			// I18n support.
 			console.log('init player Openlayers');
+			$.mobile.loading("show");
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
 			var geographictools = true;
@@ -416,11 +417,11 @@ define(['jquery',
 		            return [styles];
 		        }
 		        if (!feature.get('geometrysolved')) {
-		//Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
+		// Don't change the scale with the map. This is confusing failstageStyle.getImage().setScale((view.getZoom() / 30));.
 		            failstageStyle.getText().setText('' + stageposition);
 		            return [failstageStyle];
 		        }
-		//Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
+		// Don't change the scale with the map. This is confusing  defaultstageStyle.getImage().setScale((view.getZoom() / 100));.
 		        defaultstageStyle.getText().setText('' + stageposition);
 		        return [defaultstageStyle];
 		    }
@@ -493,7 +494,7 @@ define(['jquery',
 		        if (location) {
 		            position = currentposition;
 		            $.mobile.loading("show");
-		        }
+				}				
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -515,9 +516,9 @@ define(['jquery',
 		            qoaremoved = response.qoaremoved;
 		            roadfinished = response.roadfinished;
 					available = response.available;
-		            // Si he enviado una localizacion o una respuesta imprimo si es correcta o no.
+					$.mobile.loading("hide");
+		            // If I have sent a location or an answer I print out whether it is correct or not.
 		            if (location || selectedanswerid) {
-		                $.mobile.loading("hide");
 		                if (response.status !== null && available) {
 		                    console.log(response.status.msg);
 		                }
@@ -527,14 +528,14 @@ define(['jquery',
 		            } else {
 		                $('#validateqr').hide();
 		            }
-		            // Si cambia el modo de juego (movil o estatico)
+		            // If you change the game mode (mobile or static).
 		            if (playwithoutmoving != response.playwithoutmoving) {
 		                playwithoutmoving = response.playwithoutmoving;
 		                if (!playwithoutmoving) {
 		                    markerFeature.setGeometry(null);
 		                }
 		            }
-		            // Si cambia el modo grupo
+		            // If you change the group mode. 
 		            if (groupmode != response.groupmode) {
 		                groupmode = response.groupmode;
 		            }
@@ -562,11 +563,11 @@ define(['jquery',
 		                        }));
 		                    }
 		                }
-		                // Compruebo si existe, lo que indica que se ha actualizado.
+		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
-		                    // Si la etapa no esta solucionada aviso de que hay cambios.
+		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
 		                        changesinquestionstage = true;
 		                        $('#validatelocation').hide();
@@ -579,22 +580,24 @@ define(['jquery',
 		                        $('#question_button').hide();
 		                    }
 		                }
-		                // Compruebo si es la primera geometria o se esta inicializando y centro el mapa.
+		                // Check if it is the first geometry or it is being initialized and center the map.
 		                if (response.firststagegeom || initialize) {
 		                    fitmap = true;
 		                }
-		                // Compruebo la pagina en la que nos encontramos.
-		                var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
+		                // Check the page we're on.
+						var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
+						// Update the page model wherever the page we are.
+						set_lastsuccessfulstage();
+						fit_map_to_source();
+						set_question();
 		                if (pageId === 'mappage') {
-		                    set_lastsuccessfulstage();
-		                    fit_map_to_source();
+							// Nothing special.
 		                } else if (pageId === 'historypage') {
-		                    set_attempts_history();
+							set_attempts_history();
 		                } else if (pageId === 'questionpage') {
 		                    if (lastsuccessfulstage.question === '') {
 		                        $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                    } else {
-		                        set_question();
 		                        $.mobile.resetActivePageHeight();
 		                    }
 		                }
