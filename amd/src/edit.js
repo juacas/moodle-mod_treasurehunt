@@ -103,7 +103,7 @@ define(
 				openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
 
 			// Load the control pane, treasurehunt and road list.
-			
+
 			if (geographictools) {
 				$('<div id="searchcontainer">')
 					.appendTo($("#controlpanel"));
@@ -116,7 +116,7 @@ define(
 				$('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
 					.appendTo($("#searchcontainer"));
 			}
-			
+
 			// Creo el stagelist.
 			$('<ul id="stagelist"/>').prependTo($("#stagelistpanel"));
 			// Lo cargo como un sortable.
@@ -221,7 +221,7 @@ define(
 			// Anado los handle custom.
 			/*
 			 * Set control
-			 * 
+			 *
 			 * @type edit_L27.ol.style.Style
 			 */
 			window.app = {};
@@ -373,7 +373,7 @@ define(
 				}));
 			/**
 			 * Add a click handler to hide the popup.
-			 * 
+			 *
 			 * @return {boolean} Don't follow the href.
 			 */
 			closer.onclick = function () {
@@ -1164,21 +1164,21 @@ define(
 			function activateNavigationMode() {
 				$('#editmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
 				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
-				$('#navmode').addClass('highlightbutton').prop('disabled', true).blur().prop('z-index', 999);
+				$('#navmode').prop('disabled', false).addClass('highlightbutton').blur().prop('z-index', 999);
 				Draw.setActive(false);
 				Modify.setActive(false);
 			}
 			function activateModify() {
 				$('#editmode').addClass('highlightbutton').blur().prop('z-index', 999);
 				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
-				$('#navmode').removeClass('highlightbutton').prop('disabled', false).prop('z-index', 'Infinity');
+				$('#navmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
 				Draw.setActive(false);
 				Modify.setActive(true);
 			}
 			function activateDraw() {
 				$('#drawmode').addClass('highlightbutton').blur().prop('z-index', 'Infinity');
 				$('#editmode').removeClass('highlightbutton').prop('z-index', 'auto');
-				$('#navmode').removeClass('highlightbutton').prop('disabled', false).prop('z-index', 'auto');
+				$('#navmode').removeClass('highlightbutton').prop('z-index', 'auto');
 				Modify.setActive(false);
 				Draw.setActive(true);
 			}
@@ -1736,7 +1736,7 @@ define(
 
 				});
 			var editstatus = 'off';
-			
+
 			$("#stagelist")
 				.on(
 					'click',
