@@ -20,7 +20,6 @@
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>*
  * @license http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
- * @license http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 
 define(
@@ -31,8 +30,6 @@ define(
 		function($, jqui, touch, notification, ol, ajax, GeocoderJS,
 				olLayerSwitcher, str) {
 
-			
-			
 			function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
 
 				var mapprojection = 'EPSG:3857';
@@ -89,54 +86,53 @@ define(
 					geographictools = custommapconfig.geographic;
 				}
 				
-				var treasurehunt = {
-					"roads" : {}
-				}, dirtyStages = new ol.source.Vector({
-					projection : mapprojection
-				}), originalStages = new ol.source.Vector({
-					projection : mapprojection
-				}), dirty = false, abortDrawing = false, drawStarted = false, stageposition, roadid, stageid, selectedFeatures, selectedstageFeatures = {}, idNewFeature = 1, vectorSelected = new ol.layer.Vector(
+				var treasurehunt = {"roads" : {}}, 
+					dirtyStages = new ol.source.Vector({ projection : mapprojection }),
+					originalStages = new ol.source.Vector({ projection : mapprojection}),
+					dirty = false,
+					abortDrawing = false,
+					drawStarted = false,
+					stageposition, roadid, stageid, selectedFeatures,
+					selectedstageFeatures = {}, idNewFeature = 1, 
+					vectorSelected = new ol.layer.Vector(
 						{
 							source : new ol.source.Vector({
 								projection : mapprojection
 							})
-						}), openStreetMapGeocoder = GeocoderJS
-						.createGeocoder('openstreetmap');
+						}), 
+					openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
 				
 				// Load the control pane, treasurehunt and road list.
+				/*
 				$("#controlpanel").addClass(
 						'ui-widget-header ui-corner-all');
 				$('<span id="edition"/>').appendTo($("#controlpanel"));
-				$(
-						'<input type="radio" name="controlpanel" id="addradio" value="add">')
+				$('<input type="radio" name="controlpanel" id="addradio" value="add">')
 						.appendTo($("#edition"));
 				$("<label>").attr('for', "addradio").text(strings['add'])
 						.appendTo($("#edition"));
-				$(
-						'<input type="radio" name="controlpanel" id="modifyradio" value="modify">')
+				$('<input type="radio" name="controlpanel" id="modifyradio" value="modify">')
 						.appendTo($("#edition"));
 				$("<label>").attr('for', "modifyradio").text(strings['modify'])
 						.appendTo($("#edition"));
 				$('<button id="savestage"/>').attr('disabled', true).text(
 						strings['save']).appendTo($("#controlpanel"));
 				$('<button id="removefeature"/>').attr('disabled', true)
-						.text(strings['remove']).appendTo(
-								$("#controlpanel"));
+						.text(strings['remove']).appendTo($("#controlpanel"));
+				*/ 
 				if (geographictools) {
 					$('<div id="searchcontainer">')
 							.appendTo($("#controlpanel"));
-					$(
-							'<input type="search" placeholder="'
+					$('<input type="search" placeholder="'
 									+ strings['searchlocation']
 									+ '" class="searchaddress"/>').appendTo(
 							$("#searchcontainer"));
-					$(
-							'<span class="ui-icon  ui-icon-search searchicon"></span>')
+					$('<span class="ui-icon  ui-icon-search searchicon"></span>')
 							.prependTo($("#searchcontainer"));
-					$(
-							'<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
+					$('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
 							.appendTo($("#searchcontainer"));
 				}
+				/*
 				$('<button id="addstage" />').text(strings['stage'])
 						.prependTo($("#controlpanel"));
 				$('<button id="addroad" />').text(strings['road'])
@@ -179,6 +175,7 @@ define(
 				$("#edition").buttonset({disabled: true});
 				// Hago visible el controlpanel.
 				$("#controlpanel").removeClass('invisible');
+				*/
 				// Creo el stagelist.
 				$('<ul id="stagelist"/>').prependTo($("#stagelistpanel"));
 				// Lo cargo como un sortable.
@@ -260,8 +257,7 @@ define(
 										dirty = true;
 									}
 								}).disableSelection();
-				function relocatestageList($listitems, $listlength, i,
-						dirtyStages, originalStages, vector) {
+				function relocatestageList($listitems, $listlength, i, dirtyStages, originalStages, vector) {
 					var newVal, $item = $($listitems).get([ i ]), roadid = $(
 							$item).attr('roadid');
 					newVal = Math.abs($($item).index(
@@ -316,7 +312,7 @@ define(
 						color : 'rgba(0, 0, 0, 0.1)'
 					}),
 					stroke : new ol.style.Stroke({
-						color : '#6C0492',
+						color : '#11492',
 						width : 2
 					}),
 					image : new ol.style.Circle({
@@ -341,14 +337,14 @@ define(
 						})
 					})
 				});
-				// Estilo etapa seleccionada.
+				// Selected stage style.
 				var selectedstageStyle = new ol.style.Style({
 					fill : new ol.style.Fill({
-						color : 'rgba(0, 0, 0, 0.05)'
+						color : 'rgba(128, 0, 0, 0.2)'
 					}),
 					stroke : new ol.style.Stroke({
-						color : '#FAC30B',
-						width : 2
+						color : 'rgba(128, 0, 0, 1)',
+						width : 4
 					}),
 					image : new ol.style.Circle({
 						radius : 5,
@@ -367,7 +363,7 @@ define(
 							color : '#fff'
 						}),
 						stroke : new ol.style.Stroke({
-							color : '#ffcc33',
+							color : '#C3000B',
 							width : 3.5
 						})
 					}),
@@ -1210,36 +1206,50 @@ define(
 				}
 
 				function activateDeleteButton() {
-					$('#removefeature').button("option", "disabled", false);
+					$('#removefeature').prop('disabled', false);
 				}
 				function deactivateDeleteButton() {
-					$('#removefeature').button("option", "disabled", true);
+					$('#removefeature').prop('disabled',true);
 				}
 				function activateAddstage() {
-					$('#addstage').button("option", "disabled", false);
+					$('#addstage').prop('disabled',false);
 				}
 				function deactivateAddstage() {
-					$('#addstage').button("option", "disabled", true);
+					// $('#addstage').button("option", "disabled", true);
+					$('#addstage').prop('disabled',true);
 				}
 				function deactivateEdition() {
-
-					var radioButtons = $("#edition").find("input:radio");
-					$("#edition").find("input:radio").prop("checked", false).end()
-			           .buttonset("refresh");
-					$("#edition").buttonset("disable");
-
+					$('#editmode').removeClass('highlightbutton');
+					$('#drawmode').removeClass('highlightbutton');
+					$('#navmode').addClass('highlightbutton').prop('disabled',true);
 					Draw.setActive(false);
 					Modify.setActive(false);
 				}
-
+				function activateModify() {
+					$('#editmode').addClass('highlightbutton');
+					$('#drawmode').removeClass('highlightbutton');
+					$('#navmode').removeClass('highlightbutton').prop('disabled', false);
+					Draw.setActive(false);
+					Modify.setActive(true);
+				}				
+				function activateDraw() {
+					$('#drawmode').addClass('highlightbutton');
+					$('#editmode').removeClass('highlightbutton');
+					$('#navmode').removeClass('highlightbutton').prop('disabled', false);
+					Modify.setActive(false);
+					Draw.setActive(true);
+				}
 				function activateEdition() {
-					$("#edition").buttonset("enable");
+					$('#drawmode').prop('disabled', false);
+					$('#editmode').prop('disabled', false);
+
+					activateModify();
 				}
 				function activateSaveButton() {
-					$('#savestage').button("option", "disabled", false);
+					$('#savestage').prop('disabled',false);
 				}
 				function deactivateSaveButton() {
-					$('#savestage').button("option", "disabled", true);
+					$('#savestage').prop('disabled',true);
 				}
 				function flyTo(map, point, extent) {
 					var duration = 700;
@@ -1672,6 +1682,21 @@ define(
 					var ul = this.menu.element;
 					ul.outerWidth(this.element.outerWidth());
 				};
+				$("#drawmode").on(
+					'click',
+					function() {
+						activateDraw();
+					});
+				$("#editmode").on(
+					'click',
+					function() {
+						activateModify();
+					});
+				$("#navmode").on(
+					'click',
+					function() {
+						deactivateEdition();
+					});
 				$("#addstage").on(
 						'click',
 						function() {

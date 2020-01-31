@@ -29,7 +29,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once($CFG->libdir . '/formslib.php');
 
-global $USER;
+global $USER, $PAGE;
 
 $id = required_param('id', PARAM_INT);
 $roadid = optional_param('roadid', 0, PARAM_INT);
@@ -113,7 +113,18 @@ echo $OUTPUT->box(null, 'loader-circle-inside');
 echo $OUTPUT->container_end();
 echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
 echo $OUTPUT->box(get_string('erremptystage', 'treasurehunt'), 'alert alert-error invisible', 'erremptystage');
-echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
+//echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
+echo <<<CONTROLPANEL
+<div id="controlpanel" class="box py-3 ui-widget-header ui-corner-all">
+    <button id="addroad" disabled="disabled">Add Road</button>
+    <button id="addstage" disabled="disabled">Add Stage</button>
+    <button id="drawmode" disabled="disabled">Draw</button>
+    <button id="editmode" disabled="disabled">Edit</button>
+    <button id="navmode" disabled="disabled">Coords</button>
+    <button id="savestage" disabled="disabled">Save</button>
+    <button id="removefeature" disabled="disabled">Remove</button>
+</div>
+CONTROLPANEL;
 echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
