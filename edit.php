@@ -114,17 +114,14 @@ echo $OUTPUT->container_end();
 echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
 echo $OUTPUT->box(get_string('erremptystage', 'treasurehunt'), 'alert alert-error invisible', 'erremptystage');
 //echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
-echo <<<CONTROLPANEL
-<div id="controlpanel" class="box py-3 ui-widget-header ui-corner-all">
-    <button id="addroad" disabled="disabled">Add Road</button>
-    <button id="addstage" disabled="disabled">Add Stage</button>
-    <button id="drawmode" disabled="disabled">Draw</button>
-    <button id="editmode" disabled="disabled">Edit</button>
-    <button id="navmode" disabled="disabled">Coords</button>
-    <button id="savestage" disabled="disabled">Save</button>
-    <button id="removefeature" disabled="disabled">Remove</button>
-</div>
-CONTROLPANEL;
+$buttons = "<button id=\"addroad\" class=\"btn btn-secondary\" >" . get_string('treasurehunt:addroad', 'treasurehunt') ."</button>";
+$buttons .= "<button id=\"addstage\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('treasurehunt:addstage', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"drawmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('draw', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"editmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('edit', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"navmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('coords', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"savestage\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('save', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"removefeature\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('remove', 'treasurehunt') . "</button>";
+echo $OUTPUT->box($buttons, "box py-3 ui-widget-header ui-corner-all", 'controlpanel');
 echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
