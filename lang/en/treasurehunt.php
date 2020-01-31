@@ -361,6 +361,12 @@ $string['usermultiplesameroad'] = '{$a} belong to more than one group assigned t
 $string['userprogress'] = 'User progress successfully updated';
 $string['userquestionfailed'] = 'Failed answer to the question of stage {$a->position} on the date: {$a->date}';
 $string['userquestionovercome'] = 'Successful answer to the question of stage {$a->position} on the date: {$a->date}';
+$string['usersprogress'] = 'User progress';
+$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:<br/>
+The color <B> green </B> indicates that the stage has been overcome without failures.<br/>
+The color <B> yellow </B> indicates that the stage has been overcome with failures.<br/>
+The color <B> red </B> indicates that the stage has not been overcome and failures have been made.<br/>
+The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.';
 $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
@@ -404,14 +410,14 @@ $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';
 $string['donetutorial'] = 'End';
 // Privacy strings.
-$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by an user during the activity.';
+$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
 $string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';
-$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user if playing in.';
+$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
 $string['privacy:metadata_treasurehunt_track_location'] = 'The location of the user at a particular time.';
-$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the track point of the user.';
+$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the user is tracked at.';
 
 $string['privacy:metadata_treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
 $string['privacy:metadata_treasurehunt_attempts_userid'] = 'The ID of the user that made an attempt.';
 $string['privacy:metadata_treasurehunt_attempts_timecreated'] = 'The time at which the user made an attempt.';
-$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user play the activity.';
+$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user played the activity.';
 $string['privacy:metadata_treasurehunt_attempts_stageid'] = 'The stage ID the user was trying to solve.';
