@@ -404,14 +404,14 @@ $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';
 $string['donetutorial'] = 'End';
 // Privacy strings.
-$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by an user during the activity.';
+$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
 $string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';
-$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user if playing in.';
+$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
 $string['privacy:metadata_treasurehunt_track_location'] = 'The location of the user at a particular time.';
-$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the track point of the user.';
+$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the user is tracked at.';
 
 $string['privacy:metadata_treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
 $string['privacy:metadata_treasurehunt_attempts_userid'] = 'The ID of the user that made an attempt.';
 $string['privacy:metadata_treasurehunt_attempts_timecreated'] = 'The time at which the user made an attempt.';
-$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user play the activity.';
+$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user played the activity.';
 $string['privacy:metadata_treasurehunt_attempts_stageid'] = 'The stage ID the user was trying to solve.';
