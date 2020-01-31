@@ -103,23 +103,7 @@ define(
 				openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
 
 			// Load the control pane, treasurehunt and road list.
-			/*
-			$("#controlpanel").addClass(
-					'ui-widget-header ui-corner-all');
-			$('<span id="edition"/>').appendTo($("#controlpanel"));
-			$('<input type="radio" name="controlpanel" id="addradio" value="add">')
-					.appendTo($("#edition"));
-			$("<label>").attr('for', "addradio").text(strings['add'])
-					.appendTo($("#edition"));
-			$('<input type="radio" name="controlpanel" id="modifyradio" value="modify">')
-					.appendTo($("#edition"));
-			$("<label>").attr('for', "modifyradio").text(strings['modify'])
-					.appendTo($("#edition"));
-			$('<button id="savestage"/>').attr('disabled', true).text(
-					strings['save']).appendTo($("#controlpanel"));
-			$('<button id="removefeature"/>').attr('disabled', true)
-					.text(strings['remove']).appendTo($("#controlpanel"));
-			*/
+			
 			if (geographictools) {
 				$('<div id="searchcontainer">')
 					.appendTo($("#controlpanel"));
@@ -132,50 +116,7 @@ define(
 				$('<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>')
 					.appendTo($("#searchcontainer"));
 			}
-			/*
-			$('<button id="addstage" />').text(strings['stage'])
-					.prependTo($("#controlpanel"));
-			$('<button id="addroad" />').text(strings['road'])
-					.prependTo($("#controlpanel"));
-			$("#addradio").button({
-				text : false,
-				icons : {
-					primary : "ui-icon-plusthick"
-				}
-			});
-			$("#modifyradio").button({
-				text : false,
-				icons : {
-					primary : "ui-icon-pencil"
-				}
-			});
-			$("#removefeature").button({
-				text : false,
-				icons : {
-					primary : "ui-icon-trash"
-				}
-			});
-			$("#savestage").button({
-				text : false,
-				icons : {
-					primary : "ui-icon-disk"
-				}
-			});
-			$("#addstage").button({
-				icons : {
-					primary : "ui-icon-circle-plus"
-				}
-			});
-			$("#addroad").button({
-				icons : {
-					primary : "ui-icon-circle-plus"
-				}
-			});
-			// Lo cargo como un buttonset.
-			$("#edition").buttonset({disabled: true});
-			// Hago visible el controlpanel.
-			$("#controlpanel").removeClass('invisible');
-			*/
+			
 			// Creo el stagelist.
 			$('<ul id="stagelist"/>').prependTo($("#stagelistpanel"));
 			// Lo cargo como un sortable.
@@ -309,10 +250,10 @@ define(
 			// Get style, vectors, map and interactions.
 			var defaultstageStyle = new ol.style.Style({
 				fill: new ol.style.Fill({
-					color: 'rgba(0, 0, 0, 0.1)'
+					color: 'rgba(100, 100, 255, 0.2)'
 				}),
 				stroke: new ol.style.Stroke({
-					color: '#11492',
+					color: 'rgba(100, 100, 255, 0.5)',
 					width: 2
 				}),
 				image: new ol.style.Circle({
@@ -340,11 +281,11 @@ define(
 			// Selected stage style.
 			var selectedstageStyle = new ol.style.Style({
 				fill: new ol.style.Fill({
-					color: 'rgba(128, 0, 0, 0.2)'
+					color: 'rgba(200, 100, 100, 0.2)'
 				}),
 				stroke: new ol.style.Stroke({
-					color: 'rgba(128, 0, 0, 1)',
-					width: 4
+					color: 'rgba(255, 0, 0, 0.5)',
+					width: 3
 				}),
 				image: new ol.style.Circle({
 					radius: 5,
@@ -516,11 +457,11 @@ define(
 							},
 							style: function (feature) {
 								var fill = new ol.style.Fill({
-									color: 'rgba(255,255,255,0.4)'
+									color: 'rgba(255,100,100,0.4)'
 								});
 								var stroke = new ol.style.Stroke({
-									color: '#3399CC',
-									width: 2
+									color: 'rgba(255, 0, 0, 1)',
+									width: 4
 								});
 								var styles = [new ol.style.Style(
 									{
@@ -545,7 +486,7 @@ define(
 													}),
 												stroke: new ol.style.Stroke(
 													{
-														color: '#3399CC',
+														color: 'rgba(255, 0, 0, 1)',
 														width: 3.5
 													})
 											}),
@@ -1216,30 +1157,34 @@ define(
 				$('#addstage').prop('disabled', true);
 			}
 			function deactivateEdition() {
-				$('#editmode').removeClass('highlightbutton');
-				$('#drawmode').removeClass('highlightbutton');
-				$('#navmode').addClass('highlightbutton').prop('disabled', true).blur();
+				$('#editmode').prop('disabled', false);
+				$('#drawmode').prop('disabled', false);
+				activateNavigationMode();
+			}
+			function activateNavigationMode() {
+				$('#editmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
+				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
+				$('#navmode').addClass('highlightbutton').prop('disabled', true).blur().prop('z-index', 999);
 				Draw.setActive(false);
 				Modify.setActive(false);
 			}
 			function activateModify() {
-				$('#editmode').addClass('highlightbutton').blur();
-				$('#drawmode').removeClass('highlightbutton');
-				$('#navmode').removeClass('highlightbutton').prop('disabled', false);
+				$('#editmode').addClass('highlightbutton').blur().prop('z-index', 999);
+				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
+				$('#navmode').removeClass('highlightbutton').prop('disabled', false).prop('z-index', 'Infinity');
 				Draw.setActive(false);
 				Modify.setActive(true);
 			}
 			function activateDraw() {
-				$('#drawmode').addClass('highlightbutton').blur();
-				$('#editmode').removeClass('highlightbutton');
-				$('#navmode').removeClass('highlightbutton').prop('disabled', false);
+				$('#drawmode').addClass('highlightbutton').blur().prop('z-index', 'Infinity');
+				$('#editmode').removeClass('highlightbutton').prop('z-index', 'auto');
+				$('#navmode').removeClass('highlightbutton').prop('disabled', false).prop('z-index', 'auto');
 				Modify.setActive(false);
 				Draw.setActive(true);
 			}
 			function activateEdition() {
 				$('#drawmode').prop('disabled', false);
 				$('#editmode').prop('disabled', false);
-
 				activateModify();
 			}
 			function activateSaveButton() {
@@ -1692,7 +1637,7 @@ define(
 			$("#navmode").on(
 				'click',
 				function () {
-					deactivateEdition();
+					activateNavigationMode();
 				});
 			$("#addstage").on(
 				'click',
@@ -1803,32 +1748,7 @@ define(
 
 				});
 			var editstatus = 'off';
-			$("input[name=controlpanel]:radio")
-				.on(
-					'click',
-					function () {
-
-						var prevval = editstatus;
-						var value = $(this).prop('id');
-
-						if (value == prevval) {
-							// Toggle.
-							$("#edition").find("input:radio").buttonset().prop('checked', false).end().buttonset('refresh');
-							value = 'off';
-						}
-						editstatus = value;
-
-						if (value === 'addradio') {
-							Draw.setActive(true);
-							Modify.setActive(false);
-						} else if (value === 'modifyradio') {
-							Draw.setActive(false);
-							Modify.setActive(true);
-						} else {
-							Draw.setActive(false);
-							Modify.setActive(false);
-						}
-					});
+			
 			$("#stagelist")
 				.on(
 					'click',
