@@ -57,7 +57,7 @@ $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
 $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
-$string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
+$string['changetoplaywithmove'] = 'The game mode has changed to dynamic play';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
 $string['completionfinish'] = 'Require to finish road.';
 $string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
@@ -90,7 +90,7 @@ $string['customlayerwms'] = 'WMS service';
 $string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service. (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'WMS params';
 $string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets&STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
-$string['custommapbaselayer'] = 'The image is shown as an ADITIONAL map background option';
+$string['custommapbaselayer'] = 'The image is shown as an ADDITIONAL map background option';
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
 $string['custommapnongeographic'] = 'The image is not geographical';
@@ -198,13 +198,13 @@ $string['groupingid'] = 'Grouping assigned to the road';
 $string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
 $string['groupinvalidroad'] = '{$a} has assigned an invalid road.';
 $string['grouplocationfailed'] = 'Failed location by {$a->user} of stage {$a->position} on the date: {$a->date}';
-$string['grouplocationovercome'] = 'Succesful location by {$a->user} of stage {$a->position} on the date: {$a->date}';
+$string['grouplocationovercome'] = 'Successful location by {$a->user} of stage {$a->position} on the date: {$a->date}';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups.
 A group game will be shared among group members and they will see the changes in the game.';
 $string['groupmultipleroads'] = '{$a} has more than one road assigned.';
 $string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
-$string['groupquestionovercome'] = 'Succesful answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
+$string['groupquestionovercome'] = 'Successful answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
 $string['groups'] = 'Groups';
 $string['groupstageovercome'] = 'Stage {$a->position} overcome by {$a->user} on the date: {$a->date}';
 $string['hello'] = 'Hello';
@@ -351,18 +351,12 @@ $string['user'] = 'User';
 $string['useractivityovercome'] = 'Activity to end successfully completed for stage {$a->position} on the date: {$a->date}';
 $string['userinvalidroad'] = '{$a} has assigned an invalid road.';
 $string['userlocationfailed'] = 'Failed location of stage {$a->position} on the date: {$a->date}';
-$string['userlocationovercome'] = 'Succesful location of stage {$a->position} on the date: {$a->date}';
+$string['userlocationovercome'] = 'Successful location of stage {$a->position} on the date: {$a->date}';
 $string['usermultipleroads'] = '{$a} has more than one road assigned.';
 $string['usermultiplesameroad'] = '{$a} belong to more than one group assigned to the same road.';
 $string['userprogress'] = 'User progress successfully updated';
 $string['userquestionfailed'] = 'Failed answer to the question of stage {$a->position} on the date: {$a->date}';
-$string['userquestionovercome'] = 'Succesful answer to the question of stage {$a->position} on the date: {$a->date}';
-$string['usersprogress'] = 'Progress users';
-$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:
-<P>The color <B> green </B> indicates that the stage has been overcome without failures.</P>
-<P>The color <B> yellow </B> indicates that the stage has been oavercome with failures.</P>
-<P>The color <B> red </B> indicates that the stage has not been overcome and failures have been made.</P>
-<P>The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.</P>';
+$string['userquestionovercome'] = 'Successful answer to the question of stage {$a->position} on the date: {$a->date}';
 $string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
@@ -389,9 +383,9 @@ $string['addroad_tour'] = 'Add one or more roads to be followed by your students
 $string['editend_tour'] = 'Enjoy making exciting games for your students!';
 $string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
 $string['remove_tour'] = 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
-$string['roads_tour'] = 'In this area you will find the diferent roads of your game. Select one of them to edit the stages.';
-$string['save_tour'] = 'After drawing yout locations, don\'t forget to save your changes.';
-$string['searchlocation_tour'] = 'Whith this search area you can find your way rapidly';
+$string['roads_tour'] = 'In this area you will find the different roads of your game. Select one of them to edit the stages.';
+$string['save_tour'] = 'After drawing your locations, don\'t forget to save your changes.';
+$string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 
