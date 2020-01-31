@@ -1157,8 +1157,8 @@ define(
 				$('#addstage').prop('disabled', true);
 			}
 			function deactivateEdition() {
-				$('#editmode').prop('disabled', false);
-				$('#drawmode').prop('disabled', false);
+				$('#editmode').prop('disabled', true);
+				$('#drawmode').prop('disabled', true);
 				activateNavigationMode();
 			}
 			function activateNavigationMode() {
@@ -1624,21 +1624,9 @@ define(
 				var ul = this.menu.element;
 				ul.outerWidth(this.element.outerWidth());
 			};
-			$("#drawmode").on(
-				'click',
-				function () {
-					activateDraw();
-				});
-			$("#editmode").on(
-				'click',
-				function () {
-					activateModify();
-				});
-			$("#navmode").on(
-				'click',
-				function () {
-					activateNavigationMode();
-				});
+			$("#drawmode").css('position', 'relative').on('click', activateDraw);
+			$("#editmode").css('position','relative').on('click', activateModify);
+			$("#navmode").css('position', 'relative').on('click', activateNavigationMode);
 			$("#addstage").on(
 				'click',
 				function () {
