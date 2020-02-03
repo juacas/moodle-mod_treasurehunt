@@ -218,7 +218,6 @@ define(
 
 			// Creo el roadlistpanel.
 			$('<ul id="roadlist"/>').appendTo($("#roadlistpanel"));
-			// Anado los handle custom.
 			/*
 			 * Set control
 			 *
@@ -521,15 +520,14 @@ define(
 					this.setEvents();
 				},
 				setEvents: function () {
-					// Elimino la seleccion de features cuando cambia a
-					// off.
+					// Remove the feature selection when you switch to off.
 					selectedFeatures = this.select.getFeatures();
 					this.select.on('change:active', function () {
 						selectedFeatures.clear();
 						deactivateDeleteButton();
 					});
-					// Activo o desactivo el boton de borrar segun tenga
-					// una feature seleccionada o no.
+					// Enable or disable the delete button depending on whether I have
+					// a selected feature or not.
 					this.select.on('select', function () {
 						if (selectedFeatures.getLength() > 0) {
 							activateDeleteButton();
@@ -537,8 +535,8 @@ define(
 							deactivateDeleteButton();
 						}
 					});
-					// Activo el boton de guardar segun se haya
-					// modificado algo o no.
+					// Activate the save button as soon as you have
+					// modified sth. or not.
 					this.modify.on('modifyend', function (e) {
 						activateSaveButton();
 						modifyFeatureToDirtySource(e.features,
@@ -589,9 +587,9 @@ define(
 					})
 				}),
 				setEvents: function () {
-					// Fijo el treasurehunt al que pertenecen y activo
-					// el boton de guardar .
-					// segun se haya modificado algo o no.
+					// Set the treasurehunt they belong to and activate
+					// the save button .
+					// depending on whether something has been changed or not.
 					this.Polygon.on('drawend', function (e) {
 						drawStarted = false;
 						if (abortDrawing) {
@@ -606,15 +604,15 @@ define(
 							selectedstageFeatures[idNewFeature] = true;
 							e.feature.setId(idNewFeature);
 							idNewFeature++;
-							// Agrego la nueva feature a su
-							// correspondiente vector de poligonos.
+							// Add the new feature to the
+							// corresponding polygon vector.
 							treasurehunt.roads[roadid].vector
 								.getSource().addFeature(e.feature);
-							// Agrego la feature a la coleccion de
-							// multipoligonos sucios.
+							// Adding the feature to the collection of
+							// dirty multi-polygons.
 							addNewFeatureToDirtySource(e.feature,
 								originalStages, dirtyStages);
-							// Limpio el vector de dibujo.
+							// Clean the drawing vector.
 							vectorDraw.getSource().clear();
 							activateSaveButton();
 							dirty = true;
@@ -638,7 +636,7 @@ define(
 				}
 			};
 			$(document).keyup(function (e) {
-				// Si pulso la tecla esc dejo de dibujar.
+				// If I press the esc key I stop drawing.
 				if (e.keyCode === 27 && drawStarted) // Esc.
 				{
 					abortDrawing = true;
@@ -646,8 +644,8 @@ define(
 				}
 			});
 			Draw.init();
-			Draw.setActive(false);
-			Modify.setActive(false);
+			// Enable Navmode.
+			activateNavigationMode();
 			deactivateEdition();
 			// The snap interaction must be added after the Modify and
 			// Draw interactions.
@@ -658,7 +656,7 @@ define(
 				source: vectorDraw.getSource()
 			});
 			map.addInteraction(snap);
-			// Cargo las features.
+			// I load the features.
 			fetchTreasureHunt(treasurehuntid);
 			function addNewFeatureToDirtySource(dirtyFeature,
 				originalStages, dirtySource) {
@@ -677,7 +675,7 @@ define(
 						'idFeaturesPolygons': ''
 							+ dirtyFeature.getId()
 					});
-					// Quito la advertencia.
+					// I remove the warning.
 					notEmptystage(stageid, roadid);
 				} else {
 					feature.setProperties({
@@ -829,13 +827,13 @@ define(
 								if (!Array.isArray(roads)) {
 									roads = Object.values(roads);
 								}
-								// Necesito indexar cada camino
-								// en el objeto global
+								// I need to index every path
+								// in the global object
 								// treasurehunt.
 								roads.forEach(function (road) {
-									// agrego los
-									// vectores a cada
-									// camino.
+									// I add the
+									// vectors to each
+									// road.
 									// cast string "0"
 									// or "1" to
 									// boolean.
@@ -1043,7 +1041,7 @@ define(
 			}
 
 			function addroad2ListPanel(roadid, name, blocked) {
-				// Si no existe lo agrego.
+				// If it doesn't exist I'll add it.
 				if ($('#roadlist li[roadid="' + roadid + '"]').length < 1) {
 					var li = $(
 						'<li roadid="' + roadid + '" blocked="'
@@ -1065,9 +1063,9 @@ define(
 				if ($li.length > 0) {
 					var $lis = $('#stagelist li[roadid="' + roadid
 						+ '"]');
-					// Elimino el li del roadlist.
+					// I remove the li from the road list.
 					$li.remove();
-					// Elimino todos los li del stagelist.
+					// I remove all li from the stagelist.
 					$lis.remove();
 				}
 			}
@@ -1078,14 +1076,14 @@ define(
 					var roadid = $li.attr('roadid');
 					var start_pos = $li.index('li[roadid="' + roadid
 						+ '"]');
-					// Elimino el li.
+					// I remove the li.
 					$li.remove();
 					var $stagelist = $("#stagelist li[roadid='"
 						+ roadid + "']");
-					// Compruebo el resto de etapas de la lista.
+					// I check the rest of the stages on the list.
 					check_stage_list($stagelist);
 					var $listlength = $stagelist.length;
-					// Recoloco el resto.
+					// I collect the rest.
 					for (var i = 0; i <= start_pos - 1; i++) {
 						relocatestageList($stagelist, $listlength, i,
 							dirtySource, originalStages,
@@ -1094,7 +1092,7 @@ define(
 				}
 			}
 			function sortList() {
-				// Ordeno la lista .
+				// I order the list .
 				$('#stagelist li').sort(
 					function (a, b) {
 						var contentA = parseInt($(a).attr(
@@ -1111,8 +1109,8 @@ define(
 					+ stageid + '"]');
 				$treasurehunt.children(".handle,.nohandle").addClass(
 					'invalidstage').removeClass('validstage');
-				// Compruebo si en este camino hay alguna etapa sin
-				// geometria.
+				// I check if there are any stages on this road without
+				// geometry.
 				if (roadid) {
 					$("label[for='addradio']")
 						.addClass('highlightbutton');
@@ -1130,8 +1128,8 @@ define(
 				$treasurehunt.children(".handle, .nohandle").addClass(
 					'validstage').removeClass('invalidstage');
 				if (roadid) {
-					// Compruebo si en este camino hay alguna etapa sin
-					// geometria.
+					// I check if there are any stages on this road without
+					// geometry.
 					$("label[for='addradio']").removeClass(
 						'highlightbutton');
 					var $stagelist = $("#stagelist li[roadid='"
@@ -1153,7 +1151,6 @@ define(
 				$('#addstage').prop('disabled', false);
 			}
 			function deactivateAddstage() {
-				// $('#addstage').button("option", "disabled", true);
 				$('#addstage').prop('disabled', true);
 			}
 			function deactivateEdition() {
@@ -1162,23 +1159,23 @@ define(
 				activateNavigationMode();
 			}
 			function activateNavigationMode() {
-				$('#editmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
-				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
-				$('#navmode').prop('disabled', false).addClass('highlightbutton').blur().prop('z-index', 999);
+				$('#editmode').removeClass('selectedbutton').prop('z-index', 'Infinity');
+				$('#drawmode').removeClass('selectedbutton').prop('z-index', 'Infinity');
+				$('#navmode').prop('disabled', false).addClass('selectedbutton').blur().prop('z-index', 999);
 				Draw.setActive(false);
 				Modify.setActive(false);
 			}
 			function activateModify() {
-				$('#editmode').addClass('highlightbutton').blur().prop('z-index', 999);
-				$('#drawmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
-				$('#navmode').removeClass('highlightbutton').prop('z-index', 'Infinity');
+				$('#editmode').addClass('selectedbutton').blur().prop('z-index', 999);
+				$('#drawmode').removeClass('selectedbutton').prop('z-index', 'Infinity');
+				$('#navmode').removeClass('selectedbutton').prop('z-index', 'Infinity');
 				Draw.setActive(false);
 				Modify.setActive(true);
 			}
 			function activateDraw() {
-				$('#drawmode').addClass('highlightbutton').blur().prop('z-index', 'Infinity');
-				$('#editmode').removeClass('highlightbutton').prop('z-index', 'auto');
-				$('#navmode').removeClass('highlightbutton').prop('z-index', 'auto');
+				$('#drawmode').addClass('selectedbutton').blur().prop('z-index', 'Infinity');
+				$('#editmode').removeClass('selectedbutton').prop('z-index', 'auto');
+				$('#navmode').removeClass('selectedbutton').prop('z-index', 'auto');
 				Modify.setActive(false);
 				Draw.setActive(true);
 			}
@@ -1231,17 +1228,17 @@ define(
 				}
 			}
 			function selectRoad(roadid, vectorOfPolygons, map) {
-				// Limpio todas las features seleccionadas,oculto todos
-				// los li y solo muestro los que tengan el roadid .
+				// I clean all the selected features, hide all
+				// the li and I only show the ones with the roadid.
 				$("#stagelist li").removeClass("ui-selected").hide();
 				var $stagelist = $("#stagelist li[roadid='" + roadid
 					+ "']");
 				$stagelist.show();
 				check_stage_list($stagelist);
-				// Si no esta marcado el li road lo marco.
+				// If the li road is not marked I mark it.
 				$("#roadlist li[roadid='" + roadid + "']").addClass(
 					"ui-selected");
-				// Dejo visible solo el vector con el roadid.
+				// I leave only the vector with the visible roadid .
 				map.getLayers().forEach(function (layer) {
 					if (layer instanceof ol.layer.Vector) {
 						layer.setVisible(false);
@@ -1258,31 +1255,31 @@ define(
 				vectorSelected, selected, selectedFeatures,
 				dirtySource, originalStages) {
 				vectorSelected.getSource().clear();
-				// Deselecciono cualquier feature anterior.
+				// I deselect any previous feature.
 				selectedFeatures.clear();
-				// Reinicio el objeto.
+				// I reset the object.
 				selectedstageFeatures = {};
 				var feature = dirtySource.getFeatureById(selected);
 				if (!feature) {
 					feature = originalStages.getFeatureById(selected);
 					if (!feature) {
-						// Incremento la version para que se recargue el
-						// mapa y se deseleccione la marcada
-						// anteriormente.
+						// I increase the version so that it reloads the
+						// map and deselect the marked one
+						// before.
 						vectorOfPolygons.changed();
 						return;
 					}
 				}
 				if (feature.get('idFeaturesPolygons') === 'empty') {
-					// Incremento la version para que se recargue el
-					// mapa y se deseleccione la marcada anteriormente.
+					// I increase the version so that it reloads the
+					// map and deselect the one marked above.
 					vectorOfPolygons.changed();
 					return;
 				}
-				// Agrego los poligonos a mi objecto que almacena los
-				// poligonos seleccionados .
-				// y tambien agrego al vector al que se le aplica la
-				// animacion.
+				// I add the polygons to the object that stores the
+				// selected polygons .
+				// and I also add the vector to the object that does the
+				// animation.
 				var idFeaturesPolygons = feature.get(
 					'idFeaturesPolygons').split(",");
 				for (var i = 0, j = idFeaturesPolygons.length; i < j; i++) {
@@ -1293,9 +1290,9 @@ define(
 							.clone());
 					selectedstageFeatures[idFeaturesPolygons[i]] = true;
 				}
-				// Coloco el mapa en la posicion de las etapas
-				// seleccionadas si la etapa contiene alguna feature y .
-				// postergando el tiempo para que seleccione la nueva
+				// I place the map in the position of the stages
+				// selected if the stage contains any features and .
+				// delaying the time  to select the new
 				// feature.
 				if (vectorSelected.getSource().getFeatures().length) {
 					flyTo(map, null, vectorSelected.getSource()
@@ -1371,15 +1368,15 @@ define(
 									response.status.msg,
 									'Continue');
 							} else {
-								// Elimino tanto el li del road
-								// como todos los li de stages
-								// asociados.
+								// I remove both the li from the road
+								// as well all stage li
+								// associates.
 								deleteRoad2ListPanel(roadid);
-								// Elimino la feature de
-								// dirtySource si la tuviese, .
-								// del originalStages y elimino
-								// el camino del treasurehunt y
-								// la capa del mapa.
+								// I remove the feature of
+								// dirtySource if I had it, .
+								// of the originalStages and removed
+								// the road of treasurehunt and
+								// the map layer.
 								map.removeLayer(treasurehunt.roads[roadid].vector);
 								delete treasurehunt.roads[roadid];
 								selectfirstroad(treasurehunt.roads, map);
@@ -1433,15 +1430,15 @@ define(
 								var polygonFeature;
 								var feature = dirtySource
 									.getFeatureById(stageid);
-								// Elimino y recoloco.
+								// Remove and relocate.
 								deletestage2ListPanel(stageid,
 									dirtySource,
 									originalStages,
 									vectorOfPolygons);
-								// Elimino la feature de
-								// dirtySource si la tuviese y
-								// todos los poligonos del
-								// vector de poligonos.
+								// I remove the feature of
+								// dirtySource if I had it and
+								// all the polygons of the
+								// polygon vector.
 								if (!feature) {
 									feature = originalStages
 										.getFeatureById(stageid);
@@ -1526,8 +1523,8 @@ define(
 									'Continue');
 						} else {
 							var originalFeature;
-							// Paso las features "sucias" al objeto
-							// con las features originales.
+							// I pass the "dirty" features to the object
+							// with the original features.
 							dirtySource.forEachFeature(function (
 								feature) {
 								originalFeature = originalStages
@@ -1539,10 +1536,10 @@ define(
 								originalFeature.setGeometry(feature
 									.getGeometry());
 							});
-							// Limpio mi objeto que guarda las
-							// features sucias.
+							// I clean my object that keeps the
+							// dirty features.
 							dirtySource.clear();
-							// Desactivo el boton de guardar.
+							// Disable the save button.
 							deactivateSaveButton();
 							dirty = false;
 							if (typeof callback === "function"
@@ -1618,8 +1615,8 @@ define(
 					}).on("click", function () {
 						$(this).autocomplete("search", $(this).value);
 					});
-			// Necesario para regular la anchura de los resultados de
-			// autocompletado.
+			// Necessary for regulating the width of the
+			// autocomplete.
 			$.ui.autocomplete.prototype._resizeMenu = function () {
 				var ul = this.menu.element;
 				ul.outerWidth(this.element.outerWidth());
@@ -1669,10 +1666,7 @@ define(
 									removefeatures(
 										selectedFeatures,
 										treasurehunt.roads[roadid].vector);
-									// Desactivo el
-									// boton de borrar y
-									// activo el de
-									// guardar cambios.
+									// Disable the delete button and active on save changes.
 									deactivateDeleteButton();
 									activateSaveButton();
 									dirty = true;
@@ -1720,12 +1714,12 @@ define(
 				'click',
 				'.ui-icon-pencil',
 				function () {
-					// Busco el stageid del li que contiene la
-					// papelera seleccionada.
+					// I'm looking for the stageid of the li containing the
+					// selected trash can.
 
 					var stageid = parseInt($(this).parents('li')
 						.attr('stageid'));
-					// Si esta sucio guardo el escenario.
+					// If it's dirty I save the stage.
 					if (dirty) {
 						savestages(dirtyStages, originalStages,
 							treasurehuntid, editFormstageEntry,
@@ -1751,22 +1745,21 @@ define(
 						$(this).addClass("ui-selected")
 							.siblings().removeClass(
 								"ui-selected");
-						// Selecciono el stageid de mi atributo
+						// I select the stageid of my attribute
 						// custom.
 						stageposition = parseInt($(this).attr(
 							'stageposition'));
 						stageid = parseInt($(this).attr(
 							'stageid'));
-						// Borro la anterior seleccion de
-						// features y busco las del mismo tipo.
+						// I delete the previous selection of
+						// features and look for the same kind.
 						selectstageFeatures(
 							treasurehunt.roads[roadid].vector,
 							vectorSelected, stageid,
 							selectedFeatures, dirtyStages,
 							originalStages);
 						activateEdition();
-						// Si la etapa no tiene geometrÃ­a
-						// resalto el boton de anadir.
+						// If the stage has no geometry I highlight the add button.
 						if ($(this).find(".invalidstage").length > 0) {
 							$("label[for='addradio']").addClass(
 								'highlightbutton');
@@ -1775,7 +1768,7 @@ define(
 								.removeClass(
 									'highlightbutton');
 						}
-						// Paro de dibujar si cambio de etapa.
+						// Stop drawing if I change stage.
 						if (drawStarted) {
 							abortDrawing = true;
 							Draw.Polygon.finishDrawing();
