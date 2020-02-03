@@ -168,7 +168,10 @@ body {
   box-shadow: 0 0 13px #2f33ba;
   z-index: 10;
 }
-
+.path-mod-treasurehunt .selectedbutton {
+  border: 3px solid darkgray;
+  z-index: 10;
+}
 .path-mod-treasurehunt .ui-icon-trash,
 .path-mod-treasurehunt .ui-icon-pencil,
 .path-mod-treasurehunt .ui-icon-alert,
