@@ -258,9 +258,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
 
     $dbparams = array('id' => $coursemodule->instance);
     $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat';
-    if (!$treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields)) {
-        return false;
-    }
+    $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
 
     $result = new cached_cm_info();
     $result->name = $treasurehunt->name;
@@ -270,9 +268,30 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
             $result->content = format_module_intro('treasurehunt', $treasurehunt, $coursemodule->id, false);
         }
     }
+    //$result->icon =  new moodle_url('https://previews.123rf.com/images/dazdraperma/dazdraperma1206/dazdraperma120600001/14029418-illustration-of-treasure-chest-full-of-gold.jpg');
+
     return $result;
 }
-
+// function treasurehunt_cm_info_view(cm_info $cm) {
+   
+// }
+function treasurehunt_cm_info_dynamic(cm_info $cm) {
+    global $DB;
+    $dbparams = array('id' => $cm->instance);
+    $fields = '*';
+    $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
+    $now = time();
+    if ( ($treasurehunt->allowattemptsfromdate == null && $treasurehunt->cutoffdate== null) ||
+        ($treasurehunt->allowattemptsfromdate == null && $now <= $treasurehunt->cutoffdate) ||
+        ($now >= $treasurehunt->allowattemptsfromdate == null && $treasurehunt->cutoffdate== null) ||
+        ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate)) {
+        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon.svg'));
+    } else if ($now < $treasurehunt->allowattemptsfromdate) {
+        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon_closed.svg'));
+    } else {
+        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon_empty.svg'));
+    }
+}
 /**
  * Function to be run periodically according to the moodle cron
  *
