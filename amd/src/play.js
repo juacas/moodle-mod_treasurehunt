@@ -91,7 +91,7 @@ define(['jquery',
 			var mapprojection = 'EPSG:3857';
 			var custombaselayer = null;
 			var geographictools = true;
-			var defaultzoom = 19;
+			var defaultzoom = 15;
 			// Support customized base layers.
 			if (typeof(custommapconfig) != 'undefined' && custommapconfig !== null) {
 				if (custommapconfig.custombackgroundurl != null) {
