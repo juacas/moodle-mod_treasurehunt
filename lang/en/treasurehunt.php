@@ -414,7 +414,7 @@ $string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the s
 $string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';
 $string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
 $string['privacy:metadata_treasurehunt_track_location'] = 'The location of the user at a particular time.';
-$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time of the user is tracked at.';
+$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time the user is tracked at.';
 
 $string['privacy:metadata_treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
 $string['privacy:metadata_treasurehunt_attempts_userid'] = 'The ID of the user that made an attempt.';
