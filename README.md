@@ -1,10 +1,7 @@
 # moodle-mod_treasure
 Activity module for Moodle that allows to run outdoor, indoor (QRCodes), virtual maps (canvas) treasure-chases with geolocation. [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/main.jpg" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/4.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/1.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/users.jpg" height="200">
+<img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/main-1100x733.jpg" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/send-location.gif" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/user-progress-800x533.png" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/users-800x533.jpg" height="200">
 
 Installation
 =============
