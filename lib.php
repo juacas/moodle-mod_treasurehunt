@@ -268,28 +268,27 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
             $result->content = format_module_intro('treasurehunt', $treasurehunt, $coursemodule->id, false);
         }
     }
-    //$result->icon =  new moodle_url('https://previews.123rf.com/images/dazdraperma/dazdraperma1206/dazdraperma120600001/14029418-illustration-of-treasure-chest-full-of-gold.jpg');
-
     return $result;
 }
-// function treasurehunt_cm_info_view(cm_info $cm) {
-   
-// }
+
 function treasurehunt_cm_info_dynamic(cm_info $cm) {
-    global $DB;
+    global $DB, $OUTPUT;
     $dbparams = array('id' => $cm->instance);
     $fields = '*';
     $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
     $now = time();
-    if ( ($treasurehunt->allowattemptsfromdate == null && $treasurehunt->cutoffdate== null) ||
-        ($treasurehunt->allowattemptsfromdate == null && $now <= $treasurehunt->cutoffdate) ||
-        ($now >= $treasurehunt->allowattemptsfromdate == null && $treasurehunt->cutoffdate== null) ||
+    if ( ($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate== 0) ||
+        ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) ||
+        ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate== 0) ||
         ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate)) {
-        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon.svg'));
+        $iconurl = $OUTPUT->image_url('icon', 'treasurehunt');
+        $cm->set_icon_url($iconurl);
     } else if ($now < $treasurehunt->allowattemptsfromdate) {
-        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon_closed.svg'));
+        $iconurl = $OUTPUT->image_url('icon_closed', 'treasurehunt');
+        $cm->set_icon_url($iconurl);
     } else {
-        $cm->set_icon_url(new moodle_url('/mod/treasurehunt/pix/icon_empty.svg'));
+        $iconurl = $OUTPUT->image_url('icon_empty', 'treasurehunt');
+        $cm->set_icon_url($iconurl);
     }
 }
 /**
