@@ -399,7 +399,7 @@ $string['remove_tour'] = 'You can delete parts of the locations geometries. Just
 $string['roads_tour'] = 'In this area you will find the different roads of your game. Select one of them to edit the stages.';
 $string['save_tour'] = 'After drawing your locations, don\'t forget to save your changes.';
 $string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
-$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
+$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 
 $string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';

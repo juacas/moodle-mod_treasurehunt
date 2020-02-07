@@ -400,7 +400,7 @@ $string['remove_tour'] = 'Se pueden borrar los polígonos de las etapas. Símple
 $string['roads_tour'] = 'En este área se muestran los caminos que has creado. Selecciona uno de los caminos para ver y gestionar sus etapas.';
 $string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides guardar tus cambios con este botón.';
 $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
-$string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa.';
+$string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa. Después podrás añadir y editar las geometrías usando los botones del panel superior.';
 $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
 
 $string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';

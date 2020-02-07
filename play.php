@@ -136,7 +136,6 @@ $disable = [
     'core/notification',
     'block_navigation/navblock',
     'block_settings/settingsblock',
-    // 'theme_boost/loader',
     'core/log',
     'core/page_global',
 ];

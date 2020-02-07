@@ -570,13 +570,13 @@ define(['jquery',
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
 		                        changesinquestionstage = true;
-		                        $('#validatelocation').hide();
+								$('#validatelocation').show().addClass('ui-state-disabled');
 		                        $('#question_button').show();
 		                    } else if (!lastsuccessfulstage.activitysolved) {
-		                        $('#validatelocation').hide();
+								$('#validatelocation').show().addClass('ui-state-disabled');
 		                        $('#question_button').show();
 		                    } else {
-		                        $('#validatelocation').show();
+								$('#validatelocation').show().removeClass('ui-state-disabled');
 		                        $('#question_button').hide();
 		                    }
 		                }
@@ -616,7 +616,7 @@ define(['jquery',
 		                $('#roadended').hide();
 		            }
 		            if (roadfinished || !available) {
-		                $('#validatelocation').hide();
+						$('#validatelocation').show().addClass('ui-state-disabled');
 		                $('#question_button').hide();
 		                $('#roadended').show();
 		                markerFeature.setGeometry(null);
