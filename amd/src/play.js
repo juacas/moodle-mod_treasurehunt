@@ -702,10 +702,9 @@ define(['jquery',
 		                var id = 'answer' + counter;
 			        	// Clean color tag.
 		                answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
-
-		                $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
+		                $('#questionform').append('<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
 		                        + answer.id + '">' +
-		                        '<label for="' + id + '">' + answer.answertext + '</label>');
+								'<label for="' + id + '">' + answer.answertext + '</label></div>');
 		                counter++;
 		            });
 				   // This decoration renders with problems.
