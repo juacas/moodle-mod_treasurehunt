@@ -19,3 +19,7 @@ Jquerymobile help icon
 .path-mod-treasurehunt div.answer label {
   display: inline-block;
 }
+
+div#mappage {
+  box-sizing: unset !important;
+}
