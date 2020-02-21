@@ -662,7 +662,7 @@ define(['jquery',
 		            var clueplaintext = lastsuccessfulstage.clue.replace(/<(?:.|\n)*?>/gm, '');
 		            if (clueplaintext.length > maxchars*2 ) {
 		            	$("#lastsuccessfulstageclue").truncate(maxchars*2);
-		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext"></a> ';
 		            	$("#lastsuccessfulstageclue").append(briefing);
 		            } else {
 		            	briefing = lastsuccessfulstage.clue;

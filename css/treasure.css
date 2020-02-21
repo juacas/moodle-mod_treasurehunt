@@ -23,3 +23,6 @@ Jquerymobile help icon
 div#mappage {
   box-sizing: unset !important;
 }
+#autolocate {
+  margin-right: 3px;
+}
