@@ -349,10 +349,13 @@ define(['jquery',
 		    layers = layers.concat(layersoverlay);
 		    layers = layers.concat([ attemptslayer, userPosition, markerVector]);
 		    // New Custom zoom.
-		    var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
+			var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
+			var attribution = new ol.control.Attribution({
+				collapsible: false
+			});
 		    var map = new ol.Map({
 		        layers: layers,
-		        controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
+				controls: [zoom, attribution], //ol.control.defaults({rotate: false, attribution: false}),
 		        target: 'mapplay',
 		        view: view,
 		        loadTilesWhileAnimating: true,
@@ -462,8 +465,8 @@ define(['jquery',
 		    }
 		    /**
 		     * Updates the model of the game.
-		     * Notifies a new location for validation or a new answer to a question
-		     * @param {boolean} location requests a location validation
+		     * Notifies a new location for validation or a new answer to a question.
+		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
 		     * @param {string} qrtext submits a text scanned from a QRCode
@@ -535,7 +538,7 @@ define(['jquery',
 		                    markerFeature.setGeometry(null);
 		                }
 		            }
-		            // If you change the group mode. 
+		            // If change the group mode. 
 		            if (groupmode != response.groupmode) {
 		                groupmode = response.groupmode;
 		            }
@@ -587,20 +590,20 @@ define(['jquery',
 		                // Check the page we're on.
 						var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
 						// Update the page model wherever the page we are.
-						set_lastsuccessfulstage();
-						fit_map_to_source();
-						set_question();
 		                if (pageId === 'mappage') {
 							// Nothing special.
 		                } else if (pageId === 'historypage') {
 							set_attempts_history();
 		                } else if (pageId === 'questionpage') {
-		                    if (lastsuccessfulstage.question === '') {
-		                        $.mobile.pageContainer.pagecontainer("change", "#mappage");
+							if (lastsuccessfulstage.question === '') {
+								$.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                    } else {
-		                        $.mobile.resetActivePageHeight();
+								$.mobile.resetActivePageHeight();
 		                    }
 		                }
+						set_lastsuccessfulstage();
+						fit_map_to_source();
+						set_question();
 		            }
 		            if (response.infomsg.length > 0) {
 		                infomsgs.forEach(function (msg) {
@@ -709,7 +712,7 @@ define(['jquery',
 		                counter++;
 		            });
 				   // This decoration renders with problems.
-				   // $('#questionform').enhanceWithin().controlgroup("refresh");
+				    $('#questionform').enhanceWithin().controlgroup("refresh");
 		            changesinquestionstage = false;
 		        }
 		
