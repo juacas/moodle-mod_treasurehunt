@@ -287,8 +287,27 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
      */
     public function render_treasurehunt_info(treasurehunt_info $info)
     {
-        // Create a table for the data.
         $o = '';
+        // Warn about the use of QR scanner.
+        if ($info->numqrs > 0) {
+            global $PAGE;
+            $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
+            treasurehunt_qr_support($PAGE, 'enableTest', $params);
+            $o .= $this->output->container_start(null, 'QRStatusDiv');
+            $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
+            $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
+            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
+            $o .= '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
+            <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
+            </div>
+            <div id="QRvalue"></div>' .
+                '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
+                get_string('changecamera', 'treasurehunt') . '</button>';
+            $o .= '</div>';
+            $o .= '<div id="errorQR" style="display: none" >' . get_string('warnqrscannererror', 'treasurehunt', $info->numqrs) ;
+            $o .= $this->output->container_end();
+        }
+        // Create a table for the data.
         $notavailable = false;
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
@@ -311,23 +330,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                 $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
                 $o .= html_writer::tag('p', $message) . "\n";
             }
-        }
-        // Warn about the use of QR scanner.
-        if ($info->numqrs > 0) {
-            global $PAGE;
-            $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
-            treasurehunt_qr_support($PAGE, 'enableTest', $params);
-            $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
-            $o .= '<div id="QRStatusDiv">';
-            $o .= $this->output->notification($warnqr) . "\n";
-            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>' .
-                '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
-            <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
-            </div>
-            <div id="QRvalue"></div>' .
-                '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
-                get_string('changecamera', 'treasurehunt') . '</button>';
-            $o .= '</div>';
         }
 
         // Type of geolocation: GPS or Desktop.

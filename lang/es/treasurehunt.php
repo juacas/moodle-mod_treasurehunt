@@ -378,6 +378,10 @@ La imagen de tu cámara debería aparecer más abajo. Intenta leer con ella un c
 éste.</td><td><a href="pix/qr.png"><img align="top" src="pix/qr.png" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
 Parece que ya has pasado una prueba de escaneo y puedes usar este dispositivo para esa parte.';
+$string['warnqrscannererror'] = 'Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
+Parece que este dispositivo no permite el uso de la cámara con esta aplicación.
+Por favor, autoriza el uso de la cámara cuando el sistema le pregunte.
+Si no consigue activar la cámara es probable que no pueda usar este dispositivo para esta Caza del Tesoro.';
 $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un grupo: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una agrupación: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún grupo/agrupación: {$a},
