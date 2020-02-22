@@ -665,7 +665,7 @@ define(['jquery',
 		            var clueplaintext = lastsuccessfulstage.clue.replace(/<(?:.|\n)*?>/gm, '');
 		            if (clueplaintext.length > maxchars*2 ) {
 		            	$("#lastsuccessfulstageclue").truncate(maxchars*2);
-		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext"></a> ';
 		            	$("#lastsuccessfulstageclue").append(briefing);
 		            } else {
 		            	briefing = lastsuccessfulstage.clue;
@@ -705,10 +705,9 @@ define(['jquery',
 		                var id = 'answer' + counter;
 			        	// Clean color tag.
 		                answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
-
-		                $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
+		                $('#questionform').append('<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
 		                        + answer.id + '">' +
-		                        '<label for="' + id + '">' + answer.answertext + '</label>');
+								'<label for="' + id + '">' + answer.answertext + '</label></div>');
 		                counter++;
 		            });
 				   // This decoration renders with problems.
