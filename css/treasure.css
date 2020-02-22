@@ -5,6 +5,9 @@
 .selectedbutton, .path-mod-treasurehunt {
   border: 2px solid darkgray;
 }
+#previewQRvideo {
+  background-color: darkgray;
+}
 /*
 Jquerymobile help icon
 */

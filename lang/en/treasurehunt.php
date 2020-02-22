@@ -380,6 +380,9 @@ like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that you have passed a QR test with this device.';
+$string['warnqrscannererror'] = 'This Treasurehunt includes {$a} stages with QRCodes. 
+It seems that your device can not use the camera with this application. Please give permissions to access the camera.
+If you can\'t manage to activate the camera this device may not be suitable to play the Treasurehunt.';
 $string['warnunsecuregeolocation'] = 'Geolocation may not work in your server. This is a <b>SEVERE misconfiguration</b> caused by your
 server configuration. Geolocation is forbidden for non-Secure servers that use HTTP instead of HTTPS. In order to use the GPS of
 to locate the students during the Treasurehunt the server must be accessed by secure HTTPS URLs. In other case, only "Play without moving" mode

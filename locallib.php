@@ -2136,16 +2136,16 @@ function treasurehunt_clear_activities($treasurehuntid)
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehuntid]);
 }
 /**
- * Initialices the javascript needed to use QRScanner
+ * Initialices the javascript needed to use QRScanner.
  * @param moodle_page $PAGE
  * @param string global function name to initialice the code.
  */
-function treasurehunt_qr_support($PAGE, $initfunction = '', $params = null)
+function treasurehunt_qr_support($PAGE, $initfunction = 'setup', $params = [])
 {
-    $PAGE->requires->js('/mod/treasurehunt/js/instascan/webqr.js', false);
-    if ($initfunction) {
-        $PAGE->requires->js_init_call($initfunction, $params);
-    }
+    $PAGE->requires->js_call_amd(
+        'mod_treasurehunt/webqr',
+        $initfunction,
+        $params);
 }
 /**
  * Gets the HTML view format of the information displayed on the main screen.

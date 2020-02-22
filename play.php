@@ -61,14 +61,11 @@ $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
-//$PAGE->requires->jquery();
-// jquerymobile is tied to jquery 2.1.4.
-//$PAGE->requires->jquery();
 $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 
 // Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Adds support for QR scan.
-treasurehunt_qr_support($PAGE);
+treasurehunt_qr_support($PAGE, 'setup', []);
 // End QR support.
 $user = new stdClass();
 $user->id = $USER->id;
