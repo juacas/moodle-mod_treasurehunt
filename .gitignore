@@ -1,1 +1,7 @@
 node_modules/
+amd/build/*.map
+nbproject/**
+.project
+package-lock.json
+.vscode/launch.json
+.buildpath
