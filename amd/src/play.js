@@ -696,38 +696,39 @@ define(['jquery',
 		        }
 		    }
 		    function set_question() {
-		        if (changesinquestionstage) {
+				if (changesinquestionstage) {
 		        	// Clean color tag.
 		        	lastsuccessfulstage.question = lastsuccessfulstage.question.replace(/color/gm, 'color-disabled');
-
-		            $('#questionform').html("<legend>" + lastsuccessfulstage.question + "</legend>");
+					var questionform = "<legend>" + lastsuccessfulstage.question + "</legend>";
 		            var counter = 1;
 		            $.each(lastsuccessfulstage.answers, function (key, answer) {
 		                var id = 'answer' + counter;
 			        	// Clean color tag.
-		                answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
-		                $('#questionform').append('<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
-		                        + answer.id + '">' +
-								'<label for="' + id + '">' + answer.answertext + '</label></div>');
+						answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
+						questionform += '<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
+							+ answer.id + '">' +
+							'<label for="' + id + '">' + answer.answertext + '</label></div>';
 		                counter++;
 		            });
-				   // This decoration renders with problems.
-				    $('#questionform').enhanceWithin().controlgroup("refresh");
+				    // Enhance this with jquery mobile.
+					$('#questionform').html(questionform);
+					// Delay enhancement to avoid some glitches have been observed.
+					setTimeout(() => $('#questionform').enhanceWithin(),1); //.controlgroup("refresh");
 		            changesinquestionstage = false;
 		        }
 		
 		    }
 		    function set_attempts_history() {
-		        // Compruebo si ha habido cambios desde la ultima vez
+		        // I'm checking to see if there have been any changes since the last time.
 		        if (changesinattemptshistory) {
 		            var $historylist = $("#historylist");
-		            // Lo reinicio
+		            // I reset it
 		            $historylist.html('');
 		            changesinattemptshistory = false;
 		            if (attemptshistory.length === 0) {
 		                $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
 		            } else {
-		                // Anado cada intento
+		                // I add each attempt
 		                attemptshistory.forEach(function (attempt) {
 		                    $("<li><span class='ui-btn-icon-left "
 		                            + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt')
@@ -958,7 +959,7 @@ define(['jquery',
 		            }
 		        } else if (pageId === 'questionpage') {
 		            if (event.type === 'pagecontainershow') {
-		                if (lastsuccessfulstage.question === '') {
+						if (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') {
 		                    $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                } else {
 		                    set_question();
