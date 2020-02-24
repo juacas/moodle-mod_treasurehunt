@@ -29,6 +29,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 	var webqr = {
 		setup: function () {
 		},
+		// Enable QR test procedure.
 		enableTest: function (successString) {
 			var cook = {};
 			document.cookie.split(';').forEach(function (x) {
@@ -36,12 +37,16 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 				arr[1] && (cook[arr[0].trim()] = arr[1].trim());
 			});
 			if (cook["QRScanPassed"] != 'Done') {
-				this.loadQR(function (value) {
+				var qr_callback = function (value) {
+					// Set the cookie flag.
 					document.cookie = "QRScanPassed = Done";
+					// Disable QR scanner.
 					this.unloadQR(function () {
 						$('#QRStatusDiv').html(successString);
-					}).bind(this);
-				}, this.testFormReport.bind(this));
+					});
+				}.bind(this); 
+
+				this.loadQR(qr_callback, this.testFormReport.bind(this));
 			} else {
 				$('#QRStatusDiv').html(successString);
 			}

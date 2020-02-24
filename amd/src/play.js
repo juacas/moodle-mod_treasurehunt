@@ -26,13 +26,14 @@ define(['jquery',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
-    'mod_treasurehunt/viewgpx',
+	'mod_treasurehunt/viewgpx',
+	'mod_treasurehunt/webqr',
     // 'core/str',
     'mod_treasurehunt/jquery.truncate', 
     'mod_treasurehunt/jquery.mobile-config',
     'mod_treasurehunt/jquerymobile', 
     ],
-	    function ($, url, ol, ajax, GeocoderJS, viewgpx /*, str*/) {
+	    function ($, url, ol, ajax, GeocoderJS, viewgpx, webqr /*, str*/) {
 			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
@@ -1056,11 +1057,11 @@ define(['jquery',
 	                								  - headerdiv.height()
 	                								  - padding * 2 );
 		            	$('#previewQRvideo').show(); 
-				loadQR(qrReaded, qrReport);
+						webqr.loadQR(qrReaded, qrReport);
 		            },
 		            afterclose: function (event, ui) {
-		                unloadQR(qrReport);
-		            }
+		                webqr.unloadQR(qrReport);
+		            }.bind(this)
 		        });
 		    }
 		    $("#nextcamera").on('click', function() {
