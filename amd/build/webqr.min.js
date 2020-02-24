@@ -56,7 +56,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 				$('#QRvalue').text(info);
 				$('#previewQR').hide();
 			} else if (typeof (info) === 'object') {
-				if (info.code == 0) { // Exception.
+				if (info.name == 'NotAllowedError' || info.code == 0) { // Error with cam.
 					notification.addNotification({ message: $('#errorQR').text() , type: "error"});
 					$('#previewQR').hide();
 					$('#QRStatusDiv').hide();					
