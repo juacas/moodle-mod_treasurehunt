@@ -96,6 +96,7 @@ function treasurehunt_notify_warning($message)
         echo $OUTPUT->notification($message, 'notifyproblem');
     }
 }
+
 /**
  * @param Geometry $geom
  */

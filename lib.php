@@ -271,25 +271,49 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
     return $result;
 }
 
-function treasurehunt_cm_info_dynamic(cm_info $cm) {
-    global $DB, $OUTPUT;
-    $dbparams = array('id' => $cm->instance);
-    $fields = '*';
-    $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
-    $now = time();
-    if ( ($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate== 0) ||
-        ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) ||
-        ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate== 0) ||
-        ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate)) {
-        $iconurl = $OUTPUT->image_url('icon', 'treasurehunt');
-        $cm->set_icon_url($iconurl);
-    } else if ($now < $treasurehunt->allowattemptsfromdate) {
-        $iconurl = $OUTPUT->image_url('icon_closed', 'treasurehunt');
-        $cm->set_icon_url($iconurl);
-    } else {
-        $iconurl = $OUTPUT->image_url('icon_empty', 'treasurehunt');
-        $cm->set_icon_url($iconurl);
+function treasurehunt_cm_info_dynamic(cm_info $cm) {  
+    $cache = cache::make_from_params(cache_store::MODE_REQUEST, 'treasurehunt', 'instances');
+    $treasurehunt = $cache->get($cm->instance);
+    if (!$treasurehunt) {
+        global $DB;
+        $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
+        $cache->set($cm->instance, $treasurehunt);
     }
+    $now = time();
+    $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
+    $cm->set_icon_url($iconurl);
+}
+/**
+ * Get a icon url depending on the status of the treasurehunt:
+ * - activity waiting for start
+ * - activity ongoing
+ * - activity ended
+ * @param stdClass $treasurehunt record of the instance in database.
+ * @param int $now Timestamp to evaluate against.
+ * @return moodle_url icon url.
+ */
+function treasurehunt_get_proper_icon($treasurehunt, $now)
+{
+    if (($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate == 0) ||
+        ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) ||
+        ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate == 0) ||
+        ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate)
+    ) {
+        $icon = 'icon';
+    } else if ($now < $treasurehunt->allowattemptsfromdate) {
+        $icon = 'icon_closed';
+    } else {
+        $icon = 'icon_empty';
+    }
+    // The outputrenderer can't generate valid URL for icons when $PAGE object is not initialized.
+    // This workaround allows to override the icons in course page but maybe not in other contexts.
+    global $PAGE, $OUTPUT;
+    if ($PAGE->state > 0) {
+        $iconurl = $OUTPUT->image_url($icon, 'treasurehunt');
+    } else {
+        $iconurl = new moodle_url("/mod/treasurehunt/pix/{$icon}.svg");
+    }
+    return $iconurl;
 }
 /**
  * Function to be run periodically according to the moodle cron
