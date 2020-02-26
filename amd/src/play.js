@@ -704,20 +704,20 @@ define(['jquery',
 		            $.each(lastsuccessfulstage.answers, function (key, answer) {
 		                var id = 'answer' + counter;
 			        	// Clean color tag.
-				answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
-				questionform += '<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
+				    answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
+				    questionform += '<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
 							+ answer.id + '">' +
 							'<label style="color:white" for="' + id + '">' + answer.answertext + '</label></div>';
 		                counter++;
 					});
 					
-			    $('#questionform').html(questionform).scrollTop();
-			    // Enhance this with jquery mobile. JPC: It doesn't work in some cases. TODO: Fix.
-			    // Delay enhancement to avoid some glitches have been observed.
-			    // setTimeout(() => $('#questionform').enhanceWithin(),1); //.controlgroup("refresh");
+					$('#questionform').html(questionform).scrollTop();
+					// Enhance this with jquery mobile.
+					// JPC: It doesn't work in some cases. Disabled by now. TODO: Fix.
+					// Delay enhancement to avoid some glitches have been observed.
+					// setTimeout(() => $('#questionform').enhanceWithin(),1); //.controlgroup("refresh");
 		            changesinquestionstage = false;
-		        }
-		
+		        }	
 			}
 			
 		    function set_attempts_history() {
