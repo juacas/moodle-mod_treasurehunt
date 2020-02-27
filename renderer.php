@@ -95,14 +95,24 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
         if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')), true);
+            $col1 = new html_table_cell(get_string('attempt', 'treasurehunt'));
+            $col2 = new html_table_cell(get_string('state', 'treasurehunt'));
+            $col1->attributes = ['width'=> '1%', 'class' => ''];
+            $col2->attributes = ['width' => '100%', 'class' => ''];
+            $t->head = [$col1, $col2];
+             //$this->add_table_row($t, array($col1, $col2), true);
             foreach ($historical->attempts as $attempt) {
                 if (!$attempt->penalty) {
                     $class = 'successfulattempt';
                 } else {
                     $class = 'failedattempt';
                 }
-                $this->add_table_row($t, array($numattempt++, $attempt->string), false, array($class, ''));
+               // $this->add_table_row($t, array($numattempt++, $attempt->string), false, array($class, ''));
+               $cell1 = new html_table_cell($numattempt++);
+               $cell1->attributes = ['class' => $class];
+               $cell2 = new html_table_cell($attempt->string);
+
+               $t->data[] = new html_table_row([$cell1, $cell2]);
             }
             // All done - write the table.
             $o .= html_writer::table($t);
@@ -312,22 +322,27 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
             $notavailable = true;
-            $message = get_string('treasurehuntnotavailable', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
+            $message = get_string('treasurehuntnotavailable', 'treasurehunt', 
+                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48));
             $o .= html_writer::tag('p', $message) . "\n";
             if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
+                $message = get_string('treasurehuntcloseson', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         } else if ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
-            $message = get_string('treasurehuntclosed', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
+            $message = get_string('treasurehuntclosed', 'treasurehunt',
+                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
             $o .= html_writer::tag('p', $message) . "\n";
         } else {
             if ($info->treasurehunt->allowattemptsfromdate) {
-                $message = get_string('treasurehuntopenedon', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
+                $message = get_string('treasurehuntopenedon', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate));
                 $o .= html_writer::tag('p', $message) . "\n";
             }
             if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
+                $message = get_string('treasurehuntcloseson', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }

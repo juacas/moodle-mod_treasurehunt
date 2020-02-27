@@ -193,24 +193,24 @@ his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the r
 $string['gradesdeleted'] = 'Treasure hunt grades deleted';
 $string['gradingsummary'] = 'Grading summary';
 $string['group'] = 'Group';
-$string['groupactivityovercome'] = 'Activity to end successfully completed by {$a->user} for stage {$a->position} on the date: {$a->date}';
+$string['groupactivityovercome'] = 'Activity for stage {$a->position} successfully completed by {$a->user}  {$a->date}';
 $string['groupid'] = 'Group assigned to the road';
 $string['groupid_help'] = 'Users in this group are assigned to this road when the game starts.
 If there is only one road and the selected option is "none", all participants in the activity will play for it';
 $string['groupingid'] = 'Grouping assigned to the road';
 $string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
 $string['groupinvalidroad'] = '{$a} has assigned an invalid road.';
-$string['grouplocationfailed'] = 'Failed location by {$a->user} of stage {$a->position} on the date: {$a->date}';
-$string['grouplocationovercome'] = 'Successful location by {$a->user} of stage {$a->position} on the date: {$a->date}';
+$string['grouplocationfailed'] = '<b>Failed "stage {$a->position}" location</b> by {$a->user} of  {$a->date}';
+$string['grouplocationovercome'] = '<b>Successful stage {$a->position} location</b> by {$a->user} {$a->date}';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups.
 Every team-member can solve the current stage and the progress is common to every partner. <br/>
 This allows to “parallelize” the hunt and cover more territory. The participants see the same information but team-oriented.';
 $string['groupmultipleroads'] = '{$a} has more than one road assigned.';
-$string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
-$string['groupquestionovercome'] = 'Successful answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
+$string['groupquestionfailed'] = '<b>Failed  stage {$a->position} answer</b> by {$a->user}  {$a->date}';
+$string['groupquestionovercome'] = '<b>Successful stage {$a->position} answer</b> by {$a->user}  {$a->date}';
 $string['groups'] = 'Groups';
-$string['groupstageovercome'] = 'Stage {$a->position} overcome by {$a->user} on the date: {$a->date}';
+$string['groupstageovercome'] = '<b>Stage {$a->position} overcome</b> by {$a->user} {$a->date}';
 $string['hello'] = 'Hello';
 $string['historicalattempts'] = 'Historical attempts of {$a}';
 $string['history'] = 'History';
@@ -323,9 +323,12 @@ $string['startfromhere'] = 'You can only start from here';
 $string['state'] = 'State';
 $string['successlocation'] = 'It is the right place!';
 $string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
-$string['timelabelfailed'] = 'Location sent on the date: ';
-$string['timelabelsuccess'] = 'Stage discovered on the date: ';
 $string['totaltime'] = 'Total time';
+$string['timeago'] = '{$a->shortduration} ago';
+$string['timeat'] = 'at {$a->date}';
+$string['timeagolong'] = '{$a->shortduration} ago ({$a->date})';
+$string['timetocome'] = 'in {$a->shortduration}';
+$string['timetocomelong'] = 'in {$a->shortduration} ({$a->date})';
 $string['trackusers'] = 'Track trajectories';
 $string['trackusers_help'] = 'Register the paths made by the users. They can be seen in the “Track viewer” screen.<br/>
 The user positions are logged between validation attempts (with every poll request).<br/>
@@ -337,9 +340,9 @@ $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehunt:addroad'] = 'Add road';
 $string['treasurehunt:addstage'] = 'Add stage';
-$string['treasurehuntclosed'] = 'This treasure hunt closed on {$a}';
+$string['treasurehuntclosed'] = 'This treasure hunt closed {$a}';
 $string['treasurehuntcloses'] = 'Treasure hunt closes';
-$string['treasurehuntcloseson'] = 'This treasure hunt will close at {$a}';
+$string['treasurehuntcloseson'] = 'This treasure hunt will close {$a}';
 $string['treasurehunt:editroad'] = 'Edit road';
 $string['treasurehunt:editstage'] = 'Edit stage';
 $string['treasurehuntislocked'] = '{$a} is editing this treasurehunt right now. Try to edit it in a few minutes.';
@@ -348,29 +351,29 @@ $string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
 $string['treasurehuntname'] = 'Treasure hunt\'s name';
 $string['treasurehuntnotavailable'] = 'The treasure hunt will not be available until {$a}';
 $string['treasurehuntopens'] = 'Treasure hunt opens';
-$string['treasurehuntopenedon'] = 'This treasure hunt opened at {$a}';
+$string['treasurehuntopenedon'] = 'This treasure hunt opened {$a}';
 $string['treasurehunt:play'] = 'Play';
 $string['treasurehunt:view'] = 'View treasurehunt';
 $string['treasurehunt:viewusershistoricalattempts'] = 'View users historical attempts';
 $string['updates'] = 'Updates';
 $string['updatetimes'] = 'Update times';
 $string['user'] = 'User';
-$string['useractivityovercome'] = 'Activity to end successfully completed for stage {$a->position} on the date: {$a->date}';
+$string['useractivityovercome'] = '<b>Moodle activity for "stage {$a->position}" successfully completed</b> {$a->date}';
 $string['userinvalidroad'] = '{$a} has assigned an invalid road.';
-$string['userlocationfailed'] = 'Failed location of stage {$a->position} on the date: {$a->date}';
-$string['userlocationovercome'] = 'Successful location of stage {$a->position} on the date: {$a->date}';
+$string['userlocationfailed'] = '<b>Failed "stage {$a->position}" location</b> {$a->date}';
+$string['userlocationovercome'] = '<b>Successful "stage {$a->position}" location</b> {$a->date}';
 $string['usermultipleroads'] = '{$a} has more than one road assigned.';
 $string['usermultiplesameroad'] = '{$a} belong to more than one group assigned to the same road.';
 $string['userprogress'] = 'User progress successfully updated';
-$string['userquestionfailed'] = 'Failed answer to the question of stage {$a->position} on the date: {$a->date}';
-$string['userquestionovercome'] = 'Successful answer to the question of stage {$a->position} on the date: {$a->date}';
+$string['userquestionfailed'] = '<b>Failed "stage {$a->position}" answer</b> {$a->date}';
+$string['userquestionovercome'] = '<b>Successful "stage {$a->position}" answer</b> {$a->date}';
 $string['usersprogress'] = 'User progress';
 $string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:<br/>
 The color <B> green </B> indicates that the stage has been overcome without failures.<br/>
 The color <B> yellow </B> indicates that the stage has been overcome with failures.<br/>
 The color <B> red </B> indicates that the stage has not been overcome and failures have been made.<br/>
 The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.';
-$string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
+$string['userstageovercome'] = '<b>Stage {$a->position} overcome</b>: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';

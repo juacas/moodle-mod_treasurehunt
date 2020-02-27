@@ -567,8 +567,8 @@ class mod_treasurehunt_external extends external_api {
                 'historicalattempts' => new external_multiple_structure(
                     new external_single_structure(
                     array(
-                'string' => new external_value(PARAM_TEXT, 'The info text of attempt'),
-                'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
+                    'string' => new external_value(PARAM_RAW, 'The info text of attempt'),
+                    'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
                     )
                     ), 'Array with user/group historical attempts.'),
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
