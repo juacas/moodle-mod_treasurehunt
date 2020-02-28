@@ -171,10 +171,10 @@ function treasurehunt_wkt_to_object($text)
  * |  t > longdate  |  at 6 February 2020, 5:46 PM                         |
  * |----------------|------------------------------------------------------|
  * 
- * @param int $time timestamp to be formatted.
+ * @param int $time utc timestamp to be formatted.
  * @param float|null $mediumdate threshold (days) to use the short format without full date.
  * @param float|null $longdate threshold (days) to use the longer format with full date.
- * @param int|null $cur_tm timestamp to compare to. If null current time.
+ * @param int|null $cur_tm utc timestamp to compare to. If null current time.
  * @return string formatted interval
  */
 function treasurehunt_get_nice_date($time , $longdate = 200, $mediumdate = 4, $cur_tm = null)
@@ -203,7 +203,7 @@ function treasurehunt_get_nice_date($time , $longdate = 200, $mediumdate = 4, $c
     }else {
         $x = get_string('timeat', 'treasurehunt', $elapsed);
     }
-    return $x;
+    return "<span data-timestamp=\"$time\">$x</span>";
 }
 /**
  * Format a human-readable format for a duration in months or days and below.
@@ -1226,6 +1226,7 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid)
  * @param type $treasurehuntid
  * @param type $userid
  * @param type $groupid
+ * @return mixed object with duration, last, first in seconds.
  */
 function treasurehunt_get_hunt_duration($cmid, $userid, $groupid)
 {
@@ -1249,7 +1250,7 @@ SQL;
         $params[] = $groupid;
     }
     $result = $DB->get_record_sql($sql, $params);
-    return $result ? $result->duration : false;
+    return $result;
 }
 
 /**
@@ -2156,7 +2157,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
  * @param int $roadid The identifier of the road of user.
  * @return array All attempts described in strings.
  */
-function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid)
+function treasurehunt_get_user_attempt_history($groupid, $userid, $roadid)
 {
     global $DB;
 
@@ -2263,18 +2264,18 @@ function treasurehunt_view_info($treasurehunt, $courseid)
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
  * @return string
  */
-function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
+function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
 {
     global $PAGE;
     $roadfinished = treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
-    $attempts = treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid);
+    $attempts = treasurehunt_get_user_attempt_history($groupid, $userid, $roadid);
     if (time() > $treasurehunt->cutoffdate && $treasurehunt->cutoffdate) {
         $outoftime = true;
     } else {
         $outoftime = false;
     }
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
+    $renderable = new treasurehunt_user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
     return $output->render($renderable);
 }
 
@@ -2337,9 +2338,7 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context)
  */
 function treasurehunt_set_string_attempt($attempt, $groupmode)
 {
-
     $attempt->date = treasurehunt_get_nice_date($attempt->timecreated);
-    
     // Si se es un grupo y el usuario no es el mismo que el que lo descubrio/fallo.
     if ($groupmode) {
         $attempt->user = treasurehunt_get_user_fullname_from_id($attempt->user);

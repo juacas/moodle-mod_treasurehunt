@@ -547,8 +547,8 @@ define(['jquery',
 		                    !== response.roadtimestamp || initialize || !available) {
 		                lastattempttimestamp = response.attempttimestamp;
 		                lastroadtimestamp = response.roadtimestamp;
-		                if (response.historicalattempts.length > 0) {
-		                    attemptshistory = response.historicalattempts;
+		                if (response.attempthistory.length > 0) {
+		                    attemptshistory = response.attempthistory;
 		                    changesinattemptshistory = true;
 		                }
 		                // Compruebo si es distinto de null, lo que indica que se ha actualizado.

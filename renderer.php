@@ -81,15 +81,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
     /**
      * Render a table containing the current status of the user attempts.
      *
-     * @param treasurehunt_user_historical_stages  $historical
+     * @param treasurehunt_user_attempt_history  $historical
      * @return string
      */
-    public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical)
+    public function render_treasurehunt_user_attempt_history(treasurehunt_user_attempt_history $historical)
     {
         // Create a table for the data.
         $o = '';
-        $o .= $this->output->container_start('historicalattempts');
-        $o .= $this->output->heading(get_string('historicalattempts', 'treasurehunt', $historical->username), 3);
+        $o .= $this->output->container_start('attempthistory');
+        $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
@@ -100,14 +100,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
             $col1->attributes = ['width'=> '1%', 'class' => ''];
             $col2->attributes = ['width' => '100%', 'class' => ''];
             $t->head = [$col1, $col2];
-             //$this->add_table_row($t, array($col1, $col2), true);
             foreach ($historical->attempts as $attempt) {
                 if (!$attempt->penalty) {
                     $class = 'successfulattempt';
                 } else {
                     $class = 'failedattempt';
                 }
-               // $this->add_table_row($t, array($numattempt++, $attempt->string), false, array($class, ''));
                $cell1 = new html_table_cell($numattempt++);
                $cell1->attributes = ['class' => $class];
                $cell2 = new html_table_cell($attempt->string);
@@ -199,11 +197,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                     array(
                                         $title,
                                         get_string('totaltime', 'treasurehunt'),
+                                        get_string('start', 'treasurehunt'),
                                         get_string('stages', 'treasurehunt')
                                     ),
                                     true,
                                     null,
-                                    array(null, null, $roadusersprogress->totalstages)
+                                    array(null, null, null, $roadusersprogress->totalstages)
                                 );
                                 $hasprogress = true;
                             }
@@ -213,7 +212,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $name));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
@@ -225,14 +224,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
                             }
                             $cells = array($name);
-                            $cells[] = treasurehunt_get_nice_duration($elapsed);
-
+                            $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
+                            $cells[] = treasurehunt_get_nice_date($elapsed->first);
+                            
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($userorgroup->ratings[$i])) {

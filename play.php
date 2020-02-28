@@ -77,6 +77,7 @@ $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
                         intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
                         $treasurehunt->tracking, $user, $custommapping));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+$PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
 $PAGE->requires->css('/mod/treasurehunt/css/treasure.css');

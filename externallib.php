@@ -564,7 +564,7 @@ class mod_treasurehunt_external extends external_api {
                 'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
                 'qrexpected' => new external_value(PARAM_BOOL, 'If true the QRScanner can be used.'),
                 'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
-                'historicalattempts' => new external_multiple_structure(
+                'attempthistory' => new external_multiple_structure(
                     new external_single_structure(
                     array(
                     'string' => new external_value(PARAM_RAW, 'The info text of attempt'),
@@ -711,10 +711,10 @@ class mod_treasurehunt_external extends external_api {
             }
         }
 
-        $historicalattempts = array();
+        $attempthistory = array();
         // If there was any new attempt, reload the history of attempts.
         if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize']) {
-            $historicalattempts = treasurehunt_get_user_historical_attempts($userparams->groupid, $USER->id, $userparams->roadid);
+            $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
         $lastsuccessfulstage = array();
         if ($updates->geometrysolved
@@ -790,7 +790,7 @@ class mod_treasurehunt_external extends external_api {
         $result['playwithoutmoving'] = intval($playmode);
         $result['qrexpected'] = intval($qrmode);
         $result['groupmode'] = intval($treasurehunt->groupmode);
-        $result['historicalattempts'] = $historicalattempts;
+        $result['attempthistory'] = $attempthistory;
         $result['qoaremoved'] = $qoaremoved;
         return $result;
     }

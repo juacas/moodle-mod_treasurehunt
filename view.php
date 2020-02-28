@@ -67,6 +67,7 @@ $PAGE->set_pagelayout('standard');
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
+$PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
 echo $output->header();
 echo $output->heading(
     html_writer::empty_tag('img', array('src' => treasurehunt_get_proper_icon($treasurehunt, time()))) . ' ' .
@@ -112,7 +113,7 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
                 }
             }
         }
-        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid,
+        echo treasurehunt_view_user_attempt_history($treasurehunt, $params->groupid, $userid, $params->roadid,
                 $cm->id, $username, $teacherreview);
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
