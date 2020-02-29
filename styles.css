@@ -516,16 +516,6 @@ body {
   background-color: #d45252 !important;
 }
 
-#page-mod-treasurehunt-play h1,
-#page-mod-treasurehunt-play h2,
-#page-mod-treasurehunt-play h3,
-#page-mod-treasurehunt-play h4,
-#page-mod-treasurehunt-play h5,
-#page-mod-treasurehunt-play h6 {
-  line-height: inherit;
-  color: white;
-}
-
 #page-mod-treasurehunt-play .ui-listview > .ui-li-static,
 #page-mod-treasurehunt-play .ui-listview > .ui-li-divider,
 #page-mod-treasurehunt-play .ui-listview > li > a.ui-btn,
