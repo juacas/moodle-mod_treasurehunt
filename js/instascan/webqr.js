@@ -47,38 +47,38 @@ function testFormReport(info) {
 	if (typeof(info) === 'string') {
 		$('#QRvalue').text(info);
 		$('#previewQR').hide();
-	} else {
+	} else if(typeof(info) === 'object') {
+		if (info.code == 0) { // Exception.
+			$('#errorQR').show();
+			$('#previewQR').hide();
+		} else { // Camera ok.	
+			let videopreview = $('#previewQRvideo');
+			let parent = videopreview.closest('div');
+			let maxwidth = parent.width();
+			let maxheight = parent.height();
 
-		      let videopreview = $('#previewQRvideo');
-		      let parent = videopreview.closest('div');
-		      let maxwidth = parent.width();
-		      let maxheight = parent.height();
-
-		      let width = videopreview.width();
-		      let height = videopreview.height();
-		      if (width/height > maxwidth/maxheight) {
-		          videopreview.width(maxwidth);
-		      } else {
-		          videopreview.height(maxheight);
-		      }
-      		      videopreview.css('display','block');
-
-
-
-		let camera = info.camera;
-		
-		if (info.cameras[camera].name !== null) {
-			$('#QRvalue').text(info.cameras[camera].name);			
-		}
-		$('#previewQR').show();
-		let nextcamera = getnextwebCam();
-		if (nextcamera != camera) {
-			if (info.cameras[nextcamera].name !== null) {
-				$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+			let width = videopreview.width();
+			let height = videopreview.height();
+			if (width/height > maxwidth/maxheight) {
+				videopreview.width(maxwidth);
+			} else {
+				videopreview.height(maxheight);
 			}
-			$('#idbuttonnextcam').show();
-		} else {
-			$('#idbuttonnextcam').hide();
+				  videopreview.css('display','block');
+	  let camera = info.camera;
+	  if (info.cameras[camera].name !== null) {
+		  $('#QRvalue').text(info.cameras[camera].name);			
+	  }
+	  $('#previewQR').show();
+	  let nextcamera = getnextwebCam();
+	  if (nextcamera != camera) {
+		  if (info.cameras[nextcamera].name !== null) {
+			  $('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+		  }
+		  $('#idbuttonnextcam').show();
+	  } else {
+		  $('#idbuttonnextcam').hide();
+	  }
 		}
 	}
 }
@@ -181,7 +181,7 @@ function loadQR(scancallback, reportcallback)
         	  console.error('No cameras found.');
        		 }
       }).catch(function (e) {
-        console.error(e);
+		  reportcallback(e);
       });
 }
 

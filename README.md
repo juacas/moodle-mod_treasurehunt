@@ -1,10 +1,7 @@
 # moodle-mod_treasure
 Activity module for Moodle that allows to run outdoor, indoor (QRCodes), virtual maps (canvas) treasure-chases with geolocation. [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/main.jpg" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/4.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/1.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/users.jpg" height="200">
+<img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/main-1100x733.jpg" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/send-location.gif" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/user-progress-800x533.png" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/users-800x533.jpg" height="200">
 
 Installation
 =============
@@ -37,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.3.0 Dates and times update in real-time. Interface pulishment. Workaround to Babel compiler conflict in player page.
  - v1.2.22c Solve javascript conflict with Babel compiler in Moodle 3.8. Simplify editor buttonset. Dynamic icon.
  - v1.2.22b Update player jacvascript to be compatible with Moodle 3.8
  - v1.2.22 UI for QR Scanner in edit form improved. QR scanner fixed for Xiaomi Redmi S2. Player UI improved in question section.

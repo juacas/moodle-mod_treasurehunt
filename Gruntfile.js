@@ -73,6 +73,20 @@ module.exports = function(grunt) {
             options: {jshintrc: '.jshintrc'},
             amd: { src: jshintfiles }
         },
+        terser: {
+            options: {
+                sourceMap: true,
+                mangle: true,
+                compress: true,
+            },
+            amd: {
+                files: [{
+                    expand: true,
+                    src: amdSrc,
+                    rename: uglify_rename
+                }]
+            }
+        },
         uglify: {
             options : {
                 sourceMap : true,
@@ -254,14 +268,15 @@ module.exports = function(grunt) {
 
     // Register NPM tasks.
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-watch');
     grunt.loadNpmTasks('grunt-contrib-copy');
     // Register JS tasks.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
-    grunt.registerTask('amdonly', ['uglify']);
-    grunt.registerTask('amd', [/*'jshint',*/ 'uglify']);
+    grunt.registerTask('amdonly', ['terser']);
+    grunt.registerTask('amd', [/*'jshint',*/ 'terser']);
     grunt.registerTask('js', ['amdonly', 'shifter']);
     // Register CSS taks.
     grunt.registerTask('css', ['less:bootstrapbase']);

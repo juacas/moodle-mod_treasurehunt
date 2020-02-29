@@ -194,25 +194,25 @@ $string['gradesdeleted'] = 'Eliminadas calificaciones de la caza del tesoro';
 $string['gradingsummary'] = 'Sumario de calificaciones';
 $string['group'] = 'Grupo';
 $string['groupactivityovercome'] = 'Actividad a finalizar completada con éxito por {$a->user}
-para la etapa {$a->position} en la fecha: {$a->date}';
+para la etapa {$a->position} {$a->date}';
 $string['groupid'] = 'Grupo asignado al camino';
 $string['groupid_help'] = 'Los usuarios de este grupo son asignados a este camino cuando empieza el juego.
 Si sólo existe un camino y la opción seleccionada es "ninguno", todos los participantes de la actividad jugarán por él';
 $string['groupingid'] = 'Agrupación asignada al camino';
 $string['groupingid_help'] = 'Los grupos de esta agrupación son asignados a este camino cuando empieza el juego';
 $string['groupinvalidroad'] = '{$a} tiene asignado un camino no validado.';
-$string['grouplocationfailed'] = 'Localización fallida por {$a->user} de la etapa {$a->position} en la fecha: {$a->date}';
-$string['grouplocationovercome'] = 'Localización encontrada por {$a->user} de la etapa {$a->position} en la fecha: {$a->date}';
+$string['grouplocationfailed'] = 'Localización fallida por {$a->user} de la etapa {$a->position} {$a->date}';
+$string['grouplocationovercome'] = 'Localización encontrada por {$a->user} de la etapa {$a->position} {$a->date}';
 $string['groupmode'] = 'Juego en grupos';
 $string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración de grupos del curso.
 El juego del grupo será compartido entre los miembros del grupo y todos ellos verán los cambios producidos en el juego.';
 $string['groupmultipleroads'] = '{$a} tiene más de un camino asignado.';
-$string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
-$string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
+$string['groupquestionfailed'] = 'Respuesta fallida por {$a->user} a la pregunta de la etapa {$a->position} {$a->date}';
+$string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregunta de la etapa {$a->position} {$a->date}';
 $string['groups'] = 'Grupos';
-$string['groupstageovercome'] = 'Etapa {$a->position} superada por {$a->user} en la fecha: {$a->date}';
+$string['groupstageovercome'] = 'Etapa {$a->position} superada por {$a->user} {$a->date}';
 $string['hello'] = 'Hola';
-$string['historicalattempts'] = 'Historial de intentos de {$a}';
+$string['attempthistory'] = 'Historial de intentos de {$a}';
 $string['history'] = 'Historial';
 $string['huntcompleted'] = 'Ya has completado esta caza del tesoro';
 $string['incorrectanswer'] = 'Respuesta incorrecta.';
@@ -323,9 +323,12 @@ $string['start'] = 'Empezar';
 $string['startfromhere'] = 'Solo se puede empezar desde aquí';
 $string['state'] = 'Estado';
 $string['successlocation'] = '¡Es el lugar correcto!';
+$string['timeat'] = 'el {$a->date}';
+$string['timeago'] = 'hace {$a->shortduration}';
+$string['timeagolong'] = 'hace {$a->shortduration} (el {$a->date})';
+$string['timetocome'] = 'dentro de {$a->shortduration}';
+$string['timetocomelong'] = 'dentro de {$a->shortduration} (el {$a->date})';
 $string['timeexceeded'] = 'Se ha superado el tiempo limite para realizar la actividad. Esta pantalla solo sirve para revisar el juego';
-$string['timelabelfailed'] = 'Ubicación enviada en la fecha: ';
-$string['timelabelsuccess'] = 'Etapa descubierta en la fecha: ';
 $string['totaltime'] = 'Tiempo total';
 $string['trackusers'] = 'Almacenar itinerarios';
 $string['trackusers_help'] = 'Almacena el itinerario que realizan los usuarios mientras usan el modo de juego.';
@@ -335,40 +338,40 @@ $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
 $string['treasurehunt:addroad'] = 'Añadir camino';
 $string['treasurehunt:addstage'] = 'Añadir etapa';
-$string['treasurehuntclosed'] = 'Esta caza del tesoro está cerrada desde el {$a}';
+$string['treasurehuntclosed'] = 'Esta caza del tesoro está cerrada {$a}';
 $string['treasurehuntcloses'] = 'Caza del tesoro cerrada';
-$string['treasurehuntcloseson'] = 'Esta caza del tesoro cerrará el {$a}';
+$string['treasurehuntcloseson'] = 'Esta caza del tesoro cerrará {$a}';
 $string['treasurehunt:editroad'] = 'Editar camino';
 $string['treasurehunt:editstage'] = 'Editar etapa';
 $string['treasurehuntislocked'] = '{$a} está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
 $string['treasurehunt:managetreasure'] = 'Administrar Caza del tesoro';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehuntname'] = 'Nombre de la caza del tesoro';
-$string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible hasta el {$a}';
+$string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible {$a}';
 $string['treasurehuntopens'] = 'Caza del tesoro abierta';
-$string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta desde el {$a}';
+$string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta {$a}';
 $string['treasurehunt:play'] = 'Jugar';
 $string['treasurehunt:view'] = 'Ver la caza del tesoro';
-$string['treasurehunt:viewusershistoricalattempts'] = 'Ver el historial de intentos de los usuarios';
+$string['treasurehunt:viewusersattempthistory'] = 'Ver el historial de intentos de los usuarios';
 $string['updates'] = 'Actualizaciones';
 $string['updatetimes'] = 'Tiempos de actualización';
 $string['user'] = 'Usuario';
-$string['useractivityovercome'] = 'Actividad a finalizar completada con éxito para la etapa {$a->position} en la fecha: {$a->date}';
+$string['useractivityovercome'] = '<b>Actividad de moodle completada</b> con éxito para la etapa {$a->position} {$a->date}';
 $string['userinvalidroad'] = '{$a} tiene asignado un camino no validado.';
-$string['userlocationfailed'] = 'Localización fallida de la etapa {$a->position} en la fecha: {$a->date}';
-$string['userlocationovercome'] = 'Localización encontrada de la etapa {$a->position} en la fecha: {$a->date}';
+$string['userlocationfailed'] = '<b>Localización fallida</b> de la etapa {$a->position} {$a->date}';
+$string['userlocationovercome'] = '<b>Localización encontrada</b> de la etapa {$a->position}  {$a->date}';
 $string['usermultipleroads'] = '{$a} tiene más de un camino asignado.';
 $string['usermultiplesameroad'] = '{$a} pertenece a más de un grupo asignado al mismo camino.';
 $string['userprogress'] = 'El progreso de usuario se ha actualizado con éxito';
-$string['userquestionfailed'] = 'Respuesta fallida a la pregunta de la etapa {$a->position}  en la fecha: {$a->date}';
-$string['userquestionovercome'] = 'Respuesta acertada a la pregunta de la etapa {$a->position} en la fecha: {$a->date}';
+$string['userquestionfailed'] = '<b>Respuesta fallida</b> a la pregunta de la etapa {$a->position}  {$a->date}';
+$string['userquestionovercome'] = '<b>Respuesta acertada</b> a la pregunta de la etapa {$a->position} {$a->date}';
 $string['usersprogress'] = 'Progreso de los usuarios';
 $string['usersprogress_help'] = 'Indica el progreso de las etapas de cada alumno/grupo en función de los colores:
 <P>El color <B>verde</B> indica que la etapa se ha superado sin fallos.</P>
 <P>El color <B>amarillo</B> indica que la etapa se ha superado con fallos.</P>
 <P>El color <B>rojo</B> indica que la etapa no se ha superado y se han cometido fallos.</P>
 <P>El color <B>gris</B> indica que la etapa no se ha superado y no se han cometido fallos.</P>';
-$string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->date}';
+$string['userstageovercome'] = 'Etapa {$a->position} superada {$a->date}';
 $string['validatelocation'] = 'Validar ubicación';
 $string['validateqr'] = 'Escanea QR';
 $string['warmatchanswer'] = 'La respuesta no corresponde con la pregunta';
@@ -378,6 +381,10 @@ La imagen de tu cámara debería aparecer más abajo. Intenta leer con ella un c
 éste.</td><td><a href="pix/qr.png"><img align="top" src="pix/qr.png" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
 Parece que ya has pasado una prueba de escaneo y puedes usar este dispositivo para esa parte.';
+$string['warnqrscannererror'] = 'Esta Caza del Tesoro tiene {$a} etapas que hay que superar con códigos QR.
+Parece que este dispositivo no permite el uso de la cámara con esta aplicación.
+Por favor, autoriza el uso de la cámara cuando el sistema le pregunte.
+Si no consigue activar la cámara es probable que no pueda usar este dispositivo para esta Caza del Tesoro.';
 $string['warnusersgroup'] = 'Los siguientes usuarios pertenecen a más de un grupo: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersgrouping'] = 'Los siguientes grupos pertenecen a más de una agrupación: {$a}, por lo que no son capaces de jugar la actividad.';
 $string['warnusersoutside'] = 'Los siguientes usuarios no pertenecen a ningún grupo/agrupación: {$a},
@@ -400,7 +407,7 @@ $string['remove_tour'] = 'Se pueden borrar los polígonos de las etapas. Símple
 $string['roads_tour'] = 'En este área se muestran los caminos que has creado. Selecciona uno de los caminos para ver y gestionar sus etapas.';
 $string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides guardar tus cambios con este botón.';
 $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
-$string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa.';
+$string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa. Después podrás añadir y editar las geometrías usando los botones del panel superior.';
 $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
 
 $string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';

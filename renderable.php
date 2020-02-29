@@ -24,12 +24,12 @@
 defined('MOODLE_INTERNAL') || die();
 
 /**
- * Renderable user_historical_attempts
+ * Renderable user_attempt_history
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_user_historical_attempts implements renderable {
+class treasurehunt_user_attempt_history implements renderable {
 
     public $attempts = [];
     public $coursemoduleid = 0;

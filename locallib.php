@@ -96,6 +96,7 @@ function treasurehunt_notify_warning($message)
         echo $OUTPUT->notification($message, 'notifyproblem');
     }
 }
+
 /**
  * @param Geometry $geom
  */
@@ -148,37 +149,117 @@ function treasurehunt_wkt_to_object($text)
     $wkt = new WKT();
     return $wkt->read($text);
 }
-
 /**
- * Format a human-readable format for a duration.
- * calculates from seconds to days
+ * Generates a friendly string representation of the date relative to current time.
+ * It uses i18n strings for building a sentence part:
+ * - timeago for '23 hours ago'
+ * - timeagolong for '23 hours ago (february, 23 2020)'
+ * - timetocome for 'in 2 months 3 days'
+ * - tiemtocomelong for 'in 3 months 3 days (february, 23 2020)'
+ * - timeat for 'at febrary the 23th 2020'
+ * - strftimedatetime for a localized long time-date format.
+ * 
+ * 
+ * Example with $longdate = 200
+ *
+ * |----------------|------------------------------------------------------|
+ * | elapsed time   | formatted                                            |
+ * |----------------|------------------------------------------------------|
+ * |  t < 2 mins    |  now                                                 |
+ * |  t < mediumdate|  3 days 23 hours ago                                 |
+ * |  t < longdate  |  20 days ago (6 February 2020, 5:46 PM)              |
+ * |  t > longdate  |  at 6 February 2020, 5:46 PM                         |
+ * |----------------|------------------------------------------------------|
+ * 
+ * @param int $time utc timestamp to be formatted.
+ * @param float|null $mediumdate threshold (days) to use the short format without full date.
+ * @param float|null $longdate threshold (days) to use the longer format with full date.
+ * @param int|null $cur_tm utc timestamp to compare to. If null current time.
+ * @return string formatted interval
+ */
+function treasurehunt_get_nice_date($time , $longdate = 200, $mediumdate = 4, $cur_tm = null)
+{
+    if ($cur_tm === null) {
+        $cur_tm = time();
+    }
+    $dif = $cur_tm - $time;
+    $days = $dif / DAYSECS;
+    if ($cur_tm > $time) {
+        $timestringkey = 'timeago';
+    } else {
+        $timestringkey = 'timetocome';
+        $dif = -$dif;
+    }
+    $elapsed = new stdClass();
+    $elapsed->shortduration = treasurehunt_get_nice_duration($dif);
+    $elapsed->date = userdate($time, get_string('strftimedatetime', 'core_langconfig'));
+    if ($dif < 2 * MINSECS) {
+        $x = get_string('now');
+    } else if ($dif >=0 && $dif < ($mediumdate * DAYSECS) && $dif < ($longdate * DAYSECS)) {
+        $x = get_string($timestringkey, 'treasurehunt', $elapsed);
+    } else if ( $dif < ($longdate * DAYSECS) ) {
+        $elapsed->shortduration = treasurehunt_get_nice_duration($dif, true, true);
+        $x = get_string($timestringkey.'long', 'treasurehunt', $elapsed);
+    }else {
+        $x = get_string('timeat', 'treasurehunt', $elapsed);
+    }
+    return "<span data-timestamp=\"$time\">$x</span>";
+}
+/**
+ * Format a human-readable format for a duration in months or days and below.
+ * calculates from seconds to months.
  * trim the details to the two more significant units
  * @param int $durationinseconds
+ * @param boolean $usemonths if false render in days.
+ * @param boolean $shortprecission if true only the most significative unit.
  * @return string
  */
-function treasurehunt_get_nice_duration($durationinseconds)
+function treasurehunt_get_nice_duration($durationinseconds, $usemonths = true, $shortprecission = false)
 {
     $durationstring = '';
-    $days = floor($durationinseconds / 86400);
-    $durationinseconds -= $days * 86400;
-    $hours = floor($durationinseconds / 3600);
-    $durationinseconds -= $hours * 3600;
-    $minutes = floor($durationinseconds / 60);
-    $seconds = round($durationinseconds - $minutes * 60);
+    if ($usemonths) {
+        $months = floor($durationinseconds / (DAYSECS*30));
+        $durationinseconds -= $months * (DAYSECS * 30);
+    }
+    $days = floor($durationinseconds / DAYSECS);
+    $durationinseconds -= $days * DAYSECS;
+    $hours = floor($durationinseconds / HOURSECS);
+    $durationinseconds -= $hours * HOURSECS;
+    $minutes = floor($durationinseconds / MINSECS);
+    $seconds = round($durationinseconds - $minutes * MINSECS);
 
+    if ($usemonths && $months > 0) {
+        $durationstring .= $months . ' ' . get_string('month' .  ($months > 1 ? 's' : ''));
+        $days = true; // Report also days.
+        $hours = false;
+        $minutes = false;
+        $seconds = false;
+        if ($shortprecission) {
+            return $durationstring;
+        }
+    }
     if ($days > 0) {
-        $durationstring .= $days . ' ' . get_string('days');
+        $durationstring .= ' ' . $days . ' ' . get_string('day' . ($days > 1 ? 's':''));
         // Trim details less significant.
         $minutes = false;
         $days = false;
         $seconds = false;
+        if ($shortprecission) {
+            return $durationstring;
+        }
     }
     if ($hours > 0) {
-        $durationstring .= ' ' . $hours . ' ' . get_string('hours');
+        $durationstring .= ' ' . $hours . ' ' . get_string( 'hour' . ($hours > 1 ? 's' : ''));
         $seconds = false;
+        if ($shortprecission) {
+            return $durationstring;
+        }
     }
     if ($minutes > 0) {
-        $durationstring .= ' ' . $minutes . ' ' . get_string('minutes');
+        $durationstring .= ' ' . $minutes . ' ' . get_string('minute' . ($minutes > 1 ? 's' : ''));
+        if ($shortprecission) {
+            return $durationstring;
+        }
     }
     if ($seconds > 0) {
         $durationstring .= ' ' . $seconds . ' s.';
@@ -1145,6 +1226,7 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid)
  * @param type $treasurehuntid
  * @param type $userid
  * @param type $groupid
+ * @return mixed object with duration, last, first in seconds.
  */
 function treasurehunt_get_hunt_duration($cmid, $userid, $groupid)
 {
@@ -1168,7 +1250,7 @@ SQL;
         $params[] = $groupid;
     }
     $result = $DB->get_record_sql($sql, $params);
-    return $result ? $result->duration : false;
+    return $result;
 }
 
 /**
@@ -2075,7 +2157,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
  * @param int $roadid The identifier of the road of user.
  * @return array All attempts described in strings.
  */
-function treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid)
+function treasurehunt_get_user_attempt_history($groupid, $userid, $roadid)
 {
     global $DB;
 
@@ -2136,16 +2218,16 @@ function treasurehunt_clear_activities($treasurehuntid)
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehuntid]);
 }
 /**
- * Initialices the javascript needed to use QRScanner
+ * Initialices the javascript needed to use QRScanner.
  * @param moodle_page $PAGE
  * @param string global function name to initialice the code.
  */
-function treasurehunt_qr_support($PAGE, $initfunction = '', $params = null)
+function treasurehunt_qr_support($PAGE, $initfunction = 'setup', $params = [])
 {
-    $PAGE->requires->js('/mod/treasurehunt/js/instascan/webqr.js', false);
-    if ($initfunction) {
-        $PAGE->requires->js_init_call($initfunction, $params);
-    }
+    $PAGE->requires->js_call_amd(
+        'mod_treasurehunt/webqr',
+        $initfunction,
+        $params);
 }
 /**
  * Gets the HTML view format of the information displayed on the main screen.
@@ -2182,18 +2264,18 @@ function treasurehunt_view_info($treasurehunt, $courseid)
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
  * @return string
  */
-function treasurehunt_view_user_historical_attempts($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
+function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
 {
     global $PAGE;
     $roadfinished = treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
-    $attempts = treasurehunt_get_user_historical_attempts($groupid, $userid, $roadid);
+    $attempts = treasurehunt_get_user_attempt_history($groupid, $userid, $roadid);
     if (time() > $treasurehunt->cutoffdate && $treasurehunt->cutoffdate) {
         $outoftime = true;
     } else {
         $outoftime = false;
     }
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_user_historical_attempts($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
+    $renderable = new treasurehunt_user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
     return $output->render($renderable);
 }
 
@@ -2256,8 +2338,7 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context)
  */
 function treasurehunt_set_string_attempt($attempt, $groupmode)
 {
-
-    $attempt->date = userdate($attempt->timecreated);
+    $attempt->date = treasurehunt_get_nice_date($attempt->timecreated);
     // Si se es un grupo y el usuario no es el mismo que el que lo descubrio/fallo.
     if ($groupmode) {
         $attempt->user = treasurehunt_get_user_fullname_from_id($attempt->user);

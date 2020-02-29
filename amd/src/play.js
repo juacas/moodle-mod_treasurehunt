@@ -26,13 +26,15 @@ define(['jquery',
     'mod_treasurehunt/ol',
     'core/ajax',
     'mod_treasurehunt/geocoder',
-    'mod_treasurehunt/viewgpx',
+	'mod_treasurehunt/viewgpx',
+	'mod_treasurehunt/webqr',
     // 'core/str',
     'mod_treasurehunt/jquery.truncate', 
     'mod_treasurehunt/jquery.mobile-config',
     'mod_treasurehunt/jquerymobile', 
     ],
-	    function ($, url, ol, ajax, GeocoderJS, viewgpx /*, str*/) {
+	    function ($, url, ol, ajax, GeocoderJS, viewgpx, webqr /*, str*/) {
+			
 			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
@@ -349,10 +351,13 @@ define(['jquery',
 		    layers = layers.concat(layersoverlay);
 		    layers = layers.concat([ attemptslayer, userPosition, markerVector]);
 		    // New Custom zoom.
-		    var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
+			var zoom = new ol.control.Zoom({target: "navigation", className: "custom-zoom"});
+			var attribution = new ol.control.Attribution({
+				collapsible: false
+			});
 		    var map = new ol.Map({
 		        layers: layers,
-		        controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
+				controls: [zoom, attribution], //ol.control.defaults({rotate: false, attribution: false}),
 		        target: 'mapplay',
 		        view: view,
 		        loadTilesWhileAnimating: true,
@@ -462,8 +467,8 @@ define(['jquery',
 		    }
 		    /**
 		     * Updates the model of the game.
-		     * Notifies a new location for validation or a new answer to a question
-		     * @param {boolean} location requests a location validation
+		     * Notifies a new location for validation or a new answer to a question.
+		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
 		     * @param {string} qrtext submits a text scanned from a QRCode
@@ -535,7 +540,7 @@ define(['jquery',
 		                    markerFeature.setGeometry(null);
 		                }
 		            }
-		            // If you change the group mode. 
+		            // If change the group mode. 
 		            if (groupmode != response.groupmode) {
 		                groupmode = response.groupmode;
 		            }
@@ -543,8 +548,8 @@ define(['jquery',
 		                    !== response.roadtimestamp || initialize || !available) {
 		                lastattempttimestamp = response.attempttimestamp;
 		                lastroadtimestamp = response.roadtimestamp;
-		                if (response.historicalattempts.length > 0) {
-		                    attemptshistory = response.historicalattempts;
+		                if (response.attempthistory.length > 0) {
+		                    attemptshistory = response.attempthistory;
 		                    changesinattemptshistory = true;
 		                }
 		                // Compruebo si es distinto de null, lo que indica que se ha actualizado.
@@ -570,13 +575,13 @@ define(['jquery',
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
 		                        changesinquestionstage = true;
-		                        $('#validatelocation').hide();
+								$('#validatelocation').show().addClass('ui-state-disabled');
 		                        $('#question_button').show();
 		                    } else if (!lastsuccessfulstage.activitysolved) {
-		                        $('#validatelocation').hide();
+								$('#validatelocation').show().addClass('ui-state-disabled');
 		                        $('#question_button').show();
 		                    } else {
-		                        $('#validatelocation').show();
+								$('#validatelocation').show().removeClass('ui-state-disabled');
 		                        $('#question_button').hide();
 		                    }
 		                }
@@ -587,20 +592,20 @@ define(['jquery',
 		                // Check the page we're on.
 						var pageId = $.mobile.pageContainer.pagecontainer('getActivePage').prop("id");
 						// Update the page model wherever the page we are.
-						set_lastsuccessfulstage();
-						fit_map_to_source();
-						set_question();
 		                if (pageId === 'mappage') {
 							// Nothing special.
 		                } else if (pageId === 'historypage') {
 							set_attempts_history();
 		                } else if (pageId === 'questionpage') {
-		                    if (lastsuccessfulstage.question === '') {
-		                        $.mobile.pageContainer.pagecontainer("change", "#mappage");
+							if (lastsuccessfulstage.question === '') {
+								$.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                    } else {
-		                        $.mobile.resetActivePageHeight();
+								$.mobile.resetActivePageHeight();
 		                    }
 		                }
+						set_lastsuccessfulstage();
+						fit_map_to_source();
+						set_question();
 		            }
 		            if (response.infomsg.length > 0) {
 		                infomsgs.forEach(function (msg) {
@@ -616,7 +621,7 @@ define(['jquery',
 		                $('#roadended').hide();
 		            }
 		            if (roadfinished || !available) {
-		                $('#validatelocation').hide();
+						$('#validatelocation').show().addClass('ui-state-disabled');
 		                $('#question_button').hide();
 		                $('#roadended').show();
 		                markerFeature.setGeometry(null);
@@ -662,7 +667,7 @@ define(['jquery',
 		            var clueplaintext = lastsuccessfulstage.clue.replace(/<(?:.|\n)*?>/gm, '');
 		            if (clueplaintext.length > maxchars*2 ) {
 		            	$("#lastsuccessfulstageclue").truncate(maxchars*2);
-		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext"></a> ';
+		            	briefing = ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext"></a> ';
 		            	$("#lastsuccessfulstageclue").append(briefing);
 		            } else {
 		            	briefing = lastsuccessfulstage.clue;
@@ -692,39 +697,41 @@ define(['jquery',
 		        }
 		    }
 		    function set_question() {
-		        if (changesinquestionstage) {
+				if (changesinquestionstage) {
 		        	// Clean color tag.
 		        	lastsuccessfulstage.question = lastsuccessfulstage.question.replace(/color/gm, 'color-disabled');
-
-		            $('#questionform').html("<legend>" + lastsuccessfulstage.question + "</legend>");
+					var questionform = "<legend>" + lastsuccessfulstage.question + "</legend>";
 		            var counter = 1;
 		            $.each(lastsuccessfulstage.answers, function (key, answer) {
 		                var id = 'answer' + counter;
 			        	// Clean color tag.
-		                answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
-
-		                $('#questionform').append('<input type="radio" name="answers" id="' + id + '"value="'
-		                        + answer.id + '">' +
-		                        '<label for="' + id + '">' + answer.answertext + '</label>');
+				    answer.answertext = answer.answertext.replace(/color/gm, 'color-disabled');
+				    questionform += '<div class="answer"><input type="radio" name="answers" id="' + id + '"value="'
+							+ answer.id + '">' +
+							'<label style="color:white" for="' + id + '">' + answer.answertext + '</label></div>';
 		                counter++;
-		            });
-				   // This decoration renders with problems.
-				   // $('#questionform').enhanceWithin().controlgroup("refresh");
+					});
+					
+					$('#questionform').html(questionform).scrollTop();
+					// Enhance this with jquery mobile.
+					// JPC: It doesn't work in some cases. Disabled by now. TODO: Fix.
+					// Delay enhancement to avoid some glitches have been observed.
+					// setTimeout(() => $('#questionform').enhanceWithin(),1); //.controlgroup("refresh");
 		            changesinquestionstage = false;
-		        }
-		
-		    }
+		        }	
+			}
+			
 		    function set_attempts_history() {
-		        // Compruebo si ha habido cambios desde la ultima vez
+		        // I'm checking to see if there have been any changes since the last time.
 		        if (changesinattemptshistory) {
 		            var $historylist = $("#historylist");
-		            // Lo reinicio
+		            // I reset it
 		            $historylist.html('');
 		            changesinattemptshistory = false;
 		            if (attemptshistory.length === 0) {
 		                $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
 		            } else {
-		                // Anado cada intento
+		                // I add each attempt
 		                attemptshistory.forEach(function (attempt) {
 		                    $("<li><span class='ui-btn-icon-left "
 		                            + (attempt.penalty ? 'ui-icon-delete failedattempt' : 'ui-icon-check successfulattempt')
@@ -955,14 +962,19 @@ define(['jquery',
 		            }
 		        } else if (pageId === 'questionpage') {
 		            if (event.type === 'pagecontainershow') {
-		                if (lastsuccessfulstage.question === '') {
+						if (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') {
 		                    $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                } else {
 		                    set_question();
-		                }
+						}
+						
 		            }
-		        }
-		
+		        }		
+				// Some Themes override this style breaking the layout (i.e. Klass via :target). Patch it.
+				setTimeout( ()=> {
+					var style = document.querySelector('#questionpage').style;
+					style.setProperty('padding-top',style.paddingTop, 'important');
+					}, 200);	
 		    });
 		    //Buttons events.
 		    if (geographictools) {
@@ -1054,11 +1066,11 @@ define(['jquery',
 	                								  - headerdiv.height()
 	                								  - padding * 2 );
 		            	$('#previewQRvideo').show(); 
-				loadQR(qrReaded, qrReport);
+						webqr.loadQR(qrReaded, qrReport);
 		            },
 		            afterclose: function (event, ui) {
-		                unloadQR(qrReport);
-		            }
+		                webqr.unloadQR(qrReport);
+		            }.bind(this)
 		        });
 		    }
 		    $("#nextcamera").on('click', function() {
