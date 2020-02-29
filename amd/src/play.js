@@ -34,6 +34,7 @@ define(['jquery',
     'mod_treasurehunt/jquerymobile', 
     ],
 	    function ($, url, ol, ajax, GeocoderJS, viewgpx, webqr /*, str*/) {
+			
 			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,

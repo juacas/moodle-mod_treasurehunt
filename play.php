@@ -25,6 +25,10 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once($CFG->libdir . '/formslib.php');
+// Moodle 3.8 uses now Babel to compile and compress the js files.
+// This broke this page because it uses jquery2 and jquerymobile.
+// The only workaround we found is to disble Babel cache for this only page.
+$CFG->cachejs = false;
 
 global $USER;
 
@@ -61,7 +65,6 @@ $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 $gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $output = $PAGE->get_renderer('mod_treasurehunt');
-$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 
 // Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
 // Adds support for QR scan.
@@ -72,8 +75,9 @@ $user->id = $USER->id;
 $user->fullname = fullname($USER);
 $user->pic = $output->user_picture($USER);
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
+$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
 $PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
-        array( $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
+                        array( $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
                         intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
                         $treasurehunt->tracking, $user, $custommapping));
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
