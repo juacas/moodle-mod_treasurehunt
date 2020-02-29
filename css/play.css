@@ -1,0 +1,276 @@
+/* Hide maincontent of moodle page */
+#page-mod-treasurehunt-play #maincontent,
+#page-mod-treasurehunt-play .toast-wrapper {
+  display: none;
+}
+
+/* Containers */
+#page-mod-treasurehunt-play .play-container {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+
+#page-mod-treasurehunt-play .map-page {
+  width: 100%;
+  height: 100%;
+}
+
+#page-mod-treasurehunt-play .page-content-wrapper {
+  height: 100%;
+  width: 100%;
+}
+
+#page-mod-treasurehunt-play .map-container {
+  height: calc(100% - 50px);
+  width: 100%;
+}
+
+#page-mod-treasurehunt-play .play-tools-container {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  position: fixed;
+  left: 50%;
+  bottom: 10px;
+  transform: translate(-50%, 0);
+  margin: 0 auto;
+}
+
+/* Navbar */
+#page-mod-treasurehunt-play .play-navbar {
+  position: relative;
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.5rem 1rem;
+  background-image: linear-gradient(315deg, #006877 0, #09203f 74%);
+  color: white;
+  box-shadow: 0 3px 5px -1px rgba(0, 0, 0, 0.2),
+    0 6px 10px 0 rgba(0, 0, 0, 0.14), 0 1px 18px 0 rgba(0, 0, 0, 0.12);
+  z-index: 10;
+  height: 50px;
+}
+
+#page-mod-treasurehunt-play .play-navbar .title {
+  flex: 1;
+  font-size: 1.3em;
+  text-align: center;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+#page-mod-treasurehunt-play .play-navbar .btn {
+  color: inherit;
+  border-radius: 50%;
+}
+
+/* Sidebar */
+#page-mod-treasurehunt-play .sidebar {
+  width: 300px;
+  position: fixed;
+  top: 0;
+  height: 100vh;
+  z-index: 2000;
+  background: #f9f9f9;
+  color: #1a1919;
+  transition: all 0.3s;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+#page-mod-treasurehunt-play .sidebar.sidebar-left {
+  left: -300px;
+}
+
+#page-mod-treasurehunt-play .sidebar.sidebar-left.active {
+  left: 0;
+  box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.2);
+}
+
+#page-mod-treasurehunt-play .sidebar.sidebar-right {
+  right: -300px;
+}
+
+#page-mod-treasurehunt-play .sidebar.sidebar-right.active {
+  right: 0;
+  box-shadow: -3px 3px 3px rgba(0, 0, 0, 0.2);
+}
+
+#page-mod-treasurehunt-play .sidebar .sidebar-content {
+  flex: 1;
+  overflow: auto;
+  padding: 0.5em;
+}
+
+/* Buttons */
+#page-mod-treasurehunt-play .play-btn {
+  background-color: #0097a7;
+  border-color: #0097a7;
+  color: #ffffff;
+}
+
+#page-mod-treasurehunt-play .play-btn:hover,
+#page-mod-treasurehunt-play .play-btn:active {
+  background-color: #006974;
+  border-color: #006974;
+}
+
+#page-mod-treasurehunt-play .play-tools-container .btn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.14), 0 4px 5px rgba(0, 0, 0, 0.1);
+  margin: 0 2px;
+}
+
+/* sidebar mask*/
+#page-mod-treasurehunt-play .sidebar-mask,
+#page-mod-treasurehunt-play .modal-mask {
+  display: none;
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  z-index: 1999;
+  opacity: 0;
+  transition: all 0.5s ease-in-out;
+}
+
+#page-mod-treasurehunt-play .sidebar-mask.active,
+#page-mod-treasurehunt-play .modal-mask.active {
+  display: block;
+  opacity: 1;
+}
+
+#page-mod-treasurehunt-play .sidebar-mask.active.dismissible,
+#page-mod-treasurehunt-play .modal-mask.active.dismissible {
+  cursor: pointer;
+}
+
+/* Modal Pages */
+#page-mod-treasurehunt-play .play-modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  visibility: hidden;
+  opacity: 0;
+  transition: all 0.35s ease-in;
+  z-index: 2000;
+}
+
+#page-mod-treasurehunt-play .play-modal .modal-mask {
+  background-color: rgba(0, 0, 0, 0.2);
+}
+
+#page-mod-treasurehunt-play .play-modal.active {
+  visibility: visible;
+  opacity: 1;
+}
+
+#page-mod-treasurehunt-play .play-modal-dialog {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #f9f9f9;
+  display: flex;
+  flex-direction: column;
+  z-index: 2000;
+}
+
+@media only screen and (min-height: 768px) and (min-width: 768px) {
+  #page-mod-treasurehunt-play .play-modal-dialog {
+    width: 600px;
+    height: 600px;
+    overflow: hidden;
+    border-radius: 10px;
+    box-shadow: 0 28px 48px rgba(0, 0, 0, 0.4);
+  }
+}
+
+/* Modal Pages Animation */
+#page-mod-treasurehunt-play [data-animation] .play-modal-dialog {
+  opacity: 0;
+  transition: all 0.35s cubic-bezier(0.51, 0.92, 0.24, 1.15);
+}
+
+#page-mod-treasurehunt-play [data-animation].active .play-modal-dialog {
+  opacity: 1;
+  transition-delay: 0.1s;
+}
+
+#page-mod-treasurehunt-play
+  [data-animation="slideInOutTop"]
+  .play-modal-dialog {
+  transform: translate3d(0, 50px, 0);
+}
+
+#page-mod-treasurehunt-play .play-modal.active .play-modal-dialog {
+  transform: none;
+}
+
+/* Search panel */
+#page-mod-treasurehunt-play .search-results-container {
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+  margin: -0.5em;
+}
+#page-mod-treasurehunt-play .search-results-container li {
+  list-style-type: none;
+  padding: 0.75rem 1.25rem;
+}
+
+#page-mod-treasurehunt-play .search-results-container .search-option {
+  border: 1px solid rgba(0, 0, 0, 0.125);
+}
+
+#page-mod-treasurehunt-play .search-results-container .search-option:hover {
+  color: #0097a7;
+  cursor: pointer;
+}
+
+#page-mod-treasurehunt-play
+  .search-results-container
+  .search-option
+  + .search-option {
+  border-top-width: 0;
+}
+
+/* Zoom map buttons */
+#page-mod-treasurehunt-play .custom-zoom {
+  position: absolute;
+  background-color: rgba(255, 255, 255, 0.4);
+  border-radius: 4px;
+  padding: 2px;
+  bottom: 3px;
+  right: 3px;
+}
+
+#page-mod-treasurehunt-play .custom-zoom button {
+  display: block;
+  background-color: #0097a7;
+  border-color: #0097a7;
+  color: #ffffff;
+  margin: 1px;
+  font-weight: 700;
+  border-radius: 2px;
+  height: 1.375em;
+  width: 1.375em;
+  line-height: 0.4em;
+  border: none;
+  font-size: 1.5em;
+}
+
+@media only screen and (max-width: 768px) {
+  #page-mod-treasurehunt-play .custom-zoom {
+    display: none;
+  }
+}

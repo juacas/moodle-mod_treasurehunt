@@ -40,72 +40,137 @@
                                                                                                                                     
 }}
 
-<div class="ui-loader ui-corner-all ui-body-b ui-loader-verbose" id="loader" style="display:block">
-    <span class="ui-icon-loading"></span>
-    <h1>{{#str}} loading, mod_treasurehunt{{/str}}</h1>
-</div>
-<div id="container" style="display:none;">
-    {{! Pagina principal de la aplicacion }}
-    <div data-role="page" id="mappage"  data-quicklinks="true" data-theme="b">
-        {{!Panel principal de informacion}}
-        <div data-role="panel" data-position="left" data-display="overlay" id="infopanel">
-            <div data-role="header" data-tap-toggle="false">
-                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn 
-                   ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-                <h1>{{#str}} info, mod_treasurehunt{{/str}}</h1>
-            </div>
-            <div role="main" class="ui-content">
-                <div class="ui-bar ui-bar-b">
-                    <h1>{{{user.picture}}} {{user.name}}</h1>
-                    <a href="view.php?id={{cmid}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">
-                        {{#str}} exit, mod_treasurehunt{{/str}}
-                    </a>
-                </div>
-                <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" 
-                    data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
+<div class="play-container">
+    {{! Main map page }}
+    <div class="map-page">
+        <!-- sidebar mask -->
+        <div class="sidebar-mask"></div>
+
+        <!-- Sidebar info-->
+        <div id="infopanel" class="sidebar sidebar-left">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <button class="btn close-sidebar">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="title">{{#str}} info, mod_treasurehunt{{/str}}</span>
+            </nav>
+
+            <div class="sidebar-content">
+                <div class="card">
+                    <div class="card-body">
+                        <h5>{{{user.picture}}} {{user.name}}</h5>
+                        <a href="view.php?id={{cmid}}" class="btn play-btn">
+                            <i class="fa fa-sign-out" aria-hidden="true"></i>
+                            {{#str}} exit, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                 </div>
+
+                 <div id="accordion">
                     {{#hasdescription}}
-                    <div data-role="collapsible" data-theme="a" data-iconpos="right">
-                        <h3>{{treasurehunt.name}}</h3>
-                        <div>
-                            <p>{{{treasurehunt.description}}}</p>
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                    {{treasurehunt.name}}
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                            <div class="card-body">
+                                {{{treasurehunt.description}}}
+                            </div>
                         </div>
                     </div>
                     {{/hasdescription}}
-                    <div id="lastsuccessfulstage" data-role="collapsible">
-                        <h3>
-                            <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos"></div>
-                            <span id="lastsuccessfulstagename"></span>
-                        </h3>
-                        <div>
-                            <p id="lastsuccessfulstageclue"></p>
+                    <div class="card">
+                        <div class="card-header" id="headingTwo">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                Collapsible Group Item #2
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                            <div class="card-body">
+                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                            </div>
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
-        {{!Panel de busqueda de informacion}}
-        <div data-role="panel" data-position="right" data-display="overlay" id="searchpanel">
-            <div data-role="header" data-tap-toggle="false">
-                <a href="#" data-role="button" data-rel="close" class="ui-btn-right ui-nodisc-icon ui-btn 
-                   ui-icon-carat-r ui-btn-icon-notext ui-corner-all"></a>
-                <h1>{{#str}} search, mod_treasurehunt{{/str}}</h1>
-                <div class="ui-bar ui-bar-b">
-                    <form class="ui-filterable">
-                        <input id="autocomplete-input" data-type="search" placeholder="Find a place...">
-                    </form>
+
+        <!-- Sidebar search-->
+        <div id="searchpanel" class="sidebar sidebar-right">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <span class="title">{{#str}} search, mod_treasurehunt{{/str}}</span>
+                <button class="btn close-sidebar">
+                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                </button>
+            </nav>
+            <div class="card">
+                <div class="card-body">
+                    <div class="input-group">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text">
+                                <i class="fa fa-search" aria-hidden="true"></i>
+                            </span>
+                        </div>
+                        <input type="search" id="searchInput" class="form-control" placeholder="Find a place..." aria-label="Search">
+                    </div>
                 </div>
             </div>
-            <div role="main" class="ui-content">
-                <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
+            <div class="sidebar-content">
+                <ul id="searchsResults" class="search-results-container"></ul>
             </div>
         </div>
 
-        {{!Popup for QR scanner}}
 
-		<div data-role="popup" id="QRdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" >
-	        <div data-role="header" data-theme="b">
-			    <h2>SCAN QR</h2>
-		    </div>
+
+        <!-- Page Content -->
+        <div class="page-content-wrapper">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <button class="btn" data-rel="sidebar" data-ref="#infopanel" data-dismissible>
+                    <i class="fa fa-bars" aria-hidden="true"></i>
+                </button>
+                <span class="title">{{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}</span>
+                <button class="btn" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
+                    <i class="fa fa-search" aria-hidden="true"></i>
+                </button>
+            </nav>
+            <!-- Map Container -->
+            <div class="map-container">
+                <div id="mapplay"></div>
+            </div>
+            <!-- Bottom buttons -->
+            <div class="play-tools-container">
+                <button class="btn play-btn"><i class="fa fa-check" aria-hidden="true"></i></button>
+                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+                <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-info-circle" aria-hidden="true"></i></button>
+                <button class="btn play-btn"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
+            </div>
+        </div>
+        <!-- /#page-content-wrapper -->
+    </div>
+    {{! end map page }}
+
+    {{!Popup for QR scanner}}
+    <div class="play-modal" data-animation="slideInOutTop" id="QRdialog">
+        <!-- modal mask -->
+        <div class="modal-mask"></div>
+
+        <div class="play-modal-dialog">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <span class="title">{{#str}} SCAN QR, mod_treasurehunt{{/str}}</span>
+            </nav>
+
             <div data-role="content" class="ui-content ui-overlay-b">			    
 		           <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
 		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
@@ -116,111 +181,49 @@
 	                <div id="errorQR" style="display:inline">Camera</div>
                 </div>   
             </div>
-		</div>
- 
-        {{!Popup de aviso de envio}}
-
-        <div data-role="popup" id="popupdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
-            <div data-role="header" data-theme="b">
-                <h1>{{#str}} sendlotaciontitle, mod_treasurehunt{{/str}}</h1>
-            </div>
-            <div role="content" class="ui-content ui-overlay-b">
-                <p>{{#str}} sendlotacioncontent, mod_treasurehunt{{/str}}</p>
-                <fieldset class="ui-grid-a">
-                    <div class="ui-block-a">
-                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
-                            {{#str}} cancel, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                    <div class="ui-block-b">
-                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b" data-transition="flow" id="sendLocation">
-                            {{#str}} send, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                </fieldset>
-            </div>
-        </div>{{!Fin de Popup de aviso de envio.}}
-
- {{!Popup de aviso de geolocalizacion.}}
-
-        <div data-role="popup" id="popupgeoloc" data-overlay-theme="b" data-theme="b" data-dismissible="false" >
-            <div data-role="header" data-theme="b">
-                <h1>{{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}</h1>
-            </div>
-            <div role="content" class="ui-content ui-overlay-b">
-                <p>{{#str}} geolocation_needed, mod_treasurehunt{{/str}}</p>
-                <fieldset class="ui-grid-a">
-                    <div class="ui-block-a">
-                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
-                            {{#str}} cancel, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                </fieldset>
-            </div>
-        </div>{{!Fin de Popup de aviso de envio.}}
-
-        {{!Cabecera y barra de herramientas.}}
-
-        <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#infopanel"  data-rel="panel" data-dismissible="true" class="ui-btn ui-btn-left ui-btn-inline ui-icon-bars ui-btn-icon-notext"></a>
-            <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all ui-btn-inline ui-btn-icon-notext ui-icon-search">
-                {{#str}} search, mod_treasurehunt{{/str}}
-            </a>
-            <h1>{{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}</h1>
-        </div>		
-        <div data-role="content" id="content">		  
-            <div id="mapplay"></div>
-            <div class="treasureoverlay" id="roadended" style="position:relative;left: 0;bottom: 0;width: 100%;height: 100%;z-index: 1;background-color: rgba(25,25,25,0.6);text-align: center;" hidden="true">
-            {{#str}}roadended, mod_treasurehunt{{/str}}</div>
-        </div>
-        <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
-            <a href="#popupdialog" data-rel="popup" data-position-to="window" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validatelocation">
-                {{#str}} validatelocation, mod_treasurehunt{{/str}}
-            </a>
-            <a href="#QRdialog" data-rel="popup" data-position-to="window" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check" id="validateqr">
-                {{#str}} validateqr, mod_treasurehunt{{/str}}
-            </a>
-            <a href="#questionpage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment" id="question_button">
-                                        {{#str}}question, mod_treasurehunt{{/str}}
-            </a>
-            <a href="#layerspage" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext">
-                {{#str}} layers, mod_treasurehunt{{/str}}
-            </a>
-            <a href="#historypage" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-info ui-btn-icon-notext">
-                {{#str}} history, mod_treasurehunt{{/str}}
-            </a> 
-            <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext" id="autolocate"></a>
-            <div id="navigation"></div>
-        </div>
-        {{!Fin de Cabecera y barra de herramientas.}}
-        
-    </div>
-    {{! end mappage }}
-    {{!Pagina de capas.}}
-    <div data-role="page" id="layerspage" data-theme="b" >
-        <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} layers, mod_treasurehunt{{/str}}</h1>
-        </div>
-        <div data-role="content">
-            <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
-                <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_treasurehunt{{/str}}</li>
-            </ul>
         </div>
     </div>
-    {{!Fin de pagina de capas.}}
-    {{!Pagina de historial de intentos.}}
-    <div data-role="page" id="historypage" data-theme="b" >
-        <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
+
+
+
+    {{!Popup layer page}}
+    <div class="play-modal" data-animation="slideInOutTop" id="layerspage">
+        <!-- modal mask -->
+        <div class="modal-mask"></div>
+
+        <div class="play-modal-dialog">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <button class="btn close-modal">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="title">{{#str}} layers, mod_treasurehunt{{/str}}</span>
+            </nav>
+
+            <div data-role="content">
+                <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
+                    <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_treasurehunt{{/str}}</li>
+                </ul>
+            </div>
         </div>
-        <div data-role="content">
-        	  <div id="lastsuccessfulstage2" data-role="collapsible" data-collapsed="false" >
+    </div>
+
+    {{!Popup historical attempts page}}
+    <div class="play-modal" data-animation="slideInOutTop" id="historypage">
+        <!-- modal mask -->
+        <div class="modal-mask"></div>
+
+        <div class="play-modal-dialog">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <button class="btn close-modal">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="title">{{#str}} history, mod_treasurehunt{{/str}}</span>
+            </nav>
+
+            <div data-role="content">
+                <div id="lastsuccessfulstage2" data-role="collapsible" data-collapsed="false" >
                     <h3>
                         <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>
                         {{#str}} stageclue, mod_treasurehunt{{/str}} : <span id="lastsuccessfulstagename2"></span>
@@ -228,42 +231,86 @@
                     <div>
                         <p id="lastsuccessfulstageclue2"></p>
                     </div>
-              </div>
-              <div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
-	                <h3>{{#str}} history, mod_treasurehunt{{/str}}</h3>
-			            <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
-			                <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
-			            </ol>
-	          </div>
+                </div>
+                <div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
+                    <h3>{{#str}} history, mod_treasurehunt{{/str}}</h3>
+                        <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
+                            <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
+                        </ol>
+                </div>
+            </div>
         </div>
     </div>
+
+    {{!Popup question page}}
+    <div class="play-modal" data-animation="slideInOutTop" id="questionpage">
+        <!-- modal mask -->
+        <div class="modal-mask"></div>
+
+        <div class="play-modal-dialog">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <button class="btn close-modal">
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
+                </button>
+                <span class="title">{{#str}} question, mod_treasurehunt{{/str}}</span>
+            </nav>
+
+            <div data-role="content">
+                <form>  
+                    <fieldset data-role="controlgroup" id='questionform'>
+                    </fieldset>
+                </form>
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a"><a href="#mappage" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none">
+                            {{#str}} cancel, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b"  data-transition="none" id="sendAnswer">
+                            {{#str}} send, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+    </div>
+
+</div>
+ 
+    {{!Fin de pagina de capas.}}
+    {{!Pagina de historial de intentos.}}
     {{!Fin de pagina de historial de intentos.}}
     {{!Pagina de reponder pregunta.}}
-
-    <div data-role="page" id="questionpage" data-theme="b">
-        <div data-role="header" data-position="fixed" data-tap-toggle="false">
-            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
-            <h1>{{#str}} question, mod_treasurehunt{{/str}}</h1>
-        </div>
-        <div data-role="content">
-            <form>  
-                <fieldset data-role="controlgroup" id='questionform'>
-                </fieldset>
-            </form>
-            <fieldset class="ui-grid-a">
-                <div class="ui-block-a"><a href="#mappage" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none">
-                        {{#str}} cancel, mod_treasurehunt{{/str}}
-                    </a>
-                </div>
-                <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b"  data-transition="none" id="sendAnswer">
-                        {{#str}} send, mod_treasurehunt{{/str}}
-                    </a>
-                </div>
-            </fieldset>
-        </div>
-        
-    </div>
     {{!Fin de pagina de reponder pregunta.}}
-    {{#js}}
+{{#js}}
+require(['jquery'], function($) {
+    {{! SIDEBAR }}
+    $('*[data-rel="sidebar"]').on("click", (e)=> {
+        const target = e.currentTarget;
+        $(target.dataset.ref).addClass("active");
+        if(target.dataset.dismissible != null){
+            $(".sidebar-mask").addClass("active dismissible");
+        }
+    });
 
-    {{/js}}
+    $('.close-sidebar, .sidebar-mask').on("click", ()=> {
+        $(".sidebar").removeClass("active");
+        $(".sidebar-mask").removeClass("active dismissible");
+    });
+
+    {{! MODAL PAGE }}
+    $('*[data-rel="modal"]').on("click", (e)=> {
+        const target = e.currentTarget;
+        $(target.dataset.ref).addClass("active");
+        $(target.dataset.ref + " .modal-mask").addClass("active");
+        if(target.dataset.dismissible != null){
+             $(target.dataset.ref + " .modal-mask").addClass("dismissible");
+        }
+    });
+
+    $(document).on("click", ".close-modal, .modal-mask.dismissible", ()=> {
+        $(".play-modal").removeClass("active");
+        $(".modal-mask").removeClass("active dismissible");
+    });
+});
+{{/js}}
