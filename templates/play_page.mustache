@@ -78,7 +78,7 @@
                             </h5>
                         </div>
 
-                        <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion">
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
                             <div class="card-body">
                                 {{{treasurehunt.description}}}
                             </div>
@@ -88,12 +88,12 @@
                     <div class="card">
                         <div class="card-header" id="headingTwo">
                             <h5 class="mb-0">
-                                <button id="lastsuccessfulstagename" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                <button id="lastsuccessfulstagename" class="btn btn-link collapsed" data-toggle="collapse" data-target="#lastsuccessfulstage" aria-expanded="false" aria-controls="lastsuccessfulstage">
                                  <span id="lastsuccesfulstagepos" class="badge badge-light"></span> 
                                 </button>
                             </h5>
                         </div>
-                        <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
+                        <div id="lastsuccessfulstage" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
                             <div class="card-body" id="lastsuccessfulstageclue">
                             </div>
                         </div>
@@ -252,17 +252,20 @@
             </nav>
 
             <div class="dialog-content">
-                <div id="lastsuccessfulstage2" data-role="collapsible" data-collapsed="false" >
-                    <h3>
-                        <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>
-                        {{#str}} stageclue, mod_treasurehunt{{/str}} : <span id="lastsuccessfulstagename2"></span>
-                    </h3>
-                    <div>
-                        <p id="lastsuccessfulstageclue2"></p>
+                <h4>                        
+                    {{#str}} stageclue, mod_treasurehunt{{/str}}: 
+                </h4>
+                <div class="card">
+                    <div class="card-body">
+                        <div class="card-title d-flex justify-content-between align-items-start">
+                            <h5  id="lastsuccessfulstagename2"></h5>
+                            <span class="badge badge-dark" id="lastsuccesfulstagepos2"></span>
+                        </div>
+                        <p class="card-text" id="lastsuccessfulstageclue2"></p>
                     </div>
                 </div>
                 <div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
-                    <h3>{{#str}} history, mod_treasurehunt{{/str}}</h3>
+                    <h4>{{#str}} history, mod_treasurehunt{{/str}}</h4>
                         <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
                             <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
                         </ol>
@@ -316,14 +319,18 @@ require(['jquery'], function($) {
     {{! SIDEBAR }}
     $('*[data-rel="sidebar"]').on("click", (e)=> {
         const target = e.currentTarget;
-        $(target.dataset.ref).addClass("active");
+        const sidebar = $(target.dataset.ref);
+        sidebar.trigger("sidebar:open");
+        sidebar.addClass("active");
         if(target.dataset.dismissible != null){
             $(".sidebar-mask").addClass("active dismissible");
         }
     });
 
     $('.close-sidebar, .sidebar-mask').on("click", ()=> {
-        $(".sidebar").removeClass("active");
+        const sidebars = $(".sidebar.active");
+        sidebars.trigger("sidebar:close");
+        sidebars.removeClass("active");
         $(".sidebar-mask").removeClass("active dismissible");
     });
 

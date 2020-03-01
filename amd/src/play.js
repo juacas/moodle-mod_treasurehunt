@@ -799,9 +799,8 @@ define([
               "</a>"
           );
         }
-        $("#collapsibleset").collapsibleset("refresh");
-        $("#infopanel").panel("open");
-        $("#lastsuccessfulstage").collapsible("expand");
+        openSidePanel("#infopanel");
+        $("#lastsuccessfulstage").collapse("show");
         changesinlastsuccessfulstage = false;
       }
     }
@@ -978,7 +977,7 @@ define([
           !roadfinished &&
           available
         ) {
-          $("#infopanel").panel("open");
+          openSidePanel("#infopanel");
           $("#lastsuccessfulstage").collapse("show");
         } else {
           let stagename = features.selected[0].get("name");
@@ -1047,7 +1046,11 @@ define([
           osmGeocoderXHR = OSMGeocoder.search(value)
             .done(resp => {
               if (resp.length === 0) {
-                $searchContainer.html("<li>" + strings["noresults"] + "</li>");
+                $searchContainer.html(
+                  "<li class='list-group-item'>" +
+                    strings["noresults"] +
+                    "</li>"
+                );
               } else {
                 $.each(resp, (i, place) => {
                   let link = $("<button>", {
@@ -1072,7 +1075,7 @@ define([
                   let linkContent = $("<div>", {
                     text: place.display_name,
                     class: "search-option"
-                  }).append($("<i class='fa fa-check-circle'>"));
+                  }).append($("<i class='fa fa-chevron-circle-right'>"));
                   link.append(linkContent);
                 });
               }
@@ -1135,11 +1138,10 @@ define([
         }
       });
     }
-    $("#infopanel").panel({
-      beforeclose: function() {
-        select.getFeatures().clear();
-      }
+    $("#infopanel").on("sidebar:close", () => {
+      select.getFeatures().clear();
     });
+
     $("#sendLocation").on("click", function() {
       validateposition(true);
     });
@@ -1172,13 +1174,13 @@ define([
       if (lastsuccessfulstage.question !== "") {
         event.preventDefault();
         toast(strings["answerwarning"]);
-        $("#infopanel").panel("open");
+        openSidePanel("#infopanel");
         return;
       }
       if (!lastsuccessfulstage.activitysolved) {
         event.preventDefault();
         toast(strings["activitytoendwarning"]);
-        $("#infopanel").panel("open");
+        openSidePanel("#infopanel");
         return;
       }
     });
@@ -1307,7 +1309,10 @@ define([
     //     "</div>"
     //   );
     // }
-
+    function openSidePanel(id) {
+      $(id).addClass("active");
+      $(".sidebar-mask").addClass("active dismissible");
+    }
     function closeSidePanel(id) {
       $(id).removeClass("active");
       $(".sidebar-mask").removeClass("active dismissible");
