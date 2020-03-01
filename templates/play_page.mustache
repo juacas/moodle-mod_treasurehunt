@@ -88,14 +88,13 @@
                     <div class="card">
                         <div class="card-header" id="headingTwo">
                             <h5 class="mb-0">
-                                <button class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
-                                Collapsible Group Item #2
+                                <button id="lastsuccessfulstagename" class="btn btn-link collapsed" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+                                 <span id="lastsuccesfulstagepos" class="badge badge-light"></span> 
                                 </button>
                             </h5>
                         </div>
                         <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                            <div class="card-body">
-                                Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+                            <div class="card-body" id="lastsuccessfulstageclue">
                             </div>
                         </div>
                     </div>
@@ -126,7 +125,7 @@
                 </div>
             </div>
             <div class="sidebar-content">
-                <ul id="searchsResults" class="search-results-container"></ul>
+                <div id="searchsResults" class="list-group"></div>
             </div>
         </div>
 
@@ -151,9 +150,9 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn"><i class="fa fa-check" aria-hidden="true"></i></button>
-                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
-                <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-info-circle" aria-hidden="true"></i></button>
-                <button class="btn play-btn"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
+                <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+                <button class="btn play-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
+                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
         </div>
         <!-- /#page-content-wrapper -->
@@ -161,6 +160,31 @@
     {{! end map page }}
 
     {{!Popup for QR scanner}}
+    <div class="play-modal" data-animation="slideInOutTop" id="QRdialog">
+        <!-- modal mask -->
+        <div class="modal-mask"></div>
+
+        <div class="play-modal-dialog">
+            <!-- Header -->
+            <nav class="play-navbar">
+                <span class="title">{{#str}} SCAN QR, mod_treasurehunt{{/str}}</span>
+            </nav>
+
+            <div data-role="content" class="ui-content ui-overlay-b">			    
+		           <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
+		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
+                <div id="previewQRbuttons" class="ui-block-a">
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
+                        {{#str}} cancel, mod_treasurehunt{{/str}}
+                    </a><a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="nextcamera"></a>
+	                <div id="errorQR" style="display:inline">Camera</div>
+                </div>   
+            </div>
+        </div>
+    </div>
+
+
+       {{!Popup for location confirmation}}
     <div class="play-modal" data-animation="slideInOutTop" id="QRdialog">
         <!-- modal mask -->
         <div class="modal-mask"></div>
@@ -194,16 +218,18 @@
         <div class="play-modal-dialog">
             <!-- Header -->
             <nav class="play-navbar">
-                <button class="btn close-modal">
+                <button class="btn close-modal back-page">
                     <i class="fa fa-chevron-left" aria-hidden="true"></i>
                 </button>
                 <span class="title">{{#str}} layers, mod_treasurehunt{{/str}}</span>
+                <button class="btn close-modal close-popup">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
             </nav>
-
-            <div data-role="content">
-                <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
-                    <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_treasurehunt{{/str}}</li>
-                </ul>
+        
+            <div class="dialog-content">
+                <h5 class="card-title">{{#str}} mapview, mod_treasurehunt{{/str}}</h5>
+                <div class="list-group" id="layerslist"></div>
             </div>
         </div>
     </div>
@@ -216,13 +242,16 @@
         <div class="play-modal-dialog">
             <!-- Header -->
             <nav class="play-navbar">
-                <button class="btn close-modal">
+                <button class="btn close-modal back-page">
                     <i class="fa fa-chevron-left" aria-hidden="true"></i>
                 </button>
                 <span class="title">{{#str}} history, mod_treasurehunt{{/str}}</span>
+                <button class="btn close-modal close-popup">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                </button>
             </nav>
 
-            <div data-role="content">
+            <div class="dialog-content">
                 <div id="lastsuccessfulstage2" data-role="collapsible" data-collapsed="false" >
                     <h3>
                         <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>

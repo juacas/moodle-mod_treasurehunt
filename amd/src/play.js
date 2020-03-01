@@ -237,7 +237,7 @@ define([
     let infomsgs = [];
     let attemptshistory = [];
     let changesinattemptshistory = false;
-    // let changesinlastsuccessfulstage = false;
+    let changesinlastsuccessfulstage = false;
     let changesinquestionstage = false;
     let fitmap = false;
     let roadfinished = false;
@@ -688,7 +688,7 @@ define([
             //   .pagecontainer("getActivePage")
             //   .prop("id");
             // // Update the page model wherever the page we are.
-            // set_lastsuccessfulstage();
+            set_lastsuccessfulstage();
             fit_map_to_source();
             set_question();
             // if (pageId === "mappage") {
@@ -747,64 +747,64 @@ define([
         fitmap = false;
       }
     }
-    // function set_lastsuccessfulstage() {
-    //   if (changesinlastsuccessfulstage) {
-    //     $("#lastsuccessfulstagename").text(
-    //       strings["stage"] + ":" + lastsuccessfulstage.name
-    //     );
-    //     $("#lastsuccesfulstagepos").text(
-    //       lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
-    //     );
-    //     var maxchars = 100;
-    //     var briefing;
-    //     // Clean color styles from clue.
-    //     lastsuccessfulstage.clue = lastsuccessfulstage.clue.replace(
-    //       /color/gm,
-    //       "color-disabled"
-    //     );
-    //     $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
-    //     var clueplaintext = lastsuccessfulstage.clue.replace(
-    //       /<(?:.|\n)*?>/gm,
-    //       ""
-    //     );
-    //     if (clueplaintext.length > maxchars * 2) {
-    //       $("#lastsuccessfulstageclue").truncate(maxchars * 2);
-    //       briefing =
-    //         ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ' +
-    //         'ui - btn - inline ui - icon - info ui - btn - icon - notext"></a> ';
-    //       $("#lastsuccessfulstageclue").append(briefing);
-    //     } else {
-    //       briefing = lastsuccessfulstage.clue;
-    //     }
+    function set_lastsuccessfulstage() {
+      if (changesinlastsuccessfulstage) {
+        $("#lastsuccessfulstagename").text(
+          strings["stage"] + ":" + lastsuccessfulstage.name
+        );
+        $("#lastsuccesfulstagepos").text(
+          lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
+        );
+        var maxchars = 100;
+        var briefing;
+        // Clean color styles from clue.
+        lastsuccessfulstage.clue = lastsuccessfulstage.clue.replace(
+          /color/gm,
+          "color-disabled"
+        );
+        $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+        var clueplaintext = lastsuccessfulstage.clue.replace(
+          /<(?:.|\n)*?>/gm,
+          ""
+        );
+        if (clueplaintext.length > maxchars * 2) {
+          $("#lastsuccessfulstageclue").truncate(maxchars * 2);
+          briefing =
+            ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ' +
+            'ui - btn - inline ui - icon - info ui - btn - icon - notext"></a> ';
+          $("#lastsuccessfulstageclue").append(briefing);
+        } else {
+          briefing = lastsuccessfulstage.clue;
+        }
 
-    //     $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
-    //     $("#lastsuccesfulstagepos2").text(
-    //       lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
-    //     );
-    //     $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
+        $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
+        $("#lastsuccesfulstagepos2").text(
+          lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
+        );
+        $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
 
-    //     if (lastsuccessfulstage.question !== "") {
-    //       $("#lastsuccessfulstageclue").append(
-    //         "<a href='#questionpage' " +
-    //           "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
-    //           "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
-    //           strings["question"] +
-    //           "</a>"
-    //       );
-    //       $("#lastsuccessfulstageclue2").append(
-    //         "<a href='#questionpage' " +
-    //           "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
-    //           "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
-    //           strings["question"] +
-    //           "</a>"
-    //       );
-    //     }
-    //     $("#collapsibleset").collapsibleset("refresh");
-    //     $("#infopanel").panel("open");
-    //     $("#lastsuccessfulstage").collapsible("expand");
-    //     changesinlastsuccessfulstage = false;
-    //   }
-    // }
+        if (lastsuccessfulstage.question !== "") {
+          $("#lastsuccessfulstageclue").append(
+            "<a href='#questionpage' " +
+              "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
+              "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
+              strings["question"] +
+              "</a>"
+          );
+          $("#lastsuccessfulstageclue2").append(
+            "<a href='#questionpage' " +
+              "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
+              "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
+              strings["question"] +
+              "</a>"
+          );
+        }
+        $("#collapsibleset").collapsibleset("refresh");
+        $("#infopanel").panel("open");
+        $("#lastsuccessfulstage").collapsible("expand");
+        changesinlastsuccessfulstage = false;
+      }
+    }
     function set_question() {
       if (changesinquestionstage) {
         // Clean color tag.
@@ -872,47 +872,46 @@ define([
       }
     }
     function add_layer_to_list(layer) {
-      var item = $("<li>", {
-        "data-icon": "check",
-        class: layer.getVisible() ? "checked" : "unchecked"
-      }).append(
-        $("<a />", {
-          text: layer.get("name"),
-          href: "#mappage"
-        }).click(function() {
-          layer.setVisible(!layer.getVisible());
-        })
-      );
-      layer.on("change:visible", function() {
-        $(item).toggleClass("checked unchecked");
+      let link = $("<button>", {
+        type: "button",
+        class: "list-group-item list-group-item-action close-modal"
+      }).click(() => {
+        layer.setVisible(!layer.getVisible());
       });
-      item.insertAfter("#baseLayer");
+      let linkContent = $("<div>", {
+        text: layer.get("name"),
+        class: "layer-item " + (layer.getVisible() ? "" : "unchecked")
+      }).append($("<i class='fa fa-check-circle'>"));
+      link.append(linkContent);
+      layer.on("change:visible", () => {
+        $(linkContent).toggleClass("unchecked");
+      });
+      $("#layerslist").prepend(link);
     }
 
     function add_layergroup_to_list(layergroup) {
       layergroup.getLayers().forEach(layer => {
-        const item = $("<li>", {
-          class: layer.getVisible()
-            ? "checked close-modal"
-            : "unchecked close-modal"
-        }).append(
-          $("<a />", {
-            text: layer.get("name"),
-            href: "#mappage"
-          }).click(() => {
-            layergroup.getLayers().forEach(l => {
-              if (l === layer) {
-                l.setVisible(true);
-              } else {
-                l.setVisible(false);
-              }
-            });
-          })
-        );
-        layer.on("change:visible", () => {
-          $(item).toggleClass("checked unchecked");
+        let link = $("<button>", {
+          type: "button",
+          class: "list-group-item list-group-item-action close-modal"
+        }).click(() => {
+          layergroup.getLayers().forEach(l => {
+            if (l === layer) {
+              l.setVisible(true);
+            } else {
+              l.setVisible(false);
+            }
+          });
         });
-        item.insertAfter("#baseLayer");
+        let linkContent = $("<div>", {
+          text: layer.get("name"),
+          class: "layer-item " + (layer.getVisible() ? "" : "unchecked")
+        }).append($("<i class='fa fa-check-circle'>"));
+        link.append(linkContent);
+        layer.on("change:visible", () => {
+          $(linkContent).toggleClass("unchecked");
+        });
+        $("#layerslist").prepend(link);
       });
     }
     /**
@@ -980,7 +979,7 @@ define([
           available
         ) {
           $("#infopanel").panel("open");
-          $("#lastsuccessfulstage").collapsible("expand");
+          $("#lastsuccessfulstage").collapse("show");
         } else {
           let stagename = features.selected[0].get("name");
           let stageclue = features.selected[0].get("clue");
@@ -1034,10 +1033,10 @@ define([
       if (osmTimer) {
         clearTimeout(osmTimer);
       }
-      const $ul = $("#searchsResults");
+      const $searchContainer = $("#searchsResults");
       const value = ev.target.value;
       let html = "";
-      $ul.html(html);
+      $searchContainer.html(html);
       if (value && value.length > 2) {
         // $.mobile.loading("show", {
         //   text: strings["searching"],
@@ -1048,13 +1047,14 @@ define([
           osmGeocoderXHR = OSMGeocoder.search(value)
             .done(resp => {
               if (resp.length === 0) {
-                $ul.html("<li>" + strings["noresults"] + "</li>");
+                $searchContainer.html("<li>" + strings["noresults"] + "</li>");
               } else {
                 $.each(resp, (i, place) => {
-                  $("<li class='search-option'>")
-                    .hide()
-                    .text(place.display_name)
-                    .appendTo($ul)
+                  let link = $("<button>", {
+                    type: "button",
+                    class: "list-group-item list-group-item-action"
+                  })
+                    .appendTo($searchContainer)
                     .click(() => {
                       var extent = [];
                       extent[0] = parseFloat(place.boundingbox[2]);
@@ -1068,8 +1068,12 @@ define([
                       );
                       fly_to(map, null, extent);
                       closeSidePanel("#searchpanel");
-                    })
-                    .show();
+                    });
+                  let linkContent = $("<div>", {
+                    text: place.display_name,
+                    class: "search-option"
+                  }).append($("<i class='fa fa-check-circle'>"));
+                  link.append(linkContent);
                 });
               }
             })
