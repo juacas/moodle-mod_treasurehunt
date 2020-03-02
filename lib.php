@@ -134,7 +134,8 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
  */
 function treasurehunt_delete_instance($id) {
     global $DB;
-    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id), MUST_EXIST);
+    /** @var moodle_database $DB */
+    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id), '*', MUST_EXIST);
     // Delete any dependent records here.
     $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
     foreach ($roads as $road) {
