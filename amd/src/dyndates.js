@@ -221,4 +221,4 @@ define(['jquery', 'core/str'], function ($, str) {
         }
     }
     return dyndates;
-})
+});

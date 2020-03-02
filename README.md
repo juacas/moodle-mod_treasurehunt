@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.3.1 Fix in dyndates.js. Fix radio buttons in answers for Moodle up to 3.7.
  - v1.3.0 Dates and times update in real-time. Interface pulishment. Workaround to Babel compiler conflict in player page.
  - v1.2.22c Solve javascript conflict with Babel compiler in Moodle 3.8. Simplify editor buttonset. Dynamic icon.
  - v1.2.22b Update player jacvascript to be compatible with Moodle 3.8
