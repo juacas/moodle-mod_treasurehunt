@@ -74,11 +74,11 @@ define([
         "error"
       ];
       // console.log("loading i18n strings");
-      var stringsqueried = terms.map(function(term) {
+      var stringsqueried = terms.map(term => {
         return { key: term, component: "treasurehunt" };
       });
       // i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
-      str.get_strings(stringsqueried).done(function(strings) {
+      str.get_strings(stringsqueried).done(strings => {
         var i18n = [];
         for (var i = 0; i < terms.length; i++) {
           i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
@@ -154,6 +154,7 @@ define([
     // I18n support.
     // console.log("init player Openlayers");
     // $.mobile.loading("show");
+    setLoading(true);
     var mapprojection = "EPSG:3857";
     var custombaselayer = null;
     var geographictools = true;
@@ -380,7 +381,7 @@ define([
     var layergroup = new ol.layer.Group({ layers: layersbase });
     // All layers hidden except last one.
     var toplayer = null;
-    layergroup.getLayers().forEach(function(layer) {
+    layergroup.getLayers().forEach(layer => {
       layer.setVisible(false);
       toplayer = layer;
     });
@@ -394,7 +395,7 @@ define([
     var select = new ol.interaction.Select({
       layers: [attemptslayer],
       style: select_style_function,
-      filter: function(feature) {
+      filter: feature => {
         if (feature.get("stageposition") === 0) {
           return false;
         }
@@ -440,13 +441,13 @@ define([
     // It initializes the game.
     renew_source(false, true);
     // For the game is updated every gameupdatetime seconds.
-    interval = setInterval(function() {
+    interval = setInterval(() => {
       renew_source(false, false);
     }, gameupdatetime);
     // Initialize the page layers.
 
     add_layergroup_to_list(layergroup);
-    layersoverlay.forEach(function(overlay) {
+    layersoverlay.forEach(overlay => {
       add_layer_to_list(overlay);
     });
     if (tracking && user) {
@@ -574,10 +575,13 @@ define([
       }
       if (selectedanswerid) {
         // $.mobile.loading("show");
+        setLoading(true);
         answerid = selectedanswerid;
       }
       if (location) {
         position = currentposition;
+        setLoading(true);
+
         // $.mobile.loading("show");
       }
       var geojson = ajax.call([
@@ -602,11 +606,13 @@ define([
         }
       ]);
       geojson[0]
-        .done(function(response) {
+        .done(response => {
           // let body = "";
           qoaremoved = response.qoaremoved;
           roadfinished = response.roadfinished;
           available = response.available;
+          setLoading(false);
+
           // $.mobile.loading("hide");
           // If I have sent a location or an answer I print out whether it is correct or not.
           if (location || selectedanswerid) {
@@ -704,10 +710,10 @@ define([
             // }
           }
           if (response.infomsg.length > 0) {
-            infomsgs.forEach(function() {
+            infomsgs.forEach(() => {
               // body += "<p>" + msg + "</p>";
             });
-            response.infomsg.forEach(function(msg) {
+            response.infomsg.forEach(msg => {
               infomsgs.push(msg);
               // body += "<p>" + msg + "</p>";
             });
@@ -726,7 +732,7 @@ define([
             $("#mapplay").css("opacity", "0.8");
           }
         })
-        .fail(function() {
+        .fail(() => {
           // console.log(error);
           // create_popup("displayerror", strings["error"], error.message);
           clearInterval(interval);
@@ -799,7 +805,7 @@ define([
               "</a>"
           );
         }
-        openSidePanel("#infopanel");
+        // openSidePanel("#infopanel");
         $("#lastsuccessfulstage").collapse("show");
         changesinlastsuccessfulstage = false;
       }
@@ -816,7 +822,7 @@ define([
           "<legend>" + lastsuccessfulstage.question + "</legend>"
         );
         var counter = 1;
-        $.each(lastsuccessfulstage.answers, function(key, answer) {
+        $.each(lastsuccessfulstage.answers, (key, answer) => {
           var id = "answer" + counter;
           // Clean color tag.
           answer.answertext = answer.answertext.replace(
@@ -854,7 +860,7 @@ define([
           $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
         } else {
           // Anado cada intento
-          attemptshistory.forEach(function(attempt) {
+          attemptshistory.forEach(attempt => {
             $(
               "<li><span class='ui-btn-icon-left " +
                 (attempt.penalty
@@ -928,29 +934,30 @@ define([
       })
     );
     /*-------------------------------Events-----------------------------------*/
-    geolocation.on("change:position", function() {
-      var coordinates = this.getPosition();
+    geolocation.on("change:position", () => {
+      debugger;
+      var coordinates = geolocation.getPosition();
       positionFeature.setGeometry(
         coordinates ? new ol.geom.Point(coordinates) : null
       );
       // The map must be re-centered in the new position
-      if (this.get("center")) {
+      if (geolocation.get("center")) {
         fly_to(map, coordinates);
-        this.setProperties({ center: false }); // Disable center request. Deprecated.
+        geolocation.setProperties({ center: false }); // Disable center request. Deprecated.
       }
       // the new position must be evaluated
-      if (this.get("validate_location")) {
+      if (geolocation.get("validate_location")) {
         renew_source(true, false);
-        this.setProperties({ validate_location: false }); // Disable validate_location request. Deprecated.
+        geolocation.setProperties({ validate_location: false }); // Disable validate_location request. Deprecated.
       }
       // $.mobile.loading("hide");
     });
-    geolocation.on("change:accuracyGeometry", function() {
-      accuracyFeature.setGeometry(this.getAccuracyGeometry());
+    geolocation.on("change:accuracyGeometry", () => {
+      accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
       // $.mobile.loading("hide");
     });
     var trackinggeolocationwarndispatched = false;
-    geolocation.on("error", function(error) {
+    geolocation.on("error", error => {
       // $.mobile.loading("hide");
       geolocation.setProperties({ user_denied: true });
       toast(error.message);
@@ -960,7 +967,7 @@ define([
         !playwithoutmoving &&
         trackinggeolocationwarndispatched == false
       ) {
-        setTimeout(function() {
+        setTimeout(() => {
           $("#popupgeoloc").popup("open", { positionTo: "window" });
           trackinggeolocationwarndispatched = true;
         }, 500);
@@ -968,7 +975,7 @@ define([
     });
     geolocation.setTracking(tracking); // Start position tracking.
 
-    select.on("select", function(features) {
+    select.on("select", features => {
       if (features.selected.length === 1) {
         if (
           lastsuccessfulstage.position ===
@@ -1003,20 +1010,21 @@ define([
         }
       }
     });
-    map.on("click", function(evt) {
+    map.on("click", evt => {
       var hasFeature = false;
-      map.forEachFeatureAtPixel(map.getEventPixel(evt.originalEvent), function(
-        feature
-      ) {
-        if (
-          feature.get("stageposition") === 0 ||
-          feature.get("name") === "user_position" ||
-          feature.get("name") === "user_accuracy"
-        ) {
-          return false;
+      map.forEachFeatureAtPixel(
+        map.getEventPixel(evt.originalEvent),
+        feature => {
+          if (
+            feature.get("stageposition") === 0 ||
+            feature.get("name") === "user_position" ||
+            feature.get("name") === "user_accuracy"
+          ) {
+            return false;
+          }
+          hasFeature = true;
         }
-        hasFeature = true;
-      });
+      );
       if (playwithoutmoving && !hasFeature) {
         var coordinates = map.getEventCoordinate(evt.originalEvent);
         markerFeature.setGeometry(
@@ -1084,30 +1092,11 @@ define([
             .always(() => {
               osmGeocoderXHR = null;
             });
-          //loading hide
         }, 400);
       }
     });
-    // Scroll to collapsible expanded
-    $("#infopanel").on(
-      "collapsibleexpand",
-      "[data-role='collapsible']",
-      function() {
-        var innerinfopanel = $("#infopanel .ui-panel-inner");
-        innerinfopanel.animate(
-          {
-            scrollTop: parseInt(
-              $(this).offset().top -
-                innerinfopanel.offset().top +
-                innerinfopanel.scrollTop()
-            )
-          },
-          500
-        );
-      }
-    );
     // Set a max-height to make large images shrink to fit the screen.
-    $(document).on("popupbeforeposition", function() {
+    $(document).on("popupbeforeposition", () => {
       var maxHeight = $(window).height() - 200 + "px";
       $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
     });
@@ -1121,16 +1110,16 @@ define([
       }
     );
 
-    $(document).on("click", "#acceptupdates", function() {
+    $(document).on("click", "#acceptupdates", () => {
       infomsgs = [];
     });
     // Redraw map.
-    $(window).on("resize", function() {
+    $(window).on("resize", () => {
       map.updateSize();
     });
     //Buttons events.
     if (geographictools) {
-      $("#autolocate").on("click", function() {
+      $("#autolocate").on("click", () => {
         if (geolocation.get("user_denied")) {
           $("#popupgeoloc").popup("open", { positionTo: "window" });
         } else {
@@ -1142,10 +1131,10 @@ define([
       select.getFeatures().clear();
     });
 
-    $("#sendLocation").on("click", function() {
+    $("#sendLocation").on("click", () => {
       validateposition(true);
     });
-    $("#sendAnswer").on("click", function(event) {
+    $("#sendAnswer").on("click", event => {
       // Selecciono la respuesta.
       var selected = $("#questionform input[type='radio']:checked");
       if (!available) {
@@ -1160,7 +1149,7 @@ define([
         }
       }
     });
-    $("#validatelocation").on("click", function(event) {
+    $("#validatelocation").on("click", event => {
       if (roadfinished) {
         event.preventDefault();
         toast(strings["huntcompleted"]);
@@ -1189,7 +1178,7 @@ define([
     /*-------------------------------Help functions -------------*/
     function toast(msg) {
       if ($(".toast").length > 0) {
-        setTimeout(function() {
+        setTimeout(() => {
           toast(msg);
         }, 2500);
       } else {
@@ -1316,6 +1305,13 @@ define([
     function closeSidePanel(id) {
       $(id).removeClass("active");
       $(".sidebar-mask").removeClass("active dismissible");
+    }
+    function setLoading(loading) {
+      if (loading) {
+        $(".global-loader").addClass("active");
+      } else {
+        $(".global-loader").removeClass("active");
+      }
     }
   }
 });

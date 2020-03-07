@@ -41,6 +41,9 @@
 }}
 
 <div class="play-container">
+    <div class="global-loader active">
+        {{> treasurehunt/loading_animation }}
+    </div>
     {{! Main map page }}
     <div class="map-page">
         <!-- sidebar mask -->
@@ -57,9 +60,13 @@
             </nav>
 
             <div class="sidebar-content">
+                <!--<h5>{{{user.picture}}} {{user.name}}</h5> -->
                 <div class="card">
                     <div class="card-body">
-                        <h5>{{{user.picture}}} {{user.name}}</h5>
+                         <div class="card-title d-flex justify-content-between align-items-start">
+                            <h5>{{treasurehunt.name}}</h5>
+                        </div>
+                        <p class="card-text">{{{treasurehunt.description}}}</p>
                         <a href="view.php?id={{cmid}}" class="btn play-btn">
                             <i class="fa fa-sign-out" aria-hidden="true"></i>
                             {{#str}} exit, mod_treasurehunt{{/str}}
@@ -67,7 +74,7 @@
                     </div>
                  </div>
 
-                 <div id="accordion">
+              <!--   <div id="accordion">
                     {{#hasdescription}}
                     <div class="card">
                         <div class="card-header" id="headingOne">
@@ -98,7 +105,7 @@
                             </div>
                         </div>
                     </div>
-                </div>
+                </div>-->
 
             </div>
         </div>
@@ -150,9 +157,13 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn"><i class="fa fa-check" aria-hidden="true"></i></button>
-                <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
-                <button class="btn play-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
-                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
+                <button class="btn play-highlight-btn" data-rel="modal" data-ref="#historypage" data-dismissible>
+                   Mostrar Pista
+                </button>
+                 <button class="btn play-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button> 
+                {{! <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+               }}
+                {{! <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button> }}
             </div>
         </div>
         <!-- /#page-content-wrapper -->
@@ -252,9 +263,9 @@
             </nav>
 
             <div class="dialog-content">
-                <h4>                        
+                <!-- <h4>                        
                     {{#str}} stageclue, mod_treasurehunt{{/str}}: 
-                </h4>
+                </h4> -->
                 <div class="card">
                     <div class="card-body">
                         <div class="card-title d-flex justify-content-between align-items-start">
@@ -264,12 +275,12 @@
                         <p class="card-text" id="lastsuccessfulstageclue2"></p>
                     </div>
                 </div>
-                <div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
+                 <!--<div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
                     <h4>{{#str}} history, mod_treasurehunt{{/str}}</h4>
                         <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
                             <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
                         </ol>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>
