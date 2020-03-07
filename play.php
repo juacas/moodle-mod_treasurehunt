@@ -83,7 +83,7 @@ $PAGE->requires->js_call_amd(
 );
 $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
-// $PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
+$PAGE->requires->css('/mod/treasurehunt/css/loading-animation.css');
 $PAGE->requires->css('/mod/treasurehunt/css/play.css');
 
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
@@ -114,38 +114,4 @@ $event->add_record_snapshot('treasurehunt', $treasurehunt);
 $event->trigger();
 
 // Finish the page.
-$page = $output->footer();
-
-// JPC: Generate a global variable with strings. Moodle 3.8 broke compatibility of core/str with jquery 2.1.4.
-$terms = array('stageovercome', 'failedlocation', 'stage', 'stagename',
-    'stageclue', 'question', 'noanswerselected', 'timeexceeded',
-    'searching', 'continue', 'noattempts', 'aerialview', 'roadview',
-    'noresults', 'startfromhere', 'nomarks', 'updates', 'activitytoendwarning',
-    'huntcompleted', 'discoveredlocation', 'answerwarning', 'error', );
-$strings = array();
-foreach ($terms as $term) {
-    $strings[$term] = get_string($term, 'treasurehunt');
-}
-$i18n = json_encode($strings);
-echo <<<I18N
-<!-- Internationalization strings for the player -->
-<script type="text/javascript">
-i18nplay = {$i18n};
-</script>
-
-I18N;
-
-// Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
-$disable = array(
-    'core/notification',
-    'block_navigation/navblock',
-    'block_settings/settingsblock',
-    // 'theme_boost/loader',
-    'core/log',
-    'core/page_global',
-);
-$pagefiltered = $page;
-foreach ($disable as $module) {
-    $pagefiltered = str_replace("M.util.js_pending('{$module}')", "//M.util.js_pending('{$module}')", $pagefiltered);
-}
-echo $pagefiltered;
+echo $output->footer();
