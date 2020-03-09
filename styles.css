@@ -503,11 +503,23 @@ body {
 }
 
 #page-mod-treasurehunt-play #validatelocation {
-  padding-top: 0.6em;
-  padding-bottom: 0.6em;
-  display: none;
+  left: 8rem;
+  font-size: 2rem;
+  margin-top: 0.5rem;
+  bottom: 1rem;
+  display: inline;
+  background-color: #90ab6d;
 }
 
+#page-mod-treasurehunt-play #validatelocation::after {
+  left: 50%;
+  margin-left: -1rem;
+  background-size: 2rem;
+  width: 2rem;
+  height: 2rem;
+  top: 1.5rem;
+  background-color: #90ab6d;
+}
 #page-mod-treasurehunt-play .successfulattempt::after {
   background-color: #5cd053 !important;
 }
@@ -587,6 +599,13 @@ body {
 #page-mod-treasurehunt-play .center-wrapper,
 .ui-footer {
   text-align: center;
+}
+
+#page-mod-treasurehunt-play .ui-footer {
+  display: flex;
+  flex-wrap: nowrap;
+  justify-content: center;
+  height: 3rem;
 }
 
 #page-mod-treasurehunt-play .checked {

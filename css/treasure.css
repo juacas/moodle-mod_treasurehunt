@@ -29,3 +29,36 @@ div#mappage {
 #autolocate {
   margin-right: 3px;
 }
+
+#QRdialog {
+  top: -2rem;
+}
+
+#historybtn {
+  width: 12rem;
+  height: 8rem;
+  border-radius: 50%;
+  position: absolute;
+  bottom: -4rem;
+  border-width: 0.2rem;
+  background-color: transparent;
+  border-style: none;
+}
+
+#historybtn img {
+  width: 12rem;
+  height: 5rem;
+}
+#autolocate {
+  position: absolute;
+  left: -0.5rem;
+  font-size: 1.5rem;
+  margin-top: 0.5rem;
+  top: -4rem;
+}
+#autolocate::after {
+  background-size: 1.5rem;
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-left: auto;
+}
