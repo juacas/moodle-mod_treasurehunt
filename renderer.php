@@ -88,6 +88,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
     {
         // Create a table for the data.
         $o = '';
+        // Si no ha finalizado pongo el botón de jugar.
+        $urlparams = array('id' => $historical->coursemoduleid);
+        if ($historical->outoftime || $historical->roadfinished) {
+            $string = get_string('reviewofplay', 'treasurehunt');
+        } else {
+            $string = get_string('play', 'treasurehunt');
+        }
+        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
+            $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
+        }
         $o .= $this->output->container_start('attempthistory');
         $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
@@ -121,16 +131,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'), 'notifymessage');
             }
         }
-        // Si no ha finalizado pongo el botón de jugar.
-        $urlparams = array('id' => $historical->coursemoduleid);
-        if ($historical->outoftime || $historical->roadfinished) {
-            $string = get_string('reviewofplay', 'treasurehunt');
-        } else {
-            $string = get_string('play', 'treasurehunt');
-        }
-        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
-            $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
-        }
+
         $o .= $this->output->box_end();
 
         // Close the container and insert a spacer.
