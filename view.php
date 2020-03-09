@@ -68,6 +68,8 @@ $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+//$PAGE->requires->css('/mod/treasurehunt/css/view.css');
+
 echo $output->header();
 echo $output->heading(
     html_writer::empty_tag('img', array('src' => treasurehunt_get_proper_icon($treasurehunt, time()))) . ' ' .
