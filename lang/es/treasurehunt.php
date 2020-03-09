@@ -421,5 +421,5 @@ $string['prevstep'] = 'Ant.';
 $string['skiptutorial'] = 'Salir';
 $string['donetutorial'] = '¡Visto!';
 // Privacy strings.
-$string['privacy:metadata_treasurehunt_track_userid'] = 'Treasure hunt almacena la secuencia de posiciones del usuario durante la actividad (si el profesor ha activado esa opción).';
-$string['privacy:metadata_treasurehunt_attempts_userid'] = 'Treasure hunt almacena el histórico de los intentos realizados por cada usuario incluyendo tiempo, tipo y éxito o fracaso en cada intento.';
+$string['privacy:metadata:treasurehunt_track:userid'] = 'Treasure hunt almacena la secuencia de posiciones del usuario durante la actividad (si el profesor ha activado esa opción).';
+$string['privacy:metadata:treasurehunt_attempts:userid'] = 'Treasure hunt almacena el histórico de los intentos realizados por cada usuario incluyendo tiempo, tipo y éxito o fracaso en cada intento.';
