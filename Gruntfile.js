@@ -278,7 +278,7 @@ module.exports = function(grunt) {
     grunt.registerTask('amdonly', ['terser']);
     grunt.registerTask('amd', [/*'jshint',*/ 'terser']);
     grunt.registerTask('js', ['amdonly', 'shifter']);
-    // Register CSS taks.
+    // Register CSS tasks.
     grunt.registerTask('css', ['less:bootstrapbase']);
 
     // Register the startup task.
