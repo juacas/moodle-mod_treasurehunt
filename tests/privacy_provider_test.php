@@ -121,7 +121,6 @@ class privacy_provider_test extends provider_testcase
     public function test_delete_data_for_all_users_in_context()
     {
         $contextslist = new approved_contextlist($this->student, 'treasurehunt', [$this->context->id]);
-        xdebug_break();
         \mod_treasurehunt\privacy\provider::delete_data_for_all_users_in_context($this->context);
         $attempts = $this->get_user_attempts($this->cm->instance, $this->student->id);
         $this->assertEmpty($attempts, 'Attempts not deleted.');
