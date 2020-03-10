@@ -127,7 +127,8 @@
 		    </div>
             <div data-role="content" class="ui-content ui-overlay-b">			    
 		           <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
-		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
+		        <div id="previewVideoDiv"><center>
+                <video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
                 <div id="previewQRbuttons" class="ui-block-a">
                     <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
                         {{#str}} cancel, mod_treasurehunt{{/str}}
@@ -210,7 +211,7 @@
 {{! TODO Why this popup is in the footer?}}
             <!-- QRCode popup -->
             <a href="#QRdialog" data-rel="popup" data-position-to="window" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validateqr">
+               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="validateqr">
                 {{#str}} validateqr, mod_treasurehunt{{/str}}
             </a>
 {{! TODO Either question or clue. Not both. 
