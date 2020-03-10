@@ -87,6 +87,20 @@ class privacy_provider_test extends provider_testcase
         $student2 = $generator->create_user();
         $generator->enrol_user($student2->id,  $course->id, $studentrole->id);
 
+<<<<<<< HEAD
+=======
+        // Create attempts for student1.
+        $attempt1 = new attempt($this->stages[0]->id, $this->student->id, "location");
+        treasurehunt_insert_attempt($attempt1, $this->context);
+        $attempt2 = new attempt($this->stages[0]->id, $this->student->id, "question");
+        treasurehunt_insert_attempt($attempt2, $this->context);
+        // Create atempts for student2.
+        $attempt1 = new attempt($this->stages[0]->id, $this->student2->id, "location");
+        treasurehunt_insert_attempt($attempt1, $this->context);
+        $attempt2 = new attempt($this->stages[0]->id, $this->student2->id, "question");
+        treasurehunt_insert_attempt($attempt2, $this->context);
+                
+>>>>>>> a012183beac28e2f09354c7f5a70f9358fd6b709
         $this->student = $student;
         $this->student2 = $student2;
         $this->treasurehunt = $treasurehunt;
@@ -94,6 +108,7 @@ class privacy_provider_test extends provider_testcase
         $this->stages = [$stage1, $stage2];
         $this->course = $course;
 
+<<<<<<< HEAD
         // Create attempts for student1.
         $attempt1 = new attempt($this->stages[0]->id, $this->student->id, "location");
         treasurehunt_insert_attempt($attempt1, $this->context);
@@ -134,11 +149,47 @@ class privacy_provider_test extends provider_testcase
         $userlist = new approved_userlist($this->context, 'treasurehunt', [$this->student->id ]);
         \mod_treasurehunt\privacy\provider::delete_data_for_users($userlist);
 
+=======
+    public function test_Delete_datafor_user () {
+
+        $contextslist = new approved_contextlist($this->student, 'treasurehunt', [ $this->context->id ]);
+        \mod_treasurehunt\privacy\provider::delete_data_for_user($contextslist);
+
+        $attempts = $this->get_user_attempts($this->cm->instance, $this->student->id);
+        $this->assertEmpty($attempts, 'Attempts not deleted.');
+        // student2 must have attempts.
+        $attempts = $this->get_user_attempts($this->cm->instance, $this->student2->id);
+        $this->assertCount(2, $attempts, 'Attempts deleted for other user.');
+        // TODO: Check tracks.
+    }
+
+    public function test_delete_data_for_all_users_in_context()
+    {
+        $contextslist = new approved_contextlist($this->student, 'treasurehunt', [$this->context->id]);
+        \mod_treasurehunt\privacy\provider::delete_data_for_all_users_in_context($this->context);
+
+        $attempts = $this->get_user_attempts($this->cm->instance, $this->student->id);
+        $this->assertEmpty($attempts, 'Attempts not deleted.');
+        $attempts = $this->get_user_attempts($this->cm->instance, $this->student2->id);
+        $this->assertEmpty($attempts, 'Attempts not deleted.');
+        // TODO Check tracks.
+    }
+    public function test_delete_data_for_users()
+    {
+        // Only delete for student 1.
+        $userlist = new approved_userlist($this->context, 'treasurehunt', [$this->student->id ]);
+        \mod_treasurehunt\privacy\provider::delete_data_for_users($userlist);
+
+>>>>>>> a012183beac28e2f09354c7f5a70f9358fd6b709
         $attempts = $this->get_user_attempts($this->cm->instance, $this->student->id);
         $this->assertEmpty($attempts, 'Attempts for student not deleted.');
         // student2 should have attempts.
         $attempts = $this->get_user_attempts($this->cm->instance, $this->student2->id);
+<<<<<<< HEAD
         $this->assertNotEmpty($attempts, 'Attempts for student2 incorrectly deleted.');
+=======
+        $this->assertCount(2, $attempts, 'Attempts for student2 incorrectly deleted.');
+>>>>>>> a012183beac28e2f09354c7f5a70f9358fd6b709
         // TODO Check tracks.
     }
     function get_user_attempts($cminstance, $userid) {
@@ -147,7 +198,11 @@ class privacy_provider_test extends provider_testcase
         global $DB;
         list($insql, $inparam) = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED, 'stage');
         $where = "userid = :userid AND stageid $insql";
+<<<<<<< HEAD
         $params = ['userid' => $userid] + $inparam;
+=======
+        $params = ['userid' => $this->student->id] + $inparam;
+>>>>>>> a012183beac28e2f09354c7f5a70f9358fd6b709
         global $DB;
         $res = $DB->get_records_select('treasurehunt_attempts', $where, $params);
         return $res;
