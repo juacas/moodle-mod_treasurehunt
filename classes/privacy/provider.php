@@ -269,10 +269,11 @@ class provider implements
         if (!$context instanceof \context_module) {
             return;
         }
-        $stages = treasurehunt_get_stages($context->instanceid);
+        $cm = get_coursemodule_from_id('treasurehunt', $context->instanceid);
+        $stages = treasurehunt_get_stages($cm->instance);
         $stagesids = array_keys($stages);
         $DB->delete_records_list('treasurehunt_attempts', 'stageid', $stagesids);
-        $DB->delete_records('treasurehunt_track', ['treasurehuntid', $context->instanceid]);
+        $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $context->instanceid]);
     }
 
     /**
@@ -336,7 +337,7 @@ class provider implements
 
         $stages = treasurehunt_get_stages($cm->instance);
         $stagesids = array_keys($stages);
-        list($stagesql, $stageparams) = $DB->get_in_or_equal($stagesids);
+        list($stagesql, $stageparams) = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED);
         $select = "stageid $stagesql AND userid $usersql";
         $params = $stageparams + $userparams;
         $DB->delete_records_select('treasurehunt_attempts', $select, $params);

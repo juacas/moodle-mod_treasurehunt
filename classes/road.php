@@ -19,36 +19,21 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die;
 /** 
- * Model for a stage 
+ * Model for a road 
  * @author juacas
  */
-class stage extends stdClass
-{
+class road extends stdClass {
     var $id;
     /** @var int id of the parent road */
-    var $roadid;
+    var $treasurehuntid;
+    var $name;
     var $timecreated;
     var $timemodified;
-    /** @var string stage name */
-    var $name;
-    /** @var string text to discover the next stage */
-    var $cluetext;
-    var $cluetextformat = FORMAT_HTML;
-    var $cluetexttrust = 0;
-    var $questiontext = '';
-    var $questiontextformat = FORMAT_HTML;
-    var $questiontexttrust = 0;
-    var $activitytoendM = 0;
-    var $qrtext = null;
-    /** @var string WKT representation of the geometry (@see treasurehunt_geometry_to_wkt) */
-    var $geom = null;
-    var $playstagewithoutmoving = false;
-
-    public function __construct ($road, $name, $cluetext) {
-        $this->roadid = $road->id;
+    var $groupid = 0;
+    var $groupingid = 0;
+    var $validated = false;
+    public function __construct(string $name)
+    {
         $this->name = $name;
-        $this->cluetext = $cluetext;
-        $this->timemodified = time();
-        $this->timecreated = time();
     }
 }
