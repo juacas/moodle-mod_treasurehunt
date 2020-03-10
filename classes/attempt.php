@@ -19,36 +19,40 @@ use stdClass;
 
 defined('MOODLE_INTERNAL') || die;
 /** 
- * Model for a stage 
+ * Model for an attempt 
  * @author juacas
  */
-class stage extends stdClass
+class attempt extends stdClass
 {
+    /** @var int */
     var $id;
     /** @var int id of the parent road */
-    var $roadid;
+    var $stageid;
+    /** @var int */
     var $timecreated;
-    var $timemodified;
-    /** @var string stage name */
-    var $name;
-    /** @var string text to discover the next stage */
-    var $cluetext;
-    var $cluetextformat = FORMAT_HTML;
-    var $cluetexttrust = 0;
-    var $questiontext = '';
-    var $questiontextformat = FORMAT_HTML;
-    var $questiontexttrust = 0;
-    var $activitytoendM = 0;
-    var $qrtext = null;
+    /** @var int */
+    var $userid;
+    /** @var int */
+    var $groupid = 0;
+    /** @var boolean */
+    var $success = 0;
+    /** @var int */
+    var $penalty = 0;
+    /** @var string */
+    var $type;
+    /** @var boolean */
+    var $questionsolved = 0;
+    /** @var boolean */
+    var $activitysolved = 0;
+    /** @var boolean */
+    var $geometrysolved = 0;
     /** @var string WKT representation of the geometry (@see treasurehunt_geometry_to_wkt) */
-    var $geom = null;
-    var $playstagewithoutmoving = false;
+    var $location = null;
 
-    public function __construct ($road, $name, $cluetext) {
-        $this->roadid = $road->id;
-        $this->name = $name;
-        $this->cluetext = $cluetext;
-        $this->timemodified = time();
+    public function __construct ($stageid, $userid, $type) {
+        $this->stageid = $stageid;
+        $this->userid = $userid;
+        $this->type = $type;
         $this->timecreated = time();
     }
 }

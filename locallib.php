@@ -421,8 +421,7 @@ function treasurehunt_create_default_items($treasurehunt)
         treasurehunt_add_update_road($treasurehunt, $road, $context);
     }
     // Adds a default stage to the road.
-    $stage = new stage(get_string('stage', 'treasurehunt'), '');
-    $stage->roadid = $road->id;
+    $stage = new stage($road, get_string('stage', 'treasurehunt'), '');
     $stage->cluetextformat = FORMAT_HTML; // Updated later.
     $stage->cluetexttrust = 0;           // Updated later.
     $stage->questiontext = '';          // Updated later.
@@ -437,15 +436,15 @@ function treasurehunt_create_default_items($treasurehunt)
  */
 function treasurehunt_add_new_stage($stage, $road) {
     $stage->timecreated = time();
-    $stage->id = treasurehunt_insert_stage_form($stage);
+    $stage = treasurehunt_insert_stage_form($stage);
     return $stage;
 }
 /**
  * Adds a stage to a road by updating treasurehunt_stages table.
  * If the stage has no geometry then set the road as invalid.
  *
- * @param stdClass|stage $stage The extended stage object as used by edit_stage.php or stage 
- * @return int The id of the new stage.
+ * @param stdClass $stage The extended stage object as used by edit_stage.php or stage 
+ * @return stdClass the new stage object.
  */
 function treasurehunt_insert_stage_form($stage)
 {
@@ -455,12 +454,12 @@ function treasurehunt_insert_stage_form($stage)
     $position = $DB->get_record_sql('SELECT count(id) + 1 as position FROM '
         . '{treasurehunt_stages} WHERE roadid = (?)', array($stage->roadid));
     $stage->position = $position->position;
-    $id = $DB->insert_record("treasurehunt_stages", $stage);
+    $stage->id = $DB->insert_record("treasurehunt_stages", $stage);
     if (empty($stage->geom)) {
         // As the stage has no geometry, the road is set as invalid.
         treasurehunt_set_valid_road($stage->roadid, false);
     }
-    return $id;
+    return $stage;
 }
 
 /**
@@ -2425,16 +2424,18 @@ function treasurehunt_set_string_attempt($attempt, $groupmode)
 }
 
 /**
- * Adds a new road or update existing one
- * @param stdClass $treassurehunt
+ * Adds a new road or update existing one.
+ * Register a new event.
+ * @param stdClass $treasurehunt
  * @param stdClass $road record for a row: name, treasurehuntid
- * @param type $context
+ * @param context_module $context for creating events.
  * @return \stdClass
  */
 function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $context)
 {
     global $DB;
     $eventparams = array('context' => $context);
+    $road->timemodified = time();
     if (empty($road->id)) {
         $road->treasurehuntid = $treasurehunt->id;
         $road->timecreated = time();

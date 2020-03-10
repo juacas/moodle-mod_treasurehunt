@@ -143,7 +143,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 
         if (empty($stage->id)) {
             $stage->timecreated = $timenow;
-            $stage->id = treasurehunt_insert_stage_form($stage);
+            $stage = treasurehunt_insert_stage_form($stage);
             $isnewentry = true;
         } else {
             $stage->timemodified = $timenow;
