@@ -53,6 +53,7 @@ $string['availability'] = 'Availability';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to the course';
 $string['basemaps'] = 'Base maps';
+$string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
 $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
 $string['changetogroupmode'] = 'The game mode has changed to play in groups';
@@ -409,12 +410,12 @@ $string['searchlocation_tour'] = 'With this search area you can find your way ra
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 
-$string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
-$string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
+$string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
+$string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
 $string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/success_mark.png" width="28"/> and failed stages with <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = 'Enjoy pursuing the treasure with your mates!';
-$string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
+$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
 $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';

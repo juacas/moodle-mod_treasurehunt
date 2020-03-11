@@ -53,7 +53,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                 }, // end of editpage function
                 launchplaytutorial: function() {
                     var intro = introJS();
-                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_play_tour', 'lastsuccessfulstage_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 'playend_tour'];
+                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_play_tour', 'bigbutton_play_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 'playend_tour'];
                     var stringQueried = terms.map(function (term) {
                         return { key: term, component: 'treasurehunt' };
                     });
@@ -66,7 +66,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                             }
                         })().then(() => {
                             $.mobile.loading("hide");
-                            $("#infopanel").panel("open");
+                            //$("#infopanel").panel("open");
                             configurePlayIntro(intro, strings, terms);
                             intro.start();});
                     }).fail(notification.exception);
@@ -161,20 +161,26 @@ function configurePlayIntro(intro, strings, keys) {
                 intro: strings[keys.indexOf('welcome_play_tour')],
                 position: 'floating'
             },
-            {
+            /*{
                 element: '#collapsibleset', //#lastsuccessfulstage',
                 intro: strings[keys.indexOf('lastsuccessfulstage_tour')],
                 position: 'top'
-            },
+            },*/
             {
-                element: '#mapplay',
-                intro: strings[keys.indexOf('mapplay_tour')],
-                position: 'floating'
+                element:'#bigbtn',
+                intro: strings[keys.indexOf('bigbutton_play_tour')],
+                position: 'top'
             },
             {
                 element: '#validatelocation',
                 intro: strings[keys.indexOf('validatelocation_tour')],
                 position: 'top'
+            },
+            // You may have to discover QRCodes to validate stages <img>.<br>Click the camera button to show the code you found.
+            {
+                element: '#mapplay',
+                intro: strings[keys.indexOf('mapplay_tour')],
+                position: 'floating'
             },
             {
                 element: '#autolocate',

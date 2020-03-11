@@ -55,7 +55,7 @@ tr.introjs-showElement > th {
   position: absolute;
   z-index: 9999998;
   background-color: #FFF;
-  background-color: rgba(255,255,255,.7);
+  background-color: rgba(255,255,255,.3);
   border: 1px solid #777;
   border: 4px solid rgba(255,0,0,.9);
   border-radius: 4px;
