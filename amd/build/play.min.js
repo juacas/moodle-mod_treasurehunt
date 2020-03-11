@@ -852,7 +852,7 @@ define([
     function set_attempts_history() {
 		        // I'm checking to see if there have been any changes since the last time.
       if (changesinattemptshistory) {
-        var $historylist = $("#historylist");
+        var $historylist = $("#historylist"); // TODO: Why the variable starts with $?
         // Lo reinicio
         $historylist.html("");
         changesinattemptshistory = false;
@@ -861,8 +861,7 @@ define([
         } else {
           // Anado cada intento
           attemptshistory.forEach(function(attempt) {
-            $(
-              "<li><span class='ui-btn-icon-left " +
+            $("<li><span class='ui-btn-icon-left " +
                 (attempt.penalty
                   ? "ui-icon-delete failedattempt"
                   : "ui-icon-check successfulattempt") +

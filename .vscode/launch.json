@@ -4,11 +4,21 @@
   // Para más información, visite: https://go.microsoft.com/fwlink/?linkid=830387
   "version": "0.2.0",
   "configurations": [
+      
     {
       "name": "Listen for XDebug",
       "type": "php",
       "request": "launch",
-      "port": 9000
+      "port": 9000,
+        "pathMappings": {
+            "/var/www/html/mod/treasurehunt/": "${workspaceFolder:treasurehunt}",
+            "C:/desarrollo/servers/apache/moodle3/moodle/mod/treasurehunt/": "${workspaceFolder:treasurehunt}",
+            "/var/www/html/moodle37/mod/treasurehunt/": "${workspaceFolder:treasurehunt}",
+            "/var/www/moodle37/html/": "C:\\desarrollo\\servers\\apache\\moodle3\\moodle3lib",
+            "/var/www/html/lib": "${workspaceFolder:moodle3lib}/lib",
+            "/var/www/html/": "C:\\desarrollo\\servers\\apache\\moodle3\\moodle3lib",
+                        
+        }
     },
     {
       "name": "Launch currently open script",
