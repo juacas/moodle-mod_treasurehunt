@@ -1020,6 +1020,8 @@ function treasurehunt_get_activity_to_end_link($activitytoendid)
 
 /**
  * Checks if an instance is available.
+ * A cutoff date can be set in the activity settings (see cutoffdate in install.xml).
+ * Ater this date submissions will no longer be accepted.
  *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @return stdClass The object availability parameters.

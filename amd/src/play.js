@@ -317,7 +317,8 @@ define(['jquery',
 		        center: [0, 0],
 		        zoom: 2,
 		        minZoom: 2
-		    });
+			});
+			// ol = OpenLayer (map)
 		    var select = new ol.interaction.Select({
 		        layers: [attemptslayer],
 		        style: select_style_function,
@@ -468,6 +469,7 @@ define(['jquery',
 		    /**
 		     * Updates the model of the game.
 		     * Notifies a new location for validation or a new answer to a question.
+			 * 
 		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
@@ -475,7 +477,7 @@ define(['jquery',
 		     * @returns {undefined}
 		     */
 		    function renew_source(location, initialize, selectedanswerid, qrtext) {
-		        // var position holds the potition to be evaluated. undef if no evaluation requested
+		        // var position holds the position to be evaluated. undef if no evaluation requested
 		        var position;
 		        var currentposition;
 		        var coordinates;
@@ -499,7 +501,9 @@ define(['jquery',
 		        if (location) {
 		            position = currentposition;
 		            $.mobile.loading("show");
-				}				
+				}
+
+				// Get the progress of the user: road is finished, 
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -519,7 +523,8 @@ define(['jquery',
 		        geojson[0].done(function (response) {
 		            var body = '';
 		            qoaremoved = response.qoaremoved;
-		            roadfinished = response.roadfinished;
+					roadfinished = response.roadfinished;
+					// Is the activity still available or are we after the cut-off date (if set)?
 					available = response.available;
 					$.mobile.loading("hide");
 		            // If I have sent a location or an answer I print out whether it is correct or not.
@@ -527,7 +532,8 @@ define(['jquery',
 		                if (response.status !== null && available) {
 		                    console.log(response.status.msg);
 		                }
-		            }
+					}
+					// Show QR button?
 		            if (response.qrexpected) {
 		                $('#validateqr').show();
 		            } else {
@@ -567,22 +573,29 @@ define(['jquery',
 		                            'featureProjection': "EPSG:3857"
 		                        }));
 		                    }
-		                }
+						}
+						
+						// Display the buttons corresponding to the situation:
+
 		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
-		                        changesinquestionstage = true;
+								
+								// There is a question => disable location validation button and
+								// set the big button as Question 
+								changesinquestionstage = true;
 								$('#validatelocation').show().addClass('ui-state-disabled');
-		                        $('#question_button').show();
+								set_big_button_as("question");
 		                    } else if (!lastsuccessfulstage.activitysolved) {
+								// Previous activity not solved => disable location validation button
 								$('#validatelocation').show().addClass('ui-state-disabled');
-		                        $('#question_button').show();
+								set_big_button_as("question");
 		                    } else {
 								$('#validatelocation').show().removeClass('ui-state-disabled');
-		                        $('#question_button').hide();
+								set_big_button_as("clue");
 		                    }
 		                }
 		                // Check if it is the first geometry or it is being initialized and center the map.
@@ -690,9 +703,13 @@ define(['jquery',
 		                        + strings['question']
 		                        + "</a>");
 		            }
-		            $("#collapsibleset").collapsibleset("refresh");
-		            $("#infopanel").panel("open");
-		            $("#lastsuccessfulstage").collapsible("expand");
+					
+			// The 1st time, it is called after the map is loaded
+					
+					//$("#collapsibleset").collapsibleset("refresh");
+					open_next_activity_panel();
+					//$("#infopanel").panel("open");
+		            //$("#lastsuccessfulstage").collapsible("expand");
 		            changesinlastsuccessfulstage = false;
 		        }
 		    }
@@ -802,8 +819,11 @@ define(['jquery',
 		            maximumAge: 0,
 		            timeout: 10000
 		        }
-		    }));
-		    /*-------------------------------Events-----------------------------------*/
+			}));
+			
+
+			/*-------------------------------Events-----------------------------------*/
+			
 		    geolocation.on('change:position', function () {
 		        var coordinates = this.getPosition();
 		        positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
@@ -837,11 +857,13 @@ define(['jquery',
 		    });
 		    geolocation.setTracking(tracking); // Start position tracking.
 		
+			// 
 		    select.on("select", function (features) {
 		        if (features.selected.length === 1) {
 		            if (lastsuccessfulstage.position === features.selected[0].get('stageposition')
 		                    && features.selected[0].get('geometrysolved') && !roadfinished && available) {
-		                $("#infopanel").panel("open");
+						//$("#infopanel").panel("open");
+						open_next_activity_panel();
 		                $("#lastsuccessfulstage").collapsible("expand");
 		            } else {
 		                var title, stagename = features.selected[0].get('name'),
@@ -976,8 +998,10 @@ define(['jquery',
 					var style = document.querySelector('#questionpage').style;
 					style.setProperty('padding-top',style.paddingTop, 'important');
 					}, 200);	
-		    });
-		    //Buttons events.
+			});
+			// -------------
+		    // Button events
+		    // -------------
 		    if (geographictools) {
 			    $('#autolocate').on('click', function () {
 			        if (geolocation.get("user_denied")) {
@@ -1023,14 +1047,17 @@ define(['jquery',
 		        }
 		        if (lastsuccessfulstage.question !== '') {
 		            event.preventDefault();
-		            toast(strings['answerwarning']);
-		            $("#infopanel").panel("open");
+					toast(strings['answerwarning']);
+					// TODO Show the clue or Question panel
+					open_next_activity_panel();
+		            //$("#infopanel").panel("open");
 		            return;
 		        }
 		        if (!lastsuccessfulstage.activitysolved) {
 		            event.preventDefault();
-		            toast(strings['activitytoendwarning']);
-		            $("#infopanel").panel("open");
+					toast(strings['activitytoendwarning']);
+					open_next_activity_panel();
+		            //$("#infopanel").panel("open");
 		            return;
 		        }
 		    });
@@ -1119,7 +1146,11 @@ define(['jquery',
 		                        $(this).remove();
 		                    });
 		        }
-		    }
+			}
+			/** Open the Clue or Question panel */
+			function open_next_activity_panel() {
+				$("#bigbtn").click();
+			}
 		    function create_popup(type, title, body) {
 		        var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
 		                content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body
@@ -1196,8 +1227,14 @@ define(['jquery',
 		        return '<div class="ui-bar ui-bar-a">' + title +
 		                '</div><div class="ui-body ui-body-a">' + body +
 		                '</div>';
-		    }
-		
+			}
+			function set_big_button_as(what) {
+				var btn = $("#bigbtn")[0];
+				btn.href = "#" + what + "page";
+				btnImg = $("img", btn)[0];
+				var url = btnImg.src.replace(/btn_(\w+)$/, "btn_" + what);
+				btnImg.src = url;
+			}
 		}
 	}
 );

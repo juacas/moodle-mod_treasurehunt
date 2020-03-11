@@ -34,19 +34,21 @@ div#mappage {
   top: -2rem;
 }
 
-#bigbtn {
+/* The !important are added because jquerymobile adds its ui-* classes that have priority on this class
+Note that this is not the case if we use an ID instead. */
+.bigbtn {
   width: 12rem;
   height: 8rem;
-  border-radius: 50%;
+  background-color: transparent !important;
+  border-radius: 50% !important;
   position: absolute;
   bottom: -4rem;
   border-width: 0.2rem;
-  background-color: transparent;
   border-style: none;
   padding: 0;
 }
 
-#bigbtn img {
+.bigbtn img {
   width: 12rem;
   height: 5rem;
 }

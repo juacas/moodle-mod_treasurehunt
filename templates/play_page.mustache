@@ -72,29 +72,6 @@
                     class="ui-btn ui-shadow ui-btn-icon-left ui-icon-bullets">
                     {{#str}} history, mod_treasurehunt{{/str}}
                 </a> 
-                {{! Stages}}
-                <!--
-                <div id="collapsibleset" data-role="collapsibleset" data-collapsed-icon="carat-d" 
-                    data-expanded-icon="carat-u" data-theme="b" data-content-theme="b">
-                    {{#hasdescription}}
-                    <div data-role="collapsible" data-theme="a" data-iconpos="right">
-                        <h3>{{treasurehunt.name}}</h3>
-                        <div>
-                            <p>{{{treasurehunt.description}}}</p>
-                        </div>
-                    </div>
-                    {{/hasdescription}}
-                    <div id="lastsuccessfulstage" data-role="collapsible">
-                        <h3>
-                            <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos"></div>
-                            <span id="lastsuccessfulstagename"></span>
-                        </h3>
-                        <div>
-                            <p id="lastsuccessfulstageclue"></p>
-                        </div>
-                    </div>
-                </div>
-                -->
             </div>
             <a href="view.php?id={{cmid}}" class="ui-btn ui-btn-icon-left ui-icon-delete" data-ajax="false">
                 {{#str}} exit, mod_treasurehunt{{/str}}
@@ -203,31 +180,22 @@
         Footer buttons
         ============== -->
         <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
-            <a href="#popupdialog" data-rel="popup" data-position-to="window" data-transition="none" 
-               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validatelocation">
-                <!--{{#str}} validatelocation, mod_treasurehunt{{/str}} -->
-            </a>
 
-{{! TODO Why this popup is in the footer?}}
             <!-- QRCode popup -->
             <a href="#QRdialog" data-rel="popup" data-position-to="window" data-transition="none" 
                class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="validateqr">
                 {{#str}} validateqr, mod_treasurehunt{{/str}}
             </a>
-{{! TODO Either question or clue. Not both. 
-Set the link dynamically: #questionpage or #historypage }}
-            <!--<a href="#questionpage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment" id="question_button">
-                                        {{#str}}question, mod_treasurehunt{{/str}}
-            </a>-->
-{{! TODO Rename history page as clue or question or ...}}
             <!-- Clue or question big button -->
-            {{!class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext"
-               }}
-            <a href="#cluepage" id="bigbtn" data-transition="slideup">
-                {{#pix}} btnClue, treasurehunt, clue {{/pix}}
-                <!--<div>{{#pix}} btnClue, treasurehunt, clue {{/pix}}</div>
-                <div class="hidden">{{#pix}} btnQuestion, treasurehunt, question {{/pix}}</div-->
+            <a id="bigbtn" href="#cluepage" class="bigbtn" data-transition="slideup">
+                {{#pix}} btn_clue, treasurehunt, clue {{/pix}}
             </a> 
+
+            <!-- Location validation Button -->
+            <a href="#popupdialog" data-rel="popup" data-position-to="window" data-transition="none" 
+               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validatelocation">
+                <!--{{#str}} validatelocation, mod_treasurehunt{{/str}} -->
+            </a>
 
             <!-- Map zoom buttons -->
             <div id="navigation">
@@ -243,7 +211,7 @@ Set the link dynamically: #questionpage or #historypage }}
     {{! Fin de Pagina principal de la aplicacion }}
 
     {{! Map payer Page }}
-    <div data-role="page" id="layerspage" data-theme="b" >
+    <div id="layerspage" data-role="page" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} layers, mod_treasurehunt{{/str}}</h1>
@@ -257,7 +225,7 @@ Set the link dynamically: #questionpage or #historypage }}
     {{! End of Map payer page }}
 
     {{! Clue page }}
-    <div data-role="page" id="cluepage" data-theme="b" >
+    <div id="cluepage" data-role="page" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} clue, mod_treasurehunt{{/str}}</h1>
@@ -272,13 +240,21 @@ Set the link dynamically: #questionpage or #historypage }}
                     <div>
                         <p id="lastsuccessfulstageclue2"></p>
                     </div>
+            <!-- Quick test to put the big button on the activity page
+            ATTENTION: it has the same id as in the footer bar --> 
+                   <!-- <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
+                    <a href="#mappage" class="bigbtn">
+                        {{#pix}} btnClue, treasurehunt, clue {{/pix}}
+                        <div>{{#pix}} btnClue, treasurehunt, clue {{/pix}}</div>
+                        <div class="hidden">{{#pix}} btnQuestion, treasurehunt, question {{/pix}}</div>
+                    </a> <div>-->
               </div>
         </div>
     </div>
     {{! End of Clue page }}
 
     {{! Attempt history page }}
-    <div data-role="page" id="historypage" data-theme="b" >
+    <div id="historypage" data-role="page" data-theme="b" >
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
@@ -292,10 +268,10 @@ Set the link dynamically: #questionpage or #historypage }}
 	          </div>
         </div>
     </div>
-    {{! End of Clue page }}
+    {{! End of Attempt history page }}
 
-    {{! Answer to the question page }}
-    <div data-role="page" id="questionpage" data-theme="b">
+    {{! Question page }}
+    <div id="questionpage" data-role="page" data-theme="b">
         <div data-role="header" data-position="fixed" data-tap-toggle="false">
             <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} question, mod_treasurehunt{{/str}}</h1>
@@ -317,7 +293,7 @@ Set the link dynamically: #questionpage or #historypage }}
             </fieldset>
         </div>    
     </div>
-    {{! End of Answer to the question page }}
+    {{! End of Question page }}
 
     {{#js}}
 
