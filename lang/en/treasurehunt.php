@@ -413,7 +413,7 @@ $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. '
 $string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
 $string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/success_mark.png" width="28"/> and failed stages with <img src="pix/failure_mark.png" width="28"/>';
+$string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
 $string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
 $string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
 $string['nextstep'] = 'Next';
