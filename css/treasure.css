@@ -34,7 +34,7 @@ div#mappage {
   top: -2rem;
 }
 
-#historybtn {
+#bigbtn {
   width: 12rem;
   height: 8rem;
   border-radius: 50%;
@@ -46,7 +46,7 @@ div#mappage {
   padding: 0;
 }
 
-#historybtn img {
+#bigbtn img {
   width: 12rem;
   height: 5rem;
 }
@@ -63,3 +63,14 @@ div#mappage {
   height: 1.5rem;
   margin-left: auto;
 }
+
+.activityBg {
+  position: absolute;
+  padding: 0px;
+}
+
+.activityBg img {
+  width: 100%;
+  height: 100%;
+}
+

@@ -223,8 +223,10 @@ Set the link dynamically: #questionpage or #historypage }}
             <!-- Clue or question big button -->
             {{!class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-bullets ui-btn-icon-notext"
                }}
-            <a href="#cluepage" id="historybtn" data-transition="slideup">
-                {{#pix}} btnClue, treasurehunt, treasurehunt icon {{/pix}} <!--{{#str}} history, mod_treasurehunt{{/str}}-->
+            <a href="#cluepage" id="bigbtn" data-transition="slideup">
+                {{#pix}} btnClue, treasurehunt, clue {{/pix}}
+                <!--<div>{{#pix}} btnClue, treasurehunt, clue {{/pix}}</div>
+                <div class="hidden">{{#pix}} btnQuestion, treasurehunt, question {{/pix}}</div-->
             </a> 
 
             <!-- Map zoom buttons -->
@@ -260,6 +262,7 @@ Set the link dynamically: #questionpage or #historypage }}
             <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
             <h1>{{#str}} clue, mod_treasurehunt{{/str}}</h1>
         </div>
+        <div class="activityBg">{{#pix}} activityBg, treasurehunt, Background {{/pix}}</div>
         <div data-role="content">
         	  <div id="lastsuccessfulstage2">
                     <h3>
