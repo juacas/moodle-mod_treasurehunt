@@ -172,7 +172,6 @@ define([
           var bboxheight = customimageextent[3] - customimageextent[1];
           var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
           var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-
           var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
           var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
           var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
