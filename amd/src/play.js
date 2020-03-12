@@ -25,7 +25,7 @@ define(['jquery',
     'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
-    'mod_treasurehunt/geocoder',
+    'mod_treasurehunt/osm-geocoder',
 	'mod_treasurehunt/viewgpx',
 	'mod_treasurehunt/webqr',
     // 'core/str',
@@ -33,7 +33,7 @@ define(['jquery',
     'mod_treasurehunt/jquery.mobile-config',
 	'mod_treasurehunt/jquerymobile', 
     ],
-	    function ($, url, ol, ajax, GeocoderJS, viewgpx, webqr) {
+	    function ($, url, ol, ajax, OSMGeocoder, viewgpx, webqr) {
 			
 			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
@@ -157,7 +157,6 @@ define(['jquery',
 		    var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
 		            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
 		            markerurl = url.imageUrl('my_location', 'treasurehunt'),
-		            openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap'),
 		            lastsuccessfulstage = {},
 		            interval,
 		            imgloaded = 0,
@@ -170,7 +169,9 @@ define(['jquery',
 		            fitmap = false,
 		            roadfinished = false,
 		            available = true,
-		            qoaremoved = false;
+                qoaremoved = false;
+      let osmGeocoderXHR;
+      let osmTimer = 0; 
 		    /*-------------------------------Styles-----------------------------------*/
 		    var text = new ol.style.Text({
 		        textAlign: 'center',
@@ -885,40 +886,55 @@ define(['jquery',
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {
 		    	if (!geographictools) {
 		    		return;
-		    	}
-		        var $ul = $(this),
-		                value = $(data.input).val(),
-		                html = "";
-		        $ul.html(html);
-		        if (value && value.length > 2) {
-		            $.mobile.loading("show", {
-		                text: strings['searching'],
-		                textVisible: true,
-		                theme: "b"});
-		            openStreetMapGeocoder.geocode(value, function (response) {
-		                if (response[0] === false) {
-		                    $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
-		                } else {
-		                    $.each(response, function (i, place) {
-		                        $("<li data-filtertext='" + value + "'>")
-		                                .hide().append($("<a href='#'>").text(place.totalName)
-		                                .append($("<p>").text(place.type))
-		                                ).appendTo($ul).click(function () {
-		                            var extent = [];
-		                            extent[0] = parseFloat(place.boundingbox[2]);
-		                            extent[1] = parseFloat(place.boundingbox[0]);
-		                            extent[2] = parseFloat(place.boundingbox[3]);
-		                            extent[3] = parseFloat(place.boundingbox[1]);
-		                            extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
-		                            fly_to(map, null, extent);
-		                            $('#searchpanel').panel("close");
-		                        }).show();
-		                    });
-		                }
-		                $ul.listview("refresh");
-		                $ul.trigger("updatelayout");
-		                $.mobile.loading("hide");
-		            });
+          }
+          if (osmGeocoderXHR) {
+            osmGeocoderXHR.abort();
+          }
+          if (osmTimer) {
+            clearTimeout(osmTimer);
+          }
+		      let $ul = $(this);
+		      let value = $(data.input).val();
+		      let html = "";
+		      $ul.html(html);
+		      if (value && value.length > 2) {
+              $.mobile.loading("show", {
+                  text: strings['searching'],
+                  textVisible: true,
+                  theme: "b"});
+
+            osmTimer = setTimeout(() => {
+              osmGeocoderXHR = OSMGeocoder.search(value)
+                .done(resp => {
+                  if (resp.length === 0) {
+                    $ul.html("<li data-filtertext='" + value + "'>" + strings["noresults"] + "</li>");
+                  } else {
+                    $.each(resp, (i, place) => {
+                      $("<li data-filtertext='" + value + "'>")
+                        .hide()
+                        .append($("<a href='#'>").text(place.display_name)
+                        ).appendTo($ul).click(function () {
+                          var extent = [];
+                          extent[0] = parseFloat(place.boundingbox[2]);
+                          extent[1] = parseFloat(place.boundingbox[0]);
+                          extent[2] = parseFloat(place.boundingbox[3]);
+                          extent[3] = parseFloat(place.boundingbox[1]);
+                          extent = ol.proj.transformExtent(extent, 'EPSG:4326', 'EPSG:3857');
+                          fly_to(map, null, extent);
+                          $('#searchpanel').panel("close");
+                        }).show();
+                    });
+                  }
+                  //loading hide
+                  $ul.listview("refresh");
+                  $ul.trigger("updatelayout");
+                })
+                .fail(() => { })
+                .always(() => {
+                  osmGeocoderXHR = null;
+                  $.mobile.loading("hide");
+                });
+            }, 400);
 		        }
 		    });
 		    // Scroll to collapsible expanded
