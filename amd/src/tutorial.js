@@ -53,7 +53,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                 }, // end of editpage function
                 launchplaytutorial: function() {
                     var intro = introJS();
-                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_play_tour', 'bigbutton_play_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 'playend_tour'];
+                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 
+                        'welcome_play_tour', 'bigbutton_play_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 
+                        'playerhelp_tour', 'playend_tour'];
                     var stringQueried = terms.map(function (term) {
                         return { key: term, component: 'treasurehunt' };
                     });
@@ -186,6 +188,11 @@ function configurePlayIntro(intro, strings, keys) {
                 element: '#autolocate',
                 intro: strings[keys.indexOf('autolocate_tour')],
                 position: 'top'
+            },
+            {
+                element: '#playerhelp',
+                intro: strings[keys.indexOf('playerhelp_tour')],
+                position: 'bottom'
             },
             {
                 element: '#treasurehunt-editor',
