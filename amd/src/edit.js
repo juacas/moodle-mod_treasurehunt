@@ -25,9 +25,9 @@
 define(
 	['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch',
 		'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
-		'mod_treasurehunt/geocoder',
+		'mod_treasurehunt/osm-geocoder',
 		'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
-	function ($, jqui, touch, notification, ol, ajax, GeocoderJS,
+	function ($, jqui, touch, notification, ol, ajax, OSMGeocoder,
 		olLayerSwitcher, str) {
 
 		function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
@@ -99,8 +99,9 @@ define(
 						source: new ol.source.Vector({
 							projection: mapprojection
 						})
-					}),
-				openStreetMapGeocoder = GeocoderJS.createGeocoder('openstreetmap');
+					});
+			let osmGeocoderXHR;
+			let osmTimer = 0;
 
 			// Load the control pane, treasurehunt and road list.
 
@@ -1563,32 +1564,64 @@ define(
 						minLength: 4,
 						source: function (request, response) {
 							var term = request.term;
-							openStreetMapGeocoder
-								.geocode(
-									term,
-									function (data) {
-										if (!data[0]) {
-											response();
-											return;
-										}
-										var total = [];
-										for (var i = 0, l = data.length; i < l; i++) {
-											var latitude;
-											var longitude;
-											latitude = data[i]
-												.getLatitude();
-											longitude = data[i]
-												.getLongitude();
-											var result = {
-												"value": data[i].totalName,
-												"latitude": latitude,
-												"longitude": longitude,
-												"boundingbox": data[i].boundingbox
-											};
-											total[i] = result;
-										}
-										response(total);
-									});
+							// Abort xhr request if a new one arrives
+							if (osmGeocoderXHR) {
+								osmGeocoderXHR.abort();
+							}
+							osmGeocoderXHR = OSMGeocoder.search(term).done(
+								data => {
+									if (data.length === 0) {
+										response();
+										return;
+									}
+									var total = [];
+									for (var i = 0, l = data.length; i < l; i++) {
+										var latitude;
+										var longitude;
+										latitude = data[i].lat;
+										longitude = data[i].lon;
+										var result = {
+											"value": data[i].display_name,
+											"latitude": latitude,
+											"longitude": longitude,
+											"boundingbox": data[i].boundingbox
+										};
+										total[i] = result;
+									}
+									response(total);
+								}
+							)
+							.fail( () => {response()})
+							.always(() => {
+								osmGeocoderXHR = null;
+							});
+							//
+							// openStreetMapGeocoder
+							// 	.geocode(
+							// 		term,
+							// 		function (data) {
+							// 			if (!data[0]) {
+							// 				response();
+							// 				return;
+							// 			}
+							// 			var total = [];
+							// 			for (var i = 0, l = data.length; i < l; i++) {
+							// 				var latitude;
+							// 				var longitude;
+							// 				latitude = data[i]
+							// 					.getLatitude();
+							// 				longitude = data[i]
+							// 					.getLongitude();
+							// 				var result = {
+							// 					"value": data[i].totalName,
+							// 					"latitude": latitude,
+							// 					"longitude": longitude,
+							// 					"boundingbox": data[i].boundingbox
+							// 				};
+							// 				total[i] = result;
+							// 			}
+							// 			response(total);
+							// 		});
 						},
 						select: function (event, ui) {
 							if (ui.item.boundingbox) {

@@ -1,5 +1,4 @@
-<?php
-// This file is part of Treasurehunt for Moodle
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -15,19 +14,22 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Version information
- *
+ * @module    mod_treasurehunt/play
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
-
-$plugin->component = 'mod_treasurehunt';
-$plugin->version = 2020031200;
-$plugin->release = 'v1.3.1-hotfix';
-$plugin->requires = 2015051100; // Moodle 2.9.
-$plugin->maturity = MATURITY_STABLE;
-$plugin->dependencies = array();
+define(["jquery"], function($) {
+  const functions = {
+    search: query => {
+      return $.ajax({
+        method: "GET",
+        url: "https://nominatim.openstreetmap.org/search",
+        data: `format=json&q=${query}`
+      });
+    }
+  };
+  return functions;
+});
