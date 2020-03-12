@@ -2,6 +2,7 @@
 
 use core\notification;
 use core\session\exception;
+use mod_treasurehunt\model\stage;
 
 // This file is part of Treasurehunt for Moodle
 //
@@ -418,30 +419,35 @@ function treasurehunt_create_default_items($treasurehunt)
         $road = new stdClass();
         $road->name = get_string('road', 'treasurehunt');
         treasurehunt_add_update_road($treasurehunt, $road, $context);
-        // Adds a default stage to the road.
-        $stage = new stdClass();
-        $stage->id = null;
-        $stage->roadid = $road->id;
-        $stage->timecreated = time();
-        $stage->name = get_string('stage', 'treasurehunt');
-        $stage->cluetext = '';          // Updated later.
-        $stage->cluetextformat = FORMAT_HTML; // Updated later.
-        $stage->cluetexttrust = 0;           // Updated later.
-        $stage->questiontext = '';          // Updated later.
-        $stage->questiontextformat = FORMAT_HTML; // Updated later.
-        $stage->questiontexttrust = 0;           // Updated later.
-        $stage->id = treasurehunt_insert_stage_form($stage);
     }
-}
+    // Adds a default stage to the road.
+    $stage = new stage(get_string('stage', 'treasurehunt'), '');
+    $stage->roadid = $road->id;
+    $stage->cluetextformat = FORMAT_HTML; // Updated later.
+    $stage->cluetexttrust = 0;           // Updated later.
+    $stage->questiontext = '';          // Updated later.
+    $stage->questiontextformat = FORMAT_HTML; // Updated later.
+    $stage->questiontexttrust = 0;           // Updated later.
 
+    treasurehunt_add_new_stage($stage, $road);
+}
 /**
- * Adds a stage without geometry to a road by updating treasurehunt_stages table.
- * Then set the road as invalid.
+ * @param stage $stage
+ * @param road $road
+ */
+function treasurehunt_add_new_stage($stage, $road) {
+    $stage->timecreated = time();
+    $stage->id = treasurehunt_insert_stage_form($stage);
+    return $stage;
+}
+/**
+ * Adds a stage to a road by updating treasurehunt_stages table.
+ * If the stage has no geometry then set the road as invalid.
  *
- * @param stdClass $stage The extended stage object as used by edit_stage.php
+ * @param stdClass|stage $stage The extended stage object as used by edit_stage.php or stage 
  * @return int The id of the new stage.
  */
-function treasurehunt_insert_stage_form(stdClass $stage)
+function treasurehunt_insert_stage_form($stage)
 {
     global $DB;
 
@@ -450,10 +456,10 @@ function treasurehunt_insert_stage_form(stdClass $stage)
         . '{treasurehunt_stages} WHERE roadid = (?)', array($stage->roadid));
     $stage->position = $position->position;
     $id = $DB->insert_record("treasurehunt_stages", $stage);
-
-    // As the stage has no geometry, the road is set as invalid.
-    treasurehunt_set_valid_road($stage->roadid, false);
-
+    if (empty($stage->geom)) {
+        // As the stage has no geometry, the road is set as invalid.
+        treasurehunt_set_valid_road($stage->roadid, false);
+    }
     return $id;
 }
 
@@ -679,23 +685,8 @@ function treasurehunt_check_road_is_blocked($roadid)
  */
 function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context)
 {
-    global $DB;
-
-    // Get all stages from the instance of treasure hunt.
-    $stagessql = "SELECT stage.id, "
-        . "stage.name, stage.cluetext, roadid, position,"
-        . "geom as geometry FROM {treasurehunt_stages}  stage"
-        . " inner join {treasurehunt_roads} roads on stage.roadid = roads.id"
-        . " WHERE treasurehuntid = ? ORDER BY position DESC";
-    $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
-
-    // Get all roads from the instance of treasure hunt.
-    $roadssql = "SELECT id, name, CASE WHEN (SELECT COUNT(at.id) "
-        . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri "
-        . "ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} r "
-        . "ON ri.roadid=r.id WHERE r.id= road.id) > 0 THEN 1 ELSE 0 "
-        . "END AS blocked FROM {treasurehunt_roads} road where treasurehuntid = ?";
-    $roads = $DB->get_records_sql($roadssql, array($treasurehuntid));
+    $stagesresult = treasurehunt_get_stages($treasurehuntid);
+    $roads = treasurehunt_get_roads($treasurehuntid);
 
     foreach ($roads as $road) {
         $stagesinroad = array();
@@ -707,10 +698,40 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context)
         }
         $road->stages = treasurehunt_features_to_geojson($stagesinroad, $context, $treasurehuntid);
     }
-
     return $roads;
 }
-
+/**
+ * Get all stages in a treasurehunt instance.
+ * @param int $treasurehuntid instace id.
+ * @global moodle_database $DB
+ */
+function treasurehunt_get_stages($treasurehuntid) {
+    global $DB;
+    // Get all stages from the instance of treasure hunt.
+    $stagessql = "SELECT stage.id, "
+        . "stage.name, stage.cluetext, roadid, position,"
+        . "geom as geometry FROM {treasurehunt_stages}  stage"
+        . " inner join {treasurehunt_roads} roads on stage.roadid = roads.id"
+        . " WHERE treasurehuntid = ? ORDER BY position DESC";
+    $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
+    return $stagesresult;
+}
+/**
+ * Get all roads in a treasurehunt instance.
+ * @param int $treasurehuntid instace id.
+ * @global moodle_database $DB
+ */
+function treasurehunt_get_roads($treasurehuntid) {
+    global $DB;
+    // Get all roads from the instance of treasure hunt.
+    $roadssql = "SELECT id, name, CASE WHEN (SELECT COUNT(at.id) "
+        . "FROM {treasurehunt_attempts} at INNER JOIN {treasurehunt_stages} ri "
+        . "ON ri.id = at.stageid INNER JOIN {treasurehunt_roads} r "
+        . "ON ri.roadid=r.id WHERE r.id= road.id) > 0 THEN 1 ELSE 0 "
+        . "END AS blocked FROM {treasurehunt_roads} road where treasurehuntid = ?";
+    $roads = $DB->get_records_sql($roadssql, array($treasurehuntid));
+    return $roads;
+}
 /**
  * Create or renew the user edition lock in an instance of treasurehunt.
  *
@@ -1596,21 +1617,38 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $groupid = 'a.groupid=0';
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
-    $attemptsquery = "SELECT a.id, $user as \"user\", r.position, a.timecreated, CASE WHEN EXISTS(SELECT 1 FROM "
-        . "{treasurehunt_stages} ri INNER JOIN {treasurehunt_attempts} at "
-        . "ON at.stageid=ri.id WHERE ri.position=r.position AND ri.roadid=r.roadid "
-        . "AND $groupidwithin AND at.penalty=1) THEN 1 ELSE 0 end as withfailures, "
-        . "CASE WHEN EXISTS(SELECT 1 FROM {treasurehunt_stages} ri INNER JOIN "
-        . "{treasurehunt_attempts} at ON at.stageid=ri.id WHERE ri.position=r.position "
-        . "AND ri.roadid=r.roadid AND $groupidwithin AND at.success=1 AND "
-        . "(at.type='location' OR at.type='qr')) THEN 1 ELSE 0 end as success FROM {treasurehunt_attempts} a INNER JOIN "
-        . "{treasurehunt_stages} r ON a.stageid=r.id INNER JOIN {treasurehunt_roads} "
-        . "ro ON r.roadid=ro.id WHERE ro.treasurehuntid=? AND $groupid "
-        . "order by r.position, \"user\", a.id, r.roadid";
-    $roadsquery = "SELECT id as roadid,$grouptype,validated, name as roadname, "
-        . "(SELECT MAX(position) FROM {treasurehunt_stages} where roadid "
-        . "= r.id) as totalstages from {treasurehunt_roads} r where treasurehuntid=?";
-    $params = array($cm->instance);
+    $attemptsquery = "
+    SELECT a.id, $user as \"user\", s.position, a.timecreated,
+           CASE WHEN EXISTS 
+           (SELECT 1 
+            FROM {treasurehunt_stages} ri
+            INNER JOIN {treasurehunt_attempts} at ON at.stageid=ri.id
+            WHERE ri.position=s.position AND ri.roadid=s.roadid AND $groupidwithin AND at.penalty=1
+            ) THEN 1 ELSE 0 end as withfailures, 
+        CASE WHEN EXISTS 
+            (SELECT 1 
+            FROM {treasurehunt_stages} ri 
+            INNER JOIN {treasurehunt_attempts} at ON at.stageid=ri.id
+            WHERE ri.position=s.position 
+                AND ri.roadid=s.roadid 
+                AND $groupidwithin 
+                AND at.success=1 
+                AND (at.type='location' OR at.type='qr')
+            ) THEN 1 ELSE 0 end as success 
+        FROM {treasurehunt_attempts} a 
+        INNER JOIN {treasurehunt_stages} s ON a.stageid=s.id
+        INNER JOIN {treasurehunt_roads} ro ON s.roadid=ro.id
+        WHERE ro.treasurehuntid=:treasurehuntid AND $groupid 
+        order by s.position, \"user\", a.id, s.roadid";
+
+    $roadsquery = "
+        SELECT id as roadid,
+            $grouptype,
+            validated,
+            name as roadname, 
+            (SELECT MAX(position) FROM {treasurehunt_stages} where roadid = r.id) as totalstages
+        FROM {treasurehunt_roads} r where treasurehuntid=?";
+    $params = ['treasurehuntid' => $cm->instance];
     $attempts = $DB->get_records_sql($attemptsquery, $params);
     if ($cm->groupmode) {
         // Group mode.
