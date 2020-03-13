@@ -708,7 +708,7 @@ define(['jquery',
 			// The 1st time, it is called after the map is loaded
 					
 					//$("#collapsibleset").collapsibleset("refresh");
-					open_next_activity_panel();
+					//open_next_activity_panel();
 					//$("#infopanel").panel("open");
 		            //$("#lastsuccessfulstage").collapsible("expand");
 		            changesinlastsuccessfulstage = false;

@@ -81,9 +81,9 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                         var arr = x.split('=');
                         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
                     });
-                    if (cook["introPlayProgress"] != 'Done') {
+                    //if (cook["introPlayProgress"] != 'Done') {
                        this.launchplaytutorial();
-                    }
+                    //}
                 }, // ...end of playpage function.
 
             }; // ...end of init var.
@@ -201,15 +201,21 @@ function configurePlayIntro(intro, strings, keys) {
             }
         ]
     });
+    /** Open the Clue or Question panel */
+    function open_next_activity_panel() {
+        $("#bigbtn").click();
+    }
     intro.onexit(function (target) {
-        document.cookie = "introPlayProgress = Done";
+        //document.cookie = "introPlayProgress = Done";
+        open_next_activity_panel();
     });
     intro.oncomplete(function (target) {
-        document.cookie = "introPlayProgress = Done";
+        //document.cookie = "introPlayProgress = Done";
+        //open_next_activity_panel();
     });
     intro.onchange(function (target) {
         document.cookie = "introPlayStep = " + this._currentStep;
-        document.cookie = "introPlayProgress = Done"; // Skip the tutorial if visited.
+        //document.cookie = "introPlayProgress = Done"; // Skip the tutorial if visited.
     });
     intro.onafterchange(function (target) {
         var parentElem = target.parentElement;
