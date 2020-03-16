@@ -158,7 +158,7 @@ define([
     var mapprojection = "EPSG:3857";
     var custombaselayer = null;
     var geographictools = true;
-    var defaultzoom = 19;
+    var defaultzoom = 15;
     // Support customized base layers.
     if (custommapconfig) {
       if (custommapconfig.custombackgroundurl) {
@@ -173,7 +173,6 @@ define([
           var bboxheight = customimageextent[3] - customimageextent[1];
           var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
           var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-
           var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
           var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
           var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
@@ -335,7 +334,7 @@ define([
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
-        scale: 0.35,
+        scale: 1,
         src: markerurl
       })
     });
@@ -548,8 +547,8 @@ define([
     }
     /**
      * Updates the model of the game.
-     * Notifies a new location for validation or a new answer to a question
-     * @param {boolean} location requests a location validation
+     * Notifies a new location for validation or a new answer to a question.
+     * @param {boolean} location requests a location validation.
      * @param {boolean} initialize
      * @param {int} selectedanswerid submits an answer to a question
      * @param {string} qrtext submits a text scanned from a QRCode
@@ -632,7 +631,7 @@ define([
               markerFeature.setGeometry(null);
             }
           }
-          // If you change the group mode.
+          // If change the group mode.
           if (groupmode != response.groupmode) {
             groupmode = response.groupmode;
           }
@@ -644,8 +643,8 @@ define([
           ) {
             lastattempttimestamp = response.attempttimestamp;
             lastroadtimestamp = response.roadtimestamp;
-            if (response.historicalattempts.length > 0) {
-              attemptshistory = response.historicalattempts;
+            if (response.attempthistory.length > 0) {
+              attemptshistory = response.attempthistory;
               changesinattemptshistory = true;
             }
             // Compruebo si es distinto de null, lo que indica que se ha actualizado.
@@ -844,15 +843,26 @@ define([
           );
           counter++;
         });
-        // This decoration renders with problems.
-        // $('#questionform').enhanceWithin().controlgroup("refresh");
+
+        // $("#questionform")
+        //   .html(questionform)
+        //   .scrollTop();
+        // // Enhance this with jquery mobile.
+        // // JPC: It doesn't work in some cases (i.e. Moodle 3.7) probably some interaction with jquery, jqueryui and jquerymobile.
+        // // When the radio controls are not correctly shown its better to show the native controls.
+        // $("#questionform").enhanceWithin();
+        // setTimeout(
+        //   () =>
+        //     $("#questionform input").removeClass("ui-helper-hidden-accessible"),
+        //   1
+        // ); //.controlgroup("refresh");
         changesinquestionstage = false;
       }
     }
     function set_attempts_history() {
-      // Compruebo si ha habido cambios desde la ultima vez
+      // I'm checking to see if there have been any changes since the last time.
       if (changesinattemptshistory) {
-        var $historylist = $("#historylist");
+        var $historylist = $("#historylist"); // TODO: Why the variable starts with $?
         // Lo reinicio
         $historylist.html("");
         changesinattemptshistory = false;
@@ -935,7 +945,6 @@ define([
     );
     /*-------------------------------Events-----------------------------------*/
     geolocation.on("change:position", () => {
-      debugger;
       var coordinates = geolocation.getPosition();
       positionFeature.setGeometry(
         coordinates ? new ol.geom.Point(coordinates) : null

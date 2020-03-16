@@ -29,7 +29,7 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once($CFG->libdir . '/formslib.php');
 
-global $USER;
+global $USER, $PAGE;
 
 $id = required_param('id', PARAM_INT);
 $roadid = optional_param('roadid', 0, PARAM_INT);
@@ -100,7 +100,9 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 echo $OUTPUT->header();
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
-echo $OUTPUT->heading($title);
+echo $OUTPUT->container_start('','edition_maintitle'); // For locating the help icon and override it in tutorial.js.
+echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
+echo $OUTPUT->container_end();
 // Conditions to show the intro can change to look for own settings or whatever.
 if ($treasurehunt->intro) {
     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
@@ -113,7 +115,15 @@ echo $OUTPUT->box(null, 'loader-circle-inside');
 echo $OUTPUT->container_end();
 echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
 echo $OUTPUT->box(get_string('erremptystage', 'treasurehunt'), 'alert alert-error invisible', 'erremptystage');
-echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
+//echo $OUTPUT->box($OUTPUT->help_icon('edition', 'treasurehunt', ''), 'invisible', 'controlpanel');
+$buttons = "<button id=\"addroad\" class=\"btn btn-secondary\" >" . get_string('treasurehunt:addroad', 'treasurehunt') ."</button>";
+$buttons .= "<button id=\"addstage\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('treasurehunt:addstage', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"drawmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('drawmode', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"editmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('editmode', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"navmode\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('browsemode', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"savestage\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('save', 'treasurehunt') . "</button>";
+$buttons .= "<button id=\"removefeature\" class=\"btn btn-secondary\" disabled=\"disabled\">" . get_string('remove', 'treasurehunt') . "</button>";
+echo $OUTPUT->box($buttons, "box py-3 ui-widget-header ui-corner-all", 'controlpanel');
 echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');

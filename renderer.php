@@ -81,28 +81,36 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
     /**
      * Render a table containing the current status of the user attempts.
      *
-     * @param treasurehunt_user_historical_stages  $historical
+     * @param treasurehunt_user_attempt_history  $historical
      * @return string
      */
-    public function render_treasurehunt_user_historical_attempts(treasurehunt_user_historical_attempts $historical)
+    public function render_treasurehunt_user_attempt_history(treasurehunt_user_attempt_history $historical)
     {
         // Create a table for the data.
         $o = '';
-        $o .= $this->output->container_start('historicalattempts');
-        $o .= $this->output->heading(get_string('historicalattempts', 'treasurehunt', $historical->username), 3);
+        $o .= $this->output->container_start('attempthistory');
+        $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
             $numattempt = 1;
             $t = new html_table();
-            $this->add_table_row($t, array(get_string('attempt', 'treasurehunt'), get_string('state', 'treasurehunt')), true);
+            $col1 = new html_table_cell(get_string('attempt', 'treasurehunt'));
+            $col2 = new html_table_cell(get_string('state', 'treasurehunt'));
+            $col1->attributes = ['width'=> '1%', 'class' => ''];
+            $col2->attributes = ['width' => '100%', 'class' => ''];
+            $t->head = [$col1, $col2];
             foreach ($historical->attempts as $attempt) {
                 if (!$attempt->penalty) {
                     $class = 'successfulattempt';
                 } else {
                     $class = 'failedattempt';
                 }
-                $this->add_table_row($t, array($numattempt++, $attempt->string), false, array($class, ''));
+               $cell1 = new html_table_cell($numattempt++);
+               $cell1->attributes = ['class' => $class];
+               $cell2 = new html_table_cell($attempt->string);
+
+               $t->data[] = new html_table_row([$cell1, $cell2]);
             }
             // All done - write the table.
             $o .= html_writer::table($t);
@@ -189,11 +197,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                     array(
                                         $title,
                                         get_string('totaltime', 'treasurehunt'),
+                                        get_string('start', 'treasurehunt'),
                                         get_string('stages', 'treasurehunt')
                                     ),
                                     true,
                                     null,
-                                    array(null, null, $roadusersprogress->totalstages)
+                                    array(null, null, null, $roadusersprogress->totalstages)
                                 );
                                 $hasprogress = true;
                             }
@@ -203,7 +212,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $name));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
@@ -215,14 +224,15 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('historicalattempts', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
                             }
                             $cells = array($name);
-                            $cells[] = treasurehunt_get_nice_duration($elapsed);
-
+                            $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
+                            $cells[] = treasurehunt_get_nice_date($elapsed->first);
+                            
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($userorgroup->ratings[$i])) {
@@ -287,47 +297,54 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
      */
     public function render_treasurehunt_info(treasurehunt_info $info)
     {
-        // Create a table for the data.
         $o = '';
-        $notavailable = false;
-        $o .= $this->output->container_start('treasurehuntinfo');
-        if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
-            $notavailable = true;
-            $message = get_string('treasurehuntnotavailable', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
-            $o .= html_writer::tag('p', $message) . "\n";
-            if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
-                $o .= html_writer::tag('p', $message) . "\n";
-            }
-        } else if ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
-            $message = get_string('treasurehuntclosed', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
-            $o .= html_writer::tag('p', $message) . "\n";
-        } else {
-            if ($info->treasurehunt->allowattemptsfromdate) {
-                $message = get_string('treasurehuntopenedon', 'treasurehunt', userdate($info->treasurehunt->allowattemptsfromdate));
-                $o .= html_writer::tag('p', $message) . "\n";
-            }
-            if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt', userdate($info->treasurehunt->cutoffdate));
-                $o .= html_writer::tag('p', $message) . "\n";
-            }
-        }
         // Warn about the use of QR scanner.
         if ($info->numqrs > 0) {
             global $PAGE;
             $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
             treasurehunt_qr_support($PAGE, 'enableTest', $params);
+            $o .= $this->output->container_start(null, 'QRStatusDiv');
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
-            $o .= '<div id="QRStatusDiv">';
-            $o .= $this->output->notification($warnqr) . "\n";
-            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>' .
-                '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
+            $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
+            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
+            $o .= '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
             <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
             </div>
             <div id="QRvalue"></div>' .
                 '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
                 get_string('changecamera', 'treasurehunt') . '</button>';
             $o .= '</div>';
+            $o .= '<div id="errorQR" style="display: none" >' . get_string('warnqrscannererror', 'treasurehunt', $info->numqrs) ;
+            $o .= $this->output->container_end();
+        }
+        // Create a table for the data.
+        $notavailable = false;
+        $o .= $this->output->container_start('treasurehuntinfo');
+        if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
+            $notavailable = true;
+            $message = get_string('treasurehuntnotavailable', 'treasurehunt', 
+                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48));
+            $o .= html_writer::tag('p', $message) . "\n";
+            if ($info->treasurehunt->cutoffdate) {
+                $message = get_string('treasurehuntcloseson', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+                $o .= html_writer::tag('p', $message) . "\n";
+            }
+        } else if ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
+            $message = get_string('treasurehuntclosed', 'treasurehunt',
+                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+            $o .= html_writer::tag('p', $message) . "\n";
+        } else {
+            if ($info->treasurehunt->allowattemptsfromdate) {
+                $message = get_string('treasurehuntopenedon', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate));
+                $o .= html_writer::tag('p', $message) . "\n";
+            }
+            if ($info->treasurehunt->cutoffdate) {
+                $message = get_string('treasurehuntcloseson', 'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+                $o .= html_writer::tag('p', $message) . "\n";
+            }
         }
 
         // Type of geolocation: GPS or Desktop.

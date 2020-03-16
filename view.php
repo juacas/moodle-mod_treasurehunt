@@ -33,16 +33,15 @@ $userid = optional_param('userid', $USER->id, PARAM_INT);
 $groupid = optional_param('groupid', -1, PARAM_INT);
 
 list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
-$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
-
-require_login($course, true, $cm);
-
 $context = context_module::instance($cm->id);
-
+require_login($course, true, $cm);
 require_capability('mod/treasurehunt:view', $context);
 
+$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+$PAGE->set_activity_record($treasurehunt);
+
 $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-            'objectid' => $PAGE->cm->instance,
+    'objectid' => $PAGE->cm->instance,
             'context' => $PAGE->context,
         ));
 $event->add_record_snapshot('course', $PAGE->course);
@@ -59,19 +58,22 @@ $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
-
 /*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('treasurehunt-'.$somevar);
- */
+* Other things you may want to set - remove if not needed.
+* $PAGE->set_cacheable(false);
+* $PAGE->set_focuscontrol('some-html-id');
+* $PAGE->add_body_class('treasurehunt-'.$somevar);
+*/
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
+$PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
 echo $output->header();
-echo $output->heading(format_string($treasurehunt->name) . $output->help_icon('modulename', 'treasurehunt'));
-
+echo $output->heading(
+    html_writer::empty_tag('img', array('src' => treasurehunt_get_proper_icon($treasurehunt, time()))) . ' ' .
+    format_string($treasurehunt->name) . 
+    $output->help_icon('modulename', 'treasurehunt'));
+ 
 // Warn about the geolocation with no HTTPS.
 if ($treasurehunt->playwithoutmoving == false &&
         (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
@@ -111,7 +113,7 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
                 }
             }
         }
-        echo treasurehunt_view_user_historical_attempts($treasurehunt, $params->groupid, $userid, $params->roadid,
+        echo treasurehunt_view_user_attempt_history($treasurehunt, $params->groupid, $userid, $params->roadid,
                 $cm->id, $username, $teacherreview);
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
