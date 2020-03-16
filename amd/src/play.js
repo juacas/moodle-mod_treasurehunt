@@ -332,7 +332,7 @@ define([
     });
     var markerFeatureStyle = new ol.style.Style({
       image: new ol.style.Icon({
-        anchor: [0.5, 1],
+        anchor: [0.5, 0.9],
         opacity: 1,
         scale: 1,
         src: markerurl
