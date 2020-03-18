@@ -157,10 +157,11 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationDialog"><i class="fa fa-check" aria-hidden="true"></i></button>
-                <button class="btn play-highlight-btn" data-rel="modal" data-ref="#historypage" data-dismissible>
-                   Mostrar Pista
+                <button class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage" data-dismissible>
+                    <i class="fa fa-key" aria-hidden="true"></i>
+                    Mostrar Pista
                 </button>
-                {{! <button class="btn play-btn" data-rel="modal" data-ref="#historypage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
+                {{! <button class="btn play-btn" data-rel="modal" data-ref="#cluepage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
                }}
                 <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
@@ -196,101 +197,58 @@
         </div>
     </div>
 
-
     {{!Popup for location confirmation}}
-    <div class="play-modal" data-animation="slideInOutTop" id="confirmLocationDialog">
-        <!-- modal mask -->
-        <div class="modal-mask"></div>
+    {{< treasurehunt/popup_play_page}}
+        {{$popupid}}confirmLocationDialog{{/popupid}}
+        {{$popuptitle}}
+            {{#str}} sendlotaciontitle, mod_treasurehunt{{/str}}
+        {{/popuptitle}}
+        {{$popupcontent}}
+            <p>{{#str}} sendlotacioncontent, mod_treasurehunt{{/str}}</p>
+        {{/popupcontent}}
+        {{$popupfooter}}
+            <button type="button" class="btn play-btn close-modal" id="sendLocation">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {{#str}} send, mod_treasurehunt{{/str}}
+            </button>
+            <button type="button" class="btn play-btn close-modal">
+                <i class="fa fa-times" aria-hidden="true"></i>
+                {{#str}} cancel, mod_treasurehunt{{/str}}
+            </button>
+        {{/popupfooter}}
+    {{/treasurehunt/popup_play_page}}
 
-        <div class="play-modal-popup">
-            <!-- Header -->
-            <nav class="play-navbar">
-                <span class="title">{{#str}} sendlotaciontitle, mod_treasurehunt{{/str}}</span>
-            </nav>
-            
-            <div class="play-modal-content">
-                <p>{{#str}} sendlotacioncontent, mod_treasurehunt{{/str}}</p>
-            </div>
+    {{!Dialog layer page}}
+    {{< treasurehunt/dialog_play_page}}
+        {{$dialogid}}layerspage{{/dialogid}}
+        {{$dialogtitle}}
+            {{#str}} layers, mod_treasurehunt{{/str}}
+        {{/dialogtitle}}
+        {{$dialogcontent}}
+            <h5 class="card-title">{{#str}} mapview, mod_treasurehunt{{/str}}</h5>
+            <div class="list-group" id="layerslist"></div>        
+        {{/dialogcontent}}
+    {{/treasurehunt/dialog_play_page}}
 
-            <div class="play-modal-footer">
-                <button type="button" class="btn play-btn">
-                    <i class="fa fa-sign-out" aria-hidden="true"></i>
-                    {{#str}} send, mod_treasurehunt{{/str}}
-                </button>
-                <button type="button" class="btn play-btn close-modal">
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                    {{#str}} cancel, mod_treasurehunt{{/str}}
-                </button>
-            </div>
-        </div>
-    </div>
-
-
-
-    {{!Popup layer page}}
-    <div class="play-modal" data-animation="slideInOutTop" id="layerspage">
-        <!-- modal mask -->
-        <div class="modal-mask"></div>
-
-        <div class="play-modal-dialog">
-            <!-- Header -->
-            <nav class="play-navbar">
-                <button class="btn close-modal back-page">
-                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                </button>
-                <span class="title">{{#str}} layers, mod_treasurehunt{{/str}}</span>
-                <button class="btn close-modal close-popup">
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                </button>
-            </nav>
-        
-            <div class="play-modal-content">
-                <h5 class="card-title">{{#str}} mapview, mod_treasurehunt{{/str}}</h5>
-                <div class="list-group" id="layerslist"></div>
-            </div>
-        </div>
-    </div>
-
-    {{!Popup historical attempts page}}
-    <div class="play-modal" data-animation="slideInOutTop" id="historypage">
-        <!-- modal mask -->
-        <div class="modal-mask"></div>
-
-        <div class="play-modal-dialog">
-            <!-- Header -->
-            <nav class="play-navbar">
-                <button class="btn close-modal back-page">
-                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                </button>
-                <span class="title">{{#str}} history, mod_treasurehunt{{/str}}</span>
-                <button class="btn close-modal close-popup">
-                    <i class="fa fa-times" aria-hidden="true"></i>
-                </button>
-            </nav>
-
-            <div class="play-modal-content">
-                <!-- <h4>                        
-                    {{#str}} stageclue, mod_treasurehunt{{/str}}: 
-                </h4> -->
-                <div class="card">
-                    <div class="card-body">
-                        <div class="card-title d-flex justify-content-between align-items-start">
-                            <h5  id="lastsuccessfulstagename2"></h5>
-                            <span class="badge badge-dark" id="lastsuccesfulstagepos2"></span>
-                        </div>
-                        <p class="card-text" id="lastsuccessfulstageclue2"></p>
+    {{!Dialog clue page}}
+    {{< treasurehunt/dialog_play_page}}
+        {{$dialogid}}cluepage{{/dialogid}}
+        {{$dialogtitle}}
+            {{#str}} clue, mod_treasurehunt{{/str}}
+        {{/dialogtitle}}
+        {{$dialogcontent}}
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title d-flex justify-content-between align-items-start">
+                        <h5  id="lastsuccessfulstagename2"></h5>
+                        <span class="badge badge-dark" id="lastsuccesfulstagepos2"></span>
                     </div>
+                    <p class="card-text" id="lastsuccessfulstageclue2"></p>
                 </div>
-                 <!--<div id="lastsuccessfulstage23" data-role="collapsible"  data-collapsed="false" >
-                    <h4>{{#str}} history, mod_treasurehunt{{/str}}</h4>
-                        <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
-                            <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
-                        </ol>
-                </div> -->
-            </div>
-        </div>
-    </div>
-
+            </div>      
+        {{/dialogcontent}}
+    {{/treasurehunt/dialog_play_page}}
+   
     {{!Popup question page}}
     <div class="play-modal" data-animation="slideInOutTop" id="questionpage">
         <!-- modal mask -->

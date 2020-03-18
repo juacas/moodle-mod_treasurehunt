@@ -35,7 +35,7 @@ define([
   // "mod_treasurehunt/jquerymobile"
 ], function($, url, ol, ajax, GeocoderJS, OSMGeocoder, viewgpx, str) {
   // console.log("loading play.js with jquery " + $().jquery);
-  var init = {
+  let init = {
     playtreasurehunt: function(
       cmid,
       treasurehuntid,
@@ -49,7 +49,7 @@ define([
       custommapconfig
     ) {
       // I18n strings.
-      var terms = [
+      let terms = [
         "stageovercome",
         "failedlocation",
         "stage",
@@ -74,13 +74,13 @@ define([
         "error"
       ];
       // console.log("loading i18n strings");
-      var stringsqueried = terms.map(term => {
+      let stringsqueried = terms.map(term => {
         return { key: term, component: "treasurehunt" };
       });
       // i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
       str.get_strings(stringsqueried).done(strings => {
-        var i18n = [];
-        for (var i = 0; i < terms.length; i++) {
+        let i18n = [];
+        for (let i = 0; i < terms.length; i++) {
           i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
         }
         // i18n = i18nplay;
@@ -92,7 +92,7 @@ define([
         ) {
           // console.log("Detecting custom background image dimensions.");
           // Detect image size.
-          var img = new Image();
+          let img = new Image();
           img.addEventListener("load", function() {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
@@ -155,27 +155,27 @@ define([
     // console.log("init player Openlayers");
     // $.mobile.loading("show");
     setLoading(true);
-    var mapprojection = "EPSG:3857";
-    var custombaselayer = null;
-    var geographictools = true;
-    var defaultzoom = 15;
+    let mapprojection = "EPSG:3857";
+    let custombaselayer = null;
+    let geographictools = true;
+    let defaultzoom = 15;
     // Support customized base layers.
     if (custommapconfig) {
       if (custommapconfig.custombackgroundurl) {
         // console.log("config custom background image");
-        var customimageextent = ol.proj.transformExtent(
+        let customimageextent = ol.proj.transformExtent(
           custommapconfig.bbox,
           "EPSG:4326",
           mapprojection
         );
         if (!custommapconfig.geographic) {
           // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
-          var bboxheight = customimageextent[3] - customimageextent[1];
-          var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
-          var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-          var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
-          var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
-          var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
+          let bboxheight = customimageextent[3] - customimageextent[1];
+          let centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
+          let centerheight = (customimageextent[3] + customimageextent[1]) / 2;
+          let ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
+          let adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
+          let adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
           customimageextent = [
             centerwidth - adjwidth / 2,
             centerheight - adjheight / 2,
@@ -196,7 +196,7 @@ define([
         });
       } else if (custommapconfig.wmsurl) {
         // console.log("config custom wms server: " + custommapconfig.wmsurl);
-        var options = {
+        let options = {
           source: new ol.source.TileWMS({
             url: custommapconfig.wmsurl,
             params: custommapconfig.wmsparams
@@ -211,7 +211,7 @@ define([
           custommapconfig.bbox[2] &&
           custommapconfig.bbox[3]
         ) {
-          var customwmsextent = ol.proj.transformExtent(
+          let customwmsextent = ol.proj.transformExtent(
             custommapconfig.bbox,
             "EPSG:4326",
             mapprojection
@@ -246,29 +246,29 @@ define([
     let osmGeocoderXHR;
     let osmTimer = 0;
     /*-------------------------------Styles-----------------------------------*/
-    var text = new ol.style.Text({
+    let text = new ol.style.Text({
       textAlign: "center",
       scale: 1.3,
       fill: new ol.style.Fill({
-        color: "#fff"
+        color: "#ffffff"
       }),
       stroke: new ol.style.Stroke({
-        color: "#000",
+        color: "#000000",
         width: 3.5
       })
     });
-    var selectText = new ol.style.Text({
+    let selectText = new ol.style.Text({
       textAlign: "center",
       scale: 1.4,
       fill: new ol.style.Fill({
         color: "#fff"
       }),
       stroke: new ol.style.Stroke({
-        color: "#3399CC",
+        color: "#0097a7",
         width: 3.5
       })
     });
-    var defaultstageStyle = new ol.style.Style({
+    let defaultstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
@@ -278,7 +278,7 @@ define([
       text: text,
       zIndex: "Infinity"
     });
-    var failstageStyle = new ol.style.Style({
+    let failstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
@@ -288,7 +288,7 @@ define([
       text: text,
       zIndex: "Infinity"
     });
-    var defaultSelectstageStyle = new ol.style.Style({
+    let defaultSelectstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
@@ -298,7 +298,7 @@ define([
       text: selectText,
       zIndex: "Infinity"
     });
-    var failSelectstageStyle = new ol.style.Style({
+    let failSelectstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
@@ -308,7 +308,7 @@ define([
       text: selectText,
       zIndex: "Infinity"
     });
-    var positionFeatureStyle = new ol.style.Style({
+    let positionFeatureStyle = new ol.style.Style({
       image: new ol.style.Circle({
         radius: 6,
         fill: new ol.style.Fill({
@@ -320,7 +320,7 @@ define([
         })
       })
     });
-    var accuracyFeatureStyle = new ol.style.Style({
+    let accuracyFeatureStyle = new ol.style.Style({
       fill: new ol.style.Fill({
         color: [255, 255, 255, 0.3]
       }),
@@ -330,7 +330,7 @@ define([
       }),
       zIndex: -1
     });
-    var markerFeatureStyle = new ol.style.Style({
+    let markerFeatureStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.9],
         opacity: 1,
@@ -339,16 +339,16 @@ define([
       })
     });
     /*-------------------------------Layers-----------------------------------*/
-    var layers = [];
-    var geoJSONFormat = new ol.format.GeoJSON();
-    var source = new ol.source.Vector({
+    let layers = [];
+    let geoJSONFormat = new ol.format.GeoJSON();
+    let source = new ol.source.Vector({
       projection: "EPSG:3857"
     });
-    var attemptslayer = new ol.layer.Vector({
+    let attemptslayer = new ol.layer.Vector({
       source: source,
       style: style_function
     });
-    var aeriallayer = new ol.layer.Tile({
+    let aeriallayer = new ol.layer.Tile({
       visible: false,
       source: new ol.source.BingMaps({
         key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
@@ -360,13 +360,13 @@ define([
       })
     });
     aeriallayer.set("name", strings["aerialview"]);
-    var roadlayer = new ol.layer.Tile({
+    let roadlayer = new ol.layer.Tile({
       source: new ol.source.OSM()
     });
     roadlayer.set("name", strings["roadview"]);
 
-    var layersbase = [];
-    var layersoverlay = [];
+    let layersbase = [];
+    let layersoverlay = [];
     if (!custommapconfig || custommapconfig.onlybase === false) {
       layersbase = [aeriallayer, roadlayer];
     }
@@ -377,21 +377,21 @@ define([
         layersoverlay.push(custombaselayer);
       }
     }
-    var layergroup = new ol.layer.Group({ layers: layersbase });
+    let layergroup = new ol.layer.Group({ layers: layersbase });
     // All layers hidden except last one.
-    var toplayer = null;
+    let toplayer = null;
     layergroup.getLayers().forEach(layer => {
       layer.setVisible(false);
       toplayer = layer;
     });
     toplayer.setVisible(true);
 
-    var view = new ol.View({
+    let view = new ol.View({
       center: [0, 0],
       zoom: 2,
       minZoom: 2
     });
-    var select = new ol.interaction.Select({
+    let select = new ol.interaction.Select({
       layers: [attemptslayer],
       style: select_style_function,
       filter: feature => {
@@ -401,21 +401,21 @@ define([
         return true;
       }
     });
-    var accuracyFeature = new ol.Feature();
+    let accuracyFeature = new ol.Feature();
     accuracyFeature.setProperties({ name: "user_accuracy" });
     accuracyFeature.setStyle(accuracyFeatureStyle);
-    var positionFeature = new ol.Feature();
+    let positionFeature = new ol.Feature();
     positionFeature.setProperties({ name: "user_position" });
     positionFeature.setStyle(positionFeatureStyle);
-    var userPosition = new ol.layer.Vector({
+    let userPosition = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: [accuracyFeature, positionFeature]
       })
     });
-    var markerFeature = new ol.Feature();
+    let markerFeature = new ol.Feature();
     markerFeature.setGeometry(null);
     markerFeature.setStyle(markerFeatureStyle);
-    var markerVector = new ol.layer.Vector({
+    let markerVector = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: [markerFeature]
       })
@@ -424,11 +424,11 @@ define([
     layers = layers.concat(layersoverlay);
     layers = layers.concat([attemptslayer, userPosition, markerVector]);
     // New Custom zoom.
-    var zoom = new ol.control.Zoom({
+    let zoom = new ol.control.Zoom({
       target: "navigation",
       className: "custom-zoom"
     });
-    var map = new ol.Map({
+    let map = new ol.Map({
       layers: layers,
       controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
       target: "mapplay",
@@ -450,7 +450,7 @@ define([
       add_layer_to_list(overlay);
     });
     if (tracking && user) {
-      var tracklayergroup = viewgpx.addgpxlayer(
+      let tracklayergroup = viewgpx.addgpxlayer(
         map,
         cmid,
         treasurehuntid,
@@ -460,9 +460,9 @@ define([
       );
       tracklayergroup.set("name", tracklayergroup.get("title"));
 
-      var tracklayer = tracklayergroup.getLayers().item(0);
-      var htmltitle = tracklayer.get("title"); // Has a picture and a link.
-      var plaintitle = htmltitle.substring(htmltitle.indexOf("</a>") + 4);
+      let tracklayer = tracklayergroup.getLayers().item(0);
+      let htmltitle = tracklayer.get("title"); // Has a picture and a link.
+      let plaintitle = htmltitle.substring(htmltitle.indexOf("</a>") + 4);
       tracklayer.set("name", plaintitle);
       tracklayer.setVisible(false);
       add_layer_to_list(tracklayer);
@@ -470,16 +470,16 @@ define([
     /*-------------------------------Functions-----------------------------------*/
     function style_function(feature) {
       // Get the income level from the feature properties.
-      var stageposition = feature.get("stageposition");
+      let stageposition = feature.get("stageposition");
       if (stageposition === 0) {
-        var fill = new ol.style.Fill({
+        let fill = new ol.style.Fill({
           color: "rgba(255,255,255,0.4)"
         });
-        var stroke = new ol.style.Stroke({
-          color: "#3399CC",
+        let stroke = new ol.style.Stroke({
+          color: "#0097a7",
           width: 1.25
         });
-        var styles = new ol.style.Style({
+        let styles = new ol.style.Style({
           image: new ol.style.Circle({
             fill: fill,
             stroke: stroke,
@@ -494,7 +494,7 @@ define([
               color: "rgb(255,255,255)"
             }),
             stroke: new ol.style.Stroke({
-              color: "#3399CC",
+              color: "#0097a7",
               width: 5
             })
           })
@@ -511,7 +511,7 @@ define([
       return [defaultstageStyle];
     }
     function select_style_function(feature) {
-      var stageposition = feature.get("stageposition");
+      let stageposition = feature.get("stageposition");
       if (!feature.get("geometrysolved")) {
         failSelectstageStyle.getText().setText("" + stageposition);
         return [failSelectstageStyle];
@@ -531,8 +531,8 @@ define([
       fly_to(map, position);
     }
     function fly_to(map, point, extent) {
-      var duration = 700;
-      var view = map.getView();
+      let duration = 700;
+      let view = map.getView();
       if (extent) {
         view.fit(extent, {
           duration: duration
@@ -555,11 +555,11 @@ define([
      * @returns {undefined}
      */
     function renew_source(location, initialize, selectedanswerid, qrtext) {
-      // var position holds the potition to be evaluated. undef if no evaluation requested
-      var position;
-      var currentposition;
-      var coordinates;
-      var answerid;
+      // let position holds the potition to be evaluated. undef if no evaluation requested
+      let position;
+      let currentposition;
+      let coordinates;
+      let answerid;
 
       if (playwithoutmoving) {
         coordinates = markerFeature.getGeometry();
@@ -583,7 +583,7 @@ define([
 
         // $.mobile.loading("show");
       }
-      var geojson = ajax.call([
+      let geojson = ajax.call([
         {
           methodname: "mod_treasurehunt_user_progress",
           args: {
@@ -688,25 +688,11 @@ define([
             if (response.firststagegeom || initialize) {
               fitmap = true;
             }
-            // Check the page we're on.
-            // var pageId = $.mobile.pageContainer
-            //   .pagecontainer("getActivePage")
-            //   .prop("id");
-            // // Update the page model wherever the page we are.
+
             set_lastsuccessfulstage();
             fit_map_to_source();
             set_question();
-            // if (pageId === "mappage") {
-            //   // Nothing special.
-            // } else if (pageId === "historypage") {
             set_attempts_history();
-            // } else if (pageId === "questionpage") {
-            //   if (lastsuccessfulstage.question === "") {
-            //     $.mobile.pageContainer.pagecontainer("change", "#mappage");
-            //   } else {
-            //     $.mobile.resetActivePageHeight();
-            //   }
-            // }
           }
           if (response.infomsg.length > 0) {
             infomsgs.forEach(() => {
@@ -739,7 +725,7 @@ define([
     }
     function fit_map_to_source() {
       if (fitmap) {
-        var features = source.getFeatures();
+        let features = source.getFeatures();
         if (
           features.length === 1 &&
           features[0].getGeometry() instanceof ol.geom.Point
@@ -760,15 +746,15 @@ define([
         $("#lastsuccesfulstagepos").text(
           lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
         );
-        var maxchars = 100;
-        var briefing;
+        let maxchars = 100;
+        let briefing;
         // Clean color styles from clue.
         lastsuccessfulstage.clue = lastsuccessfulstage.clue.replace(
           /color/gm,
           "color-disabled"
         );
         $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
-        var clueplaintext = lastsuccessfulstage.clue.replace(
+        let clueplaintext = lastsuccessfulstage.clue.replace(
           /<(?:.|\n)*?>/gm,
           ""
         );
@@ -820,9 +806,9 @@ define([
         $("#questionform").html(
           "<legend>" + lastsuccessfulstage.question + "</legend>"
         );
-        var counter = 1;
+        let counter = 1;
         $.each(lastsuccessfulstage.answers, (key, answer) => {
-          var id = "answer" + counter;
+          let id = "answer" + counter;
           // Clean color tag.
           answer.answertext = answer.answertext.replace(
             /color/gm,
@@ -862,7 +848,7 @@ define([
     function set_attempts_history() {
       // I'm checking to see if there have been any changes since the last time.
       if (changesinattemptshistory) {
-        var $historylist = $("#historylist"); // TODO: Why the variable starts with $?
+        let $historylist = $("#historylist"); // TODO: Why the variable starts with $?
         // Lo reinicio
         $historylist.html("");
         changesinattemptshistory = false;
@@ -882,8 +868,6 @@ define([
             ).appendTo($historylist);
           });
         }
-        $historylist.listview("refresh");
-        $historylist.trigger("updatelayout");
       }
     }
     function add_layer_to_list(layer) {
@@ -933,7 +917,7 @@ define([
      * Geolocation component
      * @type ol.Geolocation
      */
-    var geolocation = new ol.Geolocation(
+    let geolocation = new ol.Geolocation(
       /** @type {olx.GeolocationOptions} */ ({
         projection: view.getProjection(),
         trackingOptions: {
@@ -945,7 +929,7 @@ define([
     );
     /*-------------------------------Events-----------------------------------*/
     geolocation.on("change:position", () => {
-      var coordinates = geolocation.getPosition();
+      let coordinates = geolocation.getPosition();
       positionFeature.setGeometry(
         coordinates ? new ol.geom.Point(coordinates) : null
       );
@@ -965,7 +949,7 @@ define([
       accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
       // $.mobile.loading("hide");
     });
-    var trackinggeolocationwarndispatched = false;
+    let trackinggeolocationwarndispatched = false;
     geolocation.on("error", error => {
       // $.mobile.loading("hide");
       geolocation.setProperties({ user_denied: true });
@@ -1020,7 +1004,7 @@ define([
       }
     });
     map.on("click", evt => {
-      var hasFeature = false;
+      let hasFeature = false;
       map.forEachFeatureAtPixel(
         map.getEventPixel(evt.originalEvent),
         feature => {
@@ -1035,7 +1019,7 @@ define([
         }
       );
       if (playwithoutmoving && !hasFeature) {
-        var coordinates = map.getEventCoordinate(evt.originalEvent);
+        let coordinates = map.getEventCoordinate(evt.originalEvent);
         markerFeature.setGeometry(
           coordinates ? new ol.geom.Point(coordinates) : null
         );
@@ -1076,7 +1060,7 @@ define([
                   })
                     .appendTo($searchContainer)
                     .click(() => {
-                      var extent = [];
+                      let extent = [];
                       extent[0] = parseFloat(place.boundingbox[2]);
                       extent[1] = parseFloat(place.boundingbox[0]);
                       extent[2] = parseFloat(place.boundingbox[3]);
@@ -1106,7 +1090,7 @@ define([
     });
     // Set a max-height to make large images shrink to fit the screen.
     $(document).on("popupbeforeposition", () => {
-      var maxHeight = $(window).height() - 200 + "px";
+      let maxHeight = $(window).height() - 200 + "px";
       $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
     });
     // Remove the popup after it has been closed to manage DOM size.
@@ -1145,7 +1129,7 @@ define([
     });
     $("#sendAnswer").on("click", event => {
       // Selecciono la respuesta.
-      var selected = $("#questionform input[type='radio']:checked");
+      let selected = $("#questionform input[type='radio']:checked");
       if (!available) {
         event.preventDefault();
         toast(strings["timeexceeded"]);
@@ -1209,7 +1193,7 @@ define([
       }
     }
     // function create_popup(type, title, body) {
-    //   var header = $('<div data-role="header"><h2>' + title + "</h2></div>"),
+    //   let header = $('<div data-role="header"><h2>' + title + "</h2></div>"),
     //     content = $(
     //       '<div data-role="content" class="ui-content ui-overlay-b">' +
     //         body +
@@ -1234,7 +1218,7 @@ define([
     //         strings["continue"] +
     //         "</a></p>"
     //     ).appendTo(content);
-    //     var attributes = {
+    //     let attributes = {
     //       "data-dismissible": false,
     //       "data-overlay-theme": "b"
     //     };
@@ -1249,7 +1233,7 @@ define([
     //         strings["continue"] +
     //         "</a></p>"
     //     ).appendTo(content);
-    //     var attributes = {
+    //     let attributes = {
     //       "data-dismissible": false,
     //       "data-overlay-theme": "b"
     //     };
@@ -1279,7 +1263,7 @@ define([
     //       }
     //     });
     //     // Fallback in case the browser doesn't fire a load event.
-    //     var fallback = setTimeout(function() {
+    //     let fallback = setTimeout(function() {
     //       open_popup(popup);
     //       // $.mobile.loading("hide");
     //     }, 2000);
