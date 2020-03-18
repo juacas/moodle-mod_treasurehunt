@@ -473,11 +473,11 @@ define([
       let stageposition = feature.get("stageposition");
       if (stageposition === 0) {
         let fill = new ol.style.Fill({
-          color: "rgba(255,255,255,0.4)"
+          color: "rgba(0,0,0,0.1)"
         });
         let stroke = new ol.style.Stroke({
           color: "#0097a7",
-          width: 1.25
+          width: 2
         });
         let styles = new ol.style.Style({
           image: new ol.style.Circle({
@@ -612,12 +612,9 @@ define([
           available = response.available;
           setLoading(false);
 
-          // $.mobile.loading("hide");
           // If I have sent a location or an answer I print out whether it is correct or not.
           if (location || selectedanswerid) {
-            if (response.status && available) {
-              // console.log(response.status.msg);
-            }
+            markerFeature.setGeometry(null);
           }
           if (response.qrexpected) {
             $("#validateqr").show();
@@ -1038,14 +1035,11 @@ define([
       let html = "";
       $searchContainer.html(html);
       if (value && value.length > 2) {
-        // $.mobile.loading("show", {
-        //   text: strings["searching"],
-        //   textVisible: true,
-        //   theme: "b"
-        // });
+        $(".search-loading").addClass("active");
         osmTimer = setTimeout(() => {
           osmGeocoderXHR = OSMGeocoder.search(value)
             .done(resp => {
+              $(".search-loading").removeClass("active");
               if (resp.length === 0) {
                 $searchContainer.html(
                   "<li class='list-group-item'>" +

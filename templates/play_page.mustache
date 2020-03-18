@@ -111,13 +111,13 @@
         </div>
 
         <!-- Sidebar search-->
-        <div id="searchpanel" class="sidebar sidebar-right">
+        <div id="searchpanel" class="sidebar sidebar-left">
             <!-- Header -->
             <nav class="play-navbar map-navbar">
-                <span class="title">{{#str}} search, mod_treasurehunt{{/str}}</span>
                 <button class="btn close-sidebar">
-                    <i class="fa fa-chevron-right" aria-hidden="true"></i>
+                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
                 </button>
+                <span class="title">{{#str}} search, mod_treasurehunt{{/str}}</span>
             </nav>
             <div class="card">
                 <div class="card-body">
@@ -132,6 +132,9 @@
                 </div>
             </div>
             <div class="sidebar-content">
+                <div class="search-loading">
+                    {{#pix}} loading, treasurehunt, Loading {{/pix}}
+                </div>
                 <div id="searchsResults" class="list-group"></div>
             </div>
         </div>
@@ -142,13 +145,22 @@
         <div class="page-content-wrapper">
             <!-- Header -->
             <nav class="play-navbar map-navbar">
-                <button class="btn" data-rel="sidebar" data-ref="#infopanel" data-dismissible>
+                {{! <button class="btn" data-rel="sidebar" data-ref="#infopanel" data-dismissible>
                     <i class="fa fa-bars" aria-hidden="true"></i>
-                </button>
-                <span class="title">{{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}</span>
+                </button> }}
                 <button class="btn" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
                     <i class="fa fa-search" aria-hidden="true"></i>
                 </button>
+                <span class="title">{{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}</span>
+                <button class="btn dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
+                    {{{user.picture}}}
+                </button>
+                 <div class="dropdown-menu" aria-labelledby="dropdownMenuButton">
+                    <a class="dropdown-item" href="view.php?id={{cmid}}">
+                            <i class="fa fa-sign-out" aria-hidden="true"></i>
+                            {{#str}} exit, mod_treasurehunt{{/str}}
+                        </a>
+                </div>
             </nav>
             <!-- Map Container -->
             <div class="map-container">

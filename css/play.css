@@ -83,6 +83,11 @@
   overflow: hidden;
 }
 
+#page-mod-treasurehunt-play .play-navbar .title img {
+  width: 30px;
+  height: 30px;
+}
+
 #page-mod-treasurehunt-play .play-navbar .btn {
   color: inherit;
   border-radius: 50%;
@@ -93,9 +98,6 @@
 }
 
 #page-mod-treasurehunt-play .map-navbar .title {
-  flex: 1;
-  font-size: 1.3em;
-  text-align: center;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;
@@ -176,7 +178,7 @@
   border: none;
   border-radius: 30px 30px 0 0;
   padding: 0 30px;
-  font-size: 23px;
+  font-size: 19px;
   color: white;
   text-align: center;
 }
@@ -339,6 +341,21 @@
 
 #page-mod-treasurehunt-play #searchsResults .search-option i {
   font-size: 20px;
+}
+
+#page-mod-treasurehunt-play .search-loading {
+  display: none;
+}
+
+#page-mod-treasurehunt-play .search-loading.active {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+#page-mod-treasurehunt-play .search-loading img {
+  width: 100px;
+  height: 100px;
 }
 
 /* Zoom map buttons */
