@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,9 +16,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'treasurehunt', language 'es'
+ * Strings for component 'treasurehunt', language 'es'.
  *
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -62,6 +62,7 @@ $string['changetoplaywithoutmoving'] = 'El modo de juego ha cambiado a jugar sin
 $string['cleartreasurehunt'] = 'Resetear la Caza del Tesoro';
 $string['cleartreasurehunt_done'] = 'La actividad se ha inicializado. Toda la actividad de los participantes se ha eliminado.';
 $string['cleartreasurehuntconfirm'] = 'Cuidado con esta acción. Si continua se eliminará toda la actividad de los participantes. Normalmente sólo es necesario para reiniciar la actividad y poder modificar el número de caminos o etapas en una Caza del Tesoro en la que haya participado alguien por error o para pruebas. Actualmente hay {$a} registros de actividad.';
+$string['clue'] = 'Pista';
 $string['configintro'] = 'Los valores fijados aquí definen los valores por defecto usados en el formulario de especificaciones
 cuando usted crea una nueva caza del tesoro.';
 $string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la caza del tesoro.';

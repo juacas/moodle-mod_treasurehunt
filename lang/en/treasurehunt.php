@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,9 +16,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Strings for component 'treasurehunt', language 'en'
+ * Strings for component 'treasurehunt', language 'en'.
  *
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -71,6 +71,7 @@ $string['correctanswer'] = 'Correct answer.';
 $string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
 $string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has been deleted.';
 $string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
+$string['clue'] = 'Clue';
 $string['customlayername'] = 'Layer title';
 $string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
 $string['custommapimagefile'] = 'Custom image for map';

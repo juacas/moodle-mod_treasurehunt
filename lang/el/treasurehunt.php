@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -14,9 +15,8 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 /**
- * Strings for component 'treasurehunt', language 'en'
+ * Strings for component 'treasurehunt', language 'en'.
  *
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Sp Zoupanos <szoupi@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -65,6 +65,7 @@ $string['correctanswer'] = 'Σωστή απάντηση.';
 $string['cleartreasurehunt'] = 'Επαναφορά δεδομένων για το Κυνήγι Θησαυρού';
 $string['cleartreasurehunt_done'] = 'Πραγματοποιήθηκε επαναφορά δραστηριότητας. Όλες οι δραστηριότητες των συμμετεχόντων έχουν διαγραφεί.';
 $string['cleartreasurehuntconfirm'] = 'ΠΡΟΣΟΧΗ με αυτή την ενέργεια. Όλες οι καταγεγραμμένες δραστηριότητες θα διαγραφούν εάν συνεχίσετε. Συνήθως η ενέργεια αυτή είναι απαραίτητη μόνο εάν πρέπει να αλλάξετε τον αριθμό των διαδρομών ή των σταδίων, αλλά η δραστηριότητα είναι μπλοκαρισμένη, επειδή κάποιος έχει αρχίσει να παίζει το παιχνίδι.';
+$string['clue'] = 'Ενδειξη';
 $string['cutoffdate'] = 'Ημερομηνία λήξης προθεσμίας';
 $string['cutoffdate_help'] = 'Αν οριστεί, το Κυνήγι Θησαυρού δεν δέχεται προσπάθειες μετά από αυτή την ημερομηνία χωρίς επέκταση.';
 $string['cutoffdatefromdatevalidation'] = 'Η ημερομηνία λήξης προθεσμίας πρέπει να είναι μεταγενέστερη της ημερομηνίας Επιτρέπονται Υποβολές από .';
