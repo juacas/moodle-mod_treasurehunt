@@ -36,7 +36,7 @@ class stage
     var $questiontext = '';
     var $questiontextformat = FORMAT_HTML;
     var $questiontexttrust = 0;
-    var $activitytoend;
+    var $activitytoend = 0;
     var $qrtext = null;
     /** @var string WKT representation of the geometry (@see treasurehunt_geometry_to_wkt) */
     var $geom = null;
