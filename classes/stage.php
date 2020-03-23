@@ -45,5 +45,6 @@ class stage
     public function __construct ($name, $cluetext) {
         $this->name = $name;
         $this->cluetext = $cluetext;
+        $this->timecreated = time();
     }
 }

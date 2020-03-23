@@ -36,6 +36,7 @@ defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/GeoJSON/GeoJSON.class.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
+require_once($CFG->dirroot . '/mod/treasurehunt/classes/stage.php');
 
 /* * #@+
  * Options determining how the grades from individual attempts are combined to give
@@ -436,7 +437,6 @@ function treasurehunt_create_default_items($treasurehunt)
  * @param road $road
  */
 function treasurehunt_add_new_stage($stage, $road) {
-    $stage->timecreated = time();
     $stage->id = treasurehunt_insert_stage_form($stage);
     return $stage;
 }
@@ -450,7 +450,7 @@ function treasurehunt_add_new_stage($stage, $road) {
 function treasurehunt_insert_stage_form($stage)
 {
     global $DB;
-
+    $stage->timemodified = time();
     // The position of the stage in the road is the next to the last introduced.
     $position = $DB->get_record_sql('SELECT count(id) + 1 as position FROM '
         . '{treasurehunt_stages} WHERE roadid = (?)', array($stage->roadid));
