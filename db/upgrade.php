@@ -111,22 +111,6 @@ function xmldb_treasurehunt_upgrade($oldversion) {
             0,
             'playstagewithoutmoving'
         );
-        $dbman->
-        // Conditionally launch add field custombbox.
-        if (!$dbman->field_exists($table, $field)) {
-            $dbman->add_field($table, $field);
-        }
-        $field = new xmldb_field(
-            'completionpass',
-            XMLDB_TYPE_INTEGER,
-            '1',
-            XMLDB_UNSIGNED,
-            XMLDB_NOTNULL,
-            null,
-            0,
-            'completionfinish'
-        );
-
         $dbman->change_field_notnull($table, $field);
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2020032300, 'treasurehunt');
