@@ -26,8 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_treasurehunt';
-$plugin->version = 2020032301;
-$plugin->release = 'v1.3.1c-hotfix';
+$plugin->version = 2020032302;
+$plugin->release = 'v1.3.1d';
 $plugin->requires = 2015051100; // Moodle 2.9.
 $plugin->maturity = MATURITY_STABLE;
 $plugin->dependencies = array();
