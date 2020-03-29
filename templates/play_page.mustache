@@ -169,7 +169,7 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationPopup"><i class="fa fa-check" aria-hidden="true"></i></button>
-                <button class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage" data-dismissible>
+                <button id="cluebutton" class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage" data-dismissible>
                     <i class="fa fa-key" aria-hidden="true"></i>
                     Mostrar Pista
                 </button>
@@ -307,48 +307,39 @@
             <div class="card">
                 <div class="card-body">
                     <div class="card-title d-flex justify-content-between align-items-start">
-                        <h5  id="lastsuccessfulstagename2"></h5>
-                        <span class="badge badge-dark" id="lastsuccesfulstagepos2"></span>
+                        <h5  id="lastsuccessfulstagename"></h5>
+                        <span class="badge badge-dark" id="lastsuccesfulstagepos"></span>
                     </div>
-                    <p class="card-text" id="lastsuccessfulstageclue2"></p>
+                    <p class="card-text" id="lastsuccessfulstageclue"></p>
+                    <button id="questionbutton" style="display:none" class="btn play-btn" data-rel="modal" data-ref="#questionpage" data-dismissible>
+                        <i class="fa fa-question-circle" aria-hidden="true"></i>
+                        {{#str}} question, mod_treasurehunt{{/str}}
+                    </button>
                 </div>
             </div>      
         {{/dialogcontent}}
     {{/treasurehunt/dialog_play_page}}
-   
-    {{!Popup question page}}
-    <div class="play-modal" data-animation="slideInOutTop" id="questionpage">
-        <!-- modal mask -->
-        <div class="modal-mask"></div>
 
-        <div class="play-modal-dialog">
-            <!-- Header -->
-            <nav class="play-navbar">
-                <button class="btn close-modal">
-                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                </button>
-                <span class="title">{{#str}} question, mod_treasurehunt{{/str}}</span>
-            </nav>
-
-            <div data-role="content">
-                <form>  
-                    <fieldset data-role="controlgroup" id='questionform'>
-                    </fieldset>
-                </form>
-                <fieldset class="ui-grid-a">
-                    <div class="ui-block-a"><a href="#mappage" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none">
-                            {{#str}} cancel, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                    <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b"  data-transition="none" id="sendAnswer">
-                            {{#str}} send, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                </fieldset>
+    {{!Dialog question page}}
+    {{< treasurehunt/dialog_play_page}}
+        {{$dialogid}}questionpage{{/dialogid}}
+        {{$dialogtitle}}
+            {{#str}} question, mod_treasurehunt{{/str}}
+        {{/dialogtitle}}
+        {{$dialogcontent}}
+            <div class="card">
+                <div class="card-body" id='questionform'></div>
+            </div>      
+        {{/dialogcontent}}
+        {{$dialogfooter}}
+            <div class="play-modal-footer">
+                <button type="button" class="btn play-btn" id="sendAnswer">
+                    <i class="fa fa-check" aria-hidden="true"></i>
+                    {{#str}} send, mod_treasurehunt{{/str}}
+                </button>       
             </div>
-        </div>
-    </div>
-
+        {{/dialogfooter}}
+    {{/treasurehunt/dialog_play_page}}
 </div>
  
     {{!Fin de pagina de capas.}}
@@ -359,7 +350,7 @@
 {{#js}}
 require(['jquery'], function($) {
     {{! SIDEBAR }}
-    $('*[data-rel="sidebar"]').on("click", (e)=> {
+    {{! $('*[data-rel="sidebar"]').on("click", (e)=> {
         const target = e.currentTarget;
         const sidebar = $(target.dataset.ref);
         sidebar.trigger("sidebar:open");
@@ -374,10 +365,10 @@ require(['jquery'], function($) {
         sidebars.trigger("sidebar:close");
         sidebars.removeClass("active");
         $(".sidebar-mask").removeClass("active dismissible");
-    });
+    }); }}
 
     {{! MODAL PAGE }}
-    $('*[data-rel="modal"]').on("click", (e)=> {
+    {{! $('*[data-rel="modal"]').on("click", (e)=> {
         const target = e.currentTarget;
         const modal = $(target.dataset.ref);
         modal.trigger("modal:open");
@@ -394,6 +385,6 @@ require(['jquery'], function($) {
         modal.trigger("modal:close");
         modal.removeClass("active");
         $(".modal-mask").removeClass("active dismissible");
-    });
+    }); }}
 });
 {{/js}}

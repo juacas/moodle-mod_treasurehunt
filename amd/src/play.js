@@ -613,14 +613,6 @@ define([
               toast(response.status.msg);
             }
             markerFeature.setGeometry(null);
-            // Show clue if last attempt has solved
-            if (
-              response.attempts &&
-              response.attempts.features[response.attempts.features.length - 1]
-                .properties.geometrysolved
-            ) {
-              openPopup("#cluepage");
-            }
           }
           if (response.qrexpected) {
             $("#validateqr").show();
@@ -674,17 +666,15 @@ define([
             if (response.lastsuccessfulstage) {
               lastsuccessfulstage = response.lastsuccessfulstage;
               changesinlastsuccessfulstage = true;
+              openPopup("#cluepage");
               // If the stage is not solved I will notify you that there are changes.
               if (lastsuccessfulstage.question !== "") {
                 changesinquestionstage = true;
                 $("#validatelocation").hide();
-                $("#question_button").show();
               } else if (!lastsuccessfulstage.activitysolved) {
                 $("#validatelocation").hide();
-                $("#question_button").show();
               } else {
                 $("#validatelocation").show();
-                $("#question_button").hide();
               }
             }
             // Check if it is the first geometry or it is being initialized and center the map.
@@ -745,58 +735,22 @@ define([
     }
     function set_lastsuccessfulstage() {
       if (changesinlastsuccessfulstage) {
-        $("#lastsuccessfulstagename").text(
-          strings["stage"] + ":" + lastsuccessfulstage.name
-        );
-        $("#lastsuccesfulstagepos").text(
-          lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
-        );
-        let maxchars = 100;
-        let briefing;
         // Clean color styles from clue.
         lastsuccessfulstage.clue = lastsuccessfulstage.clue.replace(
           /color/gm,
           "color-disabled"
         );
         $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
-        let clueplaintext = lastsuccessfulstage.clue.replace(
-          /<(?:.|\n)*?>/gm,
-          ""
-        );
-        if (clueplaintext.length > maxchars * 2) {
-          $("#lastsuccessfulstageclue").truncate(maxchars * 2);
-          briefing =
-            ' <a href="#historypage" data-transition="none" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ' +
-            'ui - btn - inline ui - icon - info ui - btn - icon - notext"></a> ';
-          $("#lastsuccessfulstageclue").append(briefing);
-        } else {
-          briefing = lastsuccessfulstage.clue;
-        }
 
-        $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
-        $("#lastsuccesfulstagepos2").text(
+        $("#lastsuccessfulstagename").text(lastsuccessfulstage.name);
+        $("#lastsuccesfulstagepos").text(
           lastsuccessfulstage.position + " / " + lastsuccessfulstage.totalnumber
         );
-        $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
-
         if (lastsuccessfulstage.question !== "") {
-          $("#lastsuccessfulstageclue").append(
-            "<a href='#questionpage' " +
-              "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
-              "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
-              strings["question"] +
-              "</a>"
-          );
-          $("#lastsuccessfulstageclue2").append(
-            "<a href='#questionpage' " +
-              "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
-              "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>" +
-              strings["question"] +
-              "</a>"
-          );
+          $("#questionbutton").show();
+        } else {
+          $("#questionbutton").hide();
         }
-        // openSidePanel("#infopanel");
-        $("#lastsuccessfulstage").collapse("show");
         changesinlastsuccessfulstage = false;
       }
     }
@@ -821,16 +775,12 @@ define([
           );
 
           $("#questionform").append(
-            '<input type="radio" name="answers" id="' +
-              id +
-              '"value="' +
-              answer.id +
-              '">' +
-              '<label for="' +
-              id +
-              '">' +
-              answer.answertext +
-              "</label>"
+            `<div class="form-check">
+                <input class="form-check-input" type="radio" name="answers" id="${id}" value="${answer.id}">
+                <label class="form-check-label" for="${id}">
+                  ${answer.answertext}
+                </label>
+            </div>`
           );
           counter++;
         });
@@ -1161,6 +1111,42 @@ define([
         return;
       }
     });
+
+    /* Sidebar events */
+    $(document).on("click", '*[data-rel="sidebar"]', e => {
+      const target = e.currentTarget;
+      const sidebar = $(target.dataset.ref);
+      sidebar.trigger("sidebar:open");
+      sidebar.addClass("active");
+      if (target.dataset.dismissible !== null) {
+        $(".sidebar-mask").addClass("active dismissible");
+      }
+    });
+
+    $(document).on("click", ".close-sidebar, .sidebar-mask", () => {
+      const sidebars = $(".sidebar.active");
+      sidebars.trigger("sidebar:close");
+      sidebars.removeClass("active");
+      $(".sidebar-mask").removeClass("active dismissible");
+    });
+
+    /* Modal events */
+    $(document).on("click", '*[data-rel="modal"]', e => {
+      closeModal();
+      const target = e.currentTarget;
+      const modal = $(target.dataset.ref);
+      modal.trigger("modal:open");
+      modal.addClass("active");
+      $(target.dataset.ref + " .modal-mask").addClass("active");
+      if (target.dataset.dismissible !== null) {
+        $(target.dataset.ref + " .modal-mask").addClass("dismissible");
+      }
+    });
+
+    $(document).on("click", ".close-modal, .modal-mask.dismissible", () => {
+      closeModal();
+    });
+
     /*-------------------------------Initialize page -------------*/
 
     /*-------------------------------Help functions -------------*/
@@ -1173,8 +1159,18 @@ define([
       setTimeout(() => toast.remove(), 3500);
     }
     function openPopup(id) {
-      $(id).addClass("active");
+      // Close previous modal
+      closeModal();
+      const modal = $(id);
+      modal.trigger("modal:open");
+      modal.addClass("active");
       $(`${id} .modal-mask`).addClass("active dismissible");
+    }
+    function closeModal() {
+      const modal = $(".play-modal.active");
+      modal.trigger("modal:close");
+      modal.removeClass("active");
+      $(".modal-mask").removeClass("active dismissible");
     }
     function get_block_text(title, body) {
       return `<div class="card">
