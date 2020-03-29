@@ -922,14 +922,14 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
                 $success = false;
             }
             $penalty = false;
-            $return->msg = $return->update = get_string('successlocation', 'treasurehunt');
+            $return->msg = get_string('successlocation', 'treasurehunt');
             $return->newstage = true;
         } else {
             $penalty = true;
             $questionsolved = false;
             $activitysolved = false;
             $success = false;
-            $return->msg = $return->update = get_string('faillocation', 'treasurehunt');
+            $return->msg = get_string('faillocation', 'treasurehunt');
             $return->newstage = false;
         }
         // Get a reasonable location for reporting.

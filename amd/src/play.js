@@ -26,14 +26,13 @@ define([
   "core/url",
   "mod_treasurehunt/ol",
   "core/ajax",
-  "mod_treasurehunt/geocoder",
   "mod_treasurehunt/osm-geocoder",
   "mod_treasurehunt/viewgpx",
   "core/str",
   "mod_treasurehunt/jquery.truncate"
   // "mod_treasurehunt/jquery.mobile-config",
   // "mod_treasurehunt/jquerymobile"
-], function($, url, ol, ajax, GeocoderJS, OSMGeocoder, viewgpx, str) {
+], function($, url, ol, ajax, OSMGeocoder, viewgpx, str) {
   // console.log("loading play.js with jquery " + $().jquery);
   let init = {
     playtreasurehunt: function(
@@ -573,15 +572,12 @@ define([
         });
       }
       if (selectedanswerid) {
-        // $.mobile.loading("show");
         setLoading(true);
         answerid = selectedanswerid;
       }
       if (location) {
         position = currentposition;
         setLoading(true);
-
-        // $.mobile.loading("show");
       }
       let geojson = ajax.call([
         {
@@ -606,7 +602,6 @@ define([
       ]);
       geojson[0]
         .done(response => {
-          // let body = "";
           qoaremoved = response.qoaremoved;
           roadfinished = response.roadfinished;
           available = response.available;
@@ -614,14 +609,25 @@ define([
 
           // If I have sent a location or an answer I print out whether it is correct or not.
           if (location || selectedanswerid) {
+            if (response.status !== null && available) {
+              toast(response.status.msg);
+            }
             markerFeature.setGeometry(null);
+            // Show clue if last attempt has solved
+            if (
+              response.attempts &&
+              response.attempts.features[response.attempts.features.length - 1]
+                .properties.geometrysolved
+            ) {
+              openPopup("#cluepage");
+            }
           }
           if (response.qrexpected) {
             $("#validateqr").show();
           } else {
             $("#validateqr").hide();
           }
-          // If you change the game mode (mobile or static).
+          // If change the game mode (mobile or static).
           if (playwithoutmoving != response.playwithoutmoving) {
             playwithoutmoving = response.playwithoutmoving;
             if (!playwithoutmoving) {
@@ -692,14 +698,16 @@ define([
             set_attempts_history();
           }
           if (response.infomsg.length > 0) {
-            infomsgs.forEach(() => {
-              // body += "<p>" + msg + "</p>";
+            let body = "";
+            infomsgs.forEach(msg => {
+              body += "<p>" + msg + "</p>";
             });
             response.infomsg.forEach(msg => {
               infomsgs.push(msg);
-              // body += "<p>" + msg + "</p>";
+              body += "<p>" + msg + "</p>";
             });
-            // create_popup("displayupdates", strings["updates"], body);
+            $("#notificationsPopup .update-list").html(body);
+            openPopup("#notificationsPopup");
           }
           if (!roadfinished) {
             $("#roadended").hide();
@@ -714,9 +722,9 @@ define([
             $("#mapplay").css("opacity", "0.8");
           }
         })
-        .fail(() => {
-          // console.log(error);
-          // create_popup("displayerror", strings["error"], error.message);
+        .fail(error => {
+          $("#errorPopup .play-modal-content").text(error.message);
+          openPopup("#errorPopup");
           clearInterval(interval);
         });
     }
@@ -910,6 +918,7 @@ define([
         $("#layerslist").prepend(link);
       });
     }
+
     /**
      * Geolocation component
      * @type ol.Geolocation
@@ -940,12 +949,12 @@ define([
         renew_source(true, false);
         geolocation.setProperties({ validate_location: false }); // Disable validate_location request. Deprecated.
       }
-      // $.mobile.loading("hide");
     });
+
     geolocation.on("change:accuracyGeometry", () => {
       accuracyFeature.setGeometry(geolocation.getAccuracyGeometry());
-      // $.mobile.loading("hide");
     });
+
     let trackinggeolocationwarndispatched = false;
     geolocation.on("error", error => {
       // $.mobile.loading("hide");
@@ -965,42 +974,37 @@ define([
     });
     geolocation.setTracking(tracking); // Start position tracking.
 
+    // On select location feature
     select.on("select", features => {
       if (features.selected.length === 1) {
-        if (
-          lastsuccessfulstage.position ===
-            features.selected[0].get("stageposition") &&
-          features.selected[0].get("geometrysolved") &&
-          !roadfinished &&
-          available
-        ) {
-          openSidePanel("#infopanel");
-          $("#lastsuccessfulstage").collapse("show");
-        } else {
-          let stagename = features.selected[0].get("name");
-          let stageclue = features.selected[0].get("clue");
-          let info = features.selected[0].get("info");
-          // let body = "";
-          // let title = "";
-          if (features.selected[0].get("geometrysolved")) {
-            if (stagename && stageclue) {
-              // title = strings["stageovercome"];
-              // body = get_block_text(strings["stagename"], stagename);
-              // body += get_block_text(strings["stageclue"], stageclue);
-            } else {
-              // title = strings["discoveredlocation"];
-            }
-          } else {
-            // title = strings["failedlocation"];
-          }
-          if (info) {
-            // body += "<p>" + info + "</p>";
-          }
-          // create_popup("infostage", title, body);
+        let stagename = features.selected[0].get("name");
+        let stageclue = features.selected[0].get("clue");
+        let info = features.selected[0].get("info");
+        let body = "";
+        let title = "";
+        if (info) {
+          body = "<p>" + info + "</p>";
         }
+        if (features.selected[0].get("geometrysolved")) {
+          if (stagename && stageclue) {
+            title = strings["stageovercome"];
+            body += get_block_text(strings["stagename"], stagename);
+            body += get_block_text(strings["stageclue"], stageclue);
+          } else {
+            title = strings["discoveredlocation"];
+          }
+        } else {
+          title = strings["failedlocation"];
+        }
+        $("#infoStagePopup .title").text(title);
+        $("#infoStagePopup .play-modal-content").html(body);
+        openPopup("#infoStagePopup");
       }
     });
+
+    // Change marker feature position on user click if play mode is play without moving
     map.on("click", evt => {
+      // Check if has a feature on click event position.
       let hasFeature = false;
       map.forEachFeatureAtPixel(
         map.getEventPixel(evt.originalEvent),
@@ -1022,6 +1026,7 @@ define([
         );
       }
     });
+
     $("#searchInput").on("input", ev => {
       // Abort xhr request if a new one arrives
       if (osmGeocoderXHR) {
@@ -1082,28 +1087,21 @@ define([
         }, 400);
       }
     });
-    // Set a max-height to make large images shrink to fit the screen.
-    $(document).on("popupbeforeposition", () => {
-      let maxHeight = $(window).height() - 200 + "px";
-      $('.ui-popup [data-role="content"]').css("max-height", maxHeight);
-    });
-    // Remove the popup after it has been closed to manage DOM size.
-    $(document).on(
-      "popupafterclose",
-      ".ui-popup:not(#QRdialog):not(#popupdialog):not(#popupgeoloc)",
-      function() {
-        $(this).remove();
-        select.getFeatures().clear();
-      }
-    );
 
-    $(document).on("click", "#acceptupdates", () => {
+    // Clear selected features after info stage popup close.
+    $("#infoStagePopup").on("modal:close", () => {
+      select.getFeatures().clear();
+    });
+    // Clear array of info messages after user accept updates
+    $("#acceptupdates").on("click", () => {
       infomsgs = [];
     });
-    // Redraw map.
+
+    // Redraw map on resize window.
     $(window).on("resize", () => {
       map.updateSize();
     });
+
     //Buttons events.
     if (geographictools) {
       $("#autolocate").on("click", () => {
@@ -1114,6 +1112,7 @@ define([
         }
       });
     }
+
     $("#infopanel").on("sidebar:close", () => {
       select.getFeatures().clear();
     });
@@ -1121,6 +1120,7 @@ define([
     $("#sendLocation").on("click", () => {
       validateposition(true);
     });
+
     $("#sendAnswer").on("click", event => {
       // Selecciono la respuesta.
       let selected = $("#questionform input[type='radio']:checked");
@@ -1136,6 +1136,7 @@ define([
         }
       }
     });
+
     $("#validatelocation").on("click", event => {
       if (roadfinished) {
         event.preventDefault();
@@ -1164,127 +1165,25 @@ define([
 
     /*-------------------------------Help functions -------------*/
     function toast(msg) {
-      if ($(".toast").length > 0) {
-        setTimeout(() => {
-          toast(msg);
-        }, 2500);
-      } else {
-        $(
-          "<div class='ui-loader ui-overlay-shadow  ui-corner-all toast'>" +
-            "<p>" +
-            msg +
-            "</p></div>"
-        )
-          .css({
-            left: ($(window).width() - 284) / 2,
-            top: $(window).height() / 2
-          })
-          .appendTo($("play-container"))
-          .delay(2000)
-          .fadeOut(400, function() {
-            $(this).remove();
-          });
-      }
+      const toast = $(`<div class='play-toast slide-in-bottom'>${msg}</div>`);
+      toast.appendTo($(".play-toast-container"));
+      // Out animation after 3s
+      setTimeout(() => toast.addClass("slide-out-top"), 3000);
+      // Remove element after 3,5s
+      setTimeout(() => toast.remove(), 3500);
     }
-    // function create_popup(type, title, body) {
-    //   let header = $('<div data-role="header"><h2>' + title + "</h2></div>"),
-    //     content = $(
-    //       '<div data-role="content" class="ui-content ui-overlay-b">' +
-    //         body +
-    //         "</div>"
-    //     ),
-    //     popup = $(
-    //       '<div data-role="popup" id="' +
-    //         type +
-    //         '"' +
-    //         'data-theme="b" data-transition="slidedown"></div>'
-    //     );
-    //   if (type === "infostage") {
-    //     $(
-    //       '<a href="#" data-rel="back" class="ui-btn ui-corner-all' +
-    //         'ui-btn-b ui-icon-delete ui-btn-icon-notext ui-btn-right"></a>'
-    //     ).appendTo(header);
-    //   }
-    //   if (type === "displayupdates") {
-    //     $(
-    //       '<p class="center-wrapper"><a id="acceptupdates" href="#" data-rel="back"' +
-    //         'class="ui-btn center-button ui-mini ui-btn-inline">' +
-    //         strings["continue"] +
-    //         "</a></p>"
-    //     ).appendTo(content);
-    //     let attributes = {
-    //       "data-dismissible": false,
-    //       "data-overlay-theme": "b"
-    //     };
-    //     $(popup).attr(attributes);
-    //   }
-    //   if (type === "displayerror") {
-    //     $(
-    //       '<p class="center-wrapper"><a href="view.php?id=' +
-    //         cmid +
-    //         '" class="ui-btn  center-button ui-mini ui-icon-forward ui-btn-inline ui-btn-icon-left"' +
-    //         'data-ajax="false">' +
-    //         strings["continue"] +
-    //         "</a></p>"
-    //     ).appendTo(content);
-    //     let attributes = {
-    //       "data-dismissible": false,
-    //       "data-overlay-theme": "b"
-    //     };
-    //     $(popup).attr(attributes);
-    //   }
-    //   // Create the popup.
-    //   $(header)
-    //     .appendTo(
-    //       $(popup)
-    //         .appendTo($.mobile.activePage)
-    //         .popup()
-    //     )
-    //     .toolbar()
-    //     .after(content);
-    //   // Need it for calculate popup's dimesions when popup contents an image.
-    //   totalimg = $(content).find("img");
-    //   if (totalimg.length > 0) {
-    //     // $.mobile.loading("show");
-    //     totalimg.one("load", function() {
-    //       imgloaded++;
-    //       if (totalimg.length === imgloaded) {
-    //         open_popup(popup);
-    //         imgloaded = 0;
-    //         // Clear the fallback
-    //         clearTimeout(fallback);
-    //         // $.mobile.loading("hide");
-    //       }
-    //     });
-    //     // Fallback in case the browser doesn't fire a load event.
-    //     let fallback = setTimeout(function() {
-    //       open_popup(popup);
-    //       // $.mobile.loading("hide");
-    //     }, 2000);
-    //   } else {
-    //     open_popup(popup);
-    //   }
-    // }
-    // function open_popup(popup) {
-    //   // Because chaining of popups not allowed in jquery mobile.
-    //   if ($(".ui-popup-active").length > 0) {
-    //     $(".ui-popup").popup("close");
-    //     setTimeout(function() {
-    //       $(popup).popup("open", { positionTo: "window" });
-    //     }, 1000);
-    //   } else {
-    //     $(popup).popup("open", { positionTo: "window" });
-    //   }
-    // }
-    // function get_block_text(title, body) {
-    //   return (
-    //     '<div class="ui-bar ui-bar-a">' +
-    //     title +
-    //     '</div><div class="ui-body ui-body-a">' +
-    //     body +
-    //     "</div>"
-    //   );
-    // }
+    function openPopup(id) {
+      $(id).addClass("active");
+      $(`${id} .modal-mask`).addClass("active dismissible");
+    }
+    function get_block_text(title, body) {
+      return `<div class="card">
+          <div class="card-body">
+            <h5 class="card-title">${title}</h5>
+            <h6 class="card-subtitle text-muted">${body}</h6>
+          </div>
+      </div>`;
+    }
     function openSidePanel(id) {
       $(id).addClass("active");
       $(".sidebar-mask").addClass("active dismissible");

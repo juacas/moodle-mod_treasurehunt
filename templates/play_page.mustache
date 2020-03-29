@@ -168,7 +168,7 @@
             </div>
             <!-- Bottom buttons -->
             <div class="play-tools-container">
-                <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationDialog"><i class="fa fa-check" aria-hidden="true"></i></button>
+                <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationPopup"><i class="fa fa-check" aria-hidden="true"></i></button>
                 <button class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage" data-dismissible>
                     <i class="fa fa-key" aria-hidden="true"></i>
                     Mostrar Pista
@@ -209,16 +209,20 @@
         </div>
     </div>
 
-    {{!Popup for location confirmation}}
+    {{! Toast container}}
+    <div class="play-toast-container">
+    </div>
+
+    {{!Popup location confirmation}}
     {{< treasurehunt/popup_play_page}}
-        {{$popupid}}confirmLocationDialog{{/popupid}}
+        {{$popupid}}confirmLocationPopup{{/popupid}}
         {{$popuptitle}}
             {{#str}} sendlotaciontitle, mod_treasurehunt{{/str}}
         {{/popuptitle}}
         {{$popupcontent}}
             <p>{{#str}} sendlotacioncontent, mod_treasurehunt{{/str}}</p>
         {{/popupcontent}}
-        {{$popupfooter}}
+        {{$popupfootercontent}}
             <button type="button" class="btn play-btn close-modal" id="sendLocation">
                 <i class="fa fa-check" aria-hidden="true"></i>
                 {{#str}} send, mod_treasurehunt{{/str}}
@@ -227,8 +231,59 @@
                 <i class="fa fa-times" aria-hidden="true"></i>
                 {{#str}} cancel, mod_treasurehunt{{/str}}
             </button>
+        {{/popupfootercontent}}
+    {{/treasurehunt/popup_play_page}}
+
+
+    {{!Popup notifications}}
+    {{< treasurehunt/popup_play_page}}
+        {{$popupid}}notificationsPopup{{/popupid}}
+        {{$popuptitle}}
+            {{#str}} updates, mod_treasurehunt{{/str}}
+        {{/popuptitle}}
+        {{$popupcontent}}
+            <div class="update-list">
+            </div>
+        {{/popupcontent}}
+        {{$popupfootercontent}}
+            <button type="button" class="btn play-btn close-modal" id="acceptupdates">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {{#str}} continue, mod_treasurehunt{{/str}}
+            </button>
+        {{/popupfootercontent}}
+    {{/treasurehunt/popup_play_page}}
+
+    {{!Popup error}}
+    {{< treasurehunt/popup_play_page}}
+        {{$popupid}}errorPopup{{/popupid}}
+        {{$popuptitle}}
+            {{#str}} error, mod_treasurehunt{{/str}}
+        {{/popuptitle}}
+        {{$popupcontent}}
+        {{/popupcontent}}
+        {{$popupfootercontent}}
+            <a href="view.php?id={{cmid}}" class="btn play-btn">
+                <i class="fa fa-sign-out" aria-hidden="true"></i>
+                {{#str}} continue, mod_treasurehunt{{/str}}
+            </a>
+        {{/popupfootercontent}}
+    {{/treasurehunt/popup_play_page}}
+
+    {{!Popup info stage}}
+    {{< treasurehunt/popup_play_page}}
+        {{$popupid}}infoStagePopup{{/popupid}}
+        {{$popupheading}}
+            <span class="title"></span>
+            <button class="btn close-modal close-dialog">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        {{/popupheading}}
+        {{$popupcontent}}
+        {{/popupcontent}}
+        {{$popupfooter}}
         {{/popupfooter}}
     {{/treasurehunt/popup_play_page}}
+
 
     {{!Dialog layer page}}
     {{< treasurehunt/dialog_play_page}}
@@ -324,15 +379,20 @@ require(['jquery'], function($) {
     {{! MODAL PAGE }}
     $('*[data-rel="modal"]').on("click", (e)=> {
         const target = e.currentTarget;
-        $(target.dataset.ref).addClass("active");
+        const modal = $(target.dataset.ref);
+        modal.trigger("modal:open");
+        modal.addClass("active");
         $(target.dataset.ref + " .modal-mask").addClass("active");
         if(target.dataset.dismissible != null){
              $(target.dataset.ref + " .modal-mask").addClass("dismissible");
         }
+
     });
 
     $(document).on("click", ".close-modal, .modal-mask.dismissible", ()=> {
-        $(".play-modal").removeClass("active");
+        const modal = $(".play-modal.active");
+        modal.trigger("modal:close");
+        modal.removeClass("active");
         $(".modal-mask").removeClass("active dismissible");
     });
 });
