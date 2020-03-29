@@ -645,11 +645,11 @@ class mod_treasurehunt_external extends external_api {
                             $USER->id, $userparams->groupid, $userparams->roadid,
                             $updateroad, $context, $treasurehunt, $nostages, $qoaremoved);
             // Refresh the attempts updates (mainly for reporting).
-            $updates = treasurehunt_check_attempts_updates($params['attempttimestamp'],
-                            $userparams->groupid,
-                            $USER->id,
-                            $userparams->roadid,
-                            $changesingroupmode);
+            // $updates = treasurehunt_check_attempts_updates($params['attempttimestamp'],
+            //                 $userparams->groupid,
+            //                 $USER->id,
+            //                 $userparams->roadid,
+            //                 $changesingroupmode);
 
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
