@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB;
+    /** @var database_manager */
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -97,6 +98,22 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         }
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2018022800, 'treasurehunt');
+    }
+    if ($oldversion < 2020032300) {
+        $table = new xmldb_table('treasurehunt_stages');
+        $field = new xmldb_field(
+            'activitytoend',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            XMLDB_UNSIGNED,
+            false,
+            null,
+            0,
+            'playstagewithoutmoving'
+        );
+        $dbman->change_field_notnull($table, $field);
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2020032300, 'treasurehunt');
     }
     return true;
 }

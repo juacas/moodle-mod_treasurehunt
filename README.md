@@ -34,7 +34,8 @@ See also
 
 Change log
 ==========
- - v1.3.1-hotix Important updgrade! Moodle3.8 introduced a JS compiler that conflicts with geocode.js lib and breaks all javascript of the site. Now it is reimplemented.
+ - v1.3.1c-hotfix fix to an important regression that prevented the creation of new instances.
+ - v1.3.1-hotfix Important updgrade! Moodle3.8 introduced a JS compiler that conflicts with geocode.js lib and breaks all javascript of the site. Now it is reimplemented.
  - v1.3.1 Fix in dyndates.js. Fix radio buttons in answers for Moodle up to 3.7.
  - v1.3.0 Dates and times update in real-time. Interface pulishment. Workaround to Babel compiler conflict in player page.
  - v1.2.22c Solve javascript conflict with Babel compiler in Moodle 3.8. Simplify editor buttonset. Dynamic icon.
