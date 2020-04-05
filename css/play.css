@@ -44,6 +44,7 @@
 }
 
 #page-mod-treasurehunt-play .map-container {
+  position: relative;
   height: calc(100% - 50px);
   width: 100%;
   cursor: crosshair;
@@ -58,6 +59,19 @@
   bottom: 0;
   transform: translate(-50%, 0);
   margin: 0 auto;
+}
+
+#page-mod-treasurehunt-play .treasureoverlay {
+  display: none;
+  position: absolute;
+  color: white;
+  padding: 10px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+  background-color: rgba(25, 25, 25, 0.6);
+  text-align: center;
 }
 
 /* Navbar */
@@ -370,6 +384,7 @@
 }
 
 #page-mod-treasurehunt-play .play-modal-popup {
+  width: 100%;
   max-width: 80%;
   max-height: 80%;
   border-radius: 10px;
@@ -382,7 +397,8 @@
 }
 
 @media only screen and (min-height: 768px) and (min-width: 768px) {
-  #page-mod-treasurehunt-play .play-modal-dialog {
+  #page-mod-treasurehunt-play .play-modal-dialog,
+  #page-mod-treasurehunt-play .play-modal-popup {
     height: auto;
     max-width: 600px;
     max-height: 600px;

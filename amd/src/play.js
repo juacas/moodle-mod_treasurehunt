@@ -668,7 +668,7 @@ define([
             if (response.lastsuccessfulstage) {
               lastsuccessfulstage = response.lastsuccessfulstage;
               changesinlastsuccessfulstage = true;
-              openPopup("#cluepage");
+              openModal("#cluepage");
               // If the stage is not solved I will notify you that there are changes.
               if (lastsuccessfulstage.question !== "") {
                 changesinquestionstage = true;
@@ -699,7 +699,7 @@ define([
               body += "<p>" + msg + "</p>";
             });
             $("#notificationsPopup .update-list").html(body);
-            openPopup("#notificationsPopup");
+            openModal("#notificationsPopup");
           }
           if (!roadfinished) {
             $("#roadended").hide();
@@ -716,7 +716,7 @@ define([
         })
         .fail(error => {
           $("#errorPopup .play-modal-content").text(error.message);
-          openPopup("#errorPopup");
+          openModal("#errorPopup");
           clearInterval(interval);
         });
     }
@@ -936,8 +936,10 @@ define([
         let hit = false;
         map.forEachFeatureAtPixel(
           pixel,
-          () => {
-            hit = true;
+          feature => {
+            if (!(feature.getGeometry() instanceof ol.geom.MultiPolygon)) {
+              hit = true;
+            }
           },
           { layerFilter: layer => layer === attemptslayer }
         );
@@ -972,7 +974,7 @@ define([
         }
         $("#infoStagePopup .title").text(title);
         $("#infoStagePopup .play-modal-content").html(body);
-        openPopup("#infoStagePopup");
+        openModal("#infoStagePopup");
       }
     });
 
@@ -1182,7 +1184,7 @@ define([
       // Remove element after 3,5s
       setTimeout(() => toast.remove(), 3500);
     }
-    function openPopup(id) {
+    function openModal(id) {
       // Close previous modal
       closeModal();
       const modal = $(id);
