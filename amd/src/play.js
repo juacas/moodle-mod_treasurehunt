@@ -29,13 +29,14 @@ define([
   "mod_treasurehunt/osm-geocoder",
   "mod_treasurehunt/viewgpx",
   "core/str",
-  "mod_treasurehunt/jquery.truncate"
+  "mod_treasurehunt/webqr",
+  "mod_treasurehunt/jquery.truncate",
   // "mod_treasurehunt/jquery.mobile-config",
   // "mod_treasurehunt/jquerymobile"
-], function($, url, ol, ajax, OSMGeocoder, viewgpx, str) {
+], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
   // console.log("loading play.js with jquery " + $().jquery);
   let init = {
-    playtreasurehunt: function(
+    playtreasurehunt: function (
       cmid,
       treasurehuntid,
       playwithoutmoving,
@@ -70,14 +71,14 @@ define([
         "huntcompleted",
         "discoveredlocation",
         "answerwarning",
-        "error"
+        "error",
       ];
       // console.log("loading i18n strings");
-      let stringsqueried = terms.map(term => {
+      let stringsqueried = terms.map((term) => {
         return { key: term, component: "treasurehunt" };
       });
       // i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
-      str.get_strings(stringsqueried).done(strings => {
+      str.get_strings(stringsqueried).done((strings) => {
         let i18n = [];
         for (let i = 0; i < terms.length; i++) {
           i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
@@ -92,7 +93,7 @@ define([
           // console.log("Detecting custom background image dimensions.");
           // Detect image size.
           let img = new Image();
-          img.addEventListener("load", function() {
+          img.addEventListener("load", function () {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
             // console.log(
@@ -133,7 +134,7 @@ define([
           );
         }
       });
-    } // End of function playtreasurehunt.
+    }, // End of function playtreasurehunt.
   };
   return init;
   // Initialization function.
@@ -181,7 +182,7 @@ define([
             centerwidth - adjwidth / 2,
             centerheight - adjheight / 2,
             centerwidth + adjwidth / 2,
-            centerheight + adjheight / 2
+            centerheight + adjheight / 2,
           ];
           defaultzoom = 5;
         }
@@ -191,20 +192,20 @@ define([
           type: custommapconfig.layertype,
           source: new ol.source.ImageStatic({
             url: custommapconfig.custombackgroundurl,
-            imageExtent: customimageextent
+            imageExtent: customimageextent,
           }),
-          opacity: 1.0
+          opacity: 1.0,
         });
       } else if (custommapconfig.wmsurl) {
         // console.log("config custom wms server: " + custommapconfig.wmsurl);
         let options = {
           source: new ol.source.TileWMS({
             url: custommapconfig.wmsurl,
-            params: custommapconfig.wmsparams
+            params: custommapconfig.wmsparams,
           }),
           type: custommapconfig.layertype,
           title: custommapconfig.layername,
-          name: custommapconfig.layername
+          name: custommapconfig.layername,
         };
         if (
           custommapconfig.bbox[0] &&
@@ -251,118 +252,118 @@ define([
       textAlign: "center",
       scale: 1.3,
       fill: new ol.style.Fill({
-        color: "#ffffff"
+        color: "#ffffff",
       }),
       stroke: new ol.style.Stroke({
         color: "#000000",
-        width: 3.5
-      })
+        width: 3.5,
+      }),
     });
     let selectText = new ol.style.Text({
       textAlign: "center",
       scale: 1.4,
       fill: new ol.style.Fill({
-        color: "#fff"
+        color: "#fff",
       }),
       stroke: new ol.style.Stroke({
         color: "#0097a7",
-        width: 3.5
-      })
+        width: 3.5,
+      }),
     });
     let defaultstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
         scale: 0.5,
-        src: parchmenturl
+        src: parchmenturl,
       }),
       text: text,
-      zIndex: "Infinity"
+      zIndex: "Infinity",
     });
     let failstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
         scale: 0.5,
-        src: failureurl
+        src: failureurl,
       }),
       text: text,
-      zIndex: "Infinity"
+      zIndex: "Infinity",
     });
     let defaultSelectstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
         scale: 0.75,
-        src: parchmenturl
+        src: parchmenturl,
       }),
       text: selectText,
-      zIndex: "Infinity"
+      zIndex: "Infinity",
     });
     let failSelectstageStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 1],
         opacity: 1,
         scale: 0.75,
-        src: failureurl
+        src: failureurl,
       }),
       text: selectText,
-      zIndex: "Infinity"
+      zIndex: "Infinity",
     });
     let positionFeatureStyle = new ol.style.Style({
       image: new ol.style.Circle({
         radius: 6,
         fill: new ol.style.Fill({
-          color: [0, 0, 0, 1]
+          color: [0, 0, 0, 1],
         }),
         stroke: new ol.style.Stroke({
           color: [255, 255, 255, 1],
-          width: 2
-        })
-      })
+          width: 2,
+        }),
+      }),
     });
     let accuracyFeatureStyle = new ol.style.Style({
       fill: new ol.style.Fill({
-        color: [255, 255, 255, 0.3]
+        color: [255, 255, 255, 0.3],
       }),
       stroke: new ol.style.Stroke({
         color: [0, 0, 0, 0.5],
-        width: 1
+        width: 1,
       }),
-      zIndex: -1
+      zIndex: -1,
     });
     let markerFeatureStyle = new ol.style.Style({
       image: new ol.style.Icon({
         anchor: [0.5, 0.9],
         opacity: 1,
         scale: 1,
-        src: markerurl
-      })
+        src: markerurl,
+      }),
     });
     /*-------------------------------Layers-----------------------------------*/
     let layers = [];
     let geoJSONFormat = new ol.format.GeoJSON();
     let source = new ol.source.Vector({
-      projection: "EPSG:3857"
+      projection: "EPSG:3857",
     });
     let attemptslayer = new ol.layer.Vector({
       source: source,
-      style: style_function
+      style: style_function,
     });
     let aeriallayer = new ol.layer.Tile({
       visible: false,
       source: new ol.source.BingMaps({
         key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
         imagerySet: "AerialWithLabels",
-        maxZoom: 19
+        maxZoom: 19,
         // Use maxZoom 19 to see stretched tiles instead of the BingMaps
         // "no photos at this zoom level" tiles
         // maxZoom: 19.
-      })
+      }),
     });
     aeriallayer.set("name", strings["aerialview"]);
     let roadlayer = new ol.layer.Tile({
-      source: new ol.source.OSM()
+      source: new ol.source.OSM(),
     });
     roadlayer.set("name", strings["roadview"]);
 
@@ -381,7 +382,7 @@ define([
     let layergroup = new ol.layer.Group({ layers: layersbase });
     // All layers hidden except last one.
     let toplayer = null;
-    layergroup.getLayers().forEach(layer => {
+    layergroup.getLayers().forEach((layer) => {
       layer.setVisible(false);
       toplayer = layer;
     });
@@ -390,17 +391,17 @@ define([
     let view = new ol.View({
       center: [0, 0],
       zoom: 2,
-      minZoom: 2
+      minZoom: 2,
     });
     let select = new ol.interaction.Select({
       layers: [attemptslayer],
       style: select_style_function,
-      filter: feature => {
+      filter: (feature) => {
         if (feature.get("stageposition") === 0) {
           return false;
         }
         return true;
-      }
+      },
     });
     let accuracyFeature = new ol.Feature();
     accuracyFeature.setProperties({ name: "user_accuracy" });
@@ -410,16 +411,16 @@ define([
     positionFeature.setStyle(positionFeatureStyle);
     let userPosition = new ol.layer.Vector({
       source: new ol.source.Vector({
-        features: [accuracyFeature, positionFeature]
-      })
+        features: [accuracyFeature, positionFeature],
+      }),
     });
     let markerFeature = new ol.Feature();
     markerFeature.setGeometry(null);
     markerFeature.setStyle(markerFeatureStyle);
     let markerVector = new ol.layer.Vector({
       source: new ol.source.Vector({
-        features: [markerFeature]
-      })
+        features: [markerFeature],
+      }),
     });
     layers.push(layergroup);
     layers = layers.concat(layersoverlay);
@@ -427,7 +428,7 @@ define([
     // New Custom zoom.
     let zoom = new ol.control.Zoom({
       target: "navigation",
-      className: "custom-zoom"
+      className: "custom-zoom",
     });
     let map = new ol.Map({
       layers: layers,
@@ -435,7 +436,7 @@ define([
       target: "mapplay",
       view: view,
       loadTilesWhileAnimating: true,
-      loadTilesWhileInteracting: true
+      loadTilesWhileInteracting: true,
     });
     map.addInteraction(select);
     // It initializes the game.
@@ -447,7 +448,7 @@ define([
     // Initialize the page layers.
 
     add_layergroup_to_list(layergroup);
-    layersoverlay.forEach(overlay => {
+    layersoverlay.forEach((overlay) => {
       add_layer_to_list(overlay);
     });
     if (tracking && user) {
@@ -474,17 +475,17 @@ define([
       let stageposition = feature.get("stageposition");
       if (stageposition === 0) {
         let fill = new ol.style.Fill({
-          color: "rgba(0,0,0,0.1)"
+          color: "rgba(0,0,0,0.1)",
         });
         let stroke = new ol.style.Stroke({
           color: "#0097a7",
-          width: 2
+          width: 2,
         });
         let styles = new ol.style.Style({
           image: new ol.style.Circle({
             fill: fill,
             stroke: stroke,
-            radius: 5
+            radius: 5,
           }),
           fill: fill,
           stroke: stroke,
@@ -492,13 +493,13 @@ define([
             text: strings["startfromhere"],
             textAlign: "center",
             fill: new ol.style.Fill({
-              color: "rgb(255,255,255)"
+              color: "rgb(255,255,255)",
             }),
             stroke: new ol.style.Stroke({
               color: "#0097a7",
-              width: 5
-            })
-          })
+              width: 5,
+            }),
+          }),
         });
         return [styles];
       }
@@ -536,13 +537,13 @@ define([
       let view = map.getView();
       if (extent) {
         view.fit(extent, {
-          duration: duration
+          duration: duration,
         });
       } else {
         view.animate({
           zoom: defaultzoom,
           center: point,
-          duration: duration
+          duration: duration,
         });
       }
     }
@@ -570,7 +571,7 @@ define([
       if (coordinates) {
         currentposition = geoJSONFormat.writeGeometryObject(coordinates, {
           dataProjection: "EPSG:4326",
-          featureProjection: "EPSG:3857"
+          featureProjection: "EPSG:3857",
         });
       }
       if (selectedanswerid) {
@@ -597,13 +598,13 @@ define([
                 tracking && !playwithoutmoving ? currentposition : undefined, // only for tracking in mobility.
               selectedanswerid: answerid,
               qoaremoved: qoaremoved,
-              qrtext: qrtext
-            }
-          }
-        }
+              qrtext: qrtext,
+            },
+          },
+        },
       ]);
       geojson[0]
-        .done(response => {
+        .done((response) => {
           qoaremoved = response.qoaremoved;
           roadfinished = response.roadfinished;
           available = response.available;
@@ -651,7 +652,7 @@ define([
                 source.addFeatures(
                   geoJSONFormat.readFeatures(response.firststagegeom, {
                     dataProjection: "EPSG:4326",
-                    featureProjection: "EPSG:3857"
+                    featureProjection: "EPSG:3857",
                   })
                 );
               }
@@ -659,7 +660,7 @@ define([
                 source.addFeatures(
                   geoJSONFormat.readFeatures(response.attempts, {
                     dataProjection: "EPSG:4326",
-                    featureProjection: "EPSG:3857"
+                    featureProjection: "EPSG:3857",
                   })
                 );
               }
@@ -691,10 +692,10 @@ define([
           }
           if (response.infomsg.length > 0) {
             let body = "";
-            infomsgs.forEach(msg => {
+            infomsgs.forEach((msg) => {
               body += "<p>" + msg + "</p>";
             });
-            response.infomsg.forEach(msg => {
+            response.infomsg.forEach((msg) => {
               infomsgs.push(msg);
               body += "<p>" + msg + "</p>";
             });
@@ -714,7 +715,7 @@ define([
             $("#mapplay").css("opacity", "0.8");
           }
         })
-        .fail(error => {
+        .fail((error) => {
           $("#errorPopup .play-modal-content").text(error.message);
           openModal("#errorPopup");
           clearInterval(interval);
@@ -813,7 +814,7 @@ define([
           $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
         } else {
           // Anado cada intento
-          attemptshistory.forEach(attempt => {
+          attemptshistory.forEach((attempt) => {
             $(
               "<li><span class='ui-btn-icon-left " +
                 (attempt.penalty
@@ -830,13 +831,13 @@ define([
     function add_layer_to_list(layer) {
       let link = $("<button>", {
         type: "button",
-        class: "list-group-item list-group-item-action close-modal"
+        class: "list-group-item list-group-item-action close-modal",
       }).click(() => {
         layer.setVisible(!layer.getVisible());
       });
       let linkContent = $("<div>", {
         text: layer.get("name"),
-        class: "layer-item " + (layer.getVisible() ? "" : "unchecked")
+        class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
       }).append($("<i class='fa fa-check-circle'>"));
       link.append(linkContent);
       layer.on("change:visible", () => {
@@ -846,12 +847,12 @@ define([
     }
 
     function add_layergroup_to_list(layergroup) {
-      layergroup.getLayers().forEach(layer => {
+      layergroup.getLayers().forEach((layer) => {
         let link = $("<button>", {
           type: "button",
-          class: "list-group-item list-group-item-action close-modal"
+          class: "list-group-item list-group-item-action close-modal",
         }).click(() => {
-          layergroup.getLayers().forEach(l => {
+          layergroup.getLayers().forEach((l) => {
             if (l === layer) {
               l.setVisible(true);
             } else {
@@ -861,7 +862,7 @@ define([
         });
         let linkContent = $("<div>", {
           text: layer.get("name"),
-          class: "layer-item " + (layer.getVisible() ? "" : "unchecked")
+          class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
         }).append($("<i class='fa fa-check-circle'>"));
         link.append(linkContent);
         layer.on("change:visible", () => {
@@ -881,8 +882,8 @@ define([
         trackingOptions: {
           enableHighAccuracy: true,
           maximumAge: 0,
-          timeout: 10000
-        }
+          timeout: 10000,
+        },
       })
     );
     /*-------------------------------Events-----------------------------------*/
@@ -908,7 +909,7 @@ define([
     });
 
     let trackinggeolocationwarndispatched = false;
-    geolocation.on("error", error => {
+    geolocation.on("error", (error) => {
       // $.mobile.loading("hide");
       geolocation.setProperties({ user_denied: true });
       toast(error.message);
@@ -928,7 +929,7 @@ define([
 
     // If it is not a touch screen, show pointer when hovering over an attempt
     if (!supportsTouch) {
-      map.on("pointermove", evt => {
+      map.on("pointermove", (evt) => {
         if (evt.dragging) {
           return;
         }
@@ -936,12 +937,12 @@ define([
         let hit = false;
         map.forEachFeatureAtPixel(
           pixel,
-          feature => {
+          (feature) => {
             if (!(feature.getGeometry() instanceof ol.geom.MultiPolygon)) {
               hit = true;
             }
           },
-          { layerFilter: layer => layer === attemptslayer }
+          { layerFilter: (layer) => layer === attemptslayer }
         );
         if (hit) {
           map.getTargetElement().style.cursor = "pointer";
@@ -951,7 +952,7 @@ define([
       });
     }
     // On select location feature
-    select.on("select", features => {
+    select.on("select", (features) => {
       if (features.selected.length === 1) {
         let stagename = features.selected[0].get("name");
         let stageclue = features.selected[0].get("clue");
@@ -979,12 +980,12 @@ define([
     });
 
     // Change marker feature position on user click if play mode is play without moving
-    map.on("click", evt => {
+    map.on("click", (evt) => {
       // Check if has a feature on click event position.
       let hasFeature = false;
       map.forEachFeatureAtPixel(
         map.getEventPixel(evt.originalEvent),
-        feature => {
+        (feature) => {
           if (
             feature.get("stageposition") === 0 ||
             feature.get("name") === "user_position" ||
@@ -1003,7 +1004,7 @@ define([
       }
     });
 
-    $("#searchInput").on("input", ev => {
+    $("#searchInput").on("input", (ev) => {
       // Abort xhr request if a new one arrives
       if (osmGeocoderXHR) {
         osmGeocoderXHR.abort();
@@ -1019,7 +1020,7 @@ define([
         $(".search-loading").addClass("active");
         osmTimer = setTimeout(() => {
           osmGeocoderXHR = OSMGeocoder.search(value)
-            .done(resp => {
+            .done((resp) => {
               $(".search-loading").removeClass("active");
               if (resp.length === 0) {
                 $searchContainer.html(
@@ -1031,7 +1032,7 @@ define([
                 $.each(resp, (i, place) => {
                   let link = $("<button>", {
                     type: "button",
-                    class: "list-group-item list-group-item-action"
+                    class: "list-group-item list-group-item-action",
                   })
                     .appendTo($searchContainer)
                     .click(() => {
@@ -1050,7 +1051,7 @@ define([
                     });
                   let linkContent = $("<div>", {
                     text: place.display_name,
-                    class: "search-option"
+                    class: "search-option",
                   }).append($("<i class='fa fa-chevron-circle-right'>"));
                   link.append(linkContent);
                 });
@@ -1071,6 +1072,22 @@ define([
     // Clear array of info messages after user accept updates
     $("#acceptupdates").on("click", () => {
       infomsgs = [];
+    });
+    // Load QR on open modal qrpage.
+    $("#qrpage").on("modal:open", () => {
+      webqr.loadQR(qrReaded, qrReport);
+    });
+    // Unload selected features after info stage popup close.
+    $("#qrpage").on("modal:close", () => {
+      webqr.unloadQR(qrReport);
+    });
+
+    $("#nextcamera").on("click", () => {
+      if (webqr.detectedCameras !== null) {
+        const nextcam = webqr.getnextwebCam();
+        toast("Give access to:" + webqr.detectedCameras[nextcam].name);
+      }
+      webqr.setnextwebcam(qrReport);
     });
 
     // Redraw map on resize window.
@@ -1097,7 +1114,7 @@ define([
       validateposition(true);
     });
 
-    $("#sendAnswer").on("click", event => {
+    $("#sendAnswer").on("click", (event) => {
       // Selecciono la respuesta.
       let selected = $("#questionform input[type='radio']:checked");
       if (!available) {
@@ -1113,7 +1130,7 @@ define([
       }
     });
 
-    $("#validatelocation").on("click", event => {
+    $("#validatelocation").on("click", (event) => {
       if (roadfinished) {
         event.preventDefault();
         toast(strings["huntcompleted"]);
@@ -1139,7 +1156,7 @@ define([
     });
 
     /* Sidebar events */
-    $(document).on("click", '*[data-rel="sidebar"]', e => {
+    $(document).on("click", '*[data-rel="sidebar"]', (e) => {
       const target = e.currentTarget;
       const sidebar = $(target.dataset.ref);
       sidebar.trigger("sidebar:open");
@@ -1157,7 +1174,7 @@ define([
     });
 
     /* Modal events */
-    $(document).on("click", '*[data-rel="modal"]', e => {
+    $(document).on("click", '*[data-rel="modal"]', (e) => {
       closeModal();
       const target = e.currentTarget;
       const modal = $(target.dataset.ref);
@@ -1172,8 +1189,6 @@ define([
     $(document).on("click", ".close-modal, .modal-mask.dismissible", () => {
       closeModal();
     });
-
-    /*-------------------------------Initialize page -------------*/
 
     /*-------------------------------Help functions -------------*/
     function toast(msg) {
@@ -1219,6 +1234,27 @@ define([
         $(".global-loader").addClass("active");
       } else {
         $(".global-loader").removeClass("active");
+      }
+    }
+    // Scan QR.
+    function qrReaded(value) {
+      closeModal();
+      toast("QR code readed: " + value);
+      renew_source(false, false, null, value);
+    }
+    function qrReport(message) {
+      if (typeof message == "string") {
+        $("#errorQR").text(message);
+      } else {
+        if (message.cameras[message.camera].name !== null) {
+          $("#errorQR").text(message.cameras[message.camera].name);
+        }
+        // hide/show next camera button.
+        if (message.cameras.length > 1) {
+          $("#nextcamera").show();
+        } else {
+          $("#nextcamera").hide();
+        }
       }
     }
   }

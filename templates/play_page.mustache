@@ -172,12 +172,11 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationPopup"><i class="fa fa-check" aria-hidden="true"></i></button>
+                <button class="btn play-btn" id="validateqr" data-rel="modal" data-ref="#qrpage"><i class="fa fa-qrcode" aria-hidden="true"></i></button>
                 <button id="cluebutton" class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage">
                     <i class="fa fa-key" aria-hidden="true"></i>
                     Mostrar Pista
                 </button>
-                {{! <button class="btn play-btn" data-rel="modal" data-ref="#cluepage" data-dismissible><i class="fa fa-list-ul" aria-hidden="true"></i></button>
-               }}
                 <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
 
@@ -187,30 +186,6 @@
         <!-- /#page-content-wrapper -->
     </div>
     {{! end map page }}
-
-    {{!Popup for QR scanner}}
-    <div class="play-modal" data-animation="slideInOutTop" id="QRdialog">
-        <!-- modal mask -->
-        <div class="modal-mask"></div>
-
-        <div class="play-modal-dialog">
-            <!-- Header -->
-            <nav class="play-navbar">
-                <span class="title">{{#str}} scanQR_scanbutton, mod_treasurehunt{{/str}}</span>
-            </nav>
-
-            <div data-role="content" class="ui-content ui-overlay-b">			    
-		           <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
-		        <div id="previewVideoDiv"><center><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video><center></div>
-                <div id="previewQRbuttons" class="ui-block-a">
-                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
-                        {{#str}} cancel, mod_treasurehunt{{/str}}
-                    </a><a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="nextcamera"></a>
-	                <div id="errorQR" style="display:inline">Camera</div>
-                </div>   
-            </div>
-        </div>
-    </div>
 
     {{! Toast container}}
     <div class="play-toast-container">
@@ -349,6 +324,33 @@
             </div>
         {{/dialogfooter}}
     {{/treasurehunt/dialog_play_page}}
+
+
+    {{!Dialog QR page}}
+    {{< treasurehunt/dialog_play_page}}
+        {{$dialogid}}qrpage{{/dialogid}}
+        {{$dialogtitle}}
+            {{#str}} scanQR_scanbutton, mod_treasurehunt{{/str}}
+        {{/dialogtitle}}
+        {{$dialogcontent}}
+            <script type="text/javascript" src="js/instascan/instascan.min.js"></script>
+		    <div id="previewVideoDiv"><video playsinline id="previewQRvideo" style="width:100%;height:100%"></video></div>
+            <div id="errorQR" style="display:inline">Camera</div>
+        {{/dialogcontent}}
+        {{$dialogfooter}}
+            <div class="play-modal-footer">
+                <button type="button" class="btn play-btn close-modal">
+                    <i class="fa fa-times" aria-hidden="true"></i>
+                    {{#str}} cancel, mod_treasurehunt{{/str}}
+                </button>
+                <button type="button" class="btn play-btn" id="nextcamera">
+                    <i class="fa fa-check" aria-hidden="true"></i>
+                    {{#str}} send, mod_treasurehunt{{/str}}
+                </button>       
+            </div>
+        {{/dialogfooter}}
+    {{/treasurehunt/dialog_play_page}}
+
 </div>
  
     {{!Fin de pagina de capas.}}

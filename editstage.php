@@ -1,4 +1,5 @@
 <?php
+
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,15 +16,14 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Page to edit stage
+ * Page to edit stage.
  *
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once(dirname(__FILE__) . '/editstage_form.php');
-require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
+require_once dirname(dirname(dirname(__FILE__))).'/config.php';
+require_once dirname(__FILE__).'/editstage_form.php';
+require_once "{$CFG->dirroot}/mod/treasurehunt/locallib.php";
 
 global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
@@ -37,7 +37,7 @@ $id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
+list($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
@@ -58,21 +58,24 @@ $PAGE->requires->jquery();
 if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-                                array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd(
+        'mod_treasurehunt/renewlock',
+        'renew_edition_lock',
+        array($treasurehunt->id, $lockid, $renewlocktime)
+    );
 
     if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
 
-        $stage = $DB->get_record('treasurehunt_stages', ['id' => $id], '*', MUST_EXIST);
+        $stage = $DB->get_record('treasurehunt_stages', array('id' => $id), '*', MUST_EXIST);
         // Si existe la pregunta recojo las respuestas.
-        if ($stage->questiontext !== '') {
+        if ('' !== $stage->questiontext) {
             // Hago que se muestre la pregunta.
             $stage->addsimplequestion = optional_param('addsimplequestion', 1, PARAM_INT);
             $sqlanswers = 'SELECT a.id,a.answertext,a.answertextformat,a.answertexttrust,'
-                    . ' a.correct FROM {treasurehunt_answers} a INNER JOIN'
-                    . ' {treasurehunt_stages} r ON r.id=a.stageid WHERE r.id=?';
+                    .' a.correct FROM {treasurehunt_answers} a INNER JOIN'
+                    .' {treasurehunt_stages} r ON r.id=a.stageid WHERE r.id=?';
             $params = array($stage->id);
             $answers = $DB->get_records_sql($sqlanswers, $params);
             $stage->answers = $answers;
@@ -85,7 +88,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
-        $select = "id = ?";
+        $select = 'id = ?';
         $params = array($roadid);
         // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
@@ -99,7 +102,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $stage->id = null;
         $stage->roadid = $roadid;
     }
-    if (!isset($stage->questiontext) || $stage->questiontext === '') {
+    if (!isset($stage->questiontext) || '' === $stage->questiontext) {
         $stage->addsimplequestion = optional_param('addsimplequestion', 0, PARAM_INT);
         $stage->noanswers = optional_param('noanswers', 2, PARAM_INT);
         if (!empty($addanswers)) {
@@ -111,26 +114,25 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,
-                            'context' => $context,
-                            'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
+        'context' => $context,
+        'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id), );
     // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
     // Name of the form you defined in file above.
     $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions,
-                                    'completionactivities' => $completionactivities));
+        'completionactivities' => $completionactivities, ));
 
     if ($mform->is_reloaded()) {
         // Ignore this event. Some data may be changes.
-        echo " ";
-    } else if ($mform->is_cancelled()) {
+        echo ' ';
+    } elseif ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form
         // here you tell php what to do if your user presses cancel
         // probably a redirect is called for!
         // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
-    } else if ($stage = $mform->get_data()) {
-
+    } elseif ($stage = $mform->get_data()) {
         // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);
@@ -155,26 +157,41 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
         // save and relink embedded images and save attachments
-        $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context,
-                                                'mod_treasurehunt', 'cluetext', $stage->id);
+        $stage = file_postupdate_standard_editor(
+            $stage,
+            'cluetext',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'cluetext',
+            $stage->id
+        );
         // Store the updated value values.
         if ($stage->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
-            $stage = file_postupdate_standard_editor($stage, 'questiontext', $editoroptions, $context,
-                                                    'mod_treasurehunt', 'questiontext', $stage->id);
+            $stage = file_postupdate_standard_editor(
+                $stage,
+                'questiontext',
+                $editoroptions,
+                $context,
+                'mod_treasurehunt',
+                'questiontext',
+                $stage->id
+            );
             if (isset($stage->answertext_editor)) {
                 // Process answer texts and save answers.
                 foreach ($stage->answertext_editor as $key => $answertext) {
                     if (isset($answers) && count($answers) > 0) {
                         $answer = array_shift($answers);
-                        if (trim($answertext['text']) === '') {
+                        if ('' === trim($answertext['text'])) {
                             $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+
                             continue;
                         }
                         $answer->timemodified = $timenow;
                         $answer->correct = $stage->correct[$key];
                     } else {
-                        if (trim($answertext['text']) === '') {
+                        if ('' === trim($answertext['text'])) {
                             continue;
                         }
                         $answer = new stdClass();
@@ -187,8 +204,15 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
                         $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
                     }
                     $answer->answertext_editor = $answertext;
-                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context,
-                                                                'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_postupdate_standard_editor(
+                        $answer,
+                        'answertext',
+                        $editoroptions,
+                        $context,
+                        'mod_treasurehunt',
+                        'answertext',
+                        $answer->id
+                    );
                     $DB->update_record('treasurehunt_answers', $answer);
                 }
             }
@@ -237,10 +261,6 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Support for QR scan.
 treasurehunt_qr_support($PAGE, 'enableForm');
-echo '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
 // End QR.
 $mform->display();
 echo $OUTPUT->footer();
-
-
-
