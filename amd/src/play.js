@@ -158,6 +158,8 @@ define([
     let custombaselayer = null;
     let geographictools = true;
     let defaultzoom = 15;
+    let supportsTouch = "ontouchstart" in window || navigator.msMaxTouchPoints;
+
     // Support customized base layers.
     if (custommapconfig) {
       if (custommapconfig.custombackgroundurl) {
@@ -924,6 +926,28 @@ define([
     });
     geolocation.setTracking(tracking); // Start position tracking.
 
+    // If it is not a touch screen, show pointer when hovering over an attempt
+    if (!supportsTouch) {
+      map.on("pointermove", evt => {
+        if (evt.dragging) {
+          return;
+        }
+        const pixel = map.getEventPixel(evt.originalEvent);
+        let hit = false;
+        map.forEachFeatureAtPixel(
+          pixel,
+          () => {
+            hit = true;
+          },
+          { layerFilter: layer => layer === attemptslayer }
+        );
+        if (hit) {
+          map.getTargetElement().style.cursor = "pointer";
+        } else {
+          map.getTargetElement().style.cursor = "crosshair";
+        }
+      });
+    }
     // On select location feature
     select.on("select", features => {
       if (features.selected.length === 1) {
