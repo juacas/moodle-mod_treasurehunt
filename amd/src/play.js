@@ -1091,11 +1091,12 @@ define(['jquery',
 		        });
 		    }
 		    $("#nextcamera").on('click', function() {
+				var detectedCameras = webqr.getDetectedCameras();
 		    	if (detectedCameras !== null) {
-			    	var nextcam = getnextwebCam();
+			    	var nextcam = webqr.getnextwebCam();
 			    	toast('Give access to:' + detectedCameras[nextcam].name);
 		    	}
-		    	setnextwebcam(qrReport);
+		    	webqr.setnextwebcam(qrReport);
 		    });
 		    // Scan QR.
 		    function qrReaded(value) {

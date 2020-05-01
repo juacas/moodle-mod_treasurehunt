@@ -236,8 +236,8 @@ $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Support for QR scan.
-treasurehunt_qr_support($PAGE, 'enableForm');
-echo '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
+treasurehunt_qr_support($PAGE, 'enableEditForm');
+// echo '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
 // End QR.
 $mform->display();
 echo $OUTPUT->footer();
