@@ -127,7 +127,7 @@
                                 <i class="fa fa-search" aria-hidden="true"></i>
                             </span>
                         </div>
-                        <input type="search" id="searchInput" class="form-control" placeholder="Find a place..." aria-label="Search">
+                        <input type="search" id="searchInput" class="form-control" placeholder="{{#str}} findplace, mod_treasurehunt{{/str}}..." aria-label="Search">
                     </div>
                 </div>
             </div>
@@ -151,7 +151,13 @@
                 <button class="btn" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
                     <i class="fa fa-search" aria-hidden="true"></i>
                 </button>
-                <span class="title">{{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}</span>
+                <span class="title">
+                    {{#pix}} treasurechest, treasurehunt, treasurehunt icon {{/pix}} 
+                    {{treasurehunt.name}}
+                </span>
+                <button class="btn" id="playerhelp">
+                    <i class="fa fa-question-circle" aria-hidden="true"></i>
+                </button>
                 <button class="btn dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
                     {{{user.picture}}}
                 </button>
@@ -172,16 +178,17 @@
             <!-- Bottom buttons -->
             <div class="play-tools-container">
                 <button class="btn play-btn" id="validatelocation" data-rel="modal" data-ref="#confirmLocationPopup"><i class="fa fa-check" aria-hidden="true"></i></button>
-                <button class="btn play-btn" id="validateqr" data-rel="modal" data-ref="#qrpage"><i class="fa fa-qrcode" aria-hidden="true"></i></button>
                 <button id="cluebutton" class="btn play-highlight-btn" data-rel="modal" data-ref="#cluepage">
                     <i class="fa fa-key" aria-hidden="true"></i>
-                    Mostrar Pista
+                    {{#str}}showclue, mod_treasurehunt{{/str}}
                 </button>
-                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
+                <button class="btn play-btn" id="validateqr" data-rel="modal" data-ref="#qrpage"><i class="fa fa-qrcode" aria-hidden="true"></i></button>
             </div>
 
-            <button class="btn play-btn geolocation-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button> 
-
+            <div class="map-tools-container">
+                <button class="btn play-btn geolocation-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button> 
+                <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
+            </div>
         </div>
         <!-- /#page-content-wrapper -->
     </div>
@@ -195,10 +202,10 @@
     {{< treasurehunt/popup_play_page}}
         {{$popupid}}confirmLocationPopup{{/popupid}}
         {{$popuptitle}}
-            {{#str}} sendlotaciontitle, mod_treasurehunt{{/str}}
+            {{#str}} sendlocationtitle, mod_treasurehunt{{/str}}
         {{/popuptitle}}
         {{$popupcontent}}
-            <p>{{#str}} sendlotacioncontent, mod_treasurehunt{{/str}}</p>
+            <p>{{#str}} sendlocationcontent, mod_treasurehunt{{/str}}</p>
         {{/popupcontent}}
         {{$popupfootercontent}}
             <button type="button" class="btn play-btn close-modal">

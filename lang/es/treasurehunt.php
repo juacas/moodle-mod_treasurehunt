@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
+/*
  * Strings for component 'treasurehunt', language 'es'.
  *
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -133,6 +133,7 @@ $string['eventstageupdated'] = 'Etapa actualizada';
 $string['exit'] = 'Volver al curso';
 $string['failedlocation'] = 'Localización fallada';
 $string['faillocation'] = 'No es el lugar correcto';
+$string['findplace'] = 'Busca un lugar';
 $string['gamemodeinfo'] = 'Modo de juego: {$a}';
 $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra.
@@ -310,8 +311,9 @@ $string['search'] = 'Buscar';
 $string['searching'] = 'Buscando';
 $string['searchlocation'] = 'Buscar localización';
 $string['send'] = 'Enviar';
-$string['sendlotacioncontent'] = 'Esta acción no se puede deshacer.';
-$string['sendlotaciontitle'] = '¿Estás seguro de que deseas enviar esta ubicación?';
+$string['sendlocationcontent'] = 'Esta acción no se puede deshacer.';
+$string['sendlocationtitle'] = '¿Estás seguro de que deseas enviar esta ubicación?';
+$string['showclue'] = 'Mostrar pista';
 $string['stage'] = 'Etapa';
 $string['stageclue'] = 'Pista para localizar la siguiente etapa';
 $string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar
@@ -413,7 +415,7 @@ $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la
 
 $string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';
 $string['validatelocation_tour'] = 'Cuando estés seguro de la localización de una etapa del juego debes enviar tu posición para comprobar si has acertado. Pulsa este botón una vez que el mapa esté centrado en tu posición.';
-$string['lastsuccessfulstage_tour'] = 'En este panel encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
+$string['lastsuccessfulstage_tour'] = 'En este botón encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
 $string['mapplay_tour'] = 'En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/success_mark.png" width="28"/> y las falladas con <img src="pix/failure_mark.png" width="28"/>';
 $string['playend_tour'] = '¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
 $string['welcome_play_tour'] = 'Bienvenido a la pantalla de juego de la Caza del Tesoro. Este es el interfaz para buscar, investigar y conseguir tu tesoro.';

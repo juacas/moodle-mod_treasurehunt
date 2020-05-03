@@ -15,7 +15,7 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
+/*
  * Strings for component 'treasurehunt', language 'en'.
  *
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -135,6 +135,7 @@ $string['eventstageupdated'] = 'Stage updated';
 $string['exit'] = 'Back to Course';
 $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
+$string['findplace'] = 'Find a place';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
@@ -310,8 +311,9 @@ $string['search'] = 'Search';
 $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
 $string['send'] = 'Send';
-$string['sendlotacioncontent'] = 'This action can not be undone.';
-$string['sendlotaciontitle'] = 'Are you sure you want to send this location?';
+$string['sendlocationcontent'] = 'This action can not be undone.';
+$string['sendlocationtitle'] = 'Are you sure you want to send this location?';
+$string['showclue'] = 'Show clue';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
 $string['stageclue_help'] = 'Here you should describe the clue to reach the next location.
@@ -411,7 +413,7 @@ $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. '
 
 $string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
 $string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
-$string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
+$string['lastsuccessfulstage_tour'] = 'In this button you can find out your last successful stage. It can be yours of your group\'s successful stage.';
 $string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/success_mark.png" width="28"/> and failed stages with <img src="pix/failure_mark.png" width="28"/>';
 $string['playend_tour'] = 'Enjoy pursuing the treasure with your mates!';
 $string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';

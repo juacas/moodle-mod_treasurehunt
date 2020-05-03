@@ -14,7 +14,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-/**
+/*
  * Strings for component 'treasurehunt', language 'en'.
  *
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -99,6 +99,7 @@ $string['eventstageupdated'] = 'Το στάδιο ενημερώθηκε';
 $string['exit'] = 'Επιστροφή στο μάθημα';
 $string['failedlocation'] = 'Αποτυχημένη τοποθεσία';
 $string['faillocation'] = 'Δεν είναι το σωστό μέρος';
+$string['findplace'] = 'Βρείτε ένα μέρος';
 $string['gamemodeinfo'] = 'Λειτουργία παιχνιδιού: {$a}';
 $string['gameupdatetime'] = 'Χρόνος ενημέρωσης παιχνιδιού';
 $string['gameupdatetime_help'] = 'Χρονικό διάστημα σε δευτερόλεπτα που μεσολαβεί μεταξύ μίας ενημέρωσης παιχνιδιού από τον ένα χρήστη στον άλλο.
@@ -258,8 +259,9 @@ $string['search'] = 'Αναζήτηση';
 $string['searching'] = 'Γίνεται αναζήτηση';
 $string['searchlocation'] = 'Αναζήτηση τοποθεσίας';
 $string['send'] = 'Send';
-$string['sendlotacioncontent'] = 'Αυτή η ενέργεια δεν μπορεί να ανακληθεί.';
-$string['sendlotaciontitle'] = 'Είστε βέβαιοι ότι θέλετε να στείλετε αυτήν την τοποθεσία;';
+$string['sendlocationcontent'] = 'Αυτή η ενέργεια δεν μπορεί να ανακληθεί.';
+$string['sendlocationtitle'] = 'Είστε βέβαιοι ότι θέλετε να στείλετε αυτήν την τοποθεσία;';
+$string['showclue'] = 'Εμφάνιση ενδείξεων';
 $string['stage'] = 'Στάδιο';
 $string['stageclue'] = 'Στοιχείο για να εντοπίσετε το επόμενο στάδιο';
 $string['stageclue_help'] = 'Εδώ θα πρέπει να περιγράψετε το στοιχείο - ένδειξη για να φτάσετε στην επόμενη τοποθεσία.
@@ -338,7 +340,7 @@ $string['stages_tour'] = 'Σε αυτή την περιοχή θα βρείτε 
 $string['welcome_edit_tour'] = 'Καλώς ήλθατε στη σελίδα διαχείρισης για το Κυνήγι Θησαυρού. ';
 $string['autolocate_tour'] = 'Κατά τη διάρκεια του παιχνιδιού, μπορείτε να τοποθετήσετε τον εαυτό σας γεωγραφικά χρησιμοποιώντας το GPS της συσκευής σας με αυτό το κουμπί. Παραχωρήστε δικαιώματα χρήσης "τοποθεσίας" όταν σας ζητηθεί.';
 $string['validatelocation_tour'] = 'Όταν είστε σίγουροι για τη τοποθεσία ενός σταδίου, πρέπει να καταχωρήσετε τη θέση σας ώστε να ελέγξετε αν είστε σωστοί.';
-$string['lastsuccessfulstage_tour'] = 'Σε αυτόν τον πίνακα μπορείτε να διαπιστώσετε το τελευταίο σας επιτυχημένο στάδιο. Μπορεί να είναι το δικό σας ή της ομάδας σας.';
+$string['lastsuccessfulstage_tour'] = 'Σε αυτό το κουμπί μπορείτε να δείτε το πιο πρόσφατο επιτυχημένο στάδιο. Μπορεί να είναι το δικό σας ή της ομάδας σας.';
 $string['mapplay_tour'] = 'Σε αυτό το χάρτη μπορείτε να δείτε όλες τις προσπάθειες αυτού του γεωχωρικού παιχνιδιού! Τα ολοκληρωμένα στάδια σημειώνονται με <img src="pix/success_mark.png" width="28"/> και τα αποτυχημένα στάδια με <img src="pix/failure_mark.png" width="28"/>';
 $string['playend_tour'] = 'Απολαύστε το Κηνύγι του Θησαυρού με τους φίλους σας!';
 $string['welcome_play_tour'] = 'Καλώς ήλθατε στην οθόνη για το παιχνιδι Κυνήγι Θησαυρού. Αυτό είναι το βασικό περιβάλλον εργασίας για να ερευνήσετε, να κυνηγήσετε και να βρειτε το θησαυρό.';
