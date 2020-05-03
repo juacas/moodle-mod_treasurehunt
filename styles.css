@@ -502,12 +502,6 @@ body {
   width: 100%;
 }
 
-#page-mod-treasurehunt-play #validatelocation {
-  padding-top: 0.6em;
-  padding-bottom: 0.6em;
-  display: none;
-}
-
 #page-mod-treasurehunt-play .successfulattempt::after {
   background-color: #5cd053 !important;
 }

@@ -14,7 +14,7 @@
   position: absolute;
   width: 100%;
   height: 100%;
-  background: rgba(0, 0, 0, 0.8);
+  background: rgba(0, 0, 0, 0.6);
   z-index: 10000;
   display: none;
 }
@@ -57,8 +57,17 @@
   position: fixed;
   left: 50%;
   bottom: 0;
-  transform: translate(-50%, 0);
-  margin: 0 auto;
+  /* transform: translate(-50%, 0);
+  margin: 0 auto; */
+}
+
+#page-mod-treasurehunt-play .map-tools-container {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  position: absolute;
+  bottom: 70px;
+  right: 0;
 }
 
 #page-mod-treasurehunt-play .treasureoverlay {
@@ -177,6 +186,18 @@
   box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.14), 0 4px 5px rgba(0, 0, 0, 0.1);
   margin: 0 -10px;
   z-index: 10;
+  position: relative;
+  left: -50%;
+}
+
+#page-mod-treasurehunt-play .map-tools-container .btn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.14), 0 4px 5px rgba(0, 0, 0, 0.1);
+  margin-right: 5px;
+  margin-bottom: 5px;
+  z-index: 10;
 }
 
 #page-mod-treasurehunt-play .play-tools-container .btn:focus {
@@ -200,18 +221,6 @@
 
 #page-mod-treasurehunt-play .play-tools-container .play-highlight-btn:hover {
   background-image: linear-gradient(315deg, #09203f 0, #006877 74%);
-}
-
-/* Geolocation button */
-#page-mod-treasurehunt-play .geolocation-btn {
-  border-radius: 50%;
-  width: 40px;
-  height: 40px;
-  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.14), 0 4px 5px rgba(0, 0, 0, 0.1);
-  z-index: 10;
-  position: absolute;
-  bottom: 80px;
-  right: 3px;
 }
 
 /* sidebar mask*/
@@ -518,8 +527,8 @@
   #page-mod-treasurehunt-play .custom-zoom {
     display: none;
   }
-  #page-mod-treasurehunt-play .geolocation-btn {
-    bottom: 50px;
+  #page-mod-treasurehunt-play .map-tools-container {
+    bottom: 0;
   }
 }
 
