@@ -25,10 +25,10 @@ define([
   "jquery",
   "mod_treasurehunt/intro",
   "core/str",
-  "core/notification"
-], function($, introJS, str, notification) {
+  "core/notification",
+], function ($, introJS, str, notification) {
   let init = {
-    launchedittutorial: function() {
+    launchedittutorial: function () {
       let intro = introJS();
       let terms = [
         "nextstep",
@@ -43,29 +43,29 @@ define([
         "addroad_tour",
         "addstage_tour",
         "save_tour",
-        "editend_tour"
+        "editend_tour",
       ];
-      let stringQueried = terms.map(term => {
+      let stringQueried = terms.map((term) => {
         return { key: term, component: "treasurehunt" };
       });
       $(".treasurehunt-editor-loader").show();
       str
         .get_strings(stringQueried)
-        .done(strings => {
+        .done((strings) => {
           $(".treasurehunt-editor-loader").hide();
           configureEditIntro(intro, strings, terms);
           intro.start();
         })
         .fail(notification.exception);
     },
-    editpage: function() {
+    editpage: function () {
       $("#edition_maintitle > h2 > a").on("click", this.launchedittutorial);
       const introEditProgress = localStorage.getItem("introEditProgress");
       if (introEditProgress != "Done") {
         this.launchedittutorial();
       }
     }, // end of editpage function
-    launchplaytutorial: function() {
+    launchplaytutorial: function () {
       let intro = introJS();
       let terms = [
         "nextstep",
@@ -77,38 +77,28 @@ define([
         "mapplay_tour",
         "validatelocation_tour",
         "autolocate_tour",
-        "playend_tour"
+        "playend_tour",
       ];
-      let stringQueried = terms.map(term => {
+      let stringQueried = terms.map((term) => {
         return { key: term, component: "treasurehunt" };
       });
-      // $.mobile.loading("show");
+      $(".global-loader").addClass("active");
       str
         .get_strings(stringQueried)
-        .done(strings => {
-          // JPC: With jquery 2 promises are not resolved at this point.
-          (async () => {
-            for (let i = 0; i < strings.length; i++) {
-              strings[i] = await strings[i];
-            }
-          })().then(() => {
-            // $.mobile.loading("hide");
-            // $("#infopanel").panel("open");
-            $("#infopanel").addClass("active");
-            $(".sidebar-mask").addClass("active dismissible");
-            configurePlayIntro(intro, strings, terms);
-            intro.start();
-          });
+        .done((strings) => {
+          $(".global-loader").removeClass("active");
+          configurePlayIntro(intro, strings, terms);
+          intro.start();
         })
         .fail(notification.exception);
     },
-    playpage: function() {
+    playpage: function () {
       $("#playerhelp").on("click", this.launchplaytutorial);
       const introPlayProgress = localStorage.getItem("introPlayProgress");
       if (introPlayProgress != "Done") {
         this.launchplaytutorial();
       }
-    } // ...end of playpage function.
+    }, // ...end of playpage function.
   }; // ...end of init let.
   return init;
 }); // ...end of module define function.
@@ -123,44 +113,44 @@ function configureEditIntro(intro, strings, keys) {
       {
         element: "#treasurehunt-editor",
         intro: strings[keys.indexOf("welcome_edit_tour")],
-        position: "floating"
+        position: "floating",
       },
       {
         element: "#mapedit",
         intro: strings[keys.indexOf("map_tour")],
-        position: "floating"
+        position: "floating",
       },
       {
         element: "#roadlist",
         intro: strings[keys.indexOf("roads_tour")],
-        position: "top"
+        position: "top",
       },
       {
         element: "#stagelistpanel",
         intro: strings[keys.indexOf("stages_tour")],
-        position: "right"
+        position: "right",
       },
       {
         element: "#addroad",
         intro: strings[keys.indexOf("addroad_tour")],
-        position: "bottom"
+        position: "bottom",
       },
       {
         element: "#addstage",
         intro: strings[keys.indexOf("addstage_tour")],
-        position: "bottom"
+        position: "bottom",
       },
       {
         element: "#savestage",
         intro: strings[keys.indexOf("save_tour")],
-        position: "bottom"
+        position: "bottom",
       },
       {
         element: "#treasurehunt-editor",
         intro: strings[keys.indexOf("editend_tour")],
-        position: "floating"
-      }
-    ]
+        position: "floating",
+      },
+    ],
   });
   intro.onexit(() => {
     localStorage.setItem("introEditProgress", "Done");
@@ -182,34 +172,34 @@ function configurePlayIntro(intro, strings, keys) {
     steps: [
       {
         intro: strings[keys.indexOf("welcome_play_tour")],
-        position: "floating"
+        position: "floating",
       },
       {
-        element: "#collapsibleset", //#lastsuccessfulstage',
+        element: "#cluebutton", //#lastsuccessfulstage',
         intro: strings[keys.indexOf("lastsuccessfulstage_tour")],
-        position: "top"
+        position: "top",
       },
       {
         element: "#mapplay",
         intro: strings[keys.indexOf("mapplay_tour")],
-        position: "floating"
+        position: "floating",
       },
       {
         element: "#validatelocation",
         intro: strings[keys.indexOf("validatelocation_tour")],
-        position: "top"
+        position: "auto",
       },
       {
         element: "#autolocate",
         intro: strings[keys.indexOf("autolocate_tour")],
-        position: "top"
+        position: "auto",
       },
       {
         element: "#treasurehunt-editor",
         intro: strings[keys.indexOf("playend_tour")],
-        position: "floating"
-      }
-    ]
+        position: "floating",
+      },
+    ],
   });
   intro.onexit(() => {
     localStorage.setItem("introPlayProgress", "Done");
@@ -220,7 +210,7 @@ function configurePlayIntro(intro, strings, keys) {
   intro.onchange(() => {
     localStorage.setItem("introPlayProgress", "Done");
   });
-  intro.onafterchange(target => {
+  intro.onafterchange((target) => {
     let parentElem = target.parentElement;
     while (parentElem !== null) {
       if (parentElem.dataset.role == "panel") {

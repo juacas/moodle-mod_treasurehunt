@@ -4,92 +4,113 @@
   z-index: 999999;
   background-color: #000;
   opacity: 0;
-  background: -moz-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
-  background: -webkit-gradient(radial,center center,0px,center center,100%,color-stop(0%,rgba(0,0,0,0.4)),color-stop(100%,rgba(0,0,0,0.9)));
-  background: -webkit-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
-  background: -o-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
-  background: -ms-radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
-  background: radial-gradient(center,ellipse cover,rgba(0,0,0,0.4) 0,rgba(0,0,0,0.9) 100%);
-  filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#66000000',endColorstr='#e6000000',GradientType=1)";
-  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=50)";
-  filter: alpha(opacity=50);
+  background: -moz-radial-gradient(
+    center,
+    ellipse farthest-corner,
+    rgba(0, 0, 0, 0.4) 0,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  background: -webkit-gradient(
+    radial,
+    center center,
+    0,
+    center center,
+    100%,
+    color-stop(0, rgba(0, 0, 0, 0.4)),
+    color-stop(100%, rgba(0, 0, 0, 0.9))
+  );
+  background: -webkit-radial-gradient(
+    center,
+    ellipse farthest-corner,
+    rgba(0, 0, 0, 0.4) 0,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  background: -o-radial-gradient(
+    center,
+    ellipse farthest-corner,
+    rgba(0, 0, 0, 0.4) 0,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  background: -ms-radial-gradient(
+    center,
+    ellipse farthest-corner,
+    rgba(0, 0, 0, 0.4) 0,
+    rgba(0, 0, 0, 0.9) 100%
+  );
+  background: radial-gradient(
+    center,
+    ellipse farthest-corner,
+    rgba(0, 0, 0, 0.4) 0,
+    rgba(0, 0, 0, 0.9) 100%
+  );
   -webkit-transition: all 0.3s ease-out;
-     -moz-transition: all 0.3s ease-out;
-      -ms-transition: all 0.3s ease-out;
-       -o-transition: all 0.3s ease-out;
-          transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  -ms-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
 }
-
 .introjs-fixParent {
   z-index: auto !important;
-  opacity: 1.0 !important;
+  opacity: 1 !important;
   -webkit-transform: none !important;
-     -moz-transform: none !important;
-      -ms-transform: none !important;
-       -o-transform: none !important;
-          transform: none !important;
+  -moz-transform: none !important;
+  -ms-transform: none !important;
+  -o-transform: none !important;
+  transform: none !important;
 }
-
 .introjs-showElement,
 tr.introjs-showElement > td,
 tr.introjs-showElement > th {
   z-index: 9999999 !important;
 }
-
 .introjs-disableInteraction {
   z-index: 99999999 !important;
   position: absolute;
-  background-color: white;
+  background-color: #fff;
   opacity: 0;
-  filter: alpha(opacity=0);
 }
-
 .introjs-relativePosition,
 tr.introjs-showElement > td,
 tr.introjs-showElement > th {
   position: relative;
 }
-
 .introjs-helperLayer {
   box-sizing: content-box;
   position: absolute;
   z-index: 9999998;
-  background-color: #FFF;
-  background-color: rgba(255,255,255,.7);
+  background-color: #fff;
+  background-color: rgba(255, 255, 255, 0.9);
   border: 1px solid #777;
-  border: 4px solid rgba(255,0,0,.9);
+  border: 1px solid rgba(0, 0, 0, 0.5);
   border-radius: 4px;
-  box-shadow: 0 2px 15px rgba(0,0,0,.4);
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.4);
   -webkit-transition: all 0.3s ease-out;
-     -moz-transition: all 0.3s ease-out;
-      -ms-transition: all 0.3s ease-out;
-       -o-transition: all 0.3s ease-out;
-          transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  -ms-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
 }
-
 .introjs-tooltipReferenceLayer {
   box-sizing: content-box;
   position: absolute;
   visibility: hidden;
-  z-index: 10000000;
+  z-index: 100000000;
   background-color: transparent;
   -webkit-transition: all 0.3s ease-out;
-     -moz-transition: all 0.3s ease-out;
-      -ms-transition: all 0.3s ease-out;
-       -o-transition: all 0.3s ease-out;
-          transition: all 0.3s ease-out;
+  -moz-transition: all 0.3s ease-out;
+  -ms-transition: all 0.3s ease-out;
+  -o-transition: all 0.3s ease-out;
+  transition: all 0.3s ease-out;
 }
-
 .introjs-helperLayer *,
-.introjs-helperLayer *:before,
-.introjs-helperLayer *:after {
+.introjs-helperLayer :after,
+.introjs-helperLayer :before {
   -webkit-box-sizing: content-box;
-     -moz-box-sizing: content-box;
-      -ms-box-sizing: content-box;
-       -o-box-sizing: content-box;
-          box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  -ms-box-sizing: content-box;
+  -o-box-sizing: content-box;
+  box-sizing: content-box;
 }
-
 .introjs-helperNumberLayer {
   box-sizing: content-box;
   position: absolute;
@@ -100,122 +121,105 @@ tr.introjs-showElement > th {
   padding: 2px;
   font-family: Arial, verdana, tahoma;
   font-size: 13px;
-  font-weight: bold;
-  color: white;
+  font-weight: 700;
+  color: #fff;
   text-align: center;
-  text-shadow: 1px 1px 1px rgba(0,0,0,.3);
-  background: #ff3019; /* Old browsers */
-  background: -webkit-linear-gradient(top, #ff3019 0%, #cf0404 100%); /* Chrome10+,Safari5.1+ */
-  background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #ff3019), color-stop(100%, #cf0404)); /* Chrome,Safari4+ */
-  background:    -moz-linear-gradient(top, #ff3019 0%, #cf0404 100%); /* FF3.6+ */
-  background:     -ms-linear-gradient(top, #ff3019 0%, #cf0404 100%); /* IE10+ */
-  background:      -o-linear-gradient(top, #ff3019 0%, #cf0404 100%); /* Opera 11.10+ */
-  background:         linear-gradient(to bottom, #ff3019 0%, #cf0404 100%);  /* W3C */
+  text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.3);
+  background: #ff3019;
+  background: -webkit-linear-gradient(top, #ff3019 0, #cf0404 100%);
+  background: -webkit-gradient(
+    linear,
+    left top,
+    left bottom,
+    color-stop(0, #ff3019),
+    color-stop(100%, #cf0404)
+  );
+  background: -moz-linear-gradient(top, #ff3019 0, #cf0404 100%);
+  background: -ms-linear-gradient(top, #ff3019 0, #cf0404 100%);
+  background: -o-linear-gradient(top, #ff3019 0, #cf0404 100%);
+  background: linear-gradient(to bottom, #ff3019 0, #cf0404 100%);
   width: 20px;
-  height:20px;
+  height: 20px;
   line-height: 20px;
-  border: 3px solid white;
+  border: 3px solid #fff;
   border-radius: 50%;
-  filter: "progid:DXImageTransform.Microsoft.gradient(startColorstr='#ff3019', endColorstr='#cf0404', GradientType=0)"; /* IE6-9 */
-  filter: "progid:DXImageTransform.Microsoft.Shadow(direction=135, strength=2, color=ff0000)"; /* IE10 text shadows */
-  box-shadow: 0 2px 5px rgba(0,0,0,.4);
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.4);
 }
-
 .introjs-arrow {
-  border: 5px solid white;
-  content:'';
+  border: 5px solid transparent;
+  content: "";
   position: absolute;
 }
 .introjs-arrow.top {
   top: -10px;
-  border-top-color:transparent;
-  border-right-color:transparent;
-  border-bottom-color:white;
-  border-left-color:transparent;
+  border-bottom-color: #fff;
 }
 .introjs-arrow.top-right {
   top: -10px;
   right: 10px;
-  border-top-color:transparent;
-  border-right-color:transparent;
-  border-bottom-color:white;
-  border-left-color:transparent;
+  border-bottom-color: #fff;
 }
 .introjs-arrow.top-middle {
   top: -10px;
   left: 50%;
   margin-left: -5px;
-  border-top-color:transparent;
-  border-right-color:transparent;
-  border-bottom-color:white;
-  border-left-color:transparent;
+  border-bottom-color: #fff;
 }
 .introjs-arrow.right {
   right: -10px;
   top: 10px;
-  border-top-color:transparent;
-  border-right-color:transparent;
-  border-bottom-color:transparent;
-  border-left-color:white;
+  border-left-color: #fff;
 }
 .introjs-arrow.right-bottom {
-  bottom:10px;
+  bottom: 10px;
   right: -10px;
-  border-top-color:transparent;
-  border-right-color:transparent;
-  border-bottom-color:transparent;
-  border-left-color:white;
+  border-left-color: #fff;
 }
 .introjs-arrow.bottom {
   bottom: -10px;
-  border-top-color:white;
-  border-right-color:transparent;
-  border-bottom-color:transparent;
-  border-left-color:transparent;
+  border-top-color: #fff;
+}
+.introjs-arrow.bottom-right {
+  bottom: -10px;
+  right: 10px;
+  border-top-color: #fff;
+}
+.introjs-arrow.bottom-middle {
+  bottom: -10px;
+  left: 50%;
+  margin-left: -5px;
+  border-top-color: #fff;
 }
 .introjs-arrow.left {
   left: -10px;
   top: 10px;
-  border-top-color:transparent;
-  border-right-color:white;
-  border-bottom-color:transparent;
-  border-left-color:transparent;
+  border-right-color: #fff;
 }
 .introjs-arrow.left-bottom {
   left: -10px;
-  bottom:10px;
-  border-top-color:transparent;
-  border-right-color:white;
-  border-bottom-color:transparent;
-  border-left-color:transparent;
+  bottom: 10px;
+  border-right-color: #fff;
 }
-
 .introjs-tooltip {
   box-sizing: content-box;
   position: absolute;
   visibility: visible;
   padding: 10px;
-  background-color: white;
+  background-color: #fff;
   min-width: 200px;
   max-width: 300px;
   border-radius: 3px;
-  box-shadow: 0 1px 10px rgba(0,0,0,.4);
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.4);
   -webkit-transition: opacity 0.1s ease-out;
-     -moz-transition: opacity 0.1s ease-out;
-      -ms-transition: opacity 0.1s ease-out;
-       -o-transition: opacity 0.1s ease-out;
-          transition: opacity 0.1s ease-out;
+  -moz-transition: opacity 0.1s ease-out;
+  -ms-transition: opacity 0.1s ease-out;
+  -o-transition: opacity 0.1s ease-out;
+  transition: opacity 0.1s ease-out;
 }
-
 .introjs-tooltipbuttons {
   text-align: right;
   white-space: nowrap;
 }
-
-/*
- Buttons style by http://nicolasgallagher.com/lab/css3-github-buttons/
- Changed by Afshin Mehrabani
-*/
 .introjs-button {
   box-sizing: content-box;
   position: relative;
@@ -226,82 +230,83 @@ tr.introjs-showElement > th {
   margin: 0;
   text-decoration: none;
   text-shadow: 1px 1px 0 #fff;
-  font: 11px/normal sans-serif;
+  font: 11px / normal sans-serif;
   color: #333;
   white-space: nowrap;
   cursor: pointer;
-  outline: none;
+  outline: 0;
   background-color: #ececec;
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#f4f4f4), to(#ececec));
+  background-image: -webkit-gradient(
+    linear,
+    0 0,
+    0 100%,
+    from(#f4f4f4),
+    to(#ececec)
+  );
   background-image: -moz-linear-gradient(#f4f4f4, #ececec);
   background-image: -o-linear-gradient(#f4f4f4, #ececec);
   background-image: linear-gradient(#f4f4f4, #ececec);
   -webkit-background-clip: padding;
   -moz-background-clip: padding;
   -o-background-clip: padding-box;
-  /*background-clip: padding-box;*/ /* commented out due to Opera 11.10 bug */
   -webkit-border-radius: 0.2em;
   -moz-border-radius: 0.2em;
   border-radius: 0.2em;
-  /* IE hacks */
   zoom: 1;
-  *display: inline;
   margin-top: 10px;
 }
-
 .introjs-button:hover {
   border-color: #bcbcbc;
   text-decoration: none;
-  box-shadow: 0px 1px 1px #e3e3e3;
+  box-shadow: 0 1px 1px #e3e3e3;
 }
-
-.introjs-button:focus,
-.introjs-button:active {
-  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#ececec), to(#f4f4f4));
+.introjs-button:active,
+.introjs-button:focus {
+  background-image: -webkit-gradient(
+    linear,
+    0 0,
+    0 100%,
+    from(#ececec),
+    to(#f4f4f4)
+  );
   background-image: -moz-linear-gradient(#ececec, #f4f4f4);
   background-image: -o-linear-gradient(#ececec, #f4f4f4);
   background-image: linear-gradient(#ececec, #f4f4f4);
 }
-
-/* overrides extra padding on button elements in Firefox */
 .introjs-button::-moz-focus-inner {
   padding: 0;
   border: 0;
 }
-
 .introjs-skipbutton {
   box-sizing: content-box;
   margin-right: 5px;
   color: #7a7a7a;
 }
-
 .introjs-prevbutton {
   -webkit-border-radius: 0.2em 0 0 0.2em;
   -moz-border-radius: 0.2em 0 0 0.2em;
   border-radius: 0.2em 0 0 0.2em;
   border-right: none;
 }
-
 .introjs-prevbutton.introjs-fullbutton {
   border: 1px solid #d4d4d4;
   -webkit-border-radius: 0.2em;
   -moz-border-radius: 0.2em;
   border-radius: 0.2em;
 }
-
 .introjs-nextbutton {
   -webkit-border-radius: 0 0.2em 0.2em 0;
   -moz-border-radius: 0 0.2em 0.2em 0;
   border-radius: 0 0.2em 0.2em 0;
 }
-
 .introjs-nextbutton.introjs-fullbutton {
   -webkit-border-radius: 0.2em;
   -moz-border-radius: 0.2em;
   border-radius: 0.2em;
 }
-
-.introjs-disabled, .introjs-disabled:hover, .introjs-disabled:focus {
+.introjs-disabled,
+.introjs-disabled:focus,
+.introjs-disabled:hover {
   color: #9a9a9a;
   border-color: #d4d4d4;
   box-shadow: none;
@@ -310,11 +315,9 @@ tr.introjs-showElement > th {
   background-image: none;
   text-decoration: none;
 }
-
 .introjs-hidden {
-     display: none;
+  display: none;
 }
-
 .introjs-bullets {
   text-align: center;
 }
@@ -349,14 +352,13 @@ tr.introjs-showElement > th {
 .introjs-bullets ul li a.active {
   background: #999;
 }
-
 .introjs-progress {
   box-sizing: content-box;
   overflow: hidden;
   height: 10px;
   margin: 10px 0 5px 0;
   border-radius: 4px;
-  background-color: #ecf0f1
+  background-color: #ecf0f1;
 }
 .introjs-progressbar {
   box-sizing: content-box;
@@ -368,7 +370,6 @@ tr.introjs-showElement > th {
   text-align: center;
   background-color: #08c;
 }
-
 .introjsFloatingElement {
   position: absolute;
   height: 0;
@@ -376,35 +377,30 @@ tr.introjs-showElement > th {
   left: 50%;
   top: 50%;
 }
-
 .introjs-fixedTooltip {
   position: fixed;
 }
-
 .introjs-hint {
   box-sizing: content-box;
   position: absolute;
-  background: transparent;
+  background: 0 0;
   width: 20px;
   height: 15px;
   cursor: pointer;
 }
 .introjs-hint:focus {
-    border: 0;
-    outline: 0;
+  border: 0;
+  outline: 0;
 }
 .introjs-hidehint {
   display: none;
 }
-
 .introjs-fixedhint {
   position: fixed;
 }
-
 .introjs-hint:hover > .introjs-hint-pulse {
   border: 5px solid rgba(60, 60, 60, 0.57);
 }
-
 .introjs-hint-pulse {
   box-sizing: content-box;
   width: 10px;
@@ -417,10 +413,10 @@ tr.introjs-showElement > th {
   z-index: 10;
   position: absolute;
   -webkit-transition: all 0.2s ease-out;
-     -moz-transition: all 0.2s ease-out;
-      -ms-transition: all 0.2s ease-out;
-       -o-transition: all 0.2s ease-out;
-          transition: all 0.2s ease-out;
+  -moz-transition: all 0.2s ease-out;
+  -ms-transition: all 0.2s ease-out;
+  -o-transition: all 0.2s ease-out;
+  transition: all 0.2s ease-out;
 }
 .introjs-hint-no-anim .introjs-hint-dot {
   -webkit-animation: none;
@@ -430,7 +426,7 @@ tr.introjs-showElement > th {
 .introjs-hint-dot {
   box-sizing: content-box;
   border: 10px solid rgba(146, 146, 146, 0.36);
-  background: transparent;
+  background: 0 0;
   -webkit-border-radius: 60px;
   -moz-border-radius: 60px;
   border-radius: 60px;
@@ -448,49 +444,102 @@ tr.introjs-showElement > th {
   z-index: 1;
   opacity: 0;
 }
-
-@-moz-keyframes introjspulse {
- 0% {
-    -moz-transform: scale(0);
-    opacity: 0.0;
- }
- 25% {
-    -moz-transform: scale(0);
-    opacity: 0.1;
- }
- 50% {
-    -moz-transform: scale(0.1);
-    opacity: 0.3;
- }
- 75% {
-    -moz-transform: scale(0.5);
-    opacity: 0.5;
- }
- 100% {
-    -moz-transform: scale(1);
-    opacity: 0.0;
- }
-}
-
 @-webkit-keyframes introjspulse {
- 0% {
+  0% {
     -webkit-transform: scale(0);
-    opacity: 0.0;
- }
- 25% {
+    opacity: 0;
+  }
+  25% {
     -webkit-transform: scale(0);
     opacity: 0.1;
- }
- 50% {
+  }
+  50% {
     -webkit-transform: scale(0.1);
     opacity: 0.3;
- }
- 75% {
+  }
+  75% {
     -webkit-transform: scale(0.5);
     opacity: 0.5;
- }
- 100% {
+  }
+  100% {
     -webkit-transform: scale(1);
-    opacity: 0.0;
- }
+    opacity: 0;
+  }
+}
+@-moz-keyframes introjspulse {
+  0% {
+    -moz-transform: scale(0);
+    opacity: 0;
+  }
+  25% {
+    -moz-transform: scale(0);
+    opacity: 0.1;
+  }
+  50% {
+    -moz-transform: scale(0.1);
+    opacity: 0.3;
+  }
+  75% {
+    -moz-transform: scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    -moz-transform: scale(1);
+    opacity: 0;
+  }
+}
+@keyframes introjspulse {
+  0% {
+    transform: scale(0);
+    opacity: 0;
+  }
+  25% {
+    transform: scale(0);
+    opacity: 0.1;
+  }
+  50% {
+    transform: scale(0.1);
+    opacity: 0.3;
+  }
+  75% {
+    transform: scale(0.5);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0;
+  }
+}
+
+/* Based on https://github.com/usablica/intro.js/issues/109 */
+
+.introjs-helperLayer {
+  background: transparent;
+}
+
+.introjs-overlay {
+  opacity: 0 !important;
+  z-index: 99999999 !important;
+}
+
+.introjs-helperLayer:before {
+  opacity: 0;
+  content: "";
+  position: absolute;
+  width: inherit;
+  height: inherit;
+  border-radius: 0.5em;
+  border: 0.2em solid rgba(255, 217, 68, 0.8);
+  box-shadow: 0 0 0 1000em rgba(0, 0, 0, 0.7);
+  opacity: 1;
+}
+
+.introjs-helperLayer:after {
+  content: "";
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  position: absolute;
+  z-index: 1000;
 }
