@@ -382,9 +382,9 @@ define(['jquery',
 		        tracklayergroup.set("name", tracklayergroup.get("title"));
 		
 		        var tracklayer = tracklayergroup.getLayers().item(0);
-		        var htmltitle = tracklayer.get("title"); // Has a picture and a link.
-		        var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);
-		        tracklayer.set("name", plaintitle);
+		        var htmltitle = tracklayer.get("title");
+		        //var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);// Had a picture and a link.
+		        tracklayer.set("name", htmltitle );
 		        tracklayer.setVisible(false);
 		        add_layer_to_list(tracklayer);
 		    }
@@ -476,7 +476,7 @@ define(['jquery',
 		     * @returns {undefined}
 		     */
 		    function renew_source(location, initialize, selectedanswerid, qrtext) {
-		        // var position holds the potition to be evaluated. undef if no evaluation requested
+		        // var position holds the position to be evaluated. undef if no evaluation requested
 		        var position;
 		        var currentposition;
 		        var coordinates;
@@ -500,7 +500,8 @@ define(['jquery',
 		        if (location) {
 		            position = currentposition;
 		            $.mobile.loading("show");
-				}				
+				}
+				// Get the progress of the user.
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -520,7 +521,8 @@ define(['jquery',
 		        geojson[0].done(function (response) {
 		            var body = '';
 		            qoaremoved = response.qoaremoved;
-		            roadfinished = response.roadfinished;
+					roadfinished = response.roadfinished;
+					// Is the activity still available or are we after the cut-off date (if set)?
 					available = response.available;
 					$.mobile.loading("hide");
 		            // If I have sent a location or an answer I print out whether it is correct or not.
@@ -528,7 +530,8 @@ define(['jquery',
 		                if (response.status !== null && available) {
 		                    console.log(response.status.msg);
 		                }
-		            }
+					}
+					// Show QR button?
 		            if (response.qrexpected) {
 		                $('#validateqr').show();
 		            } else {
@@ -568,13 +571,16 @@ define(['jquery',
 		                            'featureProjection': "EPSG:3857"
 		                        }));
 		                    }
-		                }
+						}
+						// Display the buttons corresponding to the situation:
 		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
+								// There is a question => disable location validation button and
+								// set the big button as Question.
 		                        changesinquestionstage = true;
 								$('#validatelocation').show().addClass('ui-state-disabled');
 		                        $('#question_button').show();
@@ -747,18 +753,18 @@ define(['jquery',
 		        }
 		    }
 		    function add_layer_to_list(layer) {
+				var name = jQuery.parseHTML(layer.get("name"));
 		        var item = $('<li>', {
 		            "data-icon": "check",
 		            "class": layer.getVisible() ? "checked" : "unchecked"
 		        })
-		                .append($('<a />', {
-		                    text: layer.get("name"),
-		                    href: "#mappage"
-		                })
-		                        .click(function () {
-		                            layer.setVisible(!layer.getVisible());
-		                        })
-		                        );
+				.append($('<a />', {
+					href: "#mappage"
+				})
+				.click(function () {
+					layer.setVisible(!layer.getVisible());
+				}).append(name)
+				);
 		        layer.on('change:visible', function () {
 		            $(item).toggleClass('checked unchecked');
 		        });

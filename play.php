@@ -25,10 +25,6 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 require_once($CFG->libdir . '/formslib.php');
-// Moodle 3.8 uses now Babel to compile and compress the js files.
-// This broke this page because it uses jquery2 and jquerymobile.
-// The only workaround we found is to disble Babel cache for this only page.
-$CFG->cachejs = false;
 
 global $USER;
 
@@ -40,109 +36,44 @@ require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:play', $context, null, false);
-
-/*
- * TODO: Create event for game started.
- * $event = \mod_treasurehunt\event\course_module_viewed::create(array(
- * 'objectid' => $PAGE->cm->instance,
- * 'context' => $PAGE->context,
- * ));
- * $event->add_record_snapshot('course', $PAGE->course);
- * $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
- * $event->trigger();
- */
+// Check availability
+if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:manage', $context)) {
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
+    print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
+}
+// Log event.
+require_once('classes/event/player_entered.php');
+$event = \mod_treasurehunt\event\player_entered::create(array(
+    'objectid' => $id,
+    'context' => $context,
+));
+$event->add_record_snapshot("treasurehunt", $treasurehunt);
+$event->trigger();
 
 // Print the page header.
 $PAGE->set_url('/mod/treasurehunt/play.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
-if ($treasurehunt->allowattemptsfromdate > time()) {
-    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
-}
+
 // Get last timestamp.
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
 list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
-$gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
-$output = $PAGE->get_renderer('mod_treasurehunt');
+// Instance selected player renderable.
+$playerstyle = $treasurehunt->playerstyle;
+$renderableclass = "treasurehunt_play_page_$playerstyle";
+$renderable = new $renderableclass($treasurehunt, $cm);
 
-// Nicescroll is incompatible with webkit in IOS 11 $PAGE->requires->js('/mod/treasurehunt/js/jquery.nicescroll.min.js');
-// Adds support for QR scan.
-treasurehunt_qr_support($PAGE, 'setup', []);
-// End QR support.
+$output = $PAGE->get_renderer('mod_treasurehunt');
+$renderable->lastattempttimestamp = $lastattempttimestamp;
+$renderable->lastroadtimestamp = $lastroadtimestamp;
+$renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
-$user->pic = $output->user_picture($USER);
+$user->pic = $output->user_picture($USER, array('link' => false));
+$renderable->set_user($user);
+
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
-$PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
-$PAGE->requires->js_call_amd('mod_treasurehunt/play', 'playtreasurehunt',
-                        array( $cm->id, $cm->instance, intval($treasurehunt->playwithoutmoving),
-                        intval($treasurehunt->groupmode), $lastattempttimestamp, $lastroadtimestamp, $gameupdatetime,
-                        $treasurehunt->tracking, $user, $custommapping));
-$PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
-$PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
-$PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
-$PAGE->requires->css('/mod/treasurehunt/css/jquerymobile.css');
-$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
+$renderable->set_custommapping($custommapping);
+echo $output->render($renderable);
 
-$PAGE->set_pagelayout('embedded');
-
-/*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('treasurehunt-'.$somevar);
- */
-
-// Output starts here.
-echo $output->header();
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
-
-echo treasurehunt_view_play_page($treasurehunt, $cm->id, $user);
-
-// Log event.
-require_once('classes/event/player_entered.php');
-$event = \mod_treasurehunt\event\player_entered::create(array(
-                'objectid' => $id,
-                'context' => $context,
-));
-$event->add_record_snapshot("treasurehunt", $treasurehunt);
-$event->trigger();
-
-// Finish the page.
-$page = $output->footer();
-
-// JPC: Generate a global variable with strings. Moodle 3.8 broke compatibility of core/str with jquery 2.1.4.
-$terms = ["stageovercome", "failedlocation", "stage", "stagename",
-                             "stageclue", "question", "noanswerselected", "timeexceeded",
-                             "searching", "continue", "noattempts", "aerialview", "roadview", 
-                             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-                             "huntcompleted", "discoveredlocation", "answerwarning", "error"];
-$strings = [];
-foreach($terms as $term) {
-    $strings[$term] = get_string($term, 'treasurehunt');
-}
-$i18n = json_encode($strings);
-echo <<<I18N
-<!-- Internationalization strings for the player -->
-<script type="text/javascript">
-i18nplay = $i18n;
-</script>
-
-I18N;
-
-// Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
-$disable = [
-    'core/notification',
-    'block_navigation/navblock',
-    'block_settings/settingsblock',
-    'core/log',
-    'core/page_global',
-];
-$pagefiltered= $page;
-foreach ($disable as $module) {
-    $pagefiltered = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefiltered);
-}
-echo $pagefiltered;

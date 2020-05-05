@@ -115,36 +115,29 @@ class treasurehunt_users_progress implements renderable {
 
 }
 
-/**
- * Renderable, Templatable play_page
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class treasurehunt_play_page implements renderable, templatable {
-
-    private $treasurehunt = null;
-    private $cmid = 0;
-
-    public function __construct($treasurehunt, $cmid) {
-        $this->treasurehunt = $treasurehunt;
-        $this->cmid = $cmid;
-    }
-
+class treasurehunt_play_page_base implements renderable, templatable {
+    public $treasurehunt = null;
+    public $cm = null;
+    public $custommapping = '';
+    public $user = null;
+    public $lastattempttimestamp;
+    public $lastroadtimestamp;
+    public $gameupdatetime;
     /**
      * Export this data so it can be used as the context for a mustache template.
      *
      * @param renderer_base $output
      * @return stdClass
      */
-    public function export_for_template(renderer_base $output) {
-        GLOBAL $USER;
+    public function export_for_template(renderer_base $output)
+    {
+        global $USER;
         $data = new stdClass();
         $user = new stdClass();
         $user->name = fullname($USER);
         $user->picture = $output->user_picture($USER, array('link' => false));
         $data->user = $user;
-        $data->cmid = $this->cmid;
+        $data->cmid = $this->cm->id;
         $data->treasurehunt = $this->treasurehunt;
         if (empty($this->treasurehunt->description)) {
             $hasdescription = false;
@@ -154,5 +147,31 @@ class treasurehunt_play_page implements renderable, templatable {
         $data->hasdescription = $hasdescription;
         return $data;
     }
+    public function __construct($treasurehunt, cm_info $cm)
+    {
+        $this->treasurehunt = $treasurehunt;
+        $this->cm = $cm;
+    }
+    public function set_user($user) {
+        $this->user = $user;
+    }
+    public function set_custommapping($custommapping)
+    {
+        $this->custommapping = $custommapping;
+    }
+}
+/**
+ * Renderable, Templatable play_page
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+class treasurehunt_play_page_classic extends treasurehunt_play_page_base {  
 
+}
+class treasurehunt_play_page_fancy extends treasurehunt_play_page_base
+{
+}
+class treasurehunt_play_page_bootstrap extends treasurehunt_play_page_base
+{
 }

@@ -62,6 +62,7 @@ $string['changetoplaywithoutmoving'] = 'El modo de juego ha cambiado a jugar sin
 $string['cleartreasurehunt'] = 'Resetear la Caza del Tesoro';
 $string['cleartreasurehunt_done'] = 'La actividad se ha inicializado. Toda la actividad de los participantes se ha eliminado.';
 $string['cleartreasurehuntconfirm'] = 'Cuidado con esta acción. Si continua se eliminará toda la actividad de los participantes. Normalmente sólo es necesario para reiniciar la actividad y poder modificar el número de caminos o etapas en una Caza del Tesoro en la que haya participado alguien por error o para pruebas. Actualmente hay {$a} registros de actividad.';
+$string['clue'] = 'Pista';
 $string['configintro'] = 'Los valores fijados aquí definen los valores por defecto usados en el formulario de especificaciones
 cuando usted crea una nueva caza del tesoro.';
 $string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la caza del tesoro.';
@@ -132,11 +133,19 @@ $string['eventstageupdated'] = 'Etapa actualizada';
 $string['exit'] = 'Volver al curso';
 $string['failedlocation'] = 'Localización fallada';
 $string['faillocation'] = 'No es el lugar correcto';
+$string['findplace'] = 'Buscar un sitio';
 $string['gamemodeinfo'] = 'Modo de juego: {$a}';
 $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra.
 Cuanto más grande es, menos peticiones de actualización deben hacerse, pero más tiempo pasa en informar de un posible cambio.
 Debe ser mayor a 0 segundos, sino se fijará el tiempo por defecto.';
+$string['defaultplayerstyle'] = 'Estilo por defecto de la pantalla de juego.';
+$string['availableplayerstyles'] = 'Estilos de la pantalla de juego disponibles.';
+$string['playerstyle'] = 'Estilo de la pantalla de juego.';
+$string['playerstyle_help'] = 'Hay diversos estilos de la pantalla de juego que los profesores pueden elegir.';
+$string['playerclassic'] = 'Classic';
+$string['playerfancy'] = 'Fanzy';
+$string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
 $string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.
 <p>Para poder usar el GPS para localizar este dispositivo durante la Caza del Tesoro, se debe acceder al servidor mediante
@@ -309,8 +318,9 @@ $string['search'] = 'Buscar';
 $string['searching'] = 'Buscando';
 $string['searchlocation'] = 'Buscar localización';
 $string['send'] = 'Enviar';
-$string['sendlotacioncontent'] = 'Esta acción no se puede deshacer.';
-$string['sendlotaciontitle'] = '¿Estás seguro de que deseas enviar esta ubicación?';
+$string['sendlocationcontent'] = 'Esta acción no se puede deshacer.';
+$string['sendlocationtitle'] = '¿Estás seguro de que deseas enviar esta ubicación?';
+$string['showclue'] = 'Mostrar pista';
 $string['stage'] = 'Etapa';
 $string['stageclue'] = 'Pista para localizar la siguiente etapa';
 $string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar

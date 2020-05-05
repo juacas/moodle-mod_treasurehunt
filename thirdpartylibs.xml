@@ -60,7 +60,7 @@
 		<!-- Pathable	https://github.com/pathable/truncate -->
 	</library>
 	<library>
-		<location>js/instascan/instascan.js</location>
+		<location>amd/src/instascan.js</location>
 		<name>INSTASCAN</name>
 		<version>1.0.0</version>
 		<license>MIT</license>

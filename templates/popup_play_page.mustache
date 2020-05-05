@@ -1,0 +1,67 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_treasurehunt/popup_play_page
+
+    popup_play_page template.
+
+    The purpose of this template is to render a pix_icon.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * attributes Array of name / value pairs.
+
+    Example context (json):
+    {
+        "attributes": [
+            { "name": "src", "value": "http://moodle.com/wp-content/themes/moodle/images/logo-hat2.png" },
+            { "name": "class", "value": "iconsmall" }
+        ]
+    }
+
+}}
+
+
+{{!Popup}}
+<div class="play-modal" data-animation="slideInOutTop" id="{{$popupid}}{{/popupid}}">
+    <!-- modal mask -->
+    <div class="modal-mask"></div>
+
+    <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+        {{$popupheading}}
+            <span class="title">{{$popuptitle}}{{/popuptitle}}</span>
+        {{/popupheading}}
+        </nav>
+
+        <div class="play-modal-content">
+            {{$popupcontent}}{{/popupcontent}}
+        </div>
+
+        {{$popupfooter}}
+            <div class="play-modal-footer">
+                {{$popupfootercontent}}{{/popupfootercontent}}
+            </div>
+        {{/popupfooter}}
+    </div>
+</div>

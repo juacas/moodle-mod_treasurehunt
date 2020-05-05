@@ -69,15 +69,224 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
      * Defer to template.
      *
      * @param treasurehunt_play_page $page
-     *
+     * @global moodle_page $PAGE
      * @return string html for the page
      */
-    public function render_treasurehunt_play_page(treasurehunt_play_page $page)
+    public function render_treasurehunt_play_page_classic(treasurehunt_play_page_classic $renderablepage)
     {
-        $data = $page->export_for_template($this);
-        return parent::render_from_template('mod_treasurehunt/play_page', $data);
+        global $PAGE, $CFG;
+        $cm = $renderablepage->cm;
+        $treasurehunt = $renderablepage->treasurehunt;
+        // Moodle 3.8 uses now Babel to compile and compress the js files.
+        // This broke this page because it uses jquery2 and jquerymobile.
+        // The only workaround we found is to disable Babel cache for this only page.
+        $CFG->cachejs = false;
+        $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+        $PAGE->requires->js_call_amd(
+            'mod_treasurehunt/play',
+            'playtreasurehunt',
+            array(
+                $cm->id, $cm->instance,
+                intval($treasurehunt->playwithoutmoving),
+                intval($treasurehunt->groupmode),
+                $renderablepage->lastattempttimestamp,
+                $renderablepage->lastroadtimestamp,
+                $renderablepage->gameupdatetime,
+                $treasurehunt->tracking,
+                $renderablepage->user,
+                $renderablepage->custommapping
+            )
+        );
+        // Adds support for QR scan.
+        treasurehunt_qr_support($PAGE, 'setup', []);
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+        $PAGE->requires->css('/mod/treasurehunt/css/playerclassic/introjs.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerclassic/jquerymobile.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerclassic/treasure.css');
+        $PAGE->set_pagelayout('embedded');
+
+        /*
+ * Other things you may want to set - remove if not needed.
+ * $PAGE->set_cacheable(false);
+ * $PAGE->set_focuscontrol('some-html-id');
+ * $PAGE->add_body_class('treasurehunt-'.$somevar);
+ */
+        // Output starts here.
+        $pageheader = $this->header();
+        // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
+        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+
+        $data = $renderablepage->export_for_template($this);
+        $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_classic', $data);
+        // Finish the page.
+        $pagefooter = $this->footer();
+
+        // JPC: Generate a global variable with strings. Moodle 3.8 broke compatibility of core/str with jquery 2.1.4.
+        $terms = [
+            "stageovercome", "failedlocation", "stage", "stagename",
+            "stageclue", "question", "noanswerselected", "timeexceeded",
+            "searching", "continue", "noattempts", "aerialview", "roadview",
+            "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
+            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+        ];
+        $strings = [];
+        foreach ($terms as $term) {
+            $strings[$term] = get_string($term, 'treasurehunt');
+        }
+        $i18n = json_encode($strings);
+        $i18nfragment  =  <<<I18N
+<!-- Internationalization strings for the player -->
+<script type="text/javascript">
+i18nplay = $i18n;
+</script>
+I18N;
+
+        // Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
+        $disable = [
+            'core/notification',
+            'block_navigation/navblock',
+            'block_settings/settingsblock',
+            'core/log',
+            'core/page_global',
+        ];
+        foreach ($disable as $module) {
+            $pagefooter = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefooter);
+        }
+        return $pageheader . $pagerendered . $i18nfragment . $pagefooter;
+    }
+    /**
+     * Defer to template.
+     *
+     * @param treasurehunt_play_page $page
+     * @global moodle_page $PAGE
+     * @return string html for the page
+     */
+    public function render_treasurehunt_play_page_fancy(treasurehunt_play_page_fancy $renderablepage)
+    {
+        global $PAGE, $CFG;
+        $cm = $renderablepage->cm;
+        $treasurehunt = $renderablepage->treasurehunt;
+        // Moodle 3.8 uses now Babel to compile and compress the js files.
+        // This broke this page because it uses jquery2 and jquerymobile.
+        // The only workaround we found is to disable Babel cache for this only page.
+        $CFG->cachejs = false;
+        $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+        $PAGE->requires->js_call_amd(
+            'mod_treasurehunt/play_fancy',
+            'playtreasurehunt',
+            array(
+                $cm->id, $cm->instance,
+                intval($treasurehunt->playwithoutmoving),
+                intval($treasurehunt->groupmode),
+                $renderablepage->lastattempttimestamp,
+                $renderablepage->lastroadtimestamp,
+                $renderablepage->gameupdatetime,
+                $treasurehunt->tracking,
+                $renderablepage->user,
+                $renderablepage->custommapping
+            )
+        );
+        // Adds support for QR scan.
+        treasurehunt_qr_support($PAGE, 'setup', []);
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/introjs.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/jquerymobile.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/treasure.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/styles.css');
+        $PAGE->set_pagelayout('embedded');
+
+        /*
+ * Other things you may want to set - remove if not needed.
+ * $PAGE->set_cacheable(false);
+ * $PAGE->set_focuscontrol('some-html-id');
+ * $PAGE->add_body_class('treasurehunt-'.$somevar);
+ */
+        // Output starts here.
+        $pageheader = $this->header();
+        // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
+        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+
+        $data = $renderablepage->export_for_template($this);
+        $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_fancy', $data);
+        // Finish the page.
+        $pagefooter = $this->footer();
+
+        // JPC: Generate a global variable with strings. Moodle 3.8 broke compatibility of core/str with jquery 2.1.4.
+        $terms = [
+            "stageovercome", "failedlocation", "stage", "stagename",
+            "stageclue", "question", "noanswerselected", "timeexceeded",
+            "searching", "continue", "noattempts", "aerialview", "roadview",
+            "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
+            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+        ];
+        $strings = [];
+        foreach ($terms as $term) {
+            $strings[$term] = get_string($term, 'treasurehunt');
+        }
+        $i18n = json_encode($strings);
+        $i18nfragment  =  <<<I18N
+<!-- Internationalization strings for the player -->
+<script type="text/javascript">
+i18nplay = $i18n;
+</script>
+I18N;
+
+        // Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
+        $disable = [
+            'core/notification',
+            'block_navigation/navblock',
+            'block_settings/settingsblock',
+            'core/log',
+            'core/page_global',
+        ];
+        foreach ($disable as $module) {
+            $pagefooter = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefooter);
+        }
+        return $pageheader . $pagerendered . $i18nfragment . $pagefooter;
     }
 
+    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage) {
+        global $PAGE, $CFG;
+        $cm = $renderablepage->cm;
+        $treasurehunt = $renderablepage->treasurehunt;
+        $PAGE->requires->js_call_amd(
+            'mod_treasurehunt/play_bootstrap',
+            'playtreasurehunt',
+            array(
+                $cm->id, $cm->instance,
+                intval($treasurehunt->playwithoutmoving),
+                intval($treasurehunt->groupmode),
+                $renderablepage->lastattempttimestamp,
+                $renderablepage->lastroadtimestamp,
+                $renderablepage->gameupdatetime,
+                $treasurehunt->tracking,
+                $renderablepage->user,
+                $renderablepage->custommapping
+            )
+        );
+        // Adds support for QR scan.
+        treasurehunt_qr_support($PAGE, 'setup', []);
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
+        // $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/treasure.css');
+        // $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/styles.css');
+        $PAGE->set_pagelayout('embedded');
+
+        // Output starts here.
+        $pageheader = $this->header();
+        // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
+        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+
+        $data = $renderablepage->export_for_template($this);
+        $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_bootstrap', $data);
+        // Finish the page.
+        $pagefooter = $this->footer();
+        return $pageheader . $pagerendered . $pagefooter;
+    }
     /**
      * Render a table containing the current status of the user attempts.
      *
@@ -88,6 +297,17 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
     {
         // Create a table for the data.
         $o = '';
+        // Si no ha finalizado pongo el botón de jugar.
+        $urlparams = array('id' => $historical->coursemoduleid);
+        if ($historical->outoftime || $historical->roadfinished) {
+            $string = get_string('reviewofplay', 'treasurehunt');
+        } else {
+            $string = get_string('play', 'treasurehunt');
+        }
+        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
+            $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
+        }
+
         $o .= $this->output->container_start('attempthistory');
         $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
@@ -121,16 +341,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'), 'notifymessage');
             }
         }
-        // Si no ha finalizado pongo el botón de jugar.
-        $urlparams = array('id' => $historical->coursemoduleid);
-        if ($historical->outoftime || $historical->roadfinished) {
-            $string = get_string('reviewofplay', 'treasurehunt');
-        } else {
-            $string = get_string('play', 'treasurehunt');
-        }
-        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
-            $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
-        }
+        
         $o .= $this->output->box_end();
 
         // Close the container and insert a spacer.
@@ -157,21 +368,21 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                 $s .= $this->output->notification(get_string(
                     'warnusersgrouping',
                     'treasurehunt',
-                    implode(", ", $progress->duplicategroupsingroupings)
+                    implode(', ', $progress->duplicategroupsingroupings)
                 ));
             }
             if (count($progress->duplicateusersingroups) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string(
                     'warnusersgroup',
                     'treasurehunt',
-                    implode(", ", $progress->duplicateusersingroups)
+                    implode(', ', $progress->duplicateusersingroups)
                 ));
             }
             if (count($progress->unassignedusers) && $progress->managepermission) {
                 $s .= $this->output->notification(get_string(
                     'warnusersoutside',
                     'treasurehunt',
-                    implode(", ", $progress->unassignedusers)
+                    implode(', ', $progress->unassignedusers)
                 ));
             }
 
@@ -306,7 +517,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
             $o .= $this->output->container_start(null, 'QRStatusDiv');
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
             $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
-            $o .= '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
             $o .= '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
             <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
             </div>

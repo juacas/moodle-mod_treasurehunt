@@ -64,6 +64,11 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $this->standard_intro_elements();
         $mform->addElement('advcheckbox', 'playwithoutmoving', get_string('playwithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playwithoutmoving', 'playwithoutmoving', 'treasurehunt');
+        // Select player interface.
+        $mform->addElement('select', 'playerstyle', get_string('playerstyle', 'treasurehunt'), treasurehunt_get_playerstyles());
+        $mform->addHelpButton('playerstyle', 'playerstyle', 'treasurehunt');
+        $mform->setDefault('playerstyle', $treasurehuntconfig->defaultplayerstyle);
+
         // Track users.
         $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
         $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
