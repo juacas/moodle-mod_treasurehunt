@@ -40,7 +40,7 @@ if ($ADMIN->fulltree) {
                 get_string('defaultplayerstyle', 'treasurehunt'),
                 get_string('playerstyle_help', 'treasurehunt'),
                 TREASUREHUNT_PLAYERCLASSIC,
-                treasurehunt_get_playerstyles()
+                treasurehunt_get_installedplayerstyles()
         ));
         // Maximum grade.
         $settings->add(new admin_setting_configtext(
