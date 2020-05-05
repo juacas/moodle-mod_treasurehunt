@@ -259,6 +259,7 @@ $string['multipleteamsplay'] = 'Es miembro de más de un grupo, por lo que no pu
 $string['mustanswerquestion'] = 'Debes responder correctamente a la pregunta antes de continuar';
 $string['mustcompleteactivity'] = 'Debes superar la actividad a completar antes de continuar';
 $string['mustcompleteboth'] = 'Debes responder correctamente a la pregunta y superar la actividad a completar antes de continuar';
+$string['nextcamera'] = 'Otra cámara';
 $string['noanswerselected'] = 'Debes seleccionar una respuesta';
 $string['noattempts'] = 'No has realizado ningún intento';
 $string['noexsitsstage'] = 'No existe la etapa número {$a} en la base de datos. Recargue la página';
@@ -419,13 +420,15 @@ $string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides gu
 $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
 $string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa. Después podrás añadir y editar las geometrías usando los botones del panel superior.';
 $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">¡Bienvenido a tu Caza del Tesoro!</span><br>Este mapa y las pistas serán tu guía.';
+$string['bigbutton_play_tour'] = 'Este es tu mejor amigo.<br>Un clic y te muestra <b>desafíos</b> o valiosas <b>pistas</b>.';
+$string['autolocate_tour'] = 'Muestra tu <b>lugar actual </b>.<br>( permite) usar " localización" cuando se te pida)';
+$string['playerhelp_tour'] = 'Esta gira puede ser revisada cuando quiera.';
+$string['validatelocation_tour'] = '¿Seguro de la ubicación de una etapa? Envía tu posición y descubre si estás en lo cierto..';
+$string['lastsuccessfulstage_tour'] = 'En este panel puedes encontrar tu última etapa superada. También puede ser la etapa superada de tu grupo.';
+$string['mapplay_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="pix/success_mark.png" width="28"/><br>Los fallidos: <img src="pix/failure_mark.png" width="28"/>';
+$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">¡Disfruta de tu Caza del Tesoro</span><br>con tus compañeros!';
 
-$string['autolocate_tour'] = 'Durante el juego, puedes situarte en el mapa mediante el GPS de tu dispositivo pulsando en este botón. Si tu dispositivo pide permiso para localizarte, responde que sí.';
-$string['validatelocation_tour'] = 'Cuando estés seguro de la localización de una etapa del juego debes enviar tu posición para comprobar si has acertado. Pulsa este botón una vez que el mapa esté centrado en tu posición.';
-$string['lastsuccessfulstage_tour'] = 'En este panel encontrarás la última pista descubierta. Puede ser la que tú has descubierto o la de tus compañeros de equipo (si juegas por equipos).';
-$string['mapplay_tour'] = 'En este mapa verás todos los intentos que habéis hecho durante este juego geolocalizado. Las pistas acertadas se marcan con <img src="pix/success_mark.png" width="28"/> y las falladas con <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = '¡Disfruta de la Caza del Tesoro con tus compañeros de búsqueda!';
-$string['welcome_play_tour'] = 'Bienvenido a la pantalla de juego de la Caza del Tesoro. Este es el interfaz para buscar, investigar y conseguir tu tesoro.';
 $string['nextstep'] = 'Sig.';
 $string['prevstep'] = 'Ant.';
 $string['skiptutorial'] = 'Salir';

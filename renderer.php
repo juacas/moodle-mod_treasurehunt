@@ -83,7 +83,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
         $CFG->cachejs = false;
         $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
         $PAGE->requires->js_call_amd(
-            'mod_treasurehunt/play',
+            'mod_treasurehunt/play_classic',
             'playtreasurehunt',
             array(
                 $cm->id, $cm->instance,
@@ -99,7 +99,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
         );
         // Adds support for QR scan.
         treasurehunt_qr_support($PAGE, 'setup', []);
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_classic', 'playpage');
         $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $PAGE->requires->css('/mod/treasurehunt/css/playerclassic/introjs.css');
         $PAGE->requires->css('/mod/treasurehunt/css/playerclassic/jquerymobile.css');
@@ -189,7 +189,7 @@ I18N;
         );
         // Adds support for QR scan.
         treasurehunt_qr_support($PAGE, 'setup', []);
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_fancy', 'playpage');
         $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/introjs.css');
         $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/jquerymobile.css');
@@ -268,12 +268,11 @@ I18N;
         );
         // Adds support for QR scan.
         treasurehunt_qr_support($PAGE, 'setup', []);
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'playpage');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_bootstrap', 'playpage');
         $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
         $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
-        // $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/treasure.css');
-        // $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/styles.css');
+        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
         $PAGE->set_pagelayout('embedded');
 
         // Output starts here.

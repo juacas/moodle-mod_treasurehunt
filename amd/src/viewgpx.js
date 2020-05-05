@@ -319,8 +319,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }, refreshTracksInterval * 1000);
                     vector.on('change:visible', function() {
                     	if (this.getVisible()) {
-                    		var extent = this.getSource().getExtent();
-                    		flyTo(map, null, extent);
+                            var extent = this.getSource().getExtent();
+                            if ( extent = get_valid_extent(extent) !== null) {
+                                flyTo(map, null, extent);
+                            }
                     	}
                     });
                     gpxsource.on('change', function () {
@@ -328,6 +330,7 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     		return;
                     	} 
                         var extent = gpxsource.getExtent();
+
                         if (max_extent === null) {
                             max_extent = extent;
                         } else {
@@ -343,6 +346,15 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                         layerSwitcher.renderPanel();
                     }
                 });
+            }
+            function get_valid_extent(extent) {
+                if (extent[0] === Infinity ||
+                    extent[1] === Infinity ||
+                    extent[2] === Infinity ||
+                    extent[3] === Infinity ) {
+                    return null;
+                }
+                return extent;
             }
             function trackStyleFunction(feature, icon, selected) {
                 var styles = [

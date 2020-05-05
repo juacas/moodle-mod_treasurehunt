@@ -34,7 +34,6 @@ define([
   // "mod_treasurehunt/jquery.mobile-config",
   // "mod_treasurehunt/jquerymobile"
 ], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
-  // console.log("loading play.js with jquery " + $().jquery);
   let init = {
     playtreasurehunt: function (
       cmid,
@@ -233,7 +232,7 @@ define([
 
     let parchmenturl = url.imageUrl("success_mark", "treasurehunt");
     let failureurl = url.imageUrl("failure_mark", "treasurehunt");
-    let markerurl = url.imageUrl("my_location", "treasurehunt");
+    let markerurl = url.imageUrl("bootstrap/my_location_3", "treasurehunt");
     let lastsuccessfulstage = {};
     let interval;
     let infomsgs = [];
@@ -464,8 +463,7 @@ define([
 
       let tracklayer = tracklayergroup.getLayers().item(0);
       let htmltitle = tracklayer.get("title"); // Has a picture and a link.
-      let plaintitle = htmltitle.substring(htmltitle.indexOf("</a>") + 4);
-      tracklayer.set("name", plaintitle);
+      tracklayer.set("name", htmltitle);
       tracklayer.setVisible(false);
       add_layer_to_list(tracklayer);
     }
@@ -835,10 +833,10 @@ define([
       }).click(() => {
         layer.setVisible(!layer.getVisible());
       });
+      let name = jQuery.parseHTML(layer.get("name"));
       let linkContent = $("<div>", {
-        text: layer.get("name"),
         class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
-      }).append($("<i class='fa fa-check-circle'>"));
+      }).append(name, $("<i class='fa fa-check-circle'>"));
       link.append(linkContent);
       layer.on("change:visible", () => {
         $(linkContent).toggleClass("unchecked");
@@ -1083,9 +1081,10 @@ define([
     });
 
     $("#nextcamera").on("click", () => {
-      if (webqr.detectedCameras !== null) {
+      let detectedCameras = webqr.getDetectedCameras();
+      if (detectedCameras !== null) {
         const nextcam = webqr.getnextwebCam();
-        toast("Give access to:" + webqr.detectedCameras[nextcam].name);
+        toast("Give access to:" + detectedCameras[nextcam].name);
       }
       webqr.setnextwebcam(qrReport);
     });
