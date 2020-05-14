@@ -26,11 +26,11 @@ define(
 	['jquery', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
 		'mod_treasurehunt/osm-geocoder',
 		'mod_treasurehunt/ol3-layerswitcher',  'core/str',
-		//'mod_treasurehunt/viewgpx',
+		'mod_treasurehunt/viewgpx',
 	],
 	function ($, notification, ol, ajax, OSMGeocoder,
 		olLayerSwitcher, str,
-		// viewgpx
+		viewgpx
 		) {
 
 		function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
