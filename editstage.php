@@ -85,7 +85,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
-        $select = "id = ?";
+        $select = 'id = ?';
         $params = array($roadid);
         // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
@@ -122,7 +122,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 
     if ($mform->is_reloaded()) {
         // Ignore this event. Some data may be changes.
-        echo " ";
+        echo ' ';
     } else if ($mform->is_cancelled()) {
         // You need this section if you have a cancel button on your form
         // here you tell php what to do if your user presses cancel
@@ -236,8 +236,7 @@ $PAGE->set_pagelayout('standard');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($title);
 // Support for QR scan.
-treasurehunt_qr_support($PAGE, 'enableForm');
-echo '<script type="text/javascript" src="js/instascan/instascan.min.js"></script>';
+treasurehunt_qr_support($PAGE, 'enableEditForm');
 // End QR.
 $mform->display();
 echo $OUTPUT->footer();

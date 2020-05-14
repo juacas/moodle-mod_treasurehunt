@@ -71,6 +71,7 @@ $string['correctanswer'] = 'Correct answer.';
 $string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
 $string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has been deleted.';
 $string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
+$string['clue'] = 'Clue';
 $string['customlayername'] = 'Layer title';
 $string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
 $string['custommapimagefile'] = 'Custom image for map';
@@ -134,11 +135,19 @@ $string['eventstageupdated'] = 'Stage updated';
 $string['exit'] = 'Back to Course';
 $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
+$string['findplace'] = 'Find a place';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
 The larger, less update requests should be made, but more time passes to report a possible change.
 It must be greater than 0 seconds, but the time will be set by default.';
+$string['defaultplayerstyle'] = 'Default game screen style';
+$string['playerstyle'] = 'Game screen style';
+$string['availableplayerstyles'] = 'Game screen styles available.';
+$string['playerstyle_help'] = 'There are several styles of the game screen that teachers can choose';
+$string['playerclassic'] = 'Classic';
+$string['playerfancy'] = 'Fanzy';
+$string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed.
 <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.
@@ -250,6 +259,7 @@ $string['multipleteamsplay'] = 'Member of more than one group, so unable to make
 $string['mustanswerquestion'] = 'You must correctly answer the question before continuing';
 $string['mustcompleteactivity'] = 'You must overcome the activity to complete before continuing';
 $string['mustcompleteboth'] = 'You must answer the question correctly and overcome the activity to complete before continuing';
+$string['nextcamera'] = 'Change camera';
 $string['noanswerselected'] = 'You must select an answer';
 $string['noattempts'] = 'You have not made any attempt';
 $string['noexsitsstage'] = 'There is no stage number {$a} in the database. Reload the page';
@@ -309,8 +319,9 @@ $string['search'] = 'Search';
 $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
 $string['send'] = 'Send';
-$string['sendlotacioncontent'] = 'This action can not be undone.';
-$string['sendlotaciontitle'] = 'Are you sure you want to send this location?';
+$string['sendlocationcontent'] = 'This action can not be undone.';
+$string['sendlocationtitle'] = 'Are you sure you want to send this location?';
+$string['showclue'] = 'Show clue';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
 $string['stageclue_help'] = 'Here you should describe the clue to reach the next location.
@@ -407,13 +418,15 @@ $string['save_tour'] = 'After drawing your locations, don\'t forget to save your
 $string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
-
-$string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
-$string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
+$string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
+$string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
+$string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
+$string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/success_mark.png" width="28"/> and failed stages with <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = 'Enjoy pursuing the treasure with your mates!';
-$string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
+$string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
+$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+
 $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';

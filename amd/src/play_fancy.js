@@ -306,6 +306,8 @@ define(['jquery',
 		    	}
 			}
 		    var layergroup = new ol.layer.Group({layers: layersbase});
+			// Create placement for a popup over user marker.
+			var overlay = viewgpx.createCoordsOverlay('#mapplay', 'css/playerfancy/ol-popup.css');
 		    // All layers hidden except last one.
 		    var toplayer = null;
 		    layergroup.getLayers().forEach(function (layer) {
@@ -318,7 +320,7 @@ define(['jquery',
 		        center: [0, 0],
 		        zoom: 2,
 		        minZoom: 2
-		    });
+			});
 		    var select = new ol.interaction.Select({
 		        layers: [attemptslayer],
 		        style: select_style_function,
@@ -358,6 +360,7 @@ define(['jquery',
 			});
 		    var map = new ol.Map({
 		        layers: layers,
+				overlays: [overlay],
 				controls: [zoom, attribution], //ol.control.defaults({rotate: false, attribution: false}),
 		        target: 'mapplay',
 		        view: view,
@@ -382,9 +385,9 @@ define(['jquery',
 		        tracklayergroup.set("name", tracklayergroup.get("title"));
 		
 		        var tracklayer = tracklayergroup.getLayers().item(0);
-		        var htmltitle = tracklayer.get("title"); // Has a picture and a link.
-		        var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);
-		        tracklayer.set("name", plaintitle);
+		        var htmltitle = tracklayer.get("title"); 
+		        //var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);// Had a picture and a link.
+		        tracklayer.set("name", htmltitle);
 		        tracklayer.setVisible(false);
 		        add_layer_to_list(tracklayer);
 		    }
@@ -466,9 +469,11 @@ define(['jquery',
 		            });
 		        }
 		    }
+			
 		    /**
 		     * Updates the model of the game.
 		     * Notifies a new location for validation or a new answer to a question.
+			 * 
 		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
@@ -476,7 +481,7 @@ define(['jquery',
 		     * @returns {undefined}
 		     */
 		    function renew_source(location, initialize, selectedanswerid, qrtext) {
-		        // var position holds the potition to be evaluated. undef if no evaluation requested
+		        // var position holds the position to be evaluated. undef if no evaluation requested
 		        var position;
 		        var currentposition;
 		        var coordinates;
@@ -500,7 +505,9 @@ define(['jquery',
 		        if (location) {
 		            position = currentposition;
 		            $.mobile.loading("show");
-				}				
+				}
+
+				// Get the progress of the user: road is finished, 
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -520,7 +527,8 @@ define(['jquery',
 		        geojson[0].done(function (response) {
 		            var body = '';
 		            qoaremoved = response.qoaremoved;
-		            roadfinished = response.roadfinished;
+					roadfinished = response.roadfinished;
+					// Is the activity still available or are we after the cut-off date (if set)?
 					available = response.available;
 					$.mobile.loading("hide");
 		            // If I have sent a location or an answer I print out whether it is correct or not.
@@ -528,7 +536,8 @@ define(['jquery',
 		                if (response.status !== null && available) {
 		                    console.log(response.status.msg);
 		                }
-		            }
+					}
+					// Show QR button?
 		            if (response.qrexpected) {
 		                $('#validateqr').show();
 		            } else {
@@ -568,22 +577,29 @@ define(['jquery',
 		                            'featureProjection': "EPSG:3857"
 		                        }));
 		                    }
-		                }
+						}
+						
+						// Display the buttons corresponding to the situation:
+
 		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
-		                        changesinquestionstage = true;
+								
+								// There is a question => disable location validation button and
+								// set the big button as Question.
+								changesinquestionstage = true;
 								$('#validatelocation').show().addClass('ui-state-disabled');
-		                        $('#question_button').show();
+								set_big_button_as("question");
 		                    } else if (!lastsuccessfulstage.activitysolved) {
+								// Previous activity not solved => disable location validation button
 								$('#validatelocation').show().addClass('ui-state-disabled');
-		                        $('#question_button').show();
+								set_big_button_as("question");
 		                    } else {
 								$('#validatelocation').show().removeClass('ui-state-disabled');
-		                        $('#question_button').hide();
+								set_big_button_as("clue");
 		                    }
 		                }
 		                // Check if it is the first geometry or it is being initialized and center the map.
@@ -674,10 +690,10 @@ define(['jquery',
 		            	briefing = lastsuccessfulstage.clue;
 		            }
 		            
-		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
-		            $("#lastsuccesfulstagepos2").text(lastsuccessfulstage.position +
+		            $('[id=lastsuccessfulstagename2]').text(lastsuccessfulstage.name);
+		            $('[id=lastsuccesfulstagepos2').text(lastsuccessfulstage.position +
 		                    " / " + lastsuccessfulstage.totalnumber);
-		            $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
+		            $("[id=lastsuccessfulstageclue2]").html(lastsuccessfulstage.clue);
 
 		            if (lastsuccessfulstage.question !== '') {
 		                $("#lastsuccessfulstageclue").append("<a href='#questionpage' " +
@@ -685,15 +701,23 @@ define(['jquery',
 		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
 		                        + strings['question']
 		                        + "</a>");
-		                $("#lastsuccessfulstageclue2").append("<a href='#questionpage' " +
+		                $("[id=lastsuccessfulstageclue2]").append("<a href='#questionpage' " +
 		                        "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
 		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
 		                        + strings['question']
-		                        + "</a>");
-		            }
-		            $("#collapsibleset").collapsibleset("refresh");
-		            $("#infopanel").panel("open");
-		            $("#lastsuccessfulstage").collapsible("expand");
+								+ "</a>");
+						$('#sendAnswer').show();
+		            } else {
+						$('#questionform').html('');
+						$('#sendAnswer').hide();
+					}
+					
+			// The 1st time, it is called after the map is loaded
+					
+					//$("#collapsibleset").collapsibleset("refresh");
+					//open_next_activity_panel();
+					//$("#infopanel").panel("open");
+		            //$("#lastsuccessfulstage").collapsible("expand");
 		            changesinlastsuccessfulstage = false;
 		        }
 		    }
@@ -747,22 +771,22 @@ define(['jquery',
 		        }
 		    }
 		    function add_layer_to_list(layer) {
-		        var item = $('<li>', {
-		            "data-icon": "check",
-		            "class": layer.getVisible() ? "checked" : "unchecked"
-		        })
-		                .append($('<a />', {
-		                    text: layer.get("name"),
-		                    href: "#mappage"
-		                })
-		                        .click(function () {
-		                            layer.setVisible(!layer.getVisible());
-		                        })
-		                        );
-		        layer.on('change:visible', function () {
-		            $(item).toggleClass('checked unchecked');
-		        });
-		        item.insertAfter('#baseLayer');
+                var name = jQuery.parseHTML(layer.get("name"));
+                var item = $('<li>', {
+                    "data-icon": "check",
+                    "class": layer.getVisible() ? "checked" : "unchecked"
+                })
+                    .append($('<a />', {
+                        href: "#mappage"
+                    })
+                        .click(function () {
+                            layer.setVisible(!layer.getVisible());
+                        }).append(name)
+                    );
+                layer.on('change:visible', function () {
+                    $(item).toggleClass('checked unchecked');
+                });
+                item.insertAfter('#baseLayer');
 		    }
 
 		    function add_layergroup_to_list(layergroup) {
@@ -803,8 +827,11 @@ define(['jquery',
 		            maximumAge: 0,
 		            timeout: 10000
 		        }
-		    }));
-		    /*-------------------------------Events-----------------------------------*/
+			}));
+			
+
+			/*-------------------------------Events-----------------------------------*/
+			
 		    geolocation.on('change:position', function () {
 		        var coordinates = this.getPosition();
 		        positionFeature.setGeometry(coordinates ? new ol.geom.Point(coordinates) : null);
@@ -838,11 +865,13 @@ define(['jquery',
 		    });
 		    geolocation.setTracking(tracking); // Start position tracking.
 		
+			// 
 		    select.on("select", function (features) {
 		        if (features.selected.length === 1) {
 		            if (lastsuccessfulstage.position === features.selected[0].get('stageposition')
 		                    && features.selected[0].get('geometrysolved') && !roadfinished && available) {
-		                $("#infopanel").panel("open");
+						//$("#infopanel").panel("open");
+						open_next_activity_panel();
 		                $("#lastsuccessfulstage").collapsible("expand");
 		            } else {
 		                var title, stagename = features.selected[0].get('name'),
@@ -881,6 +910,10 @@ define(['jquery',
 		            var coordinates = map.getEventCoordinate(evt.originalEvent);
 		            markerFeature.setGeometry(coordinates ?
 		                    new ol.geom.Point(coordinates) : null);
+					// Shorcut to Google Street View.
+					if (custommapconfig === null || custommapconfig.geographic) {
+						overlay.setPosition(evt.coordinate);
+					}
 		        }
 		    });
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {
@@ -979,7 +1012,8 @@ define(['jquery',
 		            }
 		        } else if (pageId === 'questionpage') {
 		            if (event.type === 'pagecontainershow') {
-						if (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') {
+						if ( (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') 
+							&& lastsuccessfulstage.activitysolved !== false ) {
 		                    $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                } else {
 		                    set_question();
@@ -992,8 +1026,10 @@ define(['jquery',
 					var style = document.querySelector('#questionpage').style;
 					style.setProperty('padding-top',style.paddingTop, 'important');
 					}, 200);	
-		    });
-		    //Buttons events.
+			});
+			// -------------
+		    // Button events
+		    // -------------
 		    if (geographictools) {
 			    $('#autolocate').on('click', function () {
 			        if (geolocation.get("user_denied")) {
@@ -1039,14 +1075,17 @@ define(['jquery',
 		        }
 		        if (lastsuccessfulstage.question !== '') {
 		            event.preventDefault();
-		            toast(strings['answerwarning']);
-		            $("#infopanel").panel("open");
+					toast(strings['answerwarning']);
+					// TODO Show the clue or Question panel
+					open_next_activity_panel();
+		            //$("#infopanel").panel("open");
 		            return;
 		        }
 		        if (!lastsuccessfulstage.activitysolved) {
 		            event.preventDefault();
-		            toast(strings['activitytoendwarning']);
-		            $("#infopanel").panel("open");
+					toast(strings['activitytoendwarning']);
+					open_next_activity_panel();
+		            //$("#infopanel").panel("open");
 		            return;
 		        }
 		    });
@@ -1090,12 +1129,13 @@ define(['jquery',
 		            }.bind(this)
 		        });
 		    }
-		    $("#nextcamera").on('click', function() {
-		    	if (detectedCameras !== null) {
-			    	var nextcam = getnextwebCam();
-			    	toast('Give access to:' + detectedCameras[nextcam].name);
-		    	}
-		    	setnextwebcam(qrReport);
+            $("#nextcamera").on('click', function() {
+                var detectedCameras = webqr.getDetectedCameras();
+                if (detectedCameras !== null) {
+                    var nextcam = webqr.getnextwebCam();
+                    toast('Give access to:' + detectedCameras[nextcam].name);
+                }
+                webqr.setnextwebcam(qrReport);
 		    });
 		    // Scan QR.
 		    function qrReaded(value) {
@@ -1135,7 +1175,11 @@ define(['jquery',
 		                        $(this).remove();
 		                    });
 		        }
-		    }
+			}
+			/** Open the Clue or Question panel */
+			function open_next_activity_panel() {
+				$("#bigbtn").click();
+			}
 		    function create_popup(type, title, body) {
 		        var header = $('<div data-role="header"><h2>' + title + '</h2></div>'),
 		                content = $('<div data-role="content" class="ui-content ui-overlay-b">' + body
@@ -1212,8 +1256,14 @@ define(['jquery',
 		        return '<div class="ui-bar ui-bar-a">' + title +
 		                '</div><div class="ui-body ui-body-a">' + body +
 		                '</div>';
-		    }
-		
+			}
+			function set_big_button_as(what) {
+				var btn = $("#bigbtn")[0];
+				btn.href = "#" + what + "page";
+				btnImg = $("img", btn)[0];
+				var url = btnImg.src.replace(/btn_(\w+)$/, "btn_" + what);
+				btnImg.src = url;
+			}
 		}
 	}
 );

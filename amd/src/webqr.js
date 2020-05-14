@@ -21,12 +21,13 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/notification', 'core/str'], function ($, notification, str) {
+define(['jquery', 'core/notification', 'core/str', 'mod_treasurehunt/instascan'], function ($, notification, str, Instascan) {
 	var camera = -1;
 	var detectedCameras = null;
 	var scanner = null;
 	// webQR functions.
 	var webqr = {
+		getDetectedCameras: () => detectedCameras,
 		setup: function () {
 		},
 		// Enable QR test procedure.
@@ -45,7 +46,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 						$('#QRStatusDiv').html(successString);
 					});
 				}.bind(this); 
-
+				$('#idbuttonnextcam').click(() => this.setnextwebcam(this.testFormReport.bind(this)));
 				this.loadQR(qr_callback, this.testFormReport.bind(this));
 			} else {
 				$('#QRStatusDiv').html(successString);
@@ -82,7 +83,8 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 					let nextcamera = this.getnextwebCam();
 					if (nextcamera != camera) {
 						if (info.cameras[nextcamera].name !== null) {
-							$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+							$('#idbuttonnextcam')
+								.text(nextcamera + ":" + info.cameras[nextcamera].name);
 						}
 						$('#idbuttonnextcam').show();
 					} else {
@@ -91,10 +93,11 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 				}
 			}
 		},
-		enableForm: function () {
+		enableEditForm: function () {
 			$('#id_generateQR').click(this.handleGenerateQR.bind(this));
 			$('#id_stopQR').click(this.handleStopQR.bind(this));
 			$('#id_scanQR').click( this.handleScanEditStage.bind(this));
+			$('#idbuttonnextcam').click(() => this.setnextwebcam(this.editFormReport.bind(this)));
 		},
 		handleGenerateQR: function () {
 			// unloadQR();
@@ -155,7 +158,9 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 					$('#QRvalue').text(camera + ":" + info.cameras[camera].name);
 					let nextcamera = (camera + 1) % info.cameras.length;
 					if (nextcamera != camera) {
-						$('#idbuttonnextcam').text(nextcamera + ":" + info.cameras[nextcamera].name);
+						
+						$('#idbuttonnextcam')
+							.text(nextcamera + ":" + info.cameras[nextcamera].name);
 						$('#idbuttonnextcam').show();
 					} else {
 						$('#idbuttonnextcam').hide();
@@ -222,7 +227,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 			if (camera != nextcamera) {
 				if (detectedCameras !== null) {
 					try {
-						selectCamera(detectedCameras, nextcamera, reportcallback);
+						this.selectCamera(detectedCameras, nextcamera, reportcallback);
 					} catch (e) {
 						console.error(e);
 						reportcallback(e.message);
@@ -237,54 +242,50 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
 				}
 			}
 		},
-		selectCamera: selectCamera
+		selectCamera: function (cameras, nextcamera, reportcallback) {
+					//	For testing camera switching use: cameras[1] = cameras[0];
+					if (cameras.length > 0) {
+				// Try to select back camera by name.
+				if (camera == -1 && cameras.length > 1) {
+					for (var i = 0; i < cameras.length; i++) {
+						if (cameras[i].name !== null
+							&& cameras[i].name.toLowerCase().indexOf('back') != -1) {
+							nextcamera = i;
+						}
+					}
+				}
+				camera = nextcamera;
+
+				scanner.start(cameras[camera]).then(function () {
+					let videopreview = $('#previewQRvideo');
+					let parent = videopreview.closest('div');
+					let maxwidth = parent.width();
+					let maxheight = parent.height();
+
+					let width = videopreview.width();
+					let height = videopreview.height();
+					if (width / height > maxwidth / maxheight) {
+						videopreview.width(maxwidth);
+					} else {
+						videopreview.height(maxheight);
+					}
+					videopreview.css('display', 'block');
+					reportcallback({ camera: camera, cameras: cameras });
+				}).catch(function (e) {
+					scanner.stop();
+					console.error(e);
+					reportcallback("Error activating camera: " + e.message);
+				});
+
+			} else {
+				console.error('No cameras found.');
+				reportcallback("No cameras found.");
+			}
+		}
 	}
 	return webqr;
 });
 
 
-/**
- * @param cameras
- * @returns
- */
-function selectCamera(cameras, nextcamera, reportcallback) {
-	//	For testing camera switching use: cameras[1] = cameras[0];
-	if (cameras.length > 0) {
-		// Try to select back camera by name.
-		if (camera == -1 && cameras.length > 1) {
-			for (var i = 0; i < cameras.length; i++) {
-				if (cameras[i].name !== null
-					&& cameras[i].name.toLowerCase().indexOf('back') != -1) {
-					nextcamera = i;
-				}
-			}
-		}
-		camera = nextcamera;
 
-		scanner.start(cameras[camera]).then(function () {
-			let videopreview = $('#previewQRvideo');
-			let parent = videopreview.closest('div');
-			let maxwidth = parent.width();
-			let maxheight = parent.height();
-
-			let width = videopreview.width();
-			let height = videopreview.height();
-			if (width / height > maxwidth / maxheight) {
-				videopreview.width(maxwidth);
-			} else {
-				videopreview.height(maxheight);
-			}
-			videopreview.css('display', 'block');
-			reportcallback({ camera: camera, cameras: cameras });
-		}).catch(function (e) {
-			scanner.stop();
-			console.error(e);
-			reportcallback("Error activating camera: " + e.message);
-		});
-
-	} else {
-		console.error('No cameras found.');
-		reportcallback("No cameras found.");
-	}
-}
 

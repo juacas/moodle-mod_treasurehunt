@@ -53,6 +53,9 @@ define('TREASUREHUNT_GRADEFROMABSOLUTETIME', '4');
  */
 define('TREASUREHUNT_LOCKTIME', 120);
 define('TREASUREHUNT_GAMEUPDATETIME', 20);
+define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
+define('TREASUREHUNT_PLAYERFANCY', 'fancy');
+define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
 /* * #@- */
 
 // Load classes needed for GeoJSON library.
@@ -1041,7 +1044,8 @@ function treasurehunt_get_activity_to_end_link($activitytoendid)
 
 /**
  * Checks if an instance is available.
- *
+ * A cutoff date can be set in the activity settings (see cutoffdate in install.xml).
+ * After this date stage submissions will no longer be accepted.
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @return stdClass The object availability parameters.
  */
@@ -2300,9 +2304,9 @@ function treasurehunt_view_info($treasurehunt, $courseid)
  * @param int $cmid The identifier of course module activity.
  * @param string $username The user name.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
- * @return string
+ * @return treasurehunt_user_attempt_history
  */
-function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
+function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
 {
     global $PAGE;
     $roadfinished = treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
@@ -2312,26 +2316,25 @@ function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid
     } else {
         $outoftime = false;
     }
-    $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
-    return $output->render($renderable);
+    return $renderable;
 }
 
-/**
- * Gets the view in HTML format of game interface.
- *
- * @param stdClass $treasurehunt The treasurehunt instance.
- * @param int $cmid The identifier of course module activity.
- * @return string
- */
-function treasurehunt_view_play_page($treasurehunt, $cmid)
-{
-    global $PAGE;
-    $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
-    $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_play_page($treasurehunt, $cmid);
-    return $output->render($renderable);
-}
+// /**
+//  * Gets the view in HTML format of game interface.
+//  *
+//  * @param stdClass $treasurehunt The treasurehunt instance.
+//  * @param int $cmid The identifier of course module activity.
+//  * @return string
+//  */
+// function treasurehunt_view_play_page($treasurehunt, $cmid)
+// {
+//     global $PAGE;
+//     $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
+//     $output = $PAGE->get_renderer('mod_treasurehunt');
+//     $renderable = new treasurehunt_play_page($treasurehunt, $cmid);
+//     return $output->render($renderable);
+// }
 
 /**
  * Gets the table with the progress of users or groups with assigned roads,
@@ -2858,4 +2861,27 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0)
     $stats = treasurehunt_calculate_stats($treasurehunt, $enrolledusers);
     $grades = treasurehunt_calculate_grades($treasurehunt, $stats, $students);
     return $grades;
+}
+/**
+ * List of available player interfaces.
+ */
+function treasurehunt_get_installedplayerstyles()
+{
+    return  [
+        TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),
+        TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),
+        TREASUREHUNT_PLAYERBOOTSTRAP =>  get_string('playerbootstrap', 'treasurehunt')
+    ];
+}
+/**
+ * List of enabled player interfaces
+ */
+function treasurehunt_get_playerstyles() {
+    $enabled = explode(',', get_config('mod_treasurehunt', 'availableplayerstyles'));
+    $installed = treasurehunt_get_installedplayerstyles();
+    $result = [];
+    foreach($enabled as $key => $val) {
+        $result[$val] = $installed[$val];
+    }
+    return $result;
 }

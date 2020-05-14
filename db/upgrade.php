@@ -119,5 +119,16 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2020040204, 'treasurehunt');
     }
+    if ($oldversion < 2020050400) {
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('playerstyle', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'classic', 'completionpass');
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2020050400, 'treasurehunt');
+    }
     return true;
 }
