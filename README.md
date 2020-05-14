@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.4.0 Choice between 3 different playpage styles. New bootstrap-based play page more compatible and light-weight. Street view link from play page.
  - v1.3.2 Fix upgrade code.
  - v1.3.1c-hotfix fix to an important regression that prevented the creation of new instances.
  - v1.3.1-hotfix Important updgrade! Moodle3.8 introduced a JS compiler that conflicts with geocode.js lib and breaks all javascript of the site. Now it is reimplemented.
