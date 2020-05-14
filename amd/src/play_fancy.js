@@ -690,10 +690,10 @@ define(['jquery',
 		            	briefing = lastsuccessfulstage.clue;
 		            }
 		            
-		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
-		            $("#lastsuccesfulstagepos2").text(lastsuccessfulstage.position +
+		            $('[id=lastsuccessfulstagename2]').text(lastsuccessfulstage.name);
+		            $('[id=lastsuccesfulstagepos2').text(lastsuccessfulstage.position +
 		                    " / " + lastsuccessfulstage.totalnumber);
-		            $("#lastsuccessfulstageclue2").html(lastsuccessfulstage.clue);
+		            $("[id=lastsuccessfulstageclue2]").html(lastsuccessfulstage.clue);
 
 		            if (lastsuccessfulstage.question !== '') {
 		                $("#lastsuccessfulstageclue").append("<a href='#questionpage' " +
@@ -701,12 +701,16 @@ define(['jquery',
 		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
 		                        + strings['question']
 		                        + "</a>");
-		                $("#lastsuccessfulstageclue2").append("<a href='#questionpage' " +
+		                $("[id=lastsuccessfulstageclue2]").append("<a href='#questionpage' " +
 		                        "data-transition='none' class='ui-btn ui-shadow ui-corner-all " +
 		                        "ui-btn-icon-left ui-btn-inline ui-mini ui-icon-comment'>"
 		                        + strings['question']
-		                        + "</a>");
-		            }
+								+ "</a>");
+						$('#sendAnswer').show();
+		            } else {
+						$('#questionform').html('');
+						$('#sendAnswer').hide();
+					}
 					
 			// The 1st time, it is called after the map is loaded
 					
@@ -1008,7 +1012,8 @@ define(['jquery',
 		            }
 		        } else if (pageId === 'questionpage') {
 		            if (event.type === 'pagecontainershow') {
-						if (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') {
+						if ( (lastsuccessfulstage.question == null || lastsuccessfulstage.question === '') 
+							&& lastsuccessfulstage.activitysolved !== false ) {
 		                    $.mobile.pageContainer.pagecontainer("change", "#mappage");
 		                } else {
 		                    set_question();
