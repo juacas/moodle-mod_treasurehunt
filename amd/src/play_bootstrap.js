@@ -31,6 +31,7 @@ define([
   "core/str",
   "mod_treasurehunt/webqr",
   "mod_treasurehunt/jquery.truncate",
+  "theme_boost/dropdown"
   // "mod_treasurehunt/jquery.mobile-config",
   // "mod_treasurehunt/jquerymobile"
 ], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
@@ -379,6 +380,9 @@ define([
       }
     }
     let layergroup = new ol.layer.Group({ layers: layersbase });
+    // Create placement for a popup over user marker.
+    var overlay = viewgpx.createCoordsOverlay('#mapplay', 'css/playerbootstrap/ol-popup.css');
+
     // All layers hidden except last one.
     let toplayer = null;
     layergroup.getLayers().forEach((layer) => {
@@ -431,6 +435,7 @@ define([
     });
     let map = new ol.Map({
       layers: layers,
+      overlays: [overlay],
       controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
       target: "mapplay",
       view: view,
@@ -545,6 +550,7 @@ define([
         });
       }
     }
+ 
     /**
      * Updates the model of the game.
      * Notifies a new location for validation or a new answer to a question.
@@ -999,6 +1005,10 @@ define([
         markerFeature.setGeometry(
           coordinates ? new ol.geom.Point(coordinates) : null
         );
+        // Shorcut to Google Street View.
+        if (custommapconfig === null || custommapconfig.geographic) {
+          overlay.setPosition(evt.coordinate);
+        }
       }
     });
 

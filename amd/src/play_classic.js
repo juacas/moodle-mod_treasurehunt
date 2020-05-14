@@ -305,7 +305,9 @@ define(['jquery',
 		    		layersoverlay.push(custombaselayer);
 		    	}
 			}
-		    var layergroup = new ol.layer.Group({layers: layersbase});
+			var layergroup = new ol.layer.Group({layers: layersbase});
+			// Create placement for a popup over user marker.
+			var overlay = viewgpx.createCoordsOverlay('#mapplay', 'css/playerfancy/ol-popup.css');
 		    // All layers hidden except last one.
 		    var toplayer = null;
 		    layergroup.getLayers().forEach(function (layer) {
@@ -357,7 +359,8 @@ define(['jquery',
 				collapsible: false
 			});
 		    var map = new ol.Map({
-		        layers: layers,
+				layers: layers,
+				overlays: [overlay],
 				controls: [zoom, attribution], //ol.control.defaults({rotate: false, attribution: false}),
 		        target: 'mapplay',
 		        view: view,
@@ -384,7 +387,7 @@ define(['jquery',
 		        var tracklayer = tracklayergroup.getLayers().item(0);
 		        var htmltitle = tracklayer.get("title");
 		        //var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);// Had a picture and a link.
-		        tracklayer.set("name", htmltitle );
+		        tracklayer.set("name", htmltitle);
 		        tracklayer.setVisible(false);
 		        add_layer_to_list(tracklayer);
 		    }
@@ -450,7 +453,13 @@ define(['jquery',
 		    function autocentermap() {
 		        position = geolocation.getPosition();
 		        fly_to(map, position);
-		    }
+			}
+			/**
+			 * 
+			 * @param {ol.map} map 
+			 * @param {Array} point 
+			 * @param {Array} extent 
+			 */
 		    function fly_to(map, point, extent) {
 		        var duration = 700;
 		        var view = map.getView();
@@ -465,10 +474,12 @@ define(['jquery',
 		                duration: duration
 		            });
 		        }
-		    }
+			}
+			
 		    /**
 		     * Updates the model of the game.
 		     * Notifies a new location for validation or a new answer to a question.
+			 * 
 		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
@@ -501,7 +512,8 @@ define(['jquery',
 		            position = currentposition;
 		            $.mobile.loading("show");
 				}
-				// Get the progress of the user.
+
+				// Get the progress of the user: road is finished, 
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -572,13 +584,16 @@ define(['jquery',
 		                        }));
 		                    }
 						}
+						
 						// Display the buttons corresponding to the situation:
+
 		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
 		                    changesinlastsuccessfulstage = true;
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
+								
 								// There is a question => disable location validation button and
 								// set the big button as Question.
 		                        changesinquestionstage = true;
@@ -886,9 +901,16 @@ define(['jquery',
 		        if (playwithoutmoving && !hasFeature) {
 		            var coordinates = map.getEventCoordinate(evt.originalEvent);
 		            markerFeature.setGeometry(coordinates ?
-		                    new ol.geom.Point(coordinates) : null);
+							new ol.geom.Point(coordinates) : null);
+					// Shorcut to Google Street View.
+					if (custommapconfig === null || custommapconfig.geographic) {
+						overlay.setPosition(evt.coordinate);
+					}
 		        }
-		    });
+			});
+			
+			
+
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {
 		    	if (!geographictools) {
 		    		return;

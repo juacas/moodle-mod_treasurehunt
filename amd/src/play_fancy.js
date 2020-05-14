@@ -306,6 +306,8 @@ define(['jquery',
 		    	}
 			}
 		    var layergroup = new ol.layer.Group({layers: layersbase});
+			// Create placement for a popup over user marker.
+			var overlay = viewgpx.createCoordsOverlay('#mapplay', 'css/playerfancy/ol-popup.css');
 		    // All layers hidden except last one.
 		    var toplayer = null;
 		    layergroup.getLayers().forEach(function (layer) {
@@ -319,7 +321,6 @@ define(['jquery',
 		        zoom: 2,
 		        minZoom: 2
 			});
-			// ol = OpenLayer (map)
 		    var select = new ol.interaction.Select({
 		        layers: [attemptslayer],
 		        style: select_style_function,
@@ -359,6 +360,7 @@ define(['jquery',
 			});
 		    var map = new ol.Map({
 		        layers: layers,
+				overlays: [overlay],
 				controls: [zoom, attribution], //ol.control.defaults({rotate: false, attribution: false}),
 		        target: 'mapplay',
 		        view: view,
@@ -467,6 +469,7 @@ define(['jquery',
 		            });
 		        }
 		    }
+			
 		    /**
 		     * Updates the model of the game.
 		     * Notifies a new location for validation or a new answer to a question.
@@ -586,7 +589,7 @@ define(['jquery',
 		                    if (lastsuccessfulstage.question !== '') {
 								
 								// There is a question => disable location validation button and
-								// set the big button as Question 
+								// set the big button as Question.
 								changesinquestionstage = true;
 								$('#validatelocation').show().addClass('ui-state-disabled');
 								set_big_button_as("question");
@@ -903,6 +906,10 @@ define(['jquery',
 		            var coordinates = map.getEventCoordinate(evt.originalEvent);
 		            markerFeature.setGeometry(coordinates ?
 		                    new ol.geom.Point(coordinates) : null);
+					// Shorcut to Google Street View.
+					if (custommapconfig === null || custommapconfig.geographic) {
+						overlay.setPosition(evt.coordinate);
+					}
 		        }
 		    });
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {

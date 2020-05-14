@@ -23,12 +23,11 @@
  */
 
 define(
-	['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch',
-		'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
+	['jquery', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
 		'mod_treasurehunt/osm-geocoder',
-		'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
-	function ($, jqui, touch, notification, ol, ajax, OSMGeocoder,
-		olLayerSwitcher, str) {
+		'mod_treasurehunt/ol3-layerswitcher', 'mod_treasurehunt/viewgpx', 'core/str'],
+	function ($, notification, ol, ajax, OSMGeocoder,
+		olLayerSwitcher, viewgpx, str) {
 
 		function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
 
@@ -363,24 +362,9 @@ define(
 			/**
 			 * Create an overlay to anchor the popup to the map.
 			 */
-			var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */
-				({
-					element: container,
-					autoPan: true,
-					autoPanAnimation: {
-						duration: 250
-					}
-				}));
-			/**
-			 * Add a click handler to hide the popup.
-			 *
-			 * @return {boolean} Don't follow the href.
-			 */
-			closer.onclick = function () {
-				overlay.setPosition(undefined);
-				closer.blur();
-				return false;
-			};
+			// Create placement for a popup over user marker.
+			var overlay = viewgpx.createCoordsOverlay('#mapedit');
+			
 			// Layer selector...
 			var layerSwitcher = new ol.control.LayerSwitcher();
 			// Map viewer...
@@ -407,25 +391,11 @@ define(
 											.getElementById("stagelistpanel")
 									})])
 				});
-			function showpopup(evt) {
-				var coordinate = evt.coordinate;
-				var latlon = ol.proj.toLonLat(coordinate, map.getView()
-					.getProjection());
-				var hdms = ol.coordinate.toStringHDMS(latlon);
-				var pegman = '<a target="street" href="http://maps.google.com/?cbll='
-					+ latlon[1]
-					+ ','
-					+ latlon[0]
-					+ '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" /></a>';
-				content.innerHTML = '<code>' + pegman + ''
-					+ hdms + '</code>';
-				overlay.setPosition(coordinate);
-			}
-
+			
 			map.on('click', function (evt) {
 				if (!Draw.getActive() && !Modify.getActive() &&
 					(custommapconfig === null || custommapconfig.geographic)) {
-					showpopup(evt);
+					overlay.setPosition(evt.coordinate);
 				}
 			});
 			layerSwitcher.showPanel();

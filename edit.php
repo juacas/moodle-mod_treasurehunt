@@ -87,7 +87,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
             $custommapping
         )
     );
-    $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial', 'editpage');
+    $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_edit', 'editpage');
     $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
     $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');

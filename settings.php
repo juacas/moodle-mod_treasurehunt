@@ -31,7 +31,7 @@ if ($ADMIN->fulltree) {
                 'mod_treasurehunt/availableplayerstyles',
                 get_string('availableplayerstyles', 'treasurehunt'),
                 '',
-                [TREASUREHUNT_PLAYERCLASSIC],
+                [TREASUREHUNT_PLAYERCLASSIC, TREASUREHUNT_PLAYERFANCY],
                 treasurehunt_get_installedplayerstyles()
         ));
         // Default game player style.

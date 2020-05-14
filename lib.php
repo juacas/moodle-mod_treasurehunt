@@ -283,6 +283,7 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
     $now = time();
     $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
     $cm->set_icon_url($iconurl);
+    $cm->set_after_link('pronto empieza');
 }
 /**
  * Get a icon url depending on the status of the treasurehunt:

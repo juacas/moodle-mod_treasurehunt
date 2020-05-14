@@ -22,9 +22,8 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/notification',
-		'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
-        function ($, jqui, touch, notification, ol, olLayerSwitcher, str) {
+define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 'core/str'],
+        function ($, ol, olLayerSwitcher, str) {
             console.log('Loading viewgpx.js with jquery ' + $().jquery);
 			var refreshTracksInterval = 30;
 			var refreshCounter = 0;
@@ -72,7 +71,75 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
 	            			initcreategpxviewer(cmid, treasurehuntid, i18n, users, custommapconfig);
 	            		}
 	                })
-				}  // End of function creategpxviewer.
+                },  // End of function creategpxviewer.
+            createCoordsOverlay: function(selector = '#mappage', cssurl = 'css/ol-popup.css') {
+                // Popup showing the position the user clicked.
+                // Elements that make up the popup.
+                $('<link>')
+                    .appendTo('head')
+                    .attr({
+                        type: 'text/css',
+                        rel: 'stylesheet',
+                        href: cssurl
+                    });
+                var popupmarker = $('<div id="popupmarker" class="ol-popup"><a href="#" id="popup-closer" class="ol-popup-closer"></a><div id="popup-content"></div></div>');
+                $(selector).append(popupmarker);
+                var container = $('#popupmarker');
+                var content = $('#popup-content');
+                var closer = $('#popup-closer');
+                var containernode = container.get(0);
+                var timeouthandler = null;
+                /**
+                 * Create an overlay to anchor the popup to the map.
+                 */
+                var overlay = new ol.Overlay(/** @type {olx.OverlayOptions} */
+                    ({
+                        element: containernode,
+                        autoPan: true,
+                        autoPanAnimation: {
+                            duration: 250
+                        }
+                    }));
+                /**
+                 * Add a click handler to hide the popup.
+                 *
+                 * @return {boolean} Don't follow the href.
+                 */
+                closer.click(function () {
+                    overlay.setPosition(undefined);
+                    clearTimeout(timeouthandler);
+                    closer.blur();
+                    $('#popup-content').html('');
+                    return false;
+                });
+                ol.events.listen(
+                    overlay, ol.Object.getChangeEventType(ol.Overlay.Property.POSITION),
+                    function (param) {
+                        var latlon = this.getPosition();
+                        if (latlon) {
+                            createPegmanLabel(latlon);
+                            timeouthandler = setTimeout(() => { $('#popup-closer').trigger('click'); }, 2000);
+                        }
+                    }, overlay);
+                // Disable timeout if hovering.
+                container.hover( function() {
+                    clearTimeout(timeouthandler);
+                    }
+                );
+                return overlay;
+                function createPegmanLabel(coordinate) {
+                    var latlon = ol.proj.toLonLat(coordinate, overlay.getMap().getView()
+                        .getProjection());
+                    var hdms = ol.coordinate.toStringHDMS(latlon);
+                    var pegmanlink = '<a target="street" href="http://maps.google.com/?cbll='
+                        + latlon[1]
+                        + ','
+                        + latlon[0]
+                        + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" /> <code>' + hdms + '</code></a>';
+                    $('#popup-content').html(pegmanlink);
+                }
+            }
+
             };
             return init;
             
@@ -275,6 +342,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                 }
                 return layergroup;
             }
+            /**
+             * 
+             * @param {ol.map} map 
+             * @param {Array} point center coordinates
+             * @param {Array} extent bounding box coordinates
+             */
             function flyTo(map, point, extent) {
                 var duration = 700;
                 var view = map.getView();
@@ -320,7 +393,8 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     vector.on('change:visible', function() {
                     	if (this.getVisible()) {
                             var extent = this.getSource().getExtent();
-                            if ( extent = get_valid_extent(extent) !== null) {
+                            extent = get_valid_extent(extent);
+                            if ( extent !== null) {
                                 flyTo(map, null, extent);
                             }
                     	}
@@ -347,7 +421,14 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch', 'core/no
                     }
                 });
             }
+            /**
+             * 
+             * @param {Array} extent boundingbox 2 coordinates
+             */
             function get_valid_extent(extent) {
+                if (! (extent instanceof Array) || extent.length != 4) {
+                    return null;
+                }
                 if (extent[0] === Infinity ||
                     extent[1] === Infinity ||
                     extent[2] === Infinity ||

@@ -2304,9 +2304,9 @@ function treasurehunt_view_info($treasurehunt, $courseid)
  * @param int $cmid The identifier of course module activity.
  * @param string $username The user name.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
- * @return string
+ * @return treasurehunt_user_attempt_history
  */
-function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
+function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview)
 {
     global $PAGE;
     $roadfinished = treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid);
@@ -2316,9 +2316,8 @@ function treasurehunt_view_user_attempt_history($treasurehunt, $groupid, $userid
     } else {
         $outoftime = false;
     }
-    $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
-    return $output->render($renderable);
+    return $renderable;
 }
 
 // /**

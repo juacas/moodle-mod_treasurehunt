@@ -170,7 +170,7 @@ define(['jquery', 'core/str'], function ($, str) {
             var seconds = Math.round(durationinseconds - minutes * 60);
             
             if (usemonths && months > 0) {
-                durationproms.push(this.get_string('month' + (months > 1 ? 's' : '')).then((strmonth) => { return months + strmonth }));
+                durationproms.push(this.get_string('month' + (months > 1 ? 's' : '')).then((strmonth) => { return months + ' ' + strmonth }));
                 //durationstring += months + strings['month' + (months > 1 ? 's' : '')];
                 hours = 0;
                 minutes = 0;

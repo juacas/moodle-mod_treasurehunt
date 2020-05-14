@@ -273,6 +273,7 @@ I18N;
         $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
         $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
         $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
+
         $PAGE->set_pagelayout('embedded');
 
         // Output starts here.
@@ -296,17 +297,7 @@ I18N;
     {
         // Create a table for the data.
         $o = '';
-        // Si no ha finalizado pongo el botón de jugar.
-        $urlparams = array('id' => $historical->coursemoduleid);
-        if ($historical->outoftime || $historical->roadfinished) {
-            $string = get_string('reviewofplay', 'treasurehunt');
-        } else {
-            $string = get_string('play', 'treasurehunt');
-        }
-        if ((count($historical->attempts) || !$historical->outoftime) && !$historical->teacherreview) {
-            $o .= $this->output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
-        }
-
+      
         $o .= $this->output->container_start('attempthistory');
         $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
@@ -482,12 +473,7 @@ I18N;
                 }
             }
         }
-        if ($progress->managepermission) {
-            $urlparams = array('id' => $progress->coursemoduleid);
-            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
-            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/clearhunt.php', $urlparams), get_string('cleartreasurehunt', 'treasurehunt'), 'get');
-            $s .= $this->output->single_button(new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams), get_string('trackviewer', 'treasurehunt'), 'get');
-        }
+   
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
             $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
