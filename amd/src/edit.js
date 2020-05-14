@@ -23,12 +23,13 @@
  */
 
 define(
-	['jquery', 'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
+	['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch',	
+	'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
 		'mod_treasurehunt/osm-geocoder',
 		'mod_treasurehunt/ol3-layerswitcher',  'core/str',
 		'mod_treasurehunt/viewgpx',
 	],
-	function ($, notification, ol, ajax, OSMGeocoder,
+	function ($, jqui, jqtouch, notification, ol, ajax, OSMGeocoder,
 		olLayerSwitcher, str,
 		viewgpx
 		) {
