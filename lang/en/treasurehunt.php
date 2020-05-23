@@ -57,7 +57,7 @@ $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
 $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
-$string['changetoplaywithmove'] = 'The game mode has changed to dinamyc play';
+$string['changetoplaywithmove'] = 'The game mode has changed to dynamic play';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
 $string['completionfinish'] = 'Require to finish road.';
 $string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
@@ -69,8 +69,9 @@ $string['confirmdeletestage'] = 'The stage was successfully removed';
 $string['continue'] = 'Continue';
 $string['correctanswer'] = 'Correct answer.';
 $string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
-$string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has benn deleted.';
+$string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has been deleted.';
 $string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
+$string['clue'] = 'Clue';
 $string['customlayername'] = 'Layer title';
 $string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
 $string['custommapimagefile'] = 'Custom image for map';
@@ -89,8 +90,8 @@ $string['customlayertype_help'] = 'The layer can be the only visible in the back
 $string['customlayerwms'] = 'WMS service';
 $string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service. (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'WMS params';
-$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets;STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
-$string['custommapbaselayer'] = 'The image is shown as an ADITIONAL map background option';
+$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets&STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
+$string['custommapbaselayer'] = 'The image is shown as an ADDITIONAL map background option';
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
 $string['custommapnongeographic'] = 'The image is not geographical';
@@ -104,6 +105,9 @@ $string['editingtreasurehunt'] = 'Editing treasure hunt';
 $string['edition'] = 'Edition panel';
 $string['edition_help'] = 'To enable the geometry creation and the buttons in the edition panel the stage you want to edit must be selected';
 $string['editactivity_help'] = 'You can find a step-by-step tutorial about creating treasurehunt activities at <a href="http://juacas.github.io/moodle-mod_treasurehunt/create_activity.html"> this page.</a>';
+$string['editmode'] = 'Edit';
+$string['drawmode'] = 'Draw';
+$string['browsemode'] = 'Browse';
 $string['editroad'] = 'Edit road';
 $string['editstage'] = 'Edit stage';
 $string['edittreasurehunt'] = 'Change roads and stages';
@@ -131,12 +135,20 @@ $string['eventstageupdated'] = 'Stage updated';
 $string['exit'] = 'Back to Course';
 $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
+$string['findplace'] = 'Find a place';
 $string['gamemode'] = 'Game mode';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
 The larger, less update requests should be made, but more time passes to report a possible change.
 It must be greater than 0 seconds, but the time will be set by default.';
+$string['defaultplayerstyle'] = 'Default game screen style';
+$string['playerstyle'] = 'Game screen style';
+$string['availableplayerstyles'] = 'Game screen styles available.';
+$string['playerstyle_help'] = 'There are several styles of the game screen that teachers can choose';
+$string['playerclassic'] = 'Classic';
+$string['playerfancy'] = 'Fanzy';
+$string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed.
 <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.
@@ -184,25 +196,26 @@ his grade by 16.2%, that is, will receive 83.8% of the grade calculated by the r
 $string['gradesdeleted'] = 'Treasure hunt grades deleted';
 $string['gradingsummary'] = 'Grading summary';
 $string['group'] = 'Group';
-$string['groupactivityovercome'] = 'Activity to end successfully completed by {$a->user} for stage {$a->position} on the date: {$a->date}';
+$string['groupactivityovercome'] = 'Activity for stage {$a->position} successfully completed by {$a->user}  {$a->date}';
 $string['groupid'] = 'Group assigned to the road';
 $string['groupid_help'] = 'Users in this group are assigned to this road when the game starts.
 If there is only one road and the selected option is "none", all participants in the activity will play for it';
 $string['groupingid'] = 'Grouping assigned to the road';
 $string['groupingid_help'] = 'Groups in this grouping are assigned to this road when the game starts';
 $string['groupinvalidroad'] = '{$a} has assigned an invalid road.';
-$string['grouplocationfailed'] = 'Failed location by {$a->user} of stage {$a->position} on the date: {$a->date}';
-$string['grouplocationovercome'] = 'Succesful location by {$a->user} of stage {$a->position} on the date: {$a->date}';
+$string['grouplocationfailed'] = '<b>Failed "stage {$a->position}" location</b> by {$a->user} of  {$a->date}';
+$string['grouplocationovercome'] = '<b>Successful stage {$a->position} location</b> by {$a->user} {$a->date}';
 $string['groupmode'] = 'Students play in groups';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups.
-A group game will be shared among group members and they will see the changes in the game.';
+Every team-member can solve the current stage and the progress is common to every partner. <br/>
+This allows to “parallelize” the hunt and cover more territory. The participants see the same information but team-oriented.';
 $string['groupmultipleroads'] = '{$a} has more than one road assigned.';
-$string['groupquestionfailed'] = 'Failed answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
-$string['groupquestionovercome'] = 'Succesful answer by {$a->user} to the question of stage {$a->position} on the date: {$a->date}';
+$string['groupquestionfailed'] = '<b>Failed  stage {$a->position} answer</b> by {$a->user}  {$a->date}';
+$string['groupquestionovercome'] = '<b>Successful stage {$a->position} answer</b> by {$a->user}  {$a->date}';
 $string['groups'] = 'Groups';
-$string['groupstageovercome'] = 'Stage {$a->position} overcome by {$a->user} on the date: {$a->date}';
+$string['groupstageovercome'] = '<b>Stage {$a->position} overcome</b> by {$a->user} {$a->date}';
 $string['hello'] = 'Hello';
-$string['historicalattempts'] = 'Historical attempts of {$a}';
+$string['attempthistory'] = 'Attempt history of {$a}';
 $string['history'] = 'History';
 $string['huntcompleted'] = 'You have already completed this treasure hunt';
 $string['incorrectanswer'] = 'Incorrect answer.';
@@ -240,6 +253,7 @@ $string['multipleteamsplay'] = 'Member of more than one group, so unable to make
 $string['mustanswerquestion'] = 'You must correctly answer the question before continuing';
 $string['mustcompleteactivity'] = 'You must overcome the activity to complete before continuing';
 $string['mustcompleteboth'] = 'You must answer the question correctly and overcome the activity to complete before continuing';
+$string['nextcamera'] = 'Change camera';
 $string['noanswerselected'] = 'You must select an answer';
 $string['noattempts'] = 'You have not made any attempt';
 $string['noexsitsstage'] = 'There is no stage number {$a} in the database. Reload the page';
@@ -277,7 +291,7 @@ if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
 $string['question'] = 'Question';
-$string['remove'] = 'Remove';
+$string['remove'] = 'Delete';
 $string['removealltreasurehuntattempts'] = 'Delete all treasure hunts attempts';
 $string['removedactivitytoend'] = 'Activity to complete has been removed';
 $string['removedquestion'] = 'The question has been removed';
@@ -299,8 +313,9 @@ $string['search'] = 'Search';
 $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
 $string['send'] = 'Send';
-$string['sendlotacioncontent'] = 'This action can not be undone.';
-$string['sendlotaciontitle'] = 'Are you sure you want to send this location?';
+$string['sendlocationcontent'] = 'This action can not be undone.';
+$string['sendlocationtitle'] = 'Are you sure you want to send this location?';
+$string['showclue'] = 'Show clue';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
 $string['stageclue_help'] = 'Here you should describe the clue to reach the next location.
@@ -313,20 +328,26 @@ $string['startfromhere'] = 'You can only start from here';
 $string['state'] = 'State';
 $string['successlocation'] = 'It is the right place!';
 $string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
-$string['timelabelfailed'] = 'Location sent on the date: ';
-$string['timelabelsuccess'] = 'Stage discovered on the date: ';
 $string['totaltime'] = 'Total time';
+$string['timeago'] = '{$a->shortduration} ago';
+$string['timeat'] = 'at {$a->date}';
+$string['timeagolong'] = '{$a->shortduration} ago ({$a->date})';
+$string['timetocome'] = 'in {$a->shortduration}';
+$string['timetocomelong'] = 'in {$a->shortduration} ({$a->date})';
 $string['trackusers'] = 'Track trajectories';
-$string['trackusers_help'] = 'Register the paths made by the users while using playing mode.';
+$string['trackusers_help'] = 'Register the paths made by the users. They can be seen in the “Track viewer” screen.<br/>
+The user positions are logged between validation attempts (with every poll request).<br/>
+If the user has his GPS disabled then the only location he can report is that of the scanned QR-Codes.<br/> 
+If this option is <b>disabled</b>, the only locations recorded are those of the validation attempts.';
 $string['trackviewer'] = 'Track Viewer';
 $string['trackviewerrefreshtracks'] = 'Refresh tracks each {$a} seconds.';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehunt:addroad'] = 'Add road';
 $string['treasurehunt:addstage'] = 'Add stage';
-$string['treasurehuntclosed'] = 'This treasure hunt closed on {$a}';
+$string['treasurehuntclosed'] = 'This treasure hunt closed {$a}';
 $string['treasurehuntcloses'] = 'Treasure hunt closes';
-$string['treasurehuntcloseson'] = 'This treasure hunt will close at {$a}';
+$string['treasurehuntcloseson'] = 'This treasure hunt will close {$a}';
 $string['treasurehunt:editroad'] = 'Edit road';
 $string['treasurehunt:editstage'] = 'Edit stage';
 $string['treasurehuntislocked'] = '{$a} is editing this treasurehunt right now. Try to edit it in a few minutes.';
@@ -335,29 +356,29 @@ $string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
 $string['treasurehuntname'] = 'Treasure hunt\'s name';
 $string['treasurehuntnotavailable'] = 'The treasure hunt will not be available until {$a}';
 $string['treasurehuntopens'] = 'Treasure hunt opens';
-$string['treasurehuntopenedon'] = 'This treasure hunt opened at {$a}';
+$string['treasurehuntopenedon'] = 'This treasure hunt opened {$a}';
 $string['treasurehunt:play'] = 'Play';
 $string['treasurehunt:view'] = 'View treasurehunt';
-$string['treasurehunt:viewusershistoricalattempts'] = 'View users historical attempts';
+$string['treasurehunt:viewusersattempthistory'] = 'View users attempt history';
 $string['updates'] = 'Updates';
 $string['updatetimes'] = 'Update times';
 $string['user'] = 'User';
-$string['useractivityovercome'] = 'Activity to end successfully completed for stage {$a->position} on the date: {$a->date}';
+$string['useractivityovercome'] = '<b>Moodle activity for "stage {$a->position}" successfully completed</b> {$a->date}';
 $string['userinvalidroad'] = '{$a} has assigned an invalid road.';
-$string['userlocationfailed'] = 'Failed location of stage {$a->position} on the date: {$a->date}';
-$string['userlocationovercome'] = 'Succesful location of stage {$a->position} on the date: {$a->date}';
+$string['userlocationfailed'] = '<b>Failed "stage {$a->position}" location</b> {$a->date}';
+$string['userlocationovercome'] = '<b>Successful "stage {$a->position}" location</b> {$a->date}';
 $string['usermultipleroads'] = '{$a} has more than one road assigned.';
 $string['usermultiplesameroad'] = '{$a} belong to more than one group assigned to the same road.';
 $string['userprogress'] = 'User progress successfully updated';
-$string['userquestionfailed'] = 'Failed answer to the question of stage {$a->position} on the date: {$a->date}';
-$string['userquestionovercome'] = 'Succesful answer to the question of stage {$a->position} on the date: {$a->date}';
-$string['usersprogress'] = 'Progress users';
+$string['userquestionfailed'] = '<b>Failed "stage {$a->position}" answer</b> {$a->date}';
+$string['userquestionovercome'] = '<b>Successful "stage {$a->position}" answer</b> {$a->date}';
+$string['usersprogress'] = 'User progress';
 $string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:
 <p>The color <b> green </b> indicates that the stage has been overcome without failures.</p>
 <p>The color <b> yellow </b> indicates that the stage has been oavercome with failures.</p>
 <p>The color <b> red </b> indicates that the stage has not been overcome and failures have been made.</p>
 <p>The color <b> grey </b> indicates that the stage has not been overcome and no failures have been made.</p>';
-$string['userstageovercome'] = 'Stage {$a->position} overcome on the date: {$a->date}';
+$string['userstageovercome'] = '<b>Stage {$a->position} overcome</b>: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';
@@ -367,6 +388,9 @@ like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that you have passed a QR test with this device.';
+$string['warnqrscannererror'] = 'This Treasurehunt includes {$a} stages with QRCodes. 
+It seems that your device can not use the camera with this application. Please give permissions to access the camera.
+If you can\'t manage to activate the camera this device may not be suitable to play the Treasurehunt.';
 $string['warnunsecuregeolocation'] = 'Geolocation may not work in your server. This is a <b>SEVERE misconfiguration</b> caused by your
 server configuration. Geolocation is forbidden for non-Secure servers that use HTTP instead of HTTPS. In order to use the GPS of
 to locate the students during the Treasurehunt the server must be accessed by secure HTTPS URLs. In other case, only "Play without moving" mode
@@ -383,19 +407,33 @@ $string['addroad_tour'] = 'Add one or more roads to be followed by your students
 $string['editend_tour'] = 'Enjoy making exciting games for your students!';
 $string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
 $string['remove_tour'] = 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
-$string['roads_tour'] = 'In this area you will find the diferent roads of your game. Select one of them to edit the stages.';
-$string['save_tour'] = 'After drawing yout locations, don\'t forget to save your changes.';
-$string['searchlocation_tour'] = 'Whith this search area you can find your way rapidly';
-$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the location of the stages in the map.';
+$string['roads_tour'] = 'In this area you will find the different roads of your game. Select one of them to edit the stages.';
+$string['save_tour'] = 'After drawing your locations, don\'t forget to save your changes.';
+$string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
+$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
-
-$string['autolocate_tour'] = 'While playing, you can geolocate yourself using the GPS of your device with this button. Please, give permissions to use "location" when asked.';
-$string['validatelocation_tour'] = 'When you are confident about the location of a stage you must submit your position to check if you are correct.';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
+$string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
+$string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
+$string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
+$string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour'] = 'In this map you can see all attempts o this geolocated game! Passed stages are marked with <img src="pix/success_mark.png" width="28"/> and failed stages with <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = 'Enjoy pursuing the treasure with your mates!';
-$string['welcome_play_tour'] = 'Welcome to the Treasure Hunt play screen. This is the main interface to research, chase and win your treasure.';
+$string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
+$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+
 $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';
 $string['skiptutorial'] = 'Quit';
 $string['donetutorial'] = 'End';
+// Privacy strings.
+$string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
+$string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';
+$string['privacy:metadata_treasurehunt_track_treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
+$string['privacy:metadata_treasurehunt_track_location'] = 'The location of the user at a particular time.';
+$string['privacy:metadata_treasurehunt_track_timestamp'] = 'The time the user is tracked at.';
+
+$string['privacy:metadata_treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
+$string['privacy:metadata_treasurehunt_attempts_userid'] = 'The ID of the user that made an attempt.';
+$string['privacy:metadata_treasurehunt_attempts_timecreated'] = 'The time at which the user made an attempt.';
+$string['privacy:metadata_treasurehunt_attempts_groupid'] = 'The group in which the user played the activity.';
+$string['privacy:metadata_treasurehunt_attempts_stageid'] = 'The stage ID the user was trying to solve.';

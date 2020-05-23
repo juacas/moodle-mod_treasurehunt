@@ -1,8 +1,0 @@
-/*
-	CSS fixes for Themes' interactions.
-    Created on : 19-mar-2018,
-    @Author     : juacas
-*/
-*, *::before, *::after {
-	box-sizing: unset !important;
-}

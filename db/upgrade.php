@@ -33,6 +33,7 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB;
+    /** @var database_manager */
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -97,6 +98,37 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         }
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2018022800, 'treasurehunt');
+    }
+    if ($oldversion < 2020040204) {
+        $table = new xmldb_table('treasurehunt_stages');
+        $field = new xmldb_field(
+            'activitytoend',
+            XMLDB_TYPE_INTEGER,
+            '10',
+            XMLDB_UNSIGNED,
+            false,
+            null,
+            null,
+            'playstagewithoutmoving'
+        );
+        $key = new xmldb_key('activitytoend', XMLDB_KEY_FOREIGN, ['activitytoend'], 'course_modules', ['id']);
+        $dbman->drop_key($table, $key);
+        $dbman->change_field_default($table, $field);
+        $dbman->change_field_notnull($table, $field);
+        $dbman->add_key($table, $key);
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2020040204, 'treasurehunt');
+    }
+    if ($oldversion < 2020050400) {
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('playerstyle', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, 'classic', 'completionpass');
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2020050400, 'treasurehunt');
     }
     return true;
 }

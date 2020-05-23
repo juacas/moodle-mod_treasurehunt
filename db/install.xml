@@ -15,7 +15,7 @@
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playwithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true students may play from their computers without moving to places. If false they need to be on location."/>
                 <FIELD NAME="tracking" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the system saves a log with the location of every user during the game."/>
-                <FIELD NAME="custommapconfig" TYPE="char" LENGTH="255" NOTNULL="false" DEFAULT="null" SEQUENCE="false" COMMENT="If a custom map background is uploaded this is the BBOX of the position over the earth."/>
+                <FIELD NAME="custommapconfig" TYPE="text" NOTNULL="false" DEFAULT="null" SEQUENCE="false" COMMENT="If a custom map background is uploaded this is the BBOX of the position over the earth."/>
                 <FIELD NAME="groupmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the activity will be in groups."/>
                 <FIELD NAME="alwaysshowdescription" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If false the treasurehunt intro will only be displayed after the allowsubmissionsfrom date. If true it will always be displayed."/>
                 <FIELD NAME="allowattemptsfromdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, submissions will only be accepted after this date."/>
@@ -26,6 +26,7 @@
                 <FIELD NAME="grademethod" TYPE="int" LENGTH="4" NOTNULL="true" DEFAULT="1" SEQUENCE="false" COMMENT="One of the values TREASUREHUNT_GRADEFROMSTAGES, TREASUREHUNT_GRADEFROMTIME, TREASUREHUNT_GRADEFROMPOSITION."/>
                 <FIELD NAME="completionfinish" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether the activity emits a COMPLETION_COMPLETE state."/>
                 <FIELD NAME="completionpass" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether the activity emits a COMPLETION_COMPLETE state."/>
+                <FIELD NAME="playerstyle" TYPE="char" LENGTH="20" NOTNULL="true" DEFAULT='classic' SEQUENCE="false" COMMENT="User interface for the Player page."/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -62,7 +63,7 @@
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playstagewithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true, students can play from their computers without moving to places only during the performance of the stage associated. Then it will continue using the game settings"/>
-                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Activity to be completed before the clue show"/>
+                <FIELD NAME="activitytoend" TYPE="int" LENGTH="10" NOTNULL="false" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Activity to be completed before the clue show"/>
                 <FIELD NAME="questiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the question to be answered before the clue show"/>
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>

@@ -44,8 +44,13 @@ module.exports = function(grunt) {
 
     // Globbing pattern for matching all AMD JS source files.
     var amdSrc = [inAMD ? cwd + '/src/*.js' : '**/amd/src/*.js'];
-
-    /**
+    var pathprefix = inAMD ? cwd + '/src/' : '**/amd/src/';
+    var jshintfiles = [pathprefix+ 'edit.js',
+                        pathprefix+ 'play.js',
+                        pathprefix+ 'renewlock.js',
+                        pathprefix+ 'tutorial.js',
+                        pathprefix+ 'viewgpx.js'];
+     /*                   
      * Function to generate the destination for the uglify task
      * (e.g. build/file.min.js). This function will be passed to
      * the rename property of files array when building dynamically:
@@ -66,10 +71,40 @@ module.exports = function(grunt) {
     grunt.initConfig({
         jshint: {
             options: {jshintrc: '.jshintrc'},
-            amd: { src: amdSrc }
+            amd: { src: jshintfiles }
+        },
+        terser: {
+            options: {
+                sourceMap: true,
+                mangle: true,
+                compress: true,
+            },
+            amd: {
+                files: [{
+                    expand: true,
+                    src: amdSrc,
+                    rename: uglify_rename
+                }]
+            }
         },
         uglify: {
+            options : {
+                sourceMap : true,
+                sourceMapIncludeSources : true,
+                mangle: true,
+                compress: true,
+                beautify: false
+              },
             amd: {
+                files: [{
+                    expand: true,
+                    src: amdSrc,
+                    rename: uglify_rename
+                }]
+            }
+        },
+        copy: {
+            js:{
                 files: [{
                     expand: true,
                     src: amdSrc,
@@ -94,12 +129,9 @@ module.exports = function(grunt) {
             },
             amd: {
                 files: ['**/amd/src/**/*.js'],
-                tasks: ['amd']
+                tasks: ['copy:js']
             },
-            bootstrapbase: {
-                files: ["theme/bootstrapbase/less/**/*.less"],
-                tasks: ["less:bootstrapbase"]
-            },
+            
             yui: {
                 files: ['**/yui/src/**/*.js'],
                 tasks: ['shifter']
@@ -224,6 +256,7 @@ module.exports = function(grunt) {
           var files = Object.keys(changedFiles);
           grunt.config('jshint.amd.src', files);
           grunt.config('uglify.amd.files', [{ expand: true, src: files, rename: uglify_rename }]);
+          grunt.config('copy.js.files', [{ expand: true, src: files, rename: uglify_rename }]);
           grunt.config('shifter.options.paths', files);
           changedFiles = Object.create(null);
     }, 200);
@@ -235,17 +268,17 @@ module.exports = function(grunt) {
 
     // Register NPM tasks.
     grunt.loadNpmTasks('grunt-contrib-uglify');
+    grunt.loadNpmTasks('grunt-terser');
     grunt.loadNpmTasks('grunt-contrib-jshint');
     grunt.loadNpmTasks('grunt-contrib-less');
     grunt.loadNpmTasks('grunt-contrib-watch');
-
+    grunt.loadNpmTasks('grunt-contrib-copy');
     // Register JS tasks.
     grunt.registerTask('shifter', 'Run Shifter against the current directory', tasks.shifter);
-    grunt.registerTask('amdonly', ['uglify']);
-    grunt.registerTask('amd', ['jshint', 'uglify']);
-    grunt.registerTask('js', ['amd', 'shifter']);
-
-    // Register CSS taks.
+    grunt.registerTask('amdonly', ['terser']);
+    grunt.registerTask('amd', [/*'jshint',*/ 'terser']);
+    grunt.registerTask('js', ['amdonly', 'shifter']);
+    // Register CSS tasks.
     grunt.registerTask('css', ['less:bootstrapbase']);
 
     // Register the startup task.

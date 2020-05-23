@@ -1,10 +1,7 @@
 # moodle-mod_treasure
 Activity module for Moodle that allows to run outdoor, indoor (QRCodes), virtual maps (canvas) treasure-chases with geolocation. [Tutorial and manuals in English and Spanish](https://juacas.github.io/moodle-mod_treasurehunt/)
 
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/main.jpg" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/4.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/1.png" height="200">
-<img src="https://juacas.github.io/moodle-mod_treasurehunt/assets/images/users.jpg" height="200">
+<img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/main-1100x733.jpg" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/send-location.gif" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/user-progress-800x533.png" height="200"><img src="http://juacas.github.io/moodle-mod_treasurehunt/assets/images/users-800x533.jpg" height="200">
 
 Installation
 =============
@@ -37,6 +34,15 @@ See also
 
 Change log
 ==========
+ - v1.4.0 Choice between 3 different playpage styles. New bootstrap-based play page more compatible and light-weight. Street view link from play page.
+ - v1.3.2 Fix upgrade code.
+ - v1.3.1c-hotfix fix to an important regression that prevented the creation of new instances.
+ - v1.3.1-hotfix Important updgrade! Moodle3.8 introduced a JS compiler that conflicts with geocode.js lib and breaks all javascript of the site. Now it is reimplemented.
+ - v1.3.1 Fix in dyndates.js. Fix radio buttons in answers for Moodle up to 3.7.
+ - v1.3.0 Dates and times update in real-time. Interface pulishment. Workaround to Babel compiler conflict in player page.
+ - v1.2.22c Solve javascript conflict with Babel compiler in Moodle 3.8. Simplify editor buttonset. Dynamic icon.
+ - v1.2.22b Update player jacvascript to be compatible with Moodle 3.8
+ - v1.2.22 UI for QR Scanner in edit form improved. QR scanner fixed for Xiaomi Redmi S2. Player UI improved in question section.
  - v1.2.21 Fixed a minor bug in event reporting in play mode. Icons resized.
  - v1.2.20 Fixed compatibility with PostgreSQL.
  - v1.2.19 Fixed validation error when filemanager is conditionally disabled.

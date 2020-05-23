@@ -1,0 +1,312 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template core/pix_icon
+
+    Moodle pix_icon template.
+
+    The purpose of this template is to render a pix_icon.
+
+    Classes required for JS:
+    * none
+
+    Data attributes required for JS:
+    * none
+
+    Context variables required for this template:
+    * attributes Array of name / value pairs.
+
+    Example context (json):
+    {
+        "attributes": [
+            { "name": "src", "value": "http://moodle.com/wp-content/themes/moodle/images/logo-hat2.png" },
+            { "name": "class", "value": "iconsmall" }
+        ]
+    }
+
+}}
+
+<div class="ui-loader ui-corner-all ui-body-b ui-loader-verbose" id="loader" style="display:block">
+    <span class="ui-icon-loading"></span>
+    <h1>{{#str}} loading, mod_treasurehunt{{/str}}</h1>
+</div>
+<div id="container" style="display:none;">
+
+    {{! Pagina principal de la aplicacion }}
+    <div data-role="page" id="mappage"  data-quicklinks="true" data-theme="b">
+
+        {{!Menu (Panel principal de informacion)}}
+        <div data-role="panel" data-position="left" data-display="overlay" id="infopanel">
+            {{!Menu Header}}
+            <div data-role="header" data-tap-toggle="false">
+                <!-- Close menu button -->
+                <a href="#" data-role="button" data-rel="close" class=" ui-btn-inline ui-nodisc-icon ui-btn
+                   ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+                <!-- User pic and name -->
+                <h1 style="padding: 0em 0px; margin-left: 1em; margin-right: 1em;">{{{user.picture}}} {{user.name}}</h1>
+            </div>
+
+            <div role="main" class="ui-content">
+                <!-- Map layers -->
+                <a href="#layerspage" data-transition="none"
+                    class="ui-btn ui-shadow ui-btn-icon-left ui-icon-eye">
+                    {{#str}} layers, mod_treasurehunt{{/str}}
+                </a>
+
+                <!-- Attempt history -->
+                <a href="#historypage" data-transition="none"
+                    class="ui-btn ui-shadow ui-btn-icon-left ui-icon-bullets">
+                    {{#str}} history, mod_treasurehunt{{/str}}
+                </a>
+                <a href="view.php?id={{cmid}}" class="ui-btn  ui-btn-icon-left ui-icon-delete ui-corner-all" data-ajax="false">
+                    {{#str}} exit, mod_treasurehunt{{/str}}
+                </a>
+            </div>          
+        </div>
+        {{!Fin de Menu}}
+
+        {{!Panel de busqueda de informacion}}
+        <div data-role="panel" data-position="right" data-display="overlay" id="searchpanel">
+            <div data-role="header" data-tap-toggle="false">
+                <a href="#" data-role="button" data-rel="close" class="ui-btn-right ui-nodisc-icon ui-btn
+                   ui-icon-carat-r ui-btn-icon-notext ui-corner-all"></a>
+                <h1>{{#str}} search, mod_treasurehunt{{/str}}</h1>
+                <div class="ui-bar ui-bar-b">
+                    <form class="ui-filterable">
+                        <input id="autocomplete-input" data-type="search" placeholder="Find a place...">
+                    </form>
+                </div>
+            </div>
+            <div role="main" class="ui-content">
+                <ul id="autocomplete" data-role="listview" data-inset="true" data-filter="true" data-input="#autocomplete-input"></ul>
+            </div>
+        </div>
+        {{!Fin de Panel de busqueda de informacion}}
+
+        {{!Popup for QR scanner}}
+		<div data-role="popup" id="QRdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" >
+	        <div data-role="header" data-theme="b">
+			    <h2>SCAN QR</h2>
+		    </div>
+            <div data-role="content" class="ui-content ui-overlay-b">
+		        <div id="previewVideoDiv"><video playsinline id="previewQRvideo" style="display:none;width:100%;height:100%"></video></div>
+                <div id="previewQRbuttons" class="ui-block-a">
+                    <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow  ui-btn-inline ui-btn-b">
+                        {{#str}} cancel, mod_treasurehunt{{/str}}
+                    </a><a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="nextcamera"></a>
+	                <div id="errorQR" style="display:inline">Camera</div>
+                </div>
+            </div>
+		</div>
+        {{!Fin de Popup for QR scanner}}
+
+        {{!Popup de aviso de envio}}
+        <div data-role="popup" id="popupdialog" data-overlay-theme="b" data-theme="b" data-dismissible="false" style="max-width:400px;">
+            <div data-role="header" data-theme="b">
+                <h1>{{#str}} sendlocationtitle, mod_treasurehunt{{/str}}</h1>
+            </div>
+            <div role="content" class="ui-content ui-overlay-b">
+                <p>{{#str}} sendlocationcontent, mod_treasurehunt{{/str}}</p>
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
+                            {{#str}} cancel, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                    <div class="ui-block-b">
+                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b" data-transition="flow" id="sendLocation">
+                            {{#str}} send, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        {{!Fin de Popup de aviso de envio}}
+
+        {{!Popup de aviso de geolocalizacion}}
+        <div data-role="popup" id="popupgeoloc" data-overlay-theme="b" data-theme="b" data-dismissible="false" >
+            <div data-role="header" data-theme="b">
+                <h1>{{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}</h1>
+            </div>
+            <div role="content" class="ui-content ui-overlay-b">
+                <p>{{#str}} geolocation_needed, mod_treasurehunt{{/str}}</p>
+                <fieldset class="ui-grid-a">
+                    <div class="ui-block-a">
+                        <a href="#" data-rel="back" class="ui-btn ui-corner-all ui-shadow ui-btn-b">
+                            {{#str}} cancel, mod_treasurehunt{{/str}}
+                        </a>
+                    </div>
+                </fieldset>
+            </div>
+        </div>
+        {{!Fin de Popup de aviso de geolocalizacion}}
+
+        {{!Header and toolbar}}
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#infopanel"  data-rel="panel" data-dismissible="true" class="ui-btn ui-btn-left ui-btn-inline ui-icon-bars ui-btn-icon-notext"></a>
+            <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all ui-btn-inline ui-btn-icon-notext ui-icon-search">
+                {{#str}} search, mod_treasurehunt{{/str}}
+            </a>
+            <h1>{{#pix}} icon, treasurehunt, treasurehunt icon {{/pix}}
+            {{#str}} stage, mod_treasurehunt{{/str}} <span id="lastsuccesfulstagepos2"></span>
+            <a href="#" data-role="button" id="playerhelp" class="ui-btn ui-shadow ui-corner-all ui-btn-inline ui-icon-help ui-btn-icon-notext"></a></h1>
+        </div>
+        {{!End of Header and toolbar}}
+
+        <div data-role="content" id="content">
+            <div id="mapplay"></div>
+            <div class="treasureoverlay" id="roadended" style="position:relative;left: 0;bottom: 0;width: 100%;height: 100%;z-index: 1;background-color: rgba(25,25,25,0.6);text-align: center;" hidden="true">
+            {{#str}}roadended, mod_treasurehunt{{/str}}</div>
+        </div>
+
+        <!--
+        ==============
+        Footer buttons
+        ============== -->
+        <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
+
+            <!-- QRCode popup -->
+            <a href="#QRdialog" data-rel="popup" data-position-to="window" data-transition="none"
+               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-camera ui-btn-icon-notext" id="validateqr">
+                {{#str}} validateqr, mod_treasurehunt{{/str}}
+            </a>
+            <!-- Clue or question big button -->
+            <a id="bigbtn" href="#cluepage" class="bigbtn" data-transition="slideup">
+                {{#pix}} fancy/btn_clue, treasurehunt, stage_clue {{/pix}}
+            </a>
+
+            <!-- Location validation Button -->
+            <a href="#popupdialog" data-rel="popup" data-position-to="window" data-transition="none"
+               class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-check ui-btn-icon-notext" id="validatelocation">
+                <!--{{#str}} validatelocation, mod_treasurehunt{{/str}} -->
+            </a>
+
+            <!-- Map zoom buttons -->
+            <div id="navigation">
+                <!-- Location button -->
+                <a href="#" class="ui-btn ui-shadow ui-corner-all ui-btn-icon-left ui-btn-inline ui-icon-location ui-btn-icon-notext"
+                id="autolocate"></a>
+            </div>
+
+        </div>
+        {{!Fin de Cabecera y barra de herramientas.}}
+
+    </div>
+    {{! Fin de Pagina principal de la aplicacion }}
+
+    {{! Map payer Page }}
+    <div id="layerspage" data-role="page" data-theme="b" >
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <h1>{{#str}} layers, mod_treasurehunt{{/str}}</h1>
+        </div>
+        <div data-role="content">
+            <ul data-role="listview" data-inset="true" data-theme="b" data-divider-theme="b" id="layerslist">
+                <li data-role="list-divider" id="baseLayer">{{#str}} mapview, mod_treasurehunt{{/str}}</li>
+            </ul>
+        </div>
+    </div>
+    {{! End of Map payer page }}
+
+    {{! Clue page }}
+    <div id="cluepage" data-role="page" data-theme="b" >
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <h1>{{#str}} clue, mod_treasurehunt{{/str}}</h1>
+        </div>
+        <div class="activityBg">{{#pix}} fancy/activityBg, treasurehunt, Background {{/pix}}</div>
+        <div data-role="content">
+        	  <div id="lastsuccessfulstage2">
+                    <h3>
+                        <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>
+                        {{#str}} clue, mod_treasurehunt{{/str}} : <span id="lastsuccessfulstagename2"></span>
+                    </h3>
+                    <div>
+                        <p id="lastsuccessfulstageclue2"></p>
+                    </div>
+                    <!-- Button -->
+                    <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
+                        <a href="#mappage" class="bigbtn">
+                            {{#pix}} fancy/btn_clue, treasurehunt, clue {{/pix}}
+                        </a>
+                    </div>
+              </div>
+        </div>
+    </div>
+    {{! End of Clue page }}
+
+    {{! Attempt history page }}
+    <div id="historypage" data-role="page" data-theme="b" >
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <h1>{{#str}} history, mod_treasurehunt{{/str}}</h1>
+        </div>
+        <div data-role="content">
+              <div id="lastsuccessfulstage23">
+	                <h3>{{#str}} history, mod_treasurehunt{{/str}}</h3>
+			            <ol data-role="listview" data-inset="true" data-theme="b"  id="historylist">
+			                <li>{{#str}} noattempts, mod_treasurehunt{{/str}}</li>
+			            </ol>
+	          </div>
+        </div>
+    </div>
+    {{! End of Attempt history page }}
+
+    {{! Question page }}
+    <div id="questionpage" data-role="page" data-theme="b">
+        <div data-role="header" data-position="fixed" data-tap-toggle="false">
+            <a href="#mappage" data-role="button" class="ui-btn-left  ui-nodisc-icon ui-btn ui-icon-carat-l ui-btn-icon-notext ui-corner-all"></a>
+            <h1>{{#str}} question, mod_treasurehunt{{/str}}</h1>
+        </div>
+        <div data-role="content">
+            <div id="lastsuccessfulstage2">
+                    <h3>
+                        <div class="custom-count-pos ui-body-b" id="lastsuccesfulstagepos2"></div>
+                        <span id="lastsuccessfulstagename2"></span>
+                    </h3>
+                    <div>
+                        <p id="lastsuccessfulstageclue2"></p>
+                    </div>
+            </div>
+            <form>
+                <fieldset data-role="controlgroup" id='questionform'>
+                </fieldset>
+            </form>
+            <fieldset class="ui-grid-a">
+                <div class="ui-block-a"><a href="#mappage" class="ui-btn ui-corner-all ui-shadow  ui-btn-b" data-transition="none">
+                        {{#str}} cancel, mod_treasurehunt{{/str}}
+                    </a>
+                </div>
+                <div class="ui-block-b"><a href="#" class="ui-btn ui-corner-all ui-shadow  ui-btn-b"  data-transition="none" id="sendAnswer">
+                        {{#str}} send, mod_treasurehunt{{/str}}
+                    </a>
+                </div>
+            </fieldset>
+
+            <!-- Button -->
+            <div data-role="footer" data-position="fixed"  data-tap-toggle="false">
+                <a href="#mappage" class="bigbtn">
+                    {{#pix}} fancy/btn_question, treasurehunt, question {{/pix}}
+                </a>
+            </div>
+        </div>
+    </div>
+    {{! End of Question page }}
+
+    {{#js}}
+
+    {{/js}}

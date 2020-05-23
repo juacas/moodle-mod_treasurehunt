@@ -8,15 +8,14 @@
 		<licenseversion>2.0</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/ol.js/</location>
+		<location>amd/src/ol.js</location>
 		<name>Openlayers</name>
 		<version>3.16.0</version>
 		<license>FreeBSD</license>
 		<licenseversion>n/a</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/jquery-ui-touch-punch/jquery-ui-touch-punch.js/
-		</location>
+		<location>amd/src/jquery-ui-touch-punch.js</location>
 		<name>jQuery UI Touch Punch</name>
 		<version>0.2.3</version>
 		<license>GPL</license>
@@ -61,7 +60,7 @@
 		<!-- Pathable	https://github.com/pathable/truncate -->
 	</library>
 	<library>
-		<location>js/instascan/instascan.js</location>
+		<location>amd/src/instascan.js</location>
 		<name>INSTASCAN</name>
 		<version>1.0.0</version>
 		<license>MIT</license>

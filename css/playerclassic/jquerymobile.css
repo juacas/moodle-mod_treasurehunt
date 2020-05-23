@@ -923,7 +923,7 @@ html .ui-alt-icon .ui-radio-off:after {
 }
 /* Loader */
 .ui-icon-loading {
-    background: url(../pix/ajax-loader.gif);
+    background: url(../../pix/ajax-loader.gif);
     background-size: 2.875em 2.875em;
 }
 /* Swatches */
@@ -2825,7 +2825,7 @@ li.ui-block-e {
 }
 .ui-collapsible-inset,
 .ui-collapsible-set {
-    margin: .5em 0;
+    margin: 0.5em 0;
 }
 .ui-collapsible-heading {
     display: block;
@@ -2863,7 +2863,7 @@ li.ui-block-e {
 .ui-collapsible-content {
     display: block;
     margin: 0;
-    padding: .5em 1em;
+    padding: 0.5em 1em;
 }
 .ui-collapsible-themed-content .ui-collapsible-content {
     border-left-width: 0;

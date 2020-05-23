@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="25.872808"
+   height="25.872808"
+   viewBox="0 0 6.8455139 6.8455139"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="icon_empty.svg"
+   inkscape:export-filename="D:\desarrollo\workspaces\PHP\moodle-mod_treasurehunt\pix\icon.png"
+   inkscape:export-xdpi="96"
+   inkscape:export-ydpi="96">
+  <defs
+     id="defs2" />
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="10.24"
+     inkscape:cx="33.121244"
+     inkscape:cy="15.357296"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="1920"
+     inkscape:window-height="1001"
+     inkscape:window-x="2391"
+     inkscape:window-y="122"
+     inkscape:window-maximized="1"
+     units="px"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-74.414062,-125.06808)">
+    <polygon
+       style="fill:#4e342e"
+       points="6,13 42,13 39,18 42,25 6,25 9,18 "
+       id="polygon3680"
+       transform="matrix(0.19015317,0,0,0.19015317,73.273143,123.92716)" />
+    <path
+       style="fill:#795548;stroke-width:0.19015317"
+       inkscape:connector-curvature="0"
+       d="m 81.259576,131.91359 h -6.845514 v -3.2326 h 6.845514 z m 0,-5.51444 c 0,0 -0.02377,-1.33107 -0.950766,-1.33107 -0.926996,0 -4.028775,0 -4.943982,0 -0.950766,0 -0.950766,1.33107 -0.950766,1.33107 z"
+       id="path3682" />
+    <path
+       style="fill:#5d4037;stroke-width:0.19015317"
+       inkscape:connector-curvature="0"
+       d="m 81.259576,130.01206 h -6.845514 v -0.3803 h 6.845514 z m 0,0.76061 h -6.845514 v 0.38031 h 6.845514 z"
+       id="path3684" />
+    <path
+       style="fill:#ffab00;stroke-width:0.19015317"
+       inkscape:connector-curvature="0"
+       d="m 78.597432,128.68099 v 0.76061 c 0,0.41834 -0.342276,0.76061 -0.760613,0.76061 -0.418337,0 -0.760613,-0.34227 -0.760613,-0.76061 v -0.76061 z m -4.18337,3.2326 h 1.140919 c 0,-0.62997 -0.510751,-1.14092 -1.140919,-1.14092 z m 6.845514,-1.14092 c -0.630167,0 -1.140919,0.51095 -1.140919,1.14092 h 1.140919 z m -3.422757,-5.13413 c -0.418337,0 -0.760613,0.34227 -0.760613,0.76061 h 1.521226 c 0,-0.41834 -0.342276,-0.76061 -0.760613,-0.76061 z"
+       id="path3686" />
+    <polygon
+       style="fill:#212121"
+       points="42,13 39,18 9,18 6,13 "
+       id="polygon3688"
+       transform="matrix(0.19015317,0,0,0.19015317,73.273143,123.92716)" />
+    <path
+       style="fill:#3e2723;stroke-width:0.19015317"
+       inkscape:connector-curvature="0"
+       d="m 77.836819,129.82191 v 0 c -0.104584,0 -0.190153,-0.0856 -0.190153,-0.19015 v -0.19016 c 0,-0.10458 0.08557,-0.19015 0.190153,-0.19015 v 0 c 0.104584,0 0.190153,0.0856 0.190153,0.19015 v 0.19016 c 0,0.10458 -0.08557,0.19015 -0.190153,0.19015 z"
+       id="path3696" />
+  </g>
+</svg>

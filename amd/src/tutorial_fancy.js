@@ -24,48 +24,66 @@
 define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
         function ($, jqui, introJS, str, notification) {
             var init = {
-                editpage: function () {
+                launchedittutorial: function() {
                     var intro = introJS();
+                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_edit_tour',
+                        'map_tour', 'mapplay_tour', 'roads_tour',
+                        'stages_tour', 'addroad_tour', 'addstage_tour', 'save_tour', 'editend_tour'];
+                    var stringQueried = terms.map(function (term) {
+                        return { key: term, component: 'treasurehunt' };
+                    });
+                    $('.treasurehunt-editor-loader').show();
+                    str.get_strings(stringQueried).done(function (strings) {
+                        $('.treasurehunt-editor-loader').hide();
+                        configureEditIntro(intro, strings, terms);
+                        intro.start();
+                    }).fail(notification.exception);
+                },
+                editpage: function () {
                     var cook = {};
+                    $('#edition_maintitle > h2 > a').on('click', this.launchedittutorial);
+
                     document.cookie.split(';').forEach(function (x) {
                         var arr = x.split('=');
                         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
                     });
                     if (cook["introEditProgress"] != 'Done') {
-                        var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_edit_tour',
-                        	'map_tour', 'mapplay_tour', 'roads_tour',
-                            'stages_tour', 'addroad_tour', 'addstage_tour', 'save_tour', 'editend_tour'];
-                        var stringQueried = terms.map(function (term) {
-                            return {key: term, component: 'treasurehunt'};
-                        });
-                        str.get_strings(stringQueried).done(function (strings) {
-                            configureEditIntro(intro, strings, terms);
-                            setTimeout(function () {
-                                intro.start();
-                            }, 1000);
-                        }).fail(notification.exception);
+                        this.launchedittutorial();
                     }
                 }, // end of editpage function
-                playpage: function () {
+                launchplaytutorial: function() {
                     var intro = introJS();
+                    var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 
+                        'welcome_play_tour', 'bigbutton_play_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 
+                        'playerhelp_tour', 'playend_tour'];
+                    var stringQueried = terms.map(function (term) {
+                        return { key: term, component: 'treasurehunt' };
+                    });
+                    $.mobile.loading("show");
+                    str.get_strings(stringQueried).done(function (strings) {
+                        // JPC: With jquery 2 promises are not resolved at this point.
+                        (async () => {
+                            for (var i = 0; i < strings.length; i++) {
+                                strings[i] = await strings[i];
+                            }
+                        })().then(() => {
+                            $.mobile.loading("hide");
+                            //$("#infopanel").panel("open");
+                            configurePlayIntro(intro, strings, terms);
+                            intro.start();});
+                    }).fail(notification.exception);
+                },
+                playpage: function () {
                     var cook = {};
+                    $('#playerhelp').on('click', this.launchplaytutorial);
+
                     document.cookie.split(';').forEach(function (x) {
                         var arr = x.split('=');
                         arr[1] && (cook[arr[0].trim()] = arr[1].trim());
                     });
-                    if (cook["introPlayProgress"] != 'Done') {
-                        var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_play_tour', 'lastsuccessfulstage_tour', 'mapplay_tour', 'validatelocation_tour', 'autolocate_tour', 'playend_tour'];
-                        var stringQueried = terms.map(function (term) {
-                            return {key: term, component: 'treasurehunt'};
-                        });
-                        str.get_strings(stringQueried).done(function (strings) {
-                            configurePlayIntro(intro, strings, terms);
-                            setTimeout(function () {
-                                intro.start();
-                            }, 1000);
-                        }).fail(notification.exception);
-                    }
-
+                    //if (cook["introPlayProgress"] != 'Done') {
+                       this.launchplaytutorial();
+                    //}
                 }, // ...end of playpage function.
 
             }; // ...end of init var.
@@ -145,25 +163,36 @@ function configurePlayIntro(intro, strings, keys) {
                 intro: strings[keys.indexOf('welcome_play_tour')],
                 position: 'floating'
             },
-            {
+            /*{
                 element: '#collapsibleset', //#lastsuccessfulstage',
                 intro: strings[keys.indexOf('lastsuccessfulstage_tour')],
                 position: 'top'
-            },
+            },*/
             {
-                element: '#mapplay',
-                intro: strings[keys.indexOf('mapplay_tour')],
-                position: 'floating'
+                element:'#bigbtn',
+                intro: strings[keys.indexOf('bigbutton_play_tour')],
+                position: 'top'
             },
             {
                 element: '#validatelocation',
                 intro: strings[keys.indexOf('validatelocation_tour')],
                 position: 'top'
             },
+            // You may have to discover QRCodes to validate stages <img>.<br>Click the camera button to show the code you found.
+            {
+                element: '#mapplay',
+                intro: strings[keys.indexOf('mapplay_tour')],
+                position: 'floating'
+            },
             {
                 element: '#autolocate',
                 intro: strings[keys.indexOf('autolocate_tour')],
                 position: 'top'
+            },
+            {
+                element: '#playerhelp',
+                intro: strings[keys.indexOf('playerhelp_tour')],
+                position: 'bottom'
             },
             {
                 element: '#treasurehunt-editor',
@@ -172,15 +201,21 @@ function configurePlayIntro(intro, strings, keys) {
             }
         ]
     });
+    /** Open the Clue or Question panel */
+    function open_next_activity_panel() {
+        $("#bigbtn").click();
+    }
     intro.onexit(function (target) {
-        document.cookie = "introPlayProgress = Done";
+        //document.cookie = "introPlayProgress = Done";
+        open_next_activity_panel();
     });
     intro.oncomplete(function (target) {
-        document.cookie = "introPlayProgress = Done";
+        //document.cookie = "introPlayProgress = Done";
+        //open_next_activity_panel();
     });
     intro.onchange(function (target) {
         document.cookie = "introPlayStep = " + this._currentStep;
-        document.cookie = "introPlayProgress = Done"; // Skip the tutorial if visited.
+        //document.cookie = "introPlayProgress = Done"; // Skip the tutorial if visited.
     });
     intro.onafterchange(function (target) {
         var parentElem = target.parentElement;
