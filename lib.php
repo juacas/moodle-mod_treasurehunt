@@ -281,9 +281,19 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
         $cache->set($cm->instance, $treasurehunt);
     }
     $now = time();
+    list($status, $next) = treasurehunt_get_time_status($treasurehunt, $now);
     $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
     $cm->set_icon_url($iconurl);
-    $cm->set_after_link('pronto empieza');
+    
+    // if ($status == 'tobegin' ) {
+    //     $cm->set_after_link('<span class="label label-info"> be3gin in ' 
+    //         . userdate_htmltime($treasurehunt->allowattemptsfromdate)) 
+    //         . '</span>';
+    // } else if ($status == 'ongoing' && $next == 'end') {
+    //     $cm->set_after_link('<span class="label label-info"> Closes '
+    //          . userdate_htmltime($treasurehunt->cutoffdate)
+    //         . '</span>');
+    // }
 }
 /**
  * Get a icon url depending on the status of the treasurehunt:
@@ -296,13 +306,11 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
  */
 function treasurehunt_get_proper_icon($treasurehunt, $now)
 {
-    if (($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate == 0) ||
-        ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) ||
-        ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate == 0) ||
-        ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate)
-    ) {
+    list($status, $nextevent) = treasurehunt_get_time_status($treasurehunt, $now);
+
+    if ($status == 'ongoing') {
         $icon = 'icon';
-    } else if ($now < $treasurehunt->allowattemptsfromdate) {
+    } else if ($status == 'tobegin') {
         $icon = 'icon_closed';
     } else {
         $icon = 'icon_empty';
@@ -316,6 +324,33 @@ function treasurehunt_get_proper_icon($treasurehunt, $now)
         $iconurl = new moodle_url("/mod/treasurehunt/pix/{$icon}.svg");
     }
     return $iconurl;
+}
+/**
+ * 
+ */
+function treasurehunt_get_time_status($treasurehunt, $now) {
+    $status = null;
+    if (($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate == 0))
+    {
+        $status = 'ongoing';
+        $nextevent = 'nolimit';
+    } else if ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) {
+        $status = 'ongoing';
+        $nextevent = 'end';
+    } else if ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate == 0) {
+        $status = 'ongoing';
+        $nextevent = 'nolimit';
+    } else if($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate) {
+        $status = 'ongoing';
+        $nextevent = 'end';
+    } else if ($now < $treasurehunt->allowattemptsfromdate) {
+        $status = 'tobegin';
+        $nextevent = 'start';
+    } else {
+        $status = 'ended';
+        $nextevent = 'none';
+    }
+    return [$status, $nextevent];
 }
 /**
  * Function to be run periodically according to the moodle cron
