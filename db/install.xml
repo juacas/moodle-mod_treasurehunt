@@ -15,7 +15,7 @@
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playwithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true students may play from their computers without moving to places. If false they need to be on location."/>
                 <FIELD NAME="tracking" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the system saves a log with the location of every user during the game."/>
-                <FIELD NAME="custommapconfig" TYPE="text" NOTNULL="false" DEFAULT="null" SEQUENCE="false" COMMENT="If a custom map background is uploaded this is the BBOX of the position over the earth."/>
+                <FIELD NAME="custommapconfig" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="If a custom map background is uploaded this is the BBOX of the position over the earth."/>
                 <FIELD NAME="groupmode" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the activity will be in groups."/>
                 <FIELD NAME="alwaysshowdescription" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If false the treasurehunt intro will only be displayed after the allowsubmissionsfrom date. If true it will always be displayed."/>
                 <FIELD NAME="allowattemptsfromdate" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If set, submissions will only be accepted after this date."/>
