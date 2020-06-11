@@ -58,12 +58,7 @@ $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
-/*
-* Other things you may want to set - remove if not needed.
-* $PAGE->set_cacheable(false);
-* $PAGE->set_focuscontrol('some-html-id');
-* $PAGE->add_body_class('treasurehunt-'.$somevar);
-*/
+
 $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
@@ -135,14 +130,14 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
              && !$user_attempt_renderable->teacherreview) {
             echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
         }
-        echo $output->box_end();
-
+        
         // Output user attempt history.
         echo $output->render($user_attempt_renderable);
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
     }
 }
+echo $output->box_end();
 // Render a briefing of the progress of the participants of the Treasurehunt.
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
         || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
