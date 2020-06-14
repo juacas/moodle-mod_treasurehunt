@@ -2,11 +2,32 @@
 .treasurehunt-success-attempt {
   color: #4caf50;
 }
+
 .treasurehunt-failed-attempt {
   color: #ef5350;
 }
+
 .treasurehunt-no-margin {
   margin: 0 !important;
+}
+
+.successwithfailures {
+  background-color: #ebf044 !important;
+  color: #000000;
+}
+
+.successwithoutfailures {
+  background-color: #4caf50;
+  color: #000000;
+}
+
+.noattempt {
+  background-color: #c0c0c0 !important;
+  color: #000000;
+}
+
+.rating {
+  margin: 5px 0 0 5px;
 }
 
 /* ############## PLAY STYLE ############# */

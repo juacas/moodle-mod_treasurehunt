@@ -36,7 +36,6 @@ use context_module;
 use completion_info;
 use core\session\exception;
 
-
 /**
  * Mobile output class for Choice group
  *
@@ -57,7 +56,7 @@ class mobile
         global $CFG;
         return [
             'templates' => [],
-            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/mobile_init.js'),
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_init.js'),
             'otherdata' => '',
             'files' => []
         ];
@@ -116,7 +115,7 @@ class mobile
             try {
                 $params = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, null);
                 $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $params->groupid, $params->roadid);
-                $attempts = treasurehunt_get_user_historical_attempts($params->groupid, $USER->id, $params->roadid);
+                $attempts = treasurehunt_get_user_attempt_history($params->groupid, $USER->id, $params->roadid);
                 if ($params->groupid) {
                     $username = groups_get_group_name($params->groupid);
                 } else {
@@ -126,6 +125,9 @@ class mobile
                 $exception = $e->getMessage();
             }
         }
+
+        // Grade Method
+        $grademethod = treasurehunt_get_grading_options()[$treasurehunt->grademethod];
 
         // Progress users
         $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
@@ -156,10 +158,12 @@ class mobile
                     'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_view_page', $data),
                 ),
             ),
-            'javascript' => 'setTimeout(()=>window.treasurehuntViewPageInit(this))',
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_view.js'),
             // 'javascript' => "",
             'otherdata' => array(
                 'timenow' => $timenow,
+                'grademethod' => $grademethod,
+                'groupmode' => boolval($treasurehunt->groupmode),
                 'roadfinished' => $roadfinished,
                 'attempts' => json_encode($attempts), // Cannot put arrays in otherdata.
                 'username' => $username,
@@ -223,7 +227,7 @@ class mobile
                     'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_page', $data),
                 ),
             ),
-            'javascript' => 'setTimeout(()=>window.treasurehuntPlayPageInit(this))',
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play.js'),
             // 'javascript' => "",
             'otherdata' => array(),
         );
