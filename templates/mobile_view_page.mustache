@@ -173,20 +173,7 @@
             <h2>{{ 'plugin.mod_treasurehunt.grademethod' | translate }}             
                 <ion-icon name="help-circle"></ion-icon>
             </h2>
-            <p>
-                <ng-container *ngIf="<% treasurehunt.grademethod %> === 1">
-                    {{ 'plugin.mod_treasurehunt.gradefromstages' | translate}}
-                 </ng-container>
-                <ng-container *ngIf="<% treasurehunt.grademethod %>  === 2">
-                    {{ 'plugin.mod_treasurehunt.gradefromtime' | translate}}
-                </ng-container>
-                <ng-container *ngIf="<% treasurehunt.grademethod %> === 3">
-                    {{ 'plugin.mod_treasurehunt.gradefromposition' | translate}}
-                </ng-container>
-                <ng-container *ngIf="<% treasurehunt.grademethod %> === 4">
-                    {{ 'plugin.mod_treasurehunt.gradefromabsolutetime' | translate}}
-                </ng-container>
-            </p>
+            <p>{{CONTENT_OTHERDATA.grademethod}}</p>
             <p>
                 <ion-grid no-padding>
                     <ion-row>
@@ -200,6 +187,14 @@
                 </ion-grid>                   
             </p>
         </ion-item>
+        <!-- Play or review button. -->
+        <ion-item>
+            <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
+                Jugar
+                <ion-icon name="play"></ion-icon>
+            </button>
+        </ion-item>
+        
     </ion-list>
 
      <!-- Tabs: see the user/group attempts or users progress. -->
@@ -209,7 +204,7 @@
             <ng-template>
                 <ion-list class="treasurehunt-no-margin">
                     <ion-list-header class="treasurehunt-no-margin">
-                        {{ 'plugin.mod_treasurehunt.historicalattempts' | translate : {$a: CONTENT_OTHERDATA.username} }}
+                        {{ 'plugin.mod_treasurehunt.attempthistory' | translate : {$a: CONTENT_OTHERDATA.username} }}
                     </ion-list-header>
 
                      <!-- User historical attempts -->
@@ -220,15 +215,9 @@
                     <ion-item text-wrap *ngFor="let attempt of CONTENT_OTHERDATA.attempts">
                         <ion-icon class="treasurehunt-success-attempt" *ngIf="!attempt.penalty" item-start name="checkmark-circle"></ion-icon>
                         <ion-icon class="treasurehunt-failed-attempt" *ngIf="attempt.penalty" item-start name="close-circle"></ion-icon>
-                        <p>{{attempt.string}}</p>
+                        <p [innerHtml]="attempt.string"></p>
                     </ion-item>
-                    <!-- Play or review button. -->
-                    <ion-item>
-                        <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
-                            Jugar
-                            <ion-icon name="play"></ion-icon>
-                        </button>
-                    </ion-item>
+                    
                 </ion-list>
             </ng-template>
         </core-tab>
@@ -237,10 +226,41 @@
         <core-tab icon="people" [title]="'Progreso total'">
             <ng-template>
                 <ion-list>
+                    <!-- No roads advice -->
                     <ion-item text-wrap *ngIf="!CONTENT_OTHERDATA.usersprogress.roads.length && CONTENT_OTHERDATA.managepermission">
                         <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
                         <p> {{ 'plugin.mod_treasurehunt.noroads' | translate }} </p>
                     </ion-item>
+
+                    <!-- User attemps status for each road -->
+                    <ng-container *ngFor="let road of CONTENT_OTHERDATA.usersprogress.roads">
+                        <ion-list-header class="treasurehunt-no-margin" (click)="showUsersProgressHelp()">
+                            {{ road.name }} <ion-icon name="help-circle"></ion-icon>
+                        </ion-list-header>
+                        <ng-container *ngIf="CONTENT_OTHERDATA.groupmode">
+                            <ion-item *ngFor="let group of road.userlist" text-wrap>
+                                <h2>{{ group.name }}</h2>
+                                <p>
+                                    <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
+                                    [ngClass]="group.ratings[i+1] ? group.ratings[i+1].class : 'noattempt'">
+                                        {{(i+1)}}
+                                    </ion-badge>
+                                </p>
+                            </ion-item>
+                        </ng-container>
+                        <ng-container *ngIf="!CONTENT_OTHERDATA.groupmode">
+                            <a ion-item *ngFor="let user of road.userlist" text-wrap  core-user-link [userId]="user.id" [title]="user.fullname">
+                                <ion-avatar core-user-avatar [user]="user" [checkOnline]="true" item-start></ion-avatar>
+                                <h2>{{ user.fullname }}</h2>
+                                <p>
+                                    <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
+                                    [ngClass]="user.ratings[i+1] ? user.ratings[i+1].class : 'noattempt'">
+                                        {{(i+1)}}
+                                    </ion-badge>
+                                </p>
+                            </a>
+                        </ng-container>
+                    </ng-container> 
                 </ion-list>
             </ng-template>
         </core-tab>

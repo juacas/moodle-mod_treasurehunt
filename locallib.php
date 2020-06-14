@@ -1669,7 +1669,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                 $totalparticipantsgroups,
                 $duplicategroupsingroupings
             ) = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
-            $roads = treasurehunt_add_road_userlist($roads, $groupingid, $grouplist, $attempts);
+            $roads[] = treasurehunt_get_road_userlist($groupingid, $grouplist, $attempts);
         }
 
         // Check if there are participants in more than one group in the same road.
@@ -1687,7 +1687,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
             $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:play');
-            $roads = treasurehunt_add_road_userlist($roads, current($availablegroups), $totalparticipants, $attempts);
+            $roads[] = treasurehunt_get_road_userlist(current($availablegroups), $totalparticipants, $attempts);
         } else {
             foreach ($availablegroups as $group) {
                 if ($group->groupid) {
@@ -1707,7 +1707,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                 } else {
                     $userlist = array();
                 }
-                $roads = treasurehunt_add_road_userlist($roads, $group, $userlist, $attempts);
+                $roads[] = treasurehunt_get_road_userlist($group, $userlist, $attempts);
             }
         }
     }
@@ -2471,24 +2471,23 @@ function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $c
 }
 
 /**
- * Add the list of users with their attempts to their road assigned.
+ * Get the list of users with their attempts to their road assigned.
  *
  * @param array $roads The collection of roads.
  * @param stdClass $data The road information.
  * @param array $userlist The list of users assigned to the road.
  * @param array $attempts The collection of attempts.
- * @return array The collection of roads
+ * @return stdClass The collection of roads
  */
-function treasurehunt_add_road_userlist($roads, $data, $userlist, $attempts)
+function treasurehunt_get_road_userlist($data, $userlist, $attempts)
 {
     $road = new stdClass();
     $road->id = $data->roadid;
     $road->name = $data->roadname;
     $road->validated = $data->validated;
     $road->totalstages = $data->totalstages;
-    $road = treasurehunt_insert_stage_progress_in_road_userlist($road, $userlist, $attempts);
-    $roads[$road->id] = $road;
-    return $roads;
+    $road->userlist = treasurehunt_get_stage_progress_in_road_userlist($userlist, $attempts);
+    return $road;
 }
 
 /**
@@ -2506,16 +2505,15 @@ function treasurehunt_view_intro($treasurehunt)
 }
 
 /**
- * Add the list of users with their attempts to their road assigned.
+ * Get the list of users with their attempts to their road assigned.
  *
- * @param stdClass $road The road object.
  * @param array $userlist The list of users assigned to the road.
  * @param array $attempts The collection of attempts.
- * @return stdClass The modified road object.
+ * @return array The road user list.
  */
-function treasurehunt_insert_stage_progress_in_road_userlist($road, $userlist, $attempts)
+function treasurehunt_get_stage_progress_in_road_userlist($userlist, $attempts)
 {
-    $road->userlist = array();
+    $roaduserlist = array();
     foreach ($userlist as $user) {
         $user->ratings = array();
         // Add each user / group the corresponding color of his stage.
@@ -2537,9 +2535,9 @@ function treasurehunt_insert_stage_progress_in_road_userlist($road, $userlist, $
                 unset($attempts[$key]);
             }
         }
-        $road->userlist[] = clone $user;
+        $roaduserlist[] = clone $user;
     }
-    return $road;
+    return $roaduserlist;
 }
 
 /**
