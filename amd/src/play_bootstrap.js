@@ -31,7 +31,7 @@ define([
   "core/str",
   "mod_treasurehunt/webqr",
   "mod_treasurehunt/jquery.truncate",
-  "theme_boost/dropdown"
+  "core/popper"
   // "mod_treasurehunt/jquery.mobile-config",
   // "mod_treasurehunt/jquerymobile"
 ], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
