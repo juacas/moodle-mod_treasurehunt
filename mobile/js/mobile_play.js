@@ -22,14 +22,18 @@
  */
 
 class TreasureHuntPlayMobile {
-  constructor() {}
+  constructor() {
+    this.map = null;
+    this.defaultAnimationDuration = 700;
+    this.defaultzoom = 15;
+  }
 
   init() {
     this.initMap();
   }
 
   initMap() {
-    const map = new ol.Map({
+    this.map = new ol.Map({
       target: "map",
       layers: [
         new ol.layer.Tile({
@@ -48,18 +52,38 @@ class TreasureHuntPlayMobile {
 
     // Required to draw the map after calculating container height
     setTimeout(() => {
-      map.updateSize();
+      this.map.updateSize();
     }, 500);
 
     window.onresize = () => {
-      map.updateSize();
+      this.map.updateSize();
     };
+  }
+
+  flyTo(point, extent) {
+    const view = this.map.getView();
+    if (extent) {
+      view.fit(extent, {
+        duration: this.defaultAnimationDuration,
+      });
+    } else {
+      view.animate({
+        zoom: this.defaultzoom,
+        center: point,
+        duration: this.defaultAnimationDuration,
+      });
+    }
   }
 }
 
 var that = this;
 
 const treasureHuntPlayMobile = new TreasureHuntPlayMobile();
+
+// Needed for set jsData object to Search Page
+this.flyToCallback = {
+  flyToCallback: treasureHuntPlayMobile.flyTo.bind(treasureHuntPlayMobile),
+};
 
 /**
  * Check if script if loaded
@@ -107,7 +131,6 @@ function loadOlScript() {
   });
 }
 
-debugger;
 loadOlScript().then(() => {
   treasureHuntPlayMobile.init();
 });

@@ -109,12 +109,25 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-play-page">
-    <core-navbar-buttons #content end>
-        <button ion-button icon-only core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_search" [jsData]="flyToCallback">
-            <ion-icon name="search"></ion-icon>
-        </button>
-    </core-navbar-buttons> 
+<div class="treasurehunt-search-page">
 
-    <div id="map" class="treasurehunt-map-container"></div>
+  <ion-searchbar class="searchbar" placeholder="Buscar lugar..." [(ngModel)]="searchText"
+    (ionInput)="searchLocation()" (ionCancel)="cancelSearch()">
+  </ion-searchbar>
+
+  <!-- Show loading spinner on search -->
+  <div class="loading-spinner" *ngIf="loading">
+    <ion-spinner></ion-spinner>
+  </div>
+
+  <ion-list *ngIf="!loading">
+    <ion-item text-wrap *ngIf="places.length === 0 && searchText.length > minSearch">
+      No se han encontrado ningún resultado
+    </ion-item>
+    <button ion-item text-wrap *ngFor="let place of places" (click)="zoomToPlace(place)">
+      <ion-icon name="pin" item-start color="primary"></ion-icon>
+      <ion-label>{{ place.display_name }}</ion-label>
+    </button>
+  </ion-list>
+
 </div>

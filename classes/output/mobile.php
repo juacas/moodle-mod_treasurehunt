@@ -186,7 +186,7 @@ class mobile
      */
     public static function mobile_treasurehunt_play($args)
     {
-        global  $CFG, $OUTPUT, $DB, $PAGE;
+        global  $CFG, $OUTPUT, $DB;
 
         $args = (object) $args;
 
@@ -199,19 +199,6 @@ class mobile
         require_login($args->courseid, false, $cm, true, true);
         $context = context_module::instance($cm->id);
         require_capability('mod/treasurehunt:play', $context);
-
-        $event = \mod_treasurehunt\event\course_module_viewed::create(
-            array(
-                'objectid' => $PAGE->cm->instance,
-                'context' => $PAGE->context,
-            )
-        );
-        $event->add_record_snapshot('course', $PAGE->course);
-        $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
-        $event->trigger();
-
-        $completion = new completion_info($course);
-        $completion->set_module_viewed($cm);
 
         $data = array(
             'cmid' => $cm->id,
@@ -228,6 +215,30 @@ class mobile
                 ),
             ),
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play.js'),
+            'otherdata' => array(),
+        );
+    }
+
+    /**
+     * Returns the search view for the mobile app.
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     *
+     * @return array       HTML, javascript and otherdata
+     */
+    public static function mobile_treasurehunt_search($args)
+    {
+        global  $CFG, $OUTPUT;
+
+        $args = (object) $args;
+
+        return array(
+            'templates' => array(
+                array(
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_search_page', array()),
+                ),
+            ),
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_search.js'),
             // 'javascript' => "",
             'otherdata' => array(),
         );

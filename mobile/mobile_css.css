@@ -34,8 +34,29 @@
 .treasurehunt-play-page {
   height: 100%;
 }
+
 .treasurehunt-map-container {
   height: 100%;
+}
+
+/* Needed for move map */
+.treasurehunt-map-container .ol-layers {
+  z-index: 1 !important;
+}
+/* ############## SEARCH STYLE ############# */
+.treasurehunt-search-page .searchbar {
+  background: #ffb14a;
+}
+
+.treasurehunt-search-page .loading-spinner {
+  display: flex;
+  justify-content: center;
+  margin-top: 40px;
+}
+
+.treasurehunt-search-page .loading-spinner ion-spinner {
+  height: 60px;
+  width: 60px;
 }
 
 /* ############## OL STYLE ############# */
