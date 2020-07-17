@@ -2876,6 +2876,7 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0)
     $grades = treasurehunt_calculate_grades($treasurehunt, $stats, $students);
     return $grades;
 }
+
 /**
  * List of available player interfaces.
  */
@@ -2887,6 +2888,7 @@ function treasurehunt_get_installedplayerstyles()
         TREASUREHUNT_PLAYERBOOTSTRAP =>  get_string('playerbootstrap', 'treasurehunt')
     ];
 }
+
 /**
  * List of enabled player interfaces
  */

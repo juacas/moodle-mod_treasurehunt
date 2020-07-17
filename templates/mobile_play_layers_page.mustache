@@ -109,25 +109,57 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-search-page">
+<div class="treasurehunt-play-layers-page">
 
-  <ion-searchbar class="searchbar" placeholder="Buscar lugar..." [(ngModel)]="searchText"
-    (ionInput)="searchLocation()" (ionCancel)="cancelSearch()">
-  </ion-searchbar>
+  <ion-list radio-group>
 
-  <!-- Show loading spinner on search -->
-  <div class="loading-spinner" *ngIf="loading">
-    <ion-spinner></ion-spinner>
-  </div>
+  <ion-list-header class="treasurehunt-no-margin">
+      Capas base
+    </ion-list-header>
 
-  <ion-list *ngIf="!loading">
-    <ion-item text-wrap *ngIf="places.length === 0 && searchText.length > minSearch">
-      No se han encontrado ningún resultado
+    <ion-item>
+      <ion-avatar item-start>
+        <img src="img/avatar-finn.png">
+      </ion-avatar>
+      <ion-label>Go</ion-label>
+      <ion-radio checked="true" value="go"></ion-radio>
     </ion-item>
-    <button ion-item text-wrap *ngFor="let place of places" (click)="zoomToPlace(place)">
-      <ion-icon name="pin" item-start color="primary"></ion-icon>
-      <ion-label>{{ place.display_name }}</ion-label>
-    </button>
+
+    <ion-item>
+    <ion-avatar item-start>
+        <img src="img/avatar-finn.png">
+      </ion-avatar>
+      <ion-label>Rust</ion-label>
+      <ion-radio value="rust"></ion-radio>
+    </ion-item>
+
   </ion-list>
+
+  <ion-list class="treasurehunt-no-margin">
+
+    <ion-list-header class="treasurehunt-no-margin">
+      Capas del usuario
+    </ion-list-header>
+
+    <ion-item>
+      <ion-avatar item-start>
+        <img src="img/avatar-finn.png">
+      </ion-avatar>
+      <ion-label>Adrián Rodríguez</ion-label>
+      <ion-toggle [(ngModel)]="pepperoni"></ion-toggle>
+      <!--<ion-icon name="checkmark-circle" item-end color="primary"></ion-icon>-->
+    </ion-item>
+
+    <ion-item>
+      <ion-avatar item-start>
+        <img src="img/avatar-finn.png">
+      </ion-avatar>
+      <ion-label>Finn</ion-label>    
+      <ion-toggle [(ngModel)]="pepperoni"></ion-toggle>
+    </ion-item>
+
+</ion-list>
+
+
 
 </div>

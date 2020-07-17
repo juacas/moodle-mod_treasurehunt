@@ -189,7 +189,7 @@
         </ion-item>
         <!-- Play or review button. -->
         <ion-item>
-            <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
+            <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [preSets]="{getFromCache: 0, saveToCache: 0}" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
                 Jugar
                 <ion-icon name="play"></ion-icon>
             </button>

@@ -11,8 +11,13 @@
   margin: 0 !important;
 }
 
+.failure {
+  background-color: #d45252;
+  color: #000000;
+}
+
 .successwithfailures {
-  background-color: #ebf044 !important;
+  background-color: #ebf044;
   color: #000000;
 }
 
@@ -22,7 +27,7 @@
 }
 
 .noattempt {
-  background-color: #c0c0c0 !important;
+  background-color: #c0c0c0;
   color: #000000;
 }
 
@@ -32,31 +37,114 @@
 
 /* ############## PLAY STYLE ############# */
 .treasurehunt-play-page {
+  position: relative;
   height: 100%;
 }
 
-.treasurehunt-map-container {
+.treasurehunt-play-page .treasurehunt-map-container {
   height: 100%;
 }
 
-/* Needed for move map */
-.treasurehunt-map-container .ol-layers {
-  z-index: 1 !important;
+.treasurehunt-play-page .play-tools-container {
+  display: flex;
+  flex-wrap: nowrap;
+  align-items: flex-end;
+  position: absolute;
+  left: 50%;
+  bottom: 0;
 }
+
+.treasurehunt-play-page .play-btn {
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  box-shadow: 0 4px 6px 0 rgba(0, 0, 0, 0.14), 0 4px 5px rgba(0, 0, 0, 0.1);
+}
+
+.treasurehunt-play-page .button.play-btn.button-ios {
+  min-height: 0;
+}
+
+.treasurehunt-play-page .play-tools-container .btn {
+  margin: 0 -10px;
+  z-index: 10;
+  position: relative;
+  left: -50%;
+}
+
+.treasurehunt-play-page .play-tools-container .play-highlight-btn {
+  z-index: 1;
+  min-width: 200px;
+  min-height: 55px !important;
+  width: auto;
+  height: auto;
+  background-image: linear-gradient(315deg, #f98012 0, #882200 74%);
+  border: none;
+  border-radius: 30px 30px 0 0;
+  padding: 0 30px;
+  font-size: 19px;
+  color: white;
+  text-align: center;
+  text-transform: none;
+}
+
+.treasurehunt-play-page .map-tools-container {
+  display: flex;
+  flex-wrap: nowrap;
+  flex-direction: column;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+.treasurehunt-play-page .map-tools-container .btn {
+  margin-right: 5px;
+  margin-bottom: 5px;
+  z-index: 10;
+}
+
+.treasurehunt-modal .alert-message {
+  max-height: none;
+}
+
+.treasurehunt-modal.alert-md .alert-message {
+  padding: 0 24px 0;
+}
+
+.treasurehunt-modal.alert-ios .alert-message {
+  padding: 0 16px 0;
+}
+
+.treasurehunt-modal .modal-card {
+  padding: 1.25rem;
+  border: 1px solid #d7dfe3;
+  background-color: white;
+  color: rgba(0, 0, 0, 0.7);
+  margin-bottom: 5px;
+}
+
+.treasurehunt-modal .modal-card .modal-card-title {
+  margin-top: 0;
+}
+
 /* ############## SEARCH STYLE ############# */
-.treasurehunt-search-page .searchbar {
+.treasurehunt-play-search-page .searchbar {
   background: #ffb14a;
 }
 
-.treasurehunt-search-page .loading-spinner {
+.treasurehunt-play-search-page .loading-spinner {
   display: flex;
   justify-content: center;
   margin-top: 40px;
 }
 
-.treasurehunt-search-page .loading-spinner ion-spinner {
+.treasurehunt-play-search-page .loading-spinner ion-spinner {
   height: 60px;
   width: 60px;
+}
+
+/* ############## LAYERS STYLE ############# */
+.treasurehunt-play-layers-page .layersbar {
 }
 
 /* ############## OL STYLE ############# */
@@ -134,6 +222,14 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
+.ol-overlaycontainer,
+.ol-overlaycontainer-stopevent {
+  pointer-events: none;
+}
+.ol-overlaycontainer-stopevent > *,
+.ol-overlaycontainer > * {
+  pointer-events: auto;
+}
 .ol-selectable {
   -webkit-touch-callout: default;
   -webkit-user-select: text;
@@ -202,6 +298,9 @@
 .ol-control button::-moz-focus-inner {
   border: none;
   padding: 0;
+}
+.ol-control button span {
+  pointer-events: none;
 }
 .ol-zoom-extent button {
   line-height: 1.4em;

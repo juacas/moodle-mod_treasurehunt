@@ -536,6 +536,7 @@
 #page-mod-treasurehunt-play #layerslist .layer-item {
   display: flex;
   justify-content: space-between;
+  align-items: center;
 }
 #page-mod-treasurehunt-play #layerslist .layer-item i {
   font-size: 20px;

@@ -109,38 +109,25 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-play-page">
-    <core-navbar-buttons #content end>
-        <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
-          component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
-            <ion-icon name="search"></ion-icon>
-        </button>
-    </core-navbar-buttons> 
+<div class="treasurehunt-play-search-page">
 
-    <div id="map" class="treasurehunt-map-container"></div>
+  <ion-searchbar class="searchbar" placeholder="Buscar lugar..." [(ngModel)]="searchText"
+    (ionInput)="searchLocation()" (ionCancel)="cancelSearch()">
+  </ion-searchbar>
 
-    <!-- Bottom buttons -->
-    <div class="play-tools-container">
-      <button ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
-        <ion-icon name="checkmark"></ion-icon>
-      </button>
-      <button ion-button icon-start class="btn play-highlight-btn">
-        <ion-icon name="key"></ion-icon>
-        {{'plugin.mod_treasurehunt.showclue' | translate}}
-      </button>
-      <button ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.scanQR()">
-        <ion-icon name="qr-scanner"></ion-icon>
-      </button>
-    </div>
+  <!-- Show loading spinner on search -->
+  <div class="loading-spinner" *ngIf="loading">
+    <ion-spinner></ion-spinner>
+  </div>
 
-    <div class="map-tools-container">
-      <button *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving" ion-button 
-        icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.centerOnUserPosition()">
-          <ion-icon name="pin"></ion-icon>
-      </button>
-      <button ion-button icon-only class="btn play-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.layers' | translate}}" 
-          component="mod_treasurehunt" method="mobile_treasurehunt_play_layers" [jsData]="flyToCallback" [preSets]="{getFromCache: 1, saveToCache: 1}">
-        <i class="fa fa-eye" aria-hidden="true"></i>
-      </button>
-    </div>
+  <ion-list *ngIf="!loading">
+    <ion-item text-wrap *ngIf="places.length === 0 && searchText.length > minSearch">
+      No se han encontrado ningún resultado
+    </ion-item>
+    <button ion-item text-wrap *ngFor="let place of places" (click)="zoomToPlace(place)">
+      <ion-icon name="pin" item-start color="primary"></ion-icon>
+      <ion-label>{{ place.display_name }}</ion-label>
+    </button>
+  </ion-list>
+
 </div>

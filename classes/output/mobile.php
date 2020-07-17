@@ -186,19 +186,32 @@ class mobile
      */
     public static function mobile_treasurehunt_play($args)
     {
-        global  $CFG, $OUTPUT, $DB;
+        global  $CFG, $OUTPUT, $DB, $USER;
 
         $args = (object) $args;
 
         $cm = get_coursemodule_from_id('treasurehunt', $args->cmid);
-        $course = $DB->get_record('course', array('id' => $cm->course));
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
-
 
         // Capabilities check.
         require_login($args->courseid, false, $cm, true, true);
         $context = context_module::instance($cm->id);
         require_capability('mod/treasurehunt:play', $context);
+
+        // Get last timestamp.
+        $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
+        list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+
+        $playconfig = array(
+            'treasurehuntid'=> $treasurehunt->id,
+            'playwithoutmoving'=> boolval($treasurehunt->playwithoutmoving),
+            'groupmode' => boolval($treasurehunt->groupmode),
+            'lastattempttimestamp' => $lastattempttimestamp,
+            'lastroadtimestamp' => $lastroadtimestamp,
+            'tracking' => boolval($treasurehunt->tracking),
+            'gameupdatetime' => treasurehunt_get_setting_game_update_time() * 1000,
+            'custommapping' => json_encode(treasurehunt_get_custommappingconfig($treasurehunt, $context))
+        );
 
         $data = array(
             'cmid' => $cm->id,
@@ -215,17 +228,17 @@ class mobile
                 ),
             ),
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play.js'),
-            'otherdata' => array(),
+            'otherdata' => array('playconfig' => json_encode($playconfig))
         );
     }
 
     /**
-     * Returns the search view for the mobile app.
+     * Returns the search location view for the mobile app.
      * @param  array $args Arguments from tool_mobile_get_content WS
      *
      * @return array       HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_search($args)
+    public static function mobile_treasurehunt_play_search($args)
     {
         global  $CFG, $OUTPUT;
 
@@ -235,11 +248,34 @@ class mobile
             'templates' => array(
                 array(
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_search_page', array()),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_search_page', array()),
                 ),
             ),
-            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_search.js'),
-            // 'javascript' => "",
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_search.js'),
+            'otherdata' => array(),
+        );
+    }
+
+    /**
+     * Returns the layers view for the mobile app.
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     *
+     * @return array       HTML, javascript and otherdata
+     */
+    public static function mobile_treasurehunt_play_layers($args)
+    {
+        global  $CFG, $OUTPUT;
+
+        $args = (object) $args;
+
+        return array(
+            'templates' => array(
+                array(
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_layers_page', array()),
+                ),
+            ),
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_layers.js'),
             'otherdata' => array(),
         );
     }
