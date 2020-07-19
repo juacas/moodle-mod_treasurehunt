@@ -32,10 +32,15 @@ class TreasureHuntPlayMobile {
     this.mapSources = {
       totalLayers: [],
       baseLayers: [],
+      userLayers: [],
       attemptsLayer: null,
       positionFeature: null,
       accuracyFeature: null,
       markerFeature: null,
+    };
+    this.layersConfig = {
+      baseLayers: [],
+      userLayers: [],
     };
     this.mapProperties = {
       defaultAnimationDuration: 700,
@@ -50,11 +55,20 @@ class TreasureHuntPlayMobile {
       infoMsgs: [],
       renewSourceInterval: null,
       lastSuccessfulStage: {},
+      showValidateLocationButton: true,
+      showQuestionButton: false,
+      showActivityButton: false,
     };
     this.allEvents = [];
     this.geolocation = null;
     this.resources = {};
     this.loadingModal = null;
+
+    this.infoPopup = {
+      show: false,
+      title: null,
+      content: null,
+    };
   }
 
   init(initialResources) {
@@ -188,22 +202,23 @@ class TreasureHuntPlayMobile {
     });
 
     // Base Layers
+    const roadLayer = new ol.layer.Tile({
+      visible: true,
+      source: new ol.source.OSM(),
+    });
+    roadLayer.set("name", "road");
+
     const aerialLayer = new ol.layer.Tile({
       visible: false,
       source: new ol.source.TileImage({
         url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
       }),
     });
-    aerialLayer.set("name", "plugin.mod_treasurehunt.aerialview");
-
-    const roadLayer = new ol.layer.Tile({
-      visible: true,
-      source: new ol.source.OSM(),
-    });
-    roadLayer.set("name", "plugin.mod_treasurehunt.roadview");
+    aerialLayer.set("name", "aerial");
 
     this.mapSources.baseLayers = [roadLayer, aerialLayer];
 
+    this.setLayersConfig();
     // User position layer
     this.mapSources.accuracyFeature = new ol.Feature({
       name: "userAccuracy",
@@ -434,17 +449,21 @@ class TreasureHuntPlayMobile {
               "plugin.mod_treasurehunt.failedlocation"
             );
           }
-          that.CoreDomUtilsProvider.showAlertWithOptions({
-            title: title,
-            message: body,
-            buttons: [that.TranslateService.instant("core.ok")],
-            cssClass: "treasurehunt-modal",
-          }).then((alert) => {
-            const subscription = alert.willDismiss.subscribe(() => {
-              subscription.unsubscribe();
-              this.mapInteractions.select.getFeatures().clear();
-            });
-          });
+          this.infoPopup.show = body;
+          this.infoPopup.title = title;
+          this.infoPopup.content = body;
+          // that.CoreTextUtilsProvider.viewText(title, body);
+          // that.CoreDomUtilsProvider.showAlertWithOptions({
+          //   title: title,
+          //   message: body,
+          //   buttons: [that.TranslateService.instant("core.ok")],
+          //   cssClass: "treasurehunt-modal",
+          // }).then((alert) => {
+          //   const subscription = alert.willDismiss.subscribe(() => {
+          //     subscription.unsubscribe();
+          //     this.mapInteractions.select.getFeatures().clear();
+          //   });
+          // });
         }
       })
     );
@@ -596,8 +615,7 @@ class TreasureHuntPlayMobile {
           // Check if it exists, which indicates that it has been updated.
           if (response.lastsuccessfulstage) {
             this.gameStatus.lastSuccessfulStage = response.lastsuccessfulstage;
-            // changesinlastsuccessfulstage = true;
-            // openModal("#cluepage");
+            this.openCluePage();
             // If the stage is not solved I will notify you that there are changes.
             if (response.lastsuccessfulstage.question !== "") {
               // $("#validatelocation").hide();
@@ -717,6 +735,36 @@ class TreasureHuntPlayMobile {
     );
   }
 
+  setUseLayerVisibility(layerName, visible) {
+    const selectedLayer = this.mapSources.userLayers.find(
+      (layer) => layer.get("name") === layerName
+    );
+    if (selectedLayer) {
+      selectedLayer.setVisible(visible);
+    }
+  }
+
+  setActiveBaseLayer(layerName) {
+    const selectedLayer = this.mapSources.baseLayers.find(
+      (layer) => layer.get("name") === layerName
+    );
+    if (selectedLayer) {
+      this.mapSources.baseLayers.forEach((baseLayer) => {
+        if (baseLayer === selectedLayer) {
+          selectedLayer.setVisible(true);
+        } else {
+          baseLayer.setVisible(false);
+        }
+      });
+    }
+  }
+
+  sendAnswer(selectedAnswer) {
+    if (selectedAnswer) {
+      this.renewSource(false, false, selectedAnswer);
+    }
+  }
+
   showLoading(text) {
     this.loadingModal = that.CoreDomUtilsProvider.showModalLoading(text);
   }
@@ -728,10 +776,38 @@ class TreasureHuntPlayMobile {
   }
 
   getCardTemplate(title, body) {
-    return `<div class="modal-card">
+    return `<div  class="modal-card">
           <h5 class="modal-card-title">${title}</h5>
-          ${body}
+          <div core-external-content>${body}</div>
       </div>`;
+  }
+
+  closeInfoPopup() {
+    this.mapInteractions.select.getFeatures().clear();
+    this.infoPopup.show = false;
+  }
+
+  openCluePage() {
+    // Workaround to open clue page
+    const clueButton = document.getElementById("showClueButton");
+    if (clueButton) {
+      clueButton.click();
+    }
+  }
+
+  setLayersConfig() {
+    const baseMapsImgUrl =
+      that.CoreFilepoolProvider.sitesProvider.getCurrentSite().siteUrl +
+      "/mod/treasurehunt/pix/basemaps";
+
+    this.layersConfig.baseLayers = this.mapSources.baseLayers.map((layer) => {
+      return {
+        title: `plugin.mod_treasurehunt.${layer.get("name")}view`,
+        name: layer.get("name"),
+        visible: layer.getVisible(),
+        img: `${baseMapsImgUrl}/${layer.get("name")}.jpg`,
+      };
+    });
   }
 }
 
@@ -749,7 +825,21 @@ this.searchPageData = {
 };
 
 this.layersPageData = {
-  flyToCallback: this.treasureHuntPlayMobile.flyTo.bind(
+  layersConfig: this.treasureHuntPlayMobile.layersConfig,
+  setActiveBaseLayer: this.treasureHuntPlayMobile.setActiveBaseLayer.bind(
+    this.treasureHuntPlayMobile
+  ),
+  setUseLayerVisibility: this.treasureHuntPlayMobile.setUseLayerVisibility.bind(
+    this.treasureHuntPlayMobile
+  ),
+  setLayersConfig: this.treasureHuntPlayMobile.setLayersConfig.bind(
+    this.treasureHuntPlayMobile
+  ),
+};
+
+this.cluePageData = {
+  gameStatus: this.treasureHuntPlayMobile.gameStatus,
+  sendAnswer: this.treasureHuntPlayMobile.sendAnswer.bind(
     this.treasureHuntPlayMobile
   ),
 };
@@ -760,12 +850,11 @@ this.ionViewWillUnload = () => {
   this.treasureHuntPlayMobile.clearRenewInterval();
   // Remove events
   this.treasureHuntPlayMobile.removeEvents();
-  // Remove events listener
-  this.treasureHuntPlayMobile.map
-    .getTargetElement()
-    .removeEventListener("touchmove", processTouchmove, false);
   // Remove gps tracking
   this.treasureHuntPlayMobile.geolocation.setTracking(false);
+  // Remove events listener
+  const page = document.getElementById("treasurehunt-play-page");
+  page.removeEventListener("touchmove", processTouchmove, false);
 };
 
 /**
@@ -839,6 +928,11 @@ function loadInitialResources() {
   });
 }
 
+function cancelPullToRequest() {
+  const page = document.getElementById("treasurehunt-play-page");
+  page.addEventListener("touchmove", processTouchmove, false);
+}
+
 // touchmove handler
 function processTouchmove(ev) {
   ev.stopPropagation();
@@ -846,12 +940,10 @@ function processTouchmove(ev) {
 
 // Load initial resources and initilize map
 loadInitialResources().then((initialResources) => {
+  // Cancel pull to request
+  cancelPullToRequest();
   loadOlScript(initialResources.olScript).then(() => {
     // Init map
     this.treasureHuntPlayMobile.init(initialResources);
-    // Cancel pull to request event handler
-    this.treasureHuntPlayMobile.map
-      .getTargetElement()
-      .addEventListener("touchmove", processTouchmove, false);
   });
 });

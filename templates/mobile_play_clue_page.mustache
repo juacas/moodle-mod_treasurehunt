@@ -109,38 +109,26 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-play-layers-page">
+<div class="treasurehunt-play-clue-page">
 
-  <ion-list radio-group (ionChange)="changeBaseLayer($event)">
-
-    <ion-list-header class="treasurehunt-no-margin">
-      Capas base
-    </ion-list-header>
-
-    <ion-item *ngFor="let baseLayer of layersConfig.baseLayers">
-      <ion-avatar item-start>
-        <img core-external-content [src]="baseLayer.img">
-      </ion-avatar>
-      <ion-label>{{baseLayer.title | translate}}</ion-label>
-      <ion-radio [checked]="baseLayer.visible" [value]="baseLayer.name"></ion-radio>
-    </ion-item>
-
-  </ion-list>
-
-  <ion-list class="treasurehunt-no-margin" *ngIf="layersConfig.userLayers.length">
-
-    <ion-list-header class="treasurehunt-no-margin">
-      Capas del usuario
-    </ion-list-header>
-
-    <ion-item *ngFor="let userLayer of layersConfig.userLayers">
-      <ion-avatar item-start>
-        <img core-external-content [src]="userLayer.img">
-      </ion-avatar>
-      <ion-label>{{userLayer.title | translate}}</ion-label>
-      <ion-toggle [(ngModel)]="userLayer.visible"></ion-toggle>
-    </ion-item>
-  
-  </ion-list>
+  <ion-card padding class="clue-card">
+    <div class="card-title">
+      {{gameStatus.lastSuccessfulStage.name}}
+      <ion-badge>{{gameStatus.lastSuccessfulStage.position}} / {{gameStatus.lastSuccessfulStage.totalnumber}}</ion-badge>
+    </div>
+    <ion-card-content>
+      <core-format-text  [text]="gameStatus.lastSuccessfulStage.clue"></core-format-text>
+    </ion-card-content>
+    <ion-row>
+      <ion-col text-right>
+        <button *ngIf="gameStatus.lastSuccessfulStage.question" icon-start ion-button core-site-plugins-new-content 
+          title="{{'plugin.mod_treasurehunt.question' | translate}}" component="mod_treasurehunt" method="mobile_treasurehunt_play_question" 
+          [jsData]="{lastSuccessfulStage:gameStatus.lastSuccessfulStage, sendAnswer: sendAnswer}" [preSets]="{getFromCache: 1, saveToCache: 1}">
+          <ion-icon name="help"></ion-icon>
+          {{'plugin.mod_treasurehunt.question' | translate}}
+        </button>
+      </ion-col>
+    </ion-row>
+  </ion-card>
 
 </div>

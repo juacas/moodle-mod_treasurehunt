@@ -109,7 +109,7 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-play-page">
+<div id="treasurehunt-play-page" *ngIf="treasureHuntPlayMobile" class="treasurehunt-play-page">
     <core-navbar-buttons #content end>
         <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
           component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
@@ -121,10 +121,11 @@
 
     <!-- Bottom buttons -->
     <div class="play-tools-container">
-      <button ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
+      <button *ngIf="treasureHuntPlayMobile.gameStatus.showValidateLocationButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
         <ion-icon name="checkmark"></ion-icon>
       </button>
-      <button ion-button icon-start class="btn play-highlight-btn">
+      <button id="showClueButton" ion-button icon-start class="btn play-highlight-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.clue' | translate}}" 
+          component="mod_treasurehunt" method="mobile_treasurehunt_play_clue" [jsData]="cluePageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <ion-icon name="key"></ion-icon>
         {{'plugin.mod_treasurehunt.showclue' | translate}}
       </button>
@@ -139,8 +140,30 @@
           <ion-icon name="pin"></ion-icon>
       </button>
       <button ion-button icon-only class="btn play-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.layers' | translate}}" 
-          component="mod_treasurehunt" method="mobile_treasurehunt_play_layers" [jsData]="flyToCallback" [preSets]="{getFromCache: 1, saveToCache: 1}">
+          component="mod_treasurehunt" method="mobile_treasurehunt_play_layers" [jsData]="layersPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <i class="fa fa-eye" aria-hidden="true"></i>
       </button>
     </div>
+
+    <!--Popup info stage-->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.infoPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask" (click)="treasureHuntPlayMobile.closeInfoPopup()"></div>
+
+      <div class="play-modal-popup">
+          <!-- Header -->
+          <nav class="play-navbar">
+            <span class="title">{{treasureHuntPlayMobile.infoPopup.title}}</span>
+            <button ion-button icon-only clear round (click)="treasureHuntPlayMobile.closeInfoPopup()">  
+              <ion-icon name="close"></ion-icon>
+            </button>
+          </nav>
+
+        <div class="play-modal-content">
+            <core-format-text  [text]="treasureHuntPlayMobile.infoPopup.content"></core-format-text>
+        </div>
+      </div>
+  </div>
+    <!--<core-format-text *ngIf="treasureHuntPlayMobile.contentText"  [text]="treasureHuntPlayMobile.contentText"></core-format-text>-->
 </div>

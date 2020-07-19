@@ -23,20 +23,17 @@
 
 var that = this;
 
-/** Functions */
-this.changeBaseLayer = (selectedBaseLayer) => {
-  // Update layersConfig state
-  this.layersConfig.baseLayers.forEach((baseLayer) => {
-    if (baseLayer.name === selectedBaseLayer) {
-      baseLayer.visible = true;
-    } else {
-      baseLayer.visible = false;
-    }
-  });
-  this.setActiveBaseLayer(selectedBaseLayer);
-  this.NavController.pop();
-};
+// Remove html tags from anwers
+this.lastSuccessfulStage.answers.forEach((answer) => {
+  answer.answertext = answer.answertext.replace(/<[^>]*>?/gm, "");
+  return answer;
+});
 
-this.changeUserLayer = (layerName, visible) => {
-  this.setUseLayerVisibility(layerName, visible);
+/** Functions */
+this.sendSelectedAnswer = (selectedAnswer) => {
+  this.sendAnswer(selectedAnswer);
+  // Go back 2 pages
+  this.NavController.popTo(
+    this.NavController.getByIndex(this.NavController.length() - 3)
+  );
 };

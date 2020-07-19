@@ -109,38 +109,32 @@
 }}
 
 {{=<% %>=}}
-<div class="treasurehunt-play-layers-page">
+<div class="treasurehunt-play-question-page">
 
-  <ion-list radio-group (ionChange)="changeBaseLayer($event)">
+  <ion-card padding class="question-card">
 
-    <ion-list-header class="treasurehunt-no-margin">
-      Capas base
-    </ion-list-header>
+    <div class="card-title">
+      <core-format-text  [text]="lastSuccessfulStage.question"></core-format-text>
+    </div>
 
-    <ion-item *ngFor="let baseLayer of layersConfig.baseLayers">
-      <ion-avatar item-start>
-        <img core-external-content [src]="baseLayer.img">
-      </ion-avatar>
-      <ion-label>{{baseLayer.title | translate}}</ion-label>
-      <ion-radio [checked]="baseLayer.visible" [value]="baseLayer.name"></ion-radio>
-    </ion-item>
+    <ion-list radio-group [(ngModel)]="selectedAnswer">
 
-  </ion-list>
+      <ion-item *ngFor="let answer of lastSuccessfulStage.answers">
+        <ion-label>{{answer.answertext}}</ion-label>
+        <ion-radio [value]="answer.id"></ion-radio>
+      </ion-item>
 
-  <ion-list class="treasurehunt-no-margin" *ngIf="layersConfig.userLayers.length">
+    </ion-list>
 
-    <ion-list-header class="treasurehunt-no-margin">
-      Capas del usuario
-    </ion-list-header>
+    <ion-row>
+      <ion-col text-right>
+        <button icon-start ion-button (click)="sendSelectedAnswer(selectedAnswer)">
+          <ion-icon name="checkmark"></ion-icon>
+          {{'plugin.mod_treasurehunt.send' | translate}}
+        </button>
+      </ion-col>
+    </ion-row>
 
-    <ion-item *ngFor="let userLayer of layersConfig.userLayers">
-      <ion-avatar item-start>
-        <img core-external-content [src]="userLayer.img">
-      </ion-avatar>
-      <ion-label>{{userLayer.title | translate}}</ion-label>
-      <ion-toggle [(ngModel)]="userLayer.visible"></ion-toggle>
-    </ion-item>
-  
-  </ion-list>
+  </ion-card>
 
 </div>

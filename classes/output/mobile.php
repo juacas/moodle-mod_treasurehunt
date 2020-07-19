@@ -279,4 +279,52 @@ class mobile
             'otherdata' => array(),
         );
     }
+
+    /**
+     * Returns the clue view for the mobile app.
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     *
+     * @return array       HTML, javascript and otherdata
+     */
+    public static function mobile_treasurehunt_play_clue($args)
+    {
+        global  $CFG, $OUTPUT;
+
+        $args = (object) $args;
+
+        return array(
+            'templates' => array(
+                array(
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_clue_page', array()),
+                ),
+            ),
+            'javascript' => '',
+            'otherdata' => array(),
+        );
+    }
+
+    /**
+     * Returns the question view for the mobile app.
+     * @param  array $args Arguments from tool_mobile_get_content WS
+     *
+     * @return array       HTML, javascript and otherdata
+     */
+    public static function mobile_treasurehunt_play_question($args)
+    {
+        global  $CFG, $OUTPUT;
+
+        $args = (object) $args;
+
+        return array(
+            'templates' => array(
+                array(
+                    'id' => 'main',
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_question_page', array()),
+                ),
+            ),
+            'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_question.js'),
+            'otherdata' => array(),
+        );
+    }
 }
