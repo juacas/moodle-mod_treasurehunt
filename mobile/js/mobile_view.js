@@ -44,7 +44,17 @@ function setRoadsUserProfiles(roads) {
   }
 }
 
-// document.getElementById("page-core-site-plugins-module-index ");
+this.pageOnBackground = false;
+
+this.ionViewDidLeave = () => {
+  this.pageOnBackground = true;
+};
+
+this.ionViewWillEnter = () => {
+  if (this.pageOnBackground) {
+    this.refreshContent();
+  }
+};
 
 this.showGradeMethodHelp = function () {
   that.CoreDomUtilsProvider.showAlertTranslated(
