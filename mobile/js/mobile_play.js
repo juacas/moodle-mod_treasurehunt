@@ -26,9 +26,11 @@ class TreasureHuntPlayMobile {
     this.playConfig = playConfig;
 
     this.map = null;
+
     this.mapInteractions = {
       select: null,
     };
+
     this.mapSources = {
       totalLayers: [],
       baseLayers: [],
@@ -38,36 +40,52 @@ class TreasureHuntPlayMobile {
       accuracyFeature: null,
       markerFeature: null,
     };
+
     this.layersConfig = {
       baseLayers: [],
       userLayers: [],
     };
+
     this.mapProperties = {
       defaultAnimationDuration: 700,
       maxAnimationZoom: 15,
       defaultProjection: "EPSG:3857",
     };
+
     this.gameStatus = {
       qoaremoved: false,
       roadFinished: false,
       available: true,
       attemptshistory: [],
-      infoMsgs: [],
       renewSourceInterval: null,
       lastSuccessfulStage: {},
       showValidateLocationButton: true,
       showQuestionButton: false,
       showActivityButton: false,
     };
+
     this.allEvents = [];
+
     this.geolocation = null;
+
     this.resources = {};
+
     this.loadingModal = null;
 
     this.infoPopup = {
       show: false,
       title: null,
-      content: null,
+      content: "",
+    };
+
+    this.notificationsPopup = {
+      show: false,
+      content: "",
+    };
+
+    this.errorPopup = {
+      show: false,
+      content: "",
     };
   }
 
@@ -452,18 +470,6 @@ class TreasureHuntPlayMobile {
           this.infoPopup.show = body;
           this.infoPopup.title = title;
           this.infoPopup.content = body;
-          // that.CoreTextUtilsProvider.viewText(title, body);
-          // that.CoreDomUtilsProvider.showAlertWithOptions({
-          //   title: title,
-          //   message: body,
-          //   buttons: [that.TranslateService.instant("core.ok")],
-          //   cssClass: "treasurehunt-modal",
-          // }).then((alert) => {
-          //   const subscription = alert.willDismiss.subscribe(() => {
-          //     subscription.unsubscribe();
-          //     this.mapInteractions.select.getFeatures().clear();
-          //   });
-          // });
         }
       })
     );
@@ -599,7 +605,7 @@ class TreasureHuntPlayMobile {
           if (response.attempthistory.length > 0) {
             this.gameStatus.attemptshistory = response.attempthistory;
           }
-          // Compruebo si es distinto de null, lo que indica que se ha actualizado.
+          // Update attempts layer
           if (response.attempts || response.firststagegeom) {
             const source = this.mapSources.attemptsLayer.getSource();
             source.clear();
@@ -629,22 +635,9 @@ class TreasureHuntPlayMobile {
           if (response.firststagegeom || initialize) {
             this.fitMapToSource();
           }
-
-          // set_lastsuccessfulstage();
-          // set_question();
-          // set_attempts_history();
         }
         if (response.infomsg.length > 0) {
-          let body = "";
-          this.gameStatus.infoMsgs.forEach((msg) => {
-            body += "<p>" + msg + "</p>";
-          });
-          response.infomsg.forEach((msg) => {
-            this.gameStatus.infoMsgs.push(msg);
-            body += "<p>" + msg + "</p>";
-          });
-          // $("#notificationsPopup .update-list").html(body);
-          // openModal("#notificationsPopup");
+          this.showNotifications(response.infomsg);
         }
         if (!this.gameStatus.roadfinished) {
           // $("#roadended").hide();
@@ -660,9 +653,10 @@ class TreasureHuntPlayMobile {
         }
       })
       .catch((error) => {
-        /* $("#errorPopup .play-modal-content").text(error.message);
-        openModal("#errorPopup"); */
-        this.clearRenewInterval();
+        this.hideLoading();
+        this.closeAllPopups();
+        this.errorPopup.content = error.message;
+        this.errorPopup.show = true;
       });
   }
 
@@ -704,6 +698,26 @@ class TreasureHuntPlayMobile {
         this.renewSource(false, false, null, value);
       }
     });
+  }
+
+  showNotifications(notifications) {
+    notifications.forEach((msg) => {
+      this.notificationsPopup.content += "<p>" + msg + "</p>";
+    });
+    // Before open notification popup, close others.
+    this.closeAllPopups();
+    this.notificationsPopup.show = true;
+  }
+
+  acceptNotifications() {
+    this.notificationsPopup.content = "";
+    this.notificationsPopup.show = false;
+  }
+
+  closeAllPopups() {
+    this.notificationsPopup.show = false;
+    this.infoPopup.show = false;
+    this.errorPopup.show = false;
   }
 
   showValidateLocation() {
@@ -785,6 +799,10 @@ class TreasureHuntPlayMobile {
   closeInfoPopup() {
     this.mapInteractions.select.getFeatures().clear();
     this.infoPopup.show = false;
+  }
+
+  closeErrorPopup() {
+    this.errorPopup.show = false;
   }
 
   openCluePage() {

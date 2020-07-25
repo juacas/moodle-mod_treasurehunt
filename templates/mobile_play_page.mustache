@@ -145,25 +145,78 @@
       </button>
     </div>
 
-    <!--Popup info stage-->
+    <!--Info stage popup-->
     <div class="play-modal" [class.active]="treasureHuntPlayMobile.infoPopup.show" 
       data-animation="slideInOutTop">
       <!-- modal mask -->
       <div class="modal-mask" (click)="treasureHuntPlayMobile.closeInfoPopup()"></div>
 
       <div class="play-modal-popup">
-          <!-- Header -->
-          <nav class="play-navbar">
-            <span class="title">{{treasureHuntPlayMobile.infoPopup.title}}</span>
-            <button ion-button icon-only clear round (click)="treasureHuntPlayMobile.closeInfoPopup()">  
-              <ion-icon name="close"></ion-icon>
-            </button>
-          </nav>
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{treasureHuntPlayMobile.infoPopup.title}}</span>
+          <button ion-button icon-only clear round (click)="treasureHuntPlayMobile.closeInfoPopup()">  
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </nav>
 
         <div class="play-modal-content">
             <core-format-text  [text]="treasureHuntPlayMobile.infoPopup.content"></core-format-text>
         </div>
       </div>
-  </div>
-    <!--<core-format-text *ngIf="treasureHuntPlayMobile.contentText"  [text]="treasureHuntPlayMobile.contentText"></core-format-text>-->
+    </div>
+
+  
+    <!--Notifications popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.notificationsPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.updates' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content">
+          <div [innerHtml]="treasureHuntPlayMobile.notificationsPopup.content"></div>
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.acceptNotifications()">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!--Error popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.errorPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.error' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content">
+          <p>{{treasureHuntPlayMobile.errorPopup.content}}</p>
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.closeErrorPopup()">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div> 
+
+
 </div>
