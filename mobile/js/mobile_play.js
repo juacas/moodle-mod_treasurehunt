@@ -876,29 +876,43 @@ this.ionViewWillUnload = () => {
 };
 
 /**
- * Check if script if loaded
+ * Load css style and insert into head
  *
  * @param {*} url
  * @returns
  */
-function checkIfScriptIsLoaded(url) {
-  let scripts = document.getElementsByTagName("script");
-  for (let i = scripts.length; i--; ) {
-    if (scripts[i].src == url) return true;
-  }
-  return false;
+function loadStyle(localUrl, id) {
+  return new Promise((resolve, reject) => {
+    // Check if css is loaded
+    if (document.getElementById(id)) {
+      resolve();
+    } else {
+      //load style
+      const link = document.createElement("link");
+      link.onload = () => {
+        resolve();
+      };
+      link.onerror = (error) => reject(error);
+      link.id = id;
+      link.rel = "stylesheet";
+      link.type = "text/css";
+      link.href = localUrl;
+      link.media = "all";
+      document.head.appendChild(link);
+    }
+  });
 }
 
 /**
- *
+ * Load script and insert into body
  *
  * @param {*} url
  * @returns
  */
-function loadOlScript(localUrl) {
+function loadScript(localUrl, id) {
   return new Promise((resolve, reject) => {
-    // Check if script if loaded
-    if (checkIfScriptIsLoaded(localUrl)) {
+    // Check if script is loaded
+    if (document.getElementById(id)) {
       resolve();
     } else {
       //load script
@@ -907,6 +921,7 @@ function loadOlScript(localUrl) {
         resolve();
       };
       script.onerror = (error) => reject(error);
+      script.id = id;
       script.type = "text/javascript";
       script.src = localUrl;
       document.body.appendChild(script);
@@ -924,6 +939,7 @@ function loadInitialResources() {
       failureMark: "pix/failure_mark.png",
       locationMark: "pix/bootstrap/my_location_3.png",
       olScript: "js/ol/ol.js",
+      olCss: "css/ol.css",
     };
 
     Object.keys(initialResourcesUrl).forEach((key) => {
@@ -960,8 +976,13 @@ function processTouchmove(ev) {
 loadInitialResources().then((initialResources) => {
   // Cancel pull to request
   cancelPullToRequest();
-  loadOlScript(initialResources.olScript).then(() => {
-    // Init map
-    this.treasureHuntPlayMobile.init(initialResources);
-  });
+
+  // Once openlayers script is loaded, initialize map
+  loadStyle(initialResources.olCss, "mod-treasurehunt-ol-css");
+  loadScript(initialResources.olScript, "mod-treasurehunt-ol-script").then(
+    () => {
+      // Init map
+      this.treasureHuntPlayMobile.init(initialResources);
+    }
+  );
 });
