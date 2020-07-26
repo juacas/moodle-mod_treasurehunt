@@ -416,7 +416,7 @@ $string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona
 $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
 $string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">¡Bienvenido a tu Caza del Tesoro!</span><br>Este mapa y las pistas serán tu guía.';
 $string['bigbutton_play_tour'] = 'Este es tu mejor amigo.<br>Un clic y te muestra <b>desafíos</b> o valiosas <b>pistas</b>.';
-$string['autolocate_tour'] = 'Muestra tu <b>lugar actual </b>.<br>( permite) usar " localización" cuando se te pida)';
+$string['autolocate_tour'] = 'Muestra tu <b>lugar actual </b>.<br>(permite usar "localización" cuando se te pida)';
 $string['playerhelp_tour'] = 'Esta gira puede ser revisada cuando quiera.';
 $string['validatelocation_tour'] = '¿Seguro de la ubicación de una etapa? Envía tu posición y descubre si estás en lo cierto..';
 $string['lastsuccessfulstage_tour'] = 'En este panel puedes encontrar tu última etapa superada. También puede ser la etapa superada de tu grupo.';

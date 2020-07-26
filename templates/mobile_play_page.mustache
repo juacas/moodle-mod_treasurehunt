@@ -111,20 +111,23 @@
 {{=<% %>=}}
 <div id="treasurehunt-play-page" *ngIf="treasureHuntPlayMobile" class="treasurehunt-play-page">
     <core-navbar-buttons #content end>
-        <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
-          component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
-            <ion-icon name="search"></ion-icon>
-        </button>
+      <button ion-button icon-only (click)="treasureHuntPlayMobile.launchTutorial()">
+        <ion-icon name="information-circle"></ion-icon>
+      </button>
+      <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
+        component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
+        <ion-icon name="search"></ion-icon>
+      </button>
     </core-navbar-buttons> 
 
     <div id="map" class="treasurehunt-map-container"></div>
 
     <!-- Bottom buttons -->
     <div class="play-tools-container">
-      <button *ngIf="treasureHuntPlayMobile.gameStatus.showValidateLocationButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
+      <button id="validate-location" *ngIf="treasureHuntPlayMobile.gameStatus.showValidateLocationButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
         <ion-icon name="checkmark"></ion-icon>
       </button>
-      <button id="showClueButton" ion-button icon-start class="btn play-highlight-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.clue' | translate}}" 
+      <button id="clue-button" ion-button icon-start class="btn play-highlight-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.clue' | translate}}" 
           component="mod_treasurehunt" method="mobile_treasurehunt_play_clue" [jsData]="cluePageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <ion-icon name="key"></ion-icon>
         {{'plugin.mod_treasurehunt.showclue' | translate}}
@@ -135,7 +138,7 @@
     </div>
 
     <div class="map-tools-container">
-      <button *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving" ion-button 
+      <button id="autolocate" *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving" ion-button 
         icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.centerOnUserPosition()">
           <ion-icon name="pin"></ion-icon>
       </button>

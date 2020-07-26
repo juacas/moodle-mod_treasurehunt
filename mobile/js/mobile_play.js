@@ -97,6 +97,7 @@ class TreasureHuntPlayMobile {
 
     // It initializes the game.
     this.renewSource(false, true);
+
     // The game is updated every gameupdatetime seconds.
     this.gameStatus.renewSourceInterval = setInterval(() => {
       this.renewSource(false, false);
@@ -127,6 +128,11 @@ class TreasureHuntPlayMobile {
     setTimeout(() => {
       this.map.updateSize();
     }, 500);
+
+    const introPlayProgress = localStorage.getItem("introPlayProgress");
+    if (introPlayProgress != "Done") {
+      this.launchTutorial();
+    }
   }
 
   initMapLayers() {
@@ -183,9 +189,7 @@ class TreasureHuntPlayMobile {
       fill: fill,
       stroke: stroke,
       text: new ol.style.Text({
-        text: that.TranslateService.instant(
-          "plugin.mod_treasurehunt.startfromhere"
-        ),
+        text: this.translate("plugin.mod_treasurehunt.startfromhere"),
         textAlign: "center",
         fill: new ol.style.Fill({
           color: "rgb(255,255,255)",
@@ -442,30 +446,22 @@ class TreasureHuntPlayMobile {
           }
           if (features.selected[0].get("geometrysolved")) {
             if (stagename && stageclue) {
-              title = that.TranslateService.instant(
-                "plugin.mod_treasurehunt.stageovercome"
-              );
+              title = this.translate("plugin.mod_treasurehunt.stageovercome");
               body += this.getCardTemplate(
-                that.TranslateService.instant(
-                  "plugin.mod_treasurehunt.stagename"
-                ),
+                this.translate("plugin.mod_treasurehunt.stagename"),
                 stagename
               );
               body += this.getCardTemplate(
-                that.TranslateService.instant(
-                  "plugin.mod_treasurehunt.stageclue"
-                ),
+                this.translate("plugin.mod_treasurehunt.stageclue"),
                 stageclue
               );
             } else {
-              title = that.TranslateService.instant(
+              title = this.translate(
                 "plugin.mod_treasurehunt.discoveredlocation"
               );
             }
           } else {
-            title = that.TranslateService.instant(
-              "plugin.mod_treasurehunt.failedlocation"
-            );
+            title = this.translate("plugin.mod_treasurehunt.failedlocation");
           }
           this.infoPopup.show = body;
           this.infoPopup.title = title;
@@ -722,14 +718,10 @@ class TreasureHuntPlayMobile {
 
   showValidateLocation() {
     that.CoreDomUtilsProvider.showConfirm(
-      that.TranslateService.instant(
-        "plugin.mod_treasurehunt.sendlocationcontent"
-      ),
-      that.TranslateService.instant(
-        "plugin.mod_treasurehunt.sendlocationtitle"
-      ),
-      that.TranslateService.instant("plugin.mod_treasurehunt.send"),
-      that.TranslateService.instant("plugin.mod_treasurehunt.cancel")
+      this.translate("plugin.mod_treasurehunt.sendlocationcontent"),
+      this.translate("plugin.mod_treasurehunt.sendlocationtitle"),
+      this.translate("plugin.mod_treasurehunt.send"),
+      this.translate("plugin.mod_treasurehunt.cancel")
     ).then(
       () => {
         if (
@@ -826,6 +818,75 @@ class TreasureHuntPlayMobile {
         img: `${baseMapsImgUrl}/${layer.get("name")}.jpg`,
       };
     });
+  }
+
+  launchTutorial() {
+    const intro = introJs();
+
+    intro.setOptions({
+      nextLabel: this.translate("plugin.mod_treasurehunt.nextstep"),
+      prevLabel: this.translate("plugin.mod_treasurehunt.prevstep"),
+      skipLabel: this.translate("plugin.mod_treasurehunt.skiptutorial"),
+      doneLabel: this.translate("plugin.mod_treasurehunt.donetutorial"),
+    });
+
+    const steps = [
+      {
+        intro: this.translate("plugin.mod_treasurehunt.welcome_play_tour"),
+        position: "floating",
+      },
+      {
+        element: "#clue-button",
+        intro: this.translate(
+          "plugin.mod_treasurehunt.lastsuccessfulstage_tour"
+        ),
+        position: "top",
+      },
+      {
+        element: "#map",
+        intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
+        position: "floating",
+      },
+      {
+        element: "#validate-location",
+        intro: this.translate("plugin.mod_treasurehunt.validatelocation_tour"),
+        position: "auto",
+      },
+      {
+        element: "#autolocate",
+        intro: this.translate("plugin.mod_treasurehunt.autolocate_tour"),
+        position: "auto",
+        condition: !this.playConfig.playwithoutmoving,
+      },
+      {
+        element: "#treasurehunt-play-page",
+        intro: this.translate("plugin.mod_treasurehunt.playend_tour"),
+        position: "floating",
+      },
+    ];
+
+    // Add all the steps that have no condition or those that meet them
+    steps.forEach((step) => {
+      if (!step.hasOwnProperty("condition") || step.condition) {
+        intro.addStep(step);
+      }
+    });
+
+    intro.onexit(() => {
+      localStorage.setItem("introPlayProgress", "Done");
+    });
+    intro.oncomplete(() => {
+      localStorage.setItem("introPlayProgress", "Done");
+    });
+    intro.onchange(() => {
+      localStorage.setItem("introPlayProgress", "Done");
+    });
+
+    intro.start();
+  }
+
+  translate(string) {
+    return that.TranslateService.instant(string);
   }
 }
 
@@ -940,6 +1001,8 @@ function loadInitialResources() {
       locationMark: "pix/bootstrap/my_location_3.png",
       olScript: "js/ol/ol.js",
       olCss: "css/ol.css",
+      instroJsScript: "amd/build/intro.min.js",
+      introJsCss: "css/introjs.css",
     };
 
     Object.keys(initialResourcesUrl).forEach((key) => {
@@ -978,11 +1041,16 @@ loadInitialResources().then((initialResources) => {
   cancelPullToRequest();
 
   // Once openlayers script is loaded, initialize map
-  loadStyle(initialResources.olCss, "mod-treasurehunt-ol-css");
-  loadScript(initialResources.olScript, "mod-treasurehunt-ol-script").then(
-    () => {
-      // Init map
-      this.treasureHuntPlayMobile.init(initialResources);
-    }
-  );
+  Promise.all([
+    loadScript(initialResources.olScript, "mod-treasurehunt-ol-script"),
+    loadScript(
+      initialResources.instroJsScript,
+      "mod-treasurehunt-introjs-script"
+    ),
+    loadStyle(initialResources.olCss, "mod-treasurehunt-ol-css"),
+    loadStyle(initialResources.introJsCss, "mod-treasurehunt-introjs-css"),
+  ]).then(() => {
+    // Init map
+    this.treasureHuntPlayMobile.init(initialResources);
+  });
 });

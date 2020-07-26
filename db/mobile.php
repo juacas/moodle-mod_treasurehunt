@@ -108,7 +108,17 @@ $addons = array(
             array('send', 'treasurehunt'),
             array('error', 'treasurehunt'),
             array('layers', 'treasurehunt'),
-            array('search', 'treasurehunt')
+            array('search', 'treasurehunt'),
+            array('nextstep', 'treasurehunt'),
+            array('prevstep', 'treasurehunt'),
+            array('skiptutorial', 'treasurehunt'),
+            array('donetutorial', 'treasurehunt'),
+            array('welcome_play_tour', 'treasurehunt'),
+            array('lastsuccessfulstage_tour', 'treasurehunt'),
+            array('mapplay_tour', 'treasurehunt'),
+            array('validatelocation_tour', 'treasurehunt'),
+            array('autolocate_tour', 'treasurehunt'),
+            array('playend_tour', 'treasurehunt'),
         )
     ),
 );
