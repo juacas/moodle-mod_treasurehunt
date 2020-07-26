@@ -618,7 +618,7 @@ class TreasureHuntPlayMobile {
           if (response.lastsuccessfulstage) {
             this.gameStatus.lastSuccessfulStage = response.lastsuccessfulstage;
             if (!this.gameStatus.showingTutorial) {
-              this.openCluePage();
+              setTimeout(() => this.openCluePage(), 1500);
             }
             // If the stage is not solved notify changes.
             if (response.lastsuccessfulstage.question !== "") {
