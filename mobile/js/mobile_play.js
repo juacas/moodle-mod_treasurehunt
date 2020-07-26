@@ -59,6 +59,7 @@ class TreasureHuntPlayMobile {
       attemptshistory: [],
       renewSourceInterval: null,
       lastSuccessfulStage: {},
+      showingTutorial: false,
       showValidateLocationButton: true,
       showQRButton: false,
     };
@@ -616,8 +617,10 @@ class TreasureHuntPlayMobile {
           // Check if it exists, which indicates that it has been updated.
           if (response.lastsuccessfulstage) {
             this.gameStatus.lastSuccessfulStage = response.lastsuccessfulstage;
-            this.openCluePage();
-            // If the stage is not solved I will notify you that there are changes.
+            if (!this.gameStatus.showingTutorial) {
+              this.openCluePage();
+            }
+            // If the stage is not solved notify changes.
             if (response.lastsuccessfulstage.question !== "") {
               this.gameStatus.showValidateLocationButton = false;
             } else if (!response.lastsuccessfulstage.activitysolved) {
@@ -818,6 +821,7 @@ class TreasureHuntPlayMobile {
   }
 
   launchTutorial() {
+    this.gameStatus.showingTutorial = true;
     const intro = introJs();
 
     intro.setOptions({
@@ -869,17 +873,15 @@ class TreasureHuntPlayMobile {
       }
     });
 
-    intro.onexit(() => {
-      localStorage.setItem("introPlayProgress", "Done");
-    });
-    intro.oncomplete(() => {
-      localStorage.setItem("introPlayProgress", "Done");
-    });
-    intro.onchange(() => {
-      localStorage.setItem("introPlayProgress", "Done");
-    });
+    intro.onexit(() => this.onFinishedTutorial());
+    intro.oncomplete(() => this.onFinishedTutorial());
 
     intro.start();
+  }
+
+  onFinishedTutorial() {
+    localStorage.setItem("introPlayProgress", "Done");
+    this.gameStatus.showingTutorial = false;
   }
 
   translate(string) {
