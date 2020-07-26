@@ -132,7 +132,7 @@
         <ion-icon name="key"></ion-icon>
         {{'plugin.mod_treasurehunt.showclue' | translate}}
       </button>
-      <button ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.scanQR()">
+      <button *ngIf="treasureHuntPlayMobile.gameStatus.showQRButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.scanQR()">
         <ion-icon name="qr-scanner"></ion-icon>
       </button>
     </div>

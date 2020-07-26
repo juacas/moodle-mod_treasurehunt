@@ -60,8 +60,7 @@ class TreasureHuntPlayMobile {
       renewSourceInterval: null,
       lastSuccessfulStage: {},
       showValidateLocationButton: true,
-      showQuestionButton: false,
-      showActivityButton: false,
+      showQRButton: false,
     };
 
     this.allEvents = [];
@@ -575,9 +574,9 @@ class TreasureHuntPlayMobile {
           this.mapSources.markerFeature.setGeometry(null);
         }
         if (response.qrexpected) {
-          // $("#validateqr").show();
+          this.gameStatus.showQRButton = true;
         } else {
-          // $("#validateqr").hide();
+          this.gameStatus.showQRButton = false;
         }
         // If change the game mode (mobile or static).
         if (this.playConfig.playwithoutmoving != response.playwithoutmoving) {
@@ -620,11 +619,11 @@ class TreasureHuntPlayMobile {
             this.openCluePage();
             // If the stage is not solved I will notify you that there are changes.
             if (response.lastsuccessfulstage.question !== "") {
-              // $("#validatelocation").hide();
+              this.gameStatus.showValidateLocationButton = false;
             } else if (!response.lastsuccessfulstage.activitysolved) {
-              // $("#validatelocation").hide();
+              this.gameStatus.showValidateLocationButton = false;
             } else {
-              // $("#validatelocation").show();
+              this.gameStatus.showValidateLocationButton = true;
             }
           }
           // Check if it is the first geometry or it is being initialized and center the map.
@@ -635,16 +634,14 @@ class TreasureHuntPlayMobile {
         if (response.infomsg.length > 0) {
           this.showNotifications(response.infomsg);
         }
-        if (!this.gameStatus.roadfinished) {
-          // $("#roadended").hide();
-        }
         if (this.gameStatus.roadfinished || !this.gameStatus.available) {
-          // $("#validatelocation").hide();
-          // $("#question_button").hide();
-          // $("#roadended").show();
+          this.gameStatus.showValidateLocationButton = false;
+          this.gameStatus.showQRButton = false;
           this.mapSources.markerFeature.setGeometry(null);
           this.playConfig.playwithoutmoving = false;
           this.clearRenewInterval();
+
+          // $("#roadended").show();
           // $("#mapplay").css("opacity", "0.8");
         }
       })
@@ -799,7 +796,7 @@ class TreasureHuntPlayMobile {
 
   openCluePage() {
     // Workaround to open clue page
-    const clueButton = document.getElementById("showClueButton");
+    const clueButton = document.getElementById("clue-button");
     if (clueButton) {
       clueButton.click();
     }
