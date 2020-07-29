@@ -130,12 +130,13 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                 function createPegmanLabel(coordinate) {
                     var latlon = ol.proj.toLonLat(coordinate, overlay.getMap().getView()
                         .getProjection());
-                    var hdms = ol.coordinate.toStringHDMS(latlon);
+                    var hdms = "Click to look around on StreetView"; // TODO: put the i18n instead //ol.coordinate.toStringHDMS(latlon);
                     var pegmanlink = '<a target="street" href="http://maps.google.com/?cbll='
                         + latlon[1]
                         + ','
                         + latlon[0]
-                        + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" /> <code>' + hdms + '</code></a>';
+                        + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" />'
+                        + '<code>' + hdms + '</code></a>';
                     $('#popup-content').html(pegmanlink);
                 }
             }
