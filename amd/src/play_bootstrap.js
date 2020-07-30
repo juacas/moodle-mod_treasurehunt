@@ -72,6 +72,7 @@ define([
         "discoveredlocation",
         "answerwarning",
         "error",
+        "pegmanlabel"
       ];
       // console.log("loading i18n strings");
       let stringsqueried = terms.map((term) => {
@@ -383,7 +384,8 @@ define([
     // Create placement for a popup over user marker.
     var overlay = viewgpx.createCoordsOverlay(
       "#mapplay",
-      "css/playerbootstrap/ol-popup.css"
+      "css/playerbootstrap/ol-popup.css",
+      strings['pegmanlabel']
     );
 
     // All layers hidden except last one.

@@ -23,7 +23,7 @@
  */
 
 define(
-	['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch',	
+	['jquery', 'jqueryui', 'mod_treasurehunt/jquery-ui-touch-punch',
 	'core/notification', 'mod_treasurehunt/ol', 'core/ajax',
 		'mod_treasurehunt/osm-geocoder',
 		'mod_treasurehunt/ol3-layerswitcher',  'core/str',
@@ -368,8 +368,8 @@ define(
 			 * Create an overlay to anchor the popup to the map.
 			 */
 			// Create placement for a popup over user marker.
-			var overlay = viewgpx.createCoordsOverlay('#mapedit');
-			
+			var overlay = viewgpx.createCoordsOverlay('#mapedit', null, strings['pegmanlabel']);
+
 			// Layer selector...
 			var layerSwitcher = new ol.control.LayerSwitcher();
 			// Map viewer...
@@ -396,7 +396,7 @@ define(
 											.getElementById("stagelistpanel")
 									})])
 				});
-			
+
 			map.on('click', function (evt) {
 				if (!Draw.getActive() && !Modify.getActive() &&
 					(custommapconfig === null || custommapconfig.geographic)) {
@@ -1935,7 +1935,7 @@ define(
 				// I18n strings.
 				var terms = ['stage', 'road', 'aerialmap', 'roadmap', 'basemaps', 'add', 'modify', 'save',
 					'remove', 'searchlocation', 'savewarning', 'removewarning',
-					'areyousure', 'removeroadwarning', 'confirm', 'cancel'];
+					'areyousure', 'removeroadwarning', 'confirm', 'cancel', 'pegmanlabel'];
 				var stringsqueried = terms.map(function (term) {
 					return { key: term, component: 'treasurehunt' };
 				});
