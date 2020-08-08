@@ -407,7 +407,7 @@ define([
      * Create an overlay to anchor the popup to the map.
      */
     // Create placement for a popup over user marker.
-    var overlay = viewgpx.createCoordsOverlay("#mapedit");
+    var overlay = viewgpx.createCoordsOverlay('#mapedit', null, strings['pegmanlabel']);
 
     // Layer selector...
     var layerSwitcher = new ol.control.LayerSwitcher();
@@ -1923,6 +1923,7 @@ define([
         "removeroadwarning",
         "confirm",
         "cancel",
+        "pegmanlabel",
       ];
       var stringsqueried = terms.map(function (term) {
         return { key: term, component: "treasurehunt" };
