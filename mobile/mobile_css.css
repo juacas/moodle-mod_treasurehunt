@@ -277,6 +277,18 @@
   margin-top: 0;
 }
 
+.treasurehunt-play-page .treasureoverlay {
+  position: absolute;
+  color: white;
+  padding: 10px;
+  left: 0;
+  top: 0;
+  width: 100%;
+  z-index: 1;
+  background-color: rgba(25, 25, 25, 0.8);
+  text-align: center;
+}
+
 /* ############## SEARCH STYLE ############# */
 .treasurehunt-play-search-page .searchbar {
   background: #ffb14a;

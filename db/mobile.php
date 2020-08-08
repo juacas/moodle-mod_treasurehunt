@@ -100,6 +100,7 @@ $addons = array(
             array('updates', 'treasurehunt'),
             array('activitytoendwarning', 'treasurehunt'),
             array('huntcompleted', 'treasurehunt'),
+            array('roadended', 'treasurehunt'),
             array('discoveredlocation', 'treasurehunt'),
             array('answerwarning', 'treasurehunt'),
             array('sendlocationtitle', 'treasurehunt'),

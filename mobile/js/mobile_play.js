@@ -660,7 +660,7 @@ class TreasureHuntPlayMobile {
     )
       .then((response) => {
         this.gameStatus.qoaremoved = response.qoaremoved;
-        this.gameStatus.roadfinished = response.roadfinished;
+        this.gameStatus.roadFinished = response.roadfinished;
         this.gameStatus.available = response.available;
         this.hideLoading();
 
@@ -735,7 +735,7 @@ class TreasureHuntPlayMobile {
         if (response.infomsg.length > 0) {
           this.showNotifications(response.infomsg);
         }
-        if (this.gameStatus.roadfinished || !this.gameStatus.available) {
+        if (this.gameStatus.roadFinished || !this.gameStatus.available) {
           this.gameStatus.showValidateLocationButton = false;
           this.gameStatus.showQRButton = false;
           this.mapSources.markerFeature.setGeometry(null);

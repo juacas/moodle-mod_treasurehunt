@@ -118,12 +118,16 @@
         component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <ion-icon name="search"></ion-icon>
       </button>
-    </core-navbar-buttons> 
+    </core-navbar-buttons>
+
+    <div class="treasureoverlay" *ngIf="treasureHuntPlayMobile.gameStatus.roadFinished">
+      {{'plugin.mod_treasurehunt.roadended'| translate}}
+    </div> 
 
     <div id="map" class="treasurehunt-map-container"></div>
 
     <!-- Bottom buttons -->
-    <div class="play-tools-container">
+    <div class="play-tools-container" *ngIf="!treasureHuntPlayMobile.gameStatus.roadFinished">
       <button id="validate-location" *ngIf="treasureHuntPlayMobile.gameStatus.showValidateLocationButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
         <ion-icon name="checkmark"></ion-icon>
       </button>
