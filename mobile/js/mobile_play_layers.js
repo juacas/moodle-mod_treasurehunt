@@ -37,6 +37,6 @@ this.changeBaseLayer = (selectedBaseLayer) => {
   this.NavController.pop();
 };
 
-this.changeUserLayer = (layerName, visible) => {
-  this.setUseLayerVisibility(layerName, visible);
+this.changeOverlayLayer = (layerName, visible) => {
+  this.setOverlayLayerVisibility(layerName, visible);
 };

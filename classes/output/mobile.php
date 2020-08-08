@@ -210,7 +210,7 @@ class mobile
             'lastroadtimestamp' => $lastroadtimestamp,
             'tracking' => boolval($treasurehunt->tracking),
             'gameupdatetime' => treasurehunt_get_setting_game_update_time() * 1000,
-            'custommapping' => json_encode(treasurehunt_get_custommappingconfig($treasurehunt, $context))
+            'custommapconfig' => treasurehunt_get_custommappingconfig($treasurehunt, $context)
         );
 
         $data = array(

@@ -34,7 +34,7 @@ class TreasureHuntPlayMobile {
     this.mapSources = {
       totalLayers: [],
       baseLayers: [],
-      userLayers: [],
+      overlayLayers: [],
       attemptsLayer: null,
       positionFeature: null,
       accuracyFeature: null,
@@ -43,7 +43,7 @@ class TreasureHuntPlayMobile {
 
     this.layersConfig = {
       baseLayers: [],
-      userLayers: [],
+      overlayLayers: [],
     };
 
     this.mapProperties = {
@@ -223,22 +223,118 @@ class TreasureHuntPlayMobile {
       },
     });
 
+    // Custom layer
+    let customLayer;
+    if (this.playConfig.custommapconfig) {
+      if (this.playConfig.custommapconfig.custombackgroundurl) {
+        let customImageExtent = ol.proj.transformExtent(
+          this.playConfig.custommapconfig.bbox,
+          "EPSG:4326",
+          this.mapProperties.defaultProjection
+        );
+        if (!this.playConfig.custommapconfig.geographic) {
+          // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
+          const bboxHeight = customImageExtent[3] - customImageExtent[1];
+          const centerWidth = (customImageExtent[2] + customImageExtent[0]) / 2;
+          const centerHeight =
+            (customImageExtent[3] + customImageExtent[1]) / 2;
+          const ratioRealMap = Math.round(
+            bboxHeight / this.playConfig.custommapconfig.imgheight
+          );
+          const adjWidth = Math.round(
+            this.playConfig.custommapconfig.imgwidth * ratioRealMap
+          );
+          const adjHeight = Math.round(
+            this.playConfig.custommapconfig.imgheight * ratioRealMap
+          );
+          customImageExtent = [
+            centerWidth - adjWidth / 2,
+            centerHeight - adjHeight / 2,
+            centerWidth + adjWidth / 2,
+            centerHeight + adjHeight / 2,
+          ];
+          this.mapProperties.maxAnimationZoom = 5;
+        }
+        customLayer = new ol.layer.Image({
+          title: this.playConfig.custommapconfig.layername,
+          name: this.playConfig.custommapconfig.layername,
+          type: this.playConfig.custommapconfig.layertype,
+          source: new ol.source.ImageStatic({
+            url: this.resources.customBackgroundUrl,
+            imageExtent: customImageExtent,
+          }),
+          img: this.playConfig.custommapconfig.custombackgroundurl,
+          visible: true,
+          opacity: 1.0,
+        });
+      } else if (this.playConfig.custommapconfig.wmsurl) {
+        const options = {
+          source: new ol.source.TileWMS({
+            url: this.playConfig.custommapconfig.wmsurl,
+            params: this.playConfig.custommapconfig.wmsparams,
+          }),
+          visible: true,
+          type: this.playConfig.custommapconfig.layertype,
+          title: this.playConfig.custommapconfig.layername,
+          name: this.playConfig.custommapconfig.layername,
+        };
+        if (
+          this.playConfig.custommapconfig.bbox[0] &&
+          this.playConfig.custommapconfig.bbox[1] &&
+          this.playConfig.custommapconfig.bbox[2] &&
+          this.playConfig.custommapconfig.bbox[3]
+        ) {
+          const customWmsExtent = ol.proj.transformExtent(
+            this.playConfig.custommapconfig.bbox,
+            "EPSG:4326",
+            this.mapProperties.defaultProjection
+          );
+          options.extent = customWmsExtent;
+        }
+        customLayer = new ol.layer.Tile(options);
+      }
+    }
+
     // Base Layers
-    const roadLayer = new ol.layer.Tile({
-      visible: true,
-      source: new ol.source.OSM(),
-    });
-    roadLayer.set("name", "road");
+    if (
+      !this.playConfig.custommapconfig ||
+      this.playConfig.custommapconfig.onlybase === false
+    ) {
+      const roadLayer = new ol.layer.Tile({
+        visible:
+          !customLayer ||
+          (this.playConfig.custommapconfig &&
+            this.playConfig.custommapconfig.layertype === "overlay"),
+        source: new ol.source.OSM(),
+        name: "road",
+        title: this.translate("plugin.mod_treasurehunt.roadview"),
+        img:
+          that.CoreFilepoolProvider.sitesProvider.getCurrentSite().siteUrl +
+          "/mod/treasurehunt/pix/basemaps/road.jpg",
+      });
 
-    const aerialLayer = new ol.layer.Tile({
-      visible: false,
-      source: new ol.source.TileImage({
-        url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
-      }),
-    });
-    aerialLayer.set("name", "aerial");
+      const aerialLayer = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.TileImage({
+          url: "https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}",
+        }),
+        name: "aerial",
+        title: this.translate("plugin.mod_treasurehunt.aerialview"),
+        img:
+          that.CoreFilepoolProvider.sitesProvider.getCurrentSite().siteUrl +
+          "/mod/treasurehunt/pix/basemaps/aerial.jpg",
+      });
 
-    this.mapSources.baseLayers = [roadLayer, aerialLayer];
+      this.mapSources.baseLayers = [roadLayer, aerialLayer];
+    }
+
+    if (customLayer) {
+      if (this.playConfig.custommapconfig.layertype !== "overlay") {
+        this.mapSources.baseLayers.push(customLayer);
+      } else {
+        this.mapSources.overlayLayers.push(customLayer);
+      }
+    }
 
     this.setLayersConfig();
     // User position layer
@@ -307,6 +403,7 @@ class TreasureHuntPlayMobile {
     // Total Layers
     this.mapSources.totalLayers = [
       ...this.mapSources.baseLayers,
+      ...this.mapSources.overlayLayers,
       this.mapSources.attemptsLayer,
       userPosition,
       markerPosition,
@@ -494,7 +591,7 @@ class TreasureHuntPlayMobile {
             coordinates ? new ol.geom.Point(coordinates) : null
           );
           // Shorcut to Google Street View.
-          // if (custommapconfig === null || custommapconfig.geographic) {
+          // if (this.playConfig.custommapconfig === null || this.playConfig.custommapconfig.geographic) {
           //   overlay.setPosition(evt.coordinate);
           // }
         }
@@ -582,6 +679,7 @@ class TreasureHuntPlayMobile {
         // If change the game mode (mobile or static).
         if (this.playConfig.playwithoutmoving != response.playwithoutmoving) {
           this.playConfig.playwithoutmoving = response.playwithoutmoving;
+          this.geolocation.setTracking(!this.playConfig.playwithoutmoving);
           if (!this.playConfig.playwithoutmoving) {
             this.mapSources.markerFeature.setGeometry(null);
           }
@@ -741,8 +839,8 @@ class TreasureHuntPlayMobile {
     );
   }
 
-  setUseLayerVisibility(layerName, visible) {
-    const selectedLayer = this.mapSources.userLayers.find(
+  setOverlayLayerVisibility(layerName, visible) {
+    const selectedLayer = this.mapSources.overlayLayers.find(
       (layer) => layer.get("name") === layerName
     );
     if (selectedLayer) {
@@ -806,18 +904,22 @@ class TreasureHuntPlayMobile {
   }
 
   setLayersConfig() {
-    const baseMapsImgUrl =
-      that.CoreFilepoolProvider.sitesProvider.getCurrentSite().siteUrl +
-      "/mod/treasurehunt/pix/basemaps";
+    this.layersConfig.baseLayers = this.mapSources.baseLayers.map((layer) =>
+      this.getLayerConfig(layer)
+    );
 
-    this.layersConfig.baseLayers = this.mapSources.baseLayers.map((layer) => {
-      return {
-        title: `plugin.mod_treasurehunt.${layer.get("name")}view`,
-        name: layer.get("name"),
-        visible: layer.getVisible(),
-        img: `${baseMapsImgUrl}/${layer.get("name")}.jpg`,
-      };
-    });
+    this.layersConfig.overlayLayers = this.mapSources.overlayLayers.map(
+      (layer) => this.getLayerConfig(layer)
+    );
+  }
+
+  getLayerConfig(layer) {
+    return {
+      title: layer.get("title"),
+      name: layer.get("name"),
+      visible: layer.getVisible(),
+      img: layer.get("img"),
+    };
   }
 
   launchTutorial() {
@@ -907,10 +1009,7 @@ this.layersPageData = {
   setActiveBaseLayer: this.treasureHuntPlayMobile.setActiveBaseLayer.bind(
     this.treasureHuntPlayMobile
   ),
-  setUseLayerVisibility: this.treasureHuntPlayMobile.setUseLayerVisibility.bind(
-    this.treasureHuntPlayMobile
-  ),
-  setLayersConfig: this.treasureHuntPlayMobile.setLayersConfig.bind(
+  setOverlayLayerVisibility: this.treasureHuntPlayMobile.setOverlayLayerVisibility.bind(
     this.treasureHuntPlayMobile
   ),
 };
@@ -994,7 +1093,7 @@ function loadInitialResources() {
     const promises = [];
 
     const site = that.CoreFilepoolProvider.sitesProvider.getCurrentSite();
-    const initialResourcesUrl = {
+    let initialResourcesUrl = {
       successMark: "pix/success_mark.png",
       failureMark: "pix/failure_mark.png",
       locationMark: "pix/bootstrap/my_location_3.png",
@@ -1014,6 +1113,32 @@ function loadInitialResources() {
         })
       );
     });
+
+    // custom background image as default map
+    if (
+      that.CONTENT_OTHERDATA.playconfig.custommapconfig &&
+      that.CONTENT_OTHERDATA.playconfig.custommapconfig.custombackgroundurl
+    ) {
+      promises.push(
+        that.CoreFilepoolProvider.downloadUrl(
+          site.id,
+          that.CONTENT_OTHERDATA.playconfig.custommapconfig.custombackgroundurl
+        ).then((localUrl) => {
+          initialResourcesUrl.customBackgroundUrl = localUrl;
+          return new Promise((resolve, reject) => {
+            const img = new Image();
+            img.addEventListener("load", () => {
+              that.CONTENT_OTHERDATA.playconfig.custommapconfig.imgwidth =
+                img.naturalWidth;
+              that.CONTENT_OTHERDATA.playconfig.custommapconfig.imgheight =
+                img.naturalHeight;
+              resolve();
+            });
+            img.src = localUrl;
+          });
+        })
+      );
+    }
 
     Promise.all(promises).then(
       () => {
