@@ -109,6 +109,7 @@ class mobile
         $timenow = time();
         $username = '';
         $roadfinished = false;
+        $outoftime = $treasurehunt->cutoffdate && $timenow > $treasurehunt->cutoffdate;
         $attempts = [];
         $exception = '';
         if ($playpermission && $timenow > $treasurehunt->allowattemptsfromdate) {
@@ -164,6 +165,7 @@ class mobile
                 'timenow' => $timenow,
                 'grademethod' => $grademethod,
                 'groupmode' => boolval($treasurehunt->groupmode),
+                'outoftime' => $outoftime,
                 'roadfinished' => $roadfinished,
                 'attempts' => json_encode($attempts), // Cannot put arrays in otherdata.
                 'username' => $username,

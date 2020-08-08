@@ -190,8 +190,14 @@
         <!-- Play or review button. -->
         <ion-item>
             <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [preSets]="{getFromCache: 0, saveToCache: 0}" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
-                Jugar
-                <ion-icon name="play"></ion-icon>
+                <ng-container *ngIf="CONTENT_OTHERDATA.roadfinished || CONTENT_OTHERDATA.outoftime; else play">
+                    {{ 'plugin.mod_treasurehunt.reviewofplay' | translate }}
+                    <ion-icon name="refresh-circle"></ion-icon>
+                </ng-container>
+                <ng-template #play>
+                    {{ 'plugin.mod_treasurehunt.play' | translate }}
+                    <ion-icon name="play"></ion-icon>
+                </ng-template>
             </button>
         </ion-item>
         

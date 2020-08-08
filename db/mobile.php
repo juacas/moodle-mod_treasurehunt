@@ -41,7 +41,7 @@ $addons = array(
                 ), // Function needs caching for offline.
                 'styles' => array(
                     'url' => $CFG->wwwroot . '/mod/treasurehunt/mobile/mobile_css.css',
-                    'version' => '1.0',
+                    'version' => '2.0',
                 ),
                 'displayrefresh' => true,
                 'displayprefetch' => false
@@ -66,6 +66,8 @@ $addons = array(
             array('attempthistory', 'treasurehunt'),
             array('noattempts', 'treasurehunt'),
             array('noroads', 'treasurehunt'),
+            array('play', 'treasurehunt'),
+            array('reviewofplay', 'treasurehunt'),
             array('warnusersgrouping', 'treasurehunt'),
             array('warnusersgroup', 'treasurehunt'),
             array('warnusersoutside', 'treasurehunt'),
