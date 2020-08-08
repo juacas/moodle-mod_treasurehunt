@@ -413,14 +413,14 @@ $string['save_tour'] = 'After drawing your locations, don\'t forget to save your
 $string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
-$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
 $string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
 $string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
 $string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
 $string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
 $string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+$string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
 
 $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';

@@ -289,6 +289,10 @@
   text-align: center;
 }
 
+.introjs-tooltip {
+  font-size: 1.4rem;
+}
+
 /* ############## SEARCH STYLE ############# */
 .treasurehunt-play-search-page .searchbar {
   background: #ffb14a;

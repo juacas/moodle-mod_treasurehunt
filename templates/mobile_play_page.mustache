@@ -142,7 +142,7 @@
     </div>
 
     <div class="map-tools-container">
-      <button id="autolocate" *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving" ion-button 
+      <button id="autolocate" *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving && !treasureHuntPlayMobile.gameStatus.roadFinished" ion-button 
         icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.centerOnUserPosition()">
           <ion-icon name="pin"></ion-icon>
       </button>

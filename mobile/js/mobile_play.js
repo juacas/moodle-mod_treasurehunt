@@ -947,7 +947,8 @@ class TreasureHuntPlayMobile {
       },
       {
         element: "#map",
-        intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
+        intro: `¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img core-external-content src="https://192.168.1.35/mod/treasurehunt/pix/success_mark.png" width="28"/><br>Los fallidos: <img core-external-content src="pix/failure_mark.png" width="28"/>`,
+        // intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
         position: "floating",
       },
       {
