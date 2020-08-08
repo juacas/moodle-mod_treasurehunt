@@ -145,9 +145,10 @@ It must be greater than 0 seconds, but the time will be set by default.';
 $string['defaultplayerstyle'] = 'Default game screen style';
 $string['playerstyle'] = 'Game screen style';
 $string['availableplayerstyles'] = 'Game screen styles available.';
+$string['pegmanlabel'] = 'Look around on StreetView';
 $string['playerstyle_help'] = 'There are several styles of the game screen that teachers can choose';
 $string['playerclassic'] = 'Classic';
-$string['playerfancy'] = 'Fanzy';
+$string['playerfancy'] = 'Fancy';
 $string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed.
@@ -337,7 +338,7 @@ $string['timetocomelong'] = 'in {$a->shortduration} ({$a->date})';
 $string['trackusers'] = 'Track trajectories';
 $string['trackusers_help'] = 'Register the paths made by the users. They can be seen in the “Track viewer” screen.<br/>
 The user positions are logged between validation attempts (with every poll request).<br/>
-If the user has his GPS disabled then the only location he can report is that of the scanned QR-Codes.<br/> 
+If the user has his GPS disabled then the only location he can report is that of the scanned QR-Codes.<br/>
 If this option is <b>disabled</b>, the only locations recorded are those of the validation attempts.';
 $string['trackviewer'] = 'Track Viewer';
 $string['trackviewerrefreshtracks'] = 'Refresh tracks each {$a} seconds.';
@@ -388,7 +389,7 @@ like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
 $string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that you have passed a QR test with this device.';
-$string['warnqrscannererror'] = 'This Treasurehunt includes {$a} stages with QRCodes. 
+$string['warnqrscannererror'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that your device can not use the camera with this application. Please give permissions to access the camera.
 If you can\'t manage to activate the camera this device may not be suitable to play the Treasurehunt.';
 $string['warnunsecuregeolocation'] = 'Geolocation may not work in your server. This is a <b>SEVERE misconfiguration</b> caused by your

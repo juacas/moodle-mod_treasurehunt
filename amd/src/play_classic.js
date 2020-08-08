@@ -21,7 +21,7 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery',  
+define(['jquery',
     'core/url',
     'mod_treasurehunt/ol',
     'core/ajax',
@@ -29,24 +29,24 @@ define(['jquery',
 	'mod_treasurehunt/viewgpx',
 	'mod_treasurehunt/webqr',
     // 'core/str',
-    'mod_treasurehunt/jquery.truncate', 
+    'mod_treasurehunt/jquery.truncate',
     'mod_treasurehunt/jquery.mobile-config',
-	'mod_treasurehunt/jquerymobile', 
+	'mod_treasurehunt/jquerymobile',
     ],
 	    function ($, url, ol, ajax, OSMGeocoder, viewgpx, webqr) {
-			
+
 			console.log('loading play.js with jquery ' + $().jquery);
 	        var init = {
 	            playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
 	                    lastattempttimestamp,
 	                    lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig) {
-					
-	            	// I18n strings.
+
+	            	// I18n strings. This strigns are loaded globally in play_classic.php
 	            	var terms = ["stageovercome", "failedlocation", "stage", "stagename",
 									        "stageclue", "question", "noanswerselected", "timeexceeded",
-									        "searching", "continue", "noattempts", "aerialview", "roadview", 
+									        "searching", "continue", "noattempts", "aerialview", "roadview",
 									        "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-									        "huntcompleted", "discoveredlocation", "answerwarning", "error"];
+									        "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"];
 					console.log('loading i18n strings');
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
@@ -60,7 +60,7 @@ define(['jquery',
 						// i18n = i18nplay;
 	            		// Detect custom image.
 	            		if (typeof(custommapconfig) != 'undefined' &&
-	            				custommapconfig !== null && 
+	            				custommapconfig !== null &&
 	            				custommapconfig.custombackgroundurl !== null) {
 	    						console.log('Detecting custom background image dimensions.');
 	            			// Detect image size.
@@ -71,14 +71,14 @@ define(['jquery',
 	    							console.log('image is ' + this.naturalWidth + 'x' + this.naturalHeight + 'pixels');
 	    					    	initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
 	    		                	        lastattempttimestamp,
-	    		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);        
+	    		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);
 	    					    });
 	    					    img.src = custommapconfig.custombackgroundurl;
 	            		} else {
 	            			initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
 		                	        lastattempttimestamp,
 		                	        lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig);	            		}
-	            		
+
 	                // });
 	            } // End of function playtreasurehunt.
 	        };
@@ -86,7 +86,7 @@ define(['jquery',
 		// Initialization function.
 		function initplaytreasurehunt(strings, cmid, treasurehuntid, playwithoutmoving, groupmode,
 		        lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig){
-		
+
 			// I18n support.
 			console.log('init player Openlayers');
 			$.mobile.loading("show");
@@ -105,7 +105,7 @@ define(['jquery',
 						var bboxheight = customimageextent[3] - customimageextent[1];
 						var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
 						var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-						
+
 						var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
 						var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
 						var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
@@ -145,7 +145,7 @@ define(['jquery',
 					}
 					custombaselayer = new ol.layer.Tile(options);
 				}
-				
+
 				geographictools = custommapconfig.geographic;
 			}
 			if (geographictools === false) {
@@ -153,7 +153,7 @@ define(['jquery',
 				playwithoutmoving = true;
 				$('#autolocate').hide();
 			}
-			
+
 		    var parchmenturl = url.imageUrl('success_mark', 'treasurehunt'),
 		            failureurl = url.imageUrl('failure_mark', 'treasurehunt'),
 		            markerurl = url.imageUrl('my_location', 'treasurehunt'),
@@ -171,7 +171,7 @@ define(['jquery',
 		            available = true,
                 qoaremoved = false;
       let osmGeocoderXHR;
-      let osmTimer = 0; 
+      let osmTimer = 0;
 		    /*-------------------------------Styles-----------------------------------*/
 		    var text = new ol.style.Text({
 		        textAlign: 'center',
@@ -292,7 +292,7 @@ define(['jquery',
 		        source: new ol.source.OSM()
 		    });
 		    roadlayer.set("name", strings["roadview"]);
-		    
+
 		    var layersbase = [];
 		    var layersoverlay = [];
 		    if ( custommapconfig === null || custommapconfig.onlybase === false) {
@@ -307,7 +307,11 @@ define(['jquery',
 			}
 			var layergroup = new ol.layer.Group({layers: layersbase});
 			// Create placement for a popup over user marker.
-			var overlay = viewgpx.createCoordsOverlay('#mapplay', 'css/playerfancy/ol-popup.css');
+			var overlay = viewgpx.createCoordsOverlay(
+        "#mapplay",
+        "css/playerfancy/ol-popup.css",
+        strings["pegmanlabel"]
+      );
 		    // All layers hidden except last one.
 		    var toplayer = null;
 		    layergroup.getLayers().forEach(function (layer) {
@@ -315,7 +319,7 @@ define(['jquery',
 		    	toplayer = layer;
 		    });
 		    toplayer.setVisible(true);
-		    
+
 		    var view = new ol.View({
 		        center: [0, 0],
 		        zoom: 2,
@@ -375,7 +379,7 @@ define(['jquery',
 		        renew_source(false, false);
 		    }, gameupdatetime);
 		    // Initialize the page layers.
-		
+
 		    add_layergroup_to_list(layergroup);
 		    layersoverlay.forEach(function (overlay) {
 		    	add_layer_to_list(overlay);
@@ -383,7 +387,7 @@ define(['jquery',
 		    if (tracking && user) {
 		        var tracklayergroup = viewgpx.addgpxlayer(map, cmid, treasurehuntid, strings, user, "trackgroup");
 		        tracklayergroup.set("name", tracklayergroup.get("title"));
-		
+
 		        var tracklayer = tracklayergroup.getLayers().item(0);
 		        var htmltitle = tracklayer.get("title");
 		        //var plaintitle = htmltitle.substring(htmltitle.indexOf('</a>') + 4);// Had a picture and a link.
@@ -455,10 +459,10 @@ define(['jquery',
 		        fly_to(map, position);
 			}
 			/**
-			 * 
-			 * @param {ol.map} map 
-			 * @param {Array} point 
-			 * @param {Array} extent 
+			 *
+			 * @param {ol.map} map
+			 * @param {Array} point
+			 * @param {Array} extent
 			 */
 		    function fly_to(map, point, extent) {
 		        var duration = 700;
@@ -475,11 +479,11 @@ define(['jquery',
 		            });
 		        }
 			}
-			
+
 		    /**
 		     * Updates the model of the game.
 		     * Notifies a new location for validation or a new answer to a question.
-			 * 
+			 *
 		     * @param {boolean} location requests a location validation.
 		     * @param {boolean} initialize
 		     * @param {int} selectedanswerid submits an answer to a question
@@ -492,7 +496,7 @@ define(['jquery',
 		        var currentposition;
 		        var coordinates;
 		        var answerid;
-		        
+
 		        if (playwithoutmoving) {
 		            coordinates = markerFeature.getGeometry();
 		        } else {
@@ -513,7 +517,7 @@ define(['jquery',
 		            $.mobile.loading("show");
 				}
 
-				// Get the progress of the user: road is finished, 
+				// Get the progress of the user: road is finished,
 		        var geojson = ajax.call([{
 		                methodname: 'mod_treasurehunt_user_progress',
 		                args: {userprogress: {
@@ -556,7 +560,7 @@ define(['jquery',
 		                    markerFeature.setGeometry(null);
 		                }
 		            }
-		            // If change the group mode. 
+		            // If change the group mode.
 		            if (groupmode != response.groupmode) {
 		                groupmode = response.groupmode;
 		            }
@@ -584,7 +588,7 @@ define(['jquery',
 		                        }));
 		                    }
 						}
-						
+
 						// Display the buttons corresponding to the situation:
 
 		                // Check if it exists, which indicates that it has been updated.
@@ -593,7 +597,7 @@ define(['jquery',
 		                    changesinlastsuccessfulstage = true;
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
-								
+
 								// There is a question => disable location validation button and
 								// set the big button as Question.
 		                        changesinquestionstage = true;
@@ -665,15 +669,15 @@ define(['jquery',
 		            } else {
 		                fly_to(map, null, source.getExtent());
 		            }
-		
+
 		            fitmap = false;
 		        }
 		    }
 		    function truncate( n, useWordBoundary ){
 		        if (this.length <= n) { return this; }
 		        var subString = this.substr(0, n-1);
-		        return (useWordBoundary 
-		           ? subString.substr(0, subString.lastIndexOf(' ')) 
+		        return (useWordBoundary
+		           ? subString.substr(0, subString.lastIndexOf(' '))
 		           : subString) + "&hellip";
 		    };
 		    function set_lastsuccessfulstage() {
@@ -694,7 +698,7 @@ define(['jquery',
 		            } else {
 		            	briefing = lastsuccessfulstage.clue;
 		            }
-		            
+
 		            $("#lastsuccessfulstagename2").text(lastsuccessfulstage.name);
 		            $("#lastsuccesfulstagepos2").text(lastsuccessfulstage.position +
 		                    " / " + lastsuccessfulstage.totalnumber);
@@ -733,7 +737,7 @@ define(['jquery',
 							'<label style="color:white" for="' + id + '">' + answer.answertext + '</label></div>';
 		                counter++;
 					});
-					
+
 					$('#questionform').html(questionform).scrollTop();
 					// Enhance this with jquery mobile.
 					// JPC: It doesn't work in some cases (i.e. Moodle 3.7) probably some interaction with jquery, jqueryui and jquerymobile.
@@ -741,9 +745,9 @@ define(['jquery',
 					$('#questionform').enhanceWithin();
 					setTimeout(() => $('#questionform input').removeClass('ui-helper-hidden-accessible') ,1); //.controlgroup("refresh");
 		            changesinquestionstage = false;
-		        }	
+		        }
 			}
-			
+
 		    function set_attempts_history() {
 		        // I'm checking to see if there have been any changes since the last time.
 		        if (changesinattemptshistory) {
@@ -811,7 +815,7 @@ define(['jquery',
 		            });
 		            item.insertAfter('#baseLayer');
 		        });
-		
+
 		    }
 		    /**
 		     * Geolocation component
@@ -858,7 +862,7 @@ define(['jquery',
 		        }
 		    });
 		    geolocation.setTracking(tracking); // Start position tracking.
-		
+
 		    select.on("select", function (features) {
 		        if (features.selected.length === 1) {
 		            if (lastsuccessfulstage.position === features.selected[0].get('stageposition')
@@ -908,8 +912,8 @@ define(['jquery',
 					}
 		        }
 			});
-			
-			
+
+
 
 		    $("#autocomplete").on("filterablebeforefilter", function (e, data) {
 		    	if (!geographictools) {
@@ -983,7 +987,7 @@ define(['jquery',
 		        $(this).remove();
 		        select.getFeatures().clear();
 		    });
-		
+
 		    $(document).on("click", "#acceptupdates", function () {
 		        infomsgs = [];
 		    });
@@ -1012,14 +1016,14 @@ define(['jquery',
 		                } else {
 		                    set_question();
 						}
-						
+
 		            }
-		        }		
+		        }
 				// Some Themes override this style breaking the layout (i.e. Klass via :target). Patch it.
 				setTimeout( ()=> {
 					var style = document.querySelector('#questionpage').style;
 					style.setProperty('padding-top',style.paddingTop, 'important');
-					}, 200);	
+					}, 200);
 		    });
 		    //Buttons events.
 		    if (geographictools) {
@@ -1052,7 +1056,7 @@ define(['jquery',
 		                renew_source(false, false, selected.val());
 		            }
 		        }
-		
+
 		    });
 		    $('#validatelocation').on('click', function (event) {
 		        if (roadfinished) {
@@ -1087,7 +1091,7 @@ define(['jquery',
 		        viewport.setAttribute('content', 'width=device-width, initial-scale=1.0, ' +
 		                'maximum-scale=1.0, user-scalable=0');
 //		        $("#infopanel .ui-panel-inner").niceScroll();
-		
+
 		        $("#QRdialog").popup({
 		            beforeposition: function (event, ui) {
 //		                $(this).css({
@@ -1098,7 +1102,7 @@ define(['jquery',
 //		                });
 		            	$(this).width(window.innerWidth * 0.9);
 		            	$(this).height(window.innerHeight * 0.9);
-		               
+
 		            },
 		            afteropen: function (event, ui) {
 		            	var contentdiv =  $(this).find("div[data-role='content']").first();
@@ -1106,11 +1110,11 @@ define(['jquery',
 		            	var padding = parseInt(contentdiv.css('padding-top')) + parseInt(contentdiv.css('padding-bottom'));
 		            	contentdiv.css('max-height', "1000px");
 		            	$('#previewVideoDiv').width($(this).width() - padding)
-	                						  .height($(this).height() 
-	                								  - $('#previewQRbuttons').height() 
+	                						  .height($(this).height()
+	                								  - $('#previewQRbuttons').height()
 	                								  - headerdiv.height()
 	                								  - padding * 2 );
-		            	$('#previewQRvideo').show(); 
+		            	$('#previewQRvideo').show();
 						webqr.loadQR(qrReaded, qrReport);
 		            },
 		            afterclose: function (event, ui) {
@@ -1135,7 +1139,7 @@ define(['jquery',
 		    }
 		    function qrReport(message) {
 		    	if (typeof(message) == 'string') {
-		    		$('#errorQR').text(message);		    		
+		    		$('#errorQR').text(message);
 		    	} else {
 		    		if (message.cameras[message.camera].name !== null) {
 		    			$('#errorQR').text(message.cameras[message.camera].name);
@@ -1220,7 +1224,7 @@ define(['jquery',
 		        } else {
 		            open_popup(popup);
 		        }
-		
+
 		    }
 		    function open_popup(popup) {
 		        // Because chaining of popups not allowed in jquery mobile.
@@ -1232,7 +1236,7 @@ define(['jquery',
 		        } else {
 		            $(popup).popup("open", {positionTo: "window"});
 		        }
-		
+
 		    }
 		    function close_popup(popup) {
 		        popup.popup("close")
@@ -1242,7 +1246,7 @@ define(['jquery',
 		                '</div><div class="ui-body ui-body-a">' + body +
 		                '</div>';
 		    }
-		
+
 		}
 	}
 );

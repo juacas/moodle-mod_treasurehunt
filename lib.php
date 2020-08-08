@@ -66,7 +66,7 @@ function treasurehunt_supports($feature) {
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
- *
+ * @global moodle_database $DB 
  * @param stdClass $treasurehunt Submitted data from the form in mod_form.php
  * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
  * @return int The id of the newly inserted treasurehunt record

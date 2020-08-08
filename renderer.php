@@ -128,7 +128,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
             "stageclue", "question", "noanswerselected", "timeexceeded",
             "searching", "continue", "noattempts", "aerialview", "roadview",
             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"
         ];
         $strings = [];
         foreach ($terms as $term) {
@@ -219,7 +219,7 @@ I18N;
             "stageclue", "question", "noanswerselected", "timeexceeded",
             "searching", "continue", "noattempts", "aerialview", "roadview",
             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"
         ];
         $strings = [];
         foreach ($terms as $term) {
@@ -311,7 +311,7 @@ I18N;
     {
         // Create a table for the data.
         $o = '';
-      
+
         $o .= $this->output->container_start('attempthistory');
         $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
@@ -345,7 +345,7 @@ I18N;
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'), 'notifymessage');
             }
         }
-        
+
         $o .= $this->output->box_end();
 
         // Close the container and insert a spacer.
@@ -447,7 +447,7 @@ I18N;
                             $cells = array($name);
                             $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
                             $cells[] = treasurehunt_get_nice_date($elapsed->first);
-                            
+
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($userorgroup->ratings[$i])) {
@@ -487,7 +487,7 @@ I18N;
                 }
             }
         }
-   
+
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
             $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
@@ -531,11 +531,8 @@ I18N;
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
             $notavailable = true;
-            $message = get_string(
-                'treasurehuntnotavailable',
-                'treasurehunt',
-                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48)
-            );
+            $message = get_string('treasurehuntnotavailable', 'treasurehunt',
+                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48));
             $o .= html_writer::tag('p', $message) . "\n";
             if ($info->treasurehunt->cutoffdate) {
                 $message = get_string(

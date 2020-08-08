@@ -145,7 +145,7 @@ $string['availableplayerstyles'] = 'Estilos de la pantalla de juego disponibles.
 $string['playerstyle'] = 'Estilo de la pantalla de juego.';
 $string['playerstyle_help'] = 'Hay diversos estilos de la pantalla de juego que los profesores pueden elegir.';
 $string['playerclassic'] = 'Classic';
-$string['playerfancy'] = 'Fanzy';
+$string['playerfancy'] = 'Fancy';
 $string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
 $string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.
@@ -276,6 +276,7 @@ $string['nousersprogress'] = 'Ningún usuario/grupo tiene progresos en este cami
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
 $string['play'] = 'Jugar';
+$string['pegmanlabel'] = 'Mirar en StreetView';
 $string['playstagewithoutmoving'] = 'Descubrir etapa sin desplazarse';
 $string['playstagewithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán descubrir esta etapa sin tener
 que desplazarse. Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca,
