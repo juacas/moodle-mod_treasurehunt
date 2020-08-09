@@ -83,6 +83,17 @@
   text-align: center;
 }
 
+/*Titles*/
+#page-mod-treasurehunt-play h1,
+#page-mod-treasurehunt-play h2,
+#page-mod-treasurehunt-play h3,
+#page-mod-treasurehunt-play h4,
+#page-mod-treasurehunt-play h5,
+#page-mod-treasurehunt-play h6 {
+  line-height: inherit;
+  color: #455a64;
+}
+
 /* Navbar */
 #page-mod-treasurehunt-play .play-navbar {
   position: relative;

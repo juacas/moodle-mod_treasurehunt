@@ -14,31 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
-{{!
-    @template core/pix_icon
-
-    Moodle pix_icon template.
-
-    The purpose of this template is to render a pix_icon.
-
-    Classes required for JS:
-    * none
-
-    Data attributes required for JS:
-    * none
-
-    Context variables required for this template:
-    * attributes Array of name / value pairs.
-
-    Example context (json):
-    {
-        "attributes": [
-            { "name": "src", "value": "http://moodle.com/wp-content/themes/moodle/images/logo-hat2.png" },
-            { "name": "class", "value": "iconsmall" }
-        ]
-    }
-
-}}
 
 <div class="play-container">
     <div class="global-loader active">
@@ -48,67 +23,6 @@
     <div class="map-page">
         <!-- sidebar mask -->
         <div class="sidebar-mask"></div>
-
-        <!-- Sidebar info-->
-        <div id="infopanel" class="sidebar sidebar-left">
-            <!-- Header -->
-            <nav class="play-navbar map-navbar">
-                <button class="btn close-sidebar">
-                    <i class="fa fa-chevron-left" aria-hidden="true"></i>
-                </button>
-                <span class="title">{{#str}} info, mod_treasurehunt{{/str}}</span>
-            </nav>
-
-            <div class="sidebar-content">
-                <!--<h5>{{{user.picture}}} {{user.name}}</h5> -->
-                <div class="card">
-                    <div class="card-body">
-                         <div class="card-title d-flex justify-content-between align-items-start">
-                            <h5>{{treasurehunt.name}}</h5>
-                        </div>
-                        <p class="card-text">{{{treasurehunt.description}}}</p>
-                        <a href="view.php?id={{cmid}}" class="btn play-btn">
-                            <i class="fa fa-sign-out" aria-hidden="true"></i>
-                            {{#str}} exit, mod_treasurehunt{{/str}}
-                        </a>
-                    </div>
-                 </div>
-
-              <!--   <div id="accordion">
-                    {{#hasdescription}}
-                    <div class="card">
-                        <div class="card-header" id="headingOne">
-                            <h5 class="mb-0">
-                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
-                                    {{treasurehunt.name}}
-                                </button>
-                            </h5>
-                        </div>
-
-                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-                            <div class="card-body">
-                                {{{treasurehunt.description}}}
-                            </div>
-                        </div>
-                    </div>
-                    {{/hasdescription}}
-                    <div class="card">
-                        <div class="card-header" id="headingTwo">
-                            <h5 class="mb-0">
-                                <button id="lastsuccessfulstagename" class="btn btn-link collapsed" data-toggle="collapse" data-target="#lastsuccessfulstage" aria-expanded="false" aria-controls="lastsuccessfulstage">
-                                 <span id="lastsuccesfulstagepos" class="badge badge-light"></span>
-                                </button>
-                            </h5>
-                        </div>
-                        <div id="lastsuccessfulstage" class="collapse" aria-labelledby="headingTwo" data-parent="#accordion">
-                            <div class="card-body" id="lastsuccessfulstageclue">
-                            </div>
-                        </div>
-                    </div>
-                </div>-->
-
-            </div>
-        </div>
 
         <!-- Sidebar search-->
         <div id="searchpanel" class="sidebar sidebar-left">
@@ -145,9 +59,6 @@
         <div class="page-content-wrapper">
             <!-- Header -->
             <nav class="play-navbar map-navbar">
-                {{! <button class="btn" data-rel="sidebar" data-ref="#infopanel" data-dismissible>
-                    <i class="fa fa-bars" aria-hidden="true"></i>
-                </button> }}
                 <button class="btn" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
                     <i class="fa fa-search" aria-hidden="true"></i>
                 </button>
@@ -286,18 +197,31 @@
     {{!Popup info stage}}
     {{< treasurehunt/popup_play_page}}
         {{$popupid}}infoStagePopup{{/popupid}}
-        {{$popupheading}}
-            <span class="title"></span>
-            <button class="btn close-modal close-dialog">
-                <i class="fa fa-times" aria-hidden="true"></i>
-            </button>
-        {{/popupheading}}
+        {{$popuptitle}}
+            {{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}
+        {{/popuptitle}}
         {{$popupcontent}}
         {{/popupcontent}}
         {{$popupfooter}}
         {{/popupfooter}}
     {{/treasurehunt/popup_play_page}}
 
+    {{!Popup geolocation}}
+    {{< treasurehunt/popup_play_page}}
+        {{$popupid}}geolocationPopup{{/popupid}}
+        {{$popuptitle}}
+            {{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}
+        {{/popuptitle}}
+        {{$popupcontent}}
+            <p>{{#str}} geolocation_needed, mod_treasurehunt{{/str}}</p>
+        {{/popupcontent}}
+        {{$popupfootercontent}}
+            <button type="button" class="btn play-btn close-modal">
+                <i class="fa fa-check" aria-hidden="true"></i>
+                {{#str}} continue, mod_treasurehunt{{/str}}
+            </button>
+        {{/popupfootercontent}}
+    {{/treasurehunt/popup_play_page}}
 
     {{!Dialog layer page}}
     {{< treasurehunt/dialog_play_page}}
@@ -358,50 +282,3 @@
     {{/treasurehunt/dialog_play_page}}
 
 </div>
-
-    {{!Fin de pagina de capas.}}
-    {{!Pagina de historial de intentos.}}
-    {{!Fin de pagina de historial de intentos.}}
-    {{!Pagina de reponder pregunta.}}
-    {{!Fin de pagina de reponder pregunta.}}
-{{#js}}
-require(['jquery'], function($) {
-    {{! SIDEBAR }}
-    {{! $('*[data-rel="sidebar"]').on("click", (e)=> {
-        const target = e.currentTarget;
-        const sidebar = $(target.dataset.ref);
-        sidebar.trigger("sidebar:open");
-        sidebar.addClass("active");
-        if(target.dataset.dismissible != null){
-            $(".sidebar-mask").addClass("active dismissible");
-        }
-    });
-
-    $('.close-sidebar, .sidebar-mask').on("click", ()=> {
-        const sidebars = $(".sidebar.active");
-        sidebars.trigger("sidebar:close");
-        sidebars.removeClass("active");
-        $(".sidebar-mask").removeClass("active dismissible");
-    }); }}
-
-    {{! MODAL PAGE }}
-    {{! $('*[data-rel="modal"]').on("click", (e)=> {
-        const target = e.currentTarget;
-        const modal = $(target.dataset.ref);
-        modal.trigger("modal:open");
-        modal.addClass("active");
-        $(target.dataset.ref + " .modal-mask").addClass("active");
-        if(target.dataset.dismissible != null){
-             $(target.dataset.ref + " .modal-mask").addClass("dismissible");
-        }
-
-    });
-
-    $(document).on("click", ".close-modal, .modal-mask.dismissible", ()=> {
-        const modal = $(".play-modal.active");
-        modal.trigger("modal:close");
-        modal.removeClass("active");
-        $(".modal-mask").removeClass("active dismissible");
-    }); }}
-});
-{{/js}}
