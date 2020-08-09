@@ -313,7 +313,7 @@ I18N;
         $o = '';
 
         $o .= $this->output->container_start('attempthistory');
-        $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
+        $o .= $this->output->heading(get_string('userattempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
@@ -427,7 +427,7 @@ I18N;
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $name));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
@@ -439,7 +439,7 @@ I18N;
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);

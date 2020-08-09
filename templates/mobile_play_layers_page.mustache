@@ -114,7 +114,7 @@
   <ion-list radio-group (ionChange)="changeBaseLayer($event)">
 
     <ion-list-header class="treasurehunt-no-margin">
-      Capas base
+      {{'plugin.mod_treasurehunt.baselayers' | translate}}
     </ion-list-header>
 
     <ion-item *ngFor="let baseLayer of layersConfig.baseLayers">
@@ -130,7 +130,7 @@
   <ion-list class="treasurehunt-no-margin" *ngIf="layersConfig.overlayLayers.length">
 
     <ion-list-header class="treasurehunt-no-margin">
-      Capas superpuestas
+      {{'plugin.mod_treasurehunt.overlaylayers' | translate}}
     </ion-list-header>
 
     <ion-item *ngFor="let overlayLayer of layersConfig.overlayLayers">

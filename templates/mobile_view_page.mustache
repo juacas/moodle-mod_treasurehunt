@@ -14,105 +14,6 @@
     You should have received a copy of the GNU General Public License
     along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 }}
-{{!
-    @template mod_treasurehunt/mobile_view_page
-
-    Template for the mobile view page.
-
-    Classes required for JS:
-    -
-
-    Data attributes required for JS:
-    -
-
-    Context variables required for this template:
-    * cmid
-    * courseid
-    * treasurehunt
-    * info
-
-    Example context (json):
-    {
-      "cmid": "62",
-      "courseid": "3",
-      "treasurehunt": {
-        "id": "4",
-        "course": "3",
-        "name": "Group choice activity",
-        "intro": "<p>Select your group</p>",
-        "introformat": "1",
-        "publish": "1",
-        "multipleenrollmentspossible": "1",
-        "showresults": "3",
-        "display": "0",
-        "allowupdate": "0",
-        "showunanswered": "0",
-        "limitanswers": "1",
-        "timeopen": "0",
-        "timeclose": "0",
-        "timemodified": "1528114222",
-        "completionsubmit": "0",
-        "sortgroupsby": "0",
-        "option": {
-          "10": "3",
-          "11": "4",
-          "12": "5"
-        },
-        "grpmemberid": {
-          "6": [
-            "3",
-            "2"
-          ],
-        },
-        "maxanswers": {
-          "12": "1",
-          "11": "2",
-          "10": "2"
-        },
-        "open": true,
-        "expired": false,
-        "alloptionsdisabled": false
-      },
-      "options": [
-        {
-          "id": 10,
-          "groupid": "3",
-          "name": "Group 1",
-          "maxanswers": "1",
-          "displaylayout": "0",
-          "countanswers": 2,
-          "checked": false,
-          "disabled": true
-        },
-        {
-          "id": 11,
-          "groupid": "4",
-          "name": "Group 2",
-          "maxanswers": "2",
-          "displaylayout": "0",
-          "countanswers": 1,
-          "checked": true,
-          "disabled": false
-        },
-        {
-          "id": 12,
-          "groupid": "5",
-          "name": "Group 3",
-          "maxanswers": "2",
-          "displaylayout": "0",
-          "countanswers": 0,
-          "checked": false,
-          "disabled": false
-        }
-      ]
-    }
-}}
-
-    {{! <core-navbar-buttons #content end>
-        <button ion-button icon-only (click)="action()">
-            <ion-icon name="funnel"></ion-icon>
-        </button>
-    </core-navbar-buttons> }}
 
 {{=<% %>=}}
 <div>
@@ -206,11 +107,12 @@
      <!-- Tabs: see the user/group attempts or users progress. -->
     <core-tabs>
         <!-- View the user/group attempts tab. -->
-        <core-tab [show]="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception && CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>" icon="podium" [title]="'Historial de intentos'">
+        <core-tab [show]="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception && CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>" 
+            icon="podium" title="{{'plugin.mod_treasurehunt.attempthistory' | translate}}">
             <ng-template>
                 <ion-list class="treasurehunt-no-margin">
                     <ion-list-header class="treasurehunt-no-margin">
-                        {{ 'plugin.mod_treasurehunt.attempthistory' | translate : {$a: CONTENT_OTHERDATA.username} }}
+                        {{ 'plugin.mod_treasurehunt.userattempthistory' | translate : {$a: CONTENT_OTHERDATA.username} }}
                     </ion-list-header>
 
                      <!-- User historical attempts -->
@@ -229,7 +131,7 @@
         </core-tab>
 
         <!-- View users progress tab. -->
-        <core-tab icon="people" [title]="'Progreso total'">
+        <core-tab icon="people" title="{{'plugin.mod_treasurehunt.totalprogress' | translate}}">
             <ng-template>
                 <ion-list>
                     <!-- No roads advice -->
