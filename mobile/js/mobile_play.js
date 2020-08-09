@@ -39,6 +39,7 @@ class TreasureHuntPlayMobile {
       positionFeature: null,
       accuracyFeature: null,
       markerFeature: null,
+      coordsOverlay: null,
     };
 
     this.layersConfig = {
@@ -91,6 +92,12 @@ class TreasureHuntPlayMobile {
       show: false,
       content: "",
     };
+
+    this.coordsOverlay = {
+      timeoutHandler: null,
+      hdms: null,
+      gsvUrl: null,
+    };
   }
 
   init(initialResources) {
@@ -110,9 +117,11 @@ class TreasureHuntPlayMobile {
 
   initMap() {
     this.initMapLayers();
+    this.initMapOverlays();
     this.map = new ol.Map({
       target: "map",
       layers: this.mapSources.totalLayers,
+      overlays: [this.mapSources.coordsOverlay],
       view: new ol.View({
         center: [0, 0],
         zoom: 2,
@@ -414,6 +423,16 @@ class TreasureHuntPlayMobile {
     ];
   }
 
+  initMapOverlays() {
+    this.mapSources.coordsOverlay = new ol.Overlay({
+      element: document.getElementById("coordsOverlay"),
+      autoPan: true,
+      autoPanAnimation: {
+        duration: 250,
+      },
+    });
+  }
+
   initMapInteractions() {
     // Select Styles
     const selectText = new ol.style.Text({
@@ -593,9 +612,22 @@ class TreasureHuntPlayMobile {
             coordinates ? new ol.geom.Point(coordinates) : null
           );
           // Shorcut to Google Street View.
-          // if (this.playConfig.custommapconfig === null || this.playConfig.custommapconfig.geographic) {
-          //   overlay.setPosition(evt.coordinate);
-          // }
+          if (
+            this.playConfig.custommapconfig === null ||
+            this.playConfig.custommapconfig.geographic
+          ) {
+            this.clearTimeOutCoordsOverlay();
+            this.mapSources.coordsOverlay.setPosition(evt.coordinate);
+            const latlon = ol.proj.toLonLat(
+              evt.coordinate,
+              this.map.getView().getProjection()
+            );
+            this.coordsOverlay.hdms = ol.coordinate.toStringHDMS(latlon);
+            this.coordsOverlay.gsvUrl = `http://maps.google.com/?cbll=${latlon[1]},${latlon[0]}&cbp=12,20.09,,0,5&layer=c`;
+            this.coordsOverlay.timeoutHandler = setTimeout(() => {
+              this.closeCoordsOverlay();
+            }, 3000);
+          }
         }
       })
     );
@@ -928,6 +960,16 @@ class TreasureHuntPlayMobile {
     };
   }
 
+  closeCoordsOverlay() {
+    this.mapSources.coordsOverlay.setPosition(undefined);
+  }
+
+  clearTimeOutCoordsOverlay() {
+    if (this.coordsOverlay.timeoutHandler) {
+      clearTimeout(this.coordsOverlay.timeoutHandler);
+    }
+  }
+
   launchTutorial() {
     this.gameStatus.showingTutorial = true;
     const intro = introJs();
@@ -953,8 +995,7 @@ class TreasureHuntPlayMobile {
       },
       {
         element: "#map",
-        intro: `¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img core-external-content src="https://192.168.1.35/mod/treasurehunt/pix/success_mark.png" width="28"/><br>Los fallidos: <img core-external-content src="pix/failure_mark.png" width="28"/>`,
-        // intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
+        intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
         position: "floating",
       },
       {
@@ -1106,6 +1147,7 @@ function loadInitialResources() {
       locationMark: "pix/bootstrap/my_location_3.png",
       olScript: "js/ol/ol.js",
       olCss: "css/ol.css",
+      olPopupCss: "css/playerbootstrap/ol-popup.css",
       instroJsScript: "amd/build/intro.min.js",
       introJsCss: "css/introjs.css",
     };
@@ -1180,6 +1222,7 @@ loadInitialResources().then((initialResources) => {
     ),
     loadStyle(initialResources.olCss, "mod-treasurehunt-ol-css"),
     loadStyle(initialResources.introJsCss, "mod-treasurehunt-introjs-css"),
+    loadStyle(initialResources.olPopupCss, "mod-treasurehunt-olpopup-css"),
   ]).then(() => {
     // Init map
     this.treasureHuntPlayMobile.init(initialResources);

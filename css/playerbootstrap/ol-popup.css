@@ -1,16 +1,17 @@
 .ol-popup {
   position: absolute;
   background-color: white;
-  -webkit-filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
-  filter: drop-shadow(0 1px 4px rgba(0,0,0,0.2));
+  -webkit-filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
+  filter: drop-shadow(0 1px 4px rgba(0, 0, 0, 0.2));
   padding: 15px;
   border-radius: 10px;
   border: 1px solid #cccccc;
-  bottom: 70px;
-  left: -50px;
-  min-width: 300px;
+  bottom: 75px;
+  left: -35px;
+  min-width: 230px;
 }
-.ol-popup:after, .ol-popup:before {
+.ol-popup:after,
+.ol-popup:before {
   top: 100%;
   border: solid transparent;
   content: " ";
@@ -38,5 +39,5 @@
   right: 8px;
 }
 .ol-popup-closer:after {
-  content: "X";
+  content: "✖";
 }

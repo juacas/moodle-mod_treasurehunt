@@ -122,7 +122,16 @@
 
     <div class="treasureoverlay" *ngIf="treasureHuntPlayMobile.gameStatus.roadFinished">
       {{'plugin.mod_treasurehunt.roadended'| translate}}
-    </div> 
+    </div>
+
+    <div id="coordsOverlay" (click)="treasureHuntPlayMobile.clearTimeOutCoordsOverlay()" class="ol-popup">
+      <ion-item>
+        <a class="ol-popup-closer" (click)="treasureHuntPlayMobile.closeCoordsOverlay()"></a>
+        <ion-icon item-start name="locate"></ion-icon>
+        <a rel="noopener noreferrer" target="_blank"  [href]="treasureHuntPlayMobile.coordsOverlay.gsvUrl">{{'plugin.mod_treasurehunt.pegmanlabel'| translate}}</a>
+        <p><code>{{treasureHuntPlayMobile.coordsOverlay.hdms}}</code></p>
+      </ion-item>
+    </div>
 
     <div id="map" class="treasurehunt-map-container"></div>
 
