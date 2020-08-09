@@ -83,6 +83,10 @@ class TreasureHuntPlayMobile {
       content: "",
     };
 
+    this.geolocationPopup = {
+      show: false,
+    };
+
     this.errorPopup = {
       show: false,
       content: "",
@@ -516,13 +520,11 @@ class TreasureHuntPlayMobile {
         this.geolocation.setProperties({ user_denied: true });
         that.CoreDomUtilsProvider.showToast(error.message, false);
         if (
-          error.code == error.PERMISSION_DENIED &&
-          this.playConfig.tracking &&
           !this.playConfig.playwithoutmoving &&
           trackinggeolocationwarndispatched == false
         ) {
           setTimeout(() => {
-            $("#popupgeoloc").popup("open", { positionTo: "window" });
+            this.geolocationPopup.show = true;
             trackinggeolocationwarndispatched = true;
           }, 500);
         }
@@ -769,9 +771,13 @@ class TreasureHuntPlayMobile {
   }
 
   centerOnUserPosition() {
-    const accuracy = this.mapSources.accuracyFeature.getGeometry();
-    if (accuracy) {
-      this.flyTo(accuracy);
+    if (this.geolocation.get("user_denied")) {
+      this.geolocationPopup.show = true;
+    } else {
+      const accuracy = this.mapSources.accuracyFeature.getGeometry();
+      if (accuracy) {
+        this.flyTo(accuracy);
+      }
     }
   }
 

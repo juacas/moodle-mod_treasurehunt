@@ -223,7 +223,31 @@
           </button>
         </div>
       </div>
-    </div> 
+    </div>
+
+    <!-- Geolocation error popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.geolocationPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.geolocation_needed_title' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content" innerHtml="{{'plugin.mod_treasurehunt.geolocation_needed'  | translate}}">
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.geolocationPopup.show = false">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div>  
 
 
 </div>

@@ -79,6 +79,8 @@ $addons = array(
             array('nogroupassigned', 'treasurehunt'),
             array('nouserassigned', 'treasurehunt'),
             array('invalroadid', 'treasurehunt'),
+            array('geolocation_needed_title', 'treasurehunt'),
+            array('geolocation_needed', 'treasurehunt'),
             array('trackviewer', 'treasurehunt'),
             array('usersprogress', 'treasurehunt'),
             array('usersprogress_help', 'treasurehunt'),
