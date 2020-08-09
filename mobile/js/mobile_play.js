@@ -865,7 +865,7 @@ class TreasureHuntPlayMobile {
           !this.mapSources.markerFeature.getGeometry()
         ) {
           that.CoreDomUtilsProvider.showToast(
-            "plugin.mod_treasurehunt.nomarks",
+            "plugin.mod_treasurehunt.nomarksmobile",
             true,
             5000
           );
@@ -995,7 +995,12 @@ class TreasureHuntPlayMobile {
       },
       {
         element: "#map",
-        intro: this.translate("plugin.mod_treasurehunt.mapplay_tour"),
+        intro: this.translate("plugin.mod_treasurehunt.mapplaymobile_tour", {
+          $a: {
+            successurl: this.resources.successMark,
+            failureurl: this.resources.failureMark,
+          },
+        }),
         position: "floating",
       },
       {
@@ -1034,8 +1039,8 @@ class TreasureHuntPlayMobile {
     this.gameStatus.showingTutorial = false;
   }
 
-  translate(string) {
-    return that.TranslateService.instant(string);
+  translate(string, context = null) {
+    return that.TranslateService.instant(string, context);
   }
 }
 

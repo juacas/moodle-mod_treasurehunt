@@ -262,6 +262,7 @@ $string['nogroupingplay'] = 'No tienes ningún grupo asignado a un camino, por l
 $string['nogroupplay'] = 'No tienes ningún camino asignado, por lo que no puedes jugar la actividad.';
 $string['nogrouproad'] = '{$a} no tiene ningún camino asignado.';
 $string['nomarks'] = 'Marca primero en el mapa el punto deseado. Sitúa el <img src="pix/my_location.png" width="28"/>';
+$string['nomarksmobile'] = 'Marca primero en el mapa el punto deseado.';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['notchangeorderstage'] = 'No puedes cambiar el orden de las etapas una vez que se han realizado intentos sobre el camino.';
@@ -422,6 +423,7 @@ $string['playerhelp_tour'] = 'Esta gira puede ser revisada cuando quiera.';
 $string['validatelocation_tour'] = '¿Seguro de la ubicación de una etapa? Envía tu posición y descubre si estás en lo cierto..';
 $string['lastsuccessfulstage_tour'] = 'En este panel puedes encontrar tu última etapa superada. También puede ser la etapa superada de tu grupo.';
 $string['mapplay_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="pix/success_mark.png" width="28"/><br>Los fallidos: <img src="pix/failure_mark.png" width="28"/>';
+$string['mapplaymobile_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="{$a->successurl}" width="28"/><br>Los fallidos: <img src="{$a->failureurl}" width="28"/>';
 $string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">¡Disfruta de tu Caza del Tesoro</span><br>con tus compañeros!';
 
 $string['nextstep'] = 'Sig.';

@@ -263,6 +263,7 @@ $string['nogroupingplay'] = 'You have no group assigned to a road, so you can no
 $string['nogroupplay'] = 'You have no road assigned, so you can not play the activity.';
 $string['nogrouproad'] = '{$a} has no road assigned.';
 $string['nomarks'] = 'First mark on the map the desired point. Place the <img src="pix/my_location.png" width="28"/>';
+$string['nomarksmobile'] = 'First mark on the map the desired point.';
 $string['noresults'] = 'No results found.';
 $string['noroads'] = 'No roads have been added yet';
 $string['notchangeorderstage'] = 'You can not change the order of stages after attempts have been made on the road';
@@ -420,6 +421,7 @@ $string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
 $string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
 $string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
+$string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="{$a->successurl}" width="28"/><br>Failed ones: <img src="{$a->failureurl}" width="28"/>';
 $string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
 
 $string['nextstep'] = 'Next';

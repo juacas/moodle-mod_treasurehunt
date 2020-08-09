@@ -41,7 +41,7 @@ $addons = array(
                 ), // Function needs caching for offline.
                 'styles' => array(
                     'url' => $CFG->wwwroot . '/mod/treasurehunt/mobile/mobile_css.css',
-                    'version' => '1.0',
+                    'version' => '2.0',
                 ),
                 'displayrefresh' => true,
                 'displayprefetch' => false
@@ -100,7 +100,7 @@ $addons = array(
             array('aerialview', 'treasurehunt'),
             array('roadview', 'treasurehunt'),
             array('startfromhere', 'treasurehunt'),
-            array('nomarks', 'treasurehunt'),
+            array('nomarksmobile', 'treasurehunt'),
             array('updates', 'treasurehunt'),
             array('activitytoendwarning', 'treasurehunt'),
             array('huntcompleted', 'treasurehunt'),
@@ -121,7 +121,7 @@ $addons = array(
             array('donetutorial', 'treasurehunt'),
             array('welcome_play_tour', 'treasurehunt'),
             array('lastsuccessfulstage_tour', 'treasurehunt'),
-            array('mapplay_tour', 'treasurehunt'),
+            array('mapplaymobile_tour', 'treasurehunt'),
             array('validatelocation_tour', 'treasurehunt'),
             array('autolocate_tour', 'treasurehunt'),
             array('playend_tour', 'treasurehunt'),
