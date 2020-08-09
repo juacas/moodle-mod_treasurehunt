@@ -197,9 +197,12 @@
     {{!Popup info stage}}
     {{< treasurehunt/popup_play_page}}
         {{$popupid}}infoStagePopup{{/popupid}}
-        {{$popuptitle}}
-            {{#str}} geolocation_needed_title, mod_treasurehunt{{/str}}
-        {{/popuptitle}}
+        {{$popupheading}}
+            <span class="title"></span>
+            <button class="btn close-modal close-dialog">
+                <i class="fa fa-times" aria-hidden="true"></i>
+            </button>
+        {{/popupheading}}
         {{$popupcontent}}
         {{/popupcontent}}
         {{$popupfooter}}
