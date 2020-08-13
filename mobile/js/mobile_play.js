@@ -63,6 +63,7 @@ class TreasureHuntPlayMobile {
       showingTutorial: false,
       showValidateLocationButton: true,
       showQRButton: false,
+      shakeClueButton: false,
     };
 
     this.allEvents = [];
@@ -749,7 +750,7 @@ class TreasureHuntPlayMobile {
           // Check if it exists, which indicates that it has been updated.
           if (response.lastsuccessfulstage) {
             this.gameStatus.lastSuccessfulStage = response.lastsuccessfulstage;
-            if (!this.gameStatus.showingTutorial) {
+            if (!this.gameStatus.showingTutorial && !initialize) {
               setTimeout(() => this.openCluePage(), 1500);
             }
             // If the stage is not solved notify changes.
@@ -764,6 +765,9 @@ class TreasureHuntPlayMobile {
           // Check if it is the first geometry or it is being initialized and center the map.
           if (response.firststagegeom || initialize) {
             this.fitMapToSource();
+            // Shake clue button
+            this.gameStatus.shakeClueButton = true;
+            setTimeout(() => (this.gameStatus.shakeClueButton = false), 3000);
           }
         }
         if (response.infomsg.length > 0) {
@@ -775,9 +779,6 @@ class TreasureHuntPlayMobile {
           this.mapSources.markerFeature.setGeometry(null);
           this.playConfig.playwithoutmoving = false;
           this.clearRenewInterval();
-
-          // $("#roadended").show();
-          // $("#mapplay").css("opacity", "0.8");
         }
       })
       .catch((error) => {
