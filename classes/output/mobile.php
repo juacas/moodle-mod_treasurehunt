@@ -77,6 +77,9 @@ class mobile
         $cm = get_coursemodule_from_id('treasurehunt', $args->cmid);
         $course = $DB->get_record('course', array('id' => $cm->course));
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+        
+        // Force app language
+        force_current_language($args->applang);
 
 
         // Capabilities check.
@@ -200,6 +203,10 @@ class mobile
         $context = context_module::instance($cm->id);
         require_capability('mod/treasurehunt:play', $context);
 
+        // Force app language
+        force_current_language($args->applang);
+
+
         // Get last timestamp.
         $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
@@ -246,6 +253,10 @@ class mobile
 
         $args = (object) $args;
 
+        // Force app language
+        force_current_language($args->applang);
+
+
         return array(
             'templates' => array(
                 array(
@@ -270,6 +281,9 @@ class mobile
 
         $args = (object) $args;
 
+        // Force app language
+        force_current_language($args->applang);
+       
         return array(
             'templates' => array(
                 array(
@@ -290,9 +304,12 @@ class mobile
      */
     public static function mobile_treasurehunt_play_clue($args)
     {
-        global  $CFG, $OUTPUT;
+        global  $OUTPUT;
 
         $args = (object) $args;
+
+        // Force app language
+        force_current_language($args->applang);
 
         return array(
             'templates' => array(
@@ -317,6 +334,9 @@ class mobile
         global  $CFG, $OUTPUT;
 
         $args = (object) $args;
+
+        // Force app language
+        force_current_language($args->applang);
 
         return array(
             'templates' => array(

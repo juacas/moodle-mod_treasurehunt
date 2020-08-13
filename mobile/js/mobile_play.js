@@ -66,6 +66,8 @@ class TreasureHuntPlayMobile {
       shakeClueButton: false,
     };
 
+    this.langSubscription = null;
+
     this.allEvents = [];
 
     this.geolocation = null;
@@ -103,6 +105,10 @@ class TreasureHuntPlayMobile {
 
   init(initialResources) {
     this.showLoading();
+    // Handle app language changes
+    this.langSubscription = that.TranslateService.onLangChange.subscribe(() => {
+      this.renewSource(false, false, null, null, true);
+    });
 
     this.resources = initialResources;
     this.initMap();
@@ -643,8 +649,15 @@ class TreasureHuntPlayMobile {
    * @param {boolean} initialize
    * @param {number} selectedanswerid submits an answer to a question
    * @param {string} qrtext submits a text scanned from a QRCode
+   * @param {boolean} changedapplang changed app language
    */
-  renewSource(location, initialize, selectedanswerid, qrtext) {
+  renewSource(
+    location,
+    initialize,
+    selectedanswerid,
+    qrtext,
+    changedapplang = false
+  ) {
     // let position holds the potition to be evaluated. undef if no evaluation requested
     let position;
     let currentposition;
@@ -691,6 +704,8 @@ class TreasureHuntPlayMobile {
           selectedanswerid: answerid,
           qoaremoved: this.gameStatus.qoaremoved,
           qrtext: qrtext,
+          applang: that.TranslateService.currentLang,
+          changedapplang: changedapplang,
         },
       },
       { getFromCache: false }
@@ -729,7 +744,8 @@ class TreasureHuntPlayMobile {
           this.playConfig.lastattempttimestamp !== response.attempttimestamp ||
           this.playConfig.lastroadtimestamp !== response.roadtimestamp ||
           initialize ||
-          !response.available
+          !response.available ||
+          response.attempts
         ) {
           this.playConfig.lastattempttimestamp = response.attempttimestamp;
           this.playConfig.lastroadtimestamp = response.roadtimestamp;
@@ -1085,6 +1101,8 @@ this.ionViewWillUnload = () => {
   this.treasureHuntPlayMobile.removeEvents();
   // Remove gps tracking
   this.treasureHuntPlayMobile.geolocation.setTracking(false);
+  // Remove change language subscription
+  this.treasureHuntPlayMobile.langSubscription.unsubscribe();
   // Remove events listener
   const page = document.getElementById("treasurehunt-play-page");
   page.removeEventListener("touchmove", processTouchmove, false);
