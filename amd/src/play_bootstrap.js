@@ -505,8 +505,10 @@ define([
             }),
             stroke: new ol.style.Stroke({
               color: "#0097a7",
-              width: 5,
+              width: 2,
             }),
+            overflow: true,
+            scale: 2,
           }),
         });
         return [styles];

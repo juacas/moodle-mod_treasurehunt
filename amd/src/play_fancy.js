@@ -423,8 +423,10 @@ define(['jquery',
 		                    }),
 		                    stroke: new ol.style.Stroke({
 		                        color: '#3399CC',
-		                        width: 5
-		                    })
+		                        width: 2
+							}),
+							overflow: true,
+                            scale: 2
 		                })
 		            });
 		            return [styles];
