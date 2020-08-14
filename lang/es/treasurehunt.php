@@ -294,6 +294,7 @@ Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea 
 borrando la anterior si existiese, indicando el último punto deseado';
 $string['pluginadministration'] = 'Administración de la caza del tesoro';
 $string['pluginname'] = 'Caza del tesoro';
+$string['qrreaded'] = 'Código QR leído:';
 $string['question'] = 'Pregunta';
 $string['remove'] = 'Eliminar';
 $string['removealltreasurehuntattempts'] = 'Eliminar todos los intentos de resolver la caza del tesoro';

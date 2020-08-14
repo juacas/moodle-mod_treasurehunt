@@ -234,6 +234,7 @@ $string['playwithoutmoving_help'] = 'Αν αυτή η επιλογή είναι 
 αν υπάρχει, υποδεικνύοντας το τελευταίο επιθυμητό σημείο.';
 $string['pluginadministration'] = 'Διαχείριση Κυνήγι Θησαυρού';
 $string['pluginname'] = 'Κυνήγι Θησαυρού';
+$string['qrreaded'] = 'Ο κωδικός QR διαβάστηκε:';
 $string['question'] = 'Ερώτηση';
 $string['remove'] = 'Διαγραφή';
 $string['removealltreasurehuntattempts'] = 'Διαγράψτε όλες τις προσπάθειες για το κυνήγι θησαυρού';

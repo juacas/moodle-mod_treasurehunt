@@ -845,8 +845,11 @@ class TreasureHuntPlayMobile {
   scanQR() {
     that.CoreUtilsProvider.scanQR().then((val) => {
       if (val) {
-        that.CoreDomUtilsProvider.showToast("QR code readed: " + val, false);
-        this.renewSource(false, false, null, value);
+        that.CoreDomUtilsProvider.showToast(
+          this.translate("plugin.mod_treasurehunt.qrreaded") + val,
+          false
+        );
+        this.renewSource(false, false, null, val);
       }
     });
   }

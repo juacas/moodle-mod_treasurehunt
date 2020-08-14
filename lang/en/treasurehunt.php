@@ -294,6 +294,7 @@ places. To do this, every time the student takes a simple click on the map a mar
 if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
+$string['qrreaded'] = 'QR code readed:';
 $string['question'] = 'Question';
 $string['remove'] = 'Delete';
 $string['removealltreasurehuntattempts'] = 'Delete all treasure hunts attempts';
