@@ -982,6 +982,10 @@ class TreasureHuntPlayMobile {
     };
   }
 
+  openGoogleStreetViewUrl() {
+    that.CoreUtilsProvider.openInBrowser(this.coordsOverlay.gsvUrl);
+  }
+
   closeCoordsOverlay() {
     this.mapSources.coordsOverlay.setPosition(undefined);
   }

@@ -35,7 +35,7 @@
       <ion-item>
         <a class="ol-popup-closer" (click)="treasureHuntPlayMobile.closeCoordsOverlay()"></a>
         <ion-icon item-start name="locate"></ion-icon>
-        <a rel="noopener noreferrer" target="_blank"  [href]="treasureHuntPlayMobile.coordsOverlay.gsvUrl">{{'plugin.mod_treasurehunt.pegmanlabel'| translate}}</a>
+        <a (click)="treasureHuntPlayMobile.openGoogleStreetViewUrl()">{{'plugin.mod_treasurehunt.pegmanlabel'| translate}}</a>
         <p><code>{{treasureHuntPlayMobile.coordsOverlay.hdms}}</code></p>
       </ion-item>
     </div>
