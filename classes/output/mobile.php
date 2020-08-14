@@ -168,6 +168,7 @@ class mobile
                 'timenow' => $timenow,
                 'grademethod' => $grademethod,
                 'groupmode' => boolval($treasurehunt->groupmode),
+                'playwithoutmoving'=> boolval($treasurehunt->playwithoutmoving),
                 'outoftime' => $outoftime,
                 'roadfinished' => $roadfinished,
                 'attempts' => json_encode($attempts), // Cannot put arrays in otherdata.

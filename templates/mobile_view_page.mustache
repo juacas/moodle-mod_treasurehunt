@@ -55,14 +55,14 @@
             <ion-icon item-start name="flag"></ion-icon>
             <h2>{{ 'plugin.mod_treasurehunt.gamemode' | translate }}</h2>
             <p> 
-                <ng-container *ngIf="<% treasurehunt.groupmode %>">
+                <ng-container *ngIf="CONTENT_OTHERDATA.groupmode">
                     <ion-icon name="people"></ion-icon>
                     <!-- {{ 'plugin.mod_treasurehunt.groupmode' | translate}}. -->
                  </ng-container>
-                <ng-container *ngIf="<% treasurehunt.playwithoutmoving %>">
+                <ng-container *ngIf="CONTENT_OTHERDATA.playwithoutmoving">
                     {{ 'plugin.mod_treasurehunt.playwithoutmoving' | translate}}
                 </ng-container>
-                <ng-container *ngIf="<% !treasurehunt.playwithoutmoving %>">
+                <ng-container *ngIf="!CONTENT_OTHERDATA.playwithoutmoving">
                     {{ 'plugin.mod_treasurehunt.movingplay' | translate}}
                 </ng-container>
             </p>
