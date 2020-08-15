@@ -61,6 +61,7 @@ this.zoomToPlace = (place) => {
   extent[2] = parseFloat(place.boundingbox[3]);
   extent[3] = parseFloat(place.boundingbox[1]);
   extent = ol.proj.transformExtent(extent, "EPSG:4326", "EPSG:3857");
-  this.flyToCallback(extent);
+  // Needed to avoid interrupting the execution of the callback
+  setTimeout(() => this.flyToCallback(extent), 500);
   this.NavController.pop();
 };
