@@ -33,26 +33,9 @@ define([
   "mod_treasurehunt/ol3-layerswitcher",
   "core/str",
   "mod_treasurehunt/viewgpx",
-], function (
-  $,
-  jqui,
-  jqtouch,
-  notification,
-  ol,
-  ajax,
-  OSMGeocoder,
-  olLayerSwitcher,
-  str,
-  viewgpx
-) {
-  function initedittreasurehunt(
-    idModule,
-    treasurehuntid,
-    strings,
-    selectedroadid,
-    lockid,
-    custommapconfig
-  ) {
+], function ($, jqui, jqtouch, notification, ol, ajax, OSMGeocoder, olLayerSwitcher, str, viewgpx) {
+
+  function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid,  custommapconfig) {
     var mapprojection = "EPSG:3857";
     var mapprojobj = new ol.proj.Projection(mapprojection);
     var custombaselayer = null;
@@ -407,7 +390,11 @@ define([
      * Create an overlay to anchor the popup to the map.
      */
     // Create placement for a popup over user marker.
-    var overlay = viewgpx.createCoordsOverlay('#mapedit', null, strings['pegmanlabel']);
+    var overlay = viewgpx.createCoordsOverlay(
+      "#mapedit",
+      null,
+      strings["pegmanlabel"]
+    );
 
     // Layer selector...
     var layerSwitcher = new ol.control.LayerSwitcher();
@@ -1924,6 +1911,7 @@ define([
         "confirm",
         "cancel",
         "pegmanlabel",
+        "custommapimageerror",
       ];
       var stringsqueried = terms.map(function (term) {
         return { key: term, component: "treasurehunt" };
@@ -1941,7 +1929,7 @@ define([
         ) {
           // Detect image size.
           var img = new Image();
-          img.addEventListener("load", function () {
+          img.onload = function () {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
             initedittreasurehunt(
@@ -1952,7 +1940,18 @@ define([
               lockid,
               custommapconfig
             );
-          });
+          };
+          img.onerror = function (e) {
+            notification.alert("Error", i18n["custommapimageerror"], "Continue");
+            initedittreasurehunt(
+              idModule,
+              treasurehuntid,
+              i18n,
+              selectedroadid,
+              lockid,
+              custommapconfig
+            );
+          };
           img.src = custommapconfig.custombackgroundurl;
         } else {
           initedittreasurehunt(

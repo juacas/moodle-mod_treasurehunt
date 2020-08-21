@@ -97,6 +97,7 @@ $string['custommapbaselayer'] = 'The image is shown as an ADDITIONAL map backgro
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
 $string['custommapnongeographic'] = 'The image is not geographical';
+$string['custommapimageerror'] = 'Cannot load custom image. Check activity settings.';
 $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the treasure hunt will not accept attempts after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';

@@ -95,6 +95,7 @@ $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de 
 $string['custommaponlybaselayer'] = 'La imagen se usa como ÚNICO mapa base.';
 $string['custommapoverlaylayer'] = 'La imagen se coloca por encima de los mapas';
 $string['custommapnongeographic'] = 'La imagen no es geográfica';
+$string['custommapimageerror'] = 'No se puede cargar la imágen personalizada. Revise la configuración de la actividad.';
 $string['cutoffdate'] = 'Fecha límite';
 $string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán intentos después de esta fecha sin una ampliación.';
 $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior de la de inicio.';
