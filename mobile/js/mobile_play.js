@@ -1115,6 +1115,11 @@ this.ionViewWillUnload = () => {
   page.removeEventListener("touchmove", processTouchmove, false);
 };
 
+// Cancel pull to request stopping the touchmove event propagation
+this.cancelPullToRequest = (ev) => {
+  ev.stopPropagation();
+};
+
 /**
  * Load css style and insert into head
  *
@@ -1231,21 +1236,8 @@ function loadInitialResources() {
   });
 }
 
-function cancelPullToRequest() {
-  const page = document.getElementById("treasurehunt-play-page");
-  page.addEventListener("touchmove", processTouchmove, false);
-}
-
-// touchmove handler
-function processTouchmove(ev) {
-  ev.stopPropagation();
-}
-
 // Load initial resources and initilize map
 loadInitialResources().then((initialResources) => {
-  // Cancel pull to request
-  cancelPullToRequest();
-
   // Once openlayers script is loaded, initialize map
   Promise.all([
     loadScript(initialResources.olScript, "mod-treasurehunt-ol-script"),
