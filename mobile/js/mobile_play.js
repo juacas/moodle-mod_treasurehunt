@@ -1110,9 +1110,6 @@ this.ionViewWillUnload = () => {
   this.treasureHuntPlayMobile.geolocation.setTracking(false);
   // Remove change language subscription
   this.treasureHuntPlayMobile.langSubscription.unsubscribe();
-  // Remove events listener
-  const page = document.getElementById("treasurehunt-play-page");
-  page.removeEventListener("touchmove", processTouchmove, false);
 };
 
 // Cancel pull to request stopping the touchmove event propagation
