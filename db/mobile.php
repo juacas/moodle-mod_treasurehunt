@@ -1,7 +1,6 @@
 <?php
-// TODO: Cambiar documentación/comentarios
 
-// This file is part of the Choice group module for Moodle - http://moodle.org/
+// This file is part of Treasurehunt for Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -17,11 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Choice group module capability definition
+ * Treasure Hunt module capability definition
  *
- * @package   mod_choicegroup
- * @copyright 2018 Sara Arjona <sara@moodle.com>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 $addons = array(

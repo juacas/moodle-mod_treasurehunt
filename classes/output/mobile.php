@@ -1,7 +1,5 @@
 <?php
 
-// TODO: Cambiar documentación/comentarios
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -18,11 +16,11 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Mobile output class for Choice group
+ * Mobile output class for Treasure Hunt
  *
- * @package    mod_choicegroup
- * @copyright  2018 Sara Arjona <sara@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_treasurehunt\output;
