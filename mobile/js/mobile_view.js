@@ -24,6 +24,9 @@
 
 let that = this;
 
+// Needed for detect changes on core-tabs component
+this.ChangeDetectorRef.detectChanges();
+
 // If it is not a group, get the profile pictures of users
 if (!this.CONTENT_OTHERDATA.groupmode) {
   setRoadsUserProfiles(this.CONTENT_OTHERDATA.usersprogress.roads);
@@ -58,14 +61,14 @@ this.ionViewWillEnter = () => {
   }
 };
 
-this.showGradeMethodHelp = function () {
+this.showGradeMethodHelp = () => {
   that.CoreDomUtilsProvider.showAlertTranslated(
     "plugin.mod_treasurehunt.grademethod",
     "plugin.mod_treasurehunt.grademethod_help"
   );
 };
 
-this.showUsersProgressHelp = function () {
+this.showUsersProgressHelp = () => {
   that.CoreDomUtilsProvider.showAlertTranslated(
     "plugin.mod_treasurehunt.usersprogress",
     "plugin.mod_treasurehunt.usersprogress_help"

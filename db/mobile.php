@@ -16,7 +16,7 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Treasure Hunt module capability definition
+ * Treasure Hunt mobile module capability definition
  *
  * @package   mod_treasurehunt
  * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -28,15 +28,15 @@ $addons = array(
         "handlers" => array( // Different places where the add-on will display content.
             'coursetreasurehunt' => array( // Handler unique name (can be anything)
                 'displaydata' => array(
-                    'title' => 'pluginname',
+                    'title' => 'Treasure Hunt',
                     'icon' => $CFG->wwwroot . '/mod/treasurehunt/pix/icon.svg',
                     'class' => '',
                 ),
                 'delegate' => 'CoreCourseModuleDelegate', // Delegate (where to display the link to the add-on)
-                'method' => 'mobile_treasurehunt_view', // Main function in \mod_choicegroup\output\mobile
-                'init' => 'mobile_treasurehunt_init',
+                'method' => 'mobile_treasurehunt_view', // Main function in \mod\treasurehunt\classes\output\mobile.php
+                'init' => 'mobile_treasurehunt_init', // Init function in \mod\treasurehunt\classes\output\mobile.php
                 'offlinefunctions' => array(
-                    'mobile_course_view' => array(),
+                    'mobile_treasurehunt_view' => array(),
                 ), // Function needs caching for offline.
                 'styles' => array(
                     'url' => $CFG->wwwroot . '/mod/treasurehunt/mobile/mobile_css.css',
