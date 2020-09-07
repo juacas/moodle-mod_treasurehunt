@@ -15,13 +15,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-/**
- * Mobile output class for Treasure Hunt
- *
- * @package   mod_treasurehunt
- * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
 
 namespace mod_treasurehunt\output;
 
@@ -35,10 +28,11 @@ use completion_info;
 use core\session\exception;
 
 /**
- * Mobile output class for Choice group
+ * Mobile output class for Treasure Hunt
  *
- * @copyright  2018 Sara Arjona <sara@moodle.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile
 {
@@ -61,7 +55,7 @@ class mobile
     }
 
     /**
-     * Returns the choice group course view for the mobile app.
+     * Returns the treasure hunt course view for the mobile app.
      * @param  array $args Arguments from tool_mobile_get_content WS
      *
      * @return array HTML, javascript and otherdata
@@ -161,7 +155,6 @@ class mobile
                 ),
             ),
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_view.js'),
-            // 'javascript' => "",
             'otherdata' => array(
                 'timenow' => $timenow,
                 'grademethod' => $grademethod,
