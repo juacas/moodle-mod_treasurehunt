@@ -125,7 +125,7 @@ class mobile
         // Grade Method
         $grademethod = treasurehunt_get_grading_options()[$treasurehunt->grademethod];
 
-        // Progress users
+        // Users progress
         $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
         $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
         list(

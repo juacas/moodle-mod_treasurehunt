@@ -89,7 +89,7 @@
             </p>
         </ion-item>
         <!-- Play or review button. -->
-        <ion-item>
+        <ion-item *ngIf="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception && CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>">
             <button icon-end ion-button block core-site-plugins-new-content title="<% treasurehunt.name %>" component="mod_treasurehunt" method="mobile_treasurehunt_play" [preSets]="{getFromCache: 0, saveToCache: 0}" [args]="{cmid: <% cmid %>, courseid: <% courseid %>}">
                 <ng-container *ngIf="CONTENT_OTHERDATA.roadfinished || CONTENT_OTHERDATA.outoftime; else play">
                     {{ 'plugin.mod_treasurehunt.reviewofplay' | translate }}
@@ -105,9 +105,9 @@
     </ion-list>
 
      <!-- Tabs: see the user/group attempts or users progress. -->
-    <core-tabs>
+    <core-tabs *ngIf="CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>">
         <!-- View the user/group attempts tab. -->
-        <core-tab [show]="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception && CONTENT_OTHERDATA.timenow > <% treasurehunt.allowattemptsfromdate %>" 
+        <core-tab [show]="CONTENT_OTHERDATA.playpermission && !CONTENT_OTHERDATA.exception" 
             icon="podium" title="{{'plugin.mod_treasurehunt.attempthistory' | translate}}">
             <ng-template>
                 <ion-list class="treasurehunt-no-margin">
