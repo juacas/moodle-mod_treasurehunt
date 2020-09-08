@@ -35,7 +35,7 @@
 
     <ion-row>
       <ion-col text-right>
-        <button icon-start ion-button (click)="sendSelectedAnswer(selectedAnswer)">
+        <button icon-start ion-button [disabled]="!selectedAnswer" (click)="sendSelectedAnswer(selectedAnswer)">
           <ion-icon name="checkmark"></ion-icon>
           {{'plugin.mod_treasurehunt.send' | translate}}
         </button>

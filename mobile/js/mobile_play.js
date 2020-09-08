@@ -722,13 +722,19 @@ class TreasureHuntPlayMobile {
           if (response.status !== null && response.available) {
             that.CoreDomUtilsProvider.showToast(response.status.msg, false);
           }
+          if (
+            selectedanswerid &&
+            response.lastsuccessfulstage &&
+            !response.lastsuccessfulstage.question
+          ) {
+            // Go back 2 pages (to play page)
+            that.NavController.popTo(
+              that.NavController.getByIndex(that.NavController.length() - 3)
+            );
+          }
           this.mapSources.markerFeature.setGeometry(null);
         }
-        if (response.qrexpected) {
-          this.gameStatus.showQRButton = true;
-        } else {
-          this.gameStatus.showQRButton = false;
-        }
+
         // If change the game mode (mobile or static).
         if (this.playConfig.playwithoutmoving != response.playwithoutmoving) {
           this.playConfig.playwithoutmoving = response.playwithoutmoving;
@@ -773,12 +779,17 @@ class TreasureHuntPlayMobile {
               setTimeout(() => this.openCluePage(), 1500);
             }
             // If the stage is not solved notify changes.
+            this.gameStatus.showQRButton = false;
+
             if (response.lastsuccessfulstage.question !== "") {
               this.gameStatus.showValidateLocationButton = false;
             } else if (!response.lastsuccessfulstage.activitysolved) {
               this.gameStatus.showValidateLocationButton = false;
             } else {
               this.gameStatus.showValidateLocationButton = true;
+              if (response.qrexpected) {
+                this.gameStatus.showQRButton = true;
+              }
             }
           }
           // Check if it is the first geometry or it is being initialized and center the map.

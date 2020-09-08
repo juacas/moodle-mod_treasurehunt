@@ -33,8 +33,4 @@ this.lastSuccessfulStage.answers.forEach((answer) => {
 /** Functions */
 this.sendSelectedAnswer = (selectedAnswer) => {
   this.sendAnswer(selectedAnswer);
-  // Go back 2 pages
-  this.NavController.popTo(
-    this.NavController.getByIndex(this.NavController.length() - 3)
-  );
 };
