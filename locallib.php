@@ -1560,9 +1560,9 @@ function treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipa
             $totalparticipants[$user->id] = $user;
         } else {
             if ($grouping) {
-                $duplicated[$user->id] = $user->name;
+                array_push($duplicated, $user->name);
             } else {
-                $duplicated[$user->id] = fullname($user);
+                array_push($duplicated, fullname($user));
             }
         }
     }
@@ -1582,7 +1582,7 @@ function treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants
 
     foreach ($userlist as $user) {
         if (!array_key_exists($user->id, $totalparticipants)) {
-            $unassignedusers[$user->id] = fullname($user);
+            array_push($unassignedusers, fullname($user));
         }
     }
     return $unassignedusers;
@@ -2484,7 +2484,7 @@ function treasurehunt_get_road_userlist($data, $userlist, $attempts)
     $road = new stdClass();
     $road->id = $data->roadid;
     $road->name = $data->roadname;
-    $road->validated = $data->validated;
+    $road->validated = boolval($data->validated);
     $road->totalstages = $data->totalstages;
     $road->userlist = treasurehunt_get_stage_progress_in_road_userlist($userlist, $attempts);
     return $road;

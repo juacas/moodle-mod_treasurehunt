@@ -56,8 +56,9 @@
             <h2>{{ 'plugin.mod_treasurehunt.gamemode' | translate }}</h2>
             <p> 
                 <ng-container *ngIf="CONTENT_OTHERDATA.groupmode">
+                    {{ 'plugin.mod_treasurehunt.groupmode' | translate}}
                     <ion-icon name="people"></ion-icon>
-                    <!-- {{ 'plugin.mod_treasurehunt.groupmode' | translate}}. -->
+                    <br>
                  </ng-container>
                 <ng-container *ngIf="CONTENT_OTHERDATA.playwithoutmoving">
                     {{ 'plugin.mod_treasurehunt.playwithoutmoving' | translate}}
@@ -134,40 +135,84 @@
         <core-tab icon="people" title="{{'plugin.mod_treasurehunt.totalprogress' | translate}}">
             <ng-template>
                 <ion-list>
-                    <!-- No roads advice -->
-                    <ion-item text-wrap *ngIf="!CONTENT_OTHERDATA.usersprogress.roads.length && CONTENT_OTHERDATA.managepermission">
-                        <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
-                        <p> {{ 'plugin.mod_treasurehunt.noroads' | translate }} </p>
-                    </ion-item>
+                    <!-- Advices -->
+                    <ng-container *ngIf="CONTENT_OTHERDATA.managepermission">
+                        <!-- No roads advice -->
+                        <ion-item text-wrap *ngIf="!CONTENT_OTHERDATA.usersprogress.roads.length">
+                            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                            <p> {{ 'plugin.mod_treasurehunt.noroads' | translate }} </p>
+                        </ion-item>
+
+                        <!-- Duplicate groups in groupings advice -->
+                        <ion-item text-wrap *ngIf="CONTENT_OTHERDATA.usersprogress.duplicategroupsingroupings.length">
+                            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                            <p> {{ 'plugin.mod_treasurehunt.warnusersgrouping' | translate : {$a: CONTENT_OTHERDATA.usersprogress.duplicategroupsingroupings.join(', ')} }} </p>
+                        </ion-item>
+                        
+                        <!-- Duplicate users in groups advice -->
+                        <ion-item text-wrap *ngIf="CONTENT_OTHERDATA.usersprogress.duplicateusersingroups.length">
+                            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                            <p> {{ 'plugin.mod_treasurehunt.warnusersgroup' | translate : {$a: CONTENT_OTHERDATA.usersprogress.duplicateusersingroups.join(', ')} }} </p>
+                        </ion-item>
+                        
+                        <!-- Unassigned users advice -->
+                        <ion-item text-wrap *ngIf="CONTENT_OTHERDATA.usersprogress.unassignedusers.length">
+                            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                            <p> {{ 'plugin.mod_treasurehunt.warnusersoutside' | translate : {$a: CONTENT_OTHERDATA.usersprogress.unassignedusers.join(', ')} }} </p>
+                        </ion-item>
+                    </ng-container>
 
                     <!-- User attemps status for each road -->
                     <ng-container *ngFor="let road of CONTENT_OTHERDATA.usersprogress.roads">
-                        <ion-list-header class="treasurehunt-no-margin" (click)="showUsersProgressHelp()">
+                        <ion-list-header *ngIf="(road.validated && road.userlist.length) || CONTENT_OTHERDATA.managepermission" 
+                            class="treasurehunt-no-margin" (click)="showUsersProgressHelp()">
                             {{ road.name }} <ion-icon name="help-circle"></ion-icon>
                         </ion-list-header>
-                        <ng-container *ngIf="CONTENT_OTHERDATA.groupmode">
-                            <ion-item *ngFor="let group of road.userlist" text-wrap>
-                                <h2>{{ group.name }}</h2>
-                                <p>
-                                    <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
-                                    [ngClass]="group.ratings[i+1] ? group.ratings[i+1].class : 'noattempt'">
-                                        {{(i+1)}}
-                                    </ion-badge>
-                                </p>
-                            </ion-item>
+
+                        <!-- Invalid road advice -->
+                        <ion-item text-wrap *ngIf="!road.validated && CONTENT_OTHERDATA.managepermission">
+                            <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                            <p> {{ 'plugin.mod_treasurehunt.invalroadid' | translate }} </p>
+                        </ion-item>
+
+                        <ng-container *ngIf="road.validated">
+
+                            <ng-container *ngIf="CONTENT_OTHERDATA.groupmode">
+                                <!-- No group assigned to this road advice -->
+                                <ion-item text-wrap *ngIf="!road.userlist.length && CONTENT_OTHERDATA.managepermission">
+                                    <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                                    <p> {{ 'plugin.mod_treasurehunt.nogroupassigned' | translate }} </p>
+                                </ion-item>
+                                <ion-item *ngFor="let group of road.userlist" text-wrap>
+                                    <h2>{{ group.name }}</h2>
+                                    <p>
+                                        <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
+                                        [ngClass]="group.ratings[i+1] ? group.ratings[i+1].class : 'noattempt'">
+                                            {{(i+1)}}
+                                        </ion-badge>
+                                    </p>
+                                </ion-item>
+                            </ng-container>
+
+                            <ng-container *ngIf="!CONTENT_OTHERDATA.groupmode">
+                                <!-- No user assigned to this road advice -->
+                                <ion-item text-wrap *ngIf="!road.userlist.length && CONTENT_OTHERDATA.managepermission">
+                                    <ion-icon class="treasurehunt-failed-attempt" item-start name="warning"></ion-icon>
+                                    <p> {{ 'plugin.mod_treasurehunt.nouserassigned' | translate }} </p>
+                                </ion-item>
+                                <a ion-item *ngFor="let user of road.userlist" text-wrap  core-user-link [userId]="user.id" [title]="user.fullname">
+                                    <ion-avatar core-user-avatar [user]="user" [checkOnline]="true" item-start></ion-avatar>
+                                    <h2>{{ user.fullname }}</h2>
+                                    <p>
+                                        <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
+                                        [ngClass]="user.ratings[i+1] ? user.ratings[i+1].class : 'noattempt'">
+                                            {{(i+1)}}
+                                        </ion-badge>
+                                    </p>
+                                </a>
+                            </ng-container>
                         </ng-container>
-                        <ng-container *ngIf="!CONTENT_OTHERDATA.groupmode">
-                            <a ion-item *ngFor="let user of road.userlist" text-wrap  core-user-link [userId]="user.id" [title]="user.fullname">
-                                <ion-avatar core-user-avatar [user]="user" [checkOnline]="true" item-start></ion-avatar>
-                                <h2>{{ user.fullname }}</h2>
-                                <p>
-                                    <ion-badge class="rating" *ngFor="let item of [].constructor(1 * road.totalstages); let i = index" 
-                                    [ngClass]="user.ratings[i+1] ? user.ratings[i+1].class : 'noattempt'">
-                                        {{(i+1)}}
-                                    </ion-badge>
-                                </p>
-                            </a>
-                        </ng-container>
+
                     </ng-container> 
                 </ion-list>
             </ng-template>
