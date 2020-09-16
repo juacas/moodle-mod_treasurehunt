@@ -1189,21 +1189,49 @@ function loadInitialResources() {
 
     const site = that.CoreFilepoolProvider.sitesProvider.getCurrentSite();
     let initialResourcesUrl = {
-      successMark: "pix/success_mark.png",
-      failureMark: "pix/failure_mark.png",
-      locationMark: "pix/bootstrap/my_location_3.png",
-      olScript: "js/ol/ol.js",
-      olCss: "css/ol.css",
-      olPopupCss: "css/playerbootstrap/ol-popup.css",
-      instroJsScript: "amd/build/intro.min.js",
-      introJsCss: "css/introjs.css",
+      successMark: {
+        url: "pix/success_mark.png",
+        version: 2020091600,
+      },
+      failureMark: {
+        url: "pix/failure_mark.png",
+        version: 2020091600,
+      },
+      locationMark: {
+        url: "pix/bootstrap/my_location_3.png",
+        version: 2020091600,
+      },
+      olScript: {
+        url: "js/ol/ol.js",
+        version: 2020091600,
+      },
+      olCss: {
+        url: "css/ol.css",
+        version: 2020091600,
+      },
+      olPopupCss: {
+        url: "css/playerbootstrap/ol-popup.css",
+        version: 2020091600,
+      },
+      instroJsScript: {
+        url: "amd/build/intro.min.js",
+        version: 2020091600,
+      },
+      introJsCss: {
+        url: "css/introjs.css",
+        version: 2020091600,
+      },
     };
 
     Object.keys(initialResourcesUrl).forEach((key) => {
       promises.push(
         that.CoreFilepoolProvider.downloadUrl(
           site.id,
-          site.siteUrl + "/mod/treasurehunt/" + initialResourcesUrl[key]
+          site.siteUrl + "/mod/treasurehunt/" + initialResourcesUrl[key].url,
+          null,
+          null,
+          null,
+          initialResourcesUrl[key].version
         ).then((localUrl) => {
           initialResourcesUrl[key] = localUrl;
         })
@@ -1247,7 +1275,7 @@ function loadInitialResources() {
 
 // Load initial resources and initilize map
 loadInitialResources().then((initialResources) => {
-  // Once openlayers script is loaded, initialize map
+  // Once scripts are loaded, initialize map
   Promise.all([
     loadScript(initialResources.olScript, "mod-treasurehunt-ol-script"),
     loadScript(
