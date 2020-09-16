@@ -50,7 +50,7 @@ class TreasureHuntPlayMobile {
 
     this.mapProperties = {
       defaultAnimationDuration: 700,
-      maxAnimationZoom: 15,
+      maxAnimationZoom: 18,
       defaultProjection: "EPSG:3857",
     };
 
