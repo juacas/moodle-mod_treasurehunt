@@ -549,12 +549,6 @@ define(['jquery',
 		                    console.log(response.status.msg);
 		                }
 					}
-					// Show QR button?
-		            if (response.qrexpected) {
-		                $('#validateqr').show();
-		            } else {
-		                $('#validateqr').hide();
-		            }
 		            // If you change the game mode (mobile or static).
 		            if (playwithoutmoving != response.playwithoutmoving) {
 		                playwithoutmoving = response.playwithoutmoving;
@@ -596,7 +590,8 @@ define(['jquery',
 		                // Check if it exists, which indicates that it has been updated.
 		                if (response.lastsuccessfulstage) {
 		                    lastsuccessfulstage = response.lastsuccessfulstage;
-		                    changesinlastsuccessfulstage = true;
+							changesinlastsuccessfulstage = true;
+		                	$('#validateqr').hide();
 		                    // If the stage is not solved I will notify you that there are changes.
 		                    if (lastsuccessfulstage.question !== '') {
 
@@ -610,7 +605,10 @@ define(['jquery',
 		                        $('#question_button').show();
 		                    } else {
 								$('#validatelocation').show().removeClass('ui-state-disabled');
-		                        $('#question_button').hide();
+								$('#question_button').hide();
+								if (response.qrexpected) {
+									$("#validateqr").show();
+								}
 		                    }
 		                }
 		                // Check if it is the first geometry or it is being initialized and center the map.
