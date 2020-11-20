@@ -16,12 +16,12 @@
 /**
  * Register a link handler to open mod/treasurehunt/view.php links in the app
  *
- * @package    mod_treasurehunt
- * @copyright  2018 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-var that = this;
+let that = this;
 
 /* Register a link handler to open mod/treasurehunt/view.php links anywhere in the app. */
 function AddonModTreasurehuntLinkHandler() {

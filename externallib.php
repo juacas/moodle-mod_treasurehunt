@@ -913,7 +913,7 @@ class mod_treasurehunt_external extends external_api
                 $updates->strings[] = get_string('changetoplaywithoutmoving', 'treasurehunt');
             }
         }
-        if (!$updates->geometrysolved && $currentworkingstage->qrtext != '') {
+        if ($currentworkingstage->qrtext != '') {
             $qrmode = true;
         }
         $result = array();

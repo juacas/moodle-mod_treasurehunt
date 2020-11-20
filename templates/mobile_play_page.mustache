@@ -16,7 +16,8 @@
 }}
 
 {{=<% %>=}}
-<div id="treasurehunt-play-page" *ngIf="treasureHuntPlayMobile" class="treasurehunt-play-page">
+<div id="treasurehunt-play-page" *ngIf="treasureHuntPlayMobile" (touchmove)="cancelPullToRequest($event)" (mousedown)="cancelPullToRequest($event)" 
+    class="treasurehunt-play-page">
     <core-navbar-buttons #content end>
       <button ion-button icon-only (click)="treasureHuntPlayMobile.launchTutorial()">
         <ion-icon name="information-circle"></ion-icon>

@@ -628,11 +628,6 @@ define([
             }
             markerFeature.setGeometry(null);
           }
-          if (response.qrexpected) {
-            $("#validateqr").show();
-          } else {
-            $("#validateqr").hide();
-          }
           // If change the game mode (mobile or static).
           if (playwithoutmoving != response.playwithoutmoving) {
             playwithoutmoving = response.playwithoutmoving;
@@ -681,6 +676,7 @@ define([
               lastsuccessfulstage = response.lastsuccessfulstage;
               changesinlastsuccessfulstage = true;
               openModal("#cluepage");
+              $("#validateqr").hide();
               // If the stage is not solved I will notify you that there are changes.
               if (lastsuccessfulstage.question !== "") {
                 changesinquestionstage = true;
@@ -689,6 +685,9 @@ define([
                 $("#validatelocation").hide();
               } else {
                 $("#validatelocation").show();
+                 if (response.qrexpected) {
+                   $("#validateqr").show();
+                 }
               }
             }
             // Check if it is the first geometry or it is being initialized and center the map.

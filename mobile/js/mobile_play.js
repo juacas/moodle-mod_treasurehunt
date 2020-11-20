@@ -14,11 +14,12 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * Register a link handler to open mod/treasurehunt/view.php links in the app
+ * This file is part of the Moodle apps support for the treasurehunt plugin.
+ * Define classes and game functions for treasure hunt
  *
- * @package    mod_treasurehunt
- * @copyright  2018 The Open University
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @package   mod_treasurehunt
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 class TreasureHuntPlayMobile {
@@ -49,7 +50,7 @@ class TreasureHuntPlayMobile {
 
     this.mapProperties = {
       defaultAnimationDuration: 700,
-      maxAnimationZoom: 15,
+      maxAnimationZoom: 18,
       defaultProjection: "EPSG:3857",
     };
 
@@ -721,13 +722,19 @@ class TreasureHuntPlayMobile {
           if (response.status !== null && response.available) {
             that.CoreDomUtilsProvider.showToast(response.status.msg, false);
           }
+          if (
+            selectedanswerid &&
+            response.lastsuccessfulstage &&
+            !response.lastsuccessfulstage.question
+          ) {
+            // Go back 2 pages (to play page)
+            that.NavController.popTo(
+              that.NavController.getByIndex(that.NavController.length() - 3)
+            );
+          }
           this.mapSources.markerFeature.setGeometry(null);
         }
-        if (response.qrexpected) {
-          this.gameStatus.showQRButton = true;
-        } else {
-          this.gameStatus.showQRButton = false;
-        }
+
         // If change the game mode (mobile or static).
         if (this.playConfig.playwithoutmoving != response.playwithoutmoving) {
           this.playConfig.playwithoutmoving = response.playwithoutmoving;
@@ -772,12 +779,17 @@ class TreasureHuntPlayMobile {
               setTimeout(() => this.openCluePage(), 1500);
             }
             // If the stage is not solved notify changes.
+            this.gameStatus.showQRButton = false;
+
             if (response.lastsuccessfulstage.question !== "") {
               this.gameStatus.showValidateLocationButton = false;
             } else if (!response.lastsuccessfulstage.activitysolved) {
               this.gameStatus.showValidateLocationButton = false;
             } else {
               this.gameStatus.showValidateLocationButton = true;
+              if (response.qrexpected) {
+                this.gameStatus.showQRButton = true;
+              }
             }
           }
           // Check if it is the first geometry or it is being initialized and center the map.
@@ -1110,9 +1122,11 @@ this.ionViewWillUnload = () => {
   this.treasureHuntPlayMobile.geolocation.setTracking(false);
   // Remove change language subscription
   this.treasureHuntPlayMobile.langSubscription.unsubscribe();
-  // Remove events listener
-  const page = document.getElementById("treasurehunt-play-page");
-  page.removeEventListener("touchmove", processTouchmove, false);
+};
+
+// Cancel pull to request stopping the touchmove event propagation
+this.cancelPullToRequest = (ev) => {
+  ev.stopPropagation();
 };
 
 /**
@@ -1175,21 +1189,49 @@ function loadInitialResources() {
 
     const site = that.CoreFilepoolProvider.sitesProvider.getCurrentSite();
     let initialResourcesUrl = {
-      successMark: "pix/success_mark.png",
-      failureMark: "pix/failure_mark.png",
-      locationMark: "pix/bootstrap/my_location_3.png",
-      olScript: "js/ol/ol.js",
-      olCss: "css/ol.css",
-      olPopupCss: "css/playerbootstrap/ol-popup.css",
-      instroJsScript: "amd/build/intro.min.js",
-      introJsCss: "css/introjs.css",
+      successMark: {
+        url: "pix/success_mark.png",
+        version: 2020091600,
+      },
+      failureMark: {
+        url: "pix/failure_mark.png",
+        version: 2020091600,
+      },
+      locationMark: {
+        url: "pix/bootstrap/my_location_3.png",
+        version: 2020091600,
+      },
+      olScript: {
+        url: "js/ol/ol.js",
+        version: 2020091600,
+      },
+      olCss: {
+        url: "css/ol.css",
+        version: 2020091600,
+      },
+      olPopupCss: {
+        url: "css/playerbootstrap/ol-popup.css",
+        version: 2020091600,
+      },
+      instroJsScript: {
+        url: "amd/build/intro.min.js",
+        version: 2020091600,
+      },
+      introJsCss: {
+        url: "css/introjs.css",
+        version: 2020091600,
+      },
     };
 
     Object.keys(initialResourcesUrl).forEach((key) => {
       promises.push(
         that.CoreFilepoolProvider.downloadUrl(
           site.id,
-          site.siteUrl + "/mod/treasurehunt/" + initialResourcesUrl[key]
+          site.siteUrl + "/mod/treasurehunt/" + initialResourcesUrl[key].url,
+          null,
+          null,
+          null,
+          initialResourcesUrl[key].version
         ).then((localUrl) => {
           initialResourcesUrl[key] = localUrl;
         })
@@ -1231,22 +1273,9 @@ function loadInitialResources() {
   });
 }
 
-function cancelPullToRequest() {
-  const page = document.getElementById("treasurehunt-play-page");
-  page.addEventListener("touchmove", processTouchmove, false);
-}
-
-// touchmove handler
-function processTouchmove(ev) {
-  ev.stopPropagation();
-}
-
 // Load initial resources and initilize map
 loadInitialResources().then((initialResources) => {
-  // Cancel pull to request
-  cancelPullToRequest();
-
-  // Once openlayers script is loaded, initialize map
+  // Once scripts are loaded, initialize map
   Promise.all([
     loadScript(initialResources.olScript, "mod-treasurehunt-ol-script"),
     loadScript(
