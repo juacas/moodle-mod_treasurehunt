@@ -23,8 +23,6 @@
  */
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
-// Needed for get_geometry_functions().
-require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
 
