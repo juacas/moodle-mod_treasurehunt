@@ -48,10 +48,12 @@ at the "Allow attempts from" date.';
 $string['answerwarning'] = 'You must first answer the question';
 $string['areyousure'] = 'Are you sure?';
 $string['attempt'] = 'Attempt';
+$string['attempthistory'] = 'Attempt history';
 $string['attemptsdeleted'] = 'Treasure hunt attempts deleted';
 $string['availability'] = 'Availability';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to the course';
+$string['baselayers'] = 'Base layers';
 $string['basemaps'] = 'Base maps';
 $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
@@ -95,6 +97,7 @@ $string['custommapbaselayer'] = 'The image is shown as an ADDITIONAL map backgro
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
 $string['custommapnongeographic'] = 'The image is not geographical';
+$string['custommapimageerror'] = 'Cannot load custom image. Check activity settings.';
 $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the treasure hunt will not accept attempts after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
@@ -136,6 +139,7 @@ $string['exit'] = 'Back to Course';
 $string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
 $string['findplace'] = 'Find a place';
+$string['gamemode'] = 'Game mode';
 $string['gamemodeinfo'] = 'Game mode: {$a}';
 $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
@@ -166,34 +170,27 @@ $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from finishing time';
 $string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['grademethod'] = 'Grading method';
-$string['grademethod_help'] = '<P><B>Grade from stages</B><P>
-<UL>
-<P>Each player (or team) scores proportionally by number of stages solved,
-being 100% when a road is completely solved, and 0% when no stage is solved.</UL>
-
-<P><B>Grade from duration of the hunt</B><P>
-<UL>
-<P>The hunter who ends the road in less time wins the hunt and marks the best time.
+$string['grademethod_help'] = '<p><b>Grade from stages</b></p>
+<p>Each player (or team) scores proportionally by number of stages solved,
+being 100% when a road is completely solved, and 0% when no stage is solved.</p>
+<p><b>Grade from duration of the hunt</b></p>
+<p>The hunter who ends the road in less time wins the hunt and marks the best time.
 The time is measured from the moment in which the starting stage of the road is unlocked.
 This means that the participants can play at different moments.
 The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
 and 100% the best finishing time. The players that did not finish the
-hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
-
-<P><B>Grade from finishing time</B><P>
-<UL>
-<P>The hunter who ends first is the winner of the hunt.
+hunt receive a grade under 50 calculated just by the number of stages solved.</p>
+<p><b>Grade from finishing time</b></p>
+<p>The hunter who ends first is the winner of the hunt.
 It is assumed that every hunter plays simultaneously.
 The grade is calculated by interpolating the finishing time being 50% the end time of the hunt
 and 100% the best finishing time. The players that did not finish the
-hunt receive a grade under 50 calculated just by the number of stages solved.</UL>
-
-<P><B>Grade from position</B><P>
-<UL>
-<P>The score is calculated by interpolating the position in the ranking,
+hunt receive a grade under 50 calculated just by the number of stages solved.</p>
+<p><b>Grade from position</b></p>
+<p>The score is calculated by interpolating the position in the ranking,
 being 100% the score for the first player and 50% for the last player.
 The players that did not finish the hunt receive a grade under 50% calculated
-just by the number of stages solved.</UL>';
+just by the number of stages solved.</p>';
 $string['grademethodinfo'] = 'Grading method: {$a->type}. Location penalization: {$a->gradepenlocation}%. Answer penalization: {$a->gradepenanswer}%';
 $string['gradepenanswer'] = 'Penalty for failure in answer';
 $string['gradepenlocation'] = 'Penalty for failure in location';
@@ -222,7 +219,6 @@ $string['groupquestionovercome'] = '<b>Successful stage {$a->position} answer</b
 $string['groups'] = 'Groups';
 $string['groupstageovercome'] = '<b>Stage {$a->position} overcome</b> by {$a->user} {$a->date}';
 $string['hello'] = 'Hello';
-$string['attempthistory'] = 'Attempt history of {$a}';
 $string['history'] = 'History';
 $string['huntcompleted'] = 'You have already completed this treasure hunt';
 $string['incorrectanswer'] = 'Incorrect answer.';
@@ -269,6 +265,7 @@ $string['nogroupingplay'] = 'You have no group assigned to a road, so you can no
 $string['nogroupplay'] = 'You have no road assigned, so you can not play the activity.';
 $string['nogrouproad'] = '{$a} has no road assigned.';
 $string['nomarks'] = 'First mark on the map the desired point. Place the <img src="pix/my_location.png" width="28"/>';
+$string['nomarksmobile'] = 'First mark on the map the desired point.';
 $string['noresults'] = 'No results found.';
 $string['noroads'] = 'No roads have been added yet';
 $string['notchangeorderstage'] = 'You can not change the order of stages after attempts have been made on the road';
@@ -282,6 +279,7 @@ $string['nouserroad'] = '{$a} has no road assigned.';
 $string['nousersprogress'] = 'No user / group has progress on this road.';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
+$string['overlaylayers'] = 'Overlay layers';
 $string['play'] = 'Play';
 $string['playstagewithoutmoving'] = 'Discover stage without moving';
 $string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place.
@@ -297,6 +295,7 @@ places. To do this, every time the student takes a simple click on the map a mar
 if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
+$string['qrreaded'] = 'QR code readed:';
 $string['question'] = 'Question';
 $string['remove'] = 'Delete';
 $string['removealltreasurehuntattempts'] = 'Delete all treasure hunts attempts';
@@ -335,6 +334,7 @@ $string['startfromhere'] = 'You can only start from here';
 $string['state'] = 'State';
 $string['successlocation'] = 'It is the right place!';
 $string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
+$string['totalprogress'] = 'Total progress';
 $string['totaltime'] = 'Total time';
 $string['timeago'] = '{$a->shortduration} ago';
 $string['timeat'] = 'at {$a->date}';
@@ -371,6 +371,7 @@ $string['updates'] = 'Updates';
 $string['updatetimes'] = 'Update times';
 $string['user'] = 'User';
 $string['useractivityovercome'] = '<b>Moodle activity for "stage {$a->position}" successfully completed</b> {$a->date}';
+$string['userattempthistory'] = 'Attempt history of {$a}';
 $string['userinvalidroad'] = '{$a} has assigned an invalid road.';
 $string['userlocationfailed'] = '<b>Failed "stage {$a->position}" location</b> {$a->date}';
 $string['userlocationovercome'] = '<b>Successful "stage {$a->position}" location</b> {$a->date}';
@@ -380,11 +381,11 @@ $string['userprogress'] = 'User progress successfully updated';
 $string['userquestionfailed'] = '<b>Failed "stage {$a->position}" answer</b> {$a->date}';
 $string['userquestionovercome'] = '<b>Successful "stage {$a->position}" answer</b> {$a->date}';
 $string['usersprogress'] = 'User progress';
-$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:<br/>
-The color <B> green </B> indicates that the stage has been overcome without failures.<br/>
-The color <B> yellow </B> indicates that the stage has been overcome with failures.<br/>
-The color <B> red </B> indicates that the stage has not been overcome and failures have been made.<br/>
-The color <B> grey </B> indicates that the stage has not been overcome and no failures have been made.';
+$string['usersprogress_help'] = 'Indicates the progress of the stages of each student / group according to the colors:
+<p>The color <b> green </b> indicates that the stage has been overcome without failures.</p>
+<p>The color <b> yellow </b> indicates that the stage has been oavercome with failures.</p>
+<p>The color <b> red </b> indicates that the stage has not been overcome and failures have been made.</p>
+<p>The color <b> grey </b> indicates that the stage has not been overcome and no failures have been made.</p>';
 $string['userstageovercome'] = '<b>Stage {$a->position} overcome</b>: {$a->date}';
 $string['validatelocation'] = 'Validate location';
 $string['validateqr'] = 'Scan QR';
@@ -419,14 +420,15 @@ $string['save_tour'] = 'After drawing your locations, don\'t forget to save your
 $string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
 $string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
-$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
 $string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
 $string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
 $string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
 $string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
 $string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+$string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="{$a->successurl}" width="28"/><br>Failed ones: <img src="{$a->failureurl}" width="28"/>';
+$string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
 
 $string['nextstep'] = 'Next';
 $string['prevstep'] = 'Prev';

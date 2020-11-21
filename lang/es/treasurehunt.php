@@ -48,10 +48,12 @@ visible para los estudiantes en la fecha "Permitir intentos desde".';
 $string['answerwarning'] = 'Debes responder primero a la pregunta';
 $string['areyousure'] = '¿Estás seguro?';
 $string['attempt'] = 'Intento';
+$string['attempthistory'] = 'Historial de intentos';
 $string['attemptsdeleted'] = 'Eliminados intentos de resolver la caza del tesoro';
 $string['availability'] = 'Disponibilidad';
 $string['back'] = 'Atrás';
 $string['backtocourse'] = 'Volver al curso';
+$string['baselayers'] = 'Capas base';
 $string['basemaps'] = 'Mapas base';
 $string['cancel'] = 'Cancelar';
 $string['changecamera'] = 'Cambiar cámara';
@@ -93,6 +95,7 @@ $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de 
 $string['custommaponlybaselayer'] = 'La imagen se usa como ÚNICO mapa base.';
 $string['custommapoverlaylayer'] = 'La imagen se coloca por encima de los mapas';
 $string['custommapnongeographic'] = 'La imagen no es geográfica';
+$string['custommapimageerror'] = 'No se puede cargar la imágen personalizada. Revise la configuración de la actividad.';
 $string['cutoffdate'] = 'Fecha límite';
 $string['cutoffdate_help'] = 'Si se activa la opción, no se aceptarán intentos después de esta fecha sin una ampliación.';
 $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior de la de inicio.';
@@ -134,6 +137,7 @@ $string['exit'] = 'Volver al curso';
 $string['failedlocation'] = 'Localización fallada';
 $string['faillocation'] = 'No es el lugar correcto';
 $string['findplace'] = 'Buscar un sitio';
+$string['gamemode'] = 'Modo de juego';
 $string['gamemodeinfo'] = 'Modo de juego: {$a}';
 $string['gameupdatetime'] = 'Tiempo de actualización de juego';
 $string['gameupdatetime_help'] = 'Intervalo de tiempo en segundos entre una actualización del juego de un usuario y otra.
@@ -163,36 +167,29 @@ $string['gradefromposition'] = 'Puntuación por posición';
 $string['gradefromstages'] = 'Puntuación por etapas';
 $string['gradefromtime'] = 'Puntuación por tiempo total de caza';
 $string['gradefromabsolutetime'] = 'Puntuación por hora de finalización';
-
 $string['grademethod'] = 'Método de calificación';
-$string['grademethod_help'] = '<P><B>Puntuación por etapas</B><P>
-<UL>
-<P>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
+$string['grademethod_help'] = '<p><b>Puntuación por etapas</b></p>
+<p>Cada jugador (o equipo) puntua de forma proporcional al número de etapas
 resueltas, siendo el 100% de la calificación máxima cuando se ha completado el camino
-y 0 cuando no se ha resuelto ninguna etapa.</UL>
-<P><B>Puntuación por tiempo de caza</B><P>
-<UL>
-<P>El ganador de la caza es el que termina la caza en el menor tiempo
+y 0 cuando no se ha resuelto ninguna etapa.</p>
+<p><b>Puntuación por tiempo de caza</b></p>
+<p>El ganador de la caza es el que termina la caza en el menor tiempo
 (medido desde el momento en que desbloqueó la etapa de salida,
 por lo que los participantes pueden comenzar en momentos distintos).
 La calificación se calcula interpolando el tiempo
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor.
-Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
-</UL>
-<P><B>Puntuación por hora de finalización</B><P>
-<UL>
-<P>El ganador de la caza es el que termina la caza antes (asume que todos los participantes juegan simultáneamente).
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.</p>
+<p><b>Puntuación por hora de finalización</b></p>
+<p>El ganador de la caza es el que termina la caza antes (asume que todos los participantes juegan simultáneamente).
 La calificación se calcula interpolando el tiempo
 de finalización, siendo el 50% de la calificación máxima el peor tiempo de finalización y el 100% el mejor.
-Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.
-</UL>
-<P><B>Puntuación por posición</B><P>
-<UL>
-<P>La puntuación se calcula interpolando la posición en el ranking,
+Los jugadores que no terminaron la caza reciben una calificación por debajo del 50% calculado simplemente por el número de etapas resueltas.</p>
+<p><b>Puntuación por posición</b></p>
+<p>La puntuación se calcula interpolando la posición en el ranking,
 siendo el 100% de la calificación máxima para al primer jugador (o equipo)
 en finalizar y 50% para el último jugador. Los jugadores que no terminaron
 la caza reciben una calificación por debajo del 50% calculado simplemente
-por el número de etapas resueltas.</UL>';
+por el número de etapas resueltas.</p>';
 $string['grademethodinfo'] = 'Método de calificación: {$a->type}. Penaliza {$a->gradepenlocation}% por localización, {$a->gradepenanswer}% por respuestas';
 $string['gradepenanswer'] = 'Penalización por fallo en respuesta';
 $string['gradepenlocation'] = 'Penalización por fallo en localización';
@@ -221,7 +218,6 @@ $string['groupquestionovercome'] = 'Respuesta acertada por {$a->user} a la pregu
 $string['groups'] = 'Grupos';
 $string['groupstageovercome'] = 'Etapa {$a->position} superada por {$a->user} {$a->date}';
 $string['hello'] = 'Hola';
-$string['attempthistory'] = 'Historial de intentos de {$a}';
 $string['history'] = 'Historial';
 $string['huntcompleted'] = 'Ya has completado esta caza del tesoro';
 $string['incorrectanswer'] = 'Respuesta incorrecta.';
@@ -268,6 +264,7 @@ $string['nogroupingplay'] = 'No tienes ningún grupo asignado a un camino, por l
 $string['nogroupplay'] = 'No tienes ningún camino asignado, por lo que no puedes jugar la actividad.';
 $string['nogrouproad'] = '{$a} no tiene ningún camino asignado.';
 $string['nomarks'] = 'Marca primero en el mapa el punto deseado. Sitúa el <img src="pix/my_location.png" width="28"/>';
+$string['nomarksmobile'] = 'Marca primero en el mapa el punto deseado.';
 $string['noresults'] = 'No se han encontrado resultados.';
 $string['noroads'] = 'Todavía no se han añadido caminos';
 $string['notchangeorderstage'] = 'No puedes cambiar el orden de las etapas una vez que se han realizado intentos sobre el camino.';
@@ -281,6 +278,7 @@ $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
 $string['nousersprogress'] = 'Ningún usuario/grupo tiene progresos en este camino.';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';
+$string['overlaylayers'] = 'Capas superpuestas';
 $string['play'] = 'Jugar';
 $string['pegmanlabel'] = 'Mirar en StreetView';
 $string['playstagewithoutmoving'] = 'Descubrir etapa sin desplazarse';
@@ -297,6 +295,7 @@ Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea 
 borrando la anterior si existiese, indicando el último punto deseado';
 $string['pluginadministration'] = 'Administración de la caza del tesoro';
 $string['pluginname'] = 'Caza del tesoro';
+$string['qrreaded'] = 'Código QR leído:';
 $string['question'] = 'Pregunta';
 $string['remove'] = 'Eliminar';
 $string['removealltreasurehuntattempts'] = 'Eliminar todos los intentos de resolver la caza del tesoro';
@@ -341,6 +340,7 @@ $string['timeagolong'] = 'hace {$a->shortduration} (el {$a->date})';
 $string['timetocome'] = 'dentro de {$a->shortduration}';
 $string['timetocomelong'] = 'dentro de {$a->shortduration} (el {$a->date})';
 $string['timeexceeded'] = 'Se ha superado el tiempo limite para realizar la actividad. Esta pantalla solo sirve para revisar el juego';
+$string['totalprogress'] = 'Progreso total';
 $string['totaltime'] = 'Tiempo total';
 $string['trackusers'] = 'Almacenar itinerarios';
 $string['trackusers_help'] = 'Almacena el itinerario que realizan los usuarios mientras usan el modo de juego.';
@@ -359,7 +359,7 @@ $string['treasurehuntislocked'] = '{$a} está editando esta caza del tesoro. Int
 $string['treasurehunt:managetreasure'] = 'Administrar Caza del tesoro';
 $string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
 $string['treasurehuntname'] = 'Nombre de la caza del tesoro';
-$string['treasurehuntnotavailable'] = 'Esta caza del tesoro no estará disponible {$a}';
+$string['treasurehuntnotavailable'] = 'Esta caza del tesoro estará disponible {$a}';
 $string['treasurehuntopens'] = 'Caza del tesoro abierta';
 $string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta {$a}';
 $string['treasurehunt:play'] = 'Jugar';
@@ -369,6 +369,7 @@ $string['updates'] = 'Actualizaciones';
 $string['updatetimes'] = 'Tiempos de actualización';
 $string['user'] = 'Usuario';
 $string['useractivityovercome'] = '<b>Actividad de moodle completada</b> con éxito para la etapa {$a->position} {$a->date}';
+$string['userattempthistory'] = 'Historial de intentos de {$a}';
 $string['userinvalidroad'] = '{$a} tiene asignado un camino no validado.';
 $string['userlocationfailed'] = '<b>Localización fallida</b> de la etapa {$a->position} {$a->date}';
 $string['userlocationovercome'] = '<b>Localización encontrada</b> de la etapa {$a->position}  {$a->date}';
@@ -379,11 +380,11 @@ $string['userquestionfailed'] = '<b>Respuesta fallida</b> a la pregunta de la et
 $string['userquestionovercome'] = '<b>Respuesta acertada</b> a la pregunta de la etapa {$a->position} {$a->date}';
 $string['usersprogress'] = 'Progreso de los usuarios';
 $string['usersprogress_help'] = 'Indica el progreso de las etapas de cada alumno/grupo en función de los colores:
-<P>El color <B>verde</B> indica que la etapa se ha superado sin fallos.</P>
-<P>El color <B>amarillo</B> indica que la etapa se ha superado con fallos.</P>
-<P>El color <B>rojo</B> indica que la etapa no se ha superado y se han cometido fallos.</P>
-<P>El color <B>gris</B> indica que la etapa no se ha superado y no se han cometido fallos.</P>';
-$string['userstageovercome'] = 'Etapa {$a->position} superada {$a->date}';
+<p>El color <b>verde</b> indica que la etapa se ha superado sin fallos.</p>
+<p>El color <b>amarillo</b> indica que la etapa se ha superado con fallos.</p>
+<p>El color <b>rojo</b> indica que la etapa no se ha superado y se han cometido fallos.</p>
+<p>El color <b>gris</b> indica que la etapa no se ha superado y no se han cometido fallos.</p>';
+$string['userstageovercome'] = 'Etapa {$a->position} superada en la fecha: {$a->date}';
 $string['validatelocation'] = 'Validar ubicación';
 $string['validateqr'] = 'Escanea QR';
 $string['warmatchanswer'] = 'La respuesta no corresponde con la pregunta';
@@ -421,14 +422,15 @@ $string['save_tour'] = 'Tras dibujar los polígonos de las etapas, no olvides gu
 $string['searchlocation_tour'] = 'Con este buscador puedes localizar rápidamente tus puntos de interés por su nombre.';
 $string['stages_tour'] = 'En esta zona aparecen las etapas del juego. Selecciona cada etapa y se ampliarán en el mapa. Después podrás añadir y editar las geometrías usando los botones del panel superior.';
 $string['welcome_edit_tour'] = 'Bienvenido a la página de autor de juegos de la Caza del Tesoro. ';
-$string['welcome_play_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">¡Bienvenido a tu Caza del Tesoro!</span><br>Este mapa y las pistas serán tu guía.';
+$string['welcome_play_tour'] = '<span style="font-size: 1.5em; font-weight: bold">¡Bienvenido a tu Caza del Tesoro!</span><br>Este mapa y las pistas serán tu guía.';
 $string['bigbutton_play_tour'] = 'Este es tu mejor amigo.<br>Un clic y te muestra <b>desafíos</b> o valiosas <b>pistas</b>.';
-$string['autolocate_tour'] = 'Muestra tu <b>lugar actual </b>.<br>( permite) usar " localización" cuando se te pida)';
+$string['autolocate_tour'] = 'Muestra tu <b>lugar actual </b>.<br>(permite usar "localización" cuando se te pida)';
 $string['playerhelp_tour'] = 'Esta gira puede ser revisada cuando quiera.';
 $string['validatelocation_tour'] = '¿Seguro de la ubicación de una etapa? Envía tu posición y descubre si estás en lo cierto..';
 $string['lastsuccessfulstage_tour'] = 'En este panel puedes encontrar tu última etapa superada. También puede ser la etapa superada de tu grupo.';
 $string['mapplay_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="pix/success_mark.png" width="28"/><br>Los fallidos: <img src="pix/failure_mark.png" width="28"/>';
-$string['playend_tour'] = '<span style="font-size: 1.5rem; font-weight: bold">¡Disfruta de tu Caza del Tesoro</span><br>con tus compañeros!';
+$string['mapplaymobile_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="{$a->successurl}" width="28"/><br>Los fallidos: <img src="{$a->failureurl}" width="28"/>';
+$string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">¡Disfruta de tu Caza del Tesoro</span><br>con tus compañeros!';
 
 $string['nextstep'] = 'Sig.';
 $string['prevstep'] = 'Ant.';

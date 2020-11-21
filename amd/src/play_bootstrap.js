@@ -72,7 +72,7 @@ define([
         "discoveredlocation",
         "answerwarning",
         "error",
-        "pegmanlabel"
+        "pegmanlabel",
       ];
       // console.log("loading i18n strings");
       let stringsqueried = terms.map((term) => {
@@ -385,7 +385,7 @@ define([
     var overlay = viewgpx.createCoordsOverlay(
       "#mapplay",
       "css/playerbootstrap/ol-popup.css",
-      strings['pegmanlabel']
+      strings["pegmanlabel"]
     );
 
     // All layers hidden except last one.
@@ -505,8 +505,10 @@ define([
             }),
             stroke: new ol.style.Stroke({
               color: "#0097a7",
-              width: 5,
+              width: 2,
             }),
+            overflow: true,
+            scale: 2,
           }),
         });
         return [styles];
@@ -626,11 +628,6 @@ define([
             }
             markerFeature.setGeometry(null);
           }
-          if (response.qrexpected) {
-            $("#validateqr").show();
-          } else {
-            $("#validateqr").hide();
-          }
           // If change the game mode (mobile or static).
           if (playwithoutmoving != response.playwithoutmoving) {
             playwithoutmoving = response.playwithoutmoving;
@@ -679,6 +676,7 @@ define([
               lastsuccessfulstage = response.lastsuccessfulstage;
               changesinlastsuccessfulstage = true;
               openModal("#cluepage");
+              $("#validateqr").hide();
               // If the stage is not solved I will notify you that there are changes.
               if (lastsuccessfulstage.question !== "") {
                 changesinquestionstage = true;
@@ -687,6 +685,9 @@ define([
                 $("#validatelocation").hide();
               } else {
                 $("#validatelocation").show();
+                 if (response.qrexpected) {
+                   $("#validateqr").show();
+                 }
               }
             }
             // Check if it is the first geometry or it is being initialized and center the map.
@@ -919,7 +920,6 @@ define([
 
     let trackinggeolocationwarndispatched = false;
     geolocation.on("error", (error) => {
-      // $.mobile.loading("hide");
       geolocation.setProperties({ user_denied: true });
       toast(error.message);
       if (
@@ -929,7 +929,7 @@ define([
         trackinggeolocationwarndispatched == false
       ) {
         setTimeout(() => {
-          $("#popupgeoloc").popup("open", { positionTo: "window" });
+          openModal("#geolocationPopup");
           trackinggeolocationwarndispatched = true;
         }, 500);
       }
@@ -1113,7 +1113,7 @@ define([
     if (geographictools) {
       $("#autolocate").on("click", () => {
         if (geolocation.get("user_denied")) {
-          $("#popupgeoloc").popup("open", { positionTo: "window" });
+          openModal("#geolocationPopup");
         } else {
           autocentermap(true);
         }
@@ -1158,13 +1158,13 @@ define([
       if (lastsuccessfulstage.question !== "") {
         event.preventDefault();
         toast(strings["answerwarning"]);
-        openSidePanel("#infopanel");
+        openModal("#cluepage");
         return;
       }
       if (!lastsuccessfulstage.activitysolved) {
         event.preventDefault();
         toast(strings["activitytoendwarning"]);
-        openSidePanel("#infopanel");
+        openModal("#cluepage");
         return;
       }
     });

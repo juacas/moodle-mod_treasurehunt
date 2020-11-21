@@ -25,9 +25,9 @@
  */
 // Replace treasurehunt with the name of your module and remove this line.
 
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
-require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once($CFG->libdir . '/formslib.php');
+require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
+require_once "$CFG->dirroot/mod/treasurehunt/locallib.php";
+require_once $CFG->libdir . '/formslib.php';
 
 global $USER, $PAGE;
 
@@ -44,12 +44,12 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 // TODO : launch edition event
 /* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-  'objectid' => $PAGE->cm->instance,
-  'context' => $PAGE->context,
-  ));
-  $event->add_record_snapshot('course', $PAGE->course);
-  $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
-  $event->trigger(); */
+'objectid' => $PAGE->cm->instance,
+'context' => $PAGE->context,
+));
+$event->add_record_snapshot('course', $PAGE->course);
+$event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
+$event->trigger(); */
 $url = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
 if (!empty($roadid)) {
     $url->param('roadid', $roadid);
@@ -100,7 +100,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 echo $OUTPUT->header();
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
 echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
-echo $OUTPUT->container_start('','edition_maintitle'); // For locating the help icon and override it in tutorial.js.
+echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
 echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
 echo $OUTPUT->container_end();
 // Conditions to show the intro can change to look for own settings or whatever.
@@ -128,10 +128,6 @@ echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
 echo $OUTPUT->box(null, null, 'mapedit');
 echo $OUTPUT->box(null, null, 'roadlistpanel');
 echo $OUTPUT->container_end();
-echo '<div id="popup" class="ol-popup">
-<a href="#" id="popup-closer" class="ol-popup-closer"></a>
-<div id="popup-content"></div>
-</div>';
 
 // Finish the page.
 echo $OUTPUT->footer();

@@ -1,4 +1,5 @@
 {
+<<<<<<< HEAD
     // Use IntelliSense to learn about possible attributes.
     // Hover to view descriptions of existing attributes.
     // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
@@ -20,3 +21,26 @@
         }
     ]
 }
+=======
+  // Use IntelliSense to learn about possible attributes.
+  // Hover to view descriptions of existing attributes.
+  // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Debug test",
+      "type": "php",
+      "request": "launch",
+      "program": "${workspaceFolder:treasurehunt}/tests/test_privacy_provider.php",
+      "cwd": "C:\\desarrollo\\servers\\apache\\moodle3\\moodle",
+      "args": ["test", "param"]
+    },
+    {
+      "name": "Listen for XDebug",
+      "type": "php",
+      "request": "launch",
+      "port": 9000
+    }
+  ]
+}
+>>>>>>> feature/moodle-mobile

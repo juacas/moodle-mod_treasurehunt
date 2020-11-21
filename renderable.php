@@ -29,8 +29,8 @@ defined('MOODLE_INTERNAL') || die();
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_user_attempt_history implements renderable {
-
+class treasurehunt_user_attempt_history implements renderable
+{
     public $attempts = [];
     public $coursemoduleid = 0;
     public $username = '';
@@ -42,7 +42,8 @@ class treasurehunt_user_attempt_history implements renderable {
      * constructor
      *
      */
-    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
+    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview)
+    {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
         $this->username = $username;
@@ -50,7 +51,6 @@ class treasurehunt_user_attempt_history implements renderable {
         $this->roadfinished = $roadfinished;
         $this->teacherreview = $teacherreview;
     }
-
 }
 
 /**
@@ -59,8 +59,8 @@ class treasurehunt_user_attempt_history implements renderable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_info implements renderable {
-
+class treasurehunt_info implements renderable
+{
     public $treasurehunt = null;
     public $timenow = 0;
     public $courseid = 0;
@@ -69,7 +69,8 @@ class treasurehunt_info implements renderable {
     /**
      * constructor
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs) {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs)
+    {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;
@@ -84,7 +85,8 @@ class treasurehunt_info implements renderable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_users_progress implements renderable {
+class treasurehunt_users_progress implements renderable
+{
 
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $roadsusersprogress = array();
@@ -100,9 +102,17 @@ class treasurehunt_users_progress implements renderable {
      * constructor
      *
      */
-    public function __construct($roadsusersprogress, $groupmode, $coursemoduleid,
-                                $duplicategroupsingroupings, $duplicateusersingroups,
-                                $unassignedusers, $viewpermission, $managepermission) {
+    public function __construct(
+        $roadsusersprogress,
+        $groupmode,
+        $coursemoduleid,
+        $duplicategroupsingroupings,
+        $duplicateusersingroups,
+        $unassignedusers,
+        $viewpermission,
+        $managepermission
+    )
+    {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
@@ -112,10 +122,10 @@ class treasurehunt_users_progress implements renderable {
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
     }
-
 }
 
-class treasurehunt_play_page_base implements renderable, templatable {
+class treasurehunt_play_page_base implements renderable, templatable
+{
     public $treasurehunt = null;
     public $cm = null;
     public $custommapping = '';
@@ -152,7 +162,8 @@ class treasurehunt_play_page_base implements renderable, templatable {
         $this->treasurehunt = $treasurehunt;
         $this->cm = $cm;
     }
-    public function set_user($user) {
+    public function set_user($user)
+    {
         $this->user = $user;
     }
     public function set_custommapping($custommapping)
@@ -166,8 +177,8 @@ class treasurehunt_play_page_base implements renderable, templatable {
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_play_page_classic extends treasurehunt_play_page_base {  
-
+class treasurehunt_play_page_classic extends treasurehunt_play_page_base
+{
 }
 class treasurehunt_play_page_fancy extends treasurehunt_play_page_base
 {

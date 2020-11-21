@@ -117,6 +117,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     overlay, ol.Object.getChangeEventType(ol.Overlay.Property.POSITION),
                     function (param) {
                         var latlon = this.getPosition();
+                        clearTimeout(timeouthandler);
                         if (latlon) {
                             var pegmanlink = createlink(latlon, overlay.getMap(), label);
                             $('#popup-content').html(pegmanlink);

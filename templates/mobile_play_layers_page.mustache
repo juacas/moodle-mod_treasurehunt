@@ -1,0 +1,56 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{=<% %>=}}
+<div class="treasurehunt-play-layers-page">
+
+  <ion-list radio-group (ionChange)="changeBaseLayer($event)">
+
+    <ion-list-header class="treasurehunt-no-margin">
+      {{'plugin.mod_treasurehunt.baselayers' | translate}}
+    </ion-list-header>
+
+    <ion-item *ngFor="let baseLayer of layersConfig.baseLayers">
+      <ion-avatar item-start *ngIf="baseLayer.img; else layerIcon" >
+        <img core-external-content [src]="baseLayer.img">
+      </ion-avatar>
+      <ion-label>{{baseLayer.title}}</ion-label>
+      <ion-radio [checked]="baseLayer.visible" [value]="baseLayer.name"></ion-radio>
+    </ion-item>
+
+  </ion-list>
+
+  <ion-list class="treasurehunt-no-margin" *ngIf="layersConfig.overlayLayers.length">
+
+    <ion-list-header class="treasurehunt-no-margin">
+      {{'plugin.mod_treasurehunt.overlaylayers' | translate}}
+    </ion-list-header>
+
+    <ion-item *ngFor="let overlayLayer of layersConfig.overlayLayers">
+      <ion-avatar item-start *ngIf="overlayLayer.img; else layerIcon">
+        <img core-external-content [src]="overlayLayer.img">
+      </ion-avatar>
+      <ion-label>{{overlayLayer.title}}</ion-label>
+      <ion-toggle (ionChange)="changeOverlayLayer(overlayLayer.name, overlayLayer.visible)" [(ngModel)]="overlayLayer.visible"></ion-toggle>
+    </ion-item>
+  
+  </ion-list>
+
+  <ng-template #layerIcon>
+    <ion-icon item-start name="logo-buffer"></ion-icon>
+  </ng-template>
+</div>

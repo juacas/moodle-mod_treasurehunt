@@ -76,4 +76,3 @@ $renderable->set_user($user);
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 $renderable->set_custommapping($custommapping);
 echo $output->render($renderable);
-

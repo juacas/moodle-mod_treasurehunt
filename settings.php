@@ -31,7 +31,7 @@ if ($ADMIN->fulltree) {
                 'mod_treasurehunt/availableplayerstyles',
                 get_string('availableplayerstyles', 'treasurehunt'),
                 '',
-                [TREASUREHUNT_PLAYERCLASSIC, TREASUREHUNT_PLAYERFANCY],
+                [TREASUREHUNT_PLAYERCLASSIC, TREASUREHUNT_PLAYERFANCY, TREASUREHUNT_PLAYERBOOTSTRAP],
                 treasurehunt_get_installedplayerstyles()
         ));
         // Default game player style.
@@ -39,7 +39,7 @@ if ($ADMIN->fulltree) {
                 'mod_treasurehunt/defaultplayerstyle',
                 get_string('defaultplayerstyle', 'treasurehunt'),
                 get_string('playerstyle_help', 'treasurehunt'),
-                TREASUREHUNT_PLAYERCLASSIC,
+                TREASUREHUNT_PLAYERBOOTSTRAP,
                 treasurehunt_get_installedplayerstyles()
         ));
         // Maximum grade.
