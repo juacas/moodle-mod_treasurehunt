@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.5.0 Plugin for Moodle Mobile App.
  - v1.4.2 Fix a bug with Moodle 3.9 name of Bootstrap libraries.
  - v1.4.1 Fix a bug that showed a text below the instance name.
  - v1.4.0 Choice between 3 different playpage styles. New bootstrap-based play page more compatible and light-weight. Street view link from play page.
