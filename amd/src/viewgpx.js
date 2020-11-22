@@ -39,7 +39,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                 creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig, refreshinterval) {
                     console.log('Creating gpxviewer.');
                     // I18n strings.
-	            	var terms = ['aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer'];
+	            	var terms = ['aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel'];
 	            	var stringsqueried = terms.map(function (term) {
 	                     return {key: term, component: 'treasurehunt'};
 	                });
@@ -56,15 +56,15 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
 	            		}
 	            		// Detect custom image.
 	            		if (typeof(custommapconfig) != 'undefined' &&
-	            				custommapconfig !== null && 
+	            				custommapconfig !== null &&
 	            				custommapconfig.custombackgroundurl !== null) {
-	            			
+
 	            			// Detect image size.
 	    						var img = new Image();
 	    					    img.addEventListener("load", function(){
 	    					    	custommapconfig.imgwidth =  this.naturalWidth;
 	    					    	custommapconfig.imgheight = this.naturalHeight;
-	    					    	initcreategpxviewer(cmid, treasurehuntid, i18n, users, custommapconfig);	    					        
+	    					    	initcreategpxviewer(cmid, treasurehuntid, i18n, users, custommapconfig);
 	    					    });
 	    					    img.src = custommapconfig.custombackgroundurl;
 	            		} else {
@@ -72,7 +72,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
 	            		}
 	                })
                 },  // End of function creategpxviewer.
-            createCoordsOverlay: function(selector = '#mappage', cssurl = 'css/ol-popup.css') {
+            createCoordsOverlay: function(selector = '#mappage', cssurl = 'css/ol-popup.css', label = '') {
                 // Popup showing the position the user clicked.
                 // Elements that make up the popup.
                 $('<link>')
@@ -89,6 +89,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                 var closer = $('#popup-closer');
                 var containernode = container.get(0);
                 var timeouthandler = null;
+                var createlink = this.createPegmanLink; // Function for events.
                 /**
                  * Create an overlay to anchor the popup to the map.
                  */
@@ -116,8 +117,10 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     overlay, ol.Object.getChangeEventType(ol.Overlay.Property.POSITION),
                     function (param) {
                         var latlon = this.getPosition();
+                        clearTimeout(timeouthandler);
                         if (latlon) {
-                            createPegmanLabel(latlon);
+                            var pegmanlink = createlink(latlon, overlay.getMap(), label);
+                            $('#popup-content').html(pegmanlink);
                             timeouthandler = setTimeout(() => { $('#popup-closer').trigger('click'); }, 2000);
                         }
                     }, overlay);
@@ -127,22 +130,23 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     }
                 );
                 return overlay;
-                function createPegmanLabel(coordinate) {
-                    var latlon = ol.proj.toLonLat(coordinate, overlay.getMap().getView()
-                        .getProjection());
-                    var hdms = ol.coordinate.toStringHDMS(latlon);
-                    var pegmanlink = '<a target="street" href="http://maps.google.com/?cbll='
-                        + latlon[1]
-                        + ','
-                        + latlon[0]
-                        + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" /> <code>' + hdms + '</code></a>';
-                    $('#popup-content').html(pegmanlink);
-                }
+
+            },
+            createPegmanLink: function(coordinate, map, label) {
+                var latlon = ol.proj.toLonLat(coordinate, map.getView().getProjection());
+                var hdms = ol.coordinate.toStringHDMS(latlon);
+
+                var pegmanlink = '<a target="street" href="http://maps.google.com/?cbll='
+                    + latlon[1]
+                    + ','
+                    + latlon[0]
+                    + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" />' + label + '<br/></a><code>' + hdms + '</code>';
+                return pegmanlink;
             }
 
             };
             return init;
-            
+
             function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconfig) {
                     console.log('Init gpx viewer.');
     				var mapprojection = 'EPSG:3857';
@@ -158,7 +162,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
     							var bboxheight = customimageextent[3] - customimageextent[1];
     							var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
     							var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-    							
+
     							var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
     							var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
     							var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
@@ -167,7 +171,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
     								centerwidth + adjwidth/2,
     								centerheight + adjheight/2];
     						}
-    						
+
     						custombaselayer = new ol.layer.Image({
     							  title : custommapconfig.layername,
     							  type: custommapconfig.layertype,
@@ -269,10 +273,23 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                         element: document.getElementById('info')
                     });
                     map.addOverlay(popup);
-                    function displayFeatureInfo(pixel) {
+                    // Duplicated function. TODO: refactor overlay definition.
+                    function createPegmanLink(coordinate, map, label) {
+                        var latlon = ol.proj.toLonLat(coordinate, map.getView().getProjection());
+                        var hdms = ol.coordinate.toStringHDMS(latlon);
+
+                        var pegmanlink = '<a target="street" href="http://maps.google.com/?cbll='
+                            + latlon[1]
+                            + ','
+                            + latlon[0]
+                            + '&cbp=12,20.09,,0,5&layer=c"><img src="pix/my_location.png" width="16" />' + label + '<br/></a><code>' + hdms + '</code>';
+                        return pegmanlink;
+                    }
+
+                    function displayFeatureInfo(pixel, themap, coordinates, label) {
                         var features = [];
                         var msg = '';
-                        map.forEachFeatureAtPixel(pixel, function (feature) {
+                        themap.forEachFeatureAtPixel(pixel, function (feature) {
                             features.push(feature);
                         });
                         if (features.length > 0) {
@@ -284,21 +301,22 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                             msg = info.join(', ') || '(unknown)';
                             map.getTarget().style.cursor = 'pointer';
                         } else {
+                            msg = createPegmanLink(coordinates, map, label); // TODO: Show pegman.
                             map.getTarget().style.cursor = '';
                         }
                         return msg;
                     }
-                    
+
                     function showpopup(evt) {
                         var element = popup.getElement();
                         var coordinate = evt.coordinate;
-                        $(element).popover('destroy');
+                        $(element).popover('dispose'); // For jquery 4+ it is dispose instead of destroy!
                         popup.setPosition(coordinate);
                         $(element).popover({
                             'placement': 'top',
                             'animation': false,
                             'html': true,
-                            'content': displayFeatureInfo(map.getEventPixel(evt.originalEvent))
+                            'content': displayFeatureInfo(map.getEventPixel(evt.originalEvent), map, coordinate, strings['pegmanlabel'])
                         });
                         $(element).popover('show');
                     }
@@ -324,7 +342,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     	}
                     });
                 } // End of function initcreategpxviewer.
-            
+
             function find_or_add_layergroup(map, trackgroupname) {
                 var layergroup = null;
                 var layers = map.getLayers();
@@ -343,8 +361,8 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                 return layergroup;
             }
             /**
-             * 
-             * @param {ol.map} map 
+             *
+             * @param {ol.map} map
              * @param {Array} point center coordinates
              * @param {Array} extent bounding box coordinates
              */
@@ -373,7 +391,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     var a = user.pic.indexOf('<img src="') + 10;
                     var b = user.pic.indexOf('"', a);
                     var iconurl = user.pic.substring(a, b);
-                    
+
                     var vector = new ol.layer.Vector({
                         source: gpxsource,
                         title: user.pic + '' + user.fullname,
@@ -387,7 +405,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     	if ($('#refreshtracks').is(':checked')) {
                     		refreshCounter = 0;
                     		gpxsource.clear();
-                    		gpxsource.refresh();                    		
+                    		gpxsource.refresh();
                     	}
                     }, refreshTracksInterval * 1000);
                     vector.on('change:visible', function() {
@@ -402,7 +420,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                     gpxsource.on('change', function () {
                     	if ($('#refreshtracks').is(':checked')) {
                     		return;
-                    	} 
+                    	}
                         var extent = gpxsource.getExtent();
 
                         if (max_extent === null) {
@@ -422,7 +440,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                 });
             }
             /**
-             * 
+             *
              * @param {Array} extent boundingbox 2 coordinates
              */
             function get_valid_extent(extent) {

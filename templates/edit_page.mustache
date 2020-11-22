@@ -1,0 +1,97 @@
+{{!                                                                                                                                 
+    This file is part of Moodle - http://moodle.org/                                                                                
+                                                                                                                                    
+    Moodle is free software: you can redistribute it and/or modify                                                                  
+    it under the terms of the GNU General Public License as published by                                                            
+    the Free Software Foundation, either version 3 of the License, or                                                               
+    (at your option) any later version.                                                                                             
+                                                                                                                                    
+    Moodle is distributed in the hope that it will be useful,                                                                       
+    but WITHOUT ANY WARRANTY; without even the implied warranty of                                                                  
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the                                                                   
+    GNU General Public License for more details.                                                                                    
+                                                                                                                                    
+    You should have received a copy of the GNU General Public License                                                               
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.                                                                 
+}}                                                                                                                                  
+{{!                                                                                                                                 
+    @template core/pix_icon                                                                                                         
+                                                                                                                                    
+    Moodle pix_icon template.                                                                                                       
+                                                                                                                                    
+    The purpose of this template is to render a pix_icon.                                                                           
+                                                                                                                                    
+    Classes required for JS:                                                                                                        
+    * none                                                                                                                          
+                                                                                                                                    
+    Data attributes required for JS:                                                                                                
+    * none                                                                                                                          
+                                                                                                                                    
+    Context variables required for this template:                                                                                   
+    * attributes Array of name / value pairs.                                                                                       
+                                                                                                                                    
+    Example context (json):                                                                                                         
+    {                                                                                                                               
+        "attributes": [                                                                                                             
+            { "name": "src", "value": "http://moodle.com/wp-content/themes/moodle/images/logo-hat2.png" },                          
+            { "name": "class", "value": "iconsmall" }                                                                               
+        ]                                                                                                                           
+    }                                                                                                                               
+                                                                                                                                    
+}}
+<nav class="navbar justify-content-start navbar-dark bg-dark">
+    <button type="button" class="btn btn-light">{{# pix }} e/save, core, Edit David Beckham {{/ pix }}Camino</button>
+    <button type="button" class="btn btn-light">Etapa</button>
+    <button type="button" class="btn btn-light">Etapa</button>
+    <button type="button" class="btn btn-light">Etapa</button>
+    <div class="btn-group" role="group" aria-label="Basic example">
+        <button type="button" class="btn btn-light">Añadir</button>
+        <button type="button" class="btn btn-light">Modificar</button>
+    </div>
+</nav>
+
+<div class="accordion" id="accordionExample">
+  <div class="card">
+    <div class="card-header" id="headingOne">
+      <h2 class="mb-0">
+        <button class="btn btn-link" type="button" data-toggle="collapse" data-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+          Collapsible Group Item #1
+        </button>
+      </h2>
+    </div>
+
+    <div id="collapseOne" class="collapse show" aria-labelledby="headingOne" data-parent="#accordionExample">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" id="headingTwo">
+      <h2 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseTwo" aria-expanded="false" aria-controls="collapseTwo">
+          Collapsible Group Item #2
+        </button>
+      </h2>
+    </div>
+    <div id="collapseTwo" class="collapse" aria-labelledby="headingTwo" data-parent="#accordionExample">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+  <div class="card">
+    <div class="card-header" id="headingThree">
+      <h2 class="mb-0">
+        <button class="btn btn-link collapsed" type="button" data-toggle="collapse" data-target="#collapseThree" aria-expanded="false" aria-controls="collapseThree">
+          Collapsible Group Item #3
+        </button>
+      </h2>
+    </div>
+    <div id="collapseThree" class="collapse" aria-labelledby="headingThree" data-parent="#accordionExample">
+      <div class="card-body">
+        Anim pariatur cliche reprehenderit, enim eiusmod high life accusamus terry richardson ad squid. 3 wolf moon officia aute, non cupidatat skateboard dolor brunch. Food truck quinoa nesciunt laborum eiusmod. Brunch 3 wolf moon tempor, sunt aliqua put a bird on it squid single-origin coffee nulla assumenda shoreditch et. Nihil anim keffiyeh helvetica, craft beer labore wes anderson cred nesciunt sapiente ea proident. Ad vegan excepteur butcher vice lomo. Leggings occaecat craft beer farm-to-table, raw denim aesthetic synth nesciunt you probably haven't heard of them accusamus labore sustainable VHS.
+      </div>
+    </div>
+  </div>
+</div>

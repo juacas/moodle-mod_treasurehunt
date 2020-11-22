@@ -34,8 +34,6 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
      */
     protected function define_structure() {
         global $CFG;
-        // Needed for get_geometry_functions().
-        require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
         // Get know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 

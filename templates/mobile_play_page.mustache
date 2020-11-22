@@ -1,0 +1,170 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+}}
+
+{{=<% %>=}}
+<div id="treasurehunt-play-page" *ngIf="treasureHuntPlayMobile" (touchmove)="cancelPullToRequest($event)" (mousedown)="cancelPullToRequest($event)" 
+    class="treasurehunt-play-page">
+    <core-navbar-buttons #content end>
+      <button ion-button icon-only (click)="treasureHuntPlayMobile.launchTutorial()">
+        <ion-icon name="information-circle"></ion-icon>
+      </button>
+      <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
+        component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
+        <ion-icon name="search"></ion-icon>
+      </button>
+    </core-navbar-buttons>
+
+    <div class="treasureoverlay" *ngIf="treasureHuntPlayMobile.gameStatus.roadFinished">
+      {{'plugin.mod_treasurehunt.roadended'| translate}}
+    </div>
+
+    <div id="coordsOverlay" (click)="treasureHuntPlayMobile.clearTimeOutCoordsOverlay()" class="ol-popup">
+      <ion-item>
+        <a class="ol-popup-closer" (click)="treasureHuntPlayMobile.closeCoordsOverlay()"></a>
+        <ion-icon item-start name="locate"></ion-icon>
+        <a (click)="treasureHuntPlayMobile.openGoogleStreetViewUrl()">{{'plugin.mod_treasurehunt.pegmanlabel'| translate}}</a>
+        <p><code>{{treasureHuntPlayMobile.coordsOverlay.hdms}}</code></p>
+      </ion-item>
+    </div>
+
+    <div id="map" class="treasurehunt-map-container"></div>
+
+    <!-- Bottom buttons -->
+    <div class="play-tools-container" *ngIf="!treasureHuntPlayMobile.gameStatus.roadFinished">
+      <button id="validate-location" *ngIf="treasureHuntPlayMobile.gameStatus.showValidateLocationButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.showValidateLocation()">
+        <ion-icon name="checkmark"></ion-icon>
+      </button>
+      <button id="clue-button" ion-button icon-start class="btn play-highlight-btn" [class.shake]="treasureHuntPlayMobile.gameStatus.shakeClueButton" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.clue' | translate}}" 
+          component="mod_treasurehunt" method="mobile_treasurehunt_play_clue" [jsData]="cluePageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
+        <ion-icon name="key"></ion-icon>
+        {{'plugin.mod_treasurehunt.showclue' | translate}}
+      </button>
+      <button *ngIf="treasureHuntPlayMobile.gameStatus.showQRButton" ion-button icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.scanQR()">
+        <ion-icon name="qr-scanner"></ion-icon>
+      </button>
+    </div>
+
+    <div class="map-tools-container">
+      <button id="autolocate" *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving && !treasureHuntPlayMobile.gameStatus.roadFinished" ion-button 
+        icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.centerOnUserPosition()">
+          <ion-icon name="pin"></ion-icon>
+      </button>
+      <button ion-button icon-only class="btn play-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.layers' | translate}}" 
+          component="mod_treasurehunt" method="mobile_treasurehunt_play_layers" [jsData]="layersPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
+        <i class="fa fa-eye" aria-hidden="true"></i>
+      </button>
+    </div>
+
+    <!--Info stage popup-->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.infoPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask" (click)="treasureHuntPlayMobile.closeInfoPopup()"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{treasureHuntPlayMobile.infoPopup.title}}</span>
+          <button ion-button icon-only clear round (click)="treasureHuntPlayMobile.closeInfoPopup()">  
+            <ion-icon name="close"></ion-icon>
+          </button>
+        </nav>
+
+        <div class="play-modal-content">
+            <core-format-text  [text]="treasureHuntPlayMobile.infoPopup.content"></core-format-text>
+        </div>
+      </div>
+    </div>
+
+  
+    <!--Notifications popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.notificationsPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.updates' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content">
+          <div [innerHtml]="treasureHuntPlayMobile.notificationsPopup.content"></div>
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.acceptNotifications()">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+
+    <!--Error popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.errorPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.error' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content">
+          <p>{{treasureHuntPlayMobile.errorPopup.content}}</p>
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.closeErrorPopup()">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Geolocation error popup -->
+    <div class="play-modal" [class.active]="treasureHuntPlayMobile.geolocationPopup.show" 
+      data-animation="slideInOutTop">
+      <!-- modal mask -->
+      <div class="modal-mask"></div>
+
+      <div class="play-modal-popup">
+        <!-- Header -->
+        <nav class="play-navbar">
+          <span class="title">{{'plugin.mod_treasurehunt.geolocation_needed_title' | translate}}</span>
+        </nav>
+
+        <div class="play-modal-content" innerHtml="{{'plugin.mod_treasurehunt.geolocation_needed'  | translate}}">
+        </div>
+
+        <div class="play-modal-footer">
+          <button ion-button icon-start (click)="treasureHuntPlayMobile.geolocationPopup.show = false">
+            <ion-icon name="checkmark"></ion-icon>
+            {{'plugin.mod_treasurehunt.continue' | translate}}
+          </button>
+        </div>
+      </div>
+    </div>  
+
+
+</div>

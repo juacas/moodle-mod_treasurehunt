@@ -128,7 +128,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
             "stageclue", "question", "noanswerselected", "timeexceeded",
             "searching", "continue", "noattempts", "aerialview", "roadview",
             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"
         ];
         $strings = [];
         foreach ($terms as $term) {
@@ -219,7 +219,7 @@ I18N;
             "stageclue", "question", "noanswerselected", "timeexceeded",
             "searching", "continue", "noattempts", "aerialview", "roadview",
             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-            "huntcompleted", "discoveredlocation", "answerwarning", "error"
+            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"
         ];
         $strings = [];
         foreach ($terms as $term) {
@@ -247,7 +247,8 @@ I18N;
         return $pageheader . $pagerendered . $i18nfragment . $pagefooter;
     }
 
-    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage) {
+    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage)
+    {
         global $PAGE, $CFG;
         $cm = $renderablepage->cm;
         $treasurehunt = $renderablepage->treasurehunt;
@@ -288,6 +289,19 @@ I18N;
         return $pageheader . $pagerendered . $pagefooter;
     }
     /**
+     * Defer to template.
+     *
+     * @param treasurehunt_play_page $page
+     *
+     * @return string html for the page
+     */
+    public function render_treasurehunt_edit_page(treasurehunt_edit_page $page)
+    {
+        $data = $page->export_for_template($this);
+        return parent::render_from_template('mod_treasurehunt/edit_page', $data);
+    }
+
+    /**
      * Render a table containing the current status of the user attempts.
      *
      * @param treasurehunt_user_attempt_history  $historical
@@ -297,9 +311,9 @@ I18N;
     {
         // Create a table for the data.
         $o = '';
-      
+
         $o .= $this->output->container_start('attempthistory');
-        $o .= $this->output->heading(get_string('attempthistory', 'treasurehunt', $historical->username), 3);
+        $o .= $this->output->heading(get_string('userattempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
         // Status.
         if (count($historical->attempts)) {
@@ -316,11 +330,11 @@ I18N;
                 } else {
                     $class = 'failedattempt';
                 }
-               $cell1 = new html_table_cell($numattempt++);
-               $cell1->attributes = ['class' => $class];
-               $cell2 = new html_table_cell($attempt->string);
+                $cell1 = new html_table_cell($numattempt++);
+                $cell1->attributes = ['class' => $class];
+                $cell2 = new html_table_cell($attempt->string);
 
-               $t->data[] = new html_table_row([$cell1, $cell2]);
+                $t->data[] = new html_table_row([$cell1, $cell2]);
             }
             // All done - write the table.
             $o .= html_writer::table($t);
@@ -331,7 +345,7 @@ I18N;
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'), 'notifymessage');
             }
         }
-        
+
         $o .= $this->output->box_end();
 
         // Close the container and insert a spacer.
@@ -413,7 +427,7 @@ I18N;
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $name));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $name));
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
@@ -425,7 +439,7 @@ I18N;
                                 if ($progress->viewpermission) {
                                     $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('attempthistory', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
@@ -433,7 +447,7 @@ I18N;
                             $cells = array($name);
                             $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
                             $cells[] = treasurehunt_get_nice_date($elapsed->first);
-                            
+
                             for ($i = 1; $i <= $roadusersprogress->totalstages; $i++) {
                                 $cell = new html_table_cell($i);
                                 if (isset($userorgroup->ratings[$i])) {
@@ -473,7 +487,7 @@ I18N;
                 }
             }
         }
-   
+
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
             $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
@@ -517,27 +531,39 @@ I18N;
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
             $notavailable = true;
-            $message = get_string('treasurehuntnotavailable', 'treasurehunt', 
+            $message = get_string('treasurehuntnotavailable', 'treasurehunt',
                 treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48));
             $o .= html_writer::tag('p', $message) . "\n";
             if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt',
-                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+                $message = get_string(
+                    'treasurehuntcloseson',
+                    'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+                );
                 $o .= html_writer::tag('p', $message) . "\n";
             }
-        } else if ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
-            $message = get_string('treasurehuntclosed', 'treasurehunt',
-                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+        } elseif ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
+            $message = get_string(
+                'treasurehuntclosed',
+                'treasurehunt',
+                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+            );
             $o .= html_writer::tag('p', $message) . "\n";
         } else {
             if ($info->treasurehunt->allowattemptsfromdate) {
-                $message = get_string('treasurehuntopenedon', 'treasurehunt',
-                    treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate));
+                $message = get_string(
+                    'treasurehuntopenedon',
+                    'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate)
+                );
                 $o .= html_writer::tag('p', $message) . "\n";
             }
             if ($info->treasurehunt->cutoffdate) {
-                $message = get_string('treasurehuntcloseson', 'treasurehunt',
-                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48));
+                $message = get_string(
+                    'treasurehuntcloseson',
+                    'treasurehunt',
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+                );
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
@@ -556,14 +582,13 @@ I18N;
         // Information about the groups/groupings involved in the game.
         $groupsmessages = [];
         foreach ($info->roads as $road) {
-
             if ($info->treasurehunt->groupmode == 0) {
                 if ($road->groupid > 0) {
                     $gname = groups_get_group_name($road->groupid);
                     $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => $road->groupid, 'grouping' => 0]);
                     $groupsmessages[] = html_writer::link($link, $gname);
                 }
-            } else if ($road->groupingid > 0) {
+            } elseif ($road->groupingid > 0) {
                 $gname = groups_get_grouping_name($road->groupingid);
                 $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => 0, 'grouping' => $road->groupingid]);
                 $groupsmessages[] = html_writer::link($link, $gname);

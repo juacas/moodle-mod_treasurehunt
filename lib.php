@@ -66,7 +66,7 @@ function treasurehunt_supports($feature) {
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
- *
+ * @global moodle_database $DB
  * @param stdClass $treasurehunt Submitted data from the form in mod_form.php
  * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
  * @return int The id of the newly inserted treasurehunt record
@@ -272,7 +272,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
     return $result;
 }
 
-function treasurehunt_cm_info_dynamic(cm_info $cm) {  
+function treasurehunt_cm_info_dynamic(cm_info $cm) {
     $cache = cache::make_from_params(cache_store::MODE_REQUEST, 'treasurehunt', 'instances');
     $treasurehunt = $cache->get($cm->instance);
     if (!$treasurehunt) {
@@ -284,10 +284,10 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
     list($status, $next) = treasurehunt_get_time_status($treasurehunt, $now);
     $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
     $cm->set_icon_url($iconurl);
-    
+
     // if ($status == 'tobegin' ) {
-    //     $cm->set_after_link('<span class="label label-info"> be3gin in ' 
-    //         . userdate_htmltime($treasurehunt->allowattemptsfromdate)) 
+    //     $cm->set_after_link('<span class="label label-info"> be3gin in '
+    //         . userdate_htmltime($treasurehunt->allowattemptsfromdate))
     //         . '</span>';
     // } else if ($status == 'ongoing' && $next == 'end') {
     //     $cm->set_after_link('<span class="label label-info"> Closes '
@@ -326,7 +326,7 @@ function treasurehunt_get_proper_icon($treasurehunt, $now)
     return $iconurl;
 }
 /**
- * 
+ *
  */
 function treasurehunt_get_time_status($treasurehunt, $now) {
     $status = null;
@@ -532,7 +532,7 @@ function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
  */
 function treasurehunt_get_file_areas($course, $cm, $context) {
     $areas = array();
-    $areas['custombackground'] = get_string('custombackground', 'treasurehunt');
+    $areas['custombackground'] = get_string('custommapimagefile', 'treasurehunt');
     return $areas;
 }
 /**

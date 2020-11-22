@@ -91,5 +91,6 @@ $functions = array(
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:play',
         'ajax' => true, // Allowed from ajax.
+        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
     ),
 );
