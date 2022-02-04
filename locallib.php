@@ -1789,13 +1789,14 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $c
         . "AND $grouptype AND r.roadid = ?";
     $lastsuccesfulattempt = $DB->get_record_sql($sql, $params);
     // Format attempt texts.
-    treasurehunt_format_attempt_texts($lastsuccesfulattempt, $context);
+    //TODO: treasurehunt_format_attempt_texts($lastsuccesfulattempt, $context);
     return $lastsuccesfulattempt;
 }
 /**
  * Format attempt texts.
  */
 function treasurehunt_format_attempt_texts($attempt) {
+    global $DB;
     if (isset($attempt->questiontext)) {
         $cm = get_coursemodule_from_instance('treasurehunt', $treasurehuntid);
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
