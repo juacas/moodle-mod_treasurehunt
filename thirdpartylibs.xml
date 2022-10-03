@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <libraries>
 	<library>
-		<location>amd/src/geocoder.js</location>
-		<name>geocoder</name>
+		<location>amd/src/osm-geocoder.js</location>
+		<name>osm-geocoder</name>
 		<version>n/a</version>
 		<license>GPL</license>
 		<licenseversion>2.0</licenseversion>
@@ -22,7 +22,7 @@
 		<licenseversion>2.0</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/jquery-mobile</location>
+		<location>amd/src/jquerymobile.js</location>
 		<name>jQuery Mobile</name>
 		<version>1.4.5</version>
 		<license>Expat</license>
