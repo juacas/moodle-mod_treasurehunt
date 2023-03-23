@@ -181,8 +181,8 @@ body {
 
 .path-mod-treasurehunt .ui-autocomplete-loading {
   background: white
-    url("http://ajax.googleapis.com/ajax/libs/jqueryui/1.8.2/themes/smoothness/images/ui-anim_basic_16x16.gif")
-    right center no-repeat;
+  url("pix/ui-anim_basic_16x16.gif")
+  right center no-repeat;
 }
 
 .path-mod-treasurehunt .ui-autocomplete {

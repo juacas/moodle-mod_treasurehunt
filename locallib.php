@@ -1762,12 +1762,15 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid)
  * Get the latest attempt with geometry solved by the user / group for the given road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
  * TODO: Add Caching.
+ * TODO: Add Caching.
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
  * @param module_context $context The context of the module.
+ * @param module_context $context The context of the module.
  * @return false|stdClass the record object or false if there is not succesful attempt.
  */
+function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context)
 function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context)
 {
     global $DB;
