@@ -688,7 +688,10 @@ class mod_treasurehunt_external extends external_api
                 )
         );
     }
-
+    /**
+     * Check events and return new game state.
+     * TODO: Design cache strategy. This service is polled.
+     */
     public static function user_progress($userprogress)
     {
         global $USER, $DB;
@@ -715,7 +718,7 @@ class mod_treasurehunt_external extends external_api
         // Get the total number of stages of the road of the user.
         $nostages = treasurehunt_get_total_stages($userparams->roadid);
         // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
-        $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid);
+        $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $context);
         if ($currentstage) {
             $nextnostage = min([$currentstage->position + 1, $nostages]);
         } else {

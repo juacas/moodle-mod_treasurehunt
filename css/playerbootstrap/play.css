@@ -8,7 +8,10 @@
   padding: 0;
   margin: 0;
 }
-
+/* Moodle 4 renders an activity header.*/
+.path-mod .activity-header:not(:empty) {
+  display: none;
+}
 /* Containers */
 #page-mod-treasurehunt-play .global-loader {
   position: absolute;

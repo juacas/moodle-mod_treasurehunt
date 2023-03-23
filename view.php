@@ -64,23 +64,25 @@ $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
 echo $output->header();
-echo $output->heading(
-    html_writer::empty_tag('img', array('src' => treasurehunt_get_proper_icon($treasurehunt, time()))) . ' ' .
-    format_string($treasurehunt->name) .
-    $output->help_icon('modulename', 'treasurehunt')
-);
+if ($CFG->version < 2022112800) { // Moodle 4 renders the heading and the description in the header.
+    echo $output->heading(
+        html_writer::empty_tag('img', array('src' => treasurehunt_get_proper_icon($treasurehunt, time()))) . ' ' .
+        format_string($treasurehunt->name) .
+        $output->help_icon('modulename', 'treasurehunt')
+    );
+    // Conditions to show the intro can change to look for own settings or whatever.
+    if (treasurehunt_view_intro($treasurehunt)) {
+        echo $output->box(
+            format_module_intro('treasurehunt', $treasurehunt, $cm->id),
+            'generalbox mod_introbox',
+            'treasurehuntintro'
+        );
+    }
+}
  
 // Warn about the geolocation with no HTTPS.
 if ($treasurehunt->playwithoutmoving == false && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
     treasurehunt_notify_error(get_string('warnunsecuregeolocation', 'treasurehunt'));
-}
-// Conditions to show the intro can change to look for own settings or whatever.
-if (treasurehunt_view_intro($treasurehunt)) {
-    echo $output->box(
-        format_module_intro('treasurehunt', $treasurehunt, $cm->id),
-        'generalbox mod_introbox',
-        'treasurehuntintro'
-    );
 }
 echo $output->box_start('treasurehuntinfo', 'treasurehuntinfo');
 echo treasurehunt_view_info($treasurehunt, $course->id);
