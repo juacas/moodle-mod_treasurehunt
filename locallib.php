@@ -1771,7 +1771,6 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid)
  * @return false|stdClass the record object or false if there is not succesful attempt.
  */
 function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context)
-function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context)
 {
     global $DB;
 
