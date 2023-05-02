@@ -374,18 +374,24 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      */
     public function add_completion_rules()
     {
+        global $CFG;
         $mform = &$this->_form;
-        $mform->addElement('advcheckbox', 'completionpass', '', get_string('completionpass', 'quiz'));
-        $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
-        $mform->addHelpButton('completionpass', 'completionpass', 'quiz');
-        // Enable this completion rule by default.
-        $mform->setDefault('completionpass', 1);
+        $rules = [];
+        if ($CFG->version < 2022112800) {   
+            $mform->addElement('advcheckbox', 'completionpass', '', get_string('completionpass', 'quiz'));
+            $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
+            $mform->addHelpButton('completionpass', 'completionpass', 'quiz');
+            // Enable this completion rule by default.
+            $mform->setDefault('completionpass', 1);
+            $rules[] = 'completionpass';
+        }
 
         $mform->addElement('advcheckbox', 'completionfinish', '', get_string('completionfinish', 'treasurehunt'));
         $mform->addHelpButton('completionfinish', 'completionfinish', 'treasurehunt');
         // Enable this completion rule by default.
         $mform->setDefault('completionfinish', 1);
-        return array('completionpass', 'completionfinish');
+        $rules[] = 'completionfinish';
+        return $rules;
     }
 
     /**

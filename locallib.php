@@ -690,7 +690,7 @@ function treasurehunt_check_road_is_blocked($roadid)
  */
 function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context)
 {
-    $stagesresult = treasurehunt_get_stages($treasurehuntid);
+    $stagesresult = treasurehunt_get_stages($treasurehuntid, $context);
     $roads = treasurehunt_get_roads($treasurehuntid);
 
     foreach ($roads as $road) {
@@ -710,7 +710,7 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context)
  * @param int $treasurehuntid instace id.
  * @global moodle_database $DB
  */
-function treasurehunt_get_stages($treasurehuntid)
+function treasurehunt_get_stages($treasurehuntid, $context)
 {
     global $DB;
     // Get all stages from the instance of treasure hunt.
@@ -720,7 +720,9 @@ function treasurehunt_get_stages($treasurehuntid)
         . " inner join {treasurehunt_roads} roads on stage.roadid = roads.id"
         . " WHERE treasurehuntid = ? ORDER BY position DESC";
     $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
-    // TODO:Filter
+    foreach ($stagesresult as $stage) {
+        treasurehunt_format_texts($stage, $context);
+    }
     return $stagesresult;
 }
 /**
@@ -1467,7 +1469,7 @@ function treasurehunt_get_group_road($groupid, $treasurehuntid, $groupname = '')
  * @param int $cmid The identifier of treasure hunt course module activity.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
  * @param string $username The user name.
- * @return array
+ * @return object
  */
 function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview = false, $username = '')
 {
@@ -1760,9 +1762,11 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid)
  * Get the latest attempt with geometry solved by the user / group for the given road.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
  * TODO: Add Caching.
+ * TODO: Add Caching.
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
+ * @param module_context $context The context of the module.
  * @param module_context $context The context of the module.
  * @return false|stdClass the record object or false if there is not succesful attempt.
  */
@@ -1789,18 +1793,18 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $c
         . "AND $grouptype AND r.roadid = ?";
     $lastsuccesfulattempt = $DB->get_record_sql($sql, $params);
     // Format attempt texts.
-    //TODO: treasurehunt_format_attempt_texts($lastsuccesfulattempt, $context);
+    treasurehunt_format_texts($lastsuccesfulattempt, $context);
     return $lastsuccesfulattempt;
 }
 /**
  * Format attempt texts.
+ * @param stdClass $attempt The attempt object. It must have the fields: questiontext, name, cluetext.
+ * @param module_context $context The context of the module.
+ * @return void
  */
-function treasurehunt_format_attempt_texts($attempt) {
-    global $DB;
-    if (isset($attempt->questiontext)) {
-        $cm = get_coursemodule_from_instance('treasurehunt', $treasurehuntid);
-        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
-        $context = context_module::instance($cm->id);
+function treasurehunt_format_texts($attempt, $context) {    
+    if (isset($attempt->questiontext) && $attempt->questiontext) {
+       
         $attempt->questiontext = file_rewrite_pluginfile_urls(
             $attempt->questiontext,
             'pluginfile.php',
@@ -1811,8 +1815,19 @@ function treasurehunt_format_attempt_texts($attempt) {
         );
         $attempt->questiontext = format_text($attempt->questiontext);
     }
-    if (isset($attempt->name)) {
-        $attempt->name = format_text($attempt->name);
+    if (isset($attempt->name) && $attempt->name) {
+        $attempt->name = format_text($attempt->name, FORMAT_HTML, ['para' => false, 'overflowdiv' => false]);
+    }
+    if ($attempt->cluetext && $attempt->cluetext) {
+        $attempt->cluetext = file_rewrite_pluginfile_urls(
+            $attempt->cluetext,
+            'pluginfile.php',
+            $context->id,
+            'mod_treasurehunt',
+            'cluetext',
+            $attempt->stageid
+        );
+        $attempt->cluetext = format_text($attempt->cluetext);
     }
 }
 /**

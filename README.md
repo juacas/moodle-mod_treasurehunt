@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.5.4 Fixes about accesibility (color-blinded), allow filters in texts and better visualization of play page on Moodle 4.
  - v1.5.0 Plugin for Moodle Mobile App. Issue #49 fixed.
  - v1.4.2 Fix a bug with Moodle 3.9 name of Bootstrap libraries.
  - v1.4.1 Fix a bug that showed a text below the instance name.
