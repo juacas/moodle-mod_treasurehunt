@@ -72,6 +72,11 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         // Track users.
         $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
         $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
+
+        // Show other users' progress on hunt.
+        $mform->addElement('advcheckbox', 'showboard', get_string('showboard', 'treasurehunt'));
+        $mform->addHelpButton('showboard', 'showboard', 'treasurehunt');
+
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
 

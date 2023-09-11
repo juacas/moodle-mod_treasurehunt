@@ -130,5 +130,17 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2020050400, 'treasurehunt');
     }
+    if ($oldversion < 2023091100) {
+        $table = new xmldb_table('treasurehunt');
+        // If true the hunt's board of progress is shown to users regardless the permission.
+        $field = new xmldb_field('showboard', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED, XMLDB_NOTNULL, null, 0, 'tracking');
+
+        // Conditionally launch add field.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2023091100, 'treasurehunt');
+    }
     return true;
 }

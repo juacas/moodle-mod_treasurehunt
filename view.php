@@ -147,8 +147,8 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
 echo $output->box_end();
 // Render a briefing of the progress of the participants of the Treasurehunt.
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
-        || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
-        || time() > $treasurehunt->allowattemptsfromdate) {
+    || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
+    || $treasurehunt->showboard == true ) {
     echo treasurehunt_view_users_progress_table($cm, $course->id, $context);
 }
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
