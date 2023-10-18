@@ -81,16 +81,6 @@ class player_entered extends base {
     }
 
     /**
-     * Return the legacy event log data.
-     *
-     * @return array|null
-     */
-    protected function get_legacy_logdata() {
-        return array($this->courseid, 'treasurehunt', 'view', 'player.php?id=' . $this->contextinstanceid, $this->objectid,
-                        $this->contextinstanceid);
-    }
-
-    /**
      * Custom validation.
      *
      * @throws \coding_exception

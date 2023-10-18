@@ -45,7 +45,7 @@ if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasu
 require_once('classes/event/player_entered.php');
 $event = \mod_treasurehunt\event\player_entered::create(array(
     'objectid' => $id,
-    'context' => $context,
+    'context' => $context
 ));
 $event->add_record_snapshot("treasurehunt", $treasurehunt);
 $event->trigger();

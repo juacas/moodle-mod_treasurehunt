@@ -66,8 +66,14 @@
                     {{#pix}} bootstrap/treasurechest, treasurehunt, treasurehunt icon {{/pix}}
                     {{treasurehunt.name}}
                 </span>
-                <button class="btn" id="playerhelp">
+                {{! <button class="btn" id="playerhelp">
                     <i class="fa fa-question-circle" aria-hidden="true"></i>
+                </button> }}
+                <button class="btn play-highlight-btn" id="backtocourse">
+                     <a class="btn play-highlight-btn" href="view.php?id={{cmid}}">
+                            <i class="title" aria-hidden="true"></i>
+                            {{#str}} exit, mod_treasurehunt{{/str}}
+                        </a>
                 </button>
                 <button class="btn dropdown-toggle" type="button" id="menu1" data-toggle="dropdown">
                     {{{user.picture}}}
@@ -97,6 +103,9 @@
             </div>
 
             <div class="map-tools-container">
+                <button class="btn play-btn" id="playerhelp">
+                    <i class="fa fa-question-circle" aria-hidden="true"></i>
+                </button>
                 <button class="btn play-btn geolocation-btn" id="autolocate"><i class="fa fa-map-marker" aria-hidden="true"></i></button>
                 <button class="btn play-btn" data-rel="modal" data-ref="#layerspage" data-dismissible><i class="fa fa-eye" aria-hidden="true"></i></button>
             </div>
