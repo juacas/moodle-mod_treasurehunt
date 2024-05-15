@@ -103,7 +103,7 @@ define(['jquery', 'core/notification', 'core/str', 'mod_treasurehunt/instascan']
 			// unloadQR();
 			var val = $('#id_qrtext').val();
 			if (val != '') {
-				var qrurl = 'https://chart.googleapis.com/chart?cht=qr&chs=500x500&chl='
+				var qrurl = 'https://quickchart.io/qr?size=500&text='
 					+ $('#id_qrtext').val();
 				$('#outQRCode').text('');
 				$('#outQRCode').prepend($('<img>', {
