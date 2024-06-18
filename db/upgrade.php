@@ -71,7 +71,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
     }
     if ($oldversion < 2017101904) {
         $table = new xmldb_table('treasurehunt');
-        $field = new xmldb_field('custommapconfig', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'tracking');
+        $field = new xmldb_field('custommapconfig', XMLDB_TYPE_TEXT, null, null, null, null, null, 'tracking');
 
         // Conditionally launch add field custombbox.
         if (!$dbman->field_exists($table, $field)) {
@@ -108,7 +108,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
             XMLDB_UNSIGNED,
             false,
             null,
-            null,
+            0,
             'playstagewithoutmoving'
         );
         $key = new xmldb_key('activitytoend', XMLDB_KEY_FOREIGN, ['activitytoend'], 'course_modules', ['id']);
