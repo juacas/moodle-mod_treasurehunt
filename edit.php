@@ -99,7 +99,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
 /** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-echo '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
 echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
 echo $OUTPUT->container_end();

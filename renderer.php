@@ -115,7 +115,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
         // Output starts here.
         $pageheader = $this->header();
         // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+        $pageheader .= '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
         $data = $renderablepage->export_for_template($this);
         $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_classic', $data);
@@ -206,7 +206,7 @@ I18N;
         // Output starts here.
         $pageheader = $this->header();
         // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+        $pageheader .= '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
         $data = $renderablepage->export_for_template($this);
         $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_fancy', $data);
@@ -280,7 +280,7 @@ I18N;
         // Output starts here.
         $pageheader = $this->header();
         // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-        $pageheader .= '<script src="https://cdn.polyfill.io/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+        $pageheader .= '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
         $data = $renderablepage->export_for_template($this);
         $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_bootstrap', $data);
