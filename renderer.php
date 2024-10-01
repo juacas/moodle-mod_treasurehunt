@@ -365,7 +365,7 @@ I18N;
         // Create a table for the data.
         $o = '';
         $s = '';
-        if (!count($progress->roadsusersprogress) && $progress->managepermission) {
+        if (!count($progress->roadsusersprogress) && $progress->viewpermission) {
             $s .= $this->output->notification(get_string('noroads', 'treasurehunt'));
         } else {
             if (count($progress->duplicategroupsingroupings) && $progress->managepermission) {

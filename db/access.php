@@ -45,12 +45,25 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
+    // Users that can submit attempts in the treasurehunt.
     'mod/treasurehunt:play' => array(
         'riskbitmask' => RISK_SPAM,
         'captype' => 'write',
         'contextlevel' => CONTEXT_MODULE,
         'legacy' => array(
             'student' => CAP_ALLOW,
+        )
+    ),
+    // Users that can enter the player and see the map.
+    'mod/treasurehunt:enterplayer' => array(
+        'riskbitmask' => RISK_SPAM,
+        'captype' => 'read',
+        'contextlevel' => CONTEXT_MODULE,
+        'legacy' => array(
+            'student' => CAP_ALLOW,
+            'teacher' => CAP_ALLOW,
+            'editingteacher' => CAP_ALLOW,
+            'manager' => CAP_ALLOW
         )
     ),
     'mod/treasurehunt:managetreasurehunt' => array(
@@ -97,7 +110,7 @@ $capabilities = array(
             'manager' => CAP_ALLOW
         )
     ),
-    // View the treasurehunt users historical attempts.
+    // View all the users' historical attempts.
     'mod/treasurehunt:viewusershistoricalattempts' => array(
         'riskbitmask' => RISK_PERSONAL,
         'captype' => 'read',

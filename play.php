@@ -35,7 +35,7 @@ $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-require_capability('mod/treasurehunt:play', $context, null, false);
+require_capability('mod/treasurehunt:enterplayer', $context, null, false);
 // Check availability
 if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:manage', $context)) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));

@@ -81,27 +81,28 @@ class FeatureCollection implements Iterator
   }
   # Iterator Interface functions
 
-  public function rewind()
+  public function rewind(): void
   {
     reset($this->features);
   }
 
-  public function current()
+  public function current(): mixed
   {
     return current($this->features);
   }
 
-  public function key()
+  public function key(): int|string|null
   {
     return key($this->features);
   }
 
-  public function next()
+  public function next(): void
   {
-    return next($this->features);
+    //return next($this->features);
+    next($this->features);
   }
 
-  public function valid()
+  public function valid(): bool
   {
     return $this->current() !== false;
   }

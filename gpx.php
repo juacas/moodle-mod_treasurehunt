@@ -37,7 +37,7 @@ $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 if (count($userids) > 1 || $USER->id != $userid) {
-    require_capability('mod/treasurehunt:managetreasurehunt', $context);
+    require_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 }
 date_default_timezone_set("UTC");
 foreach ($userids as $userid) {

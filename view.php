@@ -88,13 +88,17 @@ echo $output->box_start('treasurehuntinfo', 'treasurehuntinfo');
 echo treasurehunt_view_info($treasurehunt, $course->id);
 
 // Render the list the attempts of the users or the groups.
-$viewusersattemptscap = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
-if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > $treasurehunt->allowattemptsfromdate
-        && $userid == $USER->id && $groupid == -1) || (has_capability('mod/treasurehunt:play', $context, $userid, false)
-        && $viewusersattemptscap && $groupid == -1 && $userid != $USER->id)
-    || (count(get_enrolled_users($context, 'mod/treasurehunt:play', $groupid)) && $viewusersattemptscap
-        && $treasurehunt->groupmode)
-) {
+if (
+        (  //has_capability('mod/treasurehunt:play', $context, null, false) &&
+        time() > $treasurehunt->allowattemptsfromdate && $userid == $USER->id && $groupid == -1)
+        || 
+        ( //has_capability('mod/treasurehunt:play', $context, $userid, false) &&
+         has_capability('mod/treasurehunt:viewusershistoricalattempts', $context) && $groupid == -1 && $userid != $USER->id)
+        ||
+        (count(get_enrolled_users($context, 'mod/treasurehunt:enterplayer', $groupid)) > 0 &&
+        has_capability('mod/treasurehunt:viewusershistoricalattempts', $context) &&
+        $treasurehunt->groupmode)
+         ) {
     try {
         $teacherreview = true;
         $username = '';
@@ -125,17 +129,18 @@ if ((has_capability('mod/treasurehunt:play', $context, null, false) && time() > 
             $username,
             $teacherreview
         );
-
-        // Si no ha finalizado pongo el botón de jugar.
-        $urlparams = array('id' => $user_attempt_renderable->coursemoduleid);
-        if ($user_attempt_renderable->outoftime || $user_attempt_renderable->roadfinished) {
-            $string = get_string('reviewofplay', 'treasurehunt');
-        } else {
-            $string = get_string('play', 'treasurehunt');
-        }
-        if ((count($user_attempt_renderable->attempts) || !$user_attempt_renderable->outoftime)
-             && !$user_attempt_renderable->teacherreview) {
-            echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
+        if (has_capability('mod/treasurehunt:enterplayer', $context)) {
+            // Si no ha finalizado pongo el botón de jugar.
+            $urlparams = array('id' => $user_attempt_renderable->coursemoduleid);
+            if ($user_attempt_renderable->outoftime || $user_attempt_renderable->roadfinished) {
+                $string = get_string('reviewofplay', 'treasurehunt');
+            } else {
+                $string = get_string('play', 'treasurehunt');
+            }
+            if ((count($user_attempt_renderable->attempts) || !$user_attempt_renderable->outoftime)
+                 && !$user_attempt_renderable->teacherreview) {
+                echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
+            }
         }
         
         // Output user attempt history.
@@ -151,10 +156,12 @@ if (has_capability('mod/treasurehunt:managetreasurehunt', $context)
     || $treasurehunt->showboard == true ) {
     echo treasurehunt_view_users_progress_table($cm, $course->id, $context);
 }
+$urlparams = array('id' => $cm->id);
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-    $urlparams = array('id' => $cm->id);
     echo $output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
     echo $output->single_button(new moodle_url('/mod/treasurehunt/clearhunt.php', $urlparams), get_string('cleartreasurehunt', 'treasurehunt'), 'get');
+}
+if (has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)) {
     echo $output->single_button(new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams), get_string('trackviewer', 'treasurehunt'), 'get');
 }
 // Finish the page.

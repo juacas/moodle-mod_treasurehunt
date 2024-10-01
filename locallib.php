@@ -1683,7 +1683,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         foreach ($totalparticipantsgroups as $group) {
             list($totalparticipants, $duplicateusersingroups) = treasurehunt_get_all_users_has_multiple_groups_or_roads(
                 $totalparticipants,
-                get_enrolled_users($context, 'mod/treasurehunt:play', $group->id),
+                get_enrolled_users($context, 'mod/treasurehunt:enterplayer', $group->id),
                 $duplicateusersingroups,
                 false
             );
@@ -1693,13 +1693,14 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $availablegroups = $DB->get_records_sql($roadsquery, $params);
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
-            $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:play');
+            // TODO: play has write flag and is removed in freeze mode.
+            $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:enterplayer'); 
             $roads[] = treasurehunt_get_road_userlist(current($availablegroups), $totalparticipants, $attempts);
         } else {
             foreach ($availablegroups as $group) {
                 if ($group->groupid) {
                     $grouplist[] = $group;
-                    $userlist = get_enrolled_users($context, 'mod/treasurehunt:play', $group->groupid);
+                    $userlist = get_enrolled_users($context, 'mod/treasurehunt:enterplayer', $group->groupid);
 
                     // Check if there is more than one road assigned to each user.
                     list(
@@ -1719,7 +1720,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         }
     }
     // Check if any user with access can not perform the activity.
-    $totalparticipantsincourse = get_enrolled_users($context, 'mod/treasurehunt:play');
+    $totalparticipantsincourse = get_enrolled_users($context, 'mod/treasurehunt:enterplayer');
     if ((count($totalparticipantsincourse) !== count($totalparticipants))) {
         $unassignedusers = treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants, $totalparticipantsincourse);
     }
@@ -1818,7 +1819,7 @@ function treasurehunt_format_texts($attempt, $context) {
     if (isset($attempt->name) && $attempt->name) {
         $attempt->name = format_text($attempt->name, FORMAT_HTML, ['para' => false, 'overflowdiv' => false]);
     }
-    if ($attempt->cluetext && $attempt->cluetext) {
+    if ($attempt->cluetext ?? false) {
         $attempt->cluetext = file_rewrite_pluginfile_urls(
             $attempt->cluetext,
             'pluginfile.php',
@@ -2420,15 +2421,15 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context)
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
     $renderable = new treasurehunt_users_progress(
-        $roads,
-        $cm->groupmode,
-        $cm->id,
-        $duplicategroupsingroupings,
-        $duplicateusersingroups,
-        $unassignedusers,
-        $viewpermission,
-        $managepermission,
-        $availablegroups
+        roadsusersprogress: $roads,
+        groupmode: $cm->groupmode,
+        coursemoduleid: $cm->id,
+        duplicategroupsingroupings: $duplicategroupsingroupings,
+        duplicateusersingroups: $duplicateusersingroups,
+        unassignedusers: $unassignedusers,
+        viewpermission: $viewpermission,
+        managepermission: $managepermission,
+       // $availablegroups
     );
     return $output->render($renderable);
 }

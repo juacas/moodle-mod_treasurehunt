@@ -28,14 +28,14 @@ require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
+list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
 
-require_capability('mod/treasurehunt:managetreasurehunt', $context);
+require_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 // Print the page header.
 $url = new moodle_url('/mod/treasurehunt/gpx_viewer.php', array('id' => $cm->id));
 
@@ -43,7 +43,7 @@ $output = $PAGE->get_renderer('mod_treasurehunt');
 
 $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name) .
-                    ' : ' . get_string('trackviewer', 'treasurehunt'));
+    ' : ' . get_string('trackviewer', 'treasurehunt'));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
 $PAGE->requires->jquery();
@@ -66,8 +66,11 @@ foreach ($userrecords as $userrecord) {
 $refreshtracksinterval = 60;
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 
-$PAGE->requires->js_call_amd('mod_treasurehunt/viewgpx', 'creategpxviewer',
-                        array($id, $treasurehunt->id, 'global', $custommapping, $refreshtracksinterval));
+$PAGE->requires->js_call_amd(
+    'mod_treasurehunt/viewgpx',
+    'creategpxviewer',
+    array($id, $treasurehunt->id, 'global', $custommapping, $refreshtracksinterval)
+);
 
 echo $output->header();
 // Pass large data $users via Javascript.
@@ -79,11 +82,21 @@ echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?feat
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
 $controls = '<label><input type="checkbox" value="refresh" id="refreshtracks"></input>' .
-            get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval) .
-            ' <span id="timecircle"></span></label>';
+    get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval) .
+    ' <span id="timecircle"></span></label>';
+
 echo $OUTPUT->box($controls, 'visible', 'controlpanel');
 echo $OUTPUT->box('', null, 'mapgpx');
 echo $OUTPUT->container_end();
+// Add a button to download all gpx.
+echo $OUTPUT->single_button(
+    new moodle_url(
+        '/mod/treasurehunt/gpx.php',
+        ['id' => $id, 'userid' => implode(',', array_keys($userrecords))]
+    ),
+    "Download GPXs",
+    method: 'get'
+);
 echo $OUTPUT->box('', null, 'info');
 
 echo $output->footer();

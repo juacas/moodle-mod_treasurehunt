@@ -269,6 +269,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
             $result->content = format_module_intro('treasurehunt', $treasurehunt, $coursemodule->id, false);
         }
     }
+
     return $result;
 }
 
@@ -284,16 +285,6 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
     list($status, $next) = treasurehunt_get_time_status($treasurehunt, $now);
     $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
     $cm->set_icon_url($iconurl);
-
-    // if ($status == 'tobegin' ) {
-    //     $cm->set_after_link('<span class="label label-info"> be3gin in '
-    //         . userdate_htmltime($treasurehunt->allowattemptsfromdate))
-    //         . '</span>';
-    // } else if ($status == 'ongoing' && $next == 'end') {
-    //     $cm->set_after_link('<span class="label label-info"> Closes '
-    //          . userdate_htmltime($treasurehunt->cutoffdate)
-    //         . '</span>');
-    // }
 }
 /**
  * Get a icon url depending on the status of the treasurehunt:

@@ -707,7 +707,8 @@ class mod_treasurehunt_external extends external_api
         $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
-        require_capability('mod/treasurehunt:play', $context, null, false);
+        // Check if the user has permission to view player.
+        require_capability('mod/treasurehunt:enterplayer', $context, null, false);
         $status = array();
         // Force mobile app language
         if (isset($params['applang']) && $params['applang'] != current_language()) {
@@ -765,18 +766,30 @@ class mod_treasurehunt_external extends external_api
             if ($params['playwithoutmoving'] != $playmode) {
                 $changesinplaymode = true;
             }
-            // Check if the user has correctly completed the question and the required activity.
-            $qocsolved = treasurehunt_check_question_and_activity_solved(
-                $params['selectedanswerid'],
-                $USER->id,
-                $userparams->groupid,
-                $userparams->roadid,
-                $updateroad,
-                $context,
-                $treasurehunt,
-                $nostages,
-                $qoaremoved
-            );
+
+            // If the user can play process the submission.
+            if (has_capability('mod/treasurehunt:play', $context)) {
+                // Process if the user has correctly completed the question and the required activity.
+                $qocsolved = treasurehunt_check_question_and_activity_solved(
+                    $params['selectedanswerid'],
+                    $USER->id,
+                    $userparams->groupid,
+                    $userparams->roadid,
+                    $updateroad,
+                    $context,
+                    $treasurehunt,
+                    $nostages,
+                    $qoaremoved
+                );
+            } else {
+                $qocsolved = new stdClass();
+                $qocsolved->success = false;
+                $qocsolved->msg = get_string('nopermissions', 'error', get_string('treasurehunt:play', 'mod_treasurehunt'));
+                $qocsolved->updates = array();
+                $qocsolved->newattempt = false;
+                $qocsolved->attemptsolved = false;
+                $qocsolved->roadfinished = false;
+            }
             // Refresh the attempts updates (mainly for reporting).
             $updates = treasurehunt_check_attempts_updates(
                 $params['attempttimestamp'],
@@ -806,8 +819,9 @@ class mod_treasurehunt_external extends external_api
                 $roadfinished = true;
             }
             $qoaremoved = $qocsolved->qoaremoved;
-
+            // If the stage location is not solved, check if the user can play and has found the location.
             if (!$updates->geometrysolved
+                    && has_capability('mod/treasurehunt:play', $context)
                     && (isset($params['location']) || isset($params['qrtext']))
                     && !$updateroad
                     && !$changesinplaymode
@@ -849,7 +863,7 @@ class mod_treasurehunt_external extends external_api
 
         $attempthistory = array();
         // If there was any new attempt, reload the history of attempts.
-        if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $params['changedapplang']) {
+        if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $params['changedapplang'] ?? false) {
             $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
         $lastsuccessfulstage = array();
@@ -875,7 +889,7 @@ class mod_treasurehunt_external extends external_api
                 || $roadfinished
                 || $params['initialize']
                 || $changesingroupmode
-                || $params['changedapplang']) {
+                || $params['changedapplang'] ?? false) {
             list($userattempts, $firststagegeom) = treasurehunt_get_user_progress(
                 $userparams->roadid,
                 $userparams->groupid,

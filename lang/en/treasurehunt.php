@@ -367,6 +367,7 @@ $string['treasurehuntnotavailable'] = 'The treasure hunt will be available {$a}'
 $string['treasurehuntopens'] = 'Treasure hunt opens';
 $string['treasurehuntopenedon'] = 'This treasure hunt opened {$a}';
 $string['treasurehunt:play'] = 'Play';
+$string['treasurehunt:enterplayer'] = 'Access to the player interface';
 $string['treasurehunt:view'] = 'View treasurehunt';
 $string['treasurehunt:viewusershistoricalattempts'] = 'View users attempt history';
 $string['updates'] = 'Updates';

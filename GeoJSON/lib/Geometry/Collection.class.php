@@ -63,27 +63,26 @@ abstract class Collection extends Geometry implements Iterator
 
   # Iterator Interface functions
 
-  public function rewind()
-  {
+  public function rewind():void {
     reset($this->components);
   }
 
-  public function current()
-  {
+  public function current(): mixed {
     return current($this->components);
   }
 
-  public function key()
+  public function key(): int|string|null
   {
     return key($this->components);
   }
 
-  public function next()
+  public function next(): void
   {
-    return next($this->components);
+    //return next($this->components);
+    next($this->components);
   }
 
-  public function valid()
+  public function valid(): bool
   {
     return $this->current() !== false;
   }
