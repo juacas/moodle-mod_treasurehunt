@@ -53,7 +53,7 @@ define([
         .get_strings(stringQueried)
         .done((strings) => {
           $(".treasurehunt-editor-loader").hide();
-          configureEditIntro(intro, strings, terms);
+          configureBootstrapEditIntro(intro, strings, terms);
           intro.start();
         })
         .fail(notification.exception);
@@ -87,7 +87,7 @@ define([
         .get_strings(stringQueried)
         .done((strings) => {
           $(".global-loader").removeClass("active");
-          configurePlayIntro(intro, strings, terms);
+          configureBootstrapPlayIntro(intro, strings, terms);
           intro.start();
         })
         .fail(notification.exception);
@@ -103,7 +103,7 @@ define([
   return init;
 }); // ...end of module define function.
 
-function configureEditIntro(intro, strings, keys) {
+function configureBootstrapEditIntro(intro, strings, keys) {
   intro.setOptions({
     nextLabel: strings[keys.indexOf("nextstep")],
     prevLabel: strings[keys.indexOf("prevstep")],
@@ -163,7 +163,7 @@ function configureEditIntro(intro, strings, keys) {
   });
 }
 // end of configureEditIntro
-function configurePlayIntro(intro, strings, keys) {
+function configureBootstrapPlayIntro(intro, strings, keys) {
   intro.setOptions({
     nextLabel: strings[keys.indexOf("nextstep")],
     prevLabel: strings[keys.indexOf("prevstep")],
