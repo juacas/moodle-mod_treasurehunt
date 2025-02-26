@@ -845,7 +845,7 @@ define([
       }).click(() => {
         layer.setVisible(!layer.getVisible());
       });
-      let name = jQuery.parseHTML(layer.get("name"));
+      let name = $.parseHTML(layer.get("name"));
       let linkContent = $("<div>", {
         class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
       }).append(name, $("<i class='fa fa-check-circle'>"));

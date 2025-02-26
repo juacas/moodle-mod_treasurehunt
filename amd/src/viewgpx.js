@@ -394,7 +394,7 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
 
                     var vector = new ol.layer.Vector({
                         source: gpxsource,
-                        title: user.pic + '' + user.fullname,
+                        title: user.pic + '' + user.fullname + '</img>',
                         style: function (feature) {
                             var selectedstyle = trackStyleFunction(feature, iconurl, false);
                             return selectedstyle;

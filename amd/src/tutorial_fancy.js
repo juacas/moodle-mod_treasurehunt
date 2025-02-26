@@ -239,11 +239,11 @@ function configurePlayIntro(intro, strings, keys) {
         $("#bigbtn").click();
     }
     intro.onexit(function (target) {
-        //document.cookie = "introPlayProgress = Done";
-        open_next_activity_panel();
+        document.cookie = "introPlayProgress = Done";
+        //open_next_activity_panel();
     });
     intro.oncomplete(function (target) {
-        //document.cookie = "introPlayProgress = Done";
+        document.cookie = "introPlayProgress = Done";
         //open_next_activity_panel();
     });
     intro.onchange(function (target) {

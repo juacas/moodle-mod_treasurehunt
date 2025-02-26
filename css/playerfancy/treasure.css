@@ -39,6 +39,7 @@ Note that this is not the case if we use an ID instead. */
 .bigbtn {
   width: 12rem;
   height: 8rem;
+  
   background-color: transparent !important;
   border-radius: 50% !important;
   position: absolute;
@@ -51,6 +52,8 @@ Note that this is not the case if we use an ID instead. */
 .bigbtn img {
   width: 12rem;
   height: 5rem;
+  max-height: none;
+  max-width: none;
 }
 #autolocate {
   position: absolute;

@@ -778,7 +778,7 @@ define(['jquery',
 		        }
 		    }
 		    function add_layer_to_list(layer) {
-                var name = jQuery.parseHTML(layer.get("name"));
+                var name = $.parseHTML(layer.get("name"));
                 var item = $('<li>', {
                     "data-icon": "check",
                     "class": layer.getVisible() ? "checked" : "unchecked"

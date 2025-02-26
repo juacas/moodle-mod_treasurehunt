@@ -165,8 +165,12 @@
             <a href="#searchpanel" data-transition="none" class="ui-btn  ui-btn-right ui-corner-all ui-btn-inline ui-btn-icon-notext ui-icon-search">
                 {{#str}} search, mod_treasurehunt{{/str}}
             </a>
-            <h1>{{#pix}} icon, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}
-            <a href="#" data-role="button" id="playerhelp" class="ui-btn ui-shadow ui-corner-all ui-btn-inline ui-icon-help ui-btn-icon-notext"></a></h1>
+            <h1>
+            <a class="btn play-highlight-btn" href="view.php?id={{cmid}}">
+            {{#pix}} icon, treasurehunt, treasurehunt icon {{/pix}} {{treasurehunt.name}}
+            </a>
+            <a href="#" data-role="button" id="playerhelp" class="ui-btn ui-shadow ui-corner-all ui-btn-inline ui-icon-help ui-btn-icon-notext"></a>
+            </h1>
         </div>
         <div data-role="content" id="content">
             <div id="mapplay"></div>
