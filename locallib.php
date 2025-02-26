@@ -1120,10 +1120,11 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         }
         // Format string to apply moodle filters.
         $cluetext = format_text($cluetext);
+        $name = isset($feature->name) ? format_text($feature->name) : '';
         $attr = array(
             'roadid' => intval($feature->roadid),
             'stageposition' => intval($feature->position),
-            'name' => isset($feature->name) ? $feature->name : '',
+            'name' => $name,
             'treasurehuntid' => $treasurehuntid,
             'clue' => $cluetext
         );
@@ -2931,7 +2932,7 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0)
 function treasurehunt_get_installedplayerstyles()
 {
     return  [
-        TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),
+        // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),
         TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),
         TREASUREHUNT_PLAYERBOOTSTRAP =>  get_string('playerbootstrap', 'treasurehunt')
     ];
@@ -2946,7 +2947,9 @@ function treasurehunt_get_playerstyles()
     $installed = treasurehunt_get_installedplayerstyles();
     $result = [];
     foreach ($enabled as $key => $val) {
-        $result[$val] = $installed[$val];
+        if (isset($installed[$val])) {
+            $result[$val] = $installed[$val];
+        }
     }
     return $result;
 }

@@ -27,12 +27,13 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_heading('treasurehuntintro', '', get_string('configintro', 'treasurehunt')));
         // Available game player styles.
+        $styles = treasurehunt_get_installedplayerstyles();
         $settings->add(new admin_setting_configmultiselect(
                 'mod_treasurehunt/availableplayerstyles',
                 get_string('availableplayerstyles', 'treasurehunt'),
                 '',
-                [TREASUREHUNT_PLAYERCLASSIC, TREASUREHUNT_PLAYERFANCY, TREASUREHUNT_PLAYERBOOTSTRAP],
-                treasurehunt_get_installedplayerstyles()
+                array_keys($styles), // All enabled.
+                $styles
         ));
         // Default game player style.
         $settings->add(new admin_setting_configselect(

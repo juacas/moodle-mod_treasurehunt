@@ -23,7 +23,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
-
+require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 /**
  * Execute treasurehunt upgrade from the given old version
  *
@@ -141,6 +141,12 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         }
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2023091100, 'treasurehunt');
+    }
+    if ($oldversion < 2025022600) {
+        // Change in all records playerstyle from classic to bootstrap.
+        $DB->set_field('treasurehunt', 'playerstyle', TREASUREHUNT_PLAYERBOOTSTRAP, ['playerstyle' => TREASUREHUNT_PLAYERCLASSIC]);
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2025022600, 'treasurehunt');
     }
     return true;
 }

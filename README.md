@@ -34,6 +34,8 @@ See also
 
 Change log
 ==========
+ - v1.6.1 Moodle 4.5 compatibility. Player style classic deprecated.
+ - v1.6.0 Support of Freeze contexts.
  - v1.5.8 Fix polyfill obsolete library.
  - v1.5.7 Change deprecated QR generation from chart.googleapis.com to quickchart.io (Issue #61 thanks to @idograca)
  - v1.5.6 Remove get_legacy_log function deprecated by 4.1.5. #60 Small UI changes.
