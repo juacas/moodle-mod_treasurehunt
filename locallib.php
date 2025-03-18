@@ -320,17 +320,21 @@ function treasurehunt_check_point_in_multipolygon($mpolygon, $point)
 function treasurehunt_build_custommappingconfig($data)
 {
     $mapconfig = new stdClass();
-    if (empty($data->customlayername)) {
+    if ($data->customlayertype == 'none') {
         $mapconfig = null;
     } else {
         if ($data->customlayertype !== 'nongeographic') {
-            $bbox = [
-                floatval($data->custommapminlon),
-                floatval($data->custommapminlat),
-                floatval($data->custommapmaxlon),
-                floatval($data->custommapmaxlat)
-            ];
-            $mapconfig->bbox = $bbox;
+            if (isset($data->custommapminlon) && isset($data->custommapminlat) &&
+                isset($data->custommapmaxlon) && isset($data->custommapmaxlat)) {
+
+                $bbox = [
+                    floatval($data->custommapminlon),
+                    floatval($data->custommapminlat),
+                    floatval($data->custommapmaxlon),
+                    floatval($data->custommapmaxlat)
+                ];
+                $mapconfig->bbox = $bbox;
+            }
         }
         if ($data->customlayertype == 'onlybase') {
             $mapconfig->layertype = 'base';
@@ -345,7 +349,7 @@ function treasurehunt_build_custommappingconfig($data)
             $mapconfig->onlybase = false;
             $mapconfig->geographic = true;
         }
-
+        $mapconfig->layerservicetype = $data->customlayerservicetype;
         $mapconfig->wmsurl = $data->customlayerwms;
         if (!empty($data->customwmsparams)) {
             $params = explode('&', $data->customwmsparams);
@@ -376,7 +380,7 @@ function treasurehunt_get_custommappingconfig($treasurehunt, $context = null)
     $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id);
     $context = context_module::instance($cm->id);
     $custommapconfig = json_decode($treasurehunt->custommapconfig);
-    if ($custommapconfig->geographic === true) {
+    if ($custommapconfig->geographic === true && isset($custommapconfig->bbox)) {
         $custommapconfig->bbox = array_map(function ($item) {
             return floatval($item);
         }, $custommapconfig->bbox);
@@ -2933,7 +2937,7 @@ function treasurehunt_get_installedplayerstyles()
 {
     return  [
         // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),
-        TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),
+        // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),
         TREASUREHUNT_PLAYERBOOTSTRAP =>  get_string('playerbootstrap', 'treasurehunt')
     ];
 }

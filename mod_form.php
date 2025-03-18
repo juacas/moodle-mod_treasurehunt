@@ -133,21 +133,50 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         // Custom background.
         $mform->addElement('header', 'custommaps', get_string('custommapping', 'treasurehunt'));
         $mform->setExpanded('custommaps', false);
-
-        // WMS layer.
+        // Layer use.
+        $layertypes = [
+            'none' => get_string('custommapnolayer', 'treasurehunt'),
+            'base' => get_string('custommapbaselayer', 'treasurehunt'),
+            'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
+            'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
+            'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
+        ];
+        $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
+        $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
+        $mform->setDefault('customlayertype', 'none');
+        // Custom layer name.
         $mform->addElement('text', 'customlayername', get_string('customlayername', 'treasurehunt'));
         $mform->addHelpButton('customlayername', 'customlayername', 'treasurehunt');
         $mform->setType('customlayername', PARAM_TEXT);
+        $mform->hideIf('customlayername', 'customlayertype', 'eq', 'none');
+
+        // Type of service: WMS, Tiled, image.
+        $mform->addElement('select', 'customlayerservicetype', get_string('customlayerservicetype', 'treasurehunt'), array(
+            'wms' => get_string('customlayerservicewms', 'treasurehunt'),
+            'tiled' => get_string('customlayerservicetiled', 'treasurehunt'),
+            'image' => get_string('customlayerserviceimage', 'treasurehunt'),
+            'argis' => get_string('customlayerservicearcgis', 'treasurehunt'),
+        ));
+        $mform->setDefault('customlayerservicetype', 'wms');
+        $mform->hideIf('customlayerservicetype', 'customlayertype', 'eq', 'none');
+        $mform->disabledIf('customlayerservicetype', 'customlayername', 'eq', '');
+        // description
+        $mform->addElement('html',  get_string('customlayerwms_help', 'treasurehunt') );
 
         $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));
         $mform->addHelpButton('customlayerwms', 'customlayerwms', 'treasurehunt');
-        $mform->setType('customlayerwms', PARAM_URL);
-        $mform->disabledIf('customlayerwms', 'customlayername', 'eq', '');
+        $mform->setType('customlayerwms', PARAM_TEXT);
+        $mform->hideIf('customlayerwms', 'customlayername', 'eq', '');
+        $mform->hideIf('customlayerwms', 'customlayerservicetype', 'eq', 'image');
 
         $mform->addElement('text', 'customwmsparams', get_string('customwmsparams', 'treasurehunt'));
         $mform->addHelpButton('customwmsparams', 'customwmsparams', 'treasurehunt');
         $mform->setType('customwmsparams', PARAM_RAW);
-        $mform->disabledIf('customwmsparams', 'customlayerwms', 'eq', '');
+        $mform->disabledIf('customwmsparams', 'customlayerwms', 'eq', value: '');
+        $mform->hideIf('customwmsparams', 'customlayerwms', 'eq', value: '');
+        $mform->hideIf('customwmsparams', 'customlayertype', 'eq', 'none');
+        $mform->hideIf('customwmsparams', 'customlayerservicetype', 'neq', 'wms');
+
 
         // Local file overlay.
         $mform->addElement(
@@ -162,46 +191,42 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         );
         $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
         $mform->disabledIf('custombackground', 'customlayername', 'eq', '');
+        $mform->hideIf('custombackground', 'customlayerservicetype', 'neq', 'image');
 
-
-        $layertypes = [
-            'base' => get_string('custommapbaselayer', 'treasurehunt'),
-            'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
-            'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
-            'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
-        ];
-        $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
-        $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
-        $mform->setDefault('customlayertype', 'base');
-        $mform->disabledIf('customlayertype', 'customlayername', 'eq', '');
-
-        $mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
+        // Bounding box.
+        $bboxfield = [];
+        $bboxfield[] =$mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
         $mform->addHelpButton('custommapminlon', 'custommapminlon', 'treasurehunt');
         $mform->setType('custommapminlon', PARAM_FLOAT);
         $mform->addRule('custommapminlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
-        $mform->disabledIf('custommapminlon', 'customlayername', 'eq', '');
-        $mform->disabledIf('custommapminlon', 'customlayertype', 'eq', 'nongeographic');
+        $mform->hideIf('custommapminlon', 'customlayertype', 'eq', 'none');
+        $mform->hideIf('custommapminlon', 'customlayerservicetype', 'neq', 'image');
+        $mform->hideIf('custommapminlon', 'customlayertype', 'eq', 'nongeographic');
 
-        $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
+
+        $bboxfield[] = $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
         $mform->addHelpButton('custommapminlat', 'custommapminlat', 'treasurehunt');
         $mform->setType('custommapminlat', PARAM_FLOAT);
         $mform->addRule('custommapminlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
-        $mform->disabledIf('custommapminlat', 'customlayername', 'eq', '');
-        $mform->disabledIf('custommapminlat', 'customlayertype', 'eq', 'nongeographic');
+        $mform->hideIf('custommapminlat', 'customlayertype', 'eq', 'none');
+        $mform->hideIf('custommapminlat', 'customlayerservicetype', 'neq', 'image');
+        $mform->hideIf('custommapminlat', 'customlayertype', 'eq', 'nongeographic');
 
-        $mform->addElement('text', 'custommapmaxlon', get_string('custommapmaxlon', 'treasurehunt'));
+        $bboxfield[] = $mform->addElement('text', 'custommapmaxlon', get_string('custommapmaxlon', 'treasurehunt'));
         $mform->addHelpButton('custommapmaxlon', 'custommapmaxlon', 'treasurehunt');
         $mform->setType('custommapmaxlon', PARAM_FLOAT);
         $mform->addRule('custommapmaxlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
-        $mform->disabledIf('custommapmaxlon', 'customlayername', 'eq', '');
-        $mform->disabledIf('custommapmaxlon', 'customlayertype', 'eq', 'nongeographic');
+        $mform->hideIf('custommapmaxlon', 'customlayertype', 'eq', 'none');
+        $mform->hideIf('custommapmaxlon', 'customlayerservicetype', 'neq', 'image');
+        $mform->hideIf('custommapmaxlon', 'customlayertype', 'eq', 'nongeographic');
 
-        $mform->addElement('text', 'custommapmaxlat', get_string('custommapmaxlat', 'treasurehunt'));
+        $bboxfield[] = $mform->addElement('text', 'custommapmaxlat', get_string('custommapmaxlat', 'treasurehunt'));
         $mform->addHelpButton('custommapmaxlat', 'custommapmaxlat', 'treasurehunt');
         $mform->setType('custommapmaxlat', PARAM_FLOAT);
         $mform->addRule('custommapmaxlat', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
-        $mform->disabledIf('custommapmaxlat', 'customlayername', 'eq', '');
-        $mform->disabledIf('custommapmaxlat', 'customlayertype', 'eq', 'nongeographic');
+        $mform->hideIf('custommapmaxlat', 'customlayertype', 'eq', 'none');
+        $mform->hideIf('custommapmaxlat', 'customlayerservicetype', 'neq', 'image');
+        $mform->hideIf('custommapmaxlat', 'customlayertype', 'eq', 'nongeographic');
 
         // Add standard elements, common to all modules. Ajustes comunes (Visibilidad, número ID y modo grupo).
         $this->standard_coursemodule_elements();
@@ -235,8 +260,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-        // Layer name is the only lock field of the customlayer section.
-        if (!empty($data['customlayername'])) {
+        // Customlayer type and layer name is the only mandatory field of the customlayer section.
+        if ($data['customlayertype'] !== 'none' && !empty($data['customlayername'])) {
             $draftitemid = $data['custombackground'];
             global $USER;
             $usercontext = context_user::instance($USER->id);
@@ -245,11 +270,18 @@ class mod_treasurehunt_mod_form extends moodleform_mod
             if ($data['customlayername'] == '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
             }
-            if (count($draftfiles) == 0 && $data['customlayerwms'] == '') {
-                $errors['customlayerwms'] = get_string('customlayerwms_help', 'treasurehunt');
+            if ($data['customlayerservicetype'] == 'image' && count($draftfiles) == 0) {
                 $errors['custombackground'] = get_string('custommapimagefile_help', 'treasurehunt');
             }
-            if ($data['customlayertype'] !== 'nongeographic') {
+            if ($data['customlayerservicetype'] !== 'image' && $data['customlayerwms'] == '') {
+                $errors['customlayerwms'] = get_string('customlayerwms_help', 'treasurehunt');
+            }
+            if ($data['customlayerservicetype'] == 'wms') {
+                if ($data['customwmsparams'] == '') {
+                    $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
+                }
+            }
+            if ($data['customlayertype'] !== 'nongeographic' && $data['customlayerservicetype'] == 'image') {
                 if (
                     $data['custommapminlat'] === '' || $data['custommapminlat'] < -85 ||
                     $data['custommapminlat'] >= $data['custommapmaxlat']
@@ -275,11 +307,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
                     $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
                 }
             }
-            if (!empty($data['customlayerwms'])) {
-                if ($data['customwmsparams'] == '') {
-                    $errors['customwmsparams'] = get_string('customwmsparams_help', 'treasurehunt');
-                }
-            }
+
         }
         return $errors;
     }
@@ -297,6 +325,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $defaultvalues['custombackground'] = $draftitemid;
         $custommapconfig = treasurehunt_get_custommappingconfig($this->current);
         if ($custommapconfig) {
+            $defaultvalues['customlayerservicetype'] = $custommapconfig->layerservicetype;
             $defaultvalues['custommapminlon'] = $custommapconfig->bbox[0];
             $defaultvalues['custommapminlat'] = $custommapconfig->bbox[1];
             $defaultvalues['custommapmaxlon'] = $custommapconfig->bbox[2];

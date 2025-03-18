@@ -182,22 +182,28 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
     						      opacity: 1.0
     						    });
     					} else if (custommapconfig.wmsurl != null) {
-    						var options = {
-    									source: new ol.source.TileWMS({
-    							            url: custommapconfig.wmsurl,
-    							            params: custommapconfig.wmsparams,
-    							          }),
-    									type: custommapconfig.layertype,
-    									title: custommapconfig.layername,
-    						        };
-    						if (custommapconfig.bbox[0] != null &&
-    								custommapconfig.bbox[1] != null &&
-    								custommapconfig.bbox[2] != null &&
-    								custommapconfig.bbox[3] != null) {
-    							var customwmsextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
-    							options.extent = customwmsextent;
-    						}
-    						custombaselayer = new ol.layer.Tile(options);
+                            let options = {
+                                type: custommapconfig.layertype,
+                                title: custommapconfig.layername,
+                                name: custommapconfig.layername,
+                              };
+                              if (custommapconfig.layerservicetype === "wms") {
+                                options.source = new ol.source.TileWMS({
+                                    url: custommapconfig.wmsurl,
+                                    params: custommapconfig.wmsparams,
+                                  });
+                              } else if (custommapconfig.layerservicetype === "tiled") {
+                                options.source = new ol.source.XYZ({ url: custommapconfig.wmsurl });
+                              } else if (custommapconfig.layerservicetype === "arcgis") {
+                                options.source = new ol.source.TileArcGISRest({ url: custommapconfig.wmsurl });
+                              }
+                      
+                              if ( custommapconfig.bbox[0] && custommapconfig.bbox[1] && custommapconfig.bbox[2] && custommapconfig.bbox[3] ) {
+                                let customwmsextent = ol.proj.transformExtent(custommapconfig.bbox, "EPSG:4326", mapprojection);
+                                options.extent = customwmsextent;
+                              }
+                              custombaselayer = new ol.layer.Tile(options);
+                              custombaselayer.set('name', custommapconfig.layername);
     					}
     					geographictools = custommapconfig.geographic;
     				}

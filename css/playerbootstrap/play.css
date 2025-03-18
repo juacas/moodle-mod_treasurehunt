@@ -1,3 +1,8 @@
+/* Remove any background image in map */
+body {
+  background-image: none;
+  background-size: cover;
+}
 /* Hide maincontent of moodle page */
 #page-mod-treasurehunt-play #maincontent,
 #page-mod-treasurehunt-play .toast-wrapper {

@@ -234,16 +234,17 @@ i18nplay = $i18n;
 I18N;
 
         // Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
-        $disable = [
-            'core/notification',
-            'block_navigation/navblock',
-            'block_settings/settingsblock',
-            'core/log',
-            'core/page_global',
-        ];
-        foreach ($disable as $module) {
-            $pagefooter = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefooter);
-        }
+        // $disable = [
+        //     'core/notification',
+        //     'block_navigation/navblock',
+        //     'block_settings/settingsblock',
+        //     'core/log',
+        //     'core/page_global',
+        // ];
+        // foreach ($disable as $module) {
+        //     $pagefooter = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefooter);
+        // }
+
         return $pageheader . $pagerendered . $i18nfragment . $pagefooter;
     }
 
@@ -279,8 +280,6 @@ I18N;
 
         // Output starts here.
         $pageheader = $this->header();
-        // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-        $pageheader .= '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 
         $data = $renderablepage->export_for_template($this);
         $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_bootstrap', $data);

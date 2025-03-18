@@ -148,5 +148,11 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2025022600, 'treasurehunt');
     }
+    if ($oldversion < 2025031800) {
+        // Change in all records playerstyle from classic to bootstrap.
+        $DB->set_field('treasurehunt', 'playerstyle', TREASUREHUNT_PLAYERBOOTSTRAP, ['playerstyle' => TREASUREHUNT_PLAYERFANCY]);
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2025031800, 'treasurehunt');
+    }
     return true;
 }
