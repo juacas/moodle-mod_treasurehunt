@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.7.0 Add XYZ Tiled layers. Fancy style deprecated (jquerymobile is not supported anymore). 
  - v1.6.1 Moodle 4.5 compatibility. Player style classic deprecated.
  - v1.6.0 Support of Freeze contexts.
  - v1.5.8 Fix polyfill obsolete library.

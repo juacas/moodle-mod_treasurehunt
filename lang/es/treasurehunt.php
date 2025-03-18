@@ -88,7 +88,7 @@ $string['custommapmaxlon_help'] = 'Longitud este de la imagen. Use "." para los 
 $string['customlayertype'] = 'Tipo de capa';
 $string['customlayertype_help'] = 'La imagen puede usarse como fondo del mapa o mostrarse por encima de los mapas usuales de carreteras o satélite.';
 $string['customlayerwms'] = 'Servicio WMS';
-$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS. (Por ejemplo, la capa de ecosistemas de bosques EUNIS Forest Ecosystems WMS se configura con: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
+$string['customlayerwms_help'] = 'Utiliza una capa cartográfica obtenida de un servicio OGC WMS o de teselas XYZ. (Por ejemplo, la capa de ecosistemas de bosques EUNIS Forest Ecosystems WMS se configura con: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['customwmsparams'] = 'Parámetros adicionales WMS';
 $string['customwmsparams_help'] = 'Los parámetros que definen el aspecto del mapa. Con formato análogo a: "LAYERS=fondo,calles&STYLES=azul,callejero"';
 $string['custommapbaselayer'] = 'La imagen se usa como una opción adicional de mapa base.';
@@ -146,9 +146,9 @@ Debe ser mayor a 0 segundos, sino se fijará el tiempo por defecto.';
 $string['defaultplayerstyle'] = 'Estilo por defecto de la pantalla de juego.';
 $string['availableplayerstyles'] = 'Estilos de la pantalla de juego disponibles.';
 $string['playerstyle'] = 'Estilo de la pantalla de juego.';
-$string['playerstyle_help'] = 'Hay diversos estilos de la pantalla de juego que los profesores pueden elegir.';
-$string['playerclassic'] = 'Classic';
-$string['playerfancy'] = 'Fancy';
+$string['playerstyle_help'] = 'Puede haber diversos estilos de la pantalla de juego que los profesores pueden elegir.';
+$string['playerclassic'] = 'Classic (caducado)';
+$string['playerfancy'] = 'Fancy (caducado)';
 $string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
 $string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.

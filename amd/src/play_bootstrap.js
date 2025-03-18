@@ -36,43 +36,14 @@ define([
   // "mod_treasurehunt/jquerymobile"
 ], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
   let init = {
-    playtreasurehunt: function (
-      cmid,
-      treasurehuntid,
-      playwithoutmoving,
-      groupmode,
-      lastattempttimestamp,
-      lastroadtimestamp,
-      gameupdatetime,
-      tracking,
-      user,
-      custommapconfig
+    playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
+      lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig
     ) {
       // I18n strings.
-      let terms = [
-        "stageovercome",
-        "failedlocation",
-        "stage",
-        "stagename",
-        "stageclue",
-        "question",
-        "noanswerselected",
-        "timeexceeded",
-        "searching",
-        "continue",
-        "noattempts",
-        "aerialview",
-        "roadview",
-        "noresults",
-        "startfromhere",
-        "nomarks",
-        "updates",
-        "activitytoendwarning",
-        "huntcompleted",
-        "discoveredlocation",
-        "answerwarning",
-        "error",
-        "pegmanlabel",
+      let terms = ["stageovercome", "failedlocation", "stage", "stagename", "stageclue",
+        "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
+        "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
+        "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel",
       ];
       // console.log("loading i18n strings");
       let stringsqueried = terms.map((term) => {
@@ -104,19 +75,9 @@ define([
             //     this.naturalHeight +
             //     "pixels"
             // );
-            initplaytreasurehunt(
-              i18n,
-              cmid,
-              treasurehuntid,
-              playwithoutmoving,
-              groupmode,
-              lastattempttimestamp,
-              lastroadtimestamp,
-              gameupdatetime,
-              tracking,
-              user,
-              custommapconfig
-            );
+            initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
+              lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
+              user, custommapconfig);
           });
           img.src = custommapconfig.custombackgroundurl;
         } else {
@@ -171,7 +132,7 @@ define([
           "EPSG:4326",
           mapprojection
         );
-        if (!custommapconfig.geographic) {
+        if (custommapconfig.geographic == false) {
           // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
           let bboxheight = customimageextent[3] - customimageextent[1];
           let centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
@@ -200,28 +161,27 @@ define([
       } else if (custommapconfig.wmsurl) {
         // console.log("config custom wms server: " + custommapconfig.wmsurl);
         let options = {
-          source: new ol.source.TileWMS({
-            url: custommapconfig.wmsurl,
-            params: custommapconfig.wmsparams,
-          }),
           type: custommapconfig.layertype,
           title: custommapconfig.layername,
           name: custommapconfig.layername,
         };
-        if (
-          custommapconfig.bbox[0] &&
-          custommapconfig.bbox[1] &&
-          custommapconfig.bbox[2] &&
-          custommapconfig.bbox[3]
-        ) {
-          let customwmsextent = ol.proj.transformExtent(
-            custommapconfig.bbox,
-            "EPSG:4326",
-            mapprojection
-          );
+        if (custommapconfig.layerservicetype === "wms") {
+          options.source = new ol.source.TileWMS({
+              url: custommapconfig.wmsurl,
+              params: custommapconfig.wmsparams,
+            });
+        } else if (custommapconfig.layerservicetype === "tiled") {
+          options.source = new ol.source.XYZ({ url: custommapconfig.wmsurl });
+        } else if (custommapconfig.layerservicetype === "arcgis") {
+          options.source = new ol.source.TileArcGISRest({ url: custommapconfig.wmsurl });
+        }
+
+        if ( custommapconfig.bbox[0] && custommapconfig.bbox[1] && custommapconfig.bbox[2] && custommapconfig.bbox[3] ) {
+          let customwmsextent = ol.proj.transformExtent(custommapconfig.bbox, "EPSG:4326", mapprojection);
           options.extent = customwmsextent;
         }
         custombaselayer = new ol.layer.Tile(options);
+        custombaselayer.set('name', custommapconfig.layername);
       }
 
       geographictools = custommapconfig.geographic;
@@ -351,26 +311,28 @@ define([
       source: source,
       style: style_function,
     });
-    let aeriallayer = new ol.layer.Tile({
-      visible: false,
-      source: new ol.source.BingMaps({
-        key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
-        imagerySet: "AerialWithLabels",
-        maxZoom: 19,
-        // Use maxZoom 19 to see stretched tiles instead of the BingMaps
-        // "no photos at this zoom level" tiles
-        // maxZoom: 19.
-      }),
-    });
-    aeriallayer.set("name", strings["aerialview"]);
-    let roadlayer = new ol.layer.Tile({
-      source: new ol.source.OSM(),
-    });
-    roadlayer.set("name", strings["roadview"]);
-
     let layersbase = [];
     let layersoverlay = [];
     if (!custommapconfig || custommapconfig.onlybase === false) {
+      // Default layers
+      let aeriallayer = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.BingMaps({
+          key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
+          imagerySet: "AerialWithLabels",
+          maxZoom: 19,
+          // Use maxZoom 19 to see stretched tiles instead of the BingMaps
+          // "no photos at this zoom level" tiles
+          // maxZoom: 19.
+        }),
+      });
+      let roadlayer = new ol.layer.Tile({
+        source: new ol.source.OSM(),
+      });
+
+      aeriallayer.set("name", strings["aerialview"]);
+      roadlayer.set("name", strings["roadview"]);
+
       layersbase = [aeriallayer, roadlayer];
     }
     if (custombaselayer) {
@@ -685,9 +647,9 @@ define([
                 $("#validatelocation").hide();
               } else {
                 $("#validatelocation").show();
-                 if (response.qrexpected) {
-                   $("#validateqr").show();
-                 }
+                if (response.qrexpected) {
+                  $("#validateqr").show();
+                }
               }
             }
             // Check if it is the first geometry or it is being initialized and center the map.
@@ -827,12 +789,12 @@ define([
           attemptshistory.forEach((attempt) => {
             $(
               "<li><span class='ui-btn-icon-left " +
-                (attempt.penalty
-                  ? "ui-icon-delete failedattempt"
-                  : "ui-icon-check successfulattempt") +
-                "' style='position:relative'></span>" +
-                attempt.string +
-                "</li>"
+              (attempt.penalty
+                ? "ui-icon-delete failedattempt"
+                : "ui-icon-check successfulattempt") +
+              "' style='position:relative'></span>" +
+              attempt.string +
+              "</li>"
             ).appendTo($historylist);
           });
         }
@@ -887,7 +849,7 @@ define([
      * @type ol.Geolocation
      */
     let geolocation = new ol.Geolocation(
-      /** @type {olx.GeolocationOptions} */ ({
+      /** @type {olx.GeolocationOptions} */({
         projection: view.getProjection(),
         trackingOptions: {
           enableHighAccuracy: true,
@@ -1038,8 +1000,8 @@ define([
               if (resp.length === 0) {
                 $searchContainer.html(
                   "<li class='list-group-item'>" +
-                    strings["noresults"] +
-                    "</li>"
+                  strings["noresults"] +
+                  "</li>"
                 );
               } else {
                 $.each(resp, (i, place) => {
@@ -1070,7 +1032,7 @@ define([
                 });
               }
             })
-            .fail(() => {})
+            .fail(() => { })
             .always(() => {
               osmGeocoderXHR = null;
             });

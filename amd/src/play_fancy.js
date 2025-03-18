@@ -127,15 +127,25 @@ define(['jquery',
 					    });
 				} else if (custommapconfig.wmsurl !== null) {
 					console.log('config custom wms server: ' + custommapconfig.wmsurl);
-					var options = {
-								source: new ol.source.TileWMS({
-						            url: custommapconfig.wmsurl,
-						            params: custommapconfig.wmsparams,
-						          }),
-								type: custommapconfig.layertype,
-								title: custommapconfig.layername,
-								name: custommapconfig.layername,
-					        };
+					let options = {
+						type: custommapconfig.layertype,
+						title: custommapconfig.layername,
+						name: custommapconfig.layername,
+					};
+					if (custommapconfig.layerservicetype === "wms") {
+						options.source = new ol.source.TileWMS({
+							url: custommapconfig.wmsurl,
+							params: custommapconfig.wmsparams,
+						  });
+					  } else if (custommapconfig.layerservicetype === "tiled") {
+						options.source = new ol.source.XYZ({url: custommapconfig.wmsurl  });
+					  } else if (custommapconfig.layerservicetype === "arcgis") {
+						options.source = new ol.source.TileArcGISRest({url: custommapconfig.wmsurl });
+					}
+					options.type = custommapconfig.layertype;
+					options.title = custommapconfig.layername;
+					options.name = custommapconfig.layername;
+					
 					if (custommapconfig.bbox[0] !== null &&
 							custommapconfig.bbox[1] !== null &&
 							custommapconfig.bbox[2] !== null &&
@@ -296,7 +306,9 @@ define(['jquery',
 		    var layersbase = [];
 		    var layersoverlay = [];
 		    if ( custommapconfig === null || custommapconfig.onlybase === false) {
-		    	layersbase = [aeriallayer, roadlayer];
+		    	layersbase = [
+					aeriallayer,
+					roadlayer];
 		    }
 		    if (custombaselayer !== null) {
 		    	if (custommapconfig.layertype != 'overlay') {
