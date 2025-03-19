@@ -198,6 +198,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->hideIf('custompreserveaspectratio', 'customlayerservicetype', 'neq', 'image');
         $mform->hideIf('custompreserveaspectratio', 'customlayertype', 'eq', 'nongeographic');
 
+
         // Bounding box.
         $bboxfield = [];
         $bboxfield[] =$mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));

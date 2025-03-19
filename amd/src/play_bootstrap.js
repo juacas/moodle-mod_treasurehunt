@@ -154,6 +154,7 @@ define([
     if (custommapconfig) {
       if (custommapconfig.custombackgroundurl) { 
           var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
+
           defaultzoom = 5;
           custombaselayer = new ol.layer.Image({
                 title: custommapconfig.layername,
