@@ -205,7 +205,7 @@ module.exports = function(grunt) {
         },
         amd: {
           files: ["**/amd/src/**/*.js"],
-          tasks: ["copy:js"],
+          tasks: ["amd:js"],
         },
 
         yui: {

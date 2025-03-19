@@ -280,7 +280,7 @@ function treasurehunt_get_nice_duration($durationinseconds, $usemonths = true, $
  *
  * @param string $array The GeoJSON string.
  *
- * @return Feature|FeatureCollection The PHP equivalent object.
+ * @return Feature|FeatureCollection|Geometry The PHP equivalent object.
  */
 function treasurehunt_geojson_to_object($array)
 {
@@ -363,6 +363,7 @@ function treasurehunt_build_custommappingconfig($data)
             $mapconfig->wmsparams = [];
         }
         $mapconfig->layername = $data->customlayername;
+        $mapconfig->preserveaspectratio = $data->custompreserveaspectratio;
     }
     return $mapconfig;
 }

@@ -99,6 +99,33 @@ define([
     }, // End of function playtreasurehunt.
   };
   return init;
+  
+  // Calculate customimageextent.
+  function calculateCustomImageExtent(custommapconfig, mapprojection, referencetocenter=false) {
+    var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+    if (custommapconfig.preserveaspectratio == true) {
+        // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
+        var bboxwidth = customimageextent[2] - customimageextent[0];
+        var bboxheight = customimageextent[3] - customimageextent[1];
+        var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
+        var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
+
+        var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
+        var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
+        var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
+        if (referencetocenter) {
+            // Use center point as reference.
+            customimageextent = [centerwidth - adjwidth/2, centerheight - adjheight/2,
+                                    centerwidth + adjwidth/2, centerheight + adjheight/2];
+        } else {
+            // Use bottom-left point as reference.ç
+            customimageextent = [customimageextent[0], customimageextent[1],
+            customimageextent[0] + adjwidth, customimageextent[1] + adjheight];
+            console.log('Using bottom-left as reference.' + customimageextent);
+        }
+    }
+    return customimageextent;
+  }
   // Initialization function.
   function initplaytreasurehunt(
     strings,
@@ -125,39 +152,19 @@ define([
 
     // Support customized base layers.
     if (custommapconfig) {
-      if (custommapconfig.custombackgroundurl) {
-        // console.log("config custom background image");
-        let customimageextent = ol.proj.transformExtent(
-          custommapconfig.bbox,
-          "EPSG:4326",
-          mapprojection
-        );
-        if (custommapconfig.geographic == false) {
-          // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
-          let bboxheight = customimageextent[3] - customimageextent[1];
-          let centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
-          let centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-          let ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
-          let adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
-          let adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
-          customimageextent = [
-            centerwidth - adjwidth / 2,
-            centerheight - adjheight / 2,
-            centerwidth + adjwidth / 2,
-            centerheight + adjheight / 2,
-          ];
+      if (custommapconfig.custombackgroundurl) { 
+          var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
           defaultzoom = 5;
-        }
-        custombaselayer = new ol.layer.Image({
-          title: custommapconfig.layername,
-          name: custommapconfig.layername,
-          type: custommapconfig.layertype,
-          source: new ol.source.ImageStatic({
-            url: custommapconfig.custombackgroundurl,
-            imageExtent: customimageextent,
-          }),
-          opacity: 1.0,
-        });
+          custombaselayer = new ol.layer.Image({
+                title: custommapconfig.layername,
+                name: custommapconfig.layername,
+                type: custommapconfig.layertype,
+                source: new ol.source.ImageStatic({
+                          url: custommapconfig.custombackgroundurl,
+                          imageExtent: customimageextent,
+                        }),
+                opacity: 1.0,
+          });
       } else if (custommapconfig.wmsurl) {
         // console.log("config custom wms server: " + custommapconfig.wmsurl);
         let options = {
@@ -807,13 +814,16 @@ define([
       }).click(() => {
         layer.setVisible(!layer.getVisible());
       });
-      let name = $.parseHTML(layer.get("name"));
+      let name = $("<div>").append($.parseHTML(layer.get("name")));
+      let checkboxContent = $("<i>",{
+        class: "fa fa-check-circle"+ (layer.getVisible() ? "" : " unchecked"),
+      });
       let linkContent = $("<div>", {
-        class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
-      }).append(name, $("<i class='fa fa-check-circle'>"));
+        class: "layer-item",
+      }).append(name, checkboxContent);
       link.append(linkContent);
       layer.on("change:visible", () => {
-        $(linkContent).toggleClass("unchecked");
+        $(checkboxContent).toggleClass("unchecked");
       });
       $("#layerslist").prepend(link);
     }
@@ -832,13 +842,16 @@ define([
             }
           });
         });
+        let checkboxContent = $("<i>",{
+          class: "fa fa-check-circle"+ (layer.getVisible() ? "" : " unchecked"),
+        });
         let linkContent = $("<div>", {
           text: layer.get("name"),
-          class: "layer-item " + (layer.getVisible() ? "" : "unchecked"),
-        }).append($("<i class='fa fa-check-circle'>"));
+          class: "layer-item " //+ (layer.getVisible() ? "" : "unchecked"),
+        }).append(checkboxContent);
         link.append(linkContent);
         layer.on("change:visible", () => {
-          $(linkContent).toggleClass("unchecked");
+          $(checkboxContent).toggleClass("unchecked");
         });
         $("#layerslist").prepend(link);
       });
