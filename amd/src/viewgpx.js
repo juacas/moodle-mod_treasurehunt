@@ -155,29 +155,13 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
     				// Support customized base layers.
     				if (typeof(custommapconfig) != 'undefined' && custommapconfig != null) {
     					if (custommapconfig.custombackgroundurl != null) {
-    						var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
-    						if (!custommapconfig.geographic) {
-    							// Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
-    							var bboxwidth = customimageextent[2] - customimageextent[0];
-    							var bboxheight = customimageextent[3] - customimageextent[1];
-    							var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
-    							var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
-
-    							var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
-    							var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
-    							var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
-    							customimageextent = [centerwidth - adjwidth/2,
-    								centerheight - adjheight/2,
-    								centerwidth + adjwidth/2,
-    								centerheight + adjheight/2];
-    						}
-
+                            var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
     						custombaselayer = new ol.layer.Image({
     							  title : custommapconfig.layername,
     							  type: custommapconfig.layertype,
     						      source: new ol.source.ImageStatic({
     						        url: custommapconfig.custombackgroundurl,
-    						        imageExtent: customimageextent,
+    						        imageExtent: customimageextent
     						      }),
     						      opacity: 1.0
     						    });
@@ -279,6 +263,33 @@ define(['jquery', 'mod_treasurehunt/ol',  'mod_treasurehunt/ol3-layerswitcher', 
                         element: document.getElementById('info')
                     });
                     map.addOverlay(popup);
+
+                    // Calculate customimageextent.
+                    function calculateCustomImageExtent(custommapconfig, mapprojection, referencetocenter=false) {
+                        var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
+                        if (custommapconfig.preserveaspectratio == true) {
+                            // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
+                            var bboxwidth = customimageextent[2] - customimageextent[0];
+                            var bboxheight = customimageextent[3] - customimageextent[1];
+                            var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
+                            var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
+
+                            var ratiorealmap = Math.round(bboxheight / custommapconfig.imgheight);
+                            var adjwidth = Math.round(custommapconfig.imgwidth * ratiorealmap);
+                            var adjheight = Math.round(custommapconfig.imgheight * ratiorealmap);
+                            if (referencetocenter) {
+                                // Use center point as reference.
+                                customimageextent = [centerwidth - adjwidth/2, centerheight - adjheight/2,
+                                                        centerwidth + adjwidth/2, centerheight + adjheight/2];
+                            } else {
+                                // Use bottom-left point as reference.ç
+                                customimageextent = [customimageextent[0], customimageextent[1],
+                                customimageextent[0] + adjwidth, customimageextent[1] + adjheight];
+                                console.log('Using bottom-left as reference.' + customimageextent);
+                            }
+                        }
+                        return customimageextent;
+                    }
                     // Duplicated function. TODO: refactor overlay definition.
                     function createPegmanLink(coordinate, map, label) {
                         var latlon = ol.proj.toLonLat(coordinate, map.getView().getProjection());

@@ -68,7 +68,7 @@ class mod_treasurehunt_external extends external_api
                     new external_single_structure(
                         array(
                     'id' => new external_value(PARAM_INT, 'The id of the road'),
-                    'name' => new external_value(PARAM_TEXT, 'The name of the road'),
+                    'name' => new external_value(PARAM_RAW, 'The name of the road'),
                     'blocked' => new external_value(PARAM_BOOL, 'If true the road is blocked'),
                     'stages' => new external_single_structure(
                         array('type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
@@ -100,7 +100,7 @@ class mod_treasurehunt_external extends external_api
                                     array(
                                 'roadid' => new external_value(PARAM_INT, "Associated road id"),
                                 'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
-                                'name' => new external_value(PARAM_TEXT, "Name of associated stage"),
+                                'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                 'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                 'clue' => new external_value(PARAM_RAW, "Clue of associated stage")
                                     )

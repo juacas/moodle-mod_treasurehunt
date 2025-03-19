@@ -192,6 +192,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
         $mform->disabledIf('custombackground', 'customlayername', 'eq', '');
         $mform->hideIf('custombackground', 'customlayerservicetype', 'neq', 'image');
+        // Preserve aspect ratio.
+        $mform->addElement('advcheckbox', 'custompreserveaspectratio', get_string('custompreserveaspectratio', 'treasurehunt'));
+        $mform->addHelpButton('custompreserveaspectratio', 'custompreserveaspectratio', 'treasurehunt');
+        $mform->hideIf('custompreserveaspectratio', 'customlayerservicetype', 'neq', 'image');
+        $mform->hideIf('custompreserveaspectratio', 'customlayertype', 'eq', 'nongeographic');
+
 
         // Bounding box.
         $bboxfield = [];
@@ -350,6 +356,9 @@ class mod_treasurehunt_mod_form extends moodleform_mod
                 $paramstr = (array) $custommapconfig->wmsparams;
                 $params = http_build_query($paramstr, '', ';');
                 $defaultvalues['customwmsparams'] = $params;
+            }
+            if (isset($custommapconfig->preserveaspectratio)) {
+                $defaultvalues['custompreserveaspectratio'] = $custommapconfig->preserveaspectratio;
             }
         }
     }
