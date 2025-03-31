@@ -16,6 +16,7 @@
 }}
 
 {{=<% %>=}}
+{{^searchpaneldisabled}}
 <div class="treasurehunt-play-search-page">
 
   <ion-searchbar class="searchbar" placeholder="{{'plugin.mod_treasurehunt.findplace' | translate}}" [(ngModel)]="searchText"
@@ -38,3 +39,4 @@
   </ion-list>
 
 </div>
+{{/searchpaneldisabled}}

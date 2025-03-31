@@ -265,7 +265,8 @@ I18N;
                 $renderablepage->gameupdatetime,
                 $treasurehunt->tracking,
                 $renderablepage->user,
-                $renderablepage->custommapping
+                $renderablepage->custommapping,
+                $renderablepage->customplayerconfig
             )
         );
         // Adds support for QR scan.

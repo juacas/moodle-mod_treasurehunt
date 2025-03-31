@@ -64,18 +64,29 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $this->standard_intro_elements();
         $mform->addElement('advcheckbox', 'playwithoutmoving', get_string('playwithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playwithoutmoving', 'playwithoutmoving', 'treasurehunt');
+        
+        // Track users.
+        $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
+        $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
+        
+        // Show other users' progress on hunt.
+        $mform->addElement('advcheckbox', 'showboard', get_string('showboard', 'treasurehunt'));
+        $mform->addHelpButton('showboard', 'showboard', 'treasurehunt');
+        
         // Select player interface.
         $mform->addElement('select', 'playerstyle', get_string('playerstyle', 'treasurehunt'), treasurehunt_get_playerstyles());
         $mform->addHelpButton('playerstyle', 'playerstyle', 'treasurehunt');
         $mform->setDefault('playerstyle', $treasurehuntconfig->defaultplayerstyle);
 
-        // Track users.
-        $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
-        $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
-
-        // Show other users' progress on hunt.
-        $mform->addElement('advcheckbox', 'showboard', get_string('showboard', 'treasurehunt'));
-        $mform->addHelpButton('showboard', 'showboard', 'treasurehunt');
+        // Customize player's components.
+        // Check for Search panel.
+        $mform->addElement('advcheckbox', 'searchpaneldisabled', get_string('searchpaneldisabled', 'treasurehunt'));
+        $mform->addHelpButton('searchpaneldisabled', 'searchpaneldisabled', 'treasurehunt');
+        $mform->setDefault('searchpaneldisabled', false);
+        // Checkbox for localization button.
+        $mform->addElement('advcheckbox', 'localizationbuttondisabled', get_string('localizationbuttondisabled', 'treasurehunt'));
+        $mform->addHelpButton('localizationbuttondisabled', 'localizationbuttondisabled', 'treasurehunt');
+        $mform->setDefault('localizationbuttondisabled', false);
 
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
@@ -329,6 +340,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod
             array('subdirs' => false)
         );
         $defaultvalues['custombackground'] = $draftitemid;
+        $customplayerconfig = treasurehunt_get_customplayerconfig($this->current);
+        if ($customplayerconfig) {
+            // Add all properties to form array.
+            $defaultvalues = array_merge($defaultvalues, (array) $customplayerconfig);
+        }
+
         $custommapconfig = treasurehunt_get_custommappingconfig($this->current);
         if ($custommapconfig) {
             $defaultvalues['customlayerservicetype'] = $custommapconfig->layerservicetype;
@@ -377,6 +394,8 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         if ($data->customlayertype === 'nongeographic') {
             $data->playwithoutmoving = "1";
         }
+        $playerconfig = treasurehunt_build_customplayerconfig($data);
+        $data->customplayerconfig = $playerconfig === null ? null : json_encode($playerconfig);
     }
 
     /**

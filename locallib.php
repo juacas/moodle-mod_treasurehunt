@@ -313,7 +313,16 @@ function treasurehunt_check_point_in_multipolygon($mpolygon, $point)
     return false;
 }
 /**
- *
+ * Build a custom player configuration object from form data.
+ */
+function treasurehunt_build_customplayerconfig($data) {
+    $playerconfig = new stdClass();
+    $playerconfig->searchpaneldisabled = $data->searchpaneldisabled;
+    $playerconfig->localizationbuttondisabled = $data->localizationbuttondisabled;
+    return $playerconfig;
+}
+/**
+ * Build a custom mapping configuration object from form data.
  * @param stdClass $data form data.
  * @return stdClass
  */
@@ -366,6 +375,22 @@ function treasurehunt_build_custommappingconfig($data)
         $mapconfig->preserveaspectratio = $data->custompreserveaspectratio;
     }
     return $mapconfig;
+}
+/**
+ * Get json encoded customization of the player.
+ * @param mixed $treasurehunt
+ * @return stdClass
+ */
+function treasurehunt_get_customplayerconfig($treasurehunt)
+{
+    if (empty($treasurehunt->customplayerconfig)) {
+        return null;
+    }
+    $customplayerconfig = new stdClass();
+    if (isset($treasurehunt->customplayerconfig)) {
+        $customplayerconfig = json_decode($treasurehunt->customplayerconfig);
+    }
+    return $customplayerconfig;
 }
 /**
  *

@@ -129,6 +129,7 @@ class treasurehunt_play_page_base implements renderable, templatable
     public $treasurehunt = null;
     public $cm = null;
     public $custommapping = '';
+    public $customplayerconfig = null;
     public $user = null;
     public $lastattempttimestamp;
     public $lastroadtimestamp;
@@ -149,6 +150,7 @@ class treasurehunt_play_page_base implements renderable, templatable
         $data->user = $user;
         $data->cmid = $this->cm->id;
         $data->treasurehunt = $this->treasurehunt;
+        $data->customplayerconfig = $this->customplayerconfig;
         if (empty($this->treasurehunt->description)) {
             $hasdescription = false;
         } else {
@@ -161,6 +163,7 @@ class treasurehunt_play_page_base implements renderable, templatable
     {
         $this->treasurehunt = $treasurehunt;
         $this->cm = $cm;
+        $this->customplayerconfig = treasurehunt_get_customplayerconfig($this->treasurehunt);
     }
     public function set_user($user)
     {

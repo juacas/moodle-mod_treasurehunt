@@ -22,10 +22,12 @@
       <button ion-button icon-only (click)="treasureHuntPlayMobile.launchTutorial()">
         <ion-icon name="information-circle"></ion-icon>
       </button>
+      {{^searchpaneldisabled}}
       <button ion-button icon-only core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.search' | translate}}" 
         component="mod_treasurehunt" method="mobile_treasurehunt_play_search" [jsData]="searchPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <ion-icon name="search"></ion-icon>
       </button>
+      {{/searchpaneldisabled}}
     </core-navbar-buttons>
 
     <div class="treasureoverlay" *ngIf="treasureHuntPlayMobile.gameStatus.roadFinished">
@@ -59,10 +61,12 @@
     </div>
 
     <div class="map-tools-container">
+      {{^customplayerconfig.localizationbuttondisabled}}
       <button id="autolocate" *ngIf="!treasureHuntPlayMobile.playConfig.playwithoutmoving && !treasureHuntPlayMobile.gameStatus.roadFinished" ion-button 
         icon-only class="btn play-btn" (click)="treasureHuntPlayMobile.centerOnUserPosition()">
           <ion-icon name="pin"></ion-icon>
       </button>
+      {{/customplayerconfig.localizationbuttondisabled}}
       <button ion-button icon-only class="btn play-btn" core-site-plugins-new-content title="{{'plugin.mod_treasurehunt.layers' | translate}}" 
           component="mod_treasurehunt" method="mobile_treasurehunt_play_layers" [jsData]="layersPageData" [preSets]="{getFromCache: 1, saveToCache: 1}">
         <i class="fa fa-eye" aria-hidden="true"></i>

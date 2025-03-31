@@ -32,12 +32,10 @@ define([
   "mod_treasurehunt/webqr",
   "mod_treasurehunt/jquery.truncate",
   "mod_treasurehunt/dropdown",
-  // "mod_treasurehunt/jquery.mobile-config",
-  // "mod_treasurehunt/jquerymobile"
 ], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
   let init = {
     playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
-      lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig
+      lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, customplayerconfig
     ) {
       // I18n strings.
       let terms = ["stageovercome", "failedlocation", "stage", "stagename", "stageclue",
@@ -68,13 +66,7 @@ define([
           img.addEventListener("load", function () {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
-            // console.log(
-            //   "image is " +
-            //     this.naturalWidth +
-            //     "x" +
-            //     this.naturalHeight +
-            //     "pixels"
-            // );
+      
             initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
               lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
               user, custommapconfig);
