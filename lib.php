@@ -258,7 +258,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
     global $DB;
 
     $dbparams = array('id' => $coursemodule->instance);
-    $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat';
+    $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat, allowattemptsfromdate, cutoffdate, tracking';
     $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
 
     $result = new cached_cm_info();
@@ -269,7 +269,16 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
             $result->content = format_module_intro('treasurehunt', $treasurehunt, $coursemodule->id, false);
         }
     }
-
+    // Populate some other values that can be used in calendar or on dashboard.
+    if ($treasurehunt->allowattemptsfromdate) {
+        $result->customdata['timeopen'] = $treasurehunt->allowattemptsfromdate;
+    }
+    if ($treasurehunt->cutoffdate) {
+        $result->customdata['timeclose'] = $treasurehunt->cutoffdate;
+    }
+    if ($treasurehunt->tracking) {
+        $result->customdata['tracking'] = $treasurehunt->tracking;
+    }
     return $result;
 }
 

@@ -638,7 +638,18 @@ function treasurehunt_get_total_stages($roadid)
     $number = $DB->count_records('treasurehunt_stages', array('roadid' => $roadid));
     return $number;
 }
-
+/**
+ * Get the users that has any attempt in the treasure hunt.
+ * @param int $treasurehuntid The identifier of treasure hunt to check.
+ * @return array The users that has any attempt in the treasure hunt.
+ */
+function treasurehunt_get_users_with_attempts($treasurehuntid) {
+    global $DB;
+    $sql = "SELECT DISTINCT a.userid FROM {treasurehunt_attempts} a "
+        . "INNER JOIN {treasurehunt_stages} r ON r.id = a.stageid "
+        . "WHERE r.roadid IN (SELECT id FROM {treasurehunt_roads} WHERE treasurehuntid = ?)";
+    return $DB->get_records_sql($sql, array($treasurehuntid));
+}
 /**
  * Check if a user or group has completed the assigned road of treasure hunt.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
@@ -1628,12 +1639,14 @@ function treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants
 
 /**
  * Get the full list of participants and their attempts for all the roads
- * of the treasure hunt instance
+ * of the treasure hunt instance.
+ * Each user object has a "ratings" property that contains the list of attempts.
+ * Each attempt has a $ratings[$stagenum] with stagenumn, timestamp, class = "successwithfailures|failure|successwithoutfailures|noattempt";
  *
  * @param stdClass $cm The treasure hunt course module activity.
  * @param array $courseid The identifier of the course.
  * @param stdClass $context The context object.
- * @return array The roads, duplicate users and unassignedusers
+ * @return array The roads, duplicate users and unassignedusers.
  */
 function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid, $context)
 {

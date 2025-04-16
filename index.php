@@ -27,6 +27,10 @@ require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/lib.php');
 
 $id = required_param('id', PARAM_INT); // Course.
+// From moodle 5.0 onwards, the index.php is redirected to the overview page.
+if ($CFG->version >= 2025041400) {
+    \core_courseformat\activityoverviewbase::redirect_to_overview_page($id, 'treasurehunt');
+}
 
 $course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
 
