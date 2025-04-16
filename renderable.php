@@ -64,6 +64,7 @@ class treasurehunt_info implements renderable
     public $treasurehunt = null;
     public $timenow = 0;
     public $courseid = 0;
+    public $roads = [];
     public $numqrs = 0;
 
     /**
