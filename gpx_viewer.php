@@ -46,6 +46,7 @@ $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name) 
     ' : ' . get_string('trackviewer', 'treasurehunt'));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
+$PAGE->activityheader->disable();
 $PAGE->requires->jquery();
 $PAGE->requires->jquery_plugin('ui');
 $PAGE->requires->jquery_plugin('ui-css');

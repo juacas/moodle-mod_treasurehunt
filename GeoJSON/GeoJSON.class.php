@@ -227,7 +227,7 @@ class GeoJSON {
             case 'LineString':
             case 'Polygon':
                 self::checkExists($obj, 'coordinates', false, 'array');
-                $instance = call_user_func(array('self', 'to' . $obj->type), $obj->coordinates);
+                $instance = call_user_func(array(self::class, 'to' . $obj->type), $obj->coordinates);
                 break;
 
             case 'MultiPoint':
@@ -236,7 +236,7 @@ class GeoJSON {
                 self::checkExists($obj, 'coordinates', false, 'array');
                 $items = array();
                 foreach ($obj->coordinates as $item) {
-                    $items[] = call_user_func(array('self', 'to' . substr($obj->type, 5)), $item);
+                    $items[] = call_user_func(array(self::class, 'to' . substr($obj->type, 5)), $item);
                 }
                 $instance = new $obj->type($items);
                 break;

@@ -595,8 +595,7 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
     } else if (array_key_exists($i + 1, $keys)) {
         $beforekey = $keys[$i + 1];
     }
-
-    if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->cm->context)) {
+    if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->context)) {
         $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'),
                 new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)),
                 navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));

@@ -48,12 +48,12 @@ if (!empty($id)) {
     $url->param('id', $id);
 }
 $PAGE->set_url($url);
-
+$PAGE->activityheader->disable();
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
 $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $id));
 
-if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
+if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
@@ -64,7 +64,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
         $parms = array('id' => $id);
         if (!$road = $DB->get_record_sql($sql, $parms)) {
-            print_error('invalidentry');
+            throw new moodle_exception('invalidentry');
         }
     } else { // New entry.
         require_capability('mod/treasurehunt:addroad', $context);
@@ -112,7 +112,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    throw new moodle_exception('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editroad', 'treasurehunt'), $url);

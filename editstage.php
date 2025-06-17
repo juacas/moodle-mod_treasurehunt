@@ -51,11 +51,11 @@ if (!empty($roadid)) {
     $url->param('roadid', $roadid);
 }
 $PAGE->set_url($url);
-
+$PAGE->activityheader->disable();
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 $PAGE->requires->jquery();
 
-if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
+if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
     $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
@@ -89,11 +89,11 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
         $params = array($roadid);
         // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
-            print_error('invalidentry');
+            throw new moodle_exception('invalidentry');
         }
         // Compruebo si no esta bloqueado y por tanto no se puede anadir ninguna etapa.
         if (treasurehunt_check_road_is_blocked($roadid)) {
-            print_error('notcreatestage', 'treasurehunt', $returnurl);
+            throw new moodle_exception('notcreatestage', 'treasurehunt', $returnurl);
         }
         $stage = new stdClass();
         $stage->id = null;
@@ -226,7 +226,7 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    throw new moodle_exception('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editstage', 'treasurehunt'), $url);

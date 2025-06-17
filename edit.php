@@ -23,11 +23,9 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// Replace treasurehunt with the name of your module and remove this line.
 
-require_once dirname(dirname(dirname(__FILE__))) . '/config.php';
-require_once "$CFG->dirroot/mod/treasurehunt/locallib.php";
-require_once $CFG->libdir . '/formslib.php';
+require_once("../../config.php");
+require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 
 global $USER, $PAGE;
 
@@ -36,20 +34,12 @@ $roadid = optional_param('roadid', 0, PARAM_INT);
 list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
 
-require_login($course, true, $cm);
+require_login($course, false, $cm);
 
 $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-// TODO : launch edition event
-/* $event = \mod_treasurehunt\event\course_module_viewed::create(array(
-'objectid' => $PAGE->cm->instance,
-'context' => $PAGE->context,
-));
-$event->add_record_snapshot('course', $PAGE->course);
-$event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
-$event->trigger(); */
 $url = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cm->id));
 if (!empty($roadid)) {
     $url->param('roadid', $roadid);
@@ -61,8 +51,9 @@ $PAGE->set_url($url);
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('standard');
+$PAGE->activityheader->disable();
 
-if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
+if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // Si no hay ningún camino redirijo para crearlo.
     if (treasurehunt_get_total_roads($treasurehunt->id) == 0) {
         $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', array('cmid' => $id));
@@ -94,19 +85,17 @@ if (!treasurehunt_is_edition_loked($treasurehunt->id, $USER->id)) {
     $PAGE->requires->css('/mod/treasurehunt/css/ol-popup.css');
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    throw new moodle_exception('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 /** @var core_renderer $OUTPUT */
 echo $OUTPUT->header();
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
 echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
 echo $OUTPUT->container_end();
 // Conditions to show the intro can change to look for own settings or whatever.
-if ($treasurehunt->intro) {
-    echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
-}
+// if ($treasurehunt->intro) {
+//     echo $OUTPUT->box(format_module_intro('treasurehunt', $treasurehunt, $cm->id), 'generalbox mod_introbox', 'treasurehuntintro');
+// }
 treasurehunt_notify_info(get_string('editactivity_help', 'treasurehunt'), 'info');
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");

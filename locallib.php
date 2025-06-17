@@ -522,11 +522,11 @@ function treasurehunt_update_geometry_and_position_of_stage(Feature $feature, $c
 
     // It can not be change the position of stage once the road is blocked.
     if (treasurehunt_check_road_is_blocked($stage->roadid) && ($stage->position != $entry->position)) {
-        print_error('notchangeorderstage', 'treasurehunt');
+        throw new moodle_exception('notchangeorderstage', 'treasurehunt');
     }
     // It can not be save an existing stage without geometry.
     if (count($geometry->getComponents()) === 0) {
-        print_error('saveemptyridle', 'treasurehunt');
+        throw new moodle_exception('saveemptyridle', 'treasurehunt');
     }
     $DB->update_record('treasurehunt_stages', $stage);
 
@@ -557,7 +557,7 @@ function treasurehunt_delete_stage($id, $context)
     $stageresult = $DB->get_record('treasurehunt_stages', array('id' => $id), '*', MUST_EXIST);
     // It can not be delete a stage of a started road.
     if (treasurehunt_check_road_is_blocked($stageresult->roadid)) {
-        print_error('notdeletestage', 'treasurehunt');
+        throw new moodle_exception('notdeletestage', 'treasurehunt');
     }
 
     $DB->delete_records('treasurehunt_stages', array('id' => $id));
@@ -843,7 +843,7 @@ function treasurehunt_get_setting_game_update_time()
  * @param int $userid The identifier of user who want to know if the edition is locked.
  * @return int Return 1 if the edition of the instance is locked, else 0.
  */
-function treasurehunt_is_edition_loked($treasurehuntid, $userid)
+function treasurehunt_is_edition_locked($treasurehuntid, $userid)
 {
     global $DB;
 
@@ -1490,14 +1490,14 @@ function treasurehunt_get_group_road($groupid, $treasurehuntid, $groupname = '')
     $groupdata = $DB->get_records_sql($query, $params);
     if (count($groupdata) === 0) {
         // The group does not belong to any grouping.
-        print_error('nogrouproad', 'treasurehunt', '', $groupname);
+        throw new moodle_exception('nogrouproad', 'treasurehunt', '', $groupname);
     } elseif (count($groupdata) > 1) {
         // The group belong to more than one grouping.
-        print_error('groupmultipleroads', 'treasurehunt', '', $groupname);
+        throw new moodle_exception('groupmultipleroads', 'treasurehunt', '', $groupname);
     } else {
         if (current($groupdata)->validated == 0) {
             // The road is not valid.
-            print_error('groupinvalidroad', 'treasurehunt', '', $groupname);
+            throw new moodle_exception('groupinvalidroad', 'treasurehunt', '', $groupname);
         }
         return current($groupdata);
     }
@@ -1870,7 +1870,8 @@ function treasurehunt_format_texts($attempt, $context) {
             $context->id,
             'mod_treasurehunt',
             'cluetext',
-            $attempt->stageid
+            // This is used for stage and attempt structures.
+            isset($attempt->stageid) ? $attempt->stageid : $attempt->id
         );
         $attempt->cluetext = format_text($attempt->cluetext);
     }

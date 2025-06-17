@@ -39,7 +39,7 @@ require_capability('mod/treasurehunt:enterplayer', $context, null, false);
 // Check availability
 if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:manage', $context)) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
-    print_error('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
+    throw new moodle_exception('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
 }
 // Log event.
 require_once('classes/event/player_entered.php');

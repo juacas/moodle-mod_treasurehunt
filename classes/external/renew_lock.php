@@ -95,7 +95,7 @@ class renew_lock extends external_api
                 $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
             }
         } else {
-            if (!treasurehunt_is_edition_loked($params['treasurehuntid'], $USER->id)) {
+            if (!treasurehunt_is_edition_locked($params['treasurehuntid'], $USER->id)) {
                 $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha creado el bloqueo con exito';

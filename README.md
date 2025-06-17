@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.8.1 Fix compatibility with some themes and fix deprecated code in moodle and php 8.
  - v1.8.0 Moodle 5.0 release. Add support for overview api.
  - v1.7.1 Improve SVG static images. Fix aspect ratio of images to ensure that SVG are rendered vectorial.
  - v1.7.0 Add XYZ Tiled layers. Fancy style deprecated (jquerymobile is not supported anymore). 

@@ -22,9 +22,11 @@ defined('MOODLE_INTERNAL') || die;
  */
 class stage
 {
-    var $id;
     /** @var int id of the parent road */
+    var $id;
     var $roadid;
+
+    var $position;
     var $timecreated;
     var $timemodified;
     /** @var string stage name */

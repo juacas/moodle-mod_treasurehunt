@@ -42,12 +42,12 @@ class WKT
    *
    * @param string $WKT A WKT string
    *
-   * @return Geometry|GeometryCollection
+   * @return Geometry|GeometryCollection|null
    */
   public function read($WKT)
   {
     $matches = array();
-    if (!preg_match($this->regExes['typeStr'], $WKT, $matches))
+    if (!$WKT || !preg_match($this->regExes['typeStr'], $WKT, $matches))
     {
       return null;
     }
