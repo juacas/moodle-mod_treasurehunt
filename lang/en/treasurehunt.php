@@ -292,6 +292,7 @@ $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['overlaylayers'] = 'Overlay layers';
 $string['play'] = 'Play';
+$string['preview'] = 'Preview';
 $string['playstagewithoutmoving'] = 'Discover stage without moving';
 $string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place.
 To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
