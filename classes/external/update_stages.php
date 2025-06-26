@@ -645,9 +645,17 @@ class update_stages extends external_api
         }
         $available = treasurehunt_is_available($treasurehunt);
         $playmode = $params['playwithoutmoving'];
-        if ($available->available && !$roadfinished) {
+        // Teacher previewing mode.
+        $previewing = $available->actnotavailableyet && has_capability('mod/treasurehunt:managetreasurehunt', $context);
+        if ($previewing || ($available->available && !$roadfinished)) {
             $changesinplaymode = false;
-            $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
+            if ($previewing) {
+            // Play without moving is always available for teachers for previewing.
+                $playmode = 1;
+                $available->actnotavailableyet  = false;
+            } else {
+                $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
+            }
             if ($params['playwithoutmoving'] != $playmode) {
                 $changesinplaymode = true;
             }
@@ -833,7 +841,7 @@ class update_stages extends external_api
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }
         $result['roadfinished'] = $roadfinished;
-        $result['available'] = $available->available;
+        $result['available'] = $previewing ? true : $available->available;
         $result['playwithoutmoving'] = intval($playmode);
         $result['qrexpected'] = intval($qrmode);
         $result['groupmode'] = intval($treasurehunt->groupmode);
