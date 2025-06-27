@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v1.8.2 Trigger Clue dialog after each notification. Preview mode for teachers.
  - v1.8.1 Fix compatibility with some themes and fix deprecated code in moodle and php 8.
  - v1.8.0 Moodle 5.0 release. Add support for overview api.
  - v1.7.1 Improve SVG static images. Fix aspect ratio of images to ensure that SVG are rendered vectorial.
