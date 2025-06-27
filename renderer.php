@@ -609,15 +609,7 @@ I18N;
             $message = get_string('grademethodinfo', 'treasurehunt', $a);
             $o .= html_writer::tag('p', $message . $this->help_icon('grademethod', 'treasurehunt')) . "\n";
         }
-        if ($notavailable) {
-            $urlparams = array('id' => $info->courseid);
-            $o .= $this->output->single_button(
-                new moodle_url('/course/view.php', $urlparams),
-                get_string('backtocourse', 'treasurehunt'),
-                'get',
-                array('class' => 'continuebutton')
-            );
-        }
+
         // Close the container and insert a spacer.
         $o .= $this->output->container_end();
 

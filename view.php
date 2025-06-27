@@ -129,7 +129,10 @@ if (
             $username,
             $teacherreview
         );
-        if (has_capability('mod/treasurehunt:enterplayer', $context)) {
+        /**
+         * Show play/review button if the user has the capability to enter as player.
+         */
+        if (has_any_capability(['mod/treasurehunt:enterplayer', 'mod/treasurehunt:managetreasurehunt'], $context)) {
             // Si no ha finalizado pongo el botón de jugar.
             $urlparams = array('id' => $user_attempt_renderable->coursemoduleid);
             if ($user_attempt_renderable->outoftime || $user_attempt_renderable->roadfinished) {
@@ -142,11 +145,16 @@ if (
                 echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), $string, 'get');
             }
         }
-        
         // Output user attempt history.
         echo $output->render($user_attempt_renderable);
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
+    }
+} else {
+    // If the user can manage the treasurehunt, show "preview" button.
+    if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
+        $urlparams = array('id' => $cm->id);
+        echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), get_string('preview', 'treasurehunt'), 'get', array('class' => 'continuebutton'));
     }
 }
 echo $output->box_end();

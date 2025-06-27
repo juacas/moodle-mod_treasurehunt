@@ -1,9 +1,4 @@
 <?php
-
-use core\notification;
-use core\session\exception;
-use mod_treasurehunt\model\stage;
-
 // This file is part of Treasurehunt for Moodle
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -32,6 +27,11 @@ use mod_treasurehunt\model\stage;
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
+use core\notification;
+use core\session\exception;
+use mod_treasurehunt\model\stage;
+
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/GeoJSON/GeoJSON.class.php');
