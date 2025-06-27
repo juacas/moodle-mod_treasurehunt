@@ -535,7 +535,7 @@ define([
       let currentposition;
       let coordinates;
       let answerid;
-
+      // Get the position from the marker or from the geolocation.
       if (playwithoutmoving) {
         coordinates = markerFeature.getGeometry();
       } else {
@@ -583,21 +583,21 @@ define([
           available = response.available;
           setLoading(false);
 
-          // If I have sent a location or an answer I print out whether it is correct or not.
+  // If I have sent a location or an answer I print out whether it is correct or not.
           if (location || selectedanswerid) {
             if (response.status !== null && available) {
               toast(response.status.msg);
             }
             markerFeature.setGeometry(null);
           }
-          // If change the game mode (mobile or static).
+  // If change the game mode (mobile or static).
           if (playwithoutmoving != response.playwithoutmoving) {
             playwithoutmoving = response.playwithoutmoving;
             if (!playwithoutmoving) {
               markerFeature.setGeometry(null);
             }
           }
-          // If change the group mode.
+  // If change the group mode.
           if (groupmode != response.groupmode) {
             groupmode = response.groupmode;
           }
@@ -613,7 +613,7 @@ define([
               attemptshistory = response.attempthistory;
               changesinattemptshistory = true;
             }
-            // Compruebo si es distinto de null, lo que indica que se ha actualizado.
+  // Compruebo si es distinto de null, lo que indica que se ha actualizado.
             if (response.attempts || response.firststagegeom) {
               source.clear();
               if (response.firststagegeom) {
@@ -633,7 +633,7 @@ define([
                 );
               }
             }
-            // Check if it exists, which indicates that it has been updated.
+  // Check if it exists, which indicates that it has been updated.
             if (response.lastsuccessfulstage) {
               lastsuccessfulstage = response.lastsuccessfulstage;
               changesinlastsuccessfulstage = true;
@@ -673,6 +673,11 @@ define([
             });
             $("#notificationsPopup .update-list").html(body);
             openModal("#notificationsPopup");
+            // On close the modal, show the clue model.
+            $("#notificationsPopup").on("modal:close", function () {
+                // Show the clue modal.
+                openModal("#cluepage"); 
+            });
           }
           if (!roadfinished) {
             $("#roadended").hide();
@@ -1185,16 +1190,25 @@ define([
       // Close previous modal
       closeModal();
       const modal = $(id);
-      modal.trigger("modal:open");
       modal.addClass("active");
       $(`${id} .modal-mask`).addClass("active dismissible");
+      modal.trigger("modal:open");
     }
+    /**
+     * Close all active modals.
+     */
     function closeModal() {
-      const modal = $(".play-modal.active");
-      modal.trigger("modal:close");
-      modal.removeClass("active");
+      const modals = $(".play-modal.active");
+      // Remove active class from all modals.
+      modals.removeClass("active");
       $(".modal-mask").removeClass("active dismissible");
+      // Trigger close event for each modal.
+      modals.each((index, modal) => {
+        $(modal).trigger("modal:close");
+      });
     }
+
+
     function get_block_text(title, body) {
       return `<div class="card">
           <div class="card-body">
