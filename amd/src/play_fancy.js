@@ -23,7 +23,7 @@
  */
 define(['jquery',
     'core/url',
-    'mod_treasurehunt/ol',
+    'mod_treasurehunt/ol4',
     'core/ajax',
     'mod_treasurehunt/osm-geocoder',
 	'mod_treasurehunt/viewgpx',

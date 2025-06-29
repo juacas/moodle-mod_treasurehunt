@@ -14,39 +14,6 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
- * TODO describe module play_bootstrap_new
- *
- * @module     mod_treasurehunt/play_bootstrap_new
- * @copyright  2025 YOUR NAME <your@email.com>
- * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
-import $ from "jquery";
-import url from "core/url";
-import ol from "mod_treasurehunt/ol";
-import ajax from "core/ajax";
-import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
-import viewgpx from "mod_treasurehunt/viewgpx";
-import {getStrings} from "core/str";
-import webqr from "mod_treasurehunt/webqr";
-// Side‑effect only imports
-import "mod_treasurehunt/jquery.truncate";
-import "mod_treasurehunt/dropdown";
-
-/**
  * @module    mod_treasurehunt/play
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
@@ -55,12 +22,22 @@ import "mod_treasurehunt/dropdown";
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-
-let init = {
+define([
+  "jquery",
+  "core/url",
+  "mod_treasurehunt/ol",
+  "core/ajax",
+  "mod_treasurehunt/osm-geocoder",
+  "mod_treasurehunt/viewgpx",
+  "core/str",
+  "mod_treasurehunt/webqr",
+  "mod_treasurehunt/jquery.truncate",
+  "mod_treasurehunt/dropdown",
+], function ($, url, ol, ajax, OSMGeocoder, viewgpx, str, webqr) {
+  let init = {
     playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
-      lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user,
-      custommapconfig, customplayerconfig) {
-
+      lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, customplayerconfig
+    ) {
       if (customplayerconfig === undefined) {
         customplayerconfig = {};
       }
@@ -75,7 +52,7 @@ let init = {
         return { key: term, component: "treasurehunt" };
       });
       // i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
-      getStrings(stringsqueried).then((strings) => {
+      str.get_strings(stringsqueried).done((strings) => {
         let i18n = [];
         for (let i = 0; i < terms.length; i++) {
           i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
@@ -96,7 +73,7 @@ let init = {
 
             initplaytreasurehunt(i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
               lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
-              user, custommapconfig, customplayerconfig);
+              user, custommapconfig);
           });
           img.src = custommapconfig.custombackgroundurl;
         } else {
@@ -111,14 +88,13 @@ let init = {
             gameupdatetime,
             tracking,
             user,
-            custommapconfig,
-            customplayerconfig
+            custommapconfig
           );
         }
       });
     }, // End of function playtreasurehunt.
   };
-
+  return init;
   /**
    * Calculate customimageextent.
    * @param {Object} custommapconfig The custom map configuration.
@@ -164,7 +140,6 @@ let init = {
    * @param {boolean} tracking If true, the player is being tracked.
    * @param {Object} user The user object.
    * @param {Object} custommapconfig The custom map configuration.
-   * @param {Object} customplayerconfig The custom player configurations for extension.
    */
   function initplaytreasurehunt(
     strings,
@@ -177,8 +152,7 @@ let init = {
     gameupdatetime,
     tracking,
     user,
-    custommapconfig,
-    customplayerconfig = {}
+    custommapconfig
   ) {
     // I18n support.
     // console.log("init player Openlayers");
@@ -189,10 +163,7 @@ let init = {
     let geographictools = true;
     let defaultzoom = 15;
     let supportsTouch = "ontouchstart" in window || navigator.msMaxTouchPoints;
-    // Check custom player configuration.
-    if (customplayerconfig && customplayerconfig.defaultzoom) {
-      defaultzoom = customplayerconfig.defaultzoom;
-    }
+
     // Support customized base layers.
     if (custommapconfig) {
       if (custommapconfig.custombackgroundurl) {
@@ -322,7 +293,18 @@ let init = {
       text: selectText,
       zIndex: "Infinity",
     });
-
+    let positionFeatureStyle = new ol.style.Style({
+      image: new ol.style.Circle({
+        radius: 6,
+        fill: new ol.style.Fill({
+          color: [0, 0, 0, 1],
+        }),
+        stroke: new ol.style.Stroke({
+          color: [255, 255, 255, 1],
+          width: 2,
+        }),
+      }),
+    });
     let accuracyFeatureStyle = new ol.style.Style({
       fill: new ol.style.Fill({
         color: [255, 255, 255, 0.3],
@@ -333,15 +315,23 @@ let init = {
       }),
       zIndex: -1,
     });
-    /*-------------------------------Layers---------------------------------*/
+    let markerFeatureStyle = new ol.style.Style({
+      image: new ol.style.Icon({
+        anchor: [0.5, 0.9],
+        opacity: 1,
+        scale: 1,
+        src: markerurl,
+      }),
+    });
+    /*-------------------------------Layers-----------------------------------*/
     let layers = [];
     let geoJSONFormat = new ol.format.GeoJSON();
-    let attemptsource = new ol.source.Vector({
+    let source = new ol.source.Vector({
       projection: "EPSG:3857",
     });
     let attemptslayer = new ol.layer.Vector({
-      source: attemptsource,
-      style: attempt_style,
+      source: source,
+      style: style_function,
     });
     let layersbase = [];
     let layersoverlay = [];
@@ -410,36 +400,28 @@ let init = {
     accuracyFeature.setStyle(accuracyFeatureStyle);
     let positionFeature = new ol.Feature();
     positionFeature.setProperties({ name: "user_position" });
-    let userPositionLayer = new ol.layer.Vector({
+    positionFeature.setStyle(positionFeatureStyle);
+    let userPosition = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: [accuracyFeature, positionFeature],
       }),
-      style: positionFeatureStyle
     });
     let markerFeature = new ol.Feature();
     markerFeature.setGeometry(null);
     markerFeature.setStyle(markerFeatureStyle);
-    let markerLayer = new ol.layer.Vector({
+    let markerVector = new ol.layer.Vector({
       source: new ol.source.Vector({
         features: [markerFeature],
       }),
     });
     layers.push(layergroup);
     layers = layers.concat(layersoverlay);
-    layers = layers.concat([attemptslayer, userPositionLayer, markerLayer]);
+    layers = layers.concat([attemptslayer, userPosition, markerVector]);
     // New Custom zoom.
     let zoom = new ol.control.Zoom({
       target: "navigation",
       className: "custom-zoom",
     });
-
-    // Compass control.
-    // let compass = new ol.control.Compass({
-    //   target: "navigation",
-    //   className: "custom-compass",
-    // });
-
-
     let map = new ol.Map({
       layers: layers,
       overlays: [overlay],
@@ -483,7 +465,7 @@ let init = {
      * Style function for the features.
      * @param {ol.Feature} feature The feature to style.
      */
-    function attempt_style(feature) {
+    function style_function(feature) {
       // Get the income level from the feature properties.
       let stageposition = feature.get("stageposition");
       if (stageposition === 0) {
@@ -675,9 +657,9 @@ let init = {
             }
   // Compruebo si es distinto de null, lo que indica que se ha actualizado.
             if (response.attempts || response.firststagegeom) {
-              attemptsource.clear();
+              source.clear();
               if (response.firststagegeom) {
-                attemptsource.addFeatures(
+                source.addFeatures(
                   geoJSONFormat.readFeatures(response.firststagegeom, {
                     dataProjection: "EPSG:4326",
                     featureProjection: "EPSG:3857",
@@ -685,7 +667,7 @@ let init = {
                 );
               }
               if (response.attempts.features.length > 0) {
-                attemptsource.addFeatures(
+                source.addFeatures(
                   geoJSONFormat.readFeatures(response.attempts, {
                     dataProjection: "EPSG:4326",
                     featureProjection: "EPSG:3857",
@@ -763,14 +745,14 @@ let init = {
      */
     function fit_map_to_source() {
       if (fitmap) {
-        let features = attemptsource.getFeatures();
+        let features = source.getFeatures();
         if (
           features.length === 1 &&
           features[0].getGeometry() instanceof ol.geom.Point
         ) {
           fly_to(map, features[0].getGeometry().getCoordinates());
         } else {
-          fly_to(map, null, attemptsource.getExtent());
+          fly_to(map, null, source.getExtent());
         }
 
         fitmap = false;
@@ -1341,72 +1323,6 @@ let init = {
       }
     }
     /**
-     * Style for manual marker.
-     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
-     */
-    function markerFeatureStyle() {
-        let styles = [
-           new ol.style.Style({
-            image: new ol.style.Icon({
-              anchor: [0.5, 0.9],
-              opacity: 1,
-              scale: 1,
-              src: markerurl,
-              }),
-          }),
-          positionFeatureStyle(markerFeature)
-        ];
-      return styles;
-    }
-    /**
-     * Style for position marker.
-     * @param {ol.Feature} feature  The feature to style.
-     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
-     */
-    function positionFeatureStyle(feature) {
-      let targetfeature = attemptsource.getFeatures()[0];
-      let rotation = 0;
-      if (!targetfeature) {
-        rotation = 0;
-      } else { //TODO: check orientation hint setting, retrieve all features from server.
-        rotation = calculateHeading(
-          feature.getGeometry(),
-          targetfeature.getGeometry()
-        );
-      }
-      let style = new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 255, 0.2)',
-          }),
-          image: new ol.style.Icon({
-            src: './pix/bootstrap/geolocation_marker_heading.png',
-            rotateWithView: true,
-            rotation: rotation,
-          // size: 64, // Scale the icon to fit the map.
-          }),
-        });
-      return style;
-    }
-    /**
-     * Calculate the heading from two geometries.
-     * @param {ol.geom.Point} start The start point geometry.
-     * @param {ol.geom.Geometry} end The end point geometry.
-     * @returns {number} The heading in radians.
-     */
-    function calculateHeading(start, end) {
-      // Get closest point to the end geometry.
-      let closestPoint = end.getClosestPoint(start.getCoordinates());
-      // Calculate the heading from start to closest point.
-      let deltaX = closestPoint[0] - start.getCoordinates()[0];
-      let deltaY = closestPoint[1] - start.getCoordinates()[1];
-      let heading = Math.atan2(deltaY, deltaX);
-      // Normalize the heading to be between 0 and 2*PI.
-      if (heading < 0) {
-        heading += 2 * Math.PI;
-      }
-      return -heading + Math.PI / 2; // Add PI/2 to align with the icon orientation.
-    }
-    /**
      * Scan QR event handler.
      * @param {string} value The value of the QR code.
      */
@@ -1434,6 +1350,5 @@ let init = {
         }
       }
     }
-}
-
-export default init;
+  }
+});

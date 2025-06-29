@@ -51,48 +51,48 @@ class user_progress extends external_api
             array(
                 'userprogress' => new external_single_structure(
                     array(
-                    'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-                    'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
-                    'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
-                    'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
-                    'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
-                    'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
-                    'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
-                    'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
-                    'qrtext' => new external_value(PARAM_TEXT, 'Text scanned', VALUE_OPTIONAL),
-                    'applang' => new external_value(PARAM_TEXT, 'Mobile app language', VALUE_OPTIONAL),
-                    'changedapplang' => new external_value(PARAM_BOOL, 'If true, mobile app language has changed', VALUE_OPTIONAL),
-                    'location' => new external_single_structure(
-                        array(
-                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                        'coordinates' => new external_single_structure(
+                        'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
+                        'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+                        'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
+                        'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
+                        'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
+                        'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
+                        'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
+                        'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
+                        'qrtext' => new external_value(PARAM_TEXT, 'Text scanned', VALUE_OPTIONAL),
+                        'applang' => new external_value(PARAM_TEXT, 'Mobile app language', VALUE_OPTIONAL),
+                        'changedapplang' => new external_value(PARAM_BOOL, 'If true, mobile app language has changed', VALUE_OPTIONAL),
+                        'location' => new external_single_structure(
                             array(
-                            new external_value(PARAM_FLOAT, "Longitude"),
-                            new external_value(PARAM_FLOAT, "Latitude")
+                                'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                                'coordinates' => new external_single_structure(
+                                    array(
+                                        new external_value(PARAM_FLOAT, "Longitude"),
+                                        new external_value(PARAM_FLOAT, "Latitude")
+                                    ),
+                                    'Coordinates definition in geojson format for point'
                                 ),
-                            'Coordinates definition in geojson format for point'
-                        ),
-                            ),
-                        'Geometry definition in geojson format',
-                        VALUE_OPTIONAL
-                    ),
-                        'currentposition' => new external_single_structure(
-                            array(
-                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                        'coordinates' => new external_single_structure(
-                            array(
-                            new external_value(PARAM_FLOAT, "Longitude"),
-                            new external_value(PARAM_FLOAT, "Latitude")
-                                ),
-                            'Coordinates definition in geojson format for point'
-                        ),
                             ),
                             'Geometry definition in geojson format',
                             VALUE_OPTIONAL
                         ),
-                        )
+                        'currentposition' => new external_single_structure(
+                            array(
+                                'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                                'coordinates' => new external_single_structure(
+                                    array(
+                                        new external_value(PARAM_FLOAT, "Longitude"),
+                                        new external_value(PARAM_FLOAT, "Latitude")
+                                    ),
+                                    'Coordinates definition in geojson format for point'
+                                ),
+                            ),
+                            'Geometry definition in geojson format',
+                            VALUE_OPTIONAL
+                        ),
+                    )
                 )
-                )
+            )
         );
     }
 
@@ -104,81 +104,84 @@ class user_progress extends external_api
     {
         return new external_single_structure(
             array(
-            'attempts' => new external_single_structure(
-                array('type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
-                'features' => new external_multiple_structure(
-                    new external_single_structure(
-                        array(
-                    'type' => new external_value(PARAM_TEXT, 'Feature'),
-                    'id' => new external_value(PARAM_INT, 'Feature id'),
-                    'geometry' => new external_single_structure(
-                        array(
-                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                        'coordinates' => new external_single_structure(
-                            array(
-                            new external_value(PARAM_FLOAT, "Longitude"),
-                            new external_value(PARAM_FLOAT, "Latitude")
-                                ),
-                            'Coordinates definition in geojson format for points'
-                        )
-                            ),
-                        'Geometry definition in geojson format'
-                    ),
-                        'properties' => new external_single_structure(
-                            array(
-                        'roadid' => new external_value(PARAM_INT, "Associated road id"),
-                        'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
-                        'name' => new external_value(PARAM_RAW, "Name of associated stage"),
-                        'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
-                        'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
-                        'geometrysolved' => new external_value(PARAM_BOOL, "If true, geometry of attempt is solved"),
-                        'info' => new external_value(PARAM_RAW, "The info text of attempt")
-                            )
-                        )
-                        )
-                    ),
-                    'Features definition in geojson format'
-                )
-                    ),
-                'All attempts of the user/group in geojson format',
-                VALUE_OPTIONAL
-            ),
-                'firststagegeom' => new external_single_structure(
-                    array('type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
-                'features' => new external_multiple_structure(
-                    new external_single_structure(
-                        array(
-                    'type' => new external_value(PARAM_TEXT, 'Feature'),
-                    'id' => new external_value(PARAM_INT, 'Feature id'),
-                    'geometry' => new external_single_structure(
-                        array(
-                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                        'coordinates' => new external_multiple_structure(
-                            new external_multiple_structure(
-                                new external_multiple_structure(
-                                        new external_single_structure(
+                'attempts' => new external_single_structure(
+                    array(
+                        'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
+                        'features' => new external_multiple_structure(
+                            new external_single_structure(
+                                array(
+                                    'type' => new external_value(PARAM_TEXT, 'Feature'),
+                                    'id' => new external_value(PARAM_INT, 'Feature id'),
+                                    'geometry' => new external_single_structure(
                                         array(
-                            new external_value(PARAM_FLOAT, "Longitude"),
-                            new external_value(PARAM_FLOAT, "Latitude"))
+                                            'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                                            'coordinates' => new external_single_structure(
+                                                array(
+                                                    new external_value(PARAM_FLOAT, "Longitude"),
+                                                    new external_value(PARAM_FLOAT, "Latitude")
+                                                ),
+                                                'Coordinates definition in geojson format for points'
+                                            )
+                                        ),
+                                        'Geometry definition in geojson format'
+                                    ),
+                                    'properties' => new external_single_structure(
+                                        array(
+                                            'roadid' => new external_value(PARAM_INT, "Associated road id"),
+                                            'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
+                                            'name' => new external_value(PARAM_RAW, "Name of associated stage"),
+                                            'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
+                                            'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
+                                            'geometrysolved' => new external_value(PARAM_BOOL, "If true, geometry of attempt is solved"),
+                                            'info' => new external_value(PARAM_RAW, "The info text of attempt")
+                                        )
                                     )
+                                )
+                            ),
+                            'Features definition in geojson format'
+                        )
+                    ),
+                    'All attempts of the user/group in geojson format',
+                    VALUE_OPTIONAL
+                ),
+                'firststagegeom' => new external_single_structure(
+                    array(
+                        'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
+                        'features' => new external_multiple_structure(
+                            new external_single_structure(
+                                array(
+                                    'type' => new external_value(PARAM_TEXT, 'Feature'),
+                                    'id' => new external_value(PARAM_INT, 'Feature id'),
+                                    'geometry' => new external_single_structure(
+                                        array(
+                                            'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                                            'coordinates' => new external_multiple_structure(
+                                                new external_multiple_structure(
+                                                    new external_multiple_structure(
+                                                        new external_single_structure(
+                                                            array(
+                                                                new external_value(PARAM_FLOAT, "Longitude"),
+                                                                new external_value(PARAM_FLOAT, "Latitude")
+                                                            )
+                                                        )
+                                                    )
+                                                ),
+                                                'Coordinates definition in geojson format for multipolygon'
+                                            )
+                                        ),
+                                        'Geometry definition in geojson format'
+                                    ),
+                                    'properties' => new external_single_structure(
+                                       [
+                                            'roadid' => new external_value(PARAM_INT, "Associated road id"),
+                                            'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
+                                            'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
+                                        ]
                                     )
+                                )
                             ),
-                            'Coordinates definition in geojson format for multipolygon'
+                            'Features definition in geojson format'
                         )
-                            ),
-                        'Geometry definition in geojson format'
-                    ),
-                        'properties' => new external_single_structure(
-                            array(
-                        'roadid' => new external_value(PARAM_INT, "Associated road id"),
-                        'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
-                        'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
-                            )
-                        )
-                        )
-                    ),
-                    'Features definition in geojson format'
-                )
                     ),
                     'First stage geometry in geojson format',
                     VALUE_OPTIONAL
@@ -191,19 +194,19 @@ class user_progress extends external_api
                 ),
                 'lastsuccessfulstage' => new external_single_structure(
                     array(
-                'id' => new external_value(PARAM_INT, 'The id of the last successful stage.'),
-                'position' => new external_value(PARAM_INT, 'The position of the last successful stage.'),
-                'name' => new external_value(PARAM_RAW, 'The name of the last successful stage.'),
-                'clue' => new external_value(PARAM_RAW, 'The clue of the last successful stage.'),
-                'question' => new external_value(PARAM_RAW, 'The question of the last successful stage.'),
-                'answers' => new external_multiple_structure(new external_single_structure(
-                    array(
-                    'id' => new external_value(PARAM_INT, 'The id of answer'),
-                    'answertext' => new external_value(PARAM_RAW, 'The text of answer')
-                        )
-                ), 'Array with all answers of the last successful stage.'),
-                    'totalnumber' => new external_value(PARAM_INT, 'The total number of stages on the road.'),
-                    'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
+                        'id' => new external_value(PARAM_INT, 'The id of the last successful stage.'),
+                        'position' => new external_value(PARAM_INT, 'The position of the last successful stage.'),
+                        'name' => new external_value(PARAM_RAW, 'The name of the last successful stage.'),
+                        'clue' => new external_value(PARAM_RAW, 'The clue of the last successful stage.'),
+                        'question' => new external_value(PARAM_RAW, 'The question of the last successful stage.'),
+                        'answers' => new external_multiple_structure(new external_single_structure(
+                            array(
+                                'id' => new external_value(PARAM_INT, 'The id of answer'),
+                                'answertext' => new external_value(PARAM_RAW, 'The text of answer')
+                            )
+                        ), 'Array with all answers of the last successful stage.'),
+                        'totalnumber' => new external_value(PARAM_INT, 'The total number of stages on the road.'),
+                        'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
                     ),
                     'object with data from the last successful stage',
                     VALUE_OPTIONAL
@@ -216,19 +219,20 @@ class user_progress extends external_api
                 'attempthistory' => new external_multiple_structure(
                     new external_single_structure(
                         array(
-                    'string' => new external_value(PARAM_RAW, 'The info text of attempt'),
-                    'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
-                    )
+                            'string' => new external_value(PARAM_RAW, 'The info text of attempt'),
+                            'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
+                        )
                     ),
                     'Array with user/group historical attempts.'
                 ),
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                 'status' => new external_single_structure(
                     array(
-                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code'))
+                        'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                        'msg' => new external_value(PARAM_RAW, 'message explain code')
+                    )
                 )
-                )
+            )
         );
     }
     /**
@@ -308,9 +312,9 @@ class user_progress extends external_api
         if ($previewing || ($available->available && !$roadfinished)) {
             $changesinplaymode = false;
             if ($previewing) {
-            // Play without moving is always available for teachers for previewing.
+                // Play without moving is always available for teachers for previewing.
                 $playmode = 1;
-                $available->actnotavailableyet  = false;
+                $available->actnotavailableyet = false;
             } else {
                 $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
             }
@@ -371,12 +375,14 @@ class user_progress extends external_api
             }
             $qoaremoved = $qocsolved->qoaremoved;
             // If the stage location is not solved, check if the user can play and has found the location.
-            if (!$updates->geometrysolved
-                    && has_capability('mod/treasurehunt:play', $context)
-                    && (isset($params['location']) || isset($params['qrtext']))
-                    && !$updateroad
-                    && !$changesinplaymode
-                    && !$changesingroupmode) {
+            if (
+                !$updates->geometrysolved
+                && has_capability('mod/treasurehunt:play', $context)
+                && (isset($params['location']) || isset($params['qrtext']))
+                && !$updateroad
+                && !$changesinplaymode
+                && !$changesingroupmode
+            ) {
                 $qrtextparam = isset($params['qrtext']) ? $params['qrtext'] : null;
                 $locationparam = isset($params['location']) ? treasurehunt_geojson_to_object($params['location']) : null;
                 $checklocation = treasurehunt_check_user_location(
@@ -418,12 +424,14 @@ class user_progress extends external_api
             $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
         $lastsuccessfulstage = array();
-        if ($updates->geometrysolved
-                || !$available->available
-                || $updateroad
-                || $updates->attemptsolved
-                || $params['initialize']
-                || $changesingroupmode) {
+        if (
+            $updates->geometrysolved
+            || !$available->available
+            || $updateroad
+            || $updates->attemptsolved
+            || $params['initialize']
+            || $changesingroupmode
+        ) {
             $lastsuccessfulstage = treasurehunt_get_last_successful_stage(
                 $USER->id,
                 $userparams->groupid,
@@ -435,12 +443,14 @@ class user_progress extends external_api
             );
         }
 
-        if ($updates->newgeometry
-                || $updateroad
-                || $roadfinished
-                || $params['initialize']
-                || $changesingroupmode
-                || $params['changedapplang'] ?? false) {
+        if (
+            $updates->newgeometry
+            || $updateroad
+            || $roadfinished
+            || $params['initialize']
+            || $changesingroupmode
+            || $params['changedapplang'] ?? false
+        ) {
             list($userattempts, $firststagegeom) = treasurehunt_get_user_progress(
                 $userparams->roadid,
                 $userparams->groupid,
@@ -495,6 +505,8 @@ class user_progress extends external_api
             }
             $result['attempts'] = $userattempts;
         }
+        // TODO: Check and send nextstagegeom.
+        // TODO: JPC 
         if ($lastsuccessfulstage) {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }

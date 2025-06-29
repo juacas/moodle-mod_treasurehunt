@@ -1381,6 +1381,10 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         // Convert the feature format in GeoJSON.
         $firststagegeomgeojson = treasurehunt_features_to_geojson($firststagegeom, $context, $treasurehuntid, $groupid);
     }
+    // TODO: Check and add the next feature to attemptsgeojson.
+    // Get the stages in the road.
+
+    
     // Convert the features format in GeoJSON.
     $attemptsgeojson = treasurehunt_features_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
     return array($attemptsgeojson, $firststagegeomgeojson);

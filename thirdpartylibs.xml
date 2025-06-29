@@ -10,7 +10,7 @@
 	<library>
 		<location>amd/src/ol.js</location>
 		<name>Openlayers</name>
-		<version>3.16.0</version>
+		<version>4.6.1</version>
 		<license>FreeBSD</license>
 		<licenseversion>n/a</licenseversion>
 	</library>

@@ -1,5 +1,10 @@
 Notes for minimize JS
-
+cd /rootdir
 npm install
-npm install grunt-contrib-uglify grunt-contrib-jshint
-grunt amd --force
+npm -g install grunt-cli
+
+npx grunt watch
+
+#Debug browser
+start msedge.exe --remote-debugging-port=9222
+Open dev tools F12
