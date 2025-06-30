@@ -87,6 +87,18 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->addElement('advcheckbox', 'localizationbuttondisabled', get_string('localizationbuttondisabled', 'treasurehunt'));
         $mform->addHelpButton('localizationbuttondisabled', 'localizationbuttondisabled', 'treasurehunt');
         $mform->setDefault('localizationbuttondisabled', false);
+        // Checkbox for heading hint.
+        $mform->addElement('advcheckbox', 'showheadinghint', get_string('showheadinghint', 'treasurehunt'));
+        $mform->addHelpButton('showheadinghint', 'showheadinghint', 'treasurehunt');
+        $mform->setDefault('showheadinghint', false);
+        // Checkbox for in zone hint.
+        $mform->addElement('advcheckbox', 'showinzonehint', get_string('showinzonehint', 'treasurehunt'));
+        $mform->addHelpButton('showinzonehint', 'showinzonehint', 'treasurehunt');
+        $mform->setDefault('showinzonehint', false);
+        // Checkbox for distance hint.
+        $mform->addElement('advcheckbox', 'showdistancehint', get_string('showdistancehint', 'treasurehunt'));
+        $mform->addHelpButton('showdistancehint', 'showdistancehint', 'treasurehunt');
+        $mform->setDefault('showdistancehint', false);
 
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.

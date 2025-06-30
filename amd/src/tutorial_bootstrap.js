@@ -15,94 +15,94 @@
 
 /**
  * @module    mod_treasurehunt/tutorial
- * @package   mod_treasurehunt
+ * @package
  * @copyright 2016 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+import $ from "jquery";
+import introJS from "mod_treasurehunt/intro";
+import {getStrings} from "core/str";
+import notification from "core/notification";
 
-define([
-  "jquery",
-  "mod_treasurehunt/intro",
-  "core/str",
-  "core/notification",
-], function ($, introJS, str, notification) {
-  let init = {
-    launchedittutorial: function () {
-      let intro = introJS();
-      let terms = [
-        "nextstep",
-        "prevstep",
-        "skiptutorial",
-        "donetutorial",
-        "welcome_edit_tour",
-        "map_tour",
-        "mapplay_tour",
-        "roads_tour",
-        "stages_tour",
-        "addroad_tour",
-        "addstage_tour",
-        "save_tour",
-        "editend_tour",
-      ];
-      let stringQueried = terms.map((term) => {
-        return { key: term, component: "treasurehunt" };
-      });
-      $(".treasurehunt-editor-loader").show();
-      str
-        .get_strings(stringQueried)
-        .done((strings) => {
-          $(".treasurehunt-editor-loader").hide();
-          configureBootstrapEditIntro(intro, strings, terms);
-          intro.start();
-        })
-        .fail(notification.exception);
-    },
-    editpage: function () {
-      $("#edition_maintitle > h2 > a").on("click", this.launchedittutorial);
-      const introEditProgress = localStorage.getItem("introEditProgress");
-      if (introEditProgress != "Done") {
-        this.launchedittutorial();
-      }
-    }, // end of editpage function
-    launchplaytutorial: function () {
-      let intro = introJS();
-      let terms = [
-        "nextstep",
-        "prevstep",
-        "skiptutorial",
-        "donetutorial",
-        "welcome_play_tour",
-        "lastsuccessfulstage_tour",
-        "mapplay_tour",
-        "validatelocation_tour",
-        "autolocate_tour",
-        "playend_tour",
-      ];
-      let stringQueried = terms.map((term) => {
-        return { key: term, component: "treasurehunt" };
-      });
-      $(".global-loader").addClass("active");
-      str
-        .get_strings(stringQueried)
-        .done((strings) => {
-          $(".global-loader").removeClass("active");
-          configureBootstrapPlayIntro(intro, strings, terms);
-          intro.start();
-        })
-        .fail(notification.exception);
-    },
-    playpage: function () {
-      $("#playerhelp").on("click", this.launchplaytutorial);
-      const introPlayProgress = localStorage.getItem("introPlayProgress");
-      if (introPlayProgress != "Done") {
-        this.launchplaytutorial();
-      }
-    }, // ...end of playpage function.
-  }; // ...end of init let.
-  return init;
-}); // ...end of module define function.
-
+let init = {
+  launchedittutorial: function () {
+    let intro = introJS();
+    let terms = [
+      "nextstep",
+      "prevstep",
+      "skiptutorial",
+      "donetutorial",
+      "welcome_edit_tour",
+      "map_tour",
+      "mapplay_tour",
+      "roads_tour",
+      "stages_tour",
+      "addroad_tour",
+      "addstage_tour",
+      "save_tour",
+      "editend_tour",
+    ];
+    let stringQueried = terms.map((term) => {
+      return { key: term, component: "treasurehunt" };
+    });
+    $(".treasurehunt-editor-loader").show();
+    getStrings(stringQueried)
+      .then((strings) => {
+        $(".treasurehunt-editor-loader").hide();
+        configureBootstrapEditIntro(intro, strings, terms);
+        intro.start();
+      })
+      .catch(notification.exception);
+  },
+  editpage: function () {
+    $("#edition_maintitle > h2 > a").on("click", this.launchedittutorial);
+    const introEditProgress = localStorage.getItem("introEditProgress");
+    if (introEditProgress != "Done") {
+      this.launchedittutorial();
+    }
+  }, // end of editpage function
+  launchplaytutorial: function () {
+    let intro = introJS();
+    let terms = [
+      "nextstep",
+      "prevstep",
+      "skiptutorial",
+      "donetutorial",
+      "welcome_play_tour",
+      "lastsuccessfulstage_tour",
+      "mapplay_tour",
+      "validatelocation_tour",
+      "autolocate_tour",
+      "playend_tour",
+    ];
+    let stringQueried = terms.map((term) => {
+      return { key: term, component: "treasurehunt" };
+    });
+    $(".global-loader").addClass("active");
+    getStrings(stringQueried)
+      .then((strings) => {
+        $(".global-loader").removeClass("active");
+        // Configure the intro.
+        configureBootstrapPlayIntro(intro, strings, terms);
+        intro.start();
+      })
+      .catch(notification.exception);
+  },
+  playpage: function () {
+    $("#playerhelp").on("click", this.launchplaytutorial);
+    let introPlayProgress = localStorage.getItem("introPlayProgress");
+    if (introPlayProgress != "Done") {
+      this.launchplaytutorial();
+    }
+  }, // ...end of playpage function.
+}; // ...end of init let.
+/**
+ * Configure the Bootstrap tutorial for the editing page.
+ * @param {introJS} intro
+ * @param {Array<string>} strings language strings.
+ * @param {Array<string>} keys for the strings.
+ */
 function configureBootstrapEditIntro(intro, strings, keys) {
   intro.setOptions({
     nextLabel: strings[keys.indexOf("nextstep")],
@@ -158,11 +158,13 @@ function configureBootstrapEditIntro(intro, strings, keys) {
   intro.oncomplete(() => {
     localStorage.setItem("introEditProgress", "Done");
   });
-  intro.onchange(() => {
-    localStorage.setItem("introEditProgress", "Done");
-  });
-}
-// end of configureEditIntro
+} // end of configureEditIntro.
+/**
+ * Configure the Bootstrap tutorial for the playing page.
+ * @param {introJS} intro
+ * @param {Array<string>} strings language strings.
+ * @param {Array<string>} keys for the strings.
+ */
 function configureBootstrapPlayIntro(intro, strings, keys) {
   intro.setOptions({
     nextLabel: strings[keys.indexOf("nextstep")],
@@ -222,3 +224,5 @@ function configureBootstrapPlayIntro(intro, strings, keys) {
     }
   });
 }
+
+export default init;

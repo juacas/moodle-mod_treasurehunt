@@ -20,20 +20,6 @@
  * @copyright  2025 YOUR NAME <your@email.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-// This file is part of Moodle - http://moodle.org/
-//
-// Moodle is free software: you can redistribute it and/or modify
-// it under the terms of the GNU General Public License as published by
-// the Free Software Foundation, either version 3 of the License, or
-// (at your option) any later version.
-//
-// Moodle is distributed in the hope that it will be useful,
-// but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-// GNU General Public License for more details.
-//
-// You should have received a copy of the GNU General Public License
-// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 import $ from "jquery";
 import url from "core/url";
 import ol from "mod_treasurehunt/ol";
@@ -42,6 +28,9 @@ import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
 import {getStrings} from "core/str";
 import webqr from "mod_treasurehunt/webqr";
+import GeolocationPositionError from "mod_treasurehunt/ol";
+
+
 // Side‑effect only imports
 import "mod_treasurehunt/jquery.truncate";
 import "mod_treasurehunt/dropdown";
@@ -54,8 +43,6 @@ import "mod_treasurehunt/dropdown";
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
-
 let init = {
     playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
       lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user,
@@ -184,6 +171,7 @@ let init = {
     // console.log("init player Openlayers");
     // $.mobile.loading("show");
     setLoading(true);
+    let nextstagefeature = null;
     let mapprojection = "EPSG:3857";
     let custombaselayer = null;
     let geographictools = true;
@@ -260,7 +248,7 @@ let init = {
     let osmGeocoderXHR;
     let osmTimer = 0;
     /*-------------------------------Styles-----------------------------------*/
-    let text = new ol.style.Text({
+    let textStyle = new ol.style.Text({
       textAlign: "center",
       scale: 1.3,
       fill: new ol.style.Fill({
@@ -289,7 +277,7 @@ let init = {
         scale: 0.5,
         src: parchmenturl,
       }),
-      text: text,
+      text: textStyle,
       zIndex: "Infinity",
     });
     let failstageStyle = new ol.style.Style({
@@ -299,7 +287,7 @@ let init = {
         scale: 0.5,
         src: failureurl,
       }),
-      text: text,
+      text: textStyle,
       zIndex: "Infinity",
     });
     let defaultSelectstageStyle = new ol.style.Style({
@@ -333,152 +321,6 @@ let init = {
       }),
       zIndex: -1,
     });
-    /*-------------------------------Layers---------------------------------*/
-    let layers = [];
-    let geoJSONFormat = new ol.format.GeoJSON();
-    let attemptsource = new ol.source.Vector({
-      projection: "EPSG:3857",
-    });
-    let attemptslayer = new ol.layer.Vector({
-      source: attemptsource,
-      style: attempt_style,
-    });
-    let layersbase = [];
-    let layersoverlay = [];
-    if (!custommapconfig || custommapconfig.onlybase === false) {
-      // Default layers
-      let aeriallayer = new ol.layer.Tile({
-        visible: false,
-        source: new ol.source.BingMaps({
-          key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
-          imagerySet: "AerialWithLabels",
-          maxZoom: 19,
-          // Use maxZoom 19 to see stretched tiles instead of the BingMaps
-          // "no photos at this zoom level" tiles
-          // maxZoom: 19.
-        }),
-      });
-      let roadlayer = new ol.layer.Tile({
-        source: new ol.source.OSM(),
-      });
-
-      aeriallayer.set("name", strings["aerialview"]);
-      roadlayer.set("name", strings["roadview"]);
-
-      layersbase = [aeriallayer, roadlayer];
-    }
-    if (custombaselayer) {
-      if (custommapconfig.layertype != "overlay") {
-        layersbase.push(custombaselayer);
-      } else {
-        layersoverlay.push(custombaselayer);
-      }
-    }
-    let layergroup = new ol.layer.Group({ layers: layersbase });
-    // Create placement for a popup over user marker.
-    var overlay = viewgpx.createCoordsOverlay(
-      "#mapplay",
-      "css/playerbootstrap/ol-popup.css",
-      strings["pegmanlabel"]
-    );
-
-    // All layers hidden except last one.
-    let toplayer = null;
-    layergroup.getLayers().forEach((layer) => {
-      layer.setVisible(false);
-      toplayer = layer;
-    });
-    toplayer.setVisible(true);
-
-    let view = new ol.View({
-      center: [0, 0],
-      zoom: 2,
-      minZoom: 2,
-    });
-    let select = new ol.interaction.Select({
-      layers: [attemptslayer],
-      style: select_style_function,
-      filter: (feature) => {
-        if (feature.get("stageposition") === 0) {
-          return false;
-        }
-        return true;
-      },
-    });
-    let accuracyFeature = new ol.Feature();
-    accuracyFeature.setProperties({ name: "user_accuracy" });
-    accuracyFeature.setStyle(accuracyFeatureStyle);
-    let positionFeature = new ol.Feature();
-    positionFeature.setProperties({ name: "user_position" });
-    let userPositionLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: [accuracyFeature, positionFeature],
-      }),
-      style: positionFeatureStyle
-    });
-    let markerFeature = new ol.Feature();
-    markerFeature.setGeometry(null);
-    markerFeature.setStyle(markerFeatureStyle);
-    let markerLayer = new ol.layer.Vector({
-      source: new ol.source.Vector({
-        features: [markerFeature],
-      }),
-    });
-    layers.push(layergroup);
-    layers = layers.concat(layersoverlay);
-    layers = layers.concat([attemptslayer, userPositionLayer, markerLayer]);
-    // New Custom zoom.
-    let zoom = new ol.control.Zoom({
-      target: "navigation",
-      className: "custom-zoom",
-    });
-
-    // Compass control.
-    // let compass = new ol.control.Compass({
-    //   target: "navigation",
-    //   className: "custom-compass",
-    // });
-
-
-    let map = new ol.Map({
-      layers: layers,
-      overlays: [overlay],
-      controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
-      target: "mapplay",
-      view: view,
-      loadTilesWhileAnimating: true,
-      loadTilesWhileInteracting: true,
-    });
-    map.addInteraction(select);
-    // It initializes the game.
-    renew_source(false, true);
-    // For the game is updated every gameupdatetime seconds.
-    interval = setInterval(() => {
-      renew_source(false, false);
-    }, gameupdatetime);
-    // Initialize the page layers.
-
-    add_layergroup_to_list(layergroup);
-    layersoverlay.forEach((overlay) => {
-      add_layer_to_list(overlay);
-    });
-    if (tracking && user) {
-      let tracklayergroup = viewgpx.addgpxlayer(
-        map,
-        cmid,
-        treasurehuntid,
-        strings,
-        user,
-        "trackgroup"
-      );
-      tracklayergroup.set("name", tracklayergroup.get("title"));
-
-      let tracklayer = tracklayergroup.getLayers().item(0);
-      let htmltitle = tracklayer.get("title"); // Has a picture and a link.
-      tracklayer.set("name", htmltitle);
-      tracklayer.setVisible(false);
-      add_layer_to_list(tracklayer);
-    }
     /**
      * Style function for the features.
      * @param {ol.Feature} feature The feature to style.
@@ -541,6 +383,312 @@ let init = {
       defaultSelectstageStyle.getText().setText("" + stageposition);
       return [defaultSelectstageStyle];
     }
+
+    /**
+     * Style for manual marker.
+     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
+     */
+    function markerFeatureStyle() {
+      let styles = [];
+      let positionstyle = new ol.style.Style({
+        fill: new ol.style.Fill({
+          color: 'rgba(255, 0, 0, 0.2)',
+        }),
+        image: new ol.style.Icon({
+          src: './pix/bootstrap/position_marker.png',
+          rotateWithView: true,
+          scale: 0.10,
+          anchor: [0.5, 0.5],
+        }),
+      });
+      let geom1 = markerFeature.getGeometry();
+      let geom2 = nextstagefeature ? nextstagefeature.getGeometry() : null;
+      // Check if the marker is in the zone.
+      let isinzone = geom2 && geom1 && geom2.intersectsCoordinate(geom1.getFirstCoordinate());
+      // If in-zone hint is enabled and if the marker is in the zone change the style.
+      if (customplayerconfig.showinzonehint == true && isinzone) {
+          positionstyle = new ol.style.Style({
+              fill: new ol.style.Fill({
+                color: 'rgba(0, 0, 255, 0.2)',
+              }),
+              image: new ol.style.Icon({
+                src: './pix/bootstrap/position_marker_in_zone.png',
+                rotateWithView: true,
+                scale: 0.10,
+                anchor: [0.5, 0.5],
+              }),
+            });
+      }
+      styles.push(positionstyle);
+      // If the marker is not in the zone, show the heading hint.
+      if (customplayerconfig.showheadinghint == true && !isinzone) {
+        let style = headingFeatureStyle(markerFeature);
+        if (style) {
+          styles.push(style);
+        }
+      }
+      // If the distance hint is enabled, add the distance label.
+      if (customplayerconfig.showdistancehint == true && !isinzone) {
+        let style = distanceLabelStyle(markerFeature);
+        if (style) {
+          styles.push(style);
+        }
+      }
+      // Add pegman marker.
+      let pegman = new ol.style.Style({
+          image: new ol.style.Icon({
+            anchor: [0.5, 0.9],
+            opacity: 1,
+            scale: 1,
+            src: markerurl,
+          }),
+        });
+      styles.push(pegman);
+      return styles;
+    }
+    /**
+     * Style for distance label.
+     * @param {ol.Feature} feature The feature to style.
+     */
+    function distanceLabelStyle(feature) {
+      let geomtarget = nextstagefeature ? nextstagefeature.getGeometry() : null;
+      let geomfeature = feature.getGeometry();
+      // Calculate distance to the target.
+      let originpoint = geomfeature.getFirstCoordinate();
+      let closestpoint = geomtarget && geomfeature ? geomtarget.getClosestPoint(originpoint) : null;
+      let linestring = geomtarget && geomfeature ? new ol.geom.LineString([originpoint, closestpoint]) : null;
+      let distance = linestring ? ol.Sphere.getLength(linestring) : null;
+      if (distance === null) {
+        // No distance to show.
+        return null;
+      }
+      let distanceText = "";
+      // Format the distance text in correct units.
+      if (distance > 1000) {
+        distanceText = (distance / 1000).toFixed(2) + " km";
+      } else if (distance > 0) {
+        distanceText = distance.toFixed(0) + " m";
+      }
+      let textStyle = new ol.style.Style({
+        placement: "point",
+        fill: new ol.style.Fill({
+          color: '#000',
+        }),
+        stroke: new ol.style.Stroke({
+          color: '#fff',
+          width: 2,
+        }),
+        text: new ol.style.Text({
+            padding: [5, 5, 5, 5],
+            offsetY: 25,
+            text: distanceText,
+            scale: 2,
+            fill: new ol.style.Fill({
+              color: '#000',
+            }),
+            stroke: new ol.style.Stroke({
+              color: '#fff',
+              width: 2,
+            }),
+            backgroundFill: new ol.style.Fill({
+              color: 'rgba(255, 255, 255, 0.7)',
+            }),
+            backgroundStroke: new ol.style.Stroke({
+              color: '#000',
+              width: 1,
+            }),
+          })
+        });
+      return textStyle;
+    }
+
+    /**
+     * Style for position marker.
+     * @param {ol.Feature} feature  The feature to style.
+     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
+     */
+    function positionLayerStyle(feature) {
+      if (feature) {
+        let style = new ol.style.Style({
+            fill: new ol.style.Fill({
+              color: 'rgba(0, 0, 255, 0.2)',
+            }),
+            image: new ol.style.Icon({
+              src: './pix/bootstrap/position_marker.png',
+              rotateWithView: true,
+              scale: 0.10,
+              anchor: [0.5, 0.5],
+            }),
+          });
+        return [ style];
+      } else {
+        return null;
+      }
+    }
+    /**
+     * Style for heading marker.
+     * @param {ol.Feature} feature
+     * @returns {ol.style.Style} An array of styles for the marker.
+     */
+    function headingFeatureStyle(feature) {
+      if (!nextstagefeature) {
+        return null;
+      }
+      let rotation = calculateHeading(feature.getGeometry(), nextstagefeature.getGeometry()) ?? null;
+      if (rotation === null) {
+        return null;
+      }
+      let style = new ol.style.Style({
+        image: new ol.style.Icon({
+          src: './pix/bootstrap/position_marker_heading_large.png',
+          rotateWithView: true,
+          rotation: rotation,
+          scale: 0.10,
+          anchor: [0.5, 0.67],
+        }),
+      });
+      return style;
+    }
+    /*-------------------------------Layers---------------------------------*/
+    let layers = [];
+    let geoJSONFormat = new ol.format.GeoJSON();
+    let attemptsource = new ol.source.Vector({
+      projection: "EPSG:3857",
+    });
+    let attemptslayer = new ol.layer.Vector({
+      source: attemptsource,
+      style: attempt_style,
+    });
+    let layersbase = [];
+    let layersoverlay = [];
+    if (!custommapconfig || custommapconfig.onlybase === false) {
+      // Default layers
+      let aeriallayer = new ol.layer.Tile({
+        visible: false,
+        source: new ol.source.BingMaps({
+          key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
+          imagerySet: "AerialWithLabels",
+          maxZoom: 19,
+          // Use maxZoom 19 to see stretched tiles instead of the BingMaps
+          // "no photos at this zoom level" tiles
+          // maxZoom: 19.
+        }),
+      });
+      let roadlayer = new ol.layer.Tile({
+        source: new ol.source.OSM(),
+      });
+
+      aeriallayer.set("name", strings["aerialview"]);
+      roadlayer.set("name", strings["roadview"]);
+
+      layersbase = [aeriallayer, roadlayer];
+    }
+    if (custombaselayer) {
+      if (custommapconfig.layertype != "overlay") {
+        layersbase.push(custombaselayer);
+      } else {
+        layersoverlay.push(custombaselayer);
+      }
+    }
+    let layergroup = new ol.layer.Group({ layers: layersbase });
+    // Create placement for a popup over user marker.
+    var overlay = viewgpx.createCoordsOverlay(
+      "#mapplay",
+      "css/playerbootstrap/ol-popup.css",
+      strings["pegmanlabel"]
+    );
+
+    // All layers hidden except last one.
+    let toplayer = null;
+    layergroup.getLayers().forEach((layer) => {
+      layer.setVisible(false);
+      toplayer = layer;
+    });
+    toplayer.setVisible(true);
+
+    let view = new ol.View({
+      center: [0, 0],
+      zoom: 2,
+      minZoom: 2,
+      maxZoom: 19,
+    });
+    let select = new ol.interaction.Select({
+      layers: [attemptslayer],
+      style: select_style_function,
+      filter: (feature) => {
+        if (feature.get("stageposition") === 0) {
+          return false;
+        }
+        return true;
+      },
+    });
+    let accuracyFeature = new ol.Feature();
+    accuracyFeature.setProperties({ name: "user_accuracy" });
+    accuracyFeature.setStyle(accuracyFeatureStyle);
+    let positionFeature = new ol.Feature();
+    positionFeature.setProperties({ name: "user_position" });
+    let userPositionLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [accuracyFeature, positionFeature],
+      }),
+      style: positionLayerStyle
+    });
+    let markerFeature = new ol.Feature();
+    markerFeature.setGeometry(null);
+    markerFeature.setStyle(markerFeatureStyle);
+    let markerLayer = new ol.layer.Vector({
+      source: new ol.source.Vector({
+        features: [markerFeature],
+      }),
+    });
+    layers.push(layergroup);
+    layers = layers.concat(layersoverlay);
+    layers = layers.concat([userPositionLayer, markerLayer, attemptslayer]);
+    // New Custom zoom.
+    let zoom = new ol.control.Zoom({
+      target: "navigation",
+      className: "custom-zoom",
+    });
+
+    let map = new ol.Map({
+      layers: layers,
+      overlays: [overlay],
+      controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
+      target: "mapplay",
+      view: view,
+      loadTilesWhileAnimating: true,
+      loadTilesWhileInteracting: true,
+    });
+    map.addInteraction(select);
+    // It initializes the game.
+    renew_source(false, true);
+    // For the game is updated every gameupdatetime seconds.
+    interval = setInterval(() => {
+      renew_source(false, false);
+    }, gameupdatetime);
+    // Initialize the page layers.
+
+    add_layergroup_to_list(layergroup);
+    layersoverlay.forEach((overlay) => {
+      add_layer_to_list(overlay);
+    });
+    if (tracking && user) {
+      let tracklayergroup = viewgpx.addgpxlayer(
+        map,
+        cmid,
+        treasurehuntid,
+        strings,
+        user,
+        "trackgroup"
+      );
+      tracklayergroup.set("name", tracklayergroup.get("title"));
+
+      let tracklayer = tracklayergroup.getLayers().item(0);
+      let htmltitle = tracklayer.get("title"); // Has a picture and a link.
+      tracklayer.set("name", htmltitle);
+      tracklayer.setVisible(false);
+      add_layer_to_list(tracklayer);
+    }
     /**
      * Check if there is a usable position.
      */
@@ -593,16 +741,17 @@ let init = {
       // let position holds the potition to be evaluated. undef if no evaluation requested
       let position;
       let currentposition;
-      let coordinates;
+      let markLocation;
       let answerid;
-      // Get the position from the marker or from the geolocation.
-      if (playwithoutmoving) {
-        coordinates = markerFeature.getGeometry();
-      } else {
-        coordinates = positionFeature.getGeometry();
-      }
-      if (coordinates) {
-        currentposition = geoJSONFormat.writeGeometryObject(coordinates, {
+      // Get the position from the marker (it may be synced with geolocation).
+      // if (playwithoutmoving) {
+      //   coordinates = markerFeature.getGeometry();
+      // } else {
+      //   coordinates = positionFeature.getGeometry();
+      // }
+      markLocation = markerFeature.getGeometry();
+      if (markLocation) {
+        currentposition = geoJSONFormat.writeGeometryObject(markLocation, {
           dataProjection: "EPSG:4326",
           featureProjection: "EPSG:3857",
         });
@@ -648,13 +797,16 @@ let init = {
             if (response.status !== null && available) {
               toast(response.status.msg);
             }
-            markerFeature.setGeometry(null);
+            //markerFeature.setGeometry(null);
           }
   // If change the game mode (mobile or static).
           if (playwithoutmoving != response.playwithoutmoving) {
             playwithoutmoving = response.playwithoutmoving;
             if (!playwithoutmoving) {
-              markerFeature.setGeometry(null);
+              let position = markerFeature.getGeometry();
+              if (position) {
+                markerFeature.setGeometry(new ol.geom.Point(position));
+              }
             }
           }
   // If change the group mode.
@@ -673,24 +825,33 @@ let init = {
               attemptshistory = response.attempthistory;
               changesinattemptshistory = true;
             }
-  // Compruebo si es distinto de null, lo que indica que se ha actualizado.
-            if (response.attempts || response.firststagegeom) {
+
+            let nextstagefeatures = geoJSONFormat.readFeatures(response.nextstagegeom,
+                    {
+                      dataProjection: "EPSG:4326",
+                      featureProjection: "EPSG:3857",
+                    });
+
+            nextstagefeature = nextstagefeatures[0]??null;
+
+
+            let currentstage = response.attempts.features.length ?? 0;
+  // If it is different from null, which indicates that it has been updated.
+            if (response.attempts.length > 0 || nextstagefeature !== null) {
               attemptsource.clear();
-              if (response.firststagegeom) {
-                attemptsource.addFeatures(
-                  geoJSONFormat.readFeatures(response.firststagegeom, {
-                    dataProjection: "EPSG:4326",
-                    featureProjection: "EPSG:3857",
-                  })
-                );
+              if (currentstage <= 1 && nextstagefeature !== null) {
+                // Add the feature to be shown in the map.
+                attemptsource.addFeatures([nextstagefeature]);
+                fit_map_to_source();
               }
-              if (response.attempts.features.length > 0) {
+              if (currentstage > 0) {
                 attemptsource.addFeatures(
                   geoJSONFormat.readFeatures(response.attempts, {
                     dataProjection: "EPSG:4326",
                     featureProjection: "EPSG:3857",
                   })
                 );
+                fit_map_to_source();
               }
             }
   // Check if it exists, which indicates that it has been updated.
@@ -713,7 +874,7 @@ let init = {
               }
             }
             // Check if it is the first geometry or it is being initialized and center the map.
-            if (response.firststagegeom || initialize) {
+            if (currentstage === 0 && response.nextstagegeom || initialize) {
               fitmap = true;
             }
 
@@ -746,7 +907,7 @@ let init = {
             $("#validatelocation").hide();
             $("#question_button").hide();
             $("#roadended").show();
-            markerFeature.setGeometry(null);
+            //markerFeature.setGeometry(null);
             playwithoutmoving = false;
             clearInterval(interval);
             $("#mapplay").css("opacity", "0.8");
@@ -764,12 +925,9 @@ let init = {
     function fit_map_to_source() {
       if (fitmap) {
         let features = attemptsource.getFeatures();
-        if (
-          features.length === 1 &&
-          features[0].getGeometry() instanceof ol.geom.Point
-        ) {
+        if (features.length === 1 && features[0].getGeometry() instanceof ol.geom.Point        ) {
           fly_to(map, features[0].getGeometry().getCoordinates());
-        } else {
+        } else if (features.length > 0) {
           fly_to(map, null, attemptsource.getExtent());
         }
 
@@ -946,7 +1104,7 @@ let init = {
         trackingOptions: {
           enableHighAccuracy: true,
           maximumAge: 0,
-          timeout: 10000,
+          timeout: 1000,
         },
       })
     );
@@ -956,12 +1114,20 @@ let init = {
       positionFeature.setGeometry(
         coordinates ? new ol.geom.Point(coordinates) : null
       );
+      if (playwithoutmoving == false) {
+        // Move marker to the new position.
+        if (coordinates) {
+          markerFeature.setGeometry(
+            new ol.geom.Point(coordinates)
+          );
+        }
+      }
       // The map must be re-centered in the new position
       if (geolocation.get("center")) {
         fly_to(map, coordinates);
         geolocation.setProperties({ center: false }); // Disable center request. Deprecated.
       }
-      // the new position must be evaluated
+      // The new position must be evaluated
       if (geolocation.get("validate_location")) {
         renew_source(true, false);
         geolocation.setProperties({ validate_location: false }); // Disable validate_location request. Deprecated.
@@ -974,7 +1140,8 @@ let init = {
 
     let trackinggeolocationwarndispatched = false;
     geolocation.on("error", (error) => {
-      geolocation.setProperties({ user_denied: true });
+      let user_denied =  (error.code == GeolocationPositionError.PERMISSION_DENIED);
+      geolocation.setProperties({ user_denied: user_denied });
       toast(error.message);
       if (
         error.code == error.PERMISSION_DENIED &&
@@ -1340,53 +1507,7 @@ let init = {
         $(".global-loader").removeClass("active");
       }
     }
-    /**
-     * Style for manual marker.
-     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
-     */
-    function markerFeatureStyle() {
-        let styles = [
-           new ol.style.Style({
-            image: new ol.style.Icon({
-              anchor: [0.5, 0.9],
-              opacity: 1,
-              scale: 1,
-              src: markerurl,
-              }),
-          }),
-          positionFeatureStyle(markerFeature)
-        ];
-      return styles;
-    }
-    /**
-     * Style for position marker.
-     * @param {ol.Feature} feature  The feature to style.
-     * @returns {Array<ol.style.Style>|ol.style.Style} An array of styles for the marker.
-     */
-    function positionFeatureStyle(feature) {
-      let targetfeature = attemptsource.getFeatures()[0];
-      let rotation = 0;
-      if (!targetfeature) {
-        rotation = 0;
-      } else { //TODO: check orientation hint setting, retrieve all features from server.
-        rotation = calculateHeading(
-          feature.getGeometry(),
-          targetfeature.getGeometry()
-        );
-      }
-      let style = new ol.style.Style({
-          fill: new ol.style.Fill({
-            color: 'rgba(0, 0, 255, 0.2)',
-          }),
-          image: new ol.style.Icon({
-            src: './pix/bootstrap/geolocation_marker_heading.png',
-            rotateWithView: true,
-            rotation: rotation,
-          // size: 64, // Scale the icon to fit the map.
-          }),
-        });
-      return style;
-    }
+
     /**
      * Calculate the heading from two geometries.
      * @param {ol.geom.Point} start The start point geometry.

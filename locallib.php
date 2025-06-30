@@ -319,6 +319,9 @@ function treasurehunt_build_customplayerconfig($data) {
     $playerconfig = new stdClass();
     $playerconfig->searchpaneldisabled = $data->searchpaneldisabled;
     $playerconfig->localizationbuttondisabled = $data->localizationbuttondisabled;
+    $playerconfig->showheadinghint = $data->showheadinghint;
+    $playerconfig->showinzonehint = $data->showinzonehint;
+    $playerconfig->showdistancehint = $data->showdistancehint;
     return $playerconfig;
 }
 /**
@@ -1089,7 +1092,7 @@ function treasurehunt_get_activity_to_end_link($activitytoendid)
 }
 
 /**
- * Checks if an instance is available.
+ * Checks if an instance is available for players.
  * A cutoff date can be set in the activity settings (see cutoffdate in install.xml).
  * After this date stage submissions will no longer be accepted.
  * @param stdClass $treasurehunt The treasurehunt instance.
@@ -1343,7 +1346,7 @@ SQL;
 function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehuntid, $context)
 {
     global $DB;
-    $firststagegeomgeojson = false;
+    $nextstagegeomgeojson = false;
     // Get discovered stages and mistakes made by the user / group for this instance.
     if ($groupid) {
         $grouptype = 'a.groupid=(?)';
@@ -1373,21 +1376,21 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         }
     }
     // If the user does not have any progress, the geometry of the first stage of the road shows.
-    if (count($userprogress) == 0 || !$geometrysolved) {
+    // if (count($userprogress) == 0 || !$geometrysolved) {
         $query = "SELECT position -1 as position,geom as geometry,"
             . "roadid FROM {treasurehunt_stages}  WHERE  roadid=? AND position=1";
         $params = array($roadid);
         $firststagegeom = $DB->get_records_sql($query, $params);
         // Convert the feature format in GeoJSON.
-        $firststagegeomgeojson = treasurehunt_features_to_geojson($firststagegeom, $context, $treasurehuntid, $groupid);
-    }
+        $nextstagegeomgeojson = treasurehunt_features_to_geojson($firststagegeom, $context, $treasurehuntid, $groupid);
+    // }
     // TODO: Check and add the next feature to attemptsgeojson.
     // Get the stages in the road.
 
-    
+
     // Convert the features format in GeoJSON.
     $attemptsgeojson = treasurehunt_features_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
-    return array($attemptsgeojson, $firststagegeomgeojson);
+    return [$attemptsgeojson, $nextstagegeomgeojson];
 }
 
 /**

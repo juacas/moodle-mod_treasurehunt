@@ -144,7 +144,7 @@ class user_progress extends external_api
                     'All attempts of the user/group in geojson format',
                     VALUE_OPTIONAL
                 ),
-                'firststagegeom' => new external_single_structure(
+                'nextstagegeom' => new external_single_structure(
                     array(
                         'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
                         'features' => new external_multiple_structure(
@@ -183,7 +183,7 @@ class user_progress extends external_api
                             'Features definition in geojson format'
                         )
                     ),
-                    'First stage geometry in geojson format',
+                    'Next stage geometry in geojson format',
                     VALUE_OPTIONAL
                 ),
                 'attempttimestamp' => new external_value(PARAM_INT, 'Last updated timestamp attempt'),
@@ -242,7 +242,7 @@ class user_progress extends external_api
     public static function execute($userprogress)
     {
         global $USER, $DB;
-        $firststagegeom = null;
+        $nextstagegeom = null;
         $userattempts = null;
         $qrmode = false;
         $params = self::validate_parameters(
@@ -264,11 +264,11 @@ class user_progress extends external_api
         // Get the group and road to which the user belongs.
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
-        $nostages = treasurehunt_get_total_stages($userparams->roadid);
+        $numberofstages = treasurehunt_get_total_stages($userparams->roadid);
         // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
         $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $context);
         if ($currentstage) {
-            $nextnostage = min([$currentstage->position + 1, $nostages]);
+            $nextnostage = min([$currentstage->position + 1, $numberofstages]);
         } else {
             $nextnostage = 1;
         }
@@ -333,7 +333,7 @@ class user_progress extends external_api
                     $updateroad,
                     $context,
                     $treasurehunt,
-                    $nostages,
+                    $numberofstages,
                     $qoaremoved
                 );
             } else {
@@ -393,7 +393,7 @@ class user_progress extends external_api
                     $qrtextparam,
                     $context,
                     $treasurehunt,
-                    $nostages
+                    $numberofstages
                 );
 
                 if ($checklocation->newattempt) {
@@ -417,7 +417,7 @@ class user_progress extends external_api
                 $status['code'] = 0;
             }
         }
-
+        //  Get new user's state and report it.
         $attempthistory = array();
         // If there was any new attempt, reload the history of attempts.
         if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $params['changedapplang'] ?? false) {
@@ -436,7 +436,7 @@ class user_progress extends external_api
                 $USER->id,
                 $userparams->groupid,
                 $userparams->roadid,
-                $nostages,
+                $numberofstages,
                 $available->outoftime,
                 $available->actnotavailableyet,
                 $context
@@ -451,7 +451,7 @@ class user_progress extends external_api
             || $changesingroupmode
             || $params['changedapplang'] ?? false
         ) {
-            list($userattempts, $firststagegeom) = treasurehunt_get_user_progress(
+            list($userattempts, $nextstagegeom) = treasurehunt_get_user_progress(
                 $userparams->roadid,
                 $userparams->groupid,
                 $USER->id,
@@ -499,14 +499,19 @@ class user_progress extends external_api
         $result['attempttimestamp'] = $updates->newattempttimestamp;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
         $result['status'] = $status;
-        if ($userattempts || $firststagegeom) {
-            if ($firststagegeom) {
-                $result['firststagegeom'] = $firststagegeom;
-            }
+        // Get custom player configuration.
+        // This is used to know if next stage is needed for heading hint and in-zone hint.
+        $playerconfig = treasurehunt_get_customplayerconfig($treasurehunt);
+        $showheadinghint = $playerconfig->showheadinghint ?? false;
+        $showinzonehint = $playerconfig->showinzonehint ?? false;
+        // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.        
+        if ($nextstagegeom && ($showheadinghint || $showinzonehint || $currentstage == 0)) {
+            $result['nextstagegeom'] = $nextstagegeom;
+        }
+        if ($userattempts) {
             $result['attempts'] = $userattempts;
         }
-        // TODO: Check and send nextstagegeom.
-        // TODO: JPC 
+      
         if ($lastsuccessfulstage) {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }

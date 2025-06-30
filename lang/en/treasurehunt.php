@@ -59,8 +59,8 @@ $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
 $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
-$string['changetoplaywithmove'] = 'The game mode has changed to dynamic play';
-$string['changetoplaywithoutmoving'] = 'The game mode has changed to static play';
+$string['changetoplaywithmove'] = 'The game mode has changed to "playing with GPS location".';
+$string['changetoplaywithoutmoving'] = 'The game mode has changed to "playing with pegmen" <img src="pix/my_location.png" width="32" align="middle" /> (click on map)';
 $string['completionfinish'] = 'Require to finish road.';
 $string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
 $string['configintro'] = 'The values you set here define the default values that are used in the settings form when you
@@ -332,6 +332,16 @@ $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
 $string['searchpaneldisabled'] = 'Disable search panel in player';
 $string['searchpaneldisabled_help'] = 'If checked, the search panel will be disabled in the player interface.';
+$string['showheadinghint'] = 'Show heading hint';
+$string['showheadinghint_help'] = 'If enabled, the player will see a hint of the heading to the next stage.
+This hint will be shown in the player interface when the user is close to the next stage.';
+$string['showinzonehint'] = 'Show in zone hint';
+$string['showinzonehint_help'] = 'If enabled, the player will see a hint when he is in the zone of the next stage.
+This hint will be shown in the player interface when the user is in the zone of the next stage.';
+$string['showdistancehint'] = 'Show distance hint';
+$string['showdistancehint_help'] = 'If enabled, the player will see a hint of the distance to the next stage.
+This hint will be shown in the player interface when the user is close to the next stage.';
+
 $string['localizationbuttondisabled'] = 'Disable localization button';
 $string['localizationbuttondisabled_help'] = 'If checked, the localization button will be disabled in the player interface.';
 $string['send'] = 'Send';
