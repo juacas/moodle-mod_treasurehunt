@@ -413,6 +413,8 @@ tienen que marcar manualmente en el mapa cada una de las etapas.
 Por favor contacte con su administrador.
 (Referencias: <a href="https://www.chromestatus.com/feature/5636088701911040">Chrome</a>, <a href="https://blog.mozilla.org/security/2015/04/30/deprecating-non-secure-http/">Firefox</a> announces.';
 
+$string['webserviceerror'] = 'Problema de comunicación con el servidor. Por favor, inténtalo de nuevo más tarde. Si el problema persiste, contacta con tu administrador.';
+
 // Initial tour help.
 $string['addroad_tour'] = 'Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
 $string['addstage_tour'] = 'Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';

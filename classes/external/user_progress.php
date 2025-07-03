@@ -144,7 +144,7 @@ class user_progress extends external_api
                     'All attempts of the user/group in geojson format',
                     VALUE_OPTIONAL
                 ),
-                'nextstagegeom' => new external_single_structure(
+                'nextstage' => new external_single_structure(
                     array(
                         'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
                         'features' => new external_multiple_structure(
@@ -226,6 +226,18 @@ class user_progress extends external_api
                     'Array with user/group historical attempts.'
                 ),
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
+                'playerconfig' => new external_single_structure(
+                    array(
+                        'searchpaneldisabled' => new external_value(PARAM_BOOL, 'If true the search panel is disabled'),
+                        'localizationbuttondisabled' => new external_value(PARAM_BOOL, 'If true the localization button is disabled'),
+                        'showdistancehint' => new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
+                        'showheadinghint' => new external_value(PARAM_BOOL, 'If true the heading hint is shown', VALUE_DEFAULT, false),
+                        'showinzonehint' => new external_value(PARAM_BOOL, 'If true the in-zone hint is shown', VALUE_DEFAULT, false),
+                        'shownextareahint' => new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false)
+                    ),
+                    'Custom player configuration',
+                    VALUE_OPTIONAL
+                ),
                 'status' => new external_single_structure(
                     array(
                         'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
@@ -321,7 +333,7 @@ class user_progress extends external_api
             if ($params['playwithoutmoving'] != $playmode) {
                 $changesinplaymode = true;
             }
-
+            
             // If the user can play process the submission.
             if (has_capability('mod/treasurehunt:play', $context)) {
                 // Process if the user has correctly completed the question and the required activity.
@@ -419,11 +431,12 @@ class user_progress extends external_api
         }
         //  Get new user's state and report it.
         $attempthistory = array();
+        $changedapplang = isset($params['changedapplang']) ? $params['changedapplang'] : false;
         // If there was any new attempt, reload the history of attempts.
-        if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $params['changedapplang'] ?? false) {
+        if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $changedapplang) {
             $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
-        $lastsuccessfulstage = array();
+        $lastsuccessfulstage = null;
         if (
             $updates->geometrysolved
             || !$available->available
@@ -449,7 +462,7 @@ class user_progress extends external_api
             || $roadfinished
             || $params['initialize']
             || $changesingroupmode
-            || $params['changedapplang'] ?? false
+            || $changedapplang
         ) {
             list($userattempts, $nextstagegeom) = treasurehunt_get_user_progress(
                 $userparams->roadid,
@@ -504,10 +517,37 @@ class user_progress extends external_api
         $playerconfig = treasurehunt_get_customplayerconfig($treasurehunt);
         $showheadinghint = $playerconfig->showheadinghint ?? false;
         $showinzonehint = $playerconfig->showinzonehint ?? false;
+        $shownextareahint = $playerconfig->shownextareahint ?? false;
+
+        // Check if last successful stage is the same as current working stage.
+        // This means that the user has just solved the current stage.
+        if ($lastsuccessfulstage && $currentworkingstage && $currentworkingstage->position == $lastsuccessfulstage->position) {
+            // Update current working stage.
+             if ($lastsuccessfulstage) {
+                $nextnostage = min([$lastsuccessfulstage->position + 1, $numberofstages]);
+            } else {
+                $nextnostage = 1;
+            }
+            $currentworkingstage = $DB->get_record(
+                'treasurehunt_stages',
+                array('position' => $nextnostage, 'roadid' => $userparams->roadid),
+                '*',
+                MUST_EXIST
+            );
+        } 
         // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.        
-        if ($nextstagegeom && ($showheadinghint || $showinzonehint || $currentstage == 0)) {
-            $result['nextstagegeom'] = $nextstagegeom;
+        if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentstage == 0)) {
+            // Subset of properties.
+            $currentstagebrief = new stdClass();
+            $currentstagebrief->treasurehuntid = $treasurehuntid;
+            $currentstagebrief->roadid = $currentworkingstage->roadid;
+            $currentstagebrief->position = $currentworkingstage->position;
+            $currentstagebrief->geometry = $currentworkingstage->geom;
+            // Convert to geojson FeatureCollection.
+            $currentstagecoll = treasurehunt_features_to_geojson([$currentstagebrief], $context, $treasurehuntid);
+            $result['nextstage'] = $currentstagecoll;
         }
+
         if ($userattempts) {
             $result['attempts'] = $userattempts;
         }
@@ -522,6 +562,7 @@ class user_progress extends external_api
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['attempthistory'] = $attempthistory;
         $result['qoaremoved'] = $qoaremoved;
+        $result['playerconfig'] = $playerconfig;
         return $result;
     }
 }

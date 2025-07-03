@@ -164,6 +164,7 @@ $string['playerstyle_help'] = 'May be several styles of the game screen that tea
 $string['playerclassic'] = 'Classic';
 $string['playerfancy'] = 'Fancy old (deprecated)';
 $string['playerbootstrap'] = 'Bootstrap';
+$string['geolocation_problem'] = 'GPS location is having problems.';
 $string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed.
 <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.
@@ -341,7 +342,8 @@ This hint will be shown in the player interface when the user is in the zone of 
 $string['showdistancehint'] = 'Show distance hint';
 $string['showdistancehint_help'] = 'If enabled, the player will see a hint of the distance to the next stage.
 This hint will be shown in the player interface when the user is close to the next stage.';
-
+$string['shownextareahint'] = 'Show next area hint';
+$string['shownextareahint_help'] = 'If enabled, the player will see the area of the next stage.';
 $string['localizationbuttondisabled'] = 'Disable localization button';
 $string['localizationbuttondisabled_help'] = 'If checked, the localization button will be disabled in the player interface.';
 $string['send'] = 'Send';
@@ -438,6 +440,7 @@ $string['warnusersgroup'] = 'The following users belong to more than one group: 
 $string['warnusersgrouping'] = 'The following groups belong to more than one grouping: {$a}, so are unable to play the activity.';
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
 
+$string['webserviceerror'] = 'Communication with the server failed. It may be a temporary problem, please try again later. If the problem persists, contact your administrator.';
 // Initial tour help.
 $string['addstage_tour'] = 'Each road must have two or more stages. Each stage gives a clue to find out the next.';
 $string['addroad_tour'] = 'Add one or more roads to be followed by your students.';

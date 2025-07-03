@@ -57,8 +57,8 @@ let init = {
   },
   editpage: function () {
     $("#edition_maintitle > h2 > a").on("click", this.launchedittutorial);
-    const introEditProgress = localStorage.getItem("introEditProgress");
-    if (introEditProgress != "Done") {
+    let introEditViewed = this.onetimevisit("Edit", false);
+    if (introEditViewed == false) {
       this.launchedittutorial();
     }
   }, // end of editpage function
@@ -89,10 +89,38 @@ let init = {
       })
       .catch(notification.exception);
   },
+  /**
+   * This function is called to check if the user has visited the page before.
+   * If the user has not visited the page before, it will return false.
+   * If the user has visited the page before, it will return true.
+   * @param {string} name - The name of the page.
+   * @param {boolean} clear - If true, it will clear the local storage else set it to Done.
+   * @returns {boolean} - Returns true if the user has visited the page before,
+   */
+  onetimevisit: function (name, clear) {
+    // Use cookies to check if the user has visited the page before.
+    let cook = [];
+    document.cookie.split(';').forEach((x) => {
+          var arr = x.split('=');
+          if (arr[1]) {
+            cook[arr[0].trim()] = arr[1].trim();
+          }
+    });
+    if (clear) {
+      document.cookie = "intro" + name + "Progress=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+    } else {
+      document.cookie = "intro" + name + "Progress=Done; path=/;";
+    }
+    if (cook["intro"+ name + "Progress"] === 'Done') {
+      return true;
+    } else {
+      return false;
+    }
+  },
   playpage: function () {
     $("#playerhelp").on("click", this.launchplaytutorial);
-    let introPlayProgress = localStorage.getItem("introPlayProgress");
-    if (introPlayProgress != "Done") {
+    let introPlayed = this.onetimevisit("Play", false);
+    if (introPlayed == false) {
       this.launchplaytutorial();
     }
   }, // ...end of playpage function.

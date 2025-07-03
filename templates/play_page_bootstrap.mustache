@@ -24,7 +24,7 @@
         <!-- sidebar mask -->
         <div class="sidebar-mask"></div>
         <!-- Sidebar search-->
-        {{^searchpaneldisabled}}
+        {{!^searchpaneldisabled}}
         <div id="searchpanel" class="sidebar sidebar-left">
             <!-- Header -->
             <nav class="play-navbar map-navbar">
@@ -52,7 +52,7 @@
                 <div id="searchsResults" class="list-group"></div>
             </div>
         </div>
-        {{/searchpaneldisabled}}
+        {{!/searchpaneldisabled}}
 
 
         <!-- Page Content -->
@@ -60,7 +60,7 @@
             <!-- Header -->
             <nav class="play-navbar map-navbar">
                 {{^customplayerconfig.searchpaneldisabled}}
-                <button class="btn" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
+                <button class="btn" id="searchbutton" data-rel="sidebar" data-ref="#searchpanel" data-dismissible>
                     <i class="fa fa-search" aria-hidden="true"></i>
                 </button>
                 {{/customplayerconfig.searchpaneldisabled}}

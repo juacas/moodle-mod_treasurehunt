@@ -79,7 +79,7 @@ echo "\n<script>\n";
 echo "users_param = " . json_encode($users) . ";\n";
 echo "</script>\n";
 // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
+// echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
 $controls = '<label><input type="checkbox" value="refresh" id="refreshtracks"></input>' .

@@ -99,6 +99,10 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->addElement('advcheckbox', 'showdistancehint', get_string('showdistancehint', 'treasurehunt'));
         $mform->addHelpButton('showdistancehint', 'showdistancehint', 'treasurehunt');
         $mform->setDefault('showdistancehint', false);
+        // Checkbox for next area hint.
+        $mform->addElement('advcheckbox', 'shownextareahint', get_string('shownextareahint', 'treasurehunt'));
+        $mform->addHelpButton('shownextareahint', 'shownextareahint', 'treasurehunt');
+        $mform->setDefault('shownextareahint', false);
 
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.

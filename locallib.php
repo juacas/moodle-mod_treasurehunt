@@ -322,6 +322,7 @@ function treasurehunt_build_customplayerconfig($data) {
     $playerconfig->showheadinghint = $data->showheadinghint;
     $playerconfig->showinzonehint = $data->showinzonehint;
     $playerconfig->showdistancehint = $data->showdistancehint;
+    $playerconfig->shownextareahint = $data->shownextareahint;
     return $playerconfig;
 }
 /**
@@ -393,6 +394,7 @@ function treasurehunt_get_customplayerconfig($treasurehunt)
     if (isset($treasurehunt->customplayerconfig)) {
         $customplayerconfig = json_decode($treasurehunt->customplayerconfig);
     }
+    // Complete the custom player configuration.
     return $customplayerconfig;
 }
 /**
@@ -1143,7 +1145,7 @@ function treasurehunt_get_stage_answers($stageid, $context)
  * @param stdClass $context The context object.
  * @param int $treasurehuntid The identifier of the treasure hunt instance.
  * @param int $groupid The identifier of the group or 0 if is individually.
- * @return array
+ * @return stdClass The GeoJSON object with the features.
  */
 function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, $groupid = 0)
 {
