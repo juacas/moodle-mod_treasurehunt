@@ -536,7 +536,7 @@ class user_progress extends external_api
             );
         } 
         // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.        
-        if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentstage == 0)) {
+        if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)) {
             // Subset of properties.
             $currentstagebrief = new stdClass();
             $currentstagebrief->treasurehuntid = $treasurehuntid;
@@ -562,7 +562,9 @@ class user_progress extends external_api
         $result['groupmode'] = intval($treasurehunt->groupmode);
         $result['attempthistory'] = $attempthistory;
         $result['qoaremoved'] = $qoaremoved;
-        $result['playerconfig'] = $playerconfig;
+        if ($playerconfig) {
+            $result['playerconfig'] = $playerconfig;
+        }
         return $result;
     }
 }

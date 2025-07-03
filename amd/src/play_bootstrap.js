@@ -829,18 +829,23 @@ function initplaytreasurehunt(
         set_player_config(response.playerconfig);
 
         // Update stages layer.
-        let nextstagefeatures = geoJSONFormat.readFeatures(response.nextstage,
-          {
-            dataProjection: "EPSG:4326",
-            featureProjection: "EPSG:3857",
-          });
-        let newnextstagefeature = nextstagefeatures[0] ?? null;
+        let nextstagefeatures = null;
+        if (response && response.nextstage) {
+          nextstagefeatures = geoJSONFormat.readFeatures(response.nextstage,
+                                              {
+                                                dataProjection: "EPSG:4326",
+                                                featureProjection: "EPSG:3857",
+                                              });
+        }
+        let newnextstagefeature = (nextstagefeatures && nextstagefeatures[0]) ?? null;
         let stagepositionold = nextstagefeature ? nextstagefeature.get("stageposition") : null;
-        let stagepositionnew = newnextstagefeature.get("stageposition") ?? null;
+        let stagepositionnew = newnextstagefeature ? newnextstagefeature.get("stageposition") : null;
         let isfirststage = newnextstagefeature && newnextstagefeature.get("stageposition") === 1;
         let isfirstload = nextstagefeature === null;
         // If the next stage is first or different from the previous one, update it.
-        if (nextstagefeature === null || stagepositionold != stagepositionnew) {
+        if (newnextstagefeature !== null
+          && (nextstagefeature === null || stagepositionold != stagepositionnew)) {
+
           nextstagefeature = newnextstagefeature;
           stagesource.clear();
           // Add the feature to be shown in the map.

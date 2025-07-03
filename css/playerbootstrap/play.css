@@ -89,6 +89,12 @@ body {
   z-index: 1;
   background-color: rgba(25, 25, 25, 0.6);
   text-align: center;
+  font-size: large;
+}
+
+#page-mod-treasurehunt-play .treasureoverlay .treasurehunticon {
+    width: 100px;
+    float: left;
 }
 
 /*Titles*/

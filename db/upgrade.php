@@ -165,5 +165,14 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Treasurehunt savepoint reached.
         upgrade_mod_savepoint(true, 2025033100, 'treasurehunt');
     }
+    // Rename treasurehunt.custoplayerconfig to treasurehunt.customplayerconfig.
+    if ($oldversion < 2025070302) {
+         // Rename field to customplayerconfig.
+        $table = new xmldb_table('treasurehunt');
+        $field = new xmldb_field('custoplayerconfig', XMLDB_TYPE_TEXT, null, null, null, null, null, 'custommapconfig');
+        if ($dbman->field_exists($table, $field)) {
+            $dbman->rename_field($table, $field, 'customplayerconfig');
+        } 
+    }
     return true;
 }
