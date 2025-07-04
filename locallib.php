@@ -398,17 +398,17 @@ function treasurehunt_get_customplayerconfig($treasurehunt)
     return $customplayerconfig;
 }
 /**
- *
+ * Decode custommapconfig from json.
  * @param \stdClass $treasurehunt Treasurehunt record.
- * @param context_module $context
- * @return NULL|mixed
+ * @param context_module $context for retrieving text editor content, files.
+ * @return null|mixed
  */
 function treasurehunt_get_custommappingconfig($treasurehunt, $context = null)
 {
     if (empty($treasurehunt->custommapconfig)) {
         return null;
     }
-    $cm = get_coursemodule_from_instance('treasurehunt', $treasurehunt->id);
+    $cm = get_fast_modinfo($treasurehunt->course)->instances['treasurehunt'][$treasurehunt->id];
     $context = context_module::instance($cm->id);
     $custommapconfig = json_decode($treasurehunt->custommapconfig);
     if ($custommapconfig->geographic === true && isset($custommapconfig->bbox)) {
@@ -1303,6 +1303,7 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid)
 }
 
 /**
+ * Difference from the first and last attempt.
  * @global moodle_database $DB
  * @param type $treasurehuntid
  * @param type $userid

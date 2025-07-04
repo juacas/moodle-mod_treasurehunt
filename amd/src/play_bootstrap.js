@@ -153,7 +153,7 @@ function initplaytreasurehunt(
   let nextstagefeature = null;
   let mapprojection = "EPSG:3857";
   let custombaselayer = null;
-  let geographictools = true;
+  let usegeographictools = true;
   let defaultzoom = 15;
   let supportsTouch = "ontouchstart" in window || navigator.msMaxTouchPoints;
   let customplayerconfig;
@@ -204,9 +204,9 @@ function initplaytreasurehunt(
       custombaselayer.set('name', custommapconfig.layername);
     }
 
-    geographictools = custommapconfig.geographic;
+    usegeographictools = custommapconfig.geographic;
   }
-  if (geographictools === false) {
+  if (usegeographictools === false) {
     // console.log("geographic tools disabled");
     playwithoutmoving = true;
     $("#autolocate").hide();
@@ -548,18 +548,18 @@ function initplaytreasurehunt(
   /*-------------------------------Layers---------------------------------*/
   let layers = [];
   let geoJSONFormat = new ol.format.GeoJSON();
-  let attemptsource = new ol.source.Vector({
+  let attemptSource = new ol.source.Vector({
     projection: "EPSG:3857",
   });
-  let stagesource = new ol.source.Vector({
+  let stageSource = new ol.source.Vector({
     projection: "EPSG:3857",
   });
   let attemptslayer = new ol.layer.Vector({
-    source: attemptsource,
+    source: attemptSource,
     style: attemptStyle,
   });
   let stagelayer = new ol.layer.Vector({
-    source: stagesource,
+    source: stageSource,
     style: stageStyle,
   });
   let layersbase = [];
@@ -631,19 +631,21 @@ function initplaytreasurehunt(
   accuracyFeature.setStyle(accuracyFeatureStyle);
   let positionFeature = new ol.Feature();
   positionFeature.setProperties({ name: "user_position" });
-  let userPositionLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  let userPositionSource = new ol.source.Vector({
       features: [accuracyFeature, positionFeature],
-    }),
+    });
+  let userPositionLayer = new ol.layer.Vector({
+    source: userPositionSource,
     style: positionLayerStyle
   });
   let markerFeature = new ol.Feature();
   markerFeature.setGeometry(null);
   markerFeature.setStyle(markerFeatureStyle);
-  let markerLayer = new ol.layer.Vector({
-    source: new ol.source.Vector({
+  let markerSource = new ol.source.Vector({
       features: [markerFeature],
-    }),
+    });
+  let markerLayer = new ol.layer.Vector({
+    source: markerSource,
   });
   layers.push(layergroup);
   layers = layers.concat(layersoverlay);
@@ -847,7 +849,7 @@ function initplaytreasurehunt(
           && (nextstagefeature === null || stagepositionold != stagepositionnew)) {
 
           nextstagefeature = newnextstagefeature;
-          stagesource.clear();
+          stageSource.clear();
           // Add the feature to be shown in the map.
           let shouldrender = isfirststage || customplayerconfig.shownextareahint;
           if (shouldrender) {
@@ -857,11 +859,11 @@ function initplaytreasurehunt(
           }
           // Render as stage, not as attempt.
           nextstagefeature.set("is_stage", true);
-          stagesource.addFeatures([nextstagefeature]);
+          stageSource.addFeatures([nextstagefeature]);
           // If the stage is the first one, center the map on it.
           if (isfirststage === true && (isfirstload || initialize)) {
             fitmap = true;
-            fit_map_to_sources([stagesource]);
+            fit_map_to_sources([stageSource]);
           }
         }
 
@@ -881,8 +883,8 @@ function initplaytreasurehunt(
           // If it is different from null, which indicates that it has been updated.
           if (response.attempts && response.attempts.features.length > 0) {
             if (response.attempts.features.length > 0) {
-              attemptsource.clear();
-              attemptsource.addFeatures(
+              attemptSource.clear();
+              attemptSource.addFeatures(
                 geoJSONFormat.readFeatures(response.attempts, {
                   dataProjection: "EPSG:4326",
                   featureProjection: "EPSG:3857",
@@ -915,10 +917,10 @@ function initplaytreasurehunt(
           if (!response.lastsuccessfulstage && isfirststage || initialize) {
             fitmap = true;
             if (isfirststage && isfirstload) {
-              fit_map_to_sources([stagesource]);
+              fit_map_to_sources([stageSource]);
             } else {
               // If it is not the first stage, fit the map to the attempts.
-              fit_map_to_sources([attemptsource]);
+              fit_map_to_sources([attemptSource]);
             }
           }
           apply_lastsuccessfulstage();
@@ -985,7 +987,7 @@ function initplaytreasurehunt(
       }
       if (customplayerconfig.localizationbuttondisabled == true) {
         $("#autolocate").hide();
-      } else if (custommapconfig.geographic) {
+      } else if (usegeographictools) {
         $("#autolocate").show();
       }
     }
@@ -1443,9 +1445,19 @@ function initplaytreasurehunt(
   $(window).on("resize", () => {
     map.updateSize();
   });
-
+  $('#fitmap').on('click', () => {
+    let attentionSources = [attemptSource, markerSource];
+    if (usegeographictools) {
+      attentionSources.push(userPositionSource);
+    }
+    if (customplayerconfig.shownextareahint) {
+      attentionSources.push(stageSource);
+    }
+    fitmap = true;
+    fit_map_to_sources(attentionSources);
+  });
   //Buttons events.
-  if (geographictools) {
+  if (usegeographictools) {
     $("#autolocate").on("click", () => {
       // Enable tracking if not already enabled.
       geolocation.setTracking(true);
