@@ -1517,7 +1517,7 @@ function treasurehunt_get_group_road($groupid, $treasurehuntid, $groupname = '')
  *
  * @param int $userid The identifier of user to check.
  * @param stdClass $treasurehunt The treasurehunt instance.
- * @param int $cmid The identifier of treasure hunt course module activity.
+ * @param int $cmid The identifier of treasure hunt course module activity for the URL.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
  * @param string $username The user name.
  * @return object
@@ -1821,10 +1821,9 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid)
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
  * @param module_context $context The context of the module.
- * @param module_context $context The context of the module.
  * @return false|stdClass the record object or false if there is not succesful attempt.
  */
-function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context)
+function treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid)
 {
     global $DB;
 
@@ -1846,6 +1845,11 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $c
         . "$grouptypewithin AND ri.roadid=r.roadid AND at.geometrysolved=1) "
         . "AND $grouptype AND r.roadid = ?";
     $lastsuccesfulattempt = $DB->get_record_sql($sql, $params);
+    return $lastsuccesfulattempt;
+}
+function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context) {
+    // Get record.
+    $lastsuccesfulattempt = treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid);
     // Format attempt texts.
     treasurehunt_format_texts($lastsuccesfulattempt, $context);
     return $lastsuccesfulattempt;

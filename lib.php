@@ -283,7 +283,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
 }
 
 function treasurehunt_cm_info_dynamic(cm_info $cm) {
-    $cache = cache::make_from_params(cache_store::MODE_REQUEST, 'treasurehunt', 'instances');
+    $cache = cache::make_from_params(core_cache\store::MODE_REQUEST, 'treasurehunt', 'instances');
     $treasurehunt = $cache->get($cm->instance);
     if (!$treasurehunt) {
         global $DB;
