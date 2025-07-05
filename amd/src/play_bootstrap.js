@@ -149,7 +149,7 @@ function initplaytreasurehunt(
   playwithoutmoving = playwithoutmoving == true;
   groupmode = groupmode == true;
   tracking = tracking == true;
-
+  let isfirststage = false;
   let nextstagefeature = null;
   let mapprojection = "EPSG:3857";
   let custombaselayer = null;
@@ -842,7 +842,7 @@ function initplaytreasurehunt(
         let newnextstagefeature = (nextstagefeatures && nextstagefeatures[0]) ?? null;
         let stagepositionold = nextstagefeature ? nextstagefeature.get("stageposition") : null;
         let stagepositionnew = newnextstagefeature ? newnextstagefeature.get("stageposition") : null;
-        let isfirststage = newnextstagefeature && newnextstagefeature.get("stageposition") === 1;
+        isfirststage = newnextstagefeature && newnextstagefeature.get("stageposition") === 1;
         let isfirstload = nextstagefeature === null;
         // If the next stage is first or different from the previous one, update it.
         if (newnextstagefeature !== null
@@ -1195,7 +1195,7 @@ function initplaytreasurehunt(
       trackingOptions: {
         enableHighAccuracy: true,
         maximumAge: 0,
-        timeout: 1000,
+        timeout: 10000,
       },
     })
   );
@@ -1242,22 +1242,20 @@ function initplaytreasurehunt(
 
   geolocation.on("error", (error) => {
     // GeolocationPositionError.PERMISSION_DENIED = 1
-    // GeolocationPositionError.TIMEOUT = 2
-    // GeolocationPositionError.POSITION_UNAVAILABLE = 3
+    // GeolocationPositionError.POSITION_UNAVAILABLE = 2
+    // GeolocationPositionError.TIMEOUT = 3
     if (error.code == 1) {
       geolocation.set("user_denied", true);
     } else {
       geolocation.set("user_denied", false);
     }
-    // If the geolocation times out, it is not an error.
-    if (error.code != 2) {
-      getString('geolocation_problem', "mod_treasurehunt").then((msg) => {
-        toast(msg + ": " + error.message);
-      });
-    }
+    // If the geolocation times out, it is not an error. Just toast a warning.
+    getString('geolocation_problem', "mod_treasurehunt").then((msg) => {
+      toast(msg + ": " + error.message);
+    });
     // Show instructions about the geolocation permissions.
     if (
-      error.code == 1 &&
+      error.code == 1 && // USER DENIED.
       tracking &&
       !playwithoutmoving) {
       Promise.resolve().then(() => {
@@ -1450,7 +1448,7 @@ function initplaytreasurehunt(
     if (usegeographictools) {
       attentionSources.push(userPositionSource);
     }
-    if (customplayerconfig.shownextareahint) {
+    if (customplayerconfig.shownextareahint || isfirststage) {
       attentionSources.push(stageSource);
     }
     fitmap = true;

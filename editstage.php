@@ -116,9 +116,17 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
+    $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
+   
+
     // Name of the form you defined in file above.
-    $mform = new stage_form(null, array('current' => $stage, 'context' => $context, 'editoroptions' => $editoroptions,
-                                    'completionactivities' => $completionactivities));
+    $mform = new stage_form(null, 
+        [   'current' => $stage,
+                        'context' => $context,
+                        'editoroptions' => $editoroptions,
+                        'completionactivities' => $completionactivities,
+                        'lockableactivities' => $lockedmods
+                ]);
 
     if ($mform->is_reloaded()) {
         // Ignore this event. Some data may be changes.
@@ -200,6 +208,9 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                 }
             }
         }
+
+        // TODO: Configure lockactivities.
+        $lockedcms = $data->lockactivity;
         // Actualizo la etapa con los ficheros procesados.
         $DB->update_record('treasurehunt_stages', $stage);
 

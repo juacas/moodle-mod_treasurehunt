@@ -3011,3 +3011,86 @@ function treasurehunt_get_playerstyles()
     }
     return $result;
 }
+
+/**
+ * Obtiene la lista de actividades que tienen aplicada la restricción availability/treasurehunt
+ * para la stageid especificada, ya sea sola o combinada mediante AND con otras restricciones.
+ *
+ * @param int $courseid ID del curso
+ * @param int $stageid ID de la etapa del treasurehunt
+ * @return array Array de objetos con información de las actividades
+ */
+function treasurehunt_get_activities_with_stage_restriction($courseid, $stageid) {
+    // Obtener información del curso
+    $modinfo = get_fast_modinfo($courseid);
+    
+    $matching_activities = [];
+    
+    // Iterar sobre todas las actividades del curso
+    foreach ($modinfo->get_cms() as $cm) {
+        $modinfo = treasurehunt_get_activity_info_from_cm($cm);
+        // Verificar si la actividad tiene restricciones de disponibilidad
+        if ($cm->availability) {
+            // Decodificar el JSON de availability
+            $availability = json_decode($cm->availability, true);
+            
+            if ($availability && isset($availability['c'])) {
+                // Buscar la restricción treasurehunt en las condiciones
+                if (treasurehunt_check_stage_restriction($availability['c'], $stageid)) {
+                    $modinfo->locked = true;
+                }
+            }
+        }
+        $matching_activities[] = $modinfo;
+    }
+    
+    return $matching_activities;
+}
+/**
+ * Obtiene información de una actividad desde el objeto cm_info
+ *
+ * @param cm_info $cm Objeto cm_info de Moodle
+ * @return object Objeto con información completa de la actividad
+ */
+function treasurehunt_get_activity_info_from_cm($cm) {
+    $activity_info = new stdClass();
+    $activity_info->cmid = $cm->id;
+    $activity_info->course = $cm->course;
+    $activity_info->module = $cm->module;
+    $activity_info->instance = $cm->instance;
+    $activity_info->modulename = $cm->modname;
+    $activity_info->name = $cm->name;
+    $activity_info->availability = $cm->availability;
+    $activity_info->url = $cm->url;
+    $activity_info->visible = $cm->visible;
+    $activity_info->uservisible = $cm->uservisible;
+    $activity_info->locked = false;
+    
+    return $activity_info;
+}
+/**
+ * Función auxiliar para verificar si una stageid está presente en las restricciones
+ *
+ * @param array $conditions Array de condiciones de availability
+ * @param int $stageid ID de la etapa a buscar
+ * @return bool True si encuentra la restricción con la stageid
+ */
+function treasurehunt_check_stage_restriction($conditions, $stageid) {
+    foreach ($conditions as $condition) {
+        // Verificar si es una restricción treasurehunt
+        if (isset($condition['type']) && $condition['type'] === 'treasurehunt') {
+            if (isset($condition['stageid']) && $condition['stageid'] == $stageid) {
+                return true;
+            }
+        }
+        
+        // Si hay condiciones anidadas (operadores AND/OR), verificar recursivamente
+        if (isset($condition['c']) && is_array($condition['c'])) {
+            if (treasurehunt_check_stage_restriction($condition['c'], $stageid)) {
+                return true;
+            }
+        }
+    }
+    
+    return false;
+}
