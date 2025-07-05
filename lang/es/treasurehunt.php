@@ -227,6 +227,12 @@ $string['invalidassignedroad'] = 'El camino asignado no está validado';
 $string['invalroadid'] = 'El camino no está validado';
 $string['layers'] = 'Capas';
 $string['loading'] = 'Cargando';
+$string['lockactivity']          = 'Permitir acceso a actividades solo en esta etapa';
+$string['lockactivity_help']     = 'Bloquea el acceso a las actividades seleccionadas si el usuario no se encuentra en esta etapa. Este ajuste configura las restricciones de las actividades elegidas.';
+$string['lockactivitiessection'] = 'Permitir actividades solo en esta etapa.';
+$string['lockactivityannounce']  = 'Si el <a href="https://github.com/juacas/moodle-availability_treasurehunt">Treasurehunt Conditional Access Plugin</a> está habilitado en este sitio, puedes hacer que cualquier actividad no esté disponible cuando el usuario no esté trabajando dentro de esta etapa.';
+
+
 $string['lockedaclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' para desbloquear la pista';
 $string['lockedclue'] = 'Pista bloqueada';
 $string['lockedaqclue'] = 'Debes realizar la actividad \'<strong>{$a}</strong>\' y responder correctamente

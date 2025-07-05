@@ -79,7 +79,7 @@ $string['custommaplayertype_help'] = 'The custom layer can be the only visible i
 $string['customlayerservicetype'] = 'Type of the custom layer';
 $string['customlayerservicetype_help'] = 'The custom layer can be a WMS service a {x}{y}{z} tiles server, an ArcGIS REST Tile service (experimental) or an uploaded image.';
 $string['customlayerservicewms'] = 'WMS service';
-$string['customlayerservicetiled'] = 'Tiled XYZ image'; 
+$string['customlayerservicetiled'] = 'Tiled XYZ image';
 $string['customlayerservicearcgis'] = 'Arcgis REST Tile service (experimental)';
 $string['customlayerserviceimage'] = 'Uploaded image';
 $string['custompreserveaspectratio'] = 'Preserve aspect ratio';
@@ -244,8 +244,10 @@ $string['lockedclue'] = 'Locked clue';
 $string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
 $string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following
 question to unlock the clue';
-$string['lockactivity_help'] = 'Block activities if user is not in this locatios';
-$string['lockactivity'] = 'Allow only in this stage';
+$string['lockactivity'] = 'Allow only at this stage';
+$string['lockactivity_help'] = 'Blocks access to selected activities if the user is not in this stage. This setting configures restrictions for the chosen activities.';
+$string['lockactivitiessection'] = 'Allow activities only at this stage.';
+$string['lockactivityannounce'] = 'If the <a href="https://github.com/juacas/moodle-availability_treasurehunt">Treasurehunt Conditional Access Plugin</a> is enabled on this site, you can make any activity unavailable when the user is not working within this stage.';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
 $string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock.

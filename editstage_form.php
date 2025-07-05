@@ -26,6 +26,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
+require_once('availabilitylib.php');
+
 
 /**
  * Constant determines the number of answer boxes to add in the editing
@@ -102,22 +104,6 @@ class stage_form extends moodleform {
         $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'treasurehunt'), $options);
         $mform->addHelpButton('activitytoend', 'activitytoend', 'treasurehunt');
 
-        // Lock activities.
-        // TODO Bypass if no availability treasurehunt installed and enabled.
-        // Add restrict access completion activity.
-        $options = array();
-        $lockedmods = [];
-        foreach ($lockableactivities as $option) {
-            $options[$option->cmid] = $option->name;
-            if ($option->locked) {
-                $lockedmods[] = $option->cmid;
-            }
-        }
-        $select = $mform->addElement('select', 'lockactivity', get_string('lockactivity', 'treasurehunt'), $options);
-        $mform->addHelpButton('lockactivity', 'lockactivity', 'treasurehunt');
-        $select->setMultiple(true);
-        $select->setSelected($lockedmods);
-
         // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco:
         // llamo al cancel que no necesita comprobar la validacion
         // ... y le doy un valor a una variable escondida.
@@ -125,21 +111,41 @@ class stage_form extends moodleform {
         $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // Create javascript: set reloaded field to "1".
         $attributes = array("onChange" => $javascript); // Set onChange attribute.
         $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'),
-                $attributes);
+        $attributes);
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
-
+        
         if ($currentstage->addsimplequestion) {
             // Questions fields.
             $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null,
-                    $editoroptions);
+            $editoroptions);
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Answer fields.
             $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
-                    $currentstage->noanswers, NUMBER_NEW_ANSWERS);
+            $currentstage->noanswers, NUMBER_NEW_ANSWERS);
+        }
+        // Lock activities.
+        $mform->addElement('header', 'lockactivitiessection', get_string('lockactivitiessection', 'treasurehunt'));
+        //  Bypass if no availability treasurehunt installed and enabled.
+        if (treasurehunt_availability_available()) {
+            // Add restrict access completion activity.
+            $options = array();
+            $lockedmods = [];
+            foreach ($lockableactivities as $option) {
+                $options[$option->cmid] = $option->name;
+                if ($option->locked) {
+                    $lockedmods[] = $option->cmid;
+                }
+            }
+            $select = $mform->addElement('select', 'lockactivity', get_string('lockactivity', 'treasurehunt'), $options);
+            $mform->addHelpButton('lockactivity', 'lockactivity', 'treasurehunt');
+            $select->setMultiple(true);
+            $select->setSelected($lockedmods);
+        } else {
+            $mform->addElement('html', get_string('lockactivityannounce', 'treasurehunt'));
         }
         $mform->addElement('header', 'cluetextsection',
-                get_string('stageclue', 'treasurehunt'));
+            get_string('stageclue', 'treasurehunt'));
         // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
         $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');

@@ -24,6 +24,8 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
+require_once('availabilitylib.php');
+
 
 global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
@@ -117,8 +119,11 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
     // TODO: bypass if availability/treasurehunt is not installed.
-    $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
-
+     if (treasurehunt_availability_available()) {
+        $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
+     } else {
+        $lockedmods = null;
+     }
     // Name of the form you defined in file above.
     $mform = new stage_form(null, 
         [   'current' => $stage,
@@ -208,26 +213,27 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                 }
             }
         }
-
-        // TODO: Configure lockactivities.
-        $lockedmods = array_filter($lockedmods, function($cminfo) { return $cminfo->locked == true; });
-        $lockedcmids = array_map(function($cm) {return $cm->cmid;}, $lockedmods);
-        $newlockedcms = $stage->lockactivity;
-        // Locks to remove.
-        $locks_to_remove = array_diff($lockedcmids, $newlockedcms);
-        $locks_to_add = array_diff($newlockedcms, $lockedcmids);
-        $cms = get_fast_modinfo($course->id)->get_cms();
-        // Remove locks.
-        foreach ($locks_to_remove as $cmid) {
-            $availability = treasurehunt_remove_restriction($cms[$cmid], $stage);
-            treasurehunt_update_activity_availability($cms[$cmid], $availability);
+        if (treasurehunt_availability_available()) {
+            require_once('availabilitylib.php');
+            // Configure lockactivities.
+            $lockedmods = array_filter($lockedmods, function($cminfo) { return $cminfo->locked == true; });
+            $lockedcmids = array_map(function($cm) {return $cm->cmid;}, $lockedmods);
+            $newlockedcms = $stage->lockactivity;
+            // Locks to remove.
+            $locks_to_remove = array_diff($lockedcmids, $newlockedcms);
+            $locks_to_add = array_diff($newlockedcms, $lockedcmids);
+            $cms = get_fast_modinfo($course->id)->get_cms();
+            // Remove locks.
+            foreach ($locks_to_remove as $cmid) {
+                $availability = treasurehunt_remove_restriction($cms[$cmid], $stage);
+                treasurehunt_update_activity_availability($cms[$cmid], $availability);
+            }
+            // Add new locks.
+            foreach ($locks_to_add as $cmid) {
+            $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
+                treasurehunt_update_activity_availability($cms[$cmid], $availability);
+            }
         }
-        // Add new locks.
-        foreach ($locks_to_add as $cmid) {
-           $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
-            treasurehunt_update_activity_availability($cms[$cmid], $availability);
-        }
-        
         // Actualizo la etapa con los ficheros procesados.
         $DB->update_record('treasurehunt_stages', $stage);
 
