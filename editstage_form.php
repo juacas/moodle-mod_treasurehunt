@@ -54,7 +54,7 @@ class stage_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $currentstage = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
-        $activitiestolock = $this->_customdata['lockableactivities'];
+        $lockableactivities = $this->_customdata['lockableactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -103,11 +103,11 @@ class stage_form extends moodleform {
         $mform->addHelpButton('activitytoend', 'activitytoend', 'treasurehunt');
 
         // Lock activities.
-      
+        // TODO Bypass if no availability treasurehunt installed and enabled.
         // Add restrict access completion activity.
         $options = array();
         $lockedmods = [];
-        foreach ($activitiestolock as $option) {
+        foreach ($lockableactivities as $option) {
             $options[$option->cmid] = $option->name;
             if ($option->locked) {
                 $lockedmods[] = $option->cmid;
@@ -117,11 +117,6 @@ class stage_form extends moodleform {
         $mform->addHelpButton('lockactivity', 'lockactivity', 'treasurehunt');
         $select->setMultiple(true);
         $select->setSelected($lockedmods);
-
-        $mform->addElement('hidden','prevlockedactivity');
-        $mform->setType('prevlockedactivity', PARAM_TAGLIST );
-        $mform->setConstant('prevlockedactivity', join(',',$lockedmods));
-
 
         // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco:
         // llamo al cancel que no necesita comprobar la validacion

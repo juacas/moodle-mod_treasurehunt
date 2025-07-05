@@ -244,6 +244,8 @@ $string['lockedclue'] = 'Locked clue';
 $string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
 $string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following
 question to unlock the clue';
+$string['lockactivity_help'] = 'Block activities if user is not in this locatios';
+$string['lockactivity'] = 'Allow only in this stage';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
 $string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock.

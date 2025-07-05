@@ -3013,8 +3013,9 @@ function treasurehunt_get_playerstyles()
 }
 
 /**
- * Obtiene la lista de actividades que tienen aplicada la restricción availability/treasurehunt
+ * Obtiene la lista de actividades del curso.
  * para la stageid especificada, ya sea sola o combinada mediante AND con otras restricciones.
+ * Las que tienen aplicada la restricción availability/treasurehunt están marcadas con locked=true.
  *
  * @param int $courseid ID del curso
  * @param int $stageid ID de la etapa del treasurehunt
@@ -3093,4 +3094,134 @@ function treasurehunt_check_stage_restriction($conditions, $stageid) {
     }
     
     return false;
+}
+/**
+ * Añade una restricción treasurehunt a las restricciones existentes
+ *
+ * @param course_modinfo $cm course module
+ * @param stdClass $stageid record etapa
+ * @param bool $replace Si reemplazar todas las restricciones existentes
+ * @return string JSON actualizado de availability
+ */
+function treasurehunt_add_restriction($cm, $stage, $treasurehuntid, $replace = false) {
+    $current_availability = $cm->availability;
+    $new_restriction = [
+        'treasurehuntid'=> $treasurehuntid,
+        'type' => 'treasurehunt',
+        'conditiontype' => 'current_stage',
+        'requiredvalue' => 0,
+        'stageid' => $stage->id
+    ];
+    
+    if ($replace || empty($current_availability)) {
+        // Crear nueva estructura de availability.
+        $availability = [
+            'op' => '&',
+            'c' => [$new_restriction],
+            'showc' => [true]
+        ];
+    } else {
+        // Decodificar availability existente
+        $availability = json_decode($current_availability, true);
+        
+        if (!$availability || !isset($availability['c'])) {
+            // Si no hay estructura válida, crear nueva
+            $availability = [
+                'op' => '&',
+                'c' => [$new_restriction],
+                'showc' => [true]
+            ];
+        } else {
+            // Verificar si ya existe esta restricción
+            if (!treasurehunt_check_stage_restriction($availability['c'], $stage->id)) {
+                // Añadir la nueva restricción
+                $availability['c'][] = $new_restriction;
+                $availability['showc'][]= true;
+            }
+        }
+    }
+    
+    return json_encode($availability);
+}
+
+/**
+ * Elimina una restricción treasurehunt específica
+ *
+ * @param course_modinfo $cm to edit
+ * @param stdClass $stage record etapa a eliminar
+ * @return string JSON actualizado de availability
+ */
+function treasurehunt_remove_restriction($cm, $stage) {
+    if (empty($cm->availability)) {
+        return null;
+    }
+    
+    $availability = json_decode($cm->availability, true);
+    
+    if (!$availability || !isset($availability['c'])) {
+        return $cm->availability;
+    }
+    
+    // Filtrar las restricciones para eliminar la que coincida con stageid
+    $availability['c'] = treasurehunt_filter_restrictions($availability['c'], $stage->id);
+    
+    // Si no quedan restricciones, retornar null
+    if (empty($availability['c'])) {
+        return null;
+    }
+    
+    return json_encode($availability);
+}
+
+function treasurehunt_update_activity_availability($cm, $new_availability) {
+    global $DB;
+    // Clear cache.
+    $courseid = $cm->get_course()->id;
+        // Usar la API de Moodle para actualizar la disponibilidad
+        try {
+            // Actualizar usando la DB
+            $DB->set_field('course_modules', 'availability',$new_availability, ['id'=> $cm->id]);
+            
+            // Invalidar caché del curso
+            rebuild_course_cache($courseid, true);
+            
+            return true;
+        } catch (Exception $e) {
+            debugging('Error updating availability: ' . $e->getMessage(), DEBUG_DEVELOPER);
+            return false;
+        }
+}
+
+
+/**
+ * Filtra recursivamente las restricciones para eliminar la treasurehunt específica
+ *
+ * @param array $conditions Array de condiciones
+ * @param int $stageid ID de la etapa a eliminar
+ * @return array Array filtrado de condiciones
+ */
+function treasurehunt_filter_restrictions($conditions, $stageid) {
+    $filtered = [];
+    
+    foreach ($conditions as $condition) {
+        // Si es una restricción treasurehunt con el stageid específico, la saltamos
+        if (isset($condition['type']) && $condition['type'] === 'treasurehunt' && 
+            isset($condition['stageid']) && $condition['stageid'] == $stageid) {
+            continue;
+        }
+        
+        // Si hay condiciones anidadas, filtrar recursivamente
+        if (isset($condition['c']) && is_array($condition['c'])) {
+            $condition['c'] = treasurehunt_filter_restrictions($condition['c'], $stageid);
+            // Solo mantener si quedan condiciones anidadas
+            if (!empty($condition['c'])) {
+                $filtered[] = $condition;
+            }
+        } else {
+            // Mantener otras restricciones
+            $filtered[] = $condition;
+        }
+    }
+    
+    return $filtered;
 }
