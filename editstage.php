@@ -24,8 +24,6 @@
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-require_once('availabilitylib.php');
-
 
 global $COURSE, $PAGE, $CFG, $USER;
 // You will process some page parameters at the top here and get the info about
@@ -118,8 +116,9 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
-    // TODO: bypass if availability/treasurehunt is not installed.
+    // Support availability helper if availability/treasurehunt is installed.
      if (treasurehunt_availability_available()) {
+        // Get previous locked mods to render in forms and to calculate add, remove lists.
         $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
      } else {
         $lockedmods = null;
@@ -127,6 +126,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // Name of the form you defined in file above.
     $mform = new stage_form(null, 
         [   'current' => $stage,
+                        'course' => $course,
                         'context' => $context,
                         'editoroptions' => $editoroptions,
                         'completionactivities' => $completionactivities,
@@ -214,7 +214,6 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             }
         }
         if (treasurehunt_availability_available()) {
-            require_once('availabilitylib.php');
             // Configure lockactivities.
             $lockedmods = array_filter($lockedmods, function($cminfo) { return $cminfo->locked == true; });
             $lockedcmids = array_map(function($cm) {return $cm->cmid;}, $lockedmods);
@@ -230,7 +229,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             }
             // Add new locks.
             foreach ($locks_to_add as $cmid) {
-            $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
+                $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
                 treasurehunt_update_activity_availability($cms[$cmid], $availability);
             }
         }

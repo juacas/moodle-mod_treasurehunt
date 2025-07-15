@@ -50,7 +50,7 @@ class renew_lock extends external_api
         return new external_function_parameters(
             array(
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-            'lockid' => new external_value(PARAM_INT, 'id of lock', VALUE_OPTIONAL, null, NULL_ALLOWED)
+            'lockid' => new external_value(PARAM_INT, 'id of lock', VALUE_DEFAULT, null, NULL_ALLOWED)
                 )
         );
     }

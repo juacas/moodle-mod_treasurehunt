@@ -738,7 +738,7 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context)
 {
     $stagesresult = treasurehunt_get_stages($treasurehuntid, $context);
     $roads = treasurehunt_get_roads($treasurehuntid);
-
+    // Group by roads retaining order.
     foreach ($roads as $road) {
         $stagesinroad = array();
         foreach ($stagesresult as $key => $stage) {
@@ -761,15 +761,36 @@ function treasurehunt_get_stages($treasurehuntid, $context)
     global $DB;
     // Get all stages from the instance of treasure hunt.
     $stagessql = "SELECT stage.id, "
-        . "stage.name, stage.cluetext, roadid, position,"
+        . "stage.name, stage.cluetext, roadid, roads.name as roadname, position,"
         . "geom as geometry FROM {treasurehunt_stages}  stage"
         . " inner join {treasurehunt_roads} roads on stage.roadid = roads.id"
-        . " WHERE treasurehuntid = ? ORDER BY position DESC";
+        . " WHERE treasurehuntid = ? ORDER BY roadname ASC, position DESC";
     $stagesresult = $DB->get_records_sql($stagessql, array($treasurehuntid));
     foreach ($stagesresult as $stage) {
         treasurehunt_format_texts($stage, $context);
     }
     return $stagesresult;
+}
+/**
+ * Get one stage by id with road and treasurehunt ids and names.
+ * @param int $stageid instace id.
+ * @global moodle_database $DB
+ */
+function treasurehunt_get_stage($stageid)
+{
+    global $DB;
+    // Get one stage from the stageid with related objects.
+    $stagessql = "SELECT stage.id, "
+        . "stage.name, stage.cluetext, roadid, roads.name, position,"
+        . " tr.name as treasurehuntname, tr.id as treasurehuntid,"
+        . " roads.name as roadname, roads.id as roadid,"
+        . " geom as geometry FROM {treasurehunt_stages}  stage"
+        . " left join {treasurehunt_roads} roads on stage.roadid = roads.id"
+        . " left join {treasurehunt} tr on roads.treasurehuntid = tr.id"
+        . " WHERE stage.id = ?";
+    $stageresult = $DB->get_record_sql($stagessql, array($stageid), IGNORE_MISSING);
+    
+    return $stageresult;
 }
 /**
  * Get all roads in a treasurehunt instance.
@@ -3006,4 +3027,19 @@ function treasurehunt_get_playerstyles()
         }
     }
     return $result;
+}
+
+/**
+ * Check if availability_treasurehunt is available in the system.
+ * Load library functions if present.
+ */
+function treasurehunt_availability_available() {
+    global $CFG;
+    $config = get_config('availability_treasurehunt');
+    if (isset($config->version) && !isset($config->disabled)) {
+        require_once($CFG->dirroot . '/availability/condition/treasurehunt/availabilitylib.php');
+        return true;
+    } else {
+        return false;
+    }
 }

@@ -26,7 +26,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once("$CFG->libdir/formslib.php");
-require_once('availabilitylib.php');
 
 
 /**
@@ -56,6 +55,7 @@ class stage_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $currentstage = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
+        // Get previous lockedactivities from editstage.php.
         $lockableactivities = $this->_customdata['lockableactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
