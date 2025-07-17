@@ -50,7 +50,7 @@ $title = get_string('editingtreasurehunt', 'treasurehunt') . ': ' . format_strin
 $PAGE->set_url($url);
 $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('incourse');
 $PAGE->activityheader->disable();
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {

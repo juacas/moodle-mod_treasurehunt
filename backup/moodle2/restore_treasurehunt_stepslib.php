@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Define all the restore steps that will be used by the restore_treasurehunt_activity_task
  *
@@ -24,16 +25,24 @@
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 
+/**
+ * Restore step class for the TreasureHunt activity.
+ *
+ * Defines the structure and processing logic for restoring TreasureHunt activities from backup.
+ *
+ * @package   mod_treasurehunt
+ * @category  backup
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
-
     /**
      * Defines structure of path elements to be processed during the restore
      *
      * @return array of {@link restore_path_element}
      */
     protected function define_structure() {
-
-        $paths = array();
+        $paths = [];
         $userinfo = $this->get_setting_value('userinfo');
 
         $paths[] = new restore_path_element('treasurehunt', '/activity/treasurehunt');
@@ -42,7 +51,10 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $paths[] = new restore_path_element('treasurehunt_answer', '/activity/treasurehunt/roads/road/stages/stage/answers/answer');
 
         if ($userinfo) {
-            $paths[] = new restore_path_element('treasurehunt_attempt', '/activity/treasurehunt/roads/road/stages/stage/attempts/attempt');
+            $paths[] = new restore_path_element(
+                'treasurehunt_attempt',
+                '/activity/treasurehunt/roads/road/stages/stage/attempts/attempt'
+            );
             $paths[] = new restore_path_element('treasurehunt_track', '/activity/treasurehunt/tracks/track');
         }
 
@@ -91,6 +103,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->set_mapping('treasurehunt_road', $oldid, $newitemid);
     }
 
+    /**
+     * Process the given restore path element data for a treasure hunt stage
+     *
+     * @param array $data parsed element data
+     */
     protected function process_treasurehunt_stage($data) {
         global $DB;
 
@@ -105,6 +122,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->set_mapping('treasurehunt_stage', $oldid, $newitemid, true);
     }
 
+    /**
+     * Process the given restore path element data for a treasure hunt answer
+     *
+     * @param array $data parsed element data
+     */
     protected function process_treasurehunt_answer($data) {
         global $DB;
 
@@ -118,6 +140,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->set_mapping('treasurehunt_answer', $oldid, $newitemid, true);
     }
 
+    /**
+     * Process the given restore path element data for a treasure hunt attempt
+     *
+     * @param array $data parsed element data
+     */
     protected function process_treasurehunt_attempt($data) {
         global $DB;
 
@@ -132,6 +159,11 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->set_mapping('treasurehunt_attempt', $oldid, $newitemid);
     }
 
+    /**
+     * Process the given restore path element data for a treasure hunt track
+     *
+     * @param array $data parsed element data
+     */
     protected function process_treasurehunt_track($data) {
         global $DB;
 
@@ -153,5 +185,4 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         $this->add_related_files('mod_treasurehunt', 'answertext', 'treasurehunt_answer');
         $this->add_related_files('mod_treasurehunt', 'custombackground', null);
     }
-
 }

@@ -304,8 +304,7 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
  * @param int $now Timestamp to evaluate against.
  * @return moodle_url icon url.
  */
-function treasurehunt_get_proper_icon($treasurehunt, $now)
-{
+function treasurehunt_get_proper_icon($treasurehunt, $now) {
     list($status, $nextevent) = treasurehunt_get_time_status($treasurehunt, $now);
 
     if ($status == 'ongoing') {

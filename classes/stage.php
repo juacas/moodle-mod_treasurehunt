@@ -8,43 +8,64 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>. 
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
+
 namespace mod_treasurehunt\model;
 
 defined('MOODLE_INTERNAL') || die;
-/** 
- * Model for a stage 
- * @author juacas
+/**
+ * Model for a stage
+ * @author Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>
+ * @package mod_treasurehunt
+ * @copyright 2024 Juan Pablo de Castro
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stage
 {
     /** @var int id of the parent road */
-    var $id;
-    var $roadid;
-
-    var $position;
-    var $timecreated;
-    var $timemodified;
+    public $id;
+    /** @var int The ID of the road this stage belongs to */
+    public $roadid;
+    /** @var int Position number of the stage. The position/order of the stage in the treasure hunt game. */
+    public $position;
+    /** @var int Unix timestamp. The timestamp when the stage was created. */
+    public $timecreated;
+    /** @var int Unix timestamp. The timestamp when the stage was last modified. */
+    public $timemodified;
     /** @var string stage name */
-    var $name;
+    public $name;
     /** @var string text to discover the next stage */
-    var $cluetext;
-    var $cluetextformat = FORMAT_HTML;
-    var $cluetexttrust = 0;
-    var $questiontext = '';
-    var $questiontextformat = FORMAT_HTML;
-    var $questiontexttrust = 0;
-    var $activitytoend = 0;
-    var $qrtext = null;
+    public $cluetext;
+    /** @var int The format for the clue text field, using constant FORMAT_HTML (default value) */
+    public $cluetextformat = FORMAT_HTML;
+    /** @var int $cluetexttrust Trust level of clue text (see moodle api) */
+    public $cluetexttrust = 0;
+    /** @var string The text content of the question for this stage. */
+    public $questiontext = '';
+    /** @var int $questiontextformat HTML format constant for the question text (default: FORMAT_HTML) */
+    public $questiontextformat = FORMAT_HTML;
+    /** @var int $questiontexttrust Flag indicating the trustworthiness of question text (see Moodle API) */
+    public $questiontexttrust = 0;
+    /** @var int $activitytoend Indicates if this stage needs an activity to be completed (0=no, 1=yes) */
+    public $activitytoend = 0;
+    /** @var string|null QR text content for the stage */
+    public $qrtext = null;
     /** @var string WKT representation of the geometry (@see treasurehunt_geometry_to_wkt) */
-    var $geom = null;
-    var $playstagewithoutmoving = false;
+    public $geom = null;
+    /** @var bool Whether this stage can be played without moving */
+    public $playstagewithoutmoving = false;
 
-    public function __construct ($name, $cluetext) {
+    /**
+     * Creates a new stage instance.
+     *
+     * @param string $name The name of the stage
+     * @param string $cluetext The clue text for this stage
+     */
+    public function __construct($name, $cluetext) {
         $this->name = $name;
         $this->cluetext = $cluetext;
         $this->timecreated = time();

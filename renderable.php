@@ -181,9 +181,6 @@ class treasurehunt_play_page_base implements renderable, templatable
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class treasurehunt_play_page_classic extends treasurehunt_play_page_base
-{
-}
 class treasurehunt_play_page_fancy extends treasurehunt_play_page_base
 {
 }

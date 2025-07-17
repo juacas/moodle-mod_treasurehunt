@@ -29,8 +29,17 @@ defined('MOODLE_INTERNAL') || die;
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_stepslib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/backup_treasurehunt_settingslib.php');
 
+/**
+ * Activity backup task for the Treasurehunt module.
+ *
+ * Handles the backup process for Treasurehunt activities, including steps and content link encoding.
+ *
+ * @package   mod_treasurehunt
+ * @category  backup
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
 class backup_treasurehunt_activity_task extends backup_activity_task {
-
     /**
      * No specific settings for this activity
      */
@@ -50,17 +59,17 @@ class backup_treasurehunt_activity_task extends backup_activity_task {
      * @param string $content some HTML text that eventually contains URLs to the activity instance scripts
      * @return string the content with the URLs encoded
      */
-    static public function encode_content_links($content) {
+    public static function encode_content_links($content) {
         global $CFG;
 
         $base = preg_quote($CFG->wwwroot, '/');
 
         // Link to the list of treasurehunts.
-        $search = '/('.$base.'\/mod\/treasurehunt\/index.php\?id\=)([0-9]+)/';
+        $search = '/(' . $base . '\/mod\/treasurehunt\/index.php\?id\=)([0-9]+)/';
         $content = preg_replace($search, '$@TREASUREHUNTINDEX*$2@$', $content);
 
         // Link to treasurehunt view by moduleid.
-        $search = '/('.$base.'\/mod\/treasurehunt\/view.php\?id\=)([0-9]+)/';
+        $search = '/(' . $base . '\/mod\/treasurehunt\/view.php\?id\=)([0-9]+)/';
         $content = preg_replace($search, '$@TREASUREHUNTVIEWBYID*$2@$', $content);
 
         return $content;
