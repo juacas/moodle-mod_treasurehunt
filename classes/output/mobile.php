@@ -18,10 +18,8 @@
 
 namespace mod_treasurehunt\output;
 
-require_once $CFG->dirroot . '/mod/treasurehunt/locallib.php';
-
-
 defined('MOODLE_INTERNAL') || die();
+require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 use context_module;
 use completion_info;

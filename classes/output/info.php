@@ -1,5 +1,5 @@
 <?php
-// This file is part of Treasurehunt for Moodle
+// This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -14,24 +14,31 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
+namespace mod_treasurehunt\output;
+use renderable;
 /**
- * This file contains the definition for the renderable classes for the assignment
- *
+ * Renderable info
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die();
-use mod_treasurehunt\output\play_page_base;
-/**
- * Renderable, Templatable play_page
- * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
- */
-class treasurehunt_play_page_fancy extends play_page_base
+class info implements renderable
 {
-}
-class treasurehunt_play_page_bootstrap extends play_page_base
-{
+    public $treasurehunt = null;
+    public $timenow = 0;
+    public $courseid = 0;
+    public $roads = [];
+    public $numqrs = 0;
+
+    /**
+     * constructor
+     */
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs)
+    {
+        $this->treasurehunt = $treasurehunt;
+        $this->timenow = $timenow;
+        $this->courseid = $courseid;
+        $this->roads = $roads;
+        $this->numqrs = $numqrs;
+    }
 }

@@ -76,7 +76,7 @@ function treasurehunt_notify_info($message) {
 }
 /**
  * Compatibility with Moodle 2.9 notifications
- * @param unknown $message
+ * @param string $message
  */
 function treasurehunt_notify_error($message) {
     if (class_exists('\core\notification')) {
@@ -88,7 +88,7 @@ function treasurehunt_notify_error($message) {
 }
 /**
  * Compatibility with Moodle 2.9 notifications
- * @param unknown $message
+ * @param string $message
  */
 function treasurehunt_notify_warning($message) {
     if (class_exists('\core\notification')) {
@@ -100,6 +100,7 @@ function treasurehunt_notify_warning($message) {
 }
 
 /**
+ * Calculate the centroid of a geom.
  * @param Geometry $geom
  */
 function treasurehunt_geometry_centroid(Geometry $geom) {
@@ -272,7 +273,7 @@ function treasurehunt_get_nice_duration($durationinseconds, $usemonths = true, $
  *
  * @param string $array The GeoJSON string.
  *
- * @return Feature|FeatureCollection|Geometry The PHP equivalent object.
+ * @return Feature|FeatureCollection|Geometry|null The PHP equivalent object.
  */
 function treasurehunt_geojson_to_object($array) {
     if ($array === null) {
@@ -421,6 +422,7 @@ function treasurehunt_get_custommappingconfig($treasurehunt, $context = null) {
     return $custommapconfig;
 }
 /**
+ * Declare the types of grading.
  * @return array int => lang string the options for calculating the treasure hunt grade
  *      from the individual attempt grades.
  */
@@ -949,7 +951,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
             $nextnostage = 1;
         }
         $nextstage = $DB->get_record('treasurehunt_stages', ['position' => $nextnostage, 'roadid' => $roadid], '*', MUST_EXIST);
-        // Check qrtext or location
+        // Check qrtext or location.
         $nextstagegeom = treasurehunt_wkt_to_object($nextstage->geom);
         $inside = $point == null ? false : treasurehunt_check_point_in_multipolygon($nextstagegeom, $point);
         $qrguessed = $qrtext == '' ? false : $nextstage->qrtext === $qrtext;
@@ -1029,7 +1031,11 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
                     $attempt->timecreated += 1;
                     treasurehunt_insert_attempt($attempt, $context);
                 }
-                $return->update = get_string('activitytoendovercome', 'treasurehunt', treasurehunt_get_activity_to_end_link($nextstage->activitytoend));
+                $return->update = get_string(
+                    'activitytoendovercome',
+                    'treasurehunt',
+                    treasurehunt_get_activity_to_end_link($nextstage->activitytoend)
+                );
             }
         }
         if ($attempt->success) {
@@ -1064,6 +1070,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
 }
 
 /**
+ * Build a Href link to the activity.
  * @param int $activitytoendid The identifier of the activity in the course to end.
  * @return string The link to activity to end.
  */
@@ -1272,7 +1279,15 @@ function treasurehunt_set_custombackground($data) {
     if (count($files) == 1) {
         // Only one file attached, set it as main file automatically.
         $file = reset($files);
-        file_set_sortorder($context->id, 'mod_treasurehunt', 'custombackground', 0, $file->get_filepath(), $file->get_filename(), 1);
+        file_set_sortorder(
+            $context->id,
+            'mod_treasurehunt',
+            'custombackground',
+            0,
+            $file->get_filepath(),
+            $file->get_filename(),
+            1
+        );
     }
 }
 /**
@@ -1282,7 +1297,6 @@ function treasurehunt_set_custombackground($data) {
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $groupid The identifier of group.
  * @param int $userid The identifier of user.
- * @return stdClass
  */
 function treasurehunt_set_grade($treasurehunt, $groupid, $userid) {
     if ($groupid == 0) {
@@ -1299,8 +1313,8 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid) {
  * Difference from the first and last attempt.
  * @global moodle_database $DB
  * @param int $treasurehuntid
- * @param int $userid
- * @param int $groupid
+ * @param int|null $userid
+ * @param int|null $groupid
  * @return mixed object with duration, last, first in seconds.
  */
 function treasurehunt_get_hunt_duration($cmid, $userid, $groupid) {
@@ -1370,14 +1384,14 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         }
     }
     // If the user does not have any progress, the geometry of the first stage of the road shows.
-    // if (count($userprogress) == 0 || !$geometrysolved) {
+    // if (count($userprogress) == 0 || !$geometrysolved) {.
         $query = "SELECT position -1 as position,geom as geometry,"
             . "roadid FROM {treasurehunt_stages}  WHERE  roadid=? AND position=1";
         $params = [$roadid];
         $firststagegeom = $DB->get_records_sql($query, $params);
         // Convert the feature format in GeoJSON.
         $nextstagegeomgeojson = treasurehunt_features_to_geojson($firststagegeom, $context, $treasurehuntid, $groupid);
-    // }
+    // Removed }.
 
     // Convert the features format in GeoJSON.
     $attemptsgeojson = treasurehunt_features_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
@@ -1632,10 +1646,11 @@ function treasurehunt_get_all_users_has_none_groups_and_roads($totalparticipants
  * Get the full list of participants and their attempts for all the roads
  * of the treasure hunt instance.
  * Each user object has a "ratings" property that contains the list of attempts.
- * Each attempt has a $ratings[$stagenum] with stagenumn, timestamp, class = "successwithfailures|failure|successwithoutfailures|noattempt";
+ * Each attempt has a $ratings[$stagenum] with stagenumn, timestamp,
+ * class = "successwithfailures|failure|successwithoutfailures|noattempt";
  *
- * @param stdClass $cm The treasure hunt course module activity.
- * @param array $courseid The identifier of the course.
+ * @param course_modinfo $cm The treasure hunt course module activity.
+ * @param int $courseid The identifier of the course.
  * @param context $context The context object.
  * @return array The roads, duplicate users and unassignedusers.
  */
@@ -1706,10 +1721,12 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             $grouplist = groups_get_all_groups($courseid, null, $groupingid->groupingid);
 
             // Check if there is more than one road assigned to each group.
-            [
+            [$totalparticipantsgroups, $duplicategroupsingroupings] = treasurehunt_get_all_users_has_multiple_groups_or_roads(
                 $totalparticipantsgroups,
-                $duplicategroupsingroupings
-            ] = treasurehunt_get_all_users_has_multiple_groups_or_roads($totalparticipantsgroups, $grouplist, $duplicategroupsingroupings, true);
+                $grouplist,
+                $duplicategroupsingroupings,
+                true
+            );
             $roads[] = treasurehunt_get_road_userlist($groupingid, $grouplist, $attempts);
         }
 
@@ -1799,8 +1816,7 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid) {
  * @param int $userid The identifier of user.
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
- * @param module_context $context The context of the module.
- * @return false|stdClass the record object or false if there is not succesful attempt.
+ * @return false|object the record object or false if there is not succesful attempt.
  */
 function treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid) {
     global $DB;
@@ -1825,6 +1841,14 @@ function treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid) 
     $lastsuccesfulattempt = $DB->get_record_sql($sql, $params);
     return $lastsuccesfulattempt;
 }
+/**
+ * Calculate the last_successful_attempt and format texts.
+ * @param int $userid
+ * @param int $groupid
+ * @param int $roadid
+ * @param context $context
+ * @return bool|object
+ */
 function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context) {
     // Get record.
     $lastsuccesfulattempt = treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid);
@@ -1835,7 +1859,7 @@ function treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $c
 /**
  * Format attempt texts.
  * @param stdClass $attempt The attempt object. It must have the fields: questiontext, name, cluetext.
- * @param module_context $context The context of the module.
+ * @param context $context The context of the module.
  * @return void
  */
 function treasurehunt_format_texts($attempt, $context) {
@@ -1917,7 +1941,11 @@ function treasurehunt_check_question_and_activity_solved(
                 if ($usercompletion = treasurehunt_check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
-                    $return->updates[] = get_string('activitytoendovercome', 'treasurehunt', treasurehunt_get_activity_to_end_link($lastattempt->activitytoend));
+                    $return->updates[] = get_string(
+                        'activitytoendovercome',
+                        'treasurehunt',
+                        treasurehunt_get_activity_to_end_link($lastattempt->activitytoend)
+                    );
                     // If there is no question and still has not been resolved.
                     if (!$lastattempt->questionsolved && $lastattempt->questiontext === '') {
                         $lastattempt->questionsolved = 1;
@@ -2132,8 +2160,8 @@ function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time,
  * @param int $nostages The total number of stages in the road.
  * @param bool $outoftime If the instance is out of time.
  * @param bool $actnotavailableyet If the instance is not avaible yet.
- * @param stdClass $context The context object.
- * @return stdClass The last succesful stage.
+ * @param context $context The context object.
+ * @return object The last succesful stage.
  */
 function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nostages, $outoftime, $actnotavailableyet, $context) {
     $lastsuccessfulstage = new stdClass();
@@ -2303,8 +2331,9 @@ function treasurehunt_get_user_attempt_history($groupid, $userid, $roadid) {
 }
 
 /**
+ * Get all attempts in a treasurehunt.
  * @global moodle_database $DB
- * @param type $treasurehuntid record id in table treasurehunt
+ * @param integer $treasurehuntid record id in table treasurehunt
  * @return array
  */
 function treasurehunt_get_all_attempts($treasurehuntid) {
@@ -2335,11 +2364,11 @@ function treasurehunt_clear_activities($treasurehuntid) {
 }
 /**
  * Initialices the javascript needed to use QRScanner.
- * @param moodle_page $PAGE
+ * @param moodle_page $page
  * @param string global function name to initialice the code.
  */
-function treasurehunt_qr_support($PAGE, $initfunction = 'setup', $params = []) {
-    $PAGE->requires->js_call_amd(
+function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
+    $page->requires->js_call_amd(
         'mod_treasurehunt/webqr',
         $initfunction,
         $params
@@ -2361,7 +2390,7 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
     [$select, $params] = $DB->get_in_or_equal(array_keys($roads));
     $select = "roadid $select and qrtext <> ''";
     $hasqr = $DB->count_records_select('treasurehunt_stages', $select, $params, 'count(qrtext)');
-    $renderable = new treasurehunt_info($treasurehunt, $timenow, $courseid, $roads, $hasqr);
+    $renderable = new mod_treasurehunt\output\info($treasurehunt, $timenow, $courseid, $roads, $hasqr);
     return $output->render($renderable);
 }
 
@@ -2377,7 +2406,7 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
  * @param int $cmid The identifier of course module activity.
  * @param string $username The user name.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
- * @return treasurehunt_user_attempt_history
+ * @return mod_treasurehunt\output\user_attempt_history
  */
 function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $userid, $roadid, $cmid, $username, $teacherreview) {
     global $PAGE;
@@ -2388,46 +2417,15 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
     } else {
         $outoftime = false;
     }
-    $renderable = new treasurehunt_user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
+    $renderable = new mod_treasurehunt\output\user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
     return $renderable;
-}
-
-// /**
-// * Gets the view in HTML format of game interface.
-// *
-// * @param stdClass $treasurehunt The treasurehunt instance.
-// * @param int $cmid The identifier of course module activity.
-// * @return string
-// */
-// function treasurehunt_view_play_page($treasurehunt, $cmid)
-// {
-// global $PAGE;
-// $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
-// $output = $PAGE->get_renderer('mod_treasurehunt');
-// $renderable = new treasurehunt_play_page($treasurehunt, $cmid);
-// return $output->render($renderable);
-// }
-
-/**
- * Gets the view in HTML format of edit interface.
- *
- * @param stdClass $treasurehunt The treasurehunt instance.
- * @param int $cmid The identifier of course module activity.
- * @return string
- */
-function treasurehunt_view_edit_page($treasurehunt, $cmid) {
-    global $PAGE;
-    $treasurehunt->description = format_module_intro('treasurehunt', $treasurehunt, $cmid);
-    $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_edit_page($treasurehunt, $cmid);
-    return $output->render($renderable);
 }
 
 /**
  * Gets the table with the progress of users or groups with assigned roads,
  * belonging to the instance treasure hunt, in HTML format.
  *
- * @param stdClass $cm The treasure hunt course module activity.
+ * @param course_modinfo $cm The treasure hunt course module activity.
  * @param int $courseid The identifier of course.
  * @param context $context The context object.
  * @return string
@@ -2442,7 +2440,7 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
     $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    $renderable = new treasurehunt_users_progress(
+    $renderable = new mod_treasurehunt\output\users_progress(
         roadsusersprogress: $roads,
         groupmode: $cm->groupmode,
         coursemoduleid: $cm->id,
@@ -2451,7 +2449,7 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
         unassignedusers: $unassignedusers,
         viewpermission: $viewpermission,
         managepermission: $managepermission,
-        // $availablegroups
+        // ...$availablegroups.
     );
     return $output->render($renderable);
 }
@@ -2510,16 +2508,17 @@ function treasurehunt_set_string_attempt($attempt, $groupmode) {
             return get_string('useractivityovercome', 'treasurehunt', $attempt);
         }
     }
+    return "Unknown";
 }
 
 /**
  * Adds a new road or update existing one
- * @param stdClass $treassurehunt
- * @param stdClass $road record for a row: name, treasurehuntid
- * @param type $context
- * @return \stdClass
+ * @param object $treasurehunt
+ * @param object $road record for a row: name, treasurehuntid
+ * @param core\context\module $context
+ * @return object
  */
-function treasurehunt_add_update_road(stdClass $treasurehunt, stdClass $road, $context) {
+function treasurehunt_add_update_road($treasurehunt, $road, $context) {
     global $DB;
     $eventparams = ['context' => $context];
     if (empty($road->id)) {
@@ -2917,6 +2916,7 @@ function treasurehunt_calculate_line_equation($x1, $y1, $x2, $y2, $x3) {
 }
 
 /**
+ * Calculate grades for all enrolled users.
  * @param stdClass $treasurehunt The module instance.
  * @param int/array $userid The list of users to check.
  * @return array grade struct
@@ -2942,8 +2942,8 @@ function treasurehunt_calculate_user_grades($treasurehunt, $userid = 0) {
  */
 function treasurehunt_get_installedplayerstyles() {
     return  [
-        // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),
-        // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),
+        // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),.
+        // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),.
         TREASUREHUNT_PLAYERBOOTSTRAP => get_string('playerbootstrap', 'treasurehunt'),
     ];
 }

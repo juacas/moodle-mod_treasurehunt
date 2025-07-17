@@ -28,8 +28,6 @@ import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
 import { getStrings, getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
-// import GeolocationPositionError from "mod_treasurehunt/ol";
-
 // Side‑effect only imports
 import "mod_treasurehunt/jquery.truncate";
 import "mod_treasurehunt/dropdown";
@@ -1097,19 +1095,6 @@ function initplaytreasurehunt(
         );
         counter++;
       });
-
-      // $("#questionform")
-      //   .html(questionform)
-      //   .scrollTop();
-      // // Enhance this with jquery mobile.
-      // // JPC: It doesn't work in some cases (i.e. Moodle 3.7) probably some interaction with jquery, jqueryui and jquerymobile.
-      // // When the radio controls are not correctly shown its better to show the native controls.
-      // $("#questionform").enhanceWithin();
-      // setTimeout(
-      //   () =>
-      //     $("#questionform input").removeClass("ui-helper-hidden-accessible"),
-      //   1
-      // ); //.controlgroup("refresh");
       changesinquestionstage = false;
     }
   }

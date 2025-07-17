@@ -29,10 +29,10 @@ use core\output\notification;
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
-
-class mod_treasurehunt_renderer extends plugin_renderer_base
-{
-
+/**
+ * Main renderer.
+ */
+class mod_treasurehunt_renderer extends plugin_renderer_base {
     /**
      * Utility function to add a row of data to a table with 2 columns. Modified
      * the table param and does not return a value
@@ -40,14 +40,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
      * @param html_table $table The table to append the row of data to
      * @param array $text Array with the text of each cell
      * @param bool $header If cells are header or not
-     * @param array $class Array with the class of each cell
-     * @param array $colspan Array with the colspan of each cell
+     * @param array|null $class Array with the class of each cell
+     * @param array|null $colspan Array with the colspan of each cell
      * @return void
      */
-    private function add_table_row(html_table $table, array $text, $header, array $class = null, array $colspan = null)
-    {
+    private function add_table_row(html_table $table, array $text, $header, ?array $class = null, ?array $colspan = null) {
         $row = new html_table_row();
-        $cells = array();
+        $cells = [];
         for ($i = 0, $f = count($text); $i < $f; $i++) {
             $cell = new html_table_cell($text[$i]);
             if ($header) {
@@ -68,24 +67,22 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
     /**
      * Defer to template.
      *
-     * @param treasurehunt_play_page $page
-     * @global moodle_page $PAGE
+     * @param treasurehunt_play_page_fancy $page
      * @return string html for the page
      */
-    public function render_treasurehunt_play_page_fancy(treasurehunt_play_page_fancy $renderablepage)
-    {
-        global $PAGE, $CFG;
+    public function render_treasurehunt_play_page_fancy(treasurehunt_play_page_fancy $renderablepage) {
+        global $CFG;
         $cm = $renderablepage->cm;
         $treasurehunt = $renderablepage->treasurehunt;
         // Moodle 3.8 uses now Babel to compile and compress the js files.
         // This broke this page because it uses jquery2 and jquerymobile.
         // The only workaround we found is to disable Babel cache for this only page.
         $CFG->cachejs = false;
-        $PAGE->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
-        $PAGE->requires->js_call_amd(
+        $this->page->requires->js('/mod/treasurehunt/js/jquery2/jquery-2.1.4.min.js');
+        $this->page->requires->js_call_amd(
             'mod_treasurehunt/play_fancy',
             'playtreasurehunt',
-            array(
+            [
                 $cm->id, $cm->instance,
                 intval($treasurehunt->playwithoutmoving),
                 intval($treasurehunt->groupmode),
@@ -94,25 +91,24 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
                 $renderablepage->gameupdatetime,
                 $treasurehunt->tracking,
                 $renderablepage->user,
-                $renderablepage->custommapping
-            )
+                $renderablepage->custommapping,
+            ]
         );
         // Adds support for QR scan.
-        treasurehunt_qr_support($PAGE, 'setup', []);
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_fancy', 'playpage');
-        $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
-        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/introjs.css');
-        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/jquerymobile.css');
-        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/treasure.css');
-        $PAGE->requires->css('/mod/treasurehunt/css/playerfancy/styles.css');
-        $PAGE->set_pagelayout('embedded');
-
+        treasurehunt_qr_support($this->page, 'setup', []);
+        $this->page->requires->js_call_amd('mod_treasurehunt/tutorial_fancy', 'playpage');
+        $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+        $this->page->requires->css('/mod/treasurehunt/css/playerfancy/introjs.css');
+        $this->page->requires->css('/mod/treasurehunt/css/playerfancy/jquerymobile.css');
+        $this->page->requires->css('/mod/treasurehunt/css/playerfancy/treasure.css');
+        $this->page->requires->css('/mod/treasurehunt/css/playerfancy/styles.css');
+        $this->page->set_pagelayout('embedded');
         /*
- * Other things you may want to set - remove if not needed.
- * $PAGE->set_cacheable(false);
- * $PAGE->set_focuscontrol('some-html-id');
- * $PAGE->add_body_class('treasurehunt-'.$somevar);
- */
+        * Other things you may want to set - remove if not needed.
+        * $this->page->set_cacheable(false);
+        * $this->page->set_focuscontrol('some-html-id');
+        * $this->page->add_body_class('treasurehunt-'.$somevar);
+        */
         // Output starts here.
         $pageheader = $this->header();
         // Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
@@ -129,44 +125,34 @@ class mod_treasurehunt_renderer extends plugin_renderer_base
             "stageclue", "question", "noanswerselected", "timeexceeded",
             "searching", "continue", "noattempts", "aerialview", "roadview",
             "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel"
+            "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel",
         ];
         $strings = [];
         foreach ($terms as $term) {
             $strings[$term] = get_string($term, 'treasurehunt');
         }
         $i18n = json_encode($strings);
-        $i18nfragment  =  <<<I18N
+        $i18nfragment = <<<I18N
 <!-- Internationalization strings for the player -->
 <script type="text/javascript">
 i18nplay = $i18n;
 </script>
 I18N;
-
-        // Patch: disable modules that are jquery 2.1.4 uncompatible/unnecesary
-        // $disable = [
-        //     'core/notification',
-        //     'block_navigation/navblock',
-        //     'block_settings/settingsblock',
-        //     'core/log',
-        //     'core/page_global',
-        // ];
-        // foreach ($disable as $module) {
-        //     $pagefooter = str_replace("M.util.js_pending('$module')", "//M.util.js_pending('$module')", $pagefooter);
-        // }
-
         return $pageheader . $pagerendered . $i18nfragment . $pagefooter;
     }
-
-    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage)
-    {
-        global $PAGE, $CFG;
+    /**
+     * Render player webapp. Bootstrap version.
+     * @param treasurehunt_play_page_bootstrap $renderablepage
+     * @return string
+     */
+    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage) {
+        global $CFG;
         $cm = $renderablepage->cm;
         $treasurehunt = $renderablepage->treasurehunt;
-        $PAGE->requires->js_call_amd(
+        $this->page->requires->js_call_amd(
             'mod_treasurehunt/play_bootstrap',
             'playtreasurehunt',
-            array(
+            [
                 $cm->id, $cm->instance,
                 intval($treasurehunt->playwithoutmoving),
                 intval($treasurehunt->groupmode),
@@ -176,18 +162,17 @@ I18N;
                 $treasurehunt->tracking,
                 $renderablepage->user,
                 $renderablepage->custommapping,
-                $renderablepage->customplayerconfig
-            )
+                $renderablepage->customplayerconfig,
+            ]
         );
         // Adds support for QR scan.
-        treasurehunt_qr_support($PAGE, 'setup', []);
-        $PAGE->requires->js_call_amd('mod_treasurehunt/tutorial_bootstrap', 'playpage');
-        $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
-        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
-        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
-        $PAGE->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
-
-        $PAGE->set_pagelayout('embedded');
+        treasurehunt_qr_support($this->page, 'setup', []);
+        $this->page->requires->js_call_amd('mod_treasurehunt/tutorial_bootstrap', 'playpage');
+        $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+        $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
+        $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
+        $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
+        $this->page->set_pagelayout('embedded');
 
         // Output starts here.
         $pageheader = $this->header();
@@ -198,30 +183,17 @@ I18N;
         $pagefooter = $this->footer();
         return $pageheader . $pagerendered . $pagefooter;
     }
-    /**
-     * Defer to template.
-     *
-     * @param treasurehunt_play_page $page
-     *
-     * @return string html for the page
-     */
-    public function render_treasurehunt_edit_page(treasurehunt_edit_page $page)
-    {
-        $data = $page->export_for_template($this);
-        return parent::render_from_template('mod_treasurehunt/edit_page', $data);
-    }
+
 
     /**
      * Render a table containing the current status of the user attempts.
      *
-     * @param treasurehunt_user_attempt_history  $historical
+     * @param mod_treasurehunt\output\user_attempt_history  $historical
      * @return string
      */
-    public function render_treasurehunt_user_attempt_history(treasurehunt_user_attempt_history $historical)
-    {
+    public function render_user_attempt_history(mod_treasurehunt\output\user_attempt_history $historical) {
         // Create a table for the data.
         $o = '';
-
         $o .= $this->output->container_start('attempthistory');
         $o .= $this->output->heading(get_string('userattempthistory', 'treasurehunt', $historical->username), 3);
         $o .= $this->output->box_start('boxaligncenter gradingsummarytable');
@@ -231,7 +203,7 @@ I18N;
             $t = new html_table();
             $col1 = new html_table_cell(get_string('attempt', 'treasurehunt'));
             $col2 = new html_table_cell(get_string('state', 'treasurehunt'));
-            $col1->attributes = ['width'=> '1%', 'class' => ''];
+            $col1->attributes = ['width' => '1%', 'class' => ''];
             $col2->attributes = ['width' => '100%', 'class' => ''];
             $t->head = [$col1, $col2];
             foreach ($historical->attempts as $attempt) {
@@ -250,7 +222,10 @@ I18N;
             $o .= html_writer::table($t);
         } else {
             if ($historical->teacherreview) {
-                $o .= $this->output->notification(get_string('nouserattempts', 'treasurehunt', $historical->username), 'notifymessage');
+                $o .= $this->output->notification(
+                    get_string('nouserattempts', 'treasurehunt', $historical->username),
+                    'notifymessage'
+                );
             } else {
                 $o .= $this->output->notification(get_string('noattempts', 'treasurehunt'), 'notifymessage');
             }
@@ -267,11 +242,10 @@ I18N;
     /**
      * Render a table containing the current status of the users progress.
      *
-     * @param treasurehunt_user_progress $progress
+     * @param mod_treasurehunt\output\users_progress $progress
      * @return string
      */
-    public function render_treasurehunt_users_progress(treasurehunt_users_progress $progress)
-    {
+    public function render_users_progress(mod_treasurehunt\output\users_progress $progress) {
         // Create a table for the data.
         $o = '';
         $s = '';
@@ -319,15 +293,15 @@ I18N;
                             if (!$hasprogress) {
                                 $this->add_table_row(
                                     $t,
-                                    array(
+                                    [
                                         $title,
                                         get_string('totaltime', 'treasurehunt'),
                                         get_string('start', 'treasurehunt'),
-                                        get_string('stages', 'treasurehunt')
-                                    ),
+                                        get_string('stages', 'treasurehunt'),
+                                    ],
                                     true,
                                     null,
-                                    array(null, null, null, $roadusersprogress->totalstages)
+                                    [null, null, null, $roadusersprogress->totalstages]
                                 );
                                 $hasprogress = true;
                             }
@@ -335,26 +309,33 @@ I18N;
                             if ($progress->groupmode) {
                                 $name = $userorgroup->name;
                                 if ($progress->viewpermission) {
-                                    $params = array('id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id);
+                                    $params = ['id' => $progress->coursemoduleid, 'groupid' => $userorgroup->id];
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $name));
+                                    $icon = $this->output->pix_icon(
+                                        't/preview',
+                                        get_string('userattempthistory', 'treasurehunt', $name)
+                                    );
                                     $name = $name . ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, null, $userorgroup->id);
                             } else {
                                 $fullname = fullname($userorgroup);
-                                $userpic = $this->output->user_picture($userorgroup, array('size' => 32));
-                                $userurl = new moodle_url('/user/view.php', array('id' => $userorgroup->id, 'courseid' => $this->page->course->id));
+                                $userpic = $this->output->user_picture($userorgroup, ['size' => 32]);
+                                $userurl = new moodle_url(
+                                    '/user/view.php',
+                                    ['id' => $userorgroup->id,
+                                    'courseid' => $this->page->course->id]
+                                );
                                 $name = $userpic . html_writer::link($userurl, $fullname);
                                 if ($progress->viewpermission) {
-                                    $params = array('id' => $progress->coursemoduleid, 'userid' => $userorgroup->id);
+                                    $params = ['id' => $progress->coursemoduleid, 'userid' => $userorgroup->id];
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
                                     $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $fullname));
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
                             }
-                            $cells = array($name);
+                            $cells = [$name];
                             $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
                             $cells[] = treasurehunt_get_nice_date($elapsed->first);
 
@@ -412,17 +393,15 @@ I18N;
     /**
      * Render the info containing the current status of the treasure hunt.
      *
-     * @param render_treasurehunt_info $info
+     * @param mod_treasurehunt\output\info $info
      * @return string
      */
-    public function render_treasurehunt_info(treasurehunt_info $info)
-    {
+    public function render_info(mod_treasurehunt\output\info $info) {
         $o = '';
         // Warn about the use of QR scanner.
         if ($info->numqrs > 0) {
-            global $PAGE;
             $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
-            treasurehunt_qr_support($PAGE, 'enableTest', $params);
+            treasurehunt_qr_support($this->page, 'enableTest', $params);
             $o .= $this->output->container_start(null, 'QRStatusDiv');
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
             $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
@@ -433,7 +412,8 @@ I18N;
                 '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
                 get_string('changecamera', 'treasurehunt') . '</button>';
             $o .= '</div>';
-            $o .= '<div id="errorQR" style="display: none" >' . get_string('warnqrscannererror', 'treasurehunt', $info->numqrs) ;
+            $o .= '<div id="errorQR" style="display: none" >'
+            . get_string('warnqrscannererror', 'treasurehunt', $info->numqrs);
             $o .= $this->output->container_end();
         }
         // Create a table for the data.
@@ -441,22 +421,25 @@ I18N;
         $o .= $this->output->container_start('treasurehuntinfo');
         if ($info->timenow < $info->treasurehunt->allowattemptsfromdate) {
             $notavailable = true;
-            $message = get_string('treasurehuntnotavailable', 'treasurehunt',
-                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1/48));
+            $message = get_string(
+                'treasurehuntnotavailable',
+                'treasurehunt',
+                treasurehunt_get_nice_date($info->treasurehunt->allowattemptsfromdate, 30, 1 / 48)
+            );
             $o .= html_writer::tag('p', $message) . "\n";
             if ($info->treasurehunt->cutoffdate) {
                 $message = get_string(
                     'treasurehuntcloseson',
                     'treasurehunt',
-                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1 / 48)
                 );
                 $o .= html_writer::tag('p', $message) . "\n";
             }
-        } elseif ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
+        } else if ($info->treasurehunt->cutoffdate && $info->timenow > $info->treasurehunt->cutoffdate) {
             $message = get_string(
                 'treasurehuntclosed',
                 'treasurehunt',
-                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+                treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1 / 48)
             );
             $o .= html_writer::tag('p', $message) . "\n";
         } else {
@@ -472,7 +455,7 @@ I18N;
                 $message = get_string(
                     'treasurehuntcloseson',
                     'treasurehunt',
-                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1/48)
+                    treasurehunt_get_nice_date($info->treasurehunt->cutoffdate, 30, 1 / 48)
                 );
                 $o .= html_writer::tag('p', $message) . "\n";
             }
@@ -498,7 +481,7 @@ I18N;
                     $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => $road->groupid, 'grouping' => 0]);
                     $groupsmessages[] = html_writer::link($link, $gname);
                 }
-            } elseif ($road->groupingid > 0) {
+            } else if ($road->groupingid > 0) {
                 $gname = groups_get_grouping_name($road->groupingid);
                 $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => 0, 'grouping' => $road->groupingid]);
                 $groupsmessages[] = html_writer::link($link, $gname);

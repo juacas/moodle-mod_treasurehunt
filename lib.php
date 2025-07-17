@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Library of functions for the treasurehunt module.
  *
@@ -99,19 +100,26 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
 function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
     global $DB;
     // Get the current value, so we can see what changed.
-    $oldtreasurehunt = $DB->get_record('treasurehunt', array('id' => $treasurehunt->instance));
+    $oldtreasurehunt = $DB->get_record('treasurehunt', ['id' => $treasurehunt->instance]);
     // Update the database.
     $treasurehunt->timemodified = time();
     $treasurehunt->id = $treasurehunt->instance;
     $result = $DB->update_record('treasurehunt', $treasurehunt);
-    $gradeitem = grade_item::fetch(array('itemtype' => 'mod', 'itemmodule' => 'treasurehunt',
-                    'iteminstance' => $treasurehunt->instance, 'itemnumber' => 0, 'courseid' => $treasurehunt->course));
-    if (($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0)
+    $gradeitem = grade_item::fetch([
+        'itemtype' => 'mod',
+        'itemmodule' => 'treasurehunt',
+        'iteminstance' => $treasurehunt->instance,
+        'itemnumber' => 0,
+        'courseid' => $treasurehunt->course,
+    ]);
+    if (
+        ($oldtreasurehunt->grade != $treasurehunt->grade && $treasurehunt->grade > 0)
             || $oldtreasurehunt->grademethod != $treasurehunt->grademethod
             || $oldtreasurehunt->gradepenlocation != $treasurehunt->gradepenlocation
             || $oldtreasurehunt->gradepenanswer != $treasurehunt->gradepenanswer
             || $oldtreasurehunt->groupmode != $treasurehunt->groupmode
-            || $gradeitem->gradepass != $treasurehunt->gradepass) {
+            || $gradeitem->gradepass != $treasurehunt->gradepass
+    ) {
         treasurehunt_update_grades($treasurehunt);
     }
 
@@ -133,31 +141,30 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
  * @return boolean Success/Failure
  */
 function treasurehunt_delete_instance($id) {
-    global $DB;
     /** @var moodle_database $DB */
-    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $id), '*', MUST_EXIST);
+    global $DB;
+    $treasurehunt = $DB->get_record('treasurehunt', ['id' => $id], '*', MUST_EXIST);
     // Delete any dependent records here.
-    $roads = $DB->get_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
+    $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
     foreach ($roads as $road) {
-        $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?'
-                , array($road->id));
+        $stages = $DB->get_records_sql('SELECT id FROM {treasurehunt_stages} WHERE roadid = ?', [$road->id]);
         foreach ($stages as $stage) {
-            $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', array($stage->id));
-            $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', array($stage->id));
+            $DB->delete_records_select('treasurehunt_attempts', 'stageid = ?', [$stage->id]);
+            $DB->delete_records_select('treasurehunt_answers', 'stageid = ?', [$stage->id]);
         }
-        $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', array($road->id));
+        $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', [$road->id]);
     }
-    $DB->delete_records('treasurehunt_roads', array('treasurehuntid' => $treasurehunt->id));
-    $DB->delete_records('treasurehunt_track', array('treasurehuntid' => $treasurehunt->id));
-    $DB->delete_records('treasurehunt_locks', array('treasurehuntid' => $treasurehunt->id));
+    $DB->delete_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
+    $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehunt->id]);
+    $DB->delete_records('treasurehunt_locks', ['treasurehuntid' => $treasurehunt->id]);
     treasurehunt_grade_item_delete($treasurehunt);
 
-    $events = $DB->get_records('event', array('modulename' => 'treasurehunt', 'instance' => $treasurehunt->id));
+    $events = $DB->get_records('event', ['modulename' => 'treasurehunt', 'instance' => $treasurehunt->id]);
     foreach ($events as $event) {
         $event = calendar_event::load($event);
         $event->delete();
     }
-    $DB->delete_records('treasurehunt', array('id' => $treasurehunt->id));
+    $DB->delete_records('treasurehunt', ['id' => $treasurehunt->id]);
 
     return true;
 }
@@ -227,7 +234,6 @@ function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart)
  * @param int $groupid check for a particular group's activity only, defaults to 0 (all groups)
  */
 function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart, $courseid, $cmid, $userid = 0, $groupid = 0) {
-
 }
 
 
@@ -257,7 +263,7 @@ function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $
 function treasurehunt_get_coursemodule_info($coursemodule) {
     global $DB;
 
-    $dbparams = array('id' => $coursemodule->instance);
+    $dbparams = ['id' => $coursemodule->instance];
     $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat, allowattemptsfromdate, cutoffdate, tracking';
     $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
 
@@ -281,7 +287,11 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
     }
     return $result;
 }
-
+/**
+ * Gets a customized cool icon representing the state of the activity.
+ * @param cm_info $cm
+ * @return void
+ */
 function treasurehunt_cm_info_dynamic(cm_info $cm) {
     $cache = cache::make_from_params(core_cache\store::MODE_REQUEST, 'treasurehunt', 'instances');
     $treasurehunt = $cache->get($cm->instance);
@@ -291,7 +301,7 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
         $cache->set($cm->instance, $treasurehunt);
     }
     $now = time();
-    list($status, $next) = treasurehunt_get_time_status($treasurehunt, $now);
+    [$status, $next] = treasurehunt_get_time_status($treasurehunt, $now);
     $iconurl = treasurehunt_get_proper_icon($treasurehunt, $now);
     $cm->set_icon_url($iconurl);
 }
@@ -305,7 +315,7 @@ function treasurehunt_cm_info_dynamic(cm_info $cm) {
  * @return moodle_url icon url.
  */
 function treasurehunt_get_proper_icon($treasurehunt, $now) {
-    list($status, $nextevent) = treasurehunt_get_time_status($treasurehunt, $now);
+    [$status, $nextevent] = treasurehunt_get_time_status($treasurehunt, $now);
 
     if ($status == 'ongoing') {
         $icon = 'icon';
@@ -329,8 +339,7 @@ function treasurehunt_get_proper_icon($treasurehunt, $now) {
  */
 function treasurehunt_get_time_status($treasurehunt, $now) {
     $status = null;
-    if (($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate == 0))
-    {
+    if (($treasurehunt->allowattemptsfromdate == 0 && $treasurehunt->cutoffdate == 0)) {
         $status = 'ongoing';
         $nextevent = 'nolimit';
     } else if ($treasurehunt->allowattemptsfromdate == 0 && $now <= $treasurehunt->cutoffdate) {
@@ -339,7 +348,7 @@ function treasurehunt_get_time_status($treasurehunt, $now) {
     } else if ($now >= $treasurehunt->allowattemptsfromdate && $treasurehunt->cutoffdate == 0) {
         $status = 'ongoing';
         $nextevent = 'nolimit';
-    } else if($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate) {
+    } else if ($now >= $treasurehunt->allowattemptsfromdate && $now <= $treasurehunt->cutoffdate) {
         $status = 'ongoing';
         $nextevent = 'end';
     } else if ($now < $treasurehunt->allowattemptsfromdate) {
@@ -368,13 +377,13 @@ function treasurehunt_cron() {
 /**
  * Returns all other caps used in the module
  *
- * For example, this could be array('moodle/site:accessallgroups') if the
+ * For example, this could be ['moodle/site:accessallgroups'] if the
  * module uses that capability.
  *
  * @return array
  */
 function treasurehunt_get_extra_capabilities() {
-    return array();
+    return [];
 }
 
 /* Gradebook API */
@@ -392,7 +401,7 @@ function treasurehunt_get_extra_capabilities() {
 function treasurehunt_scale_used($treasurehuntid, $scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->record_exists('treasurehunt', array('id' => $treasurehuntid, 'grade' => -$scaleid))) {
+    if ($scaleid && $DB->record_exists('treasurehunt', ['id' => $treasurehuntid, 'grade' => -$scaleid])) {
         return true;
     } else {
         return false;
@@ -410,7 +419,7 @@ function treasurehunt_scale_used($treasurehuntid, $scaleid) {
 function treasurehunt_scale_used_anywhere($scaleid) {
     global $DB;
 
-    if ($scaleid and $DB->record_exists('treasurehunt', array('grade' => -$scaleid))) {
+    if ($scaleid && $DB->record_exists('treasurehunt', ['grade' => -$scaleid])) {
         return true;
     } else {
         return false;
@@ -430,7 +439,7 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) 
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    $item = array();
+    $item = [];
     $item['itemname'] = clean_param($treasurehunt->name, PARAM_NOTAGS);
     $item['idnumber'] = isset($treasurehunt->cmidnumber) ? $treasurehunt->cmidnumber : null;
 
@@ -467,14 +476,22 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) 
  * Delete grade item for given treasurehunt instance
  *
  * @param stdClass $treasurehunt instance object
- * @return grade_item
+ * @return integer GRADE_UPDATE_OK, GRADE_UPDATE_FAILED, GRADE_UPDATE_MULTIPLE or GRADE_UPDATE_ITEM_LOCKED
  */
 function treasurehunt_grade_item_delete($treasurehunt) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
-    return grade_update('mod/treasurehunt', $treasurehunt->course, 'mod',
-                        'treasurehunt', $treasurehunt->id, 0, null, array('deleted' => 1));
+    return grade_update(
+        'mod/treasurehunt',
+        $treasurehunt->course,
+        'mod',
+        'treasurehunt',
+        $treasurehunt->id,
+        0,
+        null,
+        ['deleted' => 1]
+    );
 }
 
 /**
@@ -530,7 +547,7 @@ function treasurehunt_get_user_grades($treasurehunt, $userid = 0) {
  * @return array
  */
 function treasurehunt_get_file_areas($course, $cm, $context) {
-    $areas = array();
+    $areas = [];
     $areas['custombackground'] = get_string('custommapimagefile', 'treasurehunt');
     return $areas;
 }
@@ -548,7 +565,7 @@ function treasurehunt_get_file_areas($course, $cm, $context) {
  * @param bool $forcedownload whether or not force download
  * @param array $options additional options affecting the file serving
  */
-function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = array()) {
+function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args, $forcedownload, array $options = []) {
     global $DB, $CFG;
 
     if ($context->contextlevel != CONTEXT_MODULE) {
@@ -556,7 +573,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
-    $fileareas = array('cluetext', 'questiontext', 'answertext', 'custombackground');
+    $fileareas = ['cluetext', 'questiontext', 'answertext', 'custombackground'];
     if (!in_array($filearea, $fileareas)) {
         return false;
     }
@@ -564,12 +581,13 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     $fs = get_file_storage();
     $relativepath = implode('/', $args);
     $fullpath = "/$context->id/mod_treasurehunt/$filearea/$relativepath";
-    if (!$file = $fs->get_file_by_hash(sha1($fullpath)) or $file->is_directory()) {
+    $file = $fs->get_file_by_hash(sha1($fullpath));
+    if (!$file || $file->is_directory()) {
         send_file_not_found();
+    } else {
+        // Finally send the file.
+        send_stored_file($file, null, 0, $forcedownload, $options);
     }
-
-    // Finally send the file.
-    send_stored_file($file, null, 0, $forcedownload, $options);
 }
 
 /**
@@ -581,7 +599,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
  * @param settings_navigation $settingsnav complete settings navigation tree
  * @param navigation_node $treasurehuntnode treasurehunt administration node
  */
-function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, navigation_node $treasurehuntnode = null) {
+function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, ?navigation_node $treasurehuntnode) {
 
     global $PAGE;
     // We want to add these new nodes after the Edit settings node, and before the
@@ -589,15 +607,20 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
     $keys = $treasurehuntnode->get_children_key_list();
     $beforekey = null;
     $i = array_search('modedit', $keys);
-    if ($i === false and array_key_exists(0, $keys)) {
+    if ($i === false && array_key_exists(0, $keys)) {
         $beforekey = $keys[0];
     } else if (array_key_exists($i + 1, $keys)) {
         $beforekey = $keys[$i + 1];
     }
     if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->context)) {
-        $node = navigation_node::create(get_string('edittreasurehunt', 'treasurehunt'),
-                new moodle_url('/mod/treasurehunt/edit.php', array('id' => $PAGE->cm->id)),
-                navigation_node::TYPE_SETTING, null, 'mod_treasurehunt_edit', new pix_icon('t/edit', ''));
+        $node = navigation_node::create(
+            get_string('edittreasurehunt', 'treasurehunt'),
+            new moodle_url('/mod/treasurehunt/edit.php', ['id' => $PAGE->cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'mod_treasurehunt_edit',
+            new pix_icon('t/edit', '')
+        );
         $treasurehuntnode->add_node($node, $beforekey);
     }
 }
@@ -618,7 +641,7 @@ function treasurehunt_reset_course_form_definition($mform) {
  * @return array the defaults.
  */
 function treasurehunt_reset_course_form_defaults($course) {
-    return array('reset_treasurehunt_attempts' => 1);
+    return ['reset_treasurehunt_attempts' => 1];
 }
 
 /**
@@ -631,11 +654,13 @@ function treasurehunt_reset_gradebook($courseid, $type = '') {
     global $DB;
 
     $treasurehunts = $DB->get_records_sql(
-            "SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid " .
-            "FROM {modules} m " .
-            "JOIN {course_modules} cm ON m.id = cm.module" .
-            "JOIN {treasurehunt} t ON cm.instance = t.id" .
-            "WHERE m.name = 'treasurehunt' AND cm.course = ?", array($courseid));
+        "SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid " .
+        "FROM {modules} m " .
+        "JOIN {course_modules} cm ON m.id = cm.module" .
+        "JOIN {treasurehunt} t ON cm.instance = t.id" .
+        "WHERE m.name = 'treasurehunt' AND cm.course = ?",
+        [$courseid]
+    );
 
     foreach ($treasurehunts as $treasurehunt) {
         treasurehunt_grade_item_update($treasurehunt, 'reset');
@@ -656,37 +681,32 @@ function treasurehunt_reset_userdata($data) {
     global $DB;
 
     $componentstr = get_string('modulenameplural', 'treasurehunt');
-    $status = array();
+    $status = [];
 
     // Delete attempts.
     if (!empty($data->reset_treasurehunt_attempts)) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
                 . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
-                . '{treasurehunt_stages} ri ON r.id=ri.roadid WHERE t.course = ?)', array($data->courseid));
-        $status[] = array(
-            'component' => $componentstr,
+                . '{treasurehunt_stages} ri ON r.id=ri.roadid WHERE t.course = ?)', [$data->courseid]);
+        $status[] = ['component' => $componentstr,
             'item' => get_string('attemptsdeleted', 'treasurehunt'),
-            'error' => false);
-
+            'error' => false];
         // Remove all grades from gradebook.
         if (!empty($data->reset_gradebook_grades)) {
             treasurehunt_reset_gradebook($data->courseid);
-            $status[] = array(
-                'component' => $componentstr,
+            $status[] = ['component' => $componentstr,
                 'item' => get_string('gradesdeleted', 'treasurehunt'),
-                'error' => false);
+                'error' => false];
         }
     }
 
     // Updating dates - shift may be negative too.
     if ($data->timeshift) {
-        shift_course_mod_dates('treasurehunt', array('allowattemptsfromdate', 'cutoffdate'), $data->timeshift, $data->courseid);
+        shift_course_mod_dates('treasurehunt', ['allowattemptsfromdate', 'cutoffdate'], $data->timeshift, $data->courseid);
 
-        $status[] = array(
-            'component' => $componentstr,
+        $status[] = ['component' => $componentstr,
             'item' => get_string('datechanged'),
-            'error' => false);
-    }
+            'error' => false];    }
 
     return $status;
 }
@@ -700,9 +720,8 @@ function treasurehunt_update_events($treasurehunt) {
     global $DB;
 
     // Load the old events relating to this treasure hunt.
-    $conds = array('modulename' => 'treasurehunt',
-        'instance' => $treasurehunt->id);
-
+    $conds = ['modulename' => 'treasurehunt',
+        'instance' => $treasurehunt->id];
     $oldevents = $DB->get_records('event', $conds);
 
     if (!empty($treasurehunt->coursemodule)) {
@@ -766,12 +785,12 @@ function treasurehunt_update_events($treasurehunt) {
  */
 function treasurehunt_get_completion_state($course, $cm, $userid, $type) {
     global $CFG, $DB;
-    if (($cm->completion == COMPLETION_TRACKING_NONE) or ($cm->completion == COMPLETION_TRACKING_MANUAL)) {
+    if (($cm->completion == COMPLETION_TRACKING_NONE) || ($cm->completion == COMPLETION_TRACKING_MANUAL)) {
         // Completion option is not enabled so just return $type.
         return $type;
     }
 
-    $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+    $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
     // Check for finish state.
     if ($treasurehunt->completionfinish) {
         try {
@@ -787,10 +806,10 @@ function treasurehunt_get_completion_state($course, $cm, $userid, $type) {
     // Check for passing grade.
     if ($treasurehunt->completionpass) {
         require_once($CFG->libdir . '/gradelib.php');
-        $item = grade_item::fetch(array('courseid' => $course->id, 'itemtype' => 'mod',
-                        'itemmodule' => 'treasurehunt', 'iteminstance' => $cm->instance, 'outcomeid' => null));
+        $item = grade_item::fetch(['courseid' => $course->id, 'itemtype' => 'mod',
+                        'itemmodule' => 'treasurehunt', 'iteminstance' => $cm->instance, 'outcomeid' => null]);
         if ($item) {
-            $grades = grade_grade::fetch_users_grades($item, array($userid), false);
+            $grades = grade_grade::fetch_users_grades($item, [$userid], false);
             if (!empty($grades[$userid])) {
                 $passed = $grades[$userid]->is_passed($item);
                 return $passed;
