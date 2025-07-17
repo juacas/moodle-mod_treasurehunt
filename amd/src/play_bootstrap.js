@@ -566,20 +566,35 @@ function initplaytreasurehunt(
   let layersoverlay = [];
   if (!custommapconfig || custommapconfig.onlybase === false) {
     // Default layers
-    let aeriallayer = new ol.layer.Tile({
-      visible: false,
-      preload: Infinity,
-      source: new ol.source.BingMaps({
-        key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
-        imagerySet: "AerialWithLabels",
-        maxZoom: 19,
-        // Use maxZoom 19 to see stretched tiles instead of the BingMaps
-        // "no photos at this zoom level" tiles
-        // maxZoom: 19.
-      }),
-    });
+
+
     let roadlayer = new ol.layer.Tile({
       source: new ol.source.OSM(),
+    });
+    // BingMaps layer's token expires and breaks the service.
+    // let aeriallayer = new ol.layer.Tile({
+    //   visible: false,
+    //   preload: Infinity,
+    //   source: new ol.source.BingMaps({
+    //     key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
+    //     imagerySet: "AerialWithLabels",
+    //     maxZoom: 19,
+    //     // Use maxZoom 19 to see stretched tiles instead of the BingMaps
+    //     // "no photos at this zoom level" tiles
+    //     // maxZoom: 19.
+    //   }),
+    // });
+    /**
+     * Use World Imagery de Esri (free for non commercial use).
+     */
+    let aeriallayer = new ol.layer.Tile({
+      source: new ol.source.XYZ({
+        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+        attributions: [
+          'Tiles © Esri — Fuente: Esri, DigitalGlobe, Earthstar Geographics, CNES/Airbus DS, USDA,' +
+          ' USGS, AeroGRID, IGN, and the GIS User Community'
+        ]
+      })
     });
 
     aeriallayer.set("name", strings["aerialview"]);
