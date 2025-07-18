@@ -1003,6 +1003,17 @@ function initplaytreasurehunt(
       } else if (usegeographictools) {
         $("#autolocate").show();
       }
+    } else {
+      // Initialize with defaults.
+      customplayerconfig = {
+        searchpaneldisabled: false,
+        localizationbuttondisabled: false,
+        showdistancehint: false,
+        showheadinghint: false,
+        showinzonehint: false,
+        shownextareahint: false,
+        defaultzoom: 15,
+      };
     }
   }
 
