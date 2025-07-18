@@ -24,19 +24,42 @@ use renderable;
  */
 class user_attempt_history implements renderable
 {
+    /**
+     * List of attempts.
+     * @var array[object]
+     */
     public $attempts = [];
+    /**
+     * cm->id of the activity.
+     * @var int
+     */
     public $coursemoduleid = 0;
+    /**
+     * Username
+     * @var string
+     */
     public $username = '';
+    /**
+     * Whether the treasurehunt is over.
+     * @var bool
+     */
     public $outoftime = 0;
+    /**
+     * Whether the road is over.
+     * @var bool
+     */
     public $roadfinished = 0;
+    /**
+     * Teacher review.
+     * @var int
+     */
     public $teacherreview = 0;
 
     /**
      * constructor
      *
      */
-    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview)
-    {
+    public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
         $this->attempts = $attempts;
         $this->coursemoduleid = $coursemoduleid;
         $this->username = $username;

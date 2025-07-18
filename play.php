@@ -29,8 +29,8 @@ require_once($CFG->libdir . '/formslib.php');
 global $USER;
 
 $id = required_param('id', PARAM_INT);
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
-$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+[$course, $cm] = get_course_and_cm_from_cmid($id, 'treasurehunt');
+$treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
@@ -38,7 +38,7 @@ $context = context_module::instance($cm->id);
 require_capability('mod/treasurehunt:enterplayer', $context, null, false);
 // Check availability
 if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id));
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', ['id' => $id]);
     throw new moodle_exception('treasurehuntnotavailable', 'treasurehunt', $returnurl, userdate($treasurehunt->allowattemptsfromdate));
 }
 // Log event.
@@ -51,16 +51,16 @@ $event->add_record_snapshot("treasurehunt", $treasurehunt);
 $event->trigger();
 
 // Print the page header.
-$PAGE->set_url('/mod/treasurehunt/play.php', array('id' => $cm->id));
-$PAGE->set_title(format_string($treasurehunt->name));
+$PAGE->set_url('/mod/treasurehunt/play.php', ['id' => $cm->id]);
+$PAGE->set_title(null); // We do not want it on the HTML.
 $PAGE->set_heading(format_string($course->fullname));
 
 // Get last timestamp.
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+[$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 // Instance selected player renderable.
 $playerstyle = $treasurehunt->playerstyle;
-$renderableclass = "treasurehunt_play_page_$playerstyle";
+$renderableclass = "mod_treasurehunt\output\play_page_$playerstyle";
 $renderable = new $renderableclass($treasurehunt, $cm);
 
 $output = $PAGE->get_renderer('mod_treasurehunt');
@@ -70,7 +70,7 @@ $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
-$user->pic = $output->user_picture($USER, array('link' => false));
+$user->pic = $output->user_picture($USER, ['link' => false]);
 $renderable->set_user($user);
 
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);

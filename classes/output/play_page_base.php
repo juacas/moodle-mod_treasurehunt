@@ -27,15 +27,46 @@ use stdClass;
  * @copyright  2025 YOUR NAME <your@email.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-
 class play_page_base implements renderable, templatable {
+    /**
+     * Treasurehunt data record.
+     * @var object
+     */
     public $treasurehunt = null;
+    /**
+     * Course mod.
+     * @var \cm_info
+     */
     public $cm = null;
+    /**
+     * Parameters for custom maps.
+     * @var <object data="" type=""></object>
+     */
     public $custommapping = '';
+    /**
+     * Parameters for custom player UIs.
+     * @var object
+     */
     public $customplayerconfig = null;
+    /**
+     * user object
+     * @var object
+     */
     public $user = null;
+    /**
+     * Last attempt.
+     * @var int unix timestamp.
+     */
     public $lastattempttimestamp;
+    /**
+     * Last road attempt.
+     * @var int unix timestamp.
+     */
     public $lastroadtimestamp;
+    /**
+     * Las changes in game's state.
+     * @var int unix timestamp.
+     */
     public $gameupdatetime;
     /**
      * Export this data so it can be used as the context for a mustache template.
@@ -61,14 +92,29 @@ class play_page_base implements renderable, templatable {
         $data->hasdescription = $hasdescription;
         return $data;
     }
+    /**
+     * Construct this renderable from treasurehunt record and course module info.
+     * @param object $treasurehunt
+     * @param \cm_info $cm
+     */
     public function __construct($treasurehunt, cm_info $cm) {
         $this->treasurehunt = $treasurehunt;
         $this->cm = $cm;
         $this->customplayerconfig = treasurehunt_get_customplayerconfig($this->treasurehunt);
     }
+    /**
+     * Setter for user.
+     * @param object $user
+     * @return void
+     */
     public function set_user($user) {
         $this->user = $user;
     }
+    /**
+     * Setter for custom mapping.
+     * @param object $custommapping
+     * @return void
+     */
     public function set_custommapping($custommapping) {
         $this->custommapping = $custommapping;
     }

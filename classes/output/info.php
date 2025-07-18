@@ -24,17 +24,36 @@ use renderable;
  */
 class info implements renderable
 {
+    /**
+     * Treasurehunt record.
+     * @var object
+     */
     public $treasurehunt = null;
+    /**
+     * Time to report.
+     * @var int unix timestamp.
+     */
     public $timenow = 0;
+    /**
+     * Id course.
+     * @var int
+     */
     public $courseid = 0;
+    /**
+     * Array of road records.
+     * @var array[object]
+     */
     public $roads = [];
+    /**
+     * number of QRs in the road.
+     * @var int
+     */
     public $numqrs = 0;
 
     /**
      * constructor
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs)
-    {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs) {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;

@@ -706,7 +706,8 @@ function treasurehunt_reset_userdata($data) {
 
         $status[] = ['component' => $componentstr,
             'item' => get_string('datechanged'),
-            'error' => false];    }
+            'error' => false];
+    }
 
     return $status;
 }

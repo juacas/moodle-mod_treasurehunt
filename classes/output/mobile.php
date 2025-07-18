@@ -1,5 +1,4 @@
 <?php
-
 // This file is part of Moodle - http://moodle.org/
 //
 // Moodle is free software: you can redistribute it and/or modify
@@ -15,7 +14,6 @@
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
-
 namespace mod_treasurehunt\output;
 
 defined('MOODLE_INTERNAL') || die();
@@ -30,25 +28,22 @@ use core\session\exception;
  *
  * @package   mod_treasurehunt
  * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license  http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mobile
-{
-
+class mobile {
     /**
      * Returns shared (global) templates and information for the mobile app feature.
      *
      * @param array $args Arguments (empty)
      * @return array Array with information required by app
      */
-    public static function mobile_treasurehunt_init(array $args): array
-    {
+    public static function mobile_treasurehunt_init(array $args): array {
         global $CFG;
         return [
             'templates' => [],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_init.js'),
             'otherdata' => '',
-            'files' => []
+            'files' => [],
         ];
     }
 
@@ -58,19 +53,17 @@ class mobile
      *
      * @return array HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_view($args)
-    {
+    public static function mobile_treasurehunt_view($args) {
         global  $CFG, $OUTPUT, $USER, $DB, $PAGE;
 
         $args = (object) $args;
 
         $cm = get_coursemodule_from_id('treasurehunt', $args->cmid);
-        $course = $DB->get_record('course', array('id' => $cm->course));
-        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
-        
-        // Force app language
-        force_current_language($args->applang);
+        $course = $DB->get_record('course', ['id' => $cm->course]);
+        $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
+        // Force app language.
+        force_current_language($args->applang);
 
         // Capabilities check.
         require_login($args->courseid, false, $cm, true, true);
@@ -78,10 +71,10 @@ class mobile
         require_capability('mod/treasurehunt:view', $context);
 
         $event = \mod_treasurehunt\event\course_module_viewed::create(
-            array(
+            [
                 'objectid' => $PAGE->cm->instance,
                 'context' => $PAGE->context,
-            )
+            ]
         );
         $event->add_record_snapshot('course', $PAGE->course);
         $event->add_record_snapshot($PAGE->cm->modname, $treasurehunt);
@@ -97,7 +90,7 @@ class mobile
             $treasurehunt->intro = '';
         }
 
-        // User/group historical attempts
+        // User/group historical attempts.
         $playpermission = has_capability('mod/treasurehunt:play', $context, null, false);
         $timenow = time();
         $username = '';
@@ -120,44 +113,44 @@ class mobile
             }
         }
 
-        // Grade Method
+        // Grade Method.
         $grademethod = treasurehunt_get_grading_options()[$treasurehunt->grademethod];
 
-        // Users progress
+        // Users progress.
         $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
         $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
-        list(
+        [
             $roads, $duplicategroupsingroupings, $duplicateusersingroups,
             $unassignedusers, $availablegroups
-        ) = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $course->id, $context);
+        ] = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $course->id, $context);
 
-        $usersprogress = array(
+        $usersprogress = [
             'roads' => $roads,
             'duplicategroupsingroupings' => $duplicategroupsingroupings,
             'duplicateusersingroups' => $duplicateusersingroups,
             'unassignedusers' => $unassignedusers,
-            'availablegroups' => $availablegroups
-        );
+            'availablegroups' => $availablegroups,
+        ];
 
-        $data = array(
+        $data = [
             'cmid' => $cm->id,
             'courseid' => $args->courseid,
-            'treasurehunt' => $treasurehunt
-        );
+            'treasurehunt' => $treasurehunt,
+        ];
 
-        return array(
-            'templates' => array(
-                array(
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
                     'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_view_page', $data),
-                ),
-            ),
+                ],
+            ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_view.js'),
-            'otherdata' => array(
+            'otherdata' => [
                 'timenow' => $timenow,
                 'grademethod' => $grademethod,
                 'groupmode' => boolval($treasurehunt->groupmode),
-                'playwithoutmoving'=> boolval($treasurehunt->playwithoutmoving),
+                'playwithoutmoving' => boolval($treasurehunt->playwithoutmoving),
                 'outoftime' => $outoftime,
                 'roadfinished' => $roadfinished,
                 'attempts' => json_encode($attempts), // Cannot put arrays in otherdata.
@@ -168,9 +161,9 @@ class mobile
                 'exception' => $exception,
                 'usersprogress' => json_encode(
                     $usersprogress
-                )
-            ),
-        );
+                ),
+            ],
+        ];
     }
 
     /**
@@ -179,56 +172,54 @@ class mobile
      *
      * @return array       HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_play($args)
-    {
+    public static function mobile_treasurehunt_play($args) {
         global  $CFG, $OUTPUT, $DB, $USER;
 
         $args = (object) $args;
 
         $cm = get_coursemodule_from_id('treasurehunt', $args->cmid);
-        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+        $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
         // Capabilities check.
         require_login($args->courseid, false, $cm, true, true);
         $context = context_module::instance($cm->id);
         require_capability('mod/treasurehunt:play', $context);
 
-        // Force app language
+        // Force app language.
         force_current_language($args->applang);
-
 
         // Get last timestamp.
         $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-        list($lastattempttimestamp, $lastroadtimestamp) = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+        [$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 
-        $playconfig = array(
-            'treasurehuntid'=> $treasurehunt->id,
-            'playwithoutmoving'=> boolval($treasurehunt->playwithoutmoving),
+        $playconfig = [
+            'treasurehuntid' => $treasurehunt->id,
+            'playwithoutmoving' => boolval($treasurehunt->playwithoutmoving),
             'groupmode' => boolval($treasurehunt->groupmode),
             'lastattempttimestamp' => $lastattempttimestamp,
             'lastroadtimestamp' => $lastroadtimestamp,
             'tracking' => boolval($treasurehunt->tracking),
             'gameupdatetime' => treasurehunt_get_setting_game_update_time() * 1000,
-            'custommapconfig' => treasurehunt_get_custommappingconfig($treasurehunt, $context)
-        );
+            'custommapconfig' => treasurehunt_get_custommappingconfig($treasurehunt, $context),
+        ];
 
-        $data = array(
+        $data = [
             'cmid' => $cm->id,
             'courseid' => $args->courseid,
             'treasurehunt' => $treasurehunt,
-            'options' => array(),
-        );
+            'options' => [],
+        ];
 
-        return array(
-            'templates' => array(
-                array(
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
                     'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_page', $data),
-                ),
-            ),
+                ],
+            ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play.js'),
-            'otherdata' => array('playconfig' => json_encode($playconfig))
-        );
+            'otherdata' => ['playconfig' => json_encode($playconfig)],
+        ];
     }
 
     /**
@@ -237,26 +228,24 @@ class mobile
      *
      * @return array       HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_play_search($args)
-    {
+    public static function mobile_treasurehunt_play_search($args) {
         global  $CFG, $OUTPUT;
 
         $args = (object) $args;
 
-        // Force app language
+        // Force app language.
         force_current_language($args->applang);
 
-
-        return array(
-            'templates' => array(
-                array(
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_search_page', array()),
-                ),
-            ),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_search_page', []),
+                ],
+            ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_search.js'),
-            'otherdata' => array(),
-        );
+            'otherdata' => [],
+        ];
     }
 
     /**
@@ -265,52 +254,50 @@ class mobile
      *
      * @return array       HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_play_layers($args)
-    {
+    public static function mobile_treasurehunt_play_layers($args) {
         global  $CFG, $OUTPUT;
 
         $args = (object) $args;
 
-        // Force app language
+        // Force app language.
         force_current_language($args->applang);
-       
-        return array(
-            'templates' => array(
-                array(
+
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_layers_page', array()),
-                ),
-            ),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_layers_page', []),
+                ],
+            ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_layers.js'),
-            'otherdata' => array(),
-        );
+            'otherdata' => [],
+        ];
     }
 
     /**
      * Returns the clue view for the mobile app.
      * @param  array $args Arguments from tool_mobile_get_content WS
      *
-     * @return array       HTML, javascript and otherdata
+     * @return array HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_play_clue($args)
-    {
+    public static function mobile_treasurehunt_play_clue($args) {
         global  $OUTPUT;
 
         $args = (object) $args;
 
-        // Force app language
+        // Force app language.
         force_current_language($args->applang);
 
-        return array(
-            'templates' => array(
-                array(
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_clue_page', array()),
-                ),
-            ),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_clue_page', []),
+                ],
+            ],
             'javascript' => '',
-            'otherdata' => array(),
-        );
+            'otherdata' => [],
+        ];
     }
 
     /**
@@ -319,24 +306,23 @@ class mobile
      *
      * @return array       HTML, javascript and otherdata
      */
-    public static function mobile_treasurehunt_play_question($args)
-    {
+    public static function mobile_treasurehunt_play_question($args) {
         global  $CFG, $OUTPUT;
 
         $args = (object) $args;
 
-        // Force app language
+        // Force app language.
         force_current_language($args->applang);
 
-        return array(
-            'templates' => array(
-                array(
+        return [
+            'templates' => [
+                [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_question_page', array()),
-                ),
-            ),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_question_page', []),
+                ],
+            ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_question.js'),
-            'otherdata' => array(),
-        );
+            'otherdata' => [],
+        ];
     }
 }

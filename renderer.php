@@ -25,10 +25,12 @@
  */
 
 use core\output\notification;
+use mod_treasurehunt\output\play_page_base;
 
 defined('MOODLE_INTERNAL') || die;
 
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
+
 /**
  * Main renderer.
  */
@@ -67,10 +69,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     /**
      * Defer to template.
      *
-     * @param treasurehunt_play_page_fancy $page
+     * @param play_page_base $page
      * @return string html for the page
      */
-    public function render_treasurehunt_play_page_fancy(treasurehunt_play_page_fancy $renderablepage) {
+    public function render_treasurehunt_play_page_fancy(play_page_base $renderablepage) {
         global $CFG;
         $cm = $renderablepage->cm;
         $treasurehunt = $renderablepage->treasurehunt;
@@ -142,10 +144,10 @@ I18N;
     }
     /**
      * Render player webapp. Bootstrap version.
-     * @param treasurehunt_play_page_bootstrap $renderablepage
+     * @param play_page_base $renderablepage
      * @return string
      */
-    public function render_treasurehunt_play_page_bootstrap(treasurehunt_play_page_bootstrap $renderablepage) {
+    public function render_play_page_bootstrap(play_page_base $renderablepage) {
         global $CFG;
         $cm = $renderablepage->cm;
         $treasurehunt = $renderablepage->treasurehunt;
@@ -173,7 +175,7 @@ I18N;
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
         $this->page->set_pagelayout('embedded');
-
+        $this->page->activityheader->set_title('');// Empty to avoid render on top.
         // Output starts here.
         $pageheader = $this->header();
 
@@ -183,7 +185,6 @@ I18N;
         $pagefooter = $this->footer();
         return $pageheader . $pagerendered . $pagefooter;
     }
-
 
     /**
      * Render a table containing the current status of the user attempts.

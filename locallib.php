@@ -35,7 +35,6 @@ use mod_treasurehunt\model\stage;
 defined('MOODLE_INTERNAL') || die();
 require_once($CFG->dirroot . '/mod/treasurehunt/lib.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/GeoJSON/GeoJSON.class.php');
-require_once($CFG->dirroot . '/mod/treasurehunt/renderable.php');
 require_once($CFG->dirroot . '/mod/treasurehunt/classes/stage.php');
 
 /* * #@+

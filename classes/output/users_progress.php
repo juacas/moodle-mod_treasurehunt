@@ -25,12 +25,19 @@ use renderable;
 class users_progress implements renderable {
     /** @var array participantcount - The number of users who can submit to this assignment */
     public $roadsusersprogress = [];
+    /** @var bool is groupmode? */
     public $groupmode = 0;
+    /** @var int cm id */
     public $coursemoduleid = 0;
+    /** @var bool is there duplicated groups? */
     public $duplicategroupsingroupings = [];
+    /** @var array[object] list of users in more than one group */
     public $duplicateusersingroups = [];
+    /** @var array[object] list of users in no group */
     public $unassignedusers = [];
+    /** @var bool can view? */
     public $viewpermission = false;
+    /** @var bool can manage activity? */
     public $managepermission = false;
 
     /**
@@ -46,8 +53,7 @@ class users_progress implements renderable {
         $unassignedusers,
         $viewpermission,
         $managepermission
-    )
-    {
+    ) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
