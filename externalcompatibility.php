@@ -43,4 +43,5 @@ if ($CFG->version < 2023042400) {
     class_alias(external_multiple_structure::class, \core_external\external_multiple_structure::class);
     class_alias(external_function_parameters::class, \core_external\external_function_parameters::class);
     class_alias(external_warnings::class, \core_external\external_warnings::class);
+    class_alias(cache_store::class, \core_cache\store::class);
 }
