@@ -27,7 +27,7 @@ import ajax from "core/ajax";
 import notification from "core/notification";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
-import { getStrings as str } from "core/str";
+import { get_strings as str } from "core/str";
 
 let init = {
   edittreasurehunt: function (idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {

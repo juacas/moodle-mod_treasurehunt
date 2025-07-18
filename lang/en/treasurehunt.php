@@ -112,6 +112,7 @@ $string['custommapimageerror'] = 'Cannot load custom image. Check activity setti
 $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the treasure hunt will not accept attempts after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
+$string['datechanged'] = 'Date changed';
 $string['discoveredlocation'] = 'Discovered location';
 $string['editingroad'] = 'Editing road';
 $string['editingstage'] = 'Editing stage';

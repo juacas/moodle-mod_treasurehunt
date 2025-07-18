@@ -26,7 +26,7 @@ import ol from "mod_treasurehunt/ol";
 import ajax from "core/ajax";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
-import { getStrings, getString } from "core/str";
+import { get_strings as getStrings, get_string as getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
 // Side‑effect only imports
 import "mod_treasurehunt/jquery.truncate";

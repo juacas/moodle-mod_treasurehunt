@@ -705,7 +705,7 @@ function treasurehunt_reset_userdata($data) {
         shift_course_mod_dates('treasurehunt', ['allowattemptsfromdate', 'cutoffdate'], $data->timeshift, $data->courseid);
 
         $status[] = ['component' => $componentstr,
-            'item' => get_string('datechanged'),
+            'item' => get_string('datechanged', 'treasurehunt'),
             'error' => false];
     }
 

@@ -24,7 +24,7 @@
 import $ from 'jquery';
 import ol from 'mod_treasurehunt/ol';
 import 'mod_treasurehunt/ol3-layerswitcher';
-import { getStrings as str } from 'core/str';
+import { get_strings as str } from 'core/str';
 
 let init = {
     refreshTracksInterval: 30,
