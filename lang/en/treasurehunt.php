@@ -246,7 +246,7 @@ $string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\
 $string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following
 question to unlock the clue';
 $string['lockactivity'] = 'Allow only at this stage';
-$string['lockactivity_help'] = 'Blocks access to selected activities if the user is not in this stage. This setting configures restrictions for the chosen activities.';
+$string['lockactivity_help'] = 'Block access to selected activities if the user is not in this stage. This setting auto-configures restrictions for the chosen activities. WARNING: This provides only a basic auto-configuration. If you manually edit an activity\'s restrictions, it may no longer appear here and auto-configuration may not work.';
 $string['lockactivitiessection'] = 'Restrict activities to only this stage.';
 $string['lockactivityannounce'] = 'If the <a href="https://github.com/juacas/moodle-availability_treasurehunt">Treasurehunt Conditional Access Plugin</a> is enabled on this site, you can make any activity unavailable when the user is not working within this stage.';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
