@@ -23,11 +23,10 @@
  */
 
 namespace mod_treasurehunt\event;
-
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * Treasurehunt viewed.
+ */
 class course_module_viewed extends \core\event\course_module_viewed {
-
     /**
      * Init method.
      *
@@ -38,9 +37,11 @@ class course_module_viewed extends \core\event\course_module_viewed {
         $this->data['edulevel'] = self::LEVEL_PARTICIPATING;
         $this->data['objecttable'] = 'treasurehunt';
     }
-
+    /**
+     * DB mapping.
+     * @return array{db: string, restore: string}
+     */
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt', 'restore' => 'treasurehunt');
+        return ['db' => 'treasurehunt', 'restore' => 'treasurehunt'];
     }
-
 }

@@ -17,15 +17,13 @@
 /**
  * The mod_treasurehunt player entered event class.
  *
- * @package    mod_treasurethunt
+ * @package    mod_treasurehunt
  * @copyright  2018 Juan Pablo de Castro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_treasurehunt\event;
 use core\event\base;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * Abstract Course module viewed event class.
@@ -38,7 +36,6 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class player_entered extends base {
-
     /**
      * Init method.
      *
@@ -77,7 +74,7 @@ class player_entered extends base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/player.php", array('id' => $this->contextinstanceid));
+        return new \moodle_url("/mod/treasurehunt/player.php", ['id' => $this->contextinstanceid]);
     }
 
     /**
@@ -89,7 +86,7 @@ class player_entered extends base {
     protected function validate_data() {
         parent::validate_data();
         // Make sure this class is never used without proper object details.
-        if (empty($this->objectid) ) {
+        if (empty($this->objectid)) {
             throw new \coding_exception('The player_entered event must define objectid.');
         }
         // Make sure the context level is set to module.

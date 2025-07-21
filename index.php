@@ -32,19 +32,19 @@ if ($CFG->version >= 2025041400) {
     \core_courseformat\activityoverviewbase::redirect_to_overview_page($id, 'treasurehunt');
 }
 
-$course = $DB->get_record('course', array('id' => $id), '*', MUST_EXIST);
+$course = $DB->get_record('course', ['id' => $id], '*', MUST_EXIST);
 
 require_course_login($course);
 
-$params = array(
-    'context' => context_course::instance($course->id)
-);
+$params = [
+    'context' => context_course::instance($course->id),
+];
 $event = \mod_treasurehunt\event\course_module_instance_list_viewed::create($params);
 $event->add_record_snapshot('course', $course);
 $event->trigger();
 
 $strname = get_string('modulenameplural', 'treasurehunt');
-$PAGE->set_url('/mod/treasurehunt/index.php', array('id' => $id));
+$PAGE->set_url('/mod/treasurehunt/index.php', ['id' => $id]);
 $PAGE->navbar->add($strname);
 $PAGE->set_title("$course->shortname: $strname");
 $PAGE->set_heading($course->fullname);
@@ -54,7 +54,7 @@ echo $OUTPUT->header();
 echo $OUTPUT->heading($strname);
 
 if (!$treasurehunts = get_all_instances_in_course('treasurehunt', $course)) {
-    notice(get_string('notreasurehunts', 'treasurehunt'), new moodle_url('/course/view.php', array('id' => $course->id)));
+    notice(get_string('notreasurehunts', 'treasurehunt'), new moodle_url('/course/view.php', ['id' => $course->id]));
 }
 
 $usesections = course_format_uses_sections($course->format);
@@ -64,17 +64,17 @@ $table->attributes['class'] = 'generaltable mod_index';
 
 if ($usesections) {
     $strsectionname = get_string('sectionname', 'format_' . $course->format);
-    $table->head = array($strsectionname, $strname);
-    $table->align = array('center', 'left');
+    $table->head = [$strsectionname, $strname];
+    $table->align = ['center', 'left'];
 } else {
-    $table->head = array($strname);
-    $table->align = array('left');
+    $table->head = [$strname];
+    $table->align = ['left'];
 }
 
 $modinfo = get_fast_modinfo($course);
 $currentsection = '';
 foreach ($modinfo->instances['treasurehunt'] as $cm) {
-    $row = array();
+    $row = [];
     if ($usesections) {
         if ($cm->sectionnum !== $currentsection) {
             if ($cm->sectionnum) {
@@ -86,9 +86,9 @@ foreach ($modinfo->instances['treasurehunt'] as $cm) {
         }
     }
 
-    $class = $cm->visible ? null : array('class' => 'dimmed');
+    $class = $cm->visible ? null : ['class' => 'dimmed'];
 
-    $row[] = html_writer::link(new moodle_url('view.php', array('id' => $cm->id)), $cm->get_formatted_name(), $class);
+    $row[] = html_writer::link(new moodle_url('view.php', ['id' => $cm->id]), $cm->get_formatted_name(), $class);
     $table->data[] = $row;
 }
 

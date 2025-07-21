@@ -24,8 +24,6 @@
 
 namespace mod_treasurehunt\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_treasurehunt road updated event class.
  *
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  */
 class road_updated extends \core\event\base {
-
     /**
      * Init method
      */
@@ -55,7 +52,10 @@ class road_updated extends \core\event\base {
     public static function get_name() {
         return get_string('eventroadupdated', 'mod_treasurehunt');
     }
-
+    /**
+     * Wording of the event.
+     * @return string
+     */
     public function get_description() {
         return "The user with id '$this->userid' has updated the road with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
@@ -67,13 +67,13 @@ class road_updated extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/editroad.php",
-                array('cmid' => $this->contextinstanceid,
-            'id' => $this->objectid));
+        return new \moodle_url("/mod/treasurehunt/editroad.php", ['cmid' => $this->contextinstanceid, 'id' => $this->objectid]);
     }
-
+    /**
+     * DB mapping.
+     * @return array{db: string, restore: string}
+     */
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt_roads', 'restore' => 'treasurehunt_road');
+        return ['db' => 'treasurehunt_roads', 'restore' => 'treasurehunt_road'];
     }
-
 }

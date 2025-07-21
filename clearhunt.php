@@ -13,22 +13,30 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Clear the activity registered in this module instance.
  * This resets the state of the trasurehunt and allows the number of roads and stages to be
  * edited again.
+ *
+ * @package   mod_treasurehunt
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require_once("../../config.php");
 require_once("locallib.php");
 
 $confirm = optional_param('confirm', false, PARAM_BOOL);
 
 $PAGE->set_url('/mod/trasurehunt/clearhunt.php');
-list ($course, $cm) = get_course_and_cm_from_cmid(required_param('id', PARAM_INTEGER), 'treasurehunt');
+[$course, $cm] = get_course_and_cm_from_cmid(required_param('id', PARAM_INTEGER), 'treasurehunt');
 $context = context_module::instance($cm->id);
 require_login($course, true, $cm);
 $treasurehuntid = $cm->instance;
-$return = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cm->id));
+$return = new moodle_url('/mod/treasurehunt/view.php', ['id' => $cm->id]);
 
 if (!has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
     redirect($return);
@@ -42,7 +50,7 @@ $PAGE->set_heading($COURSE->fullname);
 echo $OUTPUT->header();
 echo $OUTPUT->heading($clearhunt);
 
-if (data_submitted() and $confirm and confirm_sesskey()) {
+if (data_submitted() && $confirm && confirm_sesskey()) {
     treasurehunt_clear_activities($treasurehuntid);
 
     echo $OUTPUT->box(get_string('cleartreasurehunt_done', 'treasurehunt'));
@@ -50,12 +58,10 @@ if (data_submitted() and $confirm and confirm_sesskey()) {
     echo $OUTPUT->footer();
     die;
 } else {
-
     $attempts = treasurehunt_get_all_attempts($treasurehuntid);
     $count = count($attempts);
     $msg = get_string('cleartreasurehuntconfirm', 'treasurehunt', $count);
-    echo $OUTPUT->confirm($msg, new moodle_url('clearhunt.php', array('confirm' => 1, 'id' => $cm->id)), $return);
+    echo $OUTPUT->confirm($msg, new moodle_url('clearhunt.php', ['confirm' => 1, 'id' => $cm->id]), $return);
     echo $OUTPUT->footer();
     die;
 }
-

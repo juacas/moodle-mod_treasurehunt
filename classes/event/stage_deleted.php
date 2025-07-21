@@ -17,19 +17,17 @@
 /**
  * The mod_treasurehunt stage deleted event
  *
- * @package    mod_treasurethunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_treasurehunt\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_treasurehunt stage deleted event class.
  *
- * @property-read array $other {
+ * @property-read string $other {
  *      Extra information about event.
  *
  *      - string concept: (optional) the concept of deleted stage.
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  */
 class stage_deleted extends \core\event\base {
-
     /**
      * Init method
      */
@@ -62,7 +59,6 @@ class stage_deleted extends \core\event\base {
      * @return string
      */
     public function get_description() {
-
         return "The user with id '$this->userid' has deleted the stage '$this->other' with id '$this->objectid' for " .
                 "the treasure hunt activity with course module id '$this->contextinstanceid'.";
     }
@@ -75,9 +71,11 @@ class stage_deleted extends \core\event\base {
     public function get_url() {
         return null;
     }
-
+    /**
+     * DB mapping.
+     * @return int
+     */
     public static function get_objectid_mapping() {
         return \core\event\base::NOT_MAPPED;
     }
-
 }

@@ -23,9 +23,8 @@
  */
 
 namespace mod_treasurehunt\event;
-
-defined('MOODLE_INTERNAL') || die();
-
+/**
+ * instance list viewed.
+ */
 class course_module_instance_list_viewed extends \core\event\course_module_instance_list_viewed {
-
 }

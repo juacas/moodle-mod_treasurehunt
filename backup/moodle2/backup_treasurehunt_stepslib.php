@@ -22,11 +22,11 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-defined('MOODLE_INTERNAL') || die;
 
-
+/**
+ * Backup definition.
+ */
 class backup_treasurehunt_activity_structure_step extends backup_activity_structure_step {
-
     /**
      * Defines the backup structure of the module.
      *
@@ -38,39 +38,45 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $userinfo = $this->get_setting_value('userinfo');
 
         // Define the root element describing the treasurehunt instance.
-        $treasurehunt = new backup_nested_element('treasurehunt', array('id'), array(
+        $treasurehunt = new backup_nested_element(
+            'treasurehunt',
+            ['id'],
+            [
             'name', 'intro', 'introformat', 'timecreated', 'timemodified', 'playwithoutmoving',
             'groupmode', 'alwaysshowdescription', 'allowattemptsfromdate',
             'cutoffdate', 'grade', 'grademethod', 'gradepenlocation', 'gradepenanswer',
-            'tracking', 'custommapconfig', 'completionfinish', 'completionpass'));
-        $treasurehunt->annotate_files('mod_treasurehunt', 'custombackground', null); // This file areas haven't itemid
+            'tracking', 'custommapconfig', 'completionfinish', 'completionpass',
+            ]
+        );
+        // This file areas haven't itemid.
+        $treasurehunt->annotate_files('mod_treasurehunt', 'custombackground', null);
 
         $roads = new backup_nested_element('roads');
 
-        $road = new backup_nested_element('road', array('id'), array(
-            'name', 'timecreated', 'timemodified', 'groupid', 'groupingid', 'validated'));
+        $road = new backup_nested_element('road', ['id'], [
+            'name', 'timecreated', 'timemodified', 'groupid', 'groupingid', 'validated']);
 
         $stages = new backup_nested_element('stages');
 
-        $stage = new backup_nested_element('stage', array('id'), array(
+        $stage = new backup_nested_element('stage', ['id'], [
             'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
             'timecreated', 'timemodified', 'playstagewithoutmoving', 'activitytoend', 'questiontext',
-            'questiontextformat', 'questiontexttrust', 'qrtext', 'geom'));
+            'questiontextformat', 'questiontexttrust', 'qrtext', 'geom']);
 
         $answers = new backup_nested_element('answers');
 
-        $answer = new backup_nested_element('answer', array('id'), array(
+        $answer = new backup_nested_element('answer', ['id'], [
             'answertext', 'answertextformat', 'answertexttrust', 'timecreated',
-            'timemodified', 'correct'));
+            'timemodified', 'correct']);
 
         $attempts = new backup_nested_element('attempts');
 
-        $attempt = new backup_nested_element('attempt', array('id'), array(
+        $attempt = new backup_nested_element('attempt', ['id'], [
             'timecreated', 'userid', 'groupid', 'success',
             'penalty', 'type', 'questionsolved', 'activitysolved',
-            'geometrysolved', 'location'));
+            'geometrysolved', 'location']);
         $tracks = new backup_nested_element('tracks');
-        $track = new backup_nested_element('track', array('stageid', 'userid', 'timestamp'), array('location'));
+        $track = new backup_nested_element('track', ['stageid', 'userid', 'timestamp'], ['location']);
 
         // Build the tree.
         $treasurehunt->add_child($roads);
@@ -89,16 +95,16 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         $tracks->add_child($track);
 
         // Define sources.
-        $treasurehunt->set_source_table('treasurehunt', array('id' => backup::VAR_ACTIVITYID));
+        $treasurehunt->set_source_table('treasurehunt', ['id' => backup::VAR_ACTIVITYID]);
 
-        $road->set_source_table('treasurehunt_roads', array('treasurehuntid' => backup::VAR_PARENTID), 'id ASC');
-        $stage->set_source_table('treasurehunt_stages', array('roadid' => backup::VAR_PARENTID));
-        $answer->set_source_table('treasurehunt_answers', array('stageid' => backup::VAR_PARENTID), 'id ASC');
+        $road->set_source_table('treasurehunt_roads', ['treasurehuntid' => backup::VAR_PARENTID], 'id ASC');
+        $stage->set_source_table('treasurehunt_stages', ['roadid' => backup::VAR_PARENTID]);
+        $answer->set_source_table('treasurehunt_answers', ['stageid' => backup::VAR_PARENTID], 'id ASC');
 
         // All the rest of elements only happen if we are including user info.
         if ($userinfo) {
-            $attempt->set_source_table('treasurehunt_attempts', array('stageid' => backup::VAR_PARENTID));
-            $track->set_source_table('treasurehunt_track', array('treasurehuntid' => backup::VAR_PARENTID));
+            $attempt->set_source_table('treasurehunt_attempts', ['stageid' => backup::VAR_PARENTID]);
+            $track->set_source_table('treasurehunt_track', ['treasurehuntid' => backup::VAR_PARENTID]);
         }
 
         // Define id annotations.
@@ -117,5 +123,4 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         // Return the root element (treasurehunt), wrapped into standard activity structure.
         return $this->prepare_activity_structure($treasurehunt);
     }
-
 }

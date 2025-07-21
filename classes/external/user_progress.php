@@ -25,32 +25,31 @@
  */
 namespace mod_treasurehunt\external;
 
-use \core_external\external_function_parameters;
-use \core_external\external_single_structure;
-use \core_external\external_multiple_structure;
-use \core_external\external_value;
-use \core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_single_structure;
+use core_external\external_multiple_structure;
+use core_external\external_value;
+use core_external\external_api;
 use stdClass;
 use context_module;
 
 defined('MOODLE_INTERNAL') || die();
 global $CFG;
 require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
-
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-
-class user_progress extends external_api
-{
+/**
+ * Service: Get the status in the game os a group or user.
+ */
+class user_progress extends external_api {
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function execute_parameters()
-    {
+    public static function execute_parameters() {
         return new external_function_parameters(
-            array(
+            [
                 'userprogress' => new external_single_structure(
-                    array(
+                    [
                         'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
                         'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
                         'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
@@ -63,36 +62,36 @@ class user_progress extends external_api
                         'applang' => new external_value(PARAM_TEXT, 'Mobile app language', VALUE_OPTIONAL),
                         'changedapplang' => new external_value(PARAM_BOOL, 'If true, mobile app language has changed', VALUE_OPTIONAL),
                         'location' => new external_single_structure(
-                            array(
+                            [
                                 'type' => new external_value(PARAM_TEXT, 'Geometry type'),
                                 'coordinates' => new external_single_structure(
-                                    array(
+                                    [
                                         new external_value(PARAM_FLOAT, "Longitude"),
-                                        new external_value(PARAM_FLOAT, "Latitude")
-                                    ),
+                                        new external_value(PARAM_FLOAT, "Latitude"),
+                                    ],
                                     'Coordinates definition in geojson format for point'
                                 ),
-                            ),
+                            ],
                             'Geometry definition in geojson format',
                             VALUE_OPTIONAL
                         ),
                         'currentposition' => new external_single_structure(
-                            array(
+                            [
                                 'type' => new external_value(PARAM_TEXT, 'Geometry type'),
                                 'coordinates' => new external_single_structure(
-                                    array(
+                                    [
                                         new external_value(PARAM_FLOAT, "Longitude"),
-                                        new external_value(PARAM_FLOAT, "Latitude")
-                                    ),
+                                        new external_value(PARAM_FLOAT, "Latitude"),
+                                    ],
                                     'Coordinates definition in geojson format for point'
                                 ),
-                            ),
+                            ],
                             'Geometry definition in geojson format',
                             VALUE_OPTIONAL
                         ),
-                    )
-                )
-            )
+                    ]
+                ),
+            ]
         );
     }
 
@@ -100,89 +99,88 @@ class user_progress extends external_api
      * Describes the user_progress return values
      * @return external_single_structure
      */
-    public static function execute_returns()
-    {
+    public static function execute_returns() {
         return new external_single_structure(
-            array(
+            [
                 'attempts' => new external_single_structure(
-                    array(
+                    [
                         'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
                         'features' => new external_multiple_structure(
                             new external_single_structure(
-                                array(
+                                [
                                     'type' => new external_value(PARAM_TEXT, 'Feature'),
                                     'id' => new external_value(PARAM_INT, 'Feature id'),
                                     'geometry' => new external_single_structure(
-                                        array(
+                                        [
                                             'type' => new external_value(PARAM_TEXT, 'Geometry type'),
                                             'coordinates' => new external_single_structure(
-                                                array(
+                                                [
                                                     new external_value(PARAM_FLOAT, "Longitude"),
-                                                    new external_value(PARAM_FLOAT, "Latitude")
-                                                ),
+                                                    new external_value(PARAM_FLOAT, "Latitude"),
+                                                ],
                                                 'Coordinates definition in geojson format for points'
-                                            )
-                                        ),
+                                            ),
+                                        ],
                                         'Geometry definition in geojson format'
                                     ),
                                     'properties' => new external_single_structure(
-                                        array(
+                                        [
                                             'roadid' => new external_value(PARAM_INT, "Associated road id"),
                                             'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
                                             'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                             'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                             'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
                                             'geometrysolved' => new external_value(PARAM_BOOL, "If true, geometry of attempt is solved"),
-                                            'info' => new external_value(PARAM_RAW, "The info text of attempt")
-                                        )
-                                    )
-                                )
+                                            'info' => new external_value(PARAM_RAW, "The info text of attempt"),
+                                        ]
+                                    ),
+                                ]
                             ),
                             'Features definition in geojson format'
-                        )
-                    ),
+                        ),
+                    ],
                     'All attempts of the user/group in geojson format',
                     VALUE_OPTIONAL
                 ),
                 'nextstage' => new external_single_structure(
-                    array(
+                    [
                         'type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
                         'features' => new external_multiple_structure(
                             new external_single_structure(
-                                array(
+                                [
                                     'type' => new external_value(PARAM_TEXT, 'Feature'),
                                     'id' => new external_value(PARAM_INT, 'Feature id'),
                                     'geometry' => new external_single_structure(
-                                        array(
+                                        [
                                             'type' => new external_value(PARAM_TEXT, 'Geometry type'),
                                             'coordinates' => new external_multiple_structure(
                                                 new external_multiple_structure(
                                                     new external_multiple_structure(
                                                         new external_single_structure(
-                                                            array(
+                                                            [
                                                                 new external_value(PARAM_FLOAT, "Longitude"),
-                                                                new external_value(PARAM_FLOAT, "Latitude")
-                                                            )
+                                                                new external_value(PARAM_FLOAT, "Latitude"),
+                                                            ]
                                                         )
                                                     )
                                                 ),
                                                 'Coordinates definition in geojson format for multipolygon'
-                                            )
-                                        ),
+                                            ),
+                                        ],
                                         'Geometry definition in geojson format'
                                     ),
                                     'properties' => new external_single_structure(
-                                       [
+                                        [
                                             'roadid' => new external_value(PARAM_INT, "Associated road id"),
                                             'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
                                             'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                         ]
-                                    )
-                                )
+                                    ),
+                                ]
                             ),
                             'Features definition in geojson format'
-                        )
-                    ),
+                        ),
+                    ],
                     'Next stage geometry in geojson format',
                     VALUE_OPTIONAL
                 ),
@@ -193,21 +191,21 @@ class user_progress extends external_api
                     'Array with all strings with attempts since the last stored timestamp'
                 ),
                 'lastsuccessfulstage' => new external_single_structure(
-                    array(
+                    [
                         'id' => new external_value(PARAM_INT, 'The id of the last successful stage.'),
                         'position' => new external_value(PARAM_INT, 'The position of the last successful stage.'),
                         'name' => new external_value(PARAM_RAW, 'The name of the last successful stage.'),
                         'clue' => new external_value(PARAM_RAW, 'The clue of the last successful stage.'),
                         'question' => new external_value(PARAM_RAW, 'The question of the last successful stage.'),
                         'answers' => new external_multiple_structure(new external_single_structure(
-                            array(
+                            [
                                 'id' => new external_value(PARAM_INT, 'The id of answer'),
-                                'answertext' => new external_value(PARAM_RAW, 'The text of answer')
-                            )
+                                'answertext' => new external_value(PARAM_RAW, 'The text of answer'),
+                            ]
                         ), 'Array with all answers of the last successful stage.'),
                         'totalnumber' => new external_value(PARAM_INT, 'The total number of stages on the road.'),
-                        'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.')
-                    ),
+                        'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.'),
+                    ],
                     'object with data from the last successful stage',
                     VALUE_OPTIONAL
                 ),
@@ -218,57 +216,56 @@ class user_progress extends external_api
                 'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
                 'attempthistory' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
+                        [
                             'string' => new external_value(PARAM_RAW, 'The info text of attempt'),
-                            'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized')
-                        )
+                            'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized'),
+                        ]
                     ),
                     'Array with user/group historical attempts.'
                 ),
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                 'playerconfig' => new external_single_structure(
-                    array(
+                    [
                         'searchpaneldisabled' => new external_value(PARAM_BOOL, 'If true the search panel is disabled'),
                         'localizationbuttondisabled' => new external_value(PARAM_BOOL, 'If true the localization button is disabled'),
                         'showdistancehint' => new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
                         'showheadinghint' => new external_value(PARAM_BOOL, 'If true the heading hint is shown', VALUE_DEFAULT, false),
                         'showinzonehint' => new external_value(PARAM_BOOL, 'If true the in-zone hint is shown', VALUE_DEFAULT, false),
-                        'shownextareahint' => new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false)
-                    ),
+                        'shownextareahint' => new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false),
+                    ],
                     'Custom player configuration',
                     VALUE_OPTIONAL
                 ),
                 'status' => new external_single_structure(
-                    array(
+                    [
                         'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                        'msg' => new external_value(PARAM_RAW, 'message explain code')
-                    )
-                )
-            )
+                        'msg' => new external_value(PARAM_RAW, 'message explain code'),
+                    ]
+                ),
+            ]
         );
     }
     /**
      * Check events and return new game state.
      * TODO: Design cache strategy. This service is polled.
      */
-    public static function execute($userprogress)
-    {
+    public static function execute($userprogress) {
         global $USER, $DB;
         $nextstagegeom = null;
         $userattempts = null;
         $qrmode = false;
         $params = self::validate_parameters(
             self::execute_parameters(),
-            array('userprogress' => $userprogress)
+            ['userprogress' => $userprogress]
         )['userprogress'];
         $treasurehuntid = $params['treasurehuntid'];
         $cm = get_coursemodule_from_instance('treasurehunt', $treasurehuntid);
-        $treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+        $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         // Check if the user has permission to view player.
         require_capability('mod/treasurehunt:enterplayer', $context, null, false);
-        $status = array();
+        $status = [];
         // Force mobile app language
         if (isset($params['applang']) && $params['applang'] != current_language()) {
             force_current_language($params['applang']);
@@ -286,7 +283,7 @@ class user_progress extends external_api
         }
         $currentworkingstage = $DB->get_record(
             'treasurehunt_stages',
-            array('position' => $nextnostage, 'roadid' => $userparams->roadid),
+            ['position' => $nextnostage, 'roadid' => $userparams->roadid],
             '*',
             MUST_EXIST
         );
@@ -333,7 +330,7 @@ class user_progress extends external_api
             if ($params['playwithoutmoving'] != $playmode) {
                 $changesinplaymode = true;
             }
-            
+
             // If the user can play process the submission.
             if (has_capability('mod/treasurehunt:play', $context)) {
                 // Process if the user has correctly completed the question and the required activity.
@@ -352,7 +349,7 @@ class user_progress extends external_api
                 $qocsolved = new stdClass();
                 $qocsolved->success = false;
                 $qocsolved->msg = get_string('nopermissions', 'error', get_string('treasurehunt:play', 'mod_treasurehunt'));
-                $qocsolved->updates = array();
+                $qocsolved->updates = [];
                 $qocsolved->newattempt = false;
                 $qocsolved->attemptsolved = false;
                 $qocsolved->roadfinished = false;
@@ -429,8 +426,8 @@ class user_progress extends external_api
                 $status['code'] = 0;
             }
         }
-        //  Get new user's state and report it.
-        $attempthistory = array();
+        // Get new user's state and report it.
+        $attempthistory = [];
         $changedapplang = isset($params['changedapplang']) ? $params['changedapplang'] : false;
         // If there was any new attempt, reload the history of attempts.
         if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $changedapplang) {
@@ -464,7 +461,7 @@ class user_progress extends external_api
             || $changesingroupmode
             || $changedapplang
         ) {
-            list($userattempts, $nextstagegeom) = treasurehunt_get_user_progress(
+            [$userattempts, $nextstagegeom] = treasurehunt_get_user_progress(
                 $userparams->roadid,
                 $userparams->groupid,
                 $USER->id,
@@ -475,12 +472,12 @@ class user_progress extends external_api
         // If the road has been edited, warn the user.
         if ($updateroad) {
             if ($params['location']) {
-                $status = array();
+                $status = [];
                 $status['msg'] = get_string('errsendinglocation', 'treasurehunt');
                 $status['code'] = 1;
             }
             if ($params['selectedanswerid']) {
-                $status = array();
+                $status = [];
                 $status['msg'] = get_string('errsendinganswer', 'treasurehunt');
                 $status['code'] = 1;
             }
@@ -493,7 +490,7 @@ class user_progress extends external_api
             $updates->strings[] = get_string('actnotavailableyet', 'treasurehunt');
         }
         if (!$status) {
-            $status = array();
+            $status = [];
             $status['msg'] = get_string('userprogress', 'treasurehunt');
             $status['code'] = 0;
         }
@@ -507,7 +504,7 @@ class user_progress extends external_api
         if ($currentworkingstage->qrtext != '') {
             $qrmode = true;
         }
-        $result = array();
+        $result = [];
         $result['infomsg'] = $updates->strings;
         $result['attempttimestamp'] = $updates->newattempttimestamp;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
@@ -523,19 +520,19 @@ class user_progress extends external_api
         // This means that the user has just solved the current stage.
         if ($lastsuccessfulstage && $currentworkingstage && $currentworkingstage->position == $lastsuccessfulstage->position) {
             // Update current working stage.
-             if ($lastsuccessfulstage) {
+            if ($lastsuccessfulstage) {
                 $nextnostage = min([$lastsuccessfulstage->position + 1, $numberofstages]);
             } else {
                 $nextnostage = 1;
             }
             $currentworkingstage = $DB->get_record(
                 'treasurehunt_stages',
-                array('position' => $nextnostage, 'roadid' => $userparams->roadid),
+                ['position' => $nextnostage, 'roadid' => $userparams->roadid],
                 '*',
                 MUST_EXIST
             );
-        } 
-        // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.        
+        }
+        // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.
         if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)) {
             // Subset of properties.
             $currentstagebrief = new stdClass();
@@ -551,7 +548,7 @@ class user_progress extends external_api
         if ($userattempts) {
             $result['attempts'] = $userattempts;
         }
-      
+
         if ($lastsuccessfulstage) {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }
@@ -566,5 +563,14 @@ class user_progress extends external_api
             $result['playerconfig'] = $playerconfig;
         }
         return $result;
+    }
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
+    public static function execute_is_allowed_from_ajax() {
+        return true;
     }
 }

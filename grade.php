@@ -22,12 +22,13 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require_once(__DIR__ . "../../../config.php");
 require_login();
 $id = required_param('id', PARAM_INT); // Course module ID.
 // Item number may be != 0 for activities that allow more than one grade per user.
 $itemnumber = optional_param('itemnumber', 0, PARAM_INT);
 $userid = optional_param('userid', 0, PARAM_INT); // Graded user ID (optional).
-$url = new moodle_url('/mod/treasurehunt/view.php', array('id' => $id, 'userid' => $userid));
+$url = new moodle_url('/mod/treasurehunt/view.php', ['id' => $id, 'userid' => $userid]);
 // In the simplest case just redirect to the view page.
 redirect($url);

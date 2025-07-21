@@ -17,14 +17,12 @@
 /**
  * The mod_treasurehunt road deleted event
  *
- * @package    mod_treasurethunt
+ * @package    mod_treasurehunt
  * @copyright  2015 Adrian Rodriguez
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_treasurehunt\event;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * The mod_treasurehunt road deleted event class.
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  */
 class road_deleted extends \core\event\base {
-
     /**
      * Init method
      */
@@ -69,7 +66,7 @@ class road_deleted extends \core\event\base {
     /**
      * Get URL related to the action.
      *
-     * @return \moodle_url
+     * @return \moodle_url|null
      */
     public function get_url() {
         return null;
@@ -81,5 +78,4 @@ class road_deleted extends \core\event\base {
     public static function get_objectid_mapping() {
         return \core\event\base::NOT_MAPPED;
     }
-
 }

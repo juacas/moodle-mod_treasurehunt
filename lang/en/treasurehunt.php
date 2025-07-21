@@ -35,8 +35,10 @@ $string['actnotavailableyet'] = 'The activity is not available yet';
 $string['add'] = 'Add';
 $string['addingroad'] = 'Adding road';
 $string['addingstage'] = 'Adding stage';
+$string['addroad_tour'] = 'Add one or more roads to be followed by your students.';
 $string['addsimplequestion'] = 'Add simple question';
 $string['addsimplequestion_help'] = 'Adds a simple question before displaying the clue of this stage';
+$string['addstage_tour'] = 'Each road must have two or more stages. Each stage gives a clue to find out the next.';
 $string['aerialmap'] = 'Aerial';
 $string['aerialview'] = 'Aerial';
 $string['allowattemptsfromdate'] = 'Allow attempts from';
@@ -50,17 +52,25 @@ $string['areyousure'] = 'Are you sure?';
 $string['attempt'] = 'Attempt';
 $string['attempthistory'] = 'Attempt history';
 $string['attemptsdeleted'] = 'Treasure hunt attempts deleted';
+$string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
 $string['availability'] = 'Availability';
+$string['availableplayerstyles'] = 'Available game screen styles.';
 $string['back'] = 'Back';
 $string['backtocourse'] = 'Back to the course';
 $string['baselayers'] = 'Base layers';
 $string['basemaps'] = 'Base maps';
+$string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
+$string['browsemode'] = 'Browse';
 $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
 $string['changetogroupmode'] = 'The game mode has changed to play in groups';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to "playing with GPS location".';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to "playing with pegmen" <img src="pix/my_location.png" width="32" align="middle" /> (click on map)';
+$string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
+$string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has been deleted.';
+$string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
+$string['clue'] = 'Clue';
 $string['completionfinish'] = 'Require to finish road.';
 $string['completionfinish_help'] = 'Complete when user passes all the stages in a road.';
 $string['configintro'] = 'The values you set here define the default values that are used in the settings form when you
@@ -70,59 +80,57 @@ $string['confirm'] = 'Confirm';
 $string['confirmdeletestage'] = 'The stage was successfully removed';
 $string['continue'] = 'Continue';
 $string['correctanswer'] = 'Correct answer.';
-$string['cleartreasurehunt'] = 'Reset the Treasure Hunt';
-$string['cleartreasurehunt_done'] = 'The activity has been reset. All activity of the participants has been deleted.';
-$string['cleartreasurehuntconfirm'] = 'Beware this action. All activity recorded will be deleted if you continue. Usually, this action is only needed if you need to change the number of roads or stages but the activity is blocked because someone has started to play the game.';
-$string['clue'] = 'Clue';
-$string['custommaplayertype'] = 'Custom layer type';
-$string['custommaplayertype_help'] = 'The custom layer can be the only visible in the background or can be layered above the standard base maps.';
+$string['customlayername'] = 'Layer title';
+$string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
+$string['customlayerservicearcgis'] = 'Arcgis REST Tile service (experimental)';
+$string['customlayerserviceimage'] = 'Uploaded image';
+$string['customlayerservicetiled'] = 'Tiled XYZ image';
 $string['customlayerservicetype'] = 'Type of the custom layer';
 $string['customlayerservicetype_help'] = 'The custom layer can be a WMS service a {x}{y}{z} tiles server, an ArcGIS REST Tile service (experimental) or an uploaded image.';
 $string['customlayerservicewms'] = 'WMS service';
-$string['customlayerservicetiled'] = 'Tiled XYZ image';
-$string['customlayerservicearcgis'] = 'Arcgis REST Tile service (experimental)';
-$string['customlayerserviceimage'] = 'Uploaded image';
-$string['custompreserveaspectratio'] = 'Preserve aspect ratio';
-$string['custompreserveaspectratio_help'] = 'If enabled, the image will be scaled (East-West) to fit the geographical latitude (North-South) extents, keeping the aspect ratio. It is needed to allow SVG images to be rendered without pixelation.';
-$string['custommapnolayer'] = 'No custom map';
-$string['customlayername'] = 'Layer title';
-$string['customlayername_help'] = 'If you use a custom layer a title is needed to show it in the maps or your users. If the title is empty the custom layer is fully disabled.';
-$string['custommapimagefile'] = 'Custom image for map';
-$string['custommapimagefile_help'] = 'Upload a image of enough resolution and fill the next 4 fields with the projection coordinates over the ground';
-$string['custommapping'] = 'Custom map';
-$string['custommapminlat'] = 'South latitude';
-$string['custommapminlat_help'] = 'South latitude of the image. Use "." as decimal point. Greater than -85 degrees and lower than north latitude.';
-$string['custommapminlon'] = 'West longitude';
-$string['custommapminlon_help'] = 'West longitude of the image. Use "." as decimal point. Greater than -180 degrees and lower than east longitude.';
-$string['custommapmaxlat'] = 'North latitude';
-$string['custommapmaxlat_help'] = 'North latitude of the image. Use "." as decimal point. Lower than 85 degrees and greater than south latitude.';
-$string['custommapmaxlon'] = 'East longitude';
-$string['custommapmaxlon_help'] = 'East longitude of the image. Use "." as decimal point. Less than 180 degrees and greater than west longitude.';
 $string['customlayertype'] = 'Layer type';
 $string['customlayertype_help'] = 'The layer can be the only visible in the background or can be layered above the standard base maps.';
 $string['customlayerwms'] = 'Web map service url (WMS, tiles server XYZ)';
 $string['customlayerwms_help'] = 'Use a map layer from an OGC WMS service or an ArcGIS REST tile server. For example: <ul><li>EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)</li><li>XYZ tiles service (only for Spain) <code>https://tms-ign-base.idee.es/1.0.0/IGNBaseTodo/{z}/{x}/{-y}.jpeg</code></li><li>(Experimental) ArcGIS rest tile services could be <code>http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer</code> or <code>https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer</code></li></ul>';
-$string['customwmsparams'] = 'Web map service extra params';
-$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets&STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['custommapbaselayer'] = 'The image is shown as an ADDITIONAL map background option';
+$string['custommapimageerror'] = 'Cannot load custom image. Check activity settings.';
+$string['custommapimagefile'] = 'Custom image for map';
+$string['custommapimagefile_help'] = 'Upload a image of enough resolution and fill the next 4 fields with the projection coordinates over the ground';
+$string['custommaplayertype'] = 'Custom layer type';
+$string['custommaplayertype_help'] = 'The custom layer can be the only visible in the background or can be layered above the standard base maps.';
+$string['custommapmaxlat'] = 'North latitude';
+$string['custommapmaxlat_help'] = 'North latitude of the image. Use "." as decimal point. Lower than 85 degrees and greater than south latitude.';
+$string['custommapmaxlon'] = 'East longitude';
+$string['custommapmaxlon_help'] = 'East longitude of the image. Use "." as decimal point. Less than 180 degrees and greater than west longitude.';
+$string['custommapminlat'] = 'South latitude';
+$string['custommapminlat_help'] = 'South latitude of the image. Use "." as decimal point. Greater than -85 degrees and lower than north latitude.';
+$string['custommapminlon'] = 'West longitude';
+$string['custommapminlon_help'] = 'West longitude of the image. Use "." as decimal point. Greater than -180 degrees and lower than east longitude.';
+$string['custommapnolayer'] = 'No custom map';
+$string['custommapnongeographic'] = 'The image is not geographical and will be the only layer in map.';
 $string['custommaponlybaselayer'] = 'The image is shown as the ONLY map background option';
 $string['custommapoverlaylayer'] = 'The image is rendered above the standard map';
-$string['custommapnongeographic'] = 'The image is not geographical and will be the only layer in map.';
-$string['custommapimageerror'] = 'Cannot load custom image. Check activity settings.';
+$string['custommapping'] = 'Custom map';
+$string['custompreserveaspectratio'] = 'Preserve aspect ratio';
+$string['custompreserveaspectratio_help'] = 'If enabled, the image will be scaled (East-West) to fit the geographical latitude (North-South) extents, keeping the aspect ratio. It is needed to allow SVG images to be rendered without pixelation.';
+$string['customwmsparams'] = 'Web map service extra params';
+$string['customwmsparams_help'] = 'These parameters define the look of the map. The format follows the following format: "LAYERS=background,streets&STYLES=blue,default" (For example EUNIS Forest Ecosystems WMS can be configured by: WMS: <code style="overflow-wrap: break-word;word-wrap: break-word;">http://bio.discomap.eea.europa.eu/arcgis/services/Ecosystem/Ecosystems/MapServer/WMSServer</code> PARAMS: <code>LAYERS=4</code>)';
 $string['cutoffdate'] = 'Cut-off date';
 $string['cutoffdate_help'] = 'If set, the treasure hunt will not accept attempts after this date without an extension.';
 $string['cutoffdatefromdatevalidation'] = 'Cut-off date must be after the allow submissions from date.';
 $string['datechanged'] = 'Date changed';
+$string['defaultplayerstyle'] = 'Default game screen style';
 $string['discoveredlocation'] = 'Discovered location';
+$string['donetutorial'] = 'End';
+$string['drawmode'] = 'Draw';
+$string['editactivity_help'] = 'You can find a step-by-step tutorial about creating treasurehunt activities at <a href="http://juacas.github.io/moodle-mod_treasurehunt/create_activity.html"> this page.</a>';
+$string['editend_tour'] = 'Enjoy making exciting games for your students!';
 $string['editingroad'] = 'Editing road';
 $string['editingstage'] = 'Editing stage';
 $string['editingtreasurehunt'] = 'Editing treasure hunt';
 $string['edition'] = 'Edition panel';
 $string['edition_help'] = 'To enable the geometry creation and the buttons in the edition panel the stage you want to edit must be selected';
-$string['editactivity_help'] = 'You can find a step-by-step tutorial about creating treasurehunt activities at <a href="http://juacas.github.io/moodle-mod_treasurehunt/create_activity.html"> this page.</a>';
 $string['editmode'] = 'Edit';
-$string['drawmode'] = 'Draw';
-$string['browsemode'] = 'Browse';
 $string['editroad'] = 'Edit road';
 $string['editstage'] = 'Edit stage';
 $string['edittreasurehunt'] = 'Change roads and stages';
@@ -157,31 +165,23 @@ $string['gameupdatetime'] = 'Game update time';
 $string['gameupdatetime_help'] = 'Time interval in seconds between a user\'s game update and another.
 The larger, less update requests should be made, but more time passes to report a possible change.
 It must be greater than 0 seconds, but the time will be set by default.';
-$string['defaultplayerstyle'] = 'Default game screen style';
-$string['playerstyle'] = 'Game screen style';
-$string['availableplayerstyles'] = 'Available game screen styles.';
-$string['pegmanlabel'] = 'Look around on StreetView';
-$string['playerstyle_help'] = 'May be several styles of the game screen that teachers can choose';
-$string['playerclassic'] = 'Classic';
-$string['playerfancy'] = 'Fancy old (deprecated)';
-$string['playerbootstrap'] = 'Bootstrap';
-$string['geolocation_problem'] = 'GPS location is having problems.';
-$string['geolocation_needed_title'] = 'This application needs geolocation.';
 $string['geolocation_needed'] = 'To play this game your geolocation is needed.
 <p>To activate it go to your browser Settings->Site settings->Location and remove the eviction for this site.
 <p>Please reload this page and answer "YES" when your browser asks you if you want to share your location.
 <p>In order to use the GPS to locate this device during the Treasurehunt, the server must be accessed by secure HTTPS URLs.
 In other case, only "Play without moving" mode can be used and the players need to point manually each stage on the map.
 Please contact your administrator if you can\'t solve this problem.';
-$string['grade_explaination_fromposition'] = '{$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} stages in position {$a->position}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
-$string['grade_explaination_fromtime'] = '{$a->rawscore}-{$a->penalization}%: You needed {$a->yourtime} to complete the hunt. The best time was {$a->besttime}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
+$string['geolocation_needed_title'] = 'This application needs geolocation.';
+$string['geolocation_problem'] = 'GPS location is having problems.';
 $string['grade_explaination_fromabsolutetime'] = '{$a->rawscore}-{$a->penalization}%: You ended the huntg at {$a->yourtime}. The best time was at{$a->besttime}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
+$string['grade_explaination_fromposition'] = '{$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} stages in position {$a->position}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
 $string['grade_explaination_fromstages'] = '{$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} out of {$a->nostages} stages. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
+$string['grade_explaination_fromtime'] = '{$a->rawscore}-{$a->penalization}%: You needed {$a->yourtime} to complete the hunt. The best time was {$a->besttime}. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
 $string['grade_explaination_temporary'] = 'Unfinished hunt, receives 50% of score from stages: {$a->rawscore}-{$a->penalization}%: You discovered {$a->nosuccessfulstages} out of {$a->nostages} stages. You penalizes {$a->penalization}% due to {$a->nolocationsfailed} wrong places, and {$a->noanswersfailed} wrong answers.';
+$string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['gradefromposition'] = 'Grade from position';
 $string['gradefromstages'] = 'Grade from stages';
 $string['gradefromtime'] = 'Grade from finishing time';
-$string['gradefromabsolutetime'] = 'Grade from duration of the hunt';
 $string['grademethod'] = 'Grading method';
 $string['grademethod_help'] = '<p><b>Grade from stages</b></p>
 <p>Each player (or team) scores proportionally by number of stages solved,
@@ -239,21 +239,27 @@ $string['info'] = 'Info';
 $string['infovalidatelocation'] = 'Validate location of this stage';
 $string['invalidassignedroad'] = 'Assigned road is not validated';
 $string['invalroadid'] = 'The road is not validated';
+$string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
 $string['layers'] = 'Layers';
 $string['loading'] = 'Loading';
-$string['lockedclue'] = 'Locked clue';
+$string['localizationbuttondisabled'] = 'Disable localization button';
+$string['localizationbuttondisabled_help'] = 'If checked, the localization button will be disabled in the player interface.';
+$string['lockactivitiessection'] = 'Restrict activities to only this stage.';
+$string['lockactivity'] = 'Allow only at this stage';
+$string['lockactivity_help'] = 'Block access to selected activities if the user is not in this stage. This setting auto-configures restrictions for the chosen activities. WARNING: This provides only a basic auto-configuration. If you manually edit an activity\'s restrictions, it may no longer appear here and auto-configuration may not work.';
+$string['lockactivityannounce'] = 'If the <a href="https://github.com/juacas/moodle-availability_treasurehunt">Treasurehunt Conditional Access Plugin</a> is enabled on this site, you can make any activity unavailable when the user is not working within this stage.';
 $string['lockedaclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' to unlock the clue';
 $string['lockedaqclue'] = 'You must perform the activity \'<strong>{$a}</strong>\' and correctly answer the following
 question to unlock the clue';
-$string['lockactivity'] = 'Allow only at this stage';
-$string['lockactivity_help'] = 'Block access to selected activities if the user is not in this stage. This setting auto-configures restrictions for the chosen activities. WARNING: This provides only a basic auto-configuration. If you manually edit an activity\'s restrictions, it may no longer appear here and auto-configuration may not work.';
-$string['lockactivitiessection'] = 'Restrict activities to only this stage.';
-$string['lockactivityannounce'] = 'If the <a href="https://github.com/juacas/moodle-availability_treasurehunt">Treasurehunt Conditional Access Plugin</a> is enabled on this site, you can make any activity unavailable when the user is not working within this stage.';
+$string['lockedclue'] = 'Locked clue';
 $string['lockedqclue'] = 'You must correctly answer the following question to unlock the clue';
 $string['locktimeediting'] = 'Lock time editing';
 $string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock.
 The larger, fewer requests for renewal lock must be made, but more time is locked the edit page once the user has finished.
 It must be greater than 5 seconds, but the time will be set by default.';
+$string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
+$string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
+$string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="{$a->successurl}" width="28"/><br>Failed ones: <img src="{$a->failureurl}" width="28"/>';
 $string['mapview'] = 'Map view';
 $string['modify'] = 'Modify';
 $string['modulename'] = 'Treasure Hunt';
@@ -274,6 +280,7 @@ $string['mustanswerquestion'] = 'You must correctly answer the question before c
 $string['mustcompleteactivity'] = 'You must overcome the activity to complete before continuing';
 $string['mustcompleteboth'] = 'You must answer the question correctly and overcome the activity to complete before continuing';
 $string['nextcamera'] = 'Change camera';
+$string['nextstep'] = 'Next';
 $string['noanswerselected'] = 'You must select an answer';
 $string['noattempts'] = 'You have not made any attempt';
 $string['noexsitsstage'] = 'There is no stage number {$a} in the database. Reload the page';
@@ -297,8 +304,14 @@ $string['nousersprogress'] = 'No user / group has progress on this road.';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';
 $string['overlaylayers'] = 'Overlay layers';
+$string['pegmanlabel'] = 'Look around on StreetView';
 $string['play'] = 'Play';
-$string['preview'] = 'Preview';
+$string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
+$string['playerbootstrap'] = 'Bootstrap';
+$string['playerclassic'] = 'Classic';
+$string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
+$string['playerstyle'] = 'Game screen style';
+$string['playerstyle_help'] = 'May be several styles of the game screen that teachers can choose';
 $string['playstagewithoutmoving'] = 'Discover stage without moving';
 $string['playstagewithoutmoving_help'] = 'If this option is enabled, students can discover this stage without moving to any place.
 To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
@@ -306,16 +319,19 @@ if any, indicating the last desired point. Upon completion of the stage, the gam
 settings of the activity';
 $string['playstagewithqr'] = 'Discover stage by reading this QR text';
 $string['playstagewithqr_help'] = 'If this option has a value, students can discover this stage by scanning a QR code available at that location.';
-
 $string['playwithoutmoving'] = 'Playing without moving';
 $string['playwithoutmoving_help'] = 'If this option is enabled, students may play from their computers without moving to
 places. To do this, every time the student takes a simple click on the map a mark is created, erasing the previous
 if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
+$string['preview'] = 'Preview';
+
+$string['prevstep'] = 'Prev';
 $string['qrreaded'] = 'QR code readed:';
 $string['question'] = 'Question';
 $string['remove'] = 'Delete';
+$string['remove_tour'] = 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
 $string['removealltreasurehuntattempts'] = 'Delete all treasure hunts attempts';
 $string['removedactivitytoend'] = 'Activity to complete has been removed';
 $string['removedquestion'] = 'The question has been removed';
@@ -324,37 +340,41 @@ $string['removewarning'] = 'If you remove it you can not retrieve it';
 $string['restrictionsdiscoverstage'] = 'Restrictions to discover stage';
 $string['reviewofplay'] = 'Review of play';
 $string['road'] = 'Road';
-$string['roadmap'] = 'Road';
 $string['roadended'] = 'This road is complete. Congratulations! You have done the treasure hunt. You can check your history in the map.';
+$string['roadmap'] = 'Road';
 $string['roadname'] = 'Road\'s name';
+$string['roads_tour'] = 'In this area you will find the different roads of your game. Select one of them to edit the stages.';
 $string['roadview'] = 'Road';
 $string['save'] = 'Save';
+$string['save_tour'] = 'After drawing your locations, don\'t forget to save your changes.';
 $string['saveemptyridle'] = 'All modified stages must have geometry before saving';
 $string['savewarning'] = 'You have not saved changes.';
-$string['scanQR_scanbutton'] = 'Scan QRCode';
 $string['scanQR_generatebutton'] = 'Generate a QRCode';
+$string['scanQR_scanbutton'] = 'Scan QRCode';
 $string['search'] = 'Search';
 $string['searching'] = 'Searching';
 $string['searchlocation'] = 'Search location';
+$string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
 $string['searchpaneldisabled'] = 'Disable search panel in player';
 $string['searchpaneldisabled_help'] = 'If checked, the search panel will be disabled in the player interface.';
+$string['send'] = 'Send';
+$string['sendlocationcontent'] = 'This action can not be undone.';
+$string['sendlocationtitle'] = 'Are you sure you want to send this location?';
+$string['showboard'] = 'Show other students progress';
+$string['showboard_help'] = 'If enabled, the progress of other students will be shown in the activity page.';
+$string['showclue'] = 'Show clue';
+$string['showdistancehint'] = 'Show distance hint';
+$string['showdistancehint_help'] = 'If enabled, the player will see a hint of the distance to the next stage.
+This hint will be shown in the player interface when the user is close to the next stage.';
 $string['showheadinghint'] = 'Show heading hint';
 $string['showheadinghint_help'] = 'If enabled, the player will see a hint of the heading to the next stage.
 This hint will be shown in the player interface when the user is close to the next stage.';
 $string['showinzonehint'] = 'Show in zone hint';
 $string['showinzonehint_help'] = 'If enabled, the player will see a hint when he is in the zone of the next stage.
 This hint will be shown in the player interface when the user is in the zone of the next stage.';
-$string['showdistancehint'] = 'Show distance hint';
-$string['showdistancehint_help'] = 'If enabled, the player will see a hint of the distance to the next stage.
-This hint will be shown in the player interface when the user is close to the next stage.';
 $string['shownextareahint'] = 'Show next area hint';
 $string['shownextareahint_help'] = 'If enabled, the player will see the area of the next stage.';
-$string['localizationbuttondisabled'] = 'Disable localization button';
-$string['localizationbuttondisabled_help'] = 'If checked, the localization button will be disabled in the player interface.';
-$string['send'] = 'Send';
-$string['sendlocationcontent'] = 'This action can not be undone.';
-$string['sendlocationtitle'] = 'Are you sure you want to send this location?';
-$string['showclue'] = 'Show clue';
+$string['skiptutorial'] = 'Quit';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
 $string['stageclue_help'] = 'Here you should describe the clue to reach the next location.
@@ -362,20 +382,19 @@ In case it is the last stage, must leave a feedback message indicating that the 
 $string['stagename'] = 'Stage\'s name';
 $string['stageovercome'] = 'Stage overcome';
 $string['stages'] = 'Stages';
+$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['start'] = 'Start';
 $string['startfromhere'] = 'You can only start from here';
 $string['state'] = 'State';
 $string['successlocation'] = 'It is the right place!';
-$string['showboard'] = 'Show other students progress';
-$string['showboard_help'] = 'If enabled, the progress of other students will be shown in the activity page.';
-$string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
-$string['totalprogress'] = 'Total progress';
-$string['totaltime'] = 'Total time';
 $string['timeago'] = '{$a->shortduration} ago';
-$string['timeat'] = 'at {$a->date}';
 $string['timeagolong'] = '{$a->shortduration} ago ({$a->date})';
+$string['timeat'] = 'at {$a->date}';
+$string['timeexceeded'] = 'You have exceeded the time limit for the activity. This screen only serves to review the game';
 $string['timetocome'] = 'in {$a->shortduration}';
 $string['timetocomelong'] = 'in {$a->shortduration} ({$a->date})';
+$string['totalprogress'] = 'Total progress';
+$string['totaltime'] = 'Total time';
 $string['trackusers'] = 'Track trajectories';
 $string['trackusers_help'] = 'Register the paths made by the users. They can be seen in the “Track viewer” screen.<br/>
 The user positions are logged between validation attempts (with every poll request).<br/>
@@ -387,22 +406,22 @@ $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehunt:addroad'] = 'Add road';
 $string['treasurehunt:addstage'] = 'Add stage';
+$string['treasurehunt:editroad'] = 'Edit road';
+$string['treasurehunt:editstage'] = 'Edit stage';
+$string['treasurehunt:enterplayer'] = 'Access to the player interface';
+$string['treasurehunt:managetreasure'] = 'Manage treasurehunt';
+$string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
+$string['treasurehunt:play'] = 'Play';
+$string['treasurehunt:view'] = 'View treasurehunt';
+$string['treasurehunt:viewusershistoricalattempts'] = 'View users attempt history';
 $string['treasurehuntclosed'] = 'This treasure hunt closed {$a}';
 $string['treasurehuntcloses'] = 'Treasure hunt closes';
 $string['treasurehuntcloseson'] = 'This treasure hunt will close {$a}';
-$string['treasurehunt:editroad'] = 'Edit road';
-$string['treasurehunt:editstage'] = 'Edit stage';
 $string['treasurehuntislocked'] = '{$a} is editing this treasurehunt right now. Try to edit it in a few minutes.';
-$string['treasurehunt:managetreasure'] = 'Manage treasurehunt';
-$string['treasurehunt:managetreasurehunt'] = 'Manage treasurehunt';
 $string['treasurehuntname'] = 'Treasure hunt\'s name';
 $string['treasurehuntnotavailable'] = 'The treasure hunt will be available {$a}';
-$string['treasurehuntopens'] = 'Treasure hunt opens';
 $string['treasurehuntopenedon'] = 'This treasure hunt opened {$a}';
-$string['treasurehunt:play'] = 'Play';
-$string['treasurehunt:enterplayer'] = 'Access to the player interface';
-$string['treasurehunt:view'] = 'View treasurehunt';
-$string['treasurehunt:viewusershistoricalattempts'] = 'View users attempt history';
+$string['treasurehuntopens'] = 'Treasure hunt opens';
 $string['updates'] = 'Updates';
 $string['updatetimes'] = 'Update times';
 $string['user'] = 'User';
@@ -424,17 +443,18 @@ $string['usersprogress_help'] = 'Indicates the progress of the stages of each st
 <p>The color <b> grey </b> indicates that the stage has not been overcome and no failures have been made.</p>';
 $string['userstageovercome'] = '<b>Stage {$a->position} overcome</b>: {$a->date}';
 $string['validatelocation'] = 'Validate location';
+$string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
 $string['validateqr'] = 'Scan QR';
 $string['warmatchanswer'] = 'The answer does not match the question';
 $string['warnqrscanner'] = '<table><tr><td> This Treasurehunt includes {$a} stages with QRCodes.
 Please be sure your device can scan codes from the web browser. A view of your cam should be appeared bellow. Try to read any qrcode
 like this.</td><td> <a href="pix/qr.png">
  <img src="pix/qr.png" align="top" width="100"></a></td></tr></table>';
-$string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
-It seems that you have passed a QR test with this device.';
 $string['warnqrscannererror'] = 'This Treasurehunt includes {$a} stages with QRCodes.
 It seems that your device can not use the camera with this application. Please give permissions to access the camera.
 If you can\'t manage to activate the camera this device may not be suitable to play the Treasurehunt.';
+$string['warnqrscannersuccess'] = 'This Treasurehunt includes {$a} stages with QRCodes.
+It seems that you have passed a QR test with this device.';
 $string['warnunsecuregeolocation'] = 'Geolocation may not work in your server. This is a <b>SEVERE misconfiguration</b> caused by your
 server configuration. Geolocation is forbidden for non-Secure servers that use HTTP instead of HTTPS. In order to use the GPS of
 to locate the students during the Treasurehunt the server must be accessed by secure HTTPS URLs. In other case, only "Play without moving" mode
@@ -446,31 +466,9 @@ $string['warnusersgrouping'] = 'The following groups belong to more than one gro
 $string['warnusersoutside'] = 'The following users do not belong to any group/grouping: {$a}, so are unable to play the activity.';
 
 $string['webserviceerror'] = 'Communication with the server failed. It may be a temporary problem, please try again later. If the problem persists, contact your administrator.';
-// Initial tour help.
-$string['addstage_tour'] = 'Each road must have two or more stages. Each stage gives a clue to find out the next.';
-$string['addroad_tour'] = 'Add one or more roads to be followed by your students.';
-$string['editend_tour'] = 'Enjoy making exciting games for your students!';
-$string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
-$string['remove_tour'] = 'You can delete parts of the locations geometries. Just select a polygon and then press this button.';
-$string['roads_tour'] = 'In this area you will find the different roads of your game. Select one of them to edit the stages.';
-$string['save_tour'] = 'After drawing your locations, don\'t forget to save your changes.';
-$string['searchlocation_tour'] = 'With this search area you can find your way rapidly';
-$string['stages_tour'] = 'In this area you will find the stages of the selected road. Select each stage to zoom to the actual location in the map and begin to edit its geometries by clicking on them and the Edit/Draw buttons above.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 $string['welcome_play_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
-$string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you are shown <b>challenges</b> or valuable <b>hints</b>.';
-$string['autolocate_tour'] = 'Show your <b>current location</b>.<br>(give permissions to use "location" when asked)';
-$string['playerhelp_tour'] = 'This tour can be reviewed whenever you want.';
-$string['validatelocation_tour'] = 'Confident about the location of a stage?<br><b>Submit your position</b> and discover if you are correct.';
-$string['lastsuccessfulstage_tour'] = 'In this panel you can find out your last successfull stage. It can be yours of your group\'s successfull stage.';
-$string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
-$string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="{$a->successurl}" width="28"/><br>Failed ones: <img src="{$a->failureurl}" width="28"/>';
-$string['playend_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Enjoy your Treasure Hunt</span><br>with your mates!';
 
-$string['nextstep'] = 'Next';
-$string['prevstep'] = 'Prev';
-$string['skiptutorial'] = 'Quit';
-$string['donetutorial'] = 'End';
 // Privacy strings.
 $string['privacy:metadata_treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
 $string['privacy:metadata_treasurehunt_track_userid'] = 'The ID of the user being tracked.';

@@ -12,7 +12,7 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Upgrade script for the treasurehunt module.
@@ -33,7 +33,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB;
-    /** @var database_manager */
+    /** @var moodle_database $DB*/
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -82,15 +82,31 @@ function xmldb_treasurehunt_upgrade($oldversion) {
     }
     if ($oldversion < 2018022800) {
         $table = new xmldb_table('treasurehunt');
-        $field = new xmldb_field('completionfinish', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
-                                XMLDB_NOTNULL, null, 0, 'custommapconfig');
+        $field = new xmldb_field(
+            'completionfinish',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            0,
+            'custommapconfig'
+        );
 
         // Conditionally launch add field custombbox.
         if (!$dbman->field_exists($table, $field)) {
             $dbman->add_field($table, $field);
         }
-        $field = new xmldb_field('completionpass', XMLDB_TYPE_INTEGER, '1', XMLDB_UNSIGNED,
-                XMLDB_NOTNULL, null, 0, 'completionfinish');
+        $field = new xmldb_field(
+            'completionpass',
+            XMLDB_TYPE_INTEGER,
+            '1',
+            XMLDB_UNSIGNED,
+            XMLDB_NOTNULL,
+            null,
+            0,
+            'completionfinish'
+        );
 
         // Conditionally launch add field custombbox.
         if (!$dbman->field_exists($table, $field)) {
@@ -172,7 +188,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $field = new xmldb_field('custoplayerconfig', XMLDB_TYPE_TEXT, null, null, null, null, null, 'custommapconfig');
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, 'customplayerconfig');
-        } 
+        }
     }
     return true;
 }

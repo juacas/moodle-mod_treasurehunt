@@ -24,8 +24,6 @@
 
 namespace mod_treasurehunt\event;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * The mod_treasurehunt stage created event class.
  *
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  */
 class stage_created extends \core\event\base {
-
     /**
      * Init method
      */
@@ -73,13 +70,13 @@ class stage_created extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        return new \moodle_url("/mod/treasurehunt/editstage.php",
-                array('cmid' => $this->contextinstanceid,
-            'id' => $this->objectid));
+        return new \moodle_url("/mod/treasurehunt/editstage.php", ['cmid' => $this->contextinstanceid, 'id' => $this->objectid]);
     }
-
+    /**
+     * DB mapping.
+     * @return array{db: string, restore: string}
+     */
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt_stages', 'restore' => 'treasurehunt_stage');
+        return ['db' => 'treasurehunt_stages', 'restore' => 'treasurehunt_stage'];
     }
-
 }

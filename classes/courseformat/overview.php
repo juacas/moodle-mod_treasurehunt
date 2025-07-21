@@ -24,6 +24,8 @@ use core\url;
 use core\output\pix_icon;
 use theme_classic\output\core_renderer;
 
+defined('MOODLE_INTERNAL') || die;
+
 require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 /**
  * Class overview
@@ -51,10 +53,13 @@ class overview extends \core_courseformat\activityoverviewbase {
         // View for teachers.
         if (has_capability('mod/treasurehunt:managetreasurehunt', $this->context)) {
             // Get number of participants.
-            list(
-                $roads, $duplicategroupsingroupings, $duplicateusersingroups,
-                $unassignedusers, $availablegroups
-            )  = treasurehunt_get_list_participants_and_attempts_in_roads($this->cm, $this->course->id, $this->context);
+            [
+                $roads,
+                $duplicategroupsingroupings,
+                $duplicateusersingroups,
+                $unassignedusers,
+                $availablegroups
+            ]  = treasurehunt_get_list_participants_and_attempts_in_roads($this->cm, $this->course->id, $this->context);
             // Process participants by roads.
             $potentialparticipants = [];
             $participants = treasurehunt_get_users_with_attempts($treasurehunt->id);
@@ -87,7 +92,6 @@ class overview extends \core_courseformat\activityoverviewbase {
                 content: $content,
                 textalign: text_align::END,
             );
-           
         } else {
             // Get user group and road.
             $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $this->cm->id);
@@ -95,8 +99,8 @@ class overview extends \core_courseformat\activityoverviewbase {
              // Get the total number of stages of the road of the user.
             $total = treasurehunt_get_total_stages($userparams->roadid);
             // Get usr progress in the treasure hunt.
-            $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $this->context);                                 
-            $stagesuccessed = $currentstage->success?? 0;
+            $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $this->context);
+            $stagesuccessed = $currentstage->success ?? 0;
             $button = new action_link(
                 url: new url('/mod/treasurehunt/view.php', ['id' => $this->cm->id, 'userid' => $USER->id]),
                 text: get_string(
@@ -107,7 +111,7 @@ class overview extends \core_courseformat\activityoverviewbase {
                 attributes: ['class' => button::SECONDARY_OUTLINE->classes()],
             );
             $content = $OUTPUT->render($button);
-    
+
             return new overviewitem(
                 name: get_string('stage', 'mod_treasurehunt'),
                 value: $stagesuccessed,
@@ -145,10 +149,10 @@ class overview extends \core_courseformat\activityoverviewbase {
      */
     private function get_extra_status_overview(): ?overviewitem {
         global $USER;
-        
+
         $treasurehunt = $this->cm->get_instance_record();
         // Get status of the treasure hunt.
-        list($status, $nextevent) = treasurehunt_get_time_status($treasurehunt, $now);
+        [$status, $nextevent] = treasurehunt_get_time_status($treasurehunt, time());
         // Get icon.
         $icon = treasurehunt_get_proper_icon($treasurehunt, time());
         // Generate content with icon plus status.

@@ -33,15 +33,12 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * @copyright  2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class mod_treasurehunt_mod_form extends moodleform_mod
-{
-
+class mod_treasurehunt_mod_form extends moodleform_mod {
     /**
      * Defines forms elements
      * @global type $CFG
      */
-    public function definition()
-    {
+    public function definition() {
         global $CFG;
         $treasurehuntconfig = get_config('mod_treasurehunt');
         $mform = $this->_form;
@@ -50,7 +47,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('treasurehuntname', 'treasurehunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('treasurehuntname', 'treasurehunt'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -64,15 +61,15 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $this->standard_intro_elements();
         $mform->addElement('advcheckbox', 'playwithoutmoving', get_string('playwithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playwithoutmoving', 'playwithoutmoving', 'treasurehunt');
-        
+
         // Track users.
         $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
         $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
-        
+
         // Show other users' progress on hunt.
         $mform->addElement('advcheckbox', 'showboard', get_string('showboard', 'treasurehunt'));
         $mform->addHelpButton('showboard', 'showboard', 'treasurehunt');
-        
+
         // Select player interface.
         $mform->addElement('select', 'playerstyle', get_string('playerstyle', 'treasurehunt'), treasurehunt_get_playerstyles());
         $mform->addHelpButton('playerstyle', 'playerstyle', 'treasurehunt');
@@ -111,7 +108,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->setExpanded('availability', true);
 
         $name = get_string('allowattemptsfromdate', 'treasurehunt');
-        $options = array('optional' => true, 'step' => 1);
+        $options = ['optional' => true, 'step' => 1];
         $mform->addElement('date_time_selector', 'allowattemptsfromdate', $name, $options);
         $mform->addHelpButton('allowattemptsfromdate', 'allowattemptsfromdate', 'treasurehunt');
 
@@ -166,7 +163,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
             'base' => get_string('custommapbaselayer', 'treasurehunt'),
             'overlay' => get_string('custommapoverlaylayer', 'treasurehunt'),
             'onlybase' => get_string('custommaponlybaselayer', 'treasurehunt'),
-            'nongeographic' => get_string('custommapnongeographic', 'treasurehunt')
+            'nongeographic' => get_string('custommapnongeographic', 'treasurehunt'),
         ];
         $mform->addElement('select', 'customlayertype', get_string('customlayertype', 'treasurehunt'), $layertypes);
         $mform->addHelpButton('customlayertype', 'customlayertype', 'treasurehunt');
@@ -178,17 +175,17 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->hideIf('customlayername', 'customlayertype', 'eq', 'none');
 
         // Type of service: WMS, Tiled, image.
-        $mform->addElement('select', 'customlayerservicetype', get_string('customlayerservicetype', 'treasurehunt'), array(
+        $mform->addElement('select', 'customlayerservicetype', get_string('customlayerservicetype', 'treasurehunt'), [
             'wms' => get_string('customlayerservicewms', 'treasurehunt'),
             'tiled' => get_string('customlayerservicetiled', 'treasurehunt'),
             'image' => get_string('customlayerserviceimage', 'treasurehunt'),
             'argis' => get_string('customlayerservicearcgis', 'treasurehunt'),
-        ));
+        ]);
         $mform->setDefault('customlayerservicetype', 'wms');
         $mform->hideIf('customlayerservicetype', 'customlayertype', 'eq', 'none');
         $mform->disabledIf('customlayerservicetype', 'customlayername', 'eq', '');
         // description
-        $mform->addElement('html',  get_string('customlayerwms_help', 'treasurehunt') );
+        $mform->addElement('html', get_string('customlayerwms_help', 'treasurehunt'));
 
         $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));
         $mform->addHelpButton('customlayerwms', 'customlayerwms', 'treasurehunt');
@@ -204,17 +201,16 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->hideIf('customwmsparams', 'customlayertype', 'eq', 'none');
         $mform->hideIf('customwmsparams', 'customlayerservicetype', 'neq', 'wms');
 
-
         // Local file overlay.
         $mform->addElement(
             'filemanager',
             'custombackground',
             get_string('custommapimagefile', 'treasurehunt'),
             null,
-            array(
+            [
                 'subdirs' => false, 'maxbytes' => null, 'areamaxbytes' => null, 'maxfiles' => 1,
-                'accepted_types' => array('jpg', 'svg', 'png'), 'return_types' => FILE_INTERNAL | FILE_EXTERNAL
-            )
+                'accepted_types' => ['jpg', 'svg', 'png'], 'return_types' => FILE_INTERNAL | FILE_EXTERNAL,
+            ]
         );
         $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
         $mform->disabledIf('custombackground', 'customlayername', 'eq', '');
@@ -225,17 +221,15 @@ class mod_treasurehunt_mod_form extends moodleform_mod
         $mform->hideIf('custompreserveaspectratio', 'customlayerservicetype', 'neq', 'image');
         $mform->hideIf('custompreserveaspectratio', 'customlayertype', 'eq', 'nongeographic');
 
-
         // Bounding box.
         $bboxfield = [];
-        $bboxfield[] =$mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
+        $bboxfield[] = $mform->addElement('text', 'custommapminlon', get_string('custommapminlon', 'treasurehunt'));
         $mform->addHelpButton('custommapminlon', 'custommapminlon', 'treasurehunt');
         $mform->setType('custommapminlon', PARAM_FLOAT);
         $mform->addRule('custommapminlon', get_string('errnumeric', 'treasurehunt'), 'numeric', null, 'client');
         $mform->hideIf('custommapminlon', 'customlayertype', 'eq', 'none');
         $mform->hideIf('custommapminlon', 'customlayerservicetype', 'neq', 'image');
         $mform->hideIf('custommapminlon', 'customlayertype', 'eq', 'nongeographic');
-
 
         $bboxfield[] = $mform->addElement('text', 'custommapminlat', get_string('custommapminlat', 'treasurehunt'));
         $mform->addHelpButton('custommapminlat', 'custommapminlat', 'treasurehunt');
@@ -272,8 +266,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      * @param array $data
      * @param array $files
      */
-    public function validation($data, $files)
-    {
+    public function validation($data, $files) {
         $errors = parent::validation($data, $files);
 
         if ($data['allowattemptsfromdate'] && $data['cutoffdate']) {
@@ -340,12 +333,15 @@ class mod_treasurehunt_mod_form extends moodleform_mod
                     $errors['custommapmaxlon'] = get_string('custommapmaxlon_help', 'treasurehunt');
                 }
             }
-
         }
         return $errors;
     }
-    public function data_preprocessing(&$defaultvalues)
-    {
+    /**
+     * Preprocess JSON fields.
+     * @param mixed $defaultvalues
+     * @return void
+     */
+    public function data_preprocessing(&$defaultvalues) {
         $draftitemid = file_get_submitted_draft_itemid('custombackground');
         file_prepare_draft_area(
             $draftitemid,
@@ -353,7 +349,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
             'mod_treasurehunt',
             'custombackground',
             0,
-            array('subdirs' => false)
+            ['subdirs' => false]
         );
         $defaultvalues['custombackground'] = $draftitemid;
         $customplayerconfig = treasurehunt_get_customplayerconfig($this->current);
@@ -403,8 +399,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      *
      * @param stdClass $data passed by reference
      */
-    public function data_postprocessing($data)
-    {
+    public function data_postprocessing($data) {
         $mapconfig = treasurehunt_build_custommappingconfig($data);
         $data->custommapconfig = $mapconfig === null ? null : json_encode($mapconfig);
         if ($data->customlayertype === 'nongeographic') {
@@ -422,8 +417,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      * JPC: Method introduced in moodleform_mod.php  Moodle 3.3
      * @return object submitted data; NULL if not valid or not submitted or cancelled
      */
-    public function get_data()
-    {
+    public function get_data() {
         global $CFG;
         $mform = $this->_form;
         // JPC workaround #24: In Moodle 3.5 when filemanager is disabled, no value is submitted and
@@ -450,12 +444,11 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      *
      * @return array Contains the names of the added form elements
      */
-    public function add_completion_rules()
-    {
+    public function add_completion_rules() {
         global $CFG;
         $mform = &$this->_form;
         $rules = [];
-        if ($CFG->version < 2022112800) {   
+        if ($CFG->version < 2022112800) {
             $mform->addElement('advcheckbox', 'completionpass', '', get_string('completionpass', 'quiz'));
             $mform->disabledIf('completionpass', 'completionusegrade', 'notchecked');
             $mform->addHelpButton('completionpass', 'completionpass', 'quiz');
@@ -478,8 +471,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod
      * @param array $data
      * @return bool
      */
-    public function completion_rule_enabled($data)
-    {
+    public function completion_rule_enabled($data) {
         return !empty($data['completionfinish']) || !empty($data['completionpass']);
     }
 }

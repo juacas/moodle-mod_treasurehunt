@@ -22,17 +22,18 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-/** @var $DB database_manager Database.*/
+/** @var $DB moodle_database Database.*/
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);
 $userid = required_param('userid', PARAM_SEQUENCE);
 $userids = explode(',', $userid);
 
-list ($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
-$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+ [$course, $cm] = get_course_and_cm_from_cmid($id, 'treasurehunt');
+$treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
@@ -57,6 +58,7 @@ die;
  *
  * @param array $trackpoint  from table treasurehunt_track
  * @return \stdClass $segment
+ * @package mod_treasurehunt
  */
 function makesegment($trackpoints) {
     $activity = new stdClass();
@@ -81,6 +83,7 @@ function makesegment($trackpoints) {
  *
  * @param array(string) $tracks tracks xml sections
  * @return string xml format for gpx
+ * @package mod_treasurehunt
  */
 function makegpx($tracks) {
     $xml = <<<GPX
@@ -109,6 +112,7 @@ GPX;
  * @param string $description
  * @param array(\stdClass) array of $segments
  * @return string xmlsection for a track. From <trk> to </trk>
+ * @package mod_treasurehunt
  */
 function maketrack($description, $segments) {
     $xml = '<trk>
@@ -136,13 +140,21 @@ function maketrack($description, $segments) {
     $xml .= '</trk>';
     return $xml;
 }
-
+/**
+ * Format timestamp as iso date.
+ * @param mixed $date
+ * @return string
+ */
 function getisotime($date) {
     $dateobj = new DateTime();
     $dateobj->setTimestamp($date);
     return $dateobj->format('c');
 }
-
+/**
+ * Format a point as a track point.
+ * @param mixed $data
+ * @return string
+ */
 function maketrackpoint(&$data) {
     $return = '';
     if ($data->type == 'place') {

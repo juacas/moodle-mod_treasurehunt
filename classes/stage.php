@@ -16,7 +16,6 @@
 
 namespace mod_treasurehunt\model;
 
-defined('MOODLE_INTERNAL') || die;
 /**
  * Model for a stage
  * @author Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>

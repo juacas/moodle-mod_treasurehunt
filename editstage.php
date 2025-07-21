@@ -21,7 +21,8 @@
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
+
+require_once('../../config.php');
 require_once(dirname(__FILE__) . '/editstage_form.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 
@@ -37,13 +38,13 @@ $id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
 
-list ($course, $cm) = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
-$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+ [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
+$treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
-$url = new moodle_url('/mod/treasurehunt/editstage.php', array('cmid' => $cmid));
+$url = new moodle_url('/mod/treasurehunt/editstage.php', ['cmid' => $cmid]);
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -58,8 +59,11 @@ $PAGE->requires->jquery();
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
     $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
-    $PAGE->requires->js_call_amd('mod_treasurehunt/renewlock', 'renew_edition_lock',
-                                array($treasurehunt->id, $lockid, $renewlocktime));
+    $PAGE->requires->js_call_amd(
+        'mod_treasurehunt/renewlock',
+        'renew_edition_lock',
+        [$treasurehunt->id, $lockid, $renewlocktime]
+    );
 
     if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editstage', $context);
@@ -73,7 +77,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             $sqlanswers = 'SELECT a.id,a.answertext,a.answertextformat,a.answertexttrust,'
                     . ' a.correct FROM {treasurehunt_answers} a INNER JOIN'
                     . ' {treasurehunt_stages} r ON r.id=a.stageid WHERE r.id=?';
-            $params = array($stage->id);
+            $params = [$stage->id];
             $answers = $DB->get_records_sql($sqlanswers, $params);
             $stage->answers = $answers;
             $stage->noanswers = optional_param('noanswers', count($answers), PARAM_INT);
@@ -86,7 +90,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
         $select = 'id = ?';
-        $params = array($roadid);
+        $params = [$roadid];
         // Compruebo si existe el camino.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             throw new moodle_exception('invalidentry');
@@ -107,31 +111,33 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
     }
     $stage->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', array('id' => $cmid, 'roadid' => $stage->roadid));
+    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', ['id' => $cmid, 'roadid' => $stage->roadid]);
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
-    $editoroptions = array('trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,
+    $editoroptions = ['trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,
                             'context' => $context,
-                            'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id));
+                            'subdirs' => file_area_contains_subdirs($context, 'mod_treasurehunt', 'cluetext', $stage->id)];
     // List activities with Completion enabled.
     $completioninfo = new completion_info($course);
     $completionactivities = $completioninfo->get_activities();
     // Support availability helper if availability/treasurehunt is installed.
-     if (treasurehunt_availability_available()) {
+    if (treasurehunt_availability_available()) {
         // Get previous locked mods to render in forms and to calculate add, remove lists.
         $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
-     } else {
+    } else {
         $lockedmods = null;
-     }
+    }
     // Name of the form you defined in file above.
-    $mform = new stage_form(null, 
+    $mform = new stage_form(
+        null,
         [   'current' => $stage,
                         'course' => $course,
                         'context' => $context,
                         'editoroptions' => $editoroptions,
                         'completionactivities' => $completionactivities,
-                        'lockableactivities' => $lockedmods
-                ]);
+                        'lockableactivities' => $lockedmods,
+        ]
+    );
 
     if ($mform->is_reloaded()) {
         // Ignore this event. Some data may be changes.
@@ -143,7 +149,6 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
     } else if ($stage = $mform->get_data()) {
-
         // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);
@@ -167,21 +172,35 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         // Do stuff ...
         // Typically you finish up by redirecting to somewhere where the user
         // can see what they did.
-        // save and relink embedded images and save attachments
-        $stage = file_postupdate_standard_editor($stage, 'cluetext', $editoroptions, $context,
-                                                'mod_treasurehunt', 'cluetext', $stage->id);
+        // save and relink embedded images and save attachments.
+        $stage = file_postupdate_standard_editor(
+            $stage,
+            'cluetext',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'cluetext',
+            $stage->id
+        );
         // Store the updated value values.
         if ($stage->addsimplequestion) {
             // Proceso los ficheros del editor de pregunta.
-            $stage = file_postupdate_standard_editor($stage, 'questiontext', $editoroptions, $context,
-                                                    'mod_treasurehunt', 'questiontext', $stage->id);
+            $stage = file_postupdate_standard_editor(
+                $stage,
+                'questiontext',
+                $editoroptions,
+                $context,
+                'mod_treasurehunt',
+                'questiontext',
+                $stage->id
+            );
             if (isset($stage->answertext_editor)) {
                 // Process answer texts and save answers.
                 foreach ($stage->answertext_editor as $key => $answertext) {
                     if (isset($answers) && count($answers) > 0) {
                         $answer = array_shift($answers);
                         if (trim($answertext['text']) === '') {
-                            $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+                            $DB->delete_records('treasurehunt_answers', ['id' => $answer->id]);
                             continue;
                         }
                         $answer->timemodified = $timenow;
@@ -200,8 +219,15 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                         $answer->id = $DB->insert_record('treasurehunt_answers', $answer);
                     }
                     $answer->answertext_editor = $answertext;
-                    $answer = file_postupdate_standard_editor($answer, 'answertext', $editoroptions, $context,
-                                                                'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_postupdate_standard_editor(
+                        $answer,
+                        'answertext',
+                        $editoroptions,
+                        $context,
+                        'mod_treasurehunt',
+                        'answertext',
+                        $answer->id
+                    );
                     $DB->update_record('treasurehunt_answers', $answer);
                 }
             }
@@ -209,26 +235,30 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             if (isset($answers)) {
                 // Elimino las anteriores respuestas.
                 foreach ($answers as $answer) {
-                    $DB->delete_records('treasurehunt_answers', array('id' => $answer->id));
+                    $DB->delete_records('treasurehunt_answers', ['id' => $answer->id]);
                 }
             }
         }
         if (treasurehunt_availability_available()) {
             // Configure lockactivities.
-            $lockedmods = array_filter($lockedmods, function($cminfo) { return $cminfo->locked == true; });
-            $lockedcmids = array_map(function($cm) {return $cm->cmid;}, $lockedmods);
+            $lockedmods = array_filter($lockedmods, function ($cminfo) {
+                return $cminfo->locked == true;
+            });
+            $lockedcmids = array_map(function ($cm) {
+                return $cm->cmid;
+            }, $lockedmods);
             $newlockedcms = $stage->lockactivity;
             // Locks to remove.
-            $locks_to_remove = array_diff($lockedcmids, $newlockedcms);
-            $locks_to_add = array_diff($newlockedcms, $lockedcmids);
+            $lockstoremove = array_diff($lockedcmids, $newlockedcms);
+            $lockstoadd = array_diff($newlockedcms, $lockedcmids);
             $cms = get_fast_modinfo($course->id)->get_cms();
             // Remove locks.
-            foreach ($locks_to_remove as $cmid) {
+            foreach ($lockstoremove as $cmid) {
                 $availability = treasurehunt_remove_restriction($cms[$cmid], $stage);
                 treasurehunt_update_activity_availability($cms[$cmid], $availability);
             }
             // Add new locks.
-            foreach ($locks_to_add as $cmid) {
+            foreach ($lockstoadd as $cmid) {
                 $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
                 treasurehunt_update_activity_availability($cms[$cmid], $availability);
             }
@@ -237,11 +267,11 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $DB->update_record('treasurehunt_stages', $stage);
 
         // Trigger event and update completion (if entry was created).
-        $eventparams = array(
+        $eventparams = [
             'context' => $context,
             'objectid' => $stage->id,
             'other' => $stage->name,
-        );
+        ];
         if ($isnewentry) {
             $event = \mod_treasurehunt\event\stage_created::create($eventparams);
         } else {
@@ -258,7 +288,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         redirect($returnurl);
     }
 } else {
-    $returnurl = new moodle_url('/mod/treasurehunt/view.php', array('id' => $cmid));
+    $returnurl = new moodle_url('/mod/treasurehunt/view.php', ['id' => $cmid]);
     throw new moodle_exception('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
@@ -273,6 +303,3 @@ treasurehunt_qr_support($PAGE, 'enableEditForm');
 // End QR.
 $mform->display();
 echo $OUTPUT->footer();
-
-
-

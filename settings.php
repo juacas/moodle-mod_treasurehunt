@@ -29,68 +29,68 @@ if ($ADMIN->fulltree) {
         // Available game player styles.
         $styles = treasurehunt_get_installedplayerstyles();
         $settings->add(new admin_setting_configmultiselect(
-                'mod_treasurehunt/availableplayerstyles',
-                get_string('availableplayerstyles', 'treasurehunt'),
-                '',
-                array_keys($styles), // All enabled.
-                $styles
+            'mod_treasurehunt/availableplayerstyles',
+            get_string('availableplayerstyles', 'treasurehunt'),
+            '',
+            array_keys($styles), // All enabled.
+            $styles
         ));
         // Default game player style.
         $settings->add(new admin_setting_configselect(
-                'mod_treasurehunt/defaultplayerstyle',
-                get_string('defaultplayerstyle', 'treasurehunt'),
-                get_string('playerstyle_help', 'treasurehunt'),
-                TREASUREHUNT_PLAYERBOOTSTRAP,
-                treasurehunt_get_installedplayerstyles()
+            'mod_treasurehunt/defaultplayerstyle',
+            get_string('defaultplayerstyle', 'treasurehunt'),
+            get_string('playerstyle_help', 'treasurehunt'),
+            TREASUREHUNT_PLAYERBOOTSTRAP,
+            treasurehunt_get_installedplayerstyles()
         ));
         // Maximum grade.
         $settings->add(new admin_setting_configtext(
-                'mod_treasurehunt/maximumgrade',
-                get_string('maximumgrade'),
-                get_string('configmaximumgrade', 'treasurehunt'),
-                10,
-                PARAM_INT
+            'mod_treasurehunt/maximumgrade',
+            get_string('maximumgrade'),
+            get_string('configmaximumgrade', 'treasurehunt'),
+            10,
+            PARAM_INT
         ));
         // Grading method.
         $settings->add(new mod_treasurehunt_admin_setting_grademethod(
-                'mod_treasurehunt/grademethod',
-                get_string('grademethod', 'treasurehunt'),
-                get_string('grademethod_help', 'treasurehunt'),
-                TREASUREHUNT_GRADEFROMSTAGES,
-                null
+            'mod_treasurehunt/grademethod',
+            get_string('grademethod', 'treasurehunt'),
+            get_string('grademethod_help', 'treasurehunt'),
+            TREASUREHUNT_GRADEFROMSTAGES,
+            null
         ));
         // Location penalization.
         $settings->add(new admin_setting_configtext(
-                'mod_treasurehunt/penaltylocation',
-                get_string('gradepenlocation', 'treasurehunt'),
-                get_string('gradepenlocation_help', 'treasurehunt'),
-                0.00,
-                PARAM_FLOAT
+            'mod_treasurehunt/penaltylocation',
+            get_string('gradepenlocation', 'treasurehunt'),
+            get_string('gradepenlocation_help', 'treasurehunt'),
+            0.00,
+            PARAM_FLOAT
         ));
         // Question penalization.
         $settings->add(new admin_setting_configtext(
-                'mod_treasurehunt/penaltyanswer',
-                get_string('gradepenanswer', 'treasurehunt'),
-                get_string('gradepenlocation_help', 'treasurehunt'),
-                0.00,
-                PARAM_FLOAT
+            'mod_treasurehunt/penaltyanswer',
+            get_string('gradepenanswer', 'treasurehunt'),
+            get_string('gradepenlocation_help', 'treasurehunt'),
+            0.00,
+            PARAM_FLOAT
         ));
         // Renewed times.
         $settings->add(new admin_setting_heading('updatetimesheading', get_string('updatetimes', 'treasurehunt'), ''));
         // Lock time editing.
         $settings->add(new admin_setting_configtext(
-                'mod_treasurehunt/locktimeediting',
-                get_string('locktimeediting', 'treasurehunt'),
-                get_string('locktimeediting_help', 'treasurehunt'),
-                TREASUREHUNT_LOCKTIME,
-                PARAM_INT
+            'mod_treasurehunt/locktimeediting',
+            get_string('locktimeediting', 'treasurehunt'),
+            get_string('locktimeediting_help', 'treasurehunt'),
+            TREASUREHUNT_LOCKTIME,
+            PARAM_INT
         ));
         // Game update time.
         $settings->add(new admin_setting_configtext(
-                'mod_treasurehunt/gameupdatetime',
-                get_string('gameupdatetime', 'treasurehunt'),
-                get_string('gameupdatetime_help', 'treasurehunt'),
-                TREASUREHUNT_GAMEUPDATETIME,
-                PARAM_INT
+            'mod_treasurehunt/gameupdatetime',
+            get_string('gameupdatetime', 'treasurehunt'),
+            get_string('gameupdatetime_help', 'treasurehunt'),
+            TREASUREHUNT_GAMEUPDATETIME,
+            PARAM_INT
         ));
 }

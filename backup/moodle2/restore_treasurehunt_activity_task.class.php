@@ -13,6 +13,7 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
  * Define all the backup steps that will be used by the backup_treasurehunt_activity_task
  *
@@ -24,9 +25,10 @@
 defined('MOODLE_INTERNAL') || die();
 
 require_once($CFG->dirroot . '/mod/treasurehunt/backup/moodle2/restore_treasurehunt_stepslib.php');
-
+/**
+ * Restore definitions.
+ */
 class restore_treasurehunt_activity_task extends restore_activity_task {
-
     /**
      * Define (add) particular settings this activity can have.
      */
@@ -46,13 +48,16 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
      * Define the contents in the activity that must be
      * processed by the link decoder
      */
-    static public function define_decode_contents() {
-        $contents = array();
+    public static function define_decode_contents() {
+        $contents = [];
 
-        $contents[] = new restore_decode_content('treasurehunt', array('intro'), 'treasurehunt');
-        $contents[] = new restore_decode_content('treasurehunt_stages', array('cluetext', 'questiontext'),
-                'treasurehunt_stage');
-        $contents[] = new restore_decode_content('treasurehunt_answers', array('answertext'), 'treasurehunt_answer');
+        $contents[] = new restore_decode_content('treasurehunt', ['intro'], 'treasurehunt');
+        $contents[] = new restore_decode_content(
+            'treasurehunt_stages',
+            ['cluetext', 'questiontext'],
+            'treasurehunt_stage'
+        );
+        $contents[] = new restore_decode_content('treasurehunt_answers', ['answertext'], 'treasurehunt_answer');
         return $contents;
     }
 
@@ -60,8 +65,8 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
      * Define the decoding rules for links belonging
      * to the activity to be executed by the link decoder
      */
-    static public function define_decode_rules() {
-        $rules = array();
+    public static function define_decode_rules() {
+        $rules = [];
 
         $rules[] = new restore_decode_rule('TREASUREHUNTVIEWBYID', '/mod/treasurehunt/view.php?id=$1', 'course_module');
         $rules[] = new restore_decode_rule('TREASUREHUNTINDEX', '/mod/treasurehunt/index.php?id=$1', 'course');
@@ -75,8 +80,8 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
      * treasurehunt logs. It must return one array
      * of {@link restore_log_rule} objects
      */
-    static public function define_restore_log_rules() {
-        $rules = array();
+    public static function define_restore_log_rules() {
+        $rules = [];
 
         $rules[] = new restore_log_rule('treasurehunt', 'add', 'view.php?id={course_module}', '{treasurehunt}');
         $rules[] = new restore_log_rule('treasurehunt', 'update', 'view.php?id={course_module}', '{treasurehunt}');
@@ -94,12 +99,9 @@ class restore_treasurehunt_activity_task extends restore_activity_task {
      * by the restore final task, but are defined here at
      * activity level. All them are rules not linked to any module instance (cmid = 0)
      */
-    static public function define_restore_log_rules_for_course() {
-        $rules = array();
-
+    public static function define_restore_log_rules_for_course() {
+        $rules = [];
         $rules[] = new restore_log_rule('treasurehunt', 'view all', 'index.php?id={course}', null);
-
         return $rules;
     }
-
 }

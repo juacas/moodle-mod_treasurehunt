@@ -22,14 +22,15 @@
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+
 require_once('../../config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-// @var $DB database_manager Database.
+/** @var moodle_database $DB Database.*/
 global $DB;
-global $USER;
+
 $id = required_param('id', PARAM_INT);
-list($course, $cm) = get_course_and_cm_from_cmid($id, 'treasurehunt');
-$treasurehunt = $DB->get_record('treasurehunt', array('id' => $cm->instance), '*', MUST_EXIST);
+[$course, $cm] = get_course_and_cm_from_cmid($id, 'treasurehunt');
+$treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
@@ -37,8 +38,8 @@ $context = context_module::instance($cm->id);
 
 require_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 // Print the page header.
-$url = new moodle_url('/mod/treasurehunt/gpx_viewer.php', array('id' => $cm->id));
-
+$url = new moodle_url('/mod/treasurehunt/gpx_viewer.php', ['id' => $cm->id]);
+/** @var renderer_base $output */
 $output = $PAGE->get_renderer('mod_treasurehunt');
 
 $PAGE->set_url($url);
@@ -53,9 +54,9 @@ $PAGE->requires->jquery_plugin('ui-css');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
-//$PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
+// $PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
-$users = array();
+$users = [];
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
 foreach ($userrecords as $userrecord) {
     $user = new stdClass();
@@ -70,7 +71,7 @@ $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 $PAGE->requires->js_call_amd(
     'mod_treasurehunt/viewgpx',
     'creategpxviewer',
-    array($id, $treasurehunt->id, 'global', $custommapping, $refreshtracksinterval)
+    [$id, $treasurehunt->id, 'global', $custommapping, $refreshtracksinterval]
 );
 
 echo $output->header();

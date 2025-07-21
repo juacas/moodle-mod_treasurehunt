@@ -17,14 +17,12 @@
 /**
  * The mod_treasurehunt road finished event class.
  *
- * @package    mod_treasurethunt
+ * @package    mod_treasurehunt
  * @copyright  2018 Juan Pablo de Castro
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 namespace mod_treasurehunt\event;
-
-defined('MOODLE_INTERNAL') || die();
 
 /**
  * The mod_treasurehunt road finished event class.
@@ -37,7 +35,6 @@ defined('MOODLE_INTERNAL') || die();
  *
  */
 class hunt_succeded extends \core\event\base {
-
     /**
      * Init method
      */
@@ -78,7 +75,7 @@ class hunt_succeded extends \core\event\base {
      * @return \moodle_url
      */
     public function get_url() {
-        $url = new \moodle_url("/mod/treasurehunt/view.php", array('id' => $this->contextinstanceid));
+        $url = new \moodle_url("/mod/treasurehunt/view.php", ['id' => $this->contextinstanceid]);
         if (!empty($this->other['groupid'])) {
             $url->param('groupid', $this->other['groupid']);
         } else {
@@ -100,16 +97,21 @@ class hunt_succeded extends \core\event\base {
             throw new \coding_exception('The \'groupid\' value must be set in other.');
         }
     }
-
+    /**
+     * DB mapping.
+     * @return array{db: string, restore: string}
+     */
     public static function get_objectid_mapping() {
-        return array('db' => 'treasurehunt', 'restore' => 'treasurehunt');
+        return ['db' => 'treasurehunt', 'restore' => 'treasurehunt'];
     }
-
+    /**
+     * DB mapping.
+     * @return array{db: string, restore: string[]}
+     */
     public static function get_other_mapping() {
-        $othermapped = array();
-        $othermapped['groupid'] = array('db' => 'groups', 'restore' => 'group');
+        $othermapped = [];
+        $othermapped['groupid'] = ['db' => 'groups', 'restore' => 'group'];
 
         return $othermapped;
     }
-
 }

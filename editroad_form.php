@@ -32,7 +32,6 @@ require_once("$CFG->libdir/formslib.php");
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class road_form extends moodleform {
-
     /**
      * Defines forms elements
      */
@@ -47,7 +46,7 @@ class road_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('roadname', 'treasurehunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('roadname', 'treasurehunt'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -57,7 +56,7 @@ class road_form extends moodleform {
         // Aquí añadimos la regla del tamaño máximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
 
-        $options = array();
+        $options = [];
         $options[0] = get_string('none');
         foreach ($selectoptions as $option) {
             $options[$option->id] = $option->name;
@@ -81,5 +80,4 @@ class road_form extends moodleform {
 
         $this->set_data($currentroad);
     }
-
 }

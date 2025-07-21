@@ -25,10 +25,10 @@
  */
 namespace mod_treasurehunt\external;
 
-use \core_external\external_function_parameters;
-use \core_external\external_single_structure;
-use \core_external\external_value;
-use \core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_single_structure;
+use core_external\external_value;
+use core_external\external_api;
 use context_module;
 
 defined('MOODLE_INTERNAL') || die();
@@ -36,21 +36,22 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
 
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-
+/**
+ * Service for deleting stages.
+ */
 class delete_stage extends external_api
 {
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
-    public static function execute_parameters(): external_function_parameters
-    {
+    public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
-            array(
+            [
             'stageid' => new external_value(PARAM_RAW, 'id of stage'),
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-            'lockid' => new external_value(PARAM_INT, 'id of lock')
-                )
+            'lockid' => new external_value(PARAM_INT, 'id of lock'),
+                ]
         );
     }
 
@@ -58,31 +59,35 @@ class delete_stage extends external_api
      * Describes the delete_stage return value
      * @return external_single_structure
      */
-    public static function execute_returns()
-    {
+    public static function execute_returns() {
         return new external_single_structure(
-            array(
+            [
             'status' => new external_single_structure(
-                array(
+                [
                 'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code'))
-            )
-        )
+                'msg' => new external_value(PARAM_RAW, 'message explain code')]
+            ),
+            ]
         );
     }
-
-    public static function execute($stageid, $treasurehuntid, $lockid)
-    {
+    /**
+     * Delete a stage.
+     * @param mixed $stageid
+     * @param mixed $treasurehuntid
+     * @param mixed $lockid
+     * @return array<array<int|string>>
+     */
+    public static function execute($stageid, $treasurehuntid, $lockid) {
         $params = self::validate_parameters(
             self::execute_parameters(),
-            array('stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid)
+            ['stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid]
         );
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
-        $status = array();
+        $status = [];
         if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
@@ -92,8 +97,17 @@ class delete_stage extends external_api
             $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
         }
 
-        $result = array();
+        $result = [];
         $result['status'] = $status;
         return $result;
+    }
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
+    public static function execute_is_allowed_from_ajax() {
+        return true;
     }
 }

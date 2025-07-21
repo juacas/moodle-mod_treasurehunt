@@ -43,7 +43,6 @@ define("NUMBER_NEW_ANSWERS", 2);
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class stage_form extends moodleform {
-
     /**
      * Defines forms elements
      * @global type $CFG
@@ -62,7 +61,7 @@ class stage_form extends moodleform {
         $mform->addElement('header', 'general', get_string('general', 'form'));
 
         // Adding the standard "name" field.
-        $mform->addElement('text', 'name', get_string('stagename', 'treasurehunt'), array('size' => '64'));
+        $mform->addElement('text', 'name', get_string('stagename', 'treasurehunt'), ['size' => '64']);
         if (!empty($CFG->formatstringstriptags)) {
             $mform->setType('name', PARAM_TEXT);
         } else {
@@ -75,13 +74,16 @@ class stage_form extends moodleform {
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
 
-        $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), array('size' => '64'));
+        $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), ['size' => '64']);
         $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
         $mform->setType('qrtext', PARAM_RAW);
         // QR reader area.
-        $mform->addElement('html',
-                '<div id="outQRCode"></div><button id="id_generateQR" onclick="return false;" style="display:inline">' . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
-                '<button id="id_scanQR" onclick="return false;" style="display:inline">' . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
+        $mform->addElement(
+            'html',
+            '<div id="outQRCode"></div><button id="id_generateQR" onclick="return false;" style="display:inline">'
+            . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
+                '<button id="id_scanQR" onclick="return false;" style="display:inline">'
+                . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
                 '<div  id="previewQR" style="display:none">' .
                 '<div  id="previewQRdiv" width = "100%" style="min-height:200px; max-height:500px">
                 <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
@@ -91,12 +93,16 @@ class stage_form extends moodleform {
                 '<button style="display:none" onclick="return false;" id="idbuttonnextcam"' .
                 get_string('changecamera', 'treasurehunt') . '</button>' .
                 '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
-                '</center></div>');
+            '</center></div>'
+        );
 
-        $mform->addElement('header', 'restrictionsdiscoverstage',
-                get_string('restrictionsdiscoverstage', 'treasurehunt'));
+        $mform->addElement(
+            'header',
+            'restrictionsdiscoverstage',
+            get_string('restrictionsdiscoverstage', 'treasurehunt')
+        );
         // Add restrict access completion activity.
-        $options = array();
+        $options = [];
         $options[0] = get_string('none');
         foreach ($completionactivities as $option) {
             $options[$option->id] = $option->name;
@@ -109,27 +115,41 @@ class stage_form extends moodleform {
         // ... y le doy un valor a una variable escondida.
         $form = "document.forms['" . $formid . "']";
         $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // Create javascript: set reloaded field to "1".
-        $attributes = array("onChange" => $javascript); // Set onChange attribute.
-        $mform->addElement('selectyesno', 'addsimplequestion', get_string('addsimplequestion', 'treasurehunt'),
-        $attributes);
+        $attributes = ["onChange" => $javascript]; // Set onChange attribute.
+        $mform->addElement(
+            'selectyesno',
+            'addsimplequestion',
+            get_string('addsimplequestion', 'treasurehunt'),
+            $attributes
+        );
         $mform->addHelpButton('addsimplequestion', 'addsimplequestion', 'treasurehunt');
-        
+
         if ($currentstage->addsimplequestion) {
             // Questions fields.
-            $mform->addElement('editor', 'questiontext_editor', get_string('question', 'treasurehunt'), null,
-            $editoroptions);
+            $mform->addElement(
+                'editor',
+                'questiontext_editor',
+                get_string('question', 'treasurehunt'),
+                null,
+                $editoroptions
+            );
             $mform->setType('questiontext_editor', PARAM_RAW);
             $mform->addRule('questiontext_editor', null, 'required', null, 'client');
             // Answer fields.
-            $this->add_per_answer_fields($mform, get_string('choiceno', 'qtype_multichoice', '{no}'), $editoroptions,
-            $currentstage->noanswers, NUMBER_NEW_ANSWERS);
+            $this->add_per_answer_fields(
+                $mform,
+                get_string('choiceno', 'qtype_multichoice', '{no}'),
+                $editoroptions,
+                $currentstage->noanswers,
+                NUMBER_NEW_ANSWERS
+            );
         }
         // Lock activities.
         $mform->addElement('header', 'lockactivitiessection', get_string('lockactivitiessection', 'treasurehunt'));
-        //  Bypass if no availability treasurehunt installed and enabled.
+        // Bypass if no availability treasurehunt installed and enabled.
         if (treasurehunt_availability_available()) {
             // Add restrict access completion activity.
-            $options = array();
+            $options = [];
             $lockedmods = [];
             foreach ($lockableactivities as $option) {
                 $options[$option->cmid] = $option->name;
@@ -144,8 +164,11 @@ class stage_form extends moodleform {
         } else {
             $mform->addElement('html', get_string('lockactivityannounce', 'treasurehunt'));
         }
-        $mform->addElement('header', 'cluetextsection',
-            get_string('stageclue', 'treasurehunt'));
+        $mform->addElement(
+            'header',
+            'cluetextsection',
+            get_string('stageclue', 'treasurehunt')
+        );
         // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
         $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
@@ -168,30 +191,59 @@ class stage_form extends moodleform {
 
         $this->set_data($currentstage);
     }
-
+    /**
+     * Set form data.
+     * @param mixed $entry
+     * @return void
+     */
     public function set_data($entry) {
         $entry = $this->data_preprocessing($entry);
         parent::set_data($entry);
     }
-
+    /**
+     * Process file areas in the form.
+     * @param mixed $entry
+     * @return stdClass
+     */
     protected function data_preprocessing($entry) {
         $editoroptions = $this->_customdata['editoroptions'];
         $context = $this->_customdata['context'];
         // Prepare all editors.
-        $entry = file_prepare_standard_editor($entry, 'cluetext', $editoroptions, $context, 'mod_treasurehunt',
-                'cluetext', $entry->id);
+        $entry = file_prepare_standard_editor(
+            $entry,
+            'cluetext',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'cluetext',
+            $entry->id
+        );
 
         // Si existe la pregunta.
         if ($entry->addsimplequestion) {
             if (isset($entry->questiontext)) {
-                $entry = file_prepare_standard_editor($entry, 'questiontext', $editoroptions, $context,
-                        'mod_treasurehunt', 'questiontext', $entry->id);
+                $entry = file_prepare_standard_editor(
+                    $entry,
+                    'questiontext',
+                    $editoroptions,
+                    $context,
+                    'mod_treasurehunt',
+                    'questiontext',
+                    $entry->id
+                );
             }
             if (isset($entry->answers)) {
                 $k = 0;
                 foreach ($entry->answers as $answer) {
-                    $answer = file_prepare_standard_editor($answer, 'answertext', $editoroptions, $context,
-                            'mod_treasurehunt', 'answertext', $answer->id);
+                    $answer = file_prepare_standard_editor(
+                        $answer,
+                        'answertext',
+                        $editoroptions,
+                        $context,
+                        'mod_treasurehunt',
+                        'answertext',
+                        $answer->id
+                    );
                     $entry->answertext_editor[$k] = $answer->answertext_editor;
                     $entry->correct[$k] = $answer->correct;
                     $k++;
@@ -200,10 +252,15 @@ class stage_form extends moodleform {
         }
         return $entry;
     }
-
+    /**
+     * Validate form fields.
+     * @param mixed $data
+     * @param mixed $files
+     * @return string[]
+     */
     public function validation($data, $files) {
 
-        $errors = array();
+        $errors = [];
 
         if (array_key_exists('answertext_editor', $data)) {
             $answers = $data['answertext_editor'];
@@ -255,8 +312,8 @@ class stage_form extends moodleform {
      * @return array of form fields.
      */
     protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions) {
-        $repeated = array();
-        $repeated[] = $mform->createElement('editor', 'answertext_editor', $label, array('rows' => 1), $editoroptions);
+        $repeated = [];
+        $repeated[] = $mform->createElement('editor', 'answertext_editor', $label, ['rows' => 1], $editoroptions);
         $repeated[] = $mform->createElement('advcheckbox', 'correct', '', get_string('correctanswer', 'treasurehunt'));
         $repeatedoptions['answer']['type'] = PARAM_RAW;
         $repeatedoptions['fraction']['default'] = 0;
@@ -274,14 +331,15 @@ class stage_form extends moodleform {
      * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
      */
     protected function add_per_answer_fields(&$mform, $label, $editoroptions, $repeatsatstart, $addoptions = 0) {
-        $repeatedoptions = array();
+        $repeatedoptions = [];
         $repeated = $this->get_per_answer_fields($mform, $label, $editoroptions, $repeatedoptions);
         $this->repeat_elements($repeated, $repeatsatstart, $repeatedoptions, 'noanswers', 'addanswers', $addoptions);
     }
-
+    /**
+     * Check if the page is reloaded.
+     */
     public function is_reloaded() {
 
         return optional_param('reloaded', 0, PARAM_INT);
     }
-
 }

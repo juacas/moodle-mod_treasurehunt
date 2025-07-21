@@ -31,59 +31,61 @@ $services = [
             'mod_treasurehunt_delete_stage',
             'mod_treasurehunt_delete_road',
             'mod_treasurehunt_renew_lock',
-            'mod_treasurehunt_user_progress'
+            'mod_treasurehunt_user_progress',
         ],
         'requiredcapability' => '', // If set, the web service user need this capability to access .
         // Any function of this service. For example: 'some/capability:specified'.
         'restrictedusers' => 0, // If enabled, the Moodle administrator must link some user to this service.
         // Into the administration.
         'enabled' => true, // If enabled, the service can be reachable on a default installation.
-        ]
-    ];
+    ],
+];
 
 $functions = [
-    'mod_treasurehunt_fetch_treasurehunt' => array(// Web service function name.
+    'mod_treasurehunt_fetch_treasurehunt' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\fetch_treasurehunt::class, // Class containing the external function.
         'description' => 'Fetch all the roads and stages of instance.', // Human readable description of the web service function.
         'type' => 'read', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt',
         'ajax' => true, // Allowed from ajax.
-        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE]
-    ),
-    'mod_treasurehunt_update_stages' => array(// Web service function name.
-        'classname' => \mod_treasurehunt\external\update_stages::class, // Class containing the external function.
-        'description' => 'Updates all stages position and geometry given.', // Human readable description of the web service function.
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
+    'mod_treasurehunt_update_stages' => [// Web service function name.
+        // Class containing the external function.
+        'classname' => \mod_treasurehunt\external\update_stages::class,
+        // Human readable description of the web service function.
+        'description' => 'Updates all stages position and geometry given.',
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
         'ajax' => true, // Allowed from ajax.
-    ),
-    'mod_treasurehunt_delete_stage' => array(// Web service function name.
+    ],
+    'mod_treasurehunt_delete_stage' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\delete_stage::class, // Class containing the external function.
         'description' => 'Delete a stage given.', // Human readable description of the web service function.
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
         'ajax' => true, // Allowed from ajax.
-    ),
-    'mod_treasurehunt_delete_road' => array(// Web service function name.
+    ],
+    'mod_treasurehunt_delete_road' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\delete_road::class, // Class containing the external function.
         'description' => 'Delete a road given.', // Human readable description of the web service function.
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editroad',
         'ajax' => true, // Allowed from ajax.
-    ),
-    'mod_treasurehunt_renew_lock' => array(// Web service function name.
+    ],
+    'mod_treasurehunt_renew_lock' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\renew_lock::class, // Class containing the external function.
         'description' => 'Renew user edition lock of instance.', // Human readable description of the web service function.
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt',
         'ajax' => true, // Allowed from ajax.
-    ),
-    'mod_treasurehunt_user_progress' => array(// Web service function name.
+    ],
+    'mod_treasurehunt_user_progress' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\user_progress::class, // Class containing the external function.
         'description' => 'Check user progress in a game.', // Human readable description of the web service function.
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:play',
         'ajax' => true, // Allowed from ajax.
-        'services' => array(MOODLE_OFFICIAL_MOBILE_SERVICE)
-    ),
+        'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
 ];

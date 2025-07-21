@@ -25,11 +25,11 @@
  */
 namespace mod_treasurehunt\external;
 
-use \core_external\external_function_parameters;
-use \core_external\external_single_structure;
-use \core_external\external_multiple_structure;
-use \core_external\external_value;
-use \core_external\external_api;
+use core_external\external_function_parameters;
+use core_external\external_single_structure;
+use core_external\external_multiple_structure;
+use core_external\external_value;
+use core_external\external_api;
 use stdClass;
 use context_module;
 
@@ -38,18 +38,19 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
 
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-
-class fetch_treasurehunt extends external_api
-{
+/**
+ * Service definition. Retrieve full info.
+ */
+class fetch_treasurehunt extends external_api {
     /**
      * Returns description of method parameters
      * @return external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters([
-            'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt')
+            'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
         ]);
-    } 
+    }
 
     /**
      * Describes the fetch_treasurehunt return values
@@ -57,77 +58,81 @@ class fetch_treasurehunt extends external_api
      */
     public static function execute_returns(): external_single_structure {
         return new external_single_structure(
-            array(
+            [
             'treasurehunt' => new external_single_structure(
-                array(
+                [
                 'roads' => new external_multiple_structure(
                     new external_single_structure(
-                        array(
-                    'id' => new external_value(PARAM_INT, 'The id of the road'),
-                    'name' => new external_value(PARAM_RAW, 'The name of the road'),
-                    'blocked' => new external_value(PARAM_BOOL, 'If true the road is blocked'),
-                    'stages' => new external_single_structure(
-                        array('type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
-                        'features' => new external_multiple_structure(
-                            new external_single_structure(
-                                array(
-                            'type' => new external_value(PARAM_TEXT, 'Feature'),
-                            'id' => new external_value(PARAM_INT, 'Feature id'),
-                            'geometry' => new external_single_structure(
-                                array(
-                                'type' => new external_value(PARAM_TEXT, 'Geometry type'),
-                                'coordinates' => new external_multiple_structure(
-                                    new external_multiple_structure(
-                                        new external_multiple_structure(
-                                                new external_single_structure(
-                                                array(
-                                    new external_value(PARAM_FLOAT, "Longitude"),
-                                    new external_value(PARAM_FLOAT, "Latitude"))
-                                            )
-                                            )
-                                    ),
-                                    'Coordinates definition in geojson format for multipolygon'
-                                )
+                        [
+                        'id' => new external_value(PARAM_INT, 'The id of the road'),
+                        'name' => new external_value(PARAM_RAW, 'The name of the road'),
+                        'blocked' => new external_value(PARAM_BOOL, 'If true the road is blocked'),
+                        'stages' => new external_single_structure(
+                            ['type' => new external_value(PARAM_TEXT, 'FeatureColletion'),
+                            'features' => new external_multiple_structure(
+                                new external_single_structure(
+                                    [
+                                    'type' => new external_value(PARAM_TEXT, 'Feature'),
+                                    'id' => new external_value(PARAM_INT, 'Feature id'),
+                                    'geometry' => new external_single_structure(
+                                        [
+                                        'type' => new external_value(PARAM_TEXT, 'Geometry type'),
+                                        'coordinates' => new external_multiple_structure(
+                                            new external_multiple_structure(
+                                                new external_multiple_structure(
+                                                    new external_single_structure(
+                                                        [
+                                                        new external_value(PARAM_FLOAT, "Longitude"),
+                                                        new external_value(PARAM_FLOAT, "Latitude")]
+                                                    )
+                                                )
+                                            ),
+                                            'Coordinates definition in geojson format for multipolygon'
                                         ),
-                                'Geometry definition in geojson format',
-                                VALUE_OPTIONAL
+                                        ],
+                                        'Geometry definition in geojson format',
+                                        VALUE_OPTIONAL
+                                    ),
+                                    'properties' => new external_single_structure(
+                                        [
+                                        'roadid' => new external_value(PARAM_INT, "Associated road id"),
+                                        'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
+                                        'name' => new external_value(PARAM_RAW, "Name of associated stage"),
+                                        'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
+                                        'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
+                                        ]
+                                    ),
+                                    ]
+                                ),
+                                'Features definition in geojson format'
                             ),
-                                'properties' => new external_single_structure(
-                                    array(
-                                'roadid' => new external_value(PARAM_INT, "Associated road id"),
-                                'stageposition' => new external_value(PARAM_INT, "Position of associated stage"),
-                                'name' => new external_value(PARAM_RAW, "Name of associated stage"),
-                                'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
-                                'clue' => new external_value(PARAM_RAW, "Clue of associated stage")
-                                    )
-                                )
-                                )
-                            ),
-                            'Features definition in geojson format'
-                        )
-                            ),
-                        'All stages of the road in geojson format'
-                    )
+                            ],
+                            'All stages of the road in geojson format'
                         ),
+                        ],
                         'Array with all roads in the instance.'
                     )
-                )
-                    )
+                ),
+                    ]
             ),
                 'status' => new external_single_structure(
-                    array(
-                'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
-                'msg' => new external_value(PARAM_RAW, 'message explain code'))
-                )
-                )
+                    [
+                    'code' => new external_value(PARAM_INT, 'code of status: 0(OK),1(ERROR)'),
+                    'msg' => new external_value(PARAM_RAW, 'message explain code')]
+                ),
+                ]
         );
     }
-    public static function execute($treasurehuntid)
-    {
+    /**
+     * Get the definition information of the treasurehunt.
+     * @param mixed $treasurehuntid
+     * @return array<array|stdClass>
+     */
+    public static function execute($treasurehuntid) {
         $params = self::validate_parameters(self::execute_parameters(), [
-            'treasurehuntid' => $treasurehuntid
+            'treasurehuntid' => $treasurehuntid,
         ]);
-        $status = array();
+        $status = [];
         $treasurehunt = new stdClass();
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid']);
         $context = context_module::instance($cm->id);
@@ -137,9 +142,18 @@ class fetch_treasurehunt extends external_api
         $status['code'] = 0;
         $status['msg'] = 'La caza del tesoro se ha cargado con éxito';
 
-        $result = array();
+        $result = [];
         $result['treasurehunt'] = $treasurehunt;
         $result['status'] = $status;
         return $result;
+    }
+    /**
+     * Can this function be called directly from ajax?
+     *
+     * @return boolean
+     * @since Moodle 2.9
+     */
+    public static function execute_is_allowed_from_ajax() {
+        return true;
     }
 }
