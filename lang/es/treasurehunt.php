@@ -43,13 +43,13 @@ $string['allowattemptsfromdate'] = 'Permitir intentos desde';
 $string['allowattemptsfromdate_help'] = 'Si está habilitado, los estudiantes no podrán jugar antes de esta fecha.
 Si está deshabilitado, los estudiantes podrán comenzar a jugar de inmediato.';
 $string['alwaysshowdescription'] = 'Mostrar siempre la descripción';
-$string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Caza del tesoro superior solo será
+$string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción de la Caza del Tesoro superior solo será
 visible para los estudiantes en la fecha "Permitir intentos desde".';
 $string['answerwarning'] = 'Debes responder primero a la pregunta';
 $string['areyousure'] = '¿Estás seguro?';
 $string['attempt'] = 'Intento';
 $string['attempthistory'] = 'Historial de intentos';
-$string['attemptsdeleted'] = 'Eliminados intentos de resolver la caza del tesoro';
+$string['attemptsdeleted'] = 'Eliminados intentos de resolver la Caza del Tesoro';
 $string['availability'] = 'Disponibilidad';
 $string['back'] = 'Atrás';
 $string['backtocourse'] = 'Volver al curso';
@@ -66,8 +66,8 @@ $string['cleartreasurehunt_done'] = 'La actividad se ha inicializado. Toda la ac
 $string['cleartreasurehuntconfirm'] = 'Cuidado con esta acción. Si continua se eliminará toda la actividad de los participantes. Normalmente sólo es necesario para reiniciar la actividad y poder modificar el número de caminos o etapas en una Caza del Tesoro en la que haya participado alguien por error o para pruebas. Actualmente hay {$a} registros de actividad.';
 $string['clue'] = 'Pista';
 $string['configintro'] = 'Los valores fijados aquí definen los valores por defecto usados en el formulario de especificaciones
-cuando usted crea una nueva caza del tesoro.';
-$string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la caza del tesoro.';
+cuando usted crea una nueva Caza del Tesoro.';
+$string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la Caza del Tesoro.';
 $string['confirm'] = 'Confirmar';
 $string['confirmdeletestage'] = 'Se eliminó la etapa correctamente';
 $string['continue'] = 'Continuar';
@@ -102,10 +102,10 @@ $string['cutoffdatefromdatevalidation'] = 'La fecha límite debe ser posterior d
 $string['discoveredlocation'] = 'Localización descubierta';
 $string['editingroad'] = 'Editando camino';
 $string['editingstage'] = 'Editando etapa';
-$string['editingtreasurehunt'] = 'Editando caza del tesoro';
+$string['editingtreasurehunt'] = 'Editando Caza del Tesoro';
 $string['edition'] = 'Panel de edición';
 $string['edition_help'] = 'Para habilitar el panel de creación y edición de geometrías debe seleccionar previamente la etapa que desea editar';
-$string['editactivity_help'] = 'Puede encontrar un tutorial para crear una caza del tesoro paso a paso en <a href="http://juacas.github.io/moodle-mod_treasurehunt/es/crear_actividad.html"> esta página.</a>';
+$string['editactivity_help'] = 'Puede encontrar un tutorial para crear una Caza del Tesoro paso a paso en <a href="http://juacas.github.io/moodle-mod_treasurehunt/es/crear_actividad.html"> esta página.</a>';
 $string['editmode'] = 'Modificar';
 $string['drawmode'] = 'Dibujar';
 $string['browsemode'] = 'Ver';
@@ -151,7 +151,7 @@ $string['playerclassic'] = 'Classic (caducado)';
 $string['playerfancy'] = 'Fancy (caducado)';
 $string['playerbootstrap'] = 'Bootstrap';
 $string['geolocation_needed_title'] = 'Esta aplicación necesita geolocalización';
-$string['geolocation_needed'] = 'Para participar en la caza del tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.
+$string['geolocation_needed'] = 'Para participar en la Caza del Tesoro es necesario permitir que el teléfono nos informe de su posición. <p>Para activarlo vaya en su navegador a Configuración->Configuración de sitios web->Ubicación y borre el bloqueo para este sitio. <p>Recargue la página y responda "SÍ" cuando el navegador le pregunte si desea compartir su localización.
 <p>Para poder usar el GPS para localizar este dispositivo durante la Caza del Tesoro, se debe acceder al servidor mediante
 URLs seguras con HTTPS. En caso contrario, sólo se podrá usar el modo "Jugar sin moverse" en el que los jugadores
 tienen que marcar manualmente en el mapa cada una de las etapas.
@@ -196,7 +196,7 @@ $string['gradepenlocation'] = 'Penalización por fallo en localización';
 $string['gradepenlocation_help'] = 'La penalización es expresada en % de la calificación.
 Por ejemplo, si la penalización es 5.4, un jugador con 3 fallos penalizará su
 nota en un 16.2%, es decir, recibirá el 83.8% de la calificación calculada con el resto de criterios.';
-$string['gradesdeleted'] = 'Eliminadas calificaciones de la caza del tesoro';
+$string['gradesdeleted'] = 'Eliminadas calificaciones de la Caza del Tesoro';
 $string['gradingsummary'] = 'Sumario de calificaciones';
 $string['group'] = 'Grupo';
 $string['groupactivityovercome'] = 'Actividad a finalizar completada con éxito por {$a->user}
@@ -219,7 +219,7 @@ $string['groups'] = 'Grupos';
 $string['groupstageovercome'] = 'Etapa {$a->position} superada por {$a->user} {$a->date}';
 $string['hello'] = 'Hola';
 $string['history'] = 'Historial';
-$string['huntcompleted'] = 'Ya has completado esta caza del tesoro';
+$string['huntcompleted'] = 'Ya has completado esta Caza del Tesoro';
 $string['incorrectanswer'] = 'Respuesta incorrecta.';
 $string['info'] = 'Información';
 $string['infovalidatelocation'] = 'Validar ubicación para esta etapa';
@@ -243,8 +243,8 @@ pero más tiempo queda bloqueada la página de edición una vez que el usuario t
 Debe ser mayor a 5 segundos, sino se fijará el tiempo por defecto.';
 $string['mapview'] = 'Vista del mapa';
 $string['modify'] = 'Modificar';
-$string['modulename'] = 'Caza del tesoro';
-$string['modulename_help'] = 'Caza del tesoro al aire libre, en interiores y con mapas virtuales con geolocalización y códigos QR.
+$string['modulename'] = 'Caza del Tesoro';
+$string['modulename_help'] = 'Caza del Tesoro al aire libre, en interiores y con mapas virtuales con geolocalización y códigos QR.
 Este módulo para Moodle permite organizar juegos serios al aire libre con sus alumnos.
 TreasureHunt incluye una aplicación de navegador (no es necesario instalar ninguna aplicación nativa) para el juego y un editor geográfico
 para codificar las etapas del juego. El juego se puede configurar con una amplia gama de opciones que hacen que el módulo sea muy flexible y
@@ -275,7 +275,7 @@ $string['notchangeorderstage'] = 'No puedes cambiar el orden de las etapas una v
 $string['notcreatestage'] = 'Ya se han realizado intentos sobre este camino, no puedes añadir más etapas.';
 $string['notdeletestage'] = 'Ya se han realizado intentos sobre este camino, no puedes eliminar ninguna etapa.';
 $string['noteam'] = 'No es miembro de ningún grupo';
-$string['notreasurehunts'] = 'No existe ninguna caza del tesoro en este curso';
+$string['notreasurehunts'] = 'No existe ninguna Caza del Tesoro en este curso';
 $string['nouserassigned'] = 'Ningún usuario asignado a este camino';
 $string['nouserattempts'] = '{$a} no ha realizado ningún intento';
 $string['nouserroad'] = '{$a} no tiene ningún camino asignado.';
@@ -297,12 +297,12 @@ $string['playwithoutmoving'] = 'Jugar sin desplazarse';
 $string['playwithoutmoving_help'] = 'Si esta opción se habilita, los alumnos podrán jugar sin desplazarse a los lugares.
 Para ello, cada vez que el alumno realiza un click simple sobre el mapa se crea una marca,
 borrando la anterior si existiese, indicando el último punto deseado';
-$string['pluginadministration'] = 'Administración de la caza del tesoro';
-$string['pluginname'] = 'Caza del tesoro';
+$string['pluginadministration'] = 'Administración de la Caza del Tesoro';
+$string['pluginname'] = 'Caza del Tesoro';
 $string['qrreaded'] = 'Código QR leído:';
 $string['question'] = 'Pregunta';
 $string['remove'] = 'Eliminar';
-$string['removealltreasurehuntattempts'] = 'Eliminar todos los intentos de resolver la caza del tesoro';
+$string['removealltreasurehuntattempts'] = 'Eliminar todos los intentos de resolver la Caza del Tesoro';
 $string['removedactivitytoend'] = 'Se ha eliminado la actividad a completar';
 $string['removedquestion'] = 'Se ha eliminado la pregunta';
 $string['removeroadwarning'] = 'Si eliminas el camino se eliminaran todas las etapas asociadas y ya no podras recuperarlas';
@@ -313,7 +313,7 @@ $string['road'] = 'Camino';
 $string['roadmap'] = 'Callejero';
 $string['roadname'] = 'Nombre del camino';
 $string['roadview'] = 'Callejero';
-$string['roadended'] = 'Este camino está completado. ¡Enhorabuena! Ya has terminado la caza del tesoro. Puedes comprobar tu histórico en el mapa.';
+$string['roadended'] = 'Este camino está completado. ¡Enhorabuena! Ya has terminado la Caza del Tesoro. Puedes comprobar tu histórico en el mapa.';
 $string['save'] = 'Guardar';
 $string['saveemptyridle'] = 'Todas las etapas modificadas deben tener geometría antes de guardar';
 $string['savewarning'] = 'No ha guardado los cambios realizados.';
@@ -332,7 +332,7 @@ $string['stage'] = 'Etapa';
 $string['stageclue'] = 'Pista para localizar la siguiente etapa';
 $string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar
 la siguiente localización. En el caso de que esta sea la última etapa debe dejar
-un mensaje de retroalimentación indicando que la caza del tesoro ha finalizado';
+un mensaje de retroalimentación indicando que la Caza del Tesoro ha finalizado';
 $string['stagename'] = 'Nombre de la etapa';
 $string['stageovercome'] = 'Etapa superada';
 $string['stages'] = 'Etapas';
@@ -352,24 +352,24 @@ $string['trackusers'] = 'Almacenar itinerarios';
 $string['trackusers_help'] = 'Almacena el itinerario que realizan los usuarios mientras usan el modo de juego.';
 $string['trackviewer'] = 'Visor de rastreo';
 $string['trackviewerrefreshtracks'] = 'Actualizar las rutas cada {$a} segundos.';
-$string['treasurehunt'] = 'Treasure hunt';
-$string['treasurehunt:addinstance'] = 'Añadir nueva caza del tesoro';
+$string['treasurehunt'] = 'Caza del Tesoro';
+$string['treasurehunt:addinstance'] = 'Añadir nueva Caza del Tesoro';
 $string['treasurehunt:addroad'] = 'Añadir camino';
 $string['treasurehunt:addstage'] = 'Añadir etapa';
-$string['treasurehuntclosed'] = 'Esta caza del tesoro está cerrada {$a}';
-$string['treasurehuntcloses'] = 'Caza del tesoro cerrada';
-$string['treasurehuntcloseson'] = 'Esta caza del tesoro cerrará {$a}';
+$string['treasurehuntclosed'] = 'Esta Caza del Tesoro está cerrada {$a}';
+$string['treasurehuntcloses'] = 'Caza del Tesoro cerrada';
+$string['treasurehuntcloseson'] = 'Esta Caza del Tesoro cerrará {$a}';
 $string['treasurehunt:editroad'] = 'Editar camino';
 $string['treasurehunt:editstage'] = 'Editar etapa';
-$string['treasurehuntislocked'] = '{$a} está editando esta caza del tesoro. Intenta editarla dentro de unos minutos.';
-$string['treasurehunt:managetreasure'] = 'Administrar Caza del tesoro';
-$string['treasurehunt:managetreasurehunt'] = 'Gestionar caza del tesoro';
-$string['treasurehuntname'] = 'Nombre de la caza del tesoro';
-$string['treasurehuntnotavailable'] = 'Esta caza del tesoro estará disponible {$a}';
-$string['treasurehuntopens'] = 'Caza del tesoro abierta';
-$string['treasurehuntopenedon'] = 'Esta caza del tesoro está abierta {$a}';
+$string['treasurehuntislocked'] = '{$a} está editando esta Caza del Tesoro. Intenta editarla dentro de unos minutos.';
+$string['treasurehunt:managetreasure'] = 'Administrar Caza del Tesoro';
+$string['treasurehunt:managetreasurehunt'] = 'Gestionar Caza del Tesoro';
+$string['treasurehuntname'] = 'Nombre de la Caza del Tesoro';
+$string['treasurehuntnotavailable'] = 'Esta Caza del Tesoro estará disponible {$a}';
+$string['treasurehuntopens'] = 'Caza del Tesoro abierta';
+$string['treasurehuntopenedon'] = 'Esta Caza del Tesoro está abierta {$a}';
 $string['treasurehunt:play'] = 'Jugar';
-$string['treasurehunt:view'] = 'Ver la caza del tesoro';
+$string['treasurehunt:view'] = 'Ver la Caza del Tesoro';
 $string['treasurehunt:viewusershistoricalattempts'] = 'Ver el historial de intentos de los usuarios';
 $string['updates'] = 'Actualizaciones';
 $string['updatetimes'] = 'Tiempos de actualización';
@@ -420,7 +420,7 @@ Por favor contacte con su administrador.
 $string['webserviceerror'] = 'Problema de comunicación con el servidor. Por favor, inténtalo de nuevo más tarde. Si el problema persiste, contacta con tu administrador.';
 
 // Initial tour help.
-$string['addroad_tour'] = 'Una caza del tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
+$string['addroad_tour'] = 'Una Caza del Tesoro debe tener al menos un camino para recorrer. Cada camino debe tener dos o más etapas. Comienza a diseñar tu juego añadiendo un camino.';
 $string['addstage_tour'] = 'Añade varias etapas para que los estudiantes puedan seguir el camino. Cada etapa debe contener una pista para descubrir la siguiente etapa del camino. Además puedes poner una pregunta de verificación o establecer otras condiciones de desbloqueo.';
 $string['editend_tour'] = '¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
 $string['map_tour'] = 'En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';

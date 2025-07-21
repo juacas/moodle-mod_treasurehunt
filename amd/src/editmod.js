@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License.
 // along with Moodle.  If not, see <http:// www.gnu.org/licenses/>.
 /**
- * @module mod_treasurehunt/edit
+ * @module mod_treasurehunt/editmod
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>,
  *            Juan Pablo de Castro <jpdecastro@tel.uva.es>
