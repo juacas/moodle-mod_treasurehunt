@@ -36,12 +36,17 @@ global $CFG;
 // After Moodle 4.2 external classes were moved to namespace core_external.
 if ($CFG->version < 2023042400) {
     require_once($CFG->dirroot . '/lib/externallib.php');
-    class_alias(external_api::class, \core_external\external_api::class);
-    class_alias(restricted_context_exception::class, \core_external\restricted_context_exception::class);
-    class_alias(external_value::class, \core_external\external_value::class);
-    class_alias(external_single_structure::class, \core_external\external_single_structure::class);
-    class_alias(external_multiple_structure::class, \core_external\external_multiple_structure::class);
-    class_alias(external_function_parameters::class, \core_external\external_function_parameters::class);
-    class_alias(external_warnings::class, \core_external\external_warnings::class);
-    class_alias(cache_store::class, \core_cache\store::class);
+    if (!class_exists(core_external\external_api::class)) {
+        class_alias(external_api::class, \core_external\external_api::class);
+        class_alias(restricted_context_exception::class, \core_external\restricted_context_exception::class);
+        class_alias(external_value::class, \core_external\external_value::class);
+        class_alias(external_single_structure::class, \core_external\external_single_structure::class);
+        class_alias(external_multiple_structure::class, \core_external\external_multiple_structure::class);
+        class_alias(external_function_parameters::class, \core_external\external_function_parameters::class);
+        class_alias(external_warnings::class, \core_external\external_warnings::class);
+    }
+
+    if (!class_exists(\core_cache\store::class)) {
+        class_alias(cache_store::class, \core_cache\store::class);
+    }
 }
