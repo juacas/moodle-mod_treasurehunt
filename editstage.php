@@ -123,7 +123,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // Support availability helper if availability/treasurehunt is installed.
     if (treasurehunt_availability_available()) {
         // Get previous locked mods to render in forms and to calculate add, remove lists.
-        $lockedmods = treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
+        $lockedmods = availability_treasurehunt_get_activities_with_stage_restriction($course->id, $stage->id);
     } else {
         $lockedmods = null;
     }
@@ -254,13 +254,13 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             $cms = get_fast_modinfo($course->id)->get_cms();
             // Remove locks.
             foreach ($lockstoremove as $cmid) {
-                $availability = treasurehunt_remove_restriction($cms[$cmid], $stage);
-                treasurehunt_update_activity_availability($cms[$cmid], $availability);
+                $availability = availability_treasurehunt_remove_restriction($cms[$cmid], $stage);
+                availability_treasurehunt_update_activity_availability($cms[$cmid], $availability);
             }
             // Add new locks.
             foreach ($lockstoadd as $cmid) {
-                $availability = treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
-                treasurehunt_update_activity_availability($cms[$cmid], $availability);
+                $availability = availability_treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
+                availability_treasurehunt_update_activity_availability($cms[$cmid], $availability);
             }
         }
         // Actualizo la etapa con los ficheros procesados.
