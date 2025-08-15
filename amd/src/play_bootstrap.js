@@ -17,7 +17,7 @@
  * TODO describe module play_bootstrap_new
  *
  * @module     mod_treasurehunt/play_bootstrap_new
- * @copyright  2025 YOUR NAME <your@email.com>
+ * @copyright  2025 Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import $ from "jquery";

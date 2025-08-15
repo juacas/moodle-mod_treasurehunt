@@ -24,7 +24,7 @@ use stdClass;
  * Class play_page_base
  *
  * @package    mod_treasurehunt
- * @copyright  2025 YOUR NAME <your@email.com>
+ * @copyright  2025 Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class play_page_base implements renderable, templatable {
