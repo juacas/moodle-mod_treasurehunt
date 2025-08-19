@@ -328,6 +328,20 @@ $string['pluginname'] = 'Treasure Hunt';
 $string['preview'] = 'Preview';
 $string['prevstep'] = 'Prev';
 
+$string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
+$string['privacy:metadata:treasurehunt_attempts:groupid'] = 'The group in which the user played the activity.';
+$string['privacy:metadata:treasurehunt_attempts:location'] = 'The location of the user at the time of the attempt.';
+$string['privacy:metadata:treasurehunt_attempts:stageid'] = 'The stage ID the user was trying to solve.';
+$string['privacy:metadata:treasurehunt_attempts:timecreated'] = 'The time at which the user made an attempt.';
+$string['privacy:metadata:treasurehunt_attempts:userid'] = 'The ID of the user that made an attempt.';
+
+$string['privacy:metadata:treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
+$string['privacy:metadata:treasurehunt_track:location'] = 'The location of the user at a particular time.';
+$string['privacy:metadata:treasurehunt_track:timestamp'] = 'The time the user is tracked at.';
+$string['privacy:metadata:treasurehunt_track:treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
+$string['privacy:metadata:treasurehunt_track:userid'] = 'The ID of the user being tracked.';
+
+
 $string['qrreaded'] = 'QR code readed:';
 $string['question'] = 'Question';
 $string['remove'] = 'Delete';
@@ -468,16 +482,3 @@ $string['warnusersoutside'] = 'The following users do not belong to any group/gr
 $string['webserviceerror'] = 'Communication with the server failed. It may be a temporary problem, please try again later. If the problem persists, contact your administrator.';
 $string['welcome_edit_tour'] = 'Welcome to the authoring page of TreasureHunt. ';
 $string['welcome_play_tour'] = '<span style="font-size: 1.5em; font-weight: bold">Welcome to your Treasure Hunt!</span><br>This map and the clues will be your guide.';
-
-// Privacy strings.
-$string['privacy:metadata:treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
-$string['privacy:metadata:treasurehunt_track:userid'] = 'The ID of the user being tracked.';
-$string['privacy:metadata:treasurehunt_track:treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
-$string['privacy:metadata:treasurehunt_track:location'] = 'The location of the user at a particular time.';
-$string['privacy:metadata:treasurehunt_track:timestamp'] = 'The time the user is tracked at.';
-
-$string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
-$string['privacy:metadata:treasurehunt_attempts:userid'] = 'The ID of the user that made an attempt.';
-$string['privacy:metadata:treasurehunt_attempts:timecreated'] = 'The time at which the user made an attempt.';
-$string['privacy:metadata:treasurehunt_attempts:groupid'] = 'The group in which the user played the activity.';
-$string['privacy:metadata:treasurehunt_attempts:stageid'] = 'The stage ID the user was trying to solve.';

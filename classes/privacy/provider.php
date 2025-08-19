@@ -35,36 +35,39 @@ defined('MOODLE_INTERNAL') || die();
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
+    // This plugin is capable of determining which users have data within it.
+    \core_privacy\local\request\core_userlist_provider,
     // This plugin does store personal user data.
     \core_privacy\local\metadata\provider,
     // This plugin is a core_user_data_provider.
-    \core_privacy\local\request\plugin\provider,
-    // This plugin is capable of determining which users have data within it.
-    \core_privacy\local\request\core_userlist_provider {
-
-    // This trait must be included for supporting Moodle < 3.4.
-    // The functions below start with underscore '_' for the polyfill to work.
-    use \core_privacy\local\legacy_polyfill;
+    \core_privacy\local\request\plugin\provider
+{
     /**
      * Return the fields which contain personal data.
      *
      * @param collection $items a reference to the collection to use to store the metadata.
      * @return collection the updated collection of metadata items.
      */
-    public static function _get_metadata(collection $collection): collection {
+    public static function get_metadata(collection $collection): collection {
 
-        $collection->add_database_table('treasurehunt_attempts', [
+        $collection->add_database_table(
+            'treasurehunt_attempts',
+            [
             'userid' => 'privacy:metadata:treasurehunt_attempts:userid',
             'location' => 'privacy:metadata:treasurehunt_attempts:location',
-            'timecreated' => 'privacy:metadata:treasurehunt_attempts:timecreated'
-        ], 
-        'privacy:metadata:treasurehunt_attempts');
-        $collection->add_database_table('treasurehunt_track', [
+            'timecreated' => 'privacy:metadata:treasurehunt_attempts:timecreated',
+            ],
+            'privacy:metadata:treasurehunt_attempts'
+        );
+        $collection->add_database_table(
+            'treasurehunt_track',
+            [
             'userid' => 'privacy:metadata:treasurehunt_track:userid',
             'location' => 'privacy:metadata:treasurehunt_track:location',
-            'timestamp' => 'privacy:metadata:treasurehunt_track:timestamp'
-        ], 
-        'privacy:metadata:treasurehunt_track');
+            'timestamp' => 'privacy:metadata:treasurehunt_track:timestamp',
+            ],
+            'privacy:metadata:treasurehunt_track'
+        );
 
         return $collection;
     }
@@ -74,8 +77,7 @@ class provider implements
      * @param int $userid the userid.
      * @return contextlist the list of contexts containing user info for the user.
      */
-    public static function _get_contexts_for_userid(int $userid): contextlist
-    {
+    public static function get_contexts_for_userid(int $userid): contextlist {
         // Fetch all contexts with treasurehunt attempts.
         $sql = "SELECT DISTINCT c.id
                   FROM {context} c
@@ -118,8 +120,7 @@ class provider implements
      *
      * @param   userlist    $userlist   The userlist containing the list of users who have data in this context/plugin combination.
      */
-    public static function get_users_in_context(userlist $userlist)
-    {
+    public static function get_users_in_context(userlist $userlist) {
         $context = $userlist->get_context();
 
         if (!$context instanceof \context_module) {
@@ -165,8 +166,7 @@ class provider implements
      * @param approved_contextlist $contextlist a list of contexts approved for export.
      * @global moodle_database $DB
      */
-    public static function _export_user_data(approved_contextlist $contextlist)
-    {
+    public static function export_user_data(approved_contextlist $contextlist) {
         /** @var moodle_database $DB */
         global $DB;
 
@@ -176,7 +176,7 @@ class provider implements
 
         $user = $contextlist->get_user();
 
-        list($contextsql, $contextparams) = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
+        [$contextsql, $contextparams] = $DB->get_in_or_equal($contextlist->get_contextids(), SQL_PARAMS_NAMED);
 
         $sqlattempts = "SELECT cm.id AS cmid,
                        ta.location as location,
@@ -215,11 +215,11 @@ class provider implements
 
         foreach ($treasurehunttreasurehuntattempts as $treasurehuntattempt) {
             $attempt = [
-                'stage_name' =>  $treasurehuntattempt->stage_name,
+                'stage_name' => $treasurehuntattempt->stage_name,
                 'location' => $treasurehuntattempt->location,
                 'success' => $treasurehuntattempt->success,
                 'timestamp' => \core_privacy\local\request\transform::datetime($treasurehuntattempt->timestamp),
-                'type' => $treasurehuntattempt->type
+                'type' => $treasurehuntattempt->type,
             ];
             $treasurehuntdata[$treasurehuntattempt->cmid]['attempts'][] = $attempt;
         }
@@ -229,16 +229,16 @@ class provider implements
         foreach ($treasurehunttreasurehunttracks as $track) {
             $trackpoint = [
                 'waypointlocation' => $track->location,
-                'waypointtimestamp' => $track->timestamp
+                'waypointtimestamp' => $track->timestamp,
             ];
             $treasurehuntdata[$track->cmid]['track'][] = $trackpoint;
         }
-        
+
         $treasurehunttreasurehunttracks->close();
 
-        foreach ($treasurehuntdata as $cmid=>$data) {
+        foreach ($treasurehuntdata as $cmid => $data) {
             $context = \context_module::instance($cmid);
-            self::_export_treasurehunt_data_for_user($data, $context, $user);          
+            self::export_treasurehunt_data_for_user($data, $context, $user);
         }
     }
 
@@ -249,8 +249,7 @@ class provider implements
      * @param \context_module $context the context of the treasurehunt.
      * @param \stdClass $user the user record
      */
-    protected static function _export_treasurehunt_data_for_user(array $treasurehuntdata, \context_module $context, \stdClass $user)
-    {
+    protected static function export_treasurehunt_data_for_user(array $treasurehuntdata, \context_module $context, \stdClass $user) {
         // Fetch the generic module data for the treasurehunt.
         $contextdata = helper::get_context_data($context, $user);
 
@@ -267,8 +266,7 @@ class provider implements
      *
      * @param \context $context the context to delete in.
      */
-    public static function _delete_data_for_all_users_in_context(\context $context)
-    {
+    public static function delete_data_for_all_users_in_context(\context $context) {
         /** @var moodle_database $DB */
         global $DB;
 
@@ -287,8 +285,7 @@ class provider implements
      *
      * @param approved_contextlist $contextlist a list of contexts approved for deletion.
      */
-    public static function _delete_data_for_user(approved_contextlist $contextlist)
-    {
+    public static function delete_data_for_user(approved_contextlist $contextlist) {
         /** @var moodle_database $DB */
         global $DB;
 
@@ -298,7 +295,6 @@ class provider implements
 
         $userid = $contextlist->get_user()->id;
         foreach ($contextlist->get_contexts() as $context) {
-
             if (!$context instanceof \context_module) {
                 continue;
             }
@@ -307,10 +303,10 @@ class provider implements
                 // Only treasurehunt module will be handled.
                 continue;
             }
-           
+
             $stages = treasurehunt_get_stages($cm->instance, $context);
             $stagesids = array_keys($stages);
-            list($insql,$inparam) = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED, 'stage');
+            [$insql, $inparam] = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED, 'stage');
             $where = "userid = :userid AND stageid $insql";
             $params = ['userid' => $userid] + $inparam;
             $DB->delete_records_select('treasurehunt_attempts', $where, $params);
@@ -323,8 +319,7 @@ class provider implements
      *
      * @param   approved_userlist       $userlist The approved context and user information to delete information for.
      */
-    public static function delete_data_for_users(approved_userlist $userlist)
-    {
+    public static function delete_data_for_users(approved_userlist $userlist) {
         global $DB;
         $context = $userlist->get_context();
         if (!$context instanceof \context_module) {
@@ -336,14 +331,14 @@ class provider implements
             return;
         }
         $userids = $userlist->get_userids();
-        list($usersql, $userparams) = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
+        [$usersql, $userparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED);
         $select = "treasurehuntid = :treasurehuntid AND userid $usersql";
         $params = ['treasurehuntid' => $cm->instance] + $userparams;
         $DB->delete_records_select('treasurehunt_track', $select, $params);
 
         $stages = treasurehunt_get_stages($cm->instance, $context);
         $stagesids = array_keys($stages);
-        list($stagesql, $stageparams) = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED);
+        [$stagesql, $stageparams] = $DB->get_in_or_equal($stagesids, SQL_PARAMS_NAMED);
         $select = "stageid $stagesql AND userid $usersql";
         $params = $stageparams + $userparams;
         $DB->delete_records_select('treasurehunt_attempts', $select, $params);
