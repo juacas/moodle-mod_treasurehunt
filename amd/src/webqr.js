@@ -28,6 +28,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
     var detectedCameras = null;
     var vueApp = null;
     var scannerapp = null;
+    var qrReaderConstraints = [];
     //var currentStream = null;
 
     /**
@@ -111,6 +112,7 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
                     devices: [],
                     selectedDevice: null,
                     currentCameraIndex: 0,
+                    constraint: null,
                     isLoading: true,
                     error: null
                 };
@@ -118,11 +120,12 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
             template: `
                 <div style="position: relative; width: 100%; height: 100%;">
                     <qrcode-stream
-                        v-if="!error && selectedDevice"
-                        :constraints="{ deviceId: selectedDevice.id }"
+                        v-if="!error && constraint"
+                        :constraints="constraint"
                         @detect="onDecode"
                         @init="onInit"
                         @error="onError"
+                        @camera-on="initCameras"
                         :track="paintCenterText"
                         style="width: 100%; height: 100%;"
                     />
@@ -136,85 +139,97 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 </div>
             `,
             mounted: function() {
-                this.initCameras();
+                this.constraint = { facingMode: 'environment' };
             },
             methods: {
                 initCameras: function() {
-                    var self = this;
-                    enumerateVideoInputs()
-                        .then(function(devices) {
-                            // Add default vue-qrcode.reader cameras.
-                            // devices.splice(0, 0, { id: 'environment', name: 'Environment Camera' });
-                            // devices.splice(1, 0, { id: 'user', name: 'User Camera' });
-                            self.devices = devices;
-
-                            detectedCameras = devices;
-                            if (devices.length > 0) {
-                                // Try to find back camera first
-                                var backCameraIndex = -1;
-                                for (var i = 0; i < devices.length; i++) {
-                                    if (devices[i].name && devices[i].name.toLowerCase().indexOf('back') !== -1) {
-                                        backCameraIndex = i;
-                                        break;
-                                    }
-                                }
-                                var initialIndex = backCameraIndex !== -1 ? backCameraIndex : 0;
-
-                                self.selectedDevice = devices[initialIndex];
-                                self.currentCameraIndex = initialIndex;
-                                camera = initialIndex;
-                                self.isLoading = false;
-                                reportcallback({
-                                    camera: initialIndex,
-                                    cameras: devices
+                    if (qrReaderConstraints.length == 0 ) {
+                        // Populate devices.
+                        var self = this;
+                        enumerateVideoInputs()
+                            .then(function(devices) {
+                                self.devices = devices;
+                                 // Add default vue-qrcode.reader cameras.
+                                qrReaderConstraints.push({
+                                    name: 'Environment Camera',
+                                    constraint: { facingMode: 'environment' }
                                 });
-                            } else {
-                                self.error = 'No cameras found';
-                                reportcallback({ code: 0, name: 'NoCameras' });
-                            }
-                        })
-                        .catch(function(err) {
-                            self.error = 'Failed to enumerate cameras';
-                            console.error('Camera enumeration error:', err);
-                            reportcallback(err);
-                        });
+                                qrReaderConstraints.push({
+                                    name: 'User Camera',
+                                    constraint: { facingMode: 'user' }
+                                });
+
+                                detectedCameras = devices;
+                                if (devices.length > 0) {
+                                    // Try to find back camera first
+                                    var backCameraIndex = -1;
+                                    for (var i = 0; i < devices.length; i++) {
+                                        if (devices[i].name && devices[i].name.toLowerCase().indexOf('back') !== -1) {
+                                            backCameraIndex = i;
+                                            break;
+                                        }
+                                        qrReaderConstraints.push({
+                                            name: devices[i].name,
+                                            constraint: { deviceId: devices[i].id }
+                                        });
+                                    }
+                                    var initialIndex = backCameraIndex !== -1 ? backCameraIndex : 0;
+                                    self.constraint = qrReaderConstraints[0].constraint;
+                                    // self.selectedDevice = devices[initialIndex];
+                                    self.currentCameraIndex = initialIndex;
+                                    camera = initialIndex;
+                                    self.isLoading = false;
+                                    reportcallback({
+                                        camera: initialIndex,
+                                        cameras: qrReaderConstraints
+                                    });
+                                } else {
+                                    self.error = 'No cameras found';
+                                    reportcallback({ code: 0, name: 'NoCameras' });
+                                }
+                            })
+                            .catch(function(err) {
+                                self.error = 'Failed to enumerate cameras';
+                                console.error('Camera enumeration error:', err);
+                                reportcallback(err);
+                            });
+                    }
                 },
                 onDecode: function(content) {
                     scancallback(content[0].rawValue);
                 },
-                onInit: function(promise) {
-                    var self = this;
-                    promise
-                        .then(function() {
-                            self.isLoading = false;
-                            self.error = null;
-                        })
-                        .catch(function(error) {
-                            self.isLoading = false;
-                            if (error.name === 'NotAllowedError') {
-                                self.error = 'Camera access denied';
-                            } else if (error.name === 'NotFoundError') {
-                                self.error = 'No camera found';
-                            } else if (error.name === 'NotSupportedError') {
-                                self.error = 'Camera not supported';
-                            } else {
-                                self.error = 'Camera error: ' + error.message;
-                            }
-                            reportcallback(error);
-                        });
-                },
+
                 onError: function(err) {
-                    this.error = 'Scanner error: ' + err.message;
+                    let errorvalue = err.name + ': ';
+                    if (err.name === 'NotAllowedError') {
+                        errorvalue += 'you need to grant camera access permission';
+                    } else if (err.name === 'NotFoundError') {
+                        errorvalue += 'no camera on this device';
+                    } else if (err.name === 'NotSupportedError') {
+                        errorvalue += 'secure context required (HTTPS, localhost)';
+                    } else if (err.name === 'NotReadableError') {
+                        errorvalue += 'is the camera already in use?';
+                    } else if (err.name === 'OverconstrainedError') {
+                        errorvalue += 'installed cameras are not suitable';
+                    } else if (err.name === 'StreamApiNotSupportedError') {
+                        errorvalue += 'Stream API is not supported in this browser';
+                    } else if (err.name === 'InsecureContextError') {
+                        errorvalue += 'Camera access is only permitted in secure context. Use HTTPS or localhost rather than HTTP.';
+                    } else {
+                        errorvalue += err.message;
+                    }
+                    err.code = 1;
+                    err.messagetext = errorvalue;
                     reportcallback(err);
                 },
                 switchCamera: function(deviceIndex) {
-                    if (this.devices[deviceIndex]) {
-                        this.selectedDevice = this.devices[deviceIndex];
+                    if (qrReaderConstraints[deviceIndex]) {
+                        this.constraint = qrReaderConstraints[deviceIndex].constraint;
                         this.currentCameraIndex = deviceIndex;
                         camera = deviceIndex;
                         reportcallback({
                             camera: deviceIndex,
-                            cameras: this.devices
+                            cameras: qrReaderConstraints
                         });
                     }
                 },
@@ -324,19 +339,18 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             } else if (typeof (info) === 'object') {
                 if (info.name == 'NotAllowedError' || info.code == 0) {
                     notification.addNotification({
-                        message: $('#errorQR').text(),
+                        message: $('#errorQR').text() + "<p>(" + info.messagetext + ")</p>",
                         type: "error"
                     });
                     $('#previewQR').hide();
                     $('#QRStatusDiv').hide();
                 } else {
-                    this.updateVideoPreview();
                     let cam = info.camera;
                     if (info.cameras && info.cameras[cam] && info.cameras[cam].name !== null) {
                         $('#QRvalue').text(info.cameras[cam].name);
                     }
                     $('#previewQR').show();
-                    let nextcamera = this.getnextwebCam();
+                    let nextcamera = this.getnextwebCamIndex();
                     if (nextcamera != cam) {
                         if (info.cameras[nextcamera] && info.cameras[nextcamera].name !== null) {
                             $('#idbuttonnextcam')
@@ -411,7 +425,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 } else {
                     let cam = info.camera;
                     $('#QRvalue').text(cam + ":" + info.cameras[cam].name);
-                    let nextcamera = (cam + 1) % info.cameras.length;
+                    let nextcamera = this.getnextwebCamIndex();
                     if (nextcamera != cam) {
                         $('#idbuttonnextcam')
                             .text(nextcamera + ":" + info.cameras[nextcamera].name);
@@ -423,21 +437,6 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        updateVideoPreview: function() {
-            // let videopreview = $('#previewQRvideo');
-            // let parent = videopreview.closest('div');
-            // let maxwidth = parent.width();
-            // let maxheight = parent.height();
-
-            // let width = videopreview.width();
-            // let height = videopreview.height();
-            // if (width / height > maxwidth / maxheight) {
-            //     videopreview.width(maxwidth);
-            // } else {
-            //     videopreview.height(maxheight);
-            // }
-            // videopreview.css('display', 'block');
-        },
 
         unloadQR: function (errorcallback) {
             // Vue cleanup
@@ -483,74 +482,31 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        getnextwebCam: function () {
-            return detectedCameras === null || camera === -1 ? 0 : (camera + 1) % detectedCameras.length;
-        },
-
-        getbackCam: function () {
-            var nextcamera = this.getnextwebCam();
-            if (detectedCameras !== null && detectedCameras.length > 1) {
-                for (var i = 0; i < detectedCameras.length; i++) {
-                    if (detectedCameras[i].name !== null
-                        && detectedCameras[i].name.toLowerCase().indexOf('back') != -1) {
-                        nextcamera = i;
-                    }
-                }
-            }
-            return nextcamera;
+        getnextwebCamIndex: function () {
+            return camera === -1 ? 0 : (camera + 1) % qrReaderConstraints.length;
         },
 
         setnextwebcam: function (reportcallback) {
-            let nextcamera = this.getnextwebCam();
-            if (camera != nextcamera) {
-                if (detectedCameras !== null) {
-                    try {
-                        this.selectCamera(detectedCameras, nextcamera, reportcallback);
-                    } catch (e) {
-                        console.error(e);
-                        reportcallback(e.message);
-                    }
-                } else {
-                    enumerateVideoInputs().then(function (cameras) {
-                        detectedCameras = cameras;
-                        try {
-                            webqr.selectCamera(cameras, nextcamera, reportcallback);
-                        } catch (e) {
-                            console.error(e);
-                            reportcallback(e.message);
-                        }
-                    }).catch(function(e) {
-                        console.error(e);
-                        reportcallback(e.message);
-                    });
+            let nextcameraindex = this.getnextwebCamIndex();
+            if (camera != nextcameraindex) {
+                try {
+                    this.selectCamera( nextcameraindex, reportcallback);
+                } catch (e) {
+                    console.error(e);
+                    reportcallback(e.message);
                 }
             }
         },
 
-        selectCamera: function (cameras, nextcamera, reportcallback) {
-            if (cameras.length > 0) {
-                // Try to select back camera by name if starting fresh
-                if (camera == -1 && cameras.length > 1) {
-                    for (var i = 0; i < cameras.length; i++) {
-                        if (cameras[i].name !== null
-                            && cameras[i].name.toLowerCase().indexOf('back') != -1) {
-                            nextcamera = i;
-                        }
-                    }
-                }
-                camera = nextcamera;
-
+        selectCamera: function (nextcameraindex, reportcallback) {
                 // Switch camera using Vue component
                 if (vueApp && vueApp.switchCamera) {
-                    vueApp.switchCamera(nextcamera);
+                    vueApp.switchCamera(nextcameraindex);
                 } else {
                     console.warn('Vue app or switchCamera method not available');
                     reportcallback("Error: Vue component not properly initialized");
                 }
-            } else {
-                console.error('No cameras found.');
-                reportcallback("No cameras found.");
-            }
+
         }
     };
 

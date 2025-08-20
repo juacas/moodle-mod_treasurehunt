@@ -2371,8 +2371,8 @@ function treasurehunt_clear_activities($treasurehuntid) {
 function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
     // $page->requires->js(new moodle_url('https://unpkg.com/vue@3/dist/vue.global.prod.js'), false);
     // $page->requires->js(new moodle_url('https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js'));
-    $page->requires->js(new moodle_url('/mod/treasurehunt/js/vue.global.prod.js'), true);
-    $page->requires->js(new moodle_url('/mod/treasurehunt/js/vue-qrcode-reader.umd.js'), true);
+    echo '<script src="js/vue.global.prod.js"></script>';
+    echo '<script src="js/vue-qrcode-reader.umd.js"></script>';
     $page->requires->js_call_amd(
         'mod_treasurehunt/webqr',
         $initfunction,
