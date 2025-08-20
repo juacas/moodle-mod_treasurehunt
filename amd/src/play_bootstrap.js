@@ -1601,7 +1601,7 @@ function initplaytreasurehunt(
     let modals = null;
     if (id) {
       modals = $(id);
-      if (modals.hasClass(".play-modal.active") === false) {
+      if (!modals.hasClass("play-modal") || !modals.hasClass("active")) {
         // If the modal is not active, do nothing.
         return;
       }

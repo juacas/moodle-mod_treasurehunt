@@ -92,8 +92,7 @@ class stage_form extends moodleform {
                         get_string('changecamera', 'treasurehunt') . '</button>' .
                         '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
                     '</center>' .
-                '</div>',
-            '</div>'
+                '</div>'
         );
 
         $mform->addElement(
