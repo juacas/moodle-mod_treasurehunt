@@ -29,7 +29,6 @@ import viewgpx from "mod_treasurehunt/viewgpx";
 import { get_strings as getStrings, get_string as getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
 // Side‑effect only imports
-import "mod_treasurehunt/jquery.truncate";
 import "mod_treasurehunt/dropdown";
 
 /**
@@ -1595,10 +1594,20 @@ function initplaytreasurehunt(
     modal.trigger("modal:open");
   }
   /**
-   * Close all active modals.
+   * Close a modal or all active modals.
+   * @param {string} id The id of the modal to close. If not provided, closes all active modals.
    */
-  function closeModal() {
-    const modals = $(".play-modal.active");
+  function closeModal(id) {
+    let modals = null;
+    if (id) {
+      modals = $(id);
+      if (modals.hasClass(".play-modal.active") === false) {
+        // If the modal is not active, do nothing.
+        return;
+      }
+    } else {
+      modals = $(".play-modal.active");
+    }
     // Remove active class from all modals.
     modals.removeClass("active");
     $(".modal-mask").removeClass("active dismissible");

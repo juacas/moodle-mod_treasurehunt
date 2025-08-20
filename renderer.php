@@ -331,10 +331,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
             $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
             $o .= '<div  id="previewQR" width = "100%" style="min-height:200px; max-height:500px">
-            <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
+            <center><div id="previewQRdiv"></div></center>
             </div>
             <div id="QRvalue"></div>' .
-                '<button style="display:none" onclick="setnextwebcam(testFormReport)" id="idbuttonnextcam">' .
+                '<button style="display:none" onclick="return false;" id="idbuttonnextcam">' .
                 get_string('changecamera', 'treasurehunt') . '</button>';
             $o .= '</div>';
             $o .= '<div id="errorQR" style="display: none" >'

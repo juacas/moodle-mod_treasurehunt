@@ -84,7 +84,7 @@ class mobile {
         $completion->set_module_viewed($cm);
 
         // Conditions to show the intro can change to look for own settings or whatever.
-        if (treasurehunt_view_intro($treasurehunt)) {
+        if (treasurehunt_should_view_intro($treasurehunt)) {
             $treasurehunt->intro = format_module_intro('treasurehunt', $treasurehunt, $cm->id);
         } else {
             $treasurehunt->intro = '';

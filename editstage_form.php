@@ -84,16 +84,16 @@ class stage_form extends moodleform {
             . get_string('scanQR_generatebutton', 'treasurehunt') . '</button>' .
                 '<button id="id_scanQR" onclick="return false;" style="display:inline">'
                 . get_string('scanQR_scanbutton', 'treasurehunt') . '</button>' .
-                '<div  id="previewQR" style="display:none">' .
-                '<div  id="previewQRdiv" width = "100%" style="min-height:200px; max-height:500px">
-                <center><video playsinline id="previewQRvideo" style="display:none" height="200"></video></center>
-                </div>' .
-                '<center>' .
-                '<div id="QRvalue"></div>' .
-                '<button style="display:none" onclick="return false;" id="idbuttonnextcam"' .
-                get_string('changecamera', 'treasurehunt') . '</button>' .
-                '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
-            '</center></div>'
+                '<div  id="previewQR" >' .
+                    '<div  id="previewQRdiv"></div>' .
+                    '<center>' .
+                        '<div id="QRvalue"></div>' .
+                        '<button style="display:none" onclick="return false;" id="idbuttonnextcam"' .
+                        get_string('changecamera', 'treasurehunt') . '</button>' .
+                        '<button id="id_stopQR" onclick="return false;" style="display:none">Stop</button>' .
+                    '</center>' .
+                '</div>',
+            '</div>'
         );
 
         $mform->addElement(

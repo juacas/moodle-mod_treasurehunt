@@ -2125,7 +2125,7 @@ function treasurehunt_get_last_location($treasurehunt, $userid) {
     $sql = 'SELECT location from {treasurehunt_track} WHERE treasurehuntid=? and userid=? order by timestamp desc limit 1';
     $location = $DB->get_record_sql($sql, ['treasurehuntid' => $treasurehunt->id, 'userid' => $userid]);
     if ($location) {
-        return treasurehunt_wkt_to_object($location);
+        return treasurehunt_wkt_to_object($location->location);
     } else {
         return null;
     }
@@ -2369,6 +2369,10 @@ function treasurehunt_clear_activities($treasurehuntid) {
  * @param string global function name to initialice the code.
  */
 function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
+    // $page->requires->js(new moodle_url('https://unpkg.com/vue@3/dist/vue.global.prod.js'), false);
+    // $page->requires->js(new moodle_url('https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js'));
+    echo '<script src="js/vue.global.prod.js"></script>';
+    echo '<script src="js/vue-qrcode-reader.umd.js"></script>';
     $page->requires->js_call_amd(
         'mod_treasurehunt/webqr',
         $initfunction,
@@ -2563,7 +2567,7 @@ function treasurehunt_get_road_userlist($data, $userlist, $attempts) {
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @return bool True/false
  */
-function treasurehunt_view_intro($treasurehunt) {
+function treasurehunt_should_view_intro($treasurehunt) {
     if ($treasurehunt->alwaysshowdescription || time() > $treasurehunt->allowattemptsfromdate) {
         return true;
     }
