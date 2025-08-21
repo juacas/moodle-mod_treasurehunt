@@ -48,7 +48,7 @@ let init = {
     let terms = ["stageovercome", "failedlocation", "stage", "stagename", "stageclue",
       "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
       "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-      "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror"
+      "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
     ];
     // console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
@@ -1441,11 +1441,8 @@ function initplaytreasurehunt(
   });
 
   $("#nextcamera").on("click", () => {
-    let detectedCameras = webqr.getDetectedCameras();
-    if (detectedCameras !== null) {
-      const nextcam = webqr.getnextwebCam();
-      toast("Give access to:" + detectedCameras[nextcam].name);
-    }
+    const nextcamIndex = webqr.getnextwebCamIndex();
+    toast("Changing to:" + webqr.getCamName(nextcamIndex));
     webqr.setnextwebcam(qrReport);
   });
 
@@ -1694,9 +1691,9 @@ function initplaytreasurehunt(
   function qrReport(message) {
     if (typeof message == "string") {
       $("#errorQR").text(message);
-    } else {
-      if (message.cameras[message.camera].name !== null) {
-        $("#errorQR").text(message.cameras[message.camera].name);
+    } else if (message.cameraIndex !== undefined) {
+      if (message.cameras[message.cameraIndex].name !== null) {
+        $("#errorQR").text(message.cameras[message.cameraIndex].name);
       }
       // hide/show next camera button.
       if (message.cameras.length > 1) {
@@ -1704,6 +1701,11 @@ function initplaytreasurehunt(
       } else {
         $("#nextcamera").hide();
       }
+    } else {
+      getString('warnqrscannererror', 'treasurehunt', '').then((msg) => {
+        $("#errorQR").text(msg);
+        $("#previewQRdiv").html(message.messagetext);
+      });
     }
   }
 }

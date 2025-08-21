@@ -141,6 +141,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             },
             methods: {
                 initCameras: function() {
+                    this.isLoading = false;
                     if (qrReaderConstraints.length == 0 ) {
                         // Populate devices.
                         var self = this;
@@ -175,7 +176,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                     cameraIndex = initialIndex;
                                     self.isLoading = false;
                                     reportcallback({
-                                        camera: initialIndex,
+                                        cameraIndex: initialIndex,
                                         cameras: qrReaderConstraints
                                     });
                                 } else {
@@ -213,7 +214,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     } else {
                         errorvalue += err.message;
                     }
-                    err.code = 1;
+                    err.code = 0;
                     err.messagetext = errorvalue;
                     reportcallback(err);
                 },
@@ -223,7 +224,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                         this.currentCameraIndex = deviceIndex;
                         cameraIndex = deviceIndex;
                         reportcallback({
-                            camera: deviceIndex,
+                            cameraIndex: deviceIndex,
                             cameras: qrReaderConstraints
                         });
                     } else {
@@ -346,7 +347,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     if (nextcamera != cam) {
                         if (info.cameras[nextcamera] && info.cameras[nextcamera].name !== null) {
                             $('#idbuttonnextcam')
-                                .text(nextcamera + ":" + info.cameras[nextcamera].name);
+                                .text("Change to " + webqr.getCamName(nextcamera));
                         }
                         $('#idbuttonnextcam').show();
                     } else {
@@ -397,8 +398,8 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
         },
         handleScanEditStage: function () {
             this.loadQR(function (value) {
-                            $('#id_qrtext').val(value);
-                        }.bind(this),
+                $('#id_qrtext').val(value);
+            }.bind(this),
             this.reportEditForm.bind(this));
 
             $('#previewQR').show();
@@ -417,15 +418,19 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 $('#idbuttonnextcam').hide();
             } else if (typeof (info) === 'object') {
                 if (info.code == 0) {
-                    str.get_string('warnqrscannererror', 'treasurehunt');
-                    $('#outQRCode').text('Camera access error!');
-                } else {
-                    let cam = info.cameraIndex;
-                    $('#QRvalue').text(cam + ":" + info.cameras[cam].name);
-                    let nextcamera = this.getnextwebCamIndex();
-                    if (nextcamera != cam) {
+                    str.get_string('warnqrscannererror', 'treasurehunt', '').then( (msg) => {
+                        notification.addNotification({
+                            message: msg + "<p>" + info.messagetext + "</p>",
+                            type: 'error'
+                        });
+                    });
+                } else if (info.cameraIndex !== undefined) {
+                    let camIndex = info.cameraIndex;
+                    $('#QRvalue').text(camIndex + ":" + info.cameras[camIndex].name);
+                    let nextcameraIndex = this.getnextwebCamIndex();
+                    if (nextcameraIndex != camIndex) {
                         $('#idbuttonnextcam')
-                            .text(nextcamera + ":" + info.cameras[nextcamera].name);
+                            .text("Change to " + info.cameras[nextcameraIndex].name);
                         $('#idbuttonnextcam').show();
                     } else {
                         $('#idbuttonnextcam').hide();
@@ -481,7 +486,9 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
         getnextwebCamIndex: function () {
             return cameraIndex === -1 ? 0 : (cameraIndex + 1) % qrReaderConstraints.length;
         },
-
+        getCamName: function (index) {
+            return qrReaderConstraints[index] ? qrReaderConstraints[index].name : 'Unknown Camera';
+        },
         setnextwebcam: function (reportcallback) {
             let nextcameraindex = this.getnextwebCamIndex();
             if (cameraIndex != nextcameraindex) {
