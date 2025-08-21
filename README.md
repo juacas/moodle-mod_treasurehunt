@@ -11,7 +11,6 @@ Installation
 3. configure default settings for your site
 4. use in any course as wished
 
-
 Operation
 ==========
 
@@ -21,7 +20,7 @@ Operation
 4. write smart and educational clues that point to the next stage. Optinally, write a multiple-chice question to double-check the discovery of the stage
 5. draw the location of the stages with th buil-in GIS editor
 6. select the modality of the treasure hunt: individual or grouped (you will need to create the groups and groupings of students).
-7. configure the map elements for the player webapp.
+7. configure the map elements and hints for the player webapp.
 8. adjust the grading method and penalizations.
 9. let your students play the game.
 
@@ -35,12 +34,13 @@ See also
 
 Change log
 ==========
+ - v2.0.0 New QR Scanner library. Correctly supports both cameras on IOS devices.
  - v1.9.0 Support availability/treasurehunt (https://github.com/juacas/moodle-availability_treasurehunt). Support stage hints (direction, distance, "insideness").
  - v1.8.2 Trigger Clue dialog after each notification. Preview mode for teachers.
  - v1.8.1 Fix compatibility with some themes and fix deprecated code in moodle and php 8.
  - v1.8.0 Moodle 5.0 release. Add support for overview api.
  - v1.7.1 Improve SVG static images. Fix aspect ratio of images to ensure that SVG are rendered vectorial.
- - v1.7.0 Add XYZ Tiled layers. Fancy style deprecated (jquerymobile is not supported anymore). 
+ - v1.7.0 Add XYZ Tiled layers. Fancy style deprecated (jquerymobile is not supported anymore).
  - v1.6.1 Moodle 4.5 compatibility. Player style classic deprecated.
  - v1.6.0 Support of Freeze contexts.
  - v1.5.8 Fix polyfill obsolete library.
