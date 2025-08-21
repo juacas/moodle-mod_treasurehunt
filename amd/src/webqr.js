@@ -24,8 +24,7 @@
 define(['jquery', 'core/notification', 'core/str'], function ($, notification, str) {
     'use strict';
 
-    var camera = -1;
-    var detectedCameras = null;
+    var cameraIndex = -1;
     var vueApp = null;
     var scannerapp = null;
     var qrReaderConstraints = [];
@@ -109,7 +108,6 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
         scannerapp = Vue.createApp({
             data: function() {
                 return {
-                    devices: [],
                     selectedDevice: null,
                     currentCameraIndex: 0,
                     constraint: null,
@@ -148,7 +146,6 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                         var self = this;
                         enumerateVideoInputs()
                             .then(function(devices) {
-                                self.devices = devices;
                                  // Add default vue-qrcode.reader cameras.
                                 qrReaderConstraints.push({
                                     name: 'Environment Camera',
@@ -159,7 +156,6 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                     constraint: { facingMode: 'user' }
                                 });
 
-                                detectedCameras = devices;
                                 if (devices.length > 0) {
                                     // Try to find back camera first
                                     var backCameraIndex = -1;
@@ -175,9 +171,8 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                     }
                                     var initialIndex = backCameraIndex !== -1 ? backCameraIndex : 0;
                                     self.constraint = qrReaderConstraints[0].constraint;
-                                    // self.selectedDevice = devices[initialIndex];
                                     self.currentCameraIndex = initialIndex;
-                                    camera = initialIndex;
+                                    cameraIndex = initialIndex;
                                     self.isLoading = false;
                                     reportcallback({
                                         camera: initialIndex,
@@ -226,10 +221,16 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     if (qrReaderConstraints[deviceIndex]) {
                         this.constraint = qrReaderConstraints[deviceIndex].constraint;
                         this.currentCameraIndex = deviceIndex;
-                        camera = deviceIndex;
+                        cameraIndex = deviceIndex;
                         reportcallback({
                             camera: deviceIndex,
                             cameras: qrReaderConstraints
+                        });
+                    } else {
+                        reportcallback({
+                            code: 0,
+                            name: 'InvalidCameraIndex',
+                            message: 'Invalid camera index: ' + deviceIndex
                         });
                     }
                 },
@@ -299,9 +300,6 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
     // webQR functions
     var webqr = {
-        getDetectedCameras: function() {
-            return detectedCameras;
-        },
 
         setup: function () {
             // Check for Vue availability
@@ -319,20 +317,14 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 }
             });
             if (cook["QRScanPassed"] != 'Done') {
-                var qr_callback = function (value) {
-                    document.cookie = "QRScanPassed = Done";
-                    this.unloadQR(function () {
-                        $('#QRStatusDiv').html(successString + " - " + value);
-                    });
-                }.bind(this);
-                $('#idbuttonnextcam').click(() => this.setnextwebcam(this.testFormReport.bind(this)));
-                this.loadQR(qr_callback, this.testFormReport.bind(this));
+                $('#idbuttonnextcam').click(() => this.setnextwebcam(this.reportTestForm.bind(this)));
+                this.loadQR(this.handleScanTest.bind(this, successString), this.reportTestForm.bind(this));
             } else {
                 $('#QRStatusDiv').html(successString);
             }
         },
 
-        testFormReport: function (info) {
+        reportTestForm: function (info) {
             if (typeof (info) === 'string') {
                 $('#QRvalue').text(info);
                 $('#previewQR').hide();
@@ -345,7 +337,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     $('#previewQR').hide();
                     $('#QRStatusDiv').hide();
                 } else {
-                    let cam = info.camera;
+                    let cam = info.cameraIndex;
                     if (info.cameras && info.cameras[cam] && info.cameras[cam].name !== null) {
                         $('#QRvalue').text(info.cameras[cam].name);
                     }
@@ -368,7 +360,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             $('#id_generateQR').click(this.handleGenerateQR.bind(this));
             $('#id_stopQR').click(this.handleStopQR.bind(this));
             $('#id_scanQR').click(this.handleScanEditStage.bind(this));
-            $('#idbuttonnextcam').click(() => this.setnextwebcam(this.editFormReport.bind(this)));
+            $('#idbuttonnextcam').click(() => this.setnextwebcam(this.reportEditForm.bind(this)));
         },
 
         handleGenerateQR: function () {
@@ -397,12 +389,17 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             $('#id_scanQR').show();
             return false;
         },
-
+        handleScanTest: function (successString, value) {
+            document.cookie = "QRScanPassed = Done";
+            this.unloadQR(function () {
+                $('#QRStatusDiv').html(successString + " - " + value);
+            });
+        },
         handleScanEditStage: function () {
             this.loadQR(function (value) {
                             $('#id_qrtext').val(value);
                         }.bind(this),
-            this.editFormReport.bind(this));
+            this.reportEditForm.bind(this));
 
             $('#previewQR').show();
             $('#previewQRdiv').show();
@@ -411,7 +408,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             return false;
         },
 
-        editFormReport: function (info) {
+        reportEditForm: function (info) {
             if (typeof (info) === 'string') {
                 $('#QRvalue').text(info);
                 $('#id_stopQR').hide();
@@ -423,7 +420,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     str.get_string('warnqrscannererror', 'treasurehunt');
                     $('#outQRCode').text('Camera access error!');
                 } else {
-                    let cam = info.camera;
+                    let cam = info.cameraIndex;
                     $('#QRvalue').text(cam + ":" + info.cameras[cam].name);
                     let nextcamera = this.getnextwebCamIndex();
                     if (nextcamera != cam) {
@@ -451,8 +448,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             console.debug('Vue QR app unloaded');
 
             // Reset state
-            camera = -1;
-            detectedCameras = null;
+            cameraIndex = -1;
 
             let videopreview = $('#previewQR');
             videopreview.hide();
@@ -483,17 +479,17 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
         },
 
         getnextwebCamIndex: function () {
-            return camera === -1 ? 0 : (camera + 1) % qrReaderConstraints.length;
+            return cameraIndex === -1 ? 0 : (cameraIndex + 1) % qrReaderConstraints.length;
         },
 
         setnextwebcam: function (reportcallback) {
             let nextcameraindex = this.getnextwebCamIndex();
-            if (camera != nextcameraindex) {
+            if (cameraIndex != nextcameraindex) {
                 try {
                     this.selectCamera( nextcameraindex, reportcallback);
                 } catch (e) {
                     console.error(e);
-                    reportcallback(e.message);
+                    reportcallback(e);
                 }
             }
         },
@@ -504,7 +500,11 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                     vueApp.switchCamera(nextcameraindex);
                 } else {
                     console.warn('Vue app or switchCamera method not available');
-                    reportcallback("Error: Vue component not properly initialized");
+                    reportcallback({
+                        code: 0,
+                        name: 'VueNotInitialized',
+                        message: "Error: Vue component not properly initialized"
+                    });
                 }
 
         }
