@@ -29,7 +29,6 @@ import viewgpx from "mod_treasurehunt/viewgpx";
 import { get_strings as getStrings, get_string as getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
 // Side‑effect only imports
-import "mod_treasurehunt/jquery.truncate";
 import "mod_treasurehunt/dropdown";
 
 /**
@@ -49,7 +48,7 @@ let init = {
     let terms = ["stageovercome", "failedlocation", "stage", "stagename", "stageclue",
       "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
       "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
-      "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror"
+      "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
     ];
     // console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
@@ -1442,11 +1441,8 @@ function initplaytreasurehunt(
   });
 
   $("#nextcamera").on("click", () => {
-    let detectedCameras = webqr.getDetectedCameras();
-    if (detectedCameras !== null) {
-      const nextcam = webqr.getnextwebCam();
-      toast("Give access to:" + detectedCameras[nextcam].name);
-    }
+    const nextcamIndex = webqr.getnextwebCamIndex();
+    toast("Changing to:" + webqr.getCamName(nextcamIndex));
     webqr.setnextwebcam(qrReport);
   });
 
@@ -1595,10 +1591,20 @@ function initplaytreasurehunt(
     modal.trigger("modal:open");
   }
   /**
-   * Close all active modals.
+   * Close a modal or all active modals.
+   * @param {string} id The id of the modal to close. If not provided, closes all active modals.
    */
-  function closeModal() {
-    const modals = $(".play-modal.active");
+  function closeModal(id) {
+    let modals = null;
+    if (id) {
+      modals = $(id);
+      if (!modals.hasClass("play-modal") || !modals.hasClass("active")) {
+        // If the modal is not active, do nothing.
+        return;
+      }
+    } else {
+      modals = $(".play-modal.active");
+    }
     // Remove active class from all modals.
     modals.removeClass("active");
     $(".modal-mask").removeClass("active dismissible");
@@ -1685,9 +1691,9 @@ function initplaytreasurehunt(
   function qrReport(message) {
     if (typeof message == "string") {
       $("#errorQR").text(message);
-    } else {
-      if (message.cameras[message.camera].name !== null) {
-        $("#errorQR").text(message.cameras[message.camera].name);
+    } else if (message.cameraIndex !== undefined) {
+      if (message.cameras[message.cameraIndex].name !== null) {
+        $("#errorQR").text(message.cameras[message.cameraIndex].name);
       }
       // hide/show next camera button.
       if (message.cameras.length > 1) {
@@ -1695,6 +1701,11 @@ function initplaytreasurehunt(
       } else {
         $("#nextcamera").hide();
       }
+    } else {
+      getString('warnqrscannererror', 'treasurehunt', '').then((msg) => {
+        $("#errorQR").text(msg);
+        $("#previewQRdiv").html(message.messagetext);
+      });
     }
   }
 }

@@ -15,20 +15,6 @@
 		<licenseversion>n/a</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/jquery-ui-touch-punch.js</location>
-		<name>jQuery UI Touch Punch</name>
-		<version>0.2.3</version>
-		<license>GPL</license>
-		<licenseversion>2.0</licenseversion>
-	</library>
-	<library>
-		<location>amd/src/jquerymobile.js</location>
-		<name>jQuery Mobile</name>
-		<version>1.4.5</version>
-		<license>Expat</license>
-		<licenseversion>n/a</licenseversion>
-	</library>
-	<library>
 		<location>GeoJSON</location>
 		<name>GeoJSON</name>
 		<version>n/a</version>
@@ -51,20 +37,29 @@
 		<licenseversion>2013</licenseversion>
 		<!-- jquery.nicescroll 3.2.0 InuYaksa*2013 MIT http://areaaperta.com/nicescroll -->
 	</library>
+
 	<library>
-		<location>amd/src/jquery.truncate.js</location>
-		<name>jquery.truncate</name>
-		<version>0.0.1</version>
+		<location>js/vue.global.prod.js</location>
+		<name>Vue</name>
+		<version>v3.5.18</version>
 		<license>MIT</license>
-		<licenseversion>2012</licenseversion>
-		<!-- Pathable	https://github.com/pathable/truncate -->
+		<licenseversion>2017</licenseversion>
+		<!--   Copyright 2018 Yuxi (Evan) https://vuejs.org/ package: https://unpkg.com/vue@3/dist/vue.global.prod.js-->
 	</library>
 	<library>
-		<location>amd/src/instascan.js</location>
-		<name>INSTASCAN</name>
-		<version>1.0.0</version>
+		<location>js/vue-qrcode-reader.umd.js</location>
+		<name>Vue-QrCode_reader</name>
+		<version>v5.7.3</version>
 		<license>MIT</license>
-		<licenseversion>2016</licenseversion>
-		<!--   Copyright 2016 Chris Schmich https://github.com/schmich/instascan -->
+		<licenseversion>2017</licenseversion>
+		<!--   Copyright 2018 Niklas Gruhn https://github.com/gruhn/vue-qrcode-reader package: https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js -->
+	</library>
+	<library>
+		<location>js/zxing_reader.wasm</location>
+		<name>ZXing Reader Wasm build</name>
+		<version>1.1.3</version>
+		<license>Apache</license>
+		<licenseversion>2.0</licenseversion>
+		<!--   Copyright 2018 Ze-Zheng Wu https://github.com/Sec-ant/zxing-wasm package: https://fastly.jsdelivr.net/npm/zxing-wasm@1.1.3/dist/reader/zxing_reader.wasm -->
 	</library>
 </libraries>

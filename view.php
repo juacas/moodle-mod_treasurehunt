@@ -70,7 +70,7 @@ if ($CFG->version < 2022112800) { // Moodle 4 renders the heading and the descri
         $output->help_icon('modulename', 'treasurehunt')
     );
     // Conditions to show the intro can change to look for own settings or whatever.
-    if (treasurehunt_view_intro($treasurehunt)) {
+    if (treasurehunt_should_view_intro($treasurehunt)) {
         echo $output->box(
             format_module_intro('treasurehunt', $treasurehunt, $cm->id),
             'generalbox mod_introbox',
