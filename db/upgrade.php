@@ -190,5 +190,49 @@ function xmldb_treasurehunt_upgrade($oldversion) {
             $dbman->rename_field($table, $field, 'customplayerconfig');
         }
     }
+    // Add descriptiontext field.
+    if ($oldversion < 2025082500) {
+        $table = new xmldb_table('treasurehunt_stages');
+        $field = new xmldb_field(
+            'descriptiontext',
+            XMLDB_TYPE_TEXT,
+            null,
+            null,
+            false,
+            null,
+            '',
+            'cluetexttrust'
+        );
+        // Conditionally launch add field descriptiontext.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field(
+            'descriptiontextformat',
+            XMLDB_TYPE_INTEGER,
+            2,
+            null,
+            XMLDB_NOTNULL,
+            null,
+            0,
+            'descriptiontext'
+        );
+        // Conditionally launch add field descriptiontextformat.
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+        $field = new xmldb_field(
+            'descriptiontexttrust',
+            XMLDB_TYPE_INTEGER,
+            2,
+            null,
+            XMLDB_NOTNULL,
+            null,
+            0,
+            'descriptiontextformat'
+        );
+        // Treasurehunt savepoint reached.
+        upgrade_mod_savepoint(true, 2025082500, 'treasurehunt');
+    }
     return true;
 }

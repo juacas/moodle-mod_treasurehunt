@@ -59,9 +59,12 @@
                 <FIELD NAME="name" TYPE="char" LENGTH="255" NOTNULL="true" SEQUENCE="false" COMMENT="Name field for each stage"/>
                 <FIELD NAME="roadid" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifying the road created"/>
                 <FIELD NAME="position" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false" COMMENT="Order of the stages in every road. Every road starts with stage position = 1"/>
-                <FIELD NAME="cluetext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Clue to reach the next stage"/>
+                <FIELD NAME="cluetext" TYPE="text" NOTNULL="true" SEQUENCE="false" DEFAULT="" COMMENT="Text shown after solving. Maybe, clue to reach the next stage"/>
                 <FIELD NAME="cluetextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="cluetexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="descriptiontext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Text shown before solving. Maybe, clue to reach this stage."/>
+                <FIELD NAME="descriptiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="descriptiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playstagewithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true, students can play from their computers without moving to places only during the performance of the stage associated. Then it will continue using the game settings"/>
@@ -70,7 +73,7 @@
                 <FIELD NAME="questiontextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="questiontexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="qrtext" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Text to be readed by a QR scanner."/>
-                <FIELD NAME="geom" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep stage geometry"/>                
+                <FIELD NAME="geom" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Keep stage geometry"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
@@ -105,7 +108,7 @@
             <INDEXES>
                 <INDEX NAME="success" UNIQUE="false" FIELDS="success"/>
             </INDEXES>
-        </TABLE>     
+        </TABLE>
         <TABLE NAME="treasurehunt_locks" COMMENT="Manages edition locks of treasurehunt.">
             <FIELDS>
                 <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" SEQUENCE="true"/>
@@ -125,10 +128,10 @@
                 <FIELD NAME="stageid" TYPE="int" LENGTH="10" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Identifiying stage's question"/>
                 <FIELD NAME="answertext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="General text of the answer"/>
                 <FIELD NAME="answertextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="answertexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>                
+                <FIELD NAME="answertexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
-                <FIELD NAME="correct" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the answer is correct"/>            
+                <FIELD NAME="correct" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true the answer is correct"/>
             </FIELDS>
             <KEYS>
                 <KEY NAME="primary" TYPE="primary" FIELDS="id"/>

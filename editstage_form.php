@@ -173,7 +173,19 @@ class stage_form extends moodleform {
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
         $mform->addRule('cluetext_editor', null, 'required', null, 'client');
-        // Anado los campos ocultos.
+        // Adding the standard "descriptiontext" and "descriptiontextformat" fields.
+        // This is the text shown before solving the stage when in random mode.
+        $mform->addElement(
+            'editor',
+            'descriptiontext_editor',
+            get_string('stagedescription', 'treasurehunt'),
+            null,
+            $editoroptions
+        );
+        $mform->addHelpButton('descriptiontext_editor', 'stagedescription', 'treasurehunt');
+        $mform->setType('descriptiontext_editor', PARAM_RAW);
+        $mform->addRule('descriptiontext_editor', null, 'required', null, 'client');
+        // Add hidden fields.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
         $mform->addElement('hidden', 'id');
