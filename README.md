@@ -34,6 +34,7 @@ See also
 
 Change log
 ==========
+ - v2.0.1 Fix a bug that prevented to edit roads if library jqueryui is not loaded in time.
  - v2.0.0 New QR Scanner library. Correctly supports both cameras on IOS devices.
  - v1.9.0 Support availability/treasurehunt (https://github.com/juacas/moodle-availability_treasurehunt). Support stage hints (direction, distance, "insideness").
  - v1.8.2 Trigger Clue dialog after each notification. Preview mode for teachers.

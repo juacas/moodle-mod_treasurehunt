@@ -22,6 +22,7 @@
  * @license http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 import $ from "jquery";
+import "jqueryui";
 import ol from "mod_treasurehunt/ol";
 import ajax from "core/ajax";
 import notification from "core/notification";

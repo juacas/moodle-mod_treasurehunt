@@ -17,6 +17,7 @@
  * QR scanner integration using vue-qrcode-reader.
  *
  * @package
+ * @module mod_treasurehunt/webqr
  * @copyright 2018-2025 Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
