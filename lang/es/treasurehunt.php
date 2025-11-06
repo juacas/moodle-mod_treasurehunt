@@ -243,6 +243,8 @@ $string['locktimeediting_help'] = 'Tiempo en segundos durante el cual un usuario
 renovar el bloqueo. Cuanto más grande es, menos peticiones de renovación deben hacerse,
 pero más tiempo queda bloqueada la página de edición una vez que el usuario termine.
 Debe ser mayor a 5 segundos, sino se fijará el tiempo por defecto.';
+$string['managereturnlinktolockedactivities'] = 'Añadir a las actividades bloqueadas un enlace de retorno';
+$string['managereturnlinktolockedactivities_help'] = 'Si está habilitado, cuando se aplique una restricción de actividad desde este formulario, se añadirá un texto con un enlace en el campo de descripción de la actividad, de forma que el usuario pueda volver fácilmente a la actividad de la Caza del Tesoro.';
 $string['map_tour'] = 'En el mapa se ven y gestionan todas las localizaciones de las etapas de un juego. Las etapas están numeradas para identificarlas facilmente.';
 $string['mapplay_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="pix/success_mark.png" width="28"/><br>Los fallidos: <img src="pix/failure_mark.png" width="28"/>';
 $string['mapplaymobile_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!<br>Los exitosos: <img src="{$a->successurl}" width="28"/><br>Los fallidos: <img src="{$a->failureurl}" width="28"/>';

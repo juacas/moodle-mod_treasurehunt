@@ -91,7 +91,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $roadid = required_param('roadid', PARAM_INT);
         $select = 'id = ?';
         $params = [$roadid];
-        // Compruebo si existe el camino.
+        // Check if the road exists.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             throw new moodle_exception('invalidentry');
         }
@@ -259,8 +259,41 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             }
             // Add new locks.
             foreach ($lockstoadd as $cmid) {
-                $availability = availability_treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
+                [$availability, $condition] = availability_treasurehunt_add_restriction($cms[$cmid], $stage, $treasurehunt->id);
                 availability_treasurehunt_update_activity_availability($cms[$cmid], $availability);
+            }
+            // Add return link to intros if required.
+            foreach ($newlockedcms as $cmid) {
+                $condition = new availability_treasurehunt\condition(
+                    (object)[
+                        'treasurehuntid' => $treasurehunt->id,
+                        'stageid' => $stage->id,
+                        'conditiontype' => 'stage',
+                    ]
+                );
+                if (!empty($stage->managereturnlinktolockedactivities)) {
+                    availability_treasurehunt_add_return_link(
+                        modinfo: $cms[$cmid],
+                        condition: $condition,
+                        add: true
+                    );
+                }
+            }
+            // Remove return link from intros if required.
+            foreach ($lockstoremove as $cmid) {
+                $condition = new availability_treasurehunt\condition(
+                    (object)[
+                        'treasurehuntid' => $treasurehunt->id,
+                        'stageid' => $stage->id,
+                        'conditiontype' => 'stage',
+                    ]
+                );
+                availability_treasurehunt_add_return_link(
+                    modinfo: $cms[$cmid],
+                    condition: $condition,
+                    add: false,
+                    delete: true
+                );
             }
         }
         // Actualizo la etapa con los ficheros procesados.
