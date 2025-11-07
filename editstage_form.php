@@ -54,8 +54,6 @@ class stage_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $currentstage = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
-        // Get previous lockedactivities from editstage.php.
-        $lockableactivities = $this->_customdata['lockableactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -146,13 +144,15 @@ class stage_form extends moodleform {
         $mform->addElement('header', 'lockactivitiessection', get_string('lockactivitiessection', 'treasurehunt'));
         // Bypass if no availability treasurehunt installed and enabled.
         if (treasurehunt_availability_available()) {
+            // Get previous lockedactivities from editstage.php. Each has a cm_info and locked status.
+            $lockableactivities = $this->_customdata['lockableactivities'];
             // Add restrict access completion activity.
             $options = [];
             $lockedmods = [];
             foreach ($lockableactivities as $option) {
-                $options[$option->cmid] = $option->name;
+                $options[$option->cm_info->id] = format_string($option->cm_info->name);
                 if ($option->locked) {
-                    $lockedmods[] = $option->cmid;
+                    $lockedmods[] = $option->cm_info->id;
                 }
             }
             $select = $mform->addElement('select', 'lockactivity', get_string('lockactivity', 'treasurehunt'), $options);

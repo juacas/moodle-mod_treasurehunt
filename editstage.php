@@ -273,7 +273,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                 );
                 if (!empty($stage->managereturnlinktolockedactivities)) {
                     availability_treasurehunt_add_return_link(
-                        modinfo: $cms[$cmid],
+                        cminfo: $cms[$cmid],
                         condition: $condition,
                         add: true
                     );
@@ -289,7 +289,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                     ]
                 );
                 availability_treasurehunt_add_return_link(
-                    modinfo: $cms[$cmid],
+                    cminfo: $cms[$cmid],
                     condition: $condition,
                     add: false,
                     delete: true
