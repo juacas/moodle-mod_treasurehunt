@@ -245,7 +245,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
                 return $cminfo->locked == true;
             });
             $lockedcmids = array_map(function ($cm) {
-                return $cm->cmid;
+                return $cm->cm_info->id;
             }, $lockedmods);
             $newlockedcms = $stage->lockactivity;
             // Locks to remove.
