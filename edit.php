@@ -89,7 +89,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         treasurehunt_get_username_blocking_edition($treasurehunt->id)
     );
 }
-/** @var core_renderer $OUTPUT */
+/** @global core_renderer $OUTPUT */ // phpcs:ignore
 echo $OUTPUT->header();
 echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
 echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');

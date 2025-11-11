@@ -184,7 +184,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->setDefault('customlayerservicetype', 'wms');
         $mform->hideIf('customlayerservicetype', 'customlayertype', 'eq', 'none');
         $mform->disabledIf('customlayerservicetype', 'customlayername', 'eq', '');
-        // description
+        // Description.
         $mform->addElement('html', get_string('customlayerwms_help', 'treasurehunt'));
 
         $mform->addElement('text', 'customlayerwms', get_string('customlayerwms', 'treasurehunt'));

@@ -25,7 +25,7 @@
 
 require_once(dirname(dirname(dirname(__FILE__))) . '/config.php');
 
-/** @var $DB moodle_database Database.*/
+/** @global moodle_database $DB Database.*/ // phpcs:ignore
 global $DB;
 global $USER;
 $id = required_param('id', PARAM_INT);

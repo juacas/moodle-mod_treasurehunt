@@ -25,7 +25,8 @@
 
 require_once('../../config.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
-/** @var moodle_database $DB Database.*/
+
+/** @global moodle_database $DB Database.*/ // phpcs:ignore
 global $DB;
 
 $id = required_param('id', PARAM_INT);
@@ -54,7 +55,6 @@ $PAGE->requires->jquery_plugin('ui-css');
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
-// $PAGE->requires->css('/mod/treasurehunt/css/treasure.css');
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = [];
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
@@ -79,8 +79,6 @@ echo $output->header();
 echo "\n<script>\n";
 echo "users_param = " . json_encode($users) . ";\n";
 echo "</script>\n";
-// Polyfill service adds compatibility to old browsers like IOS WebKit for requestAnimationFrame.
-// echo '<script src="https://cdnjs.cloudflare.com/polyfill/v2/polyfill.min.js?features=fetch,requestAnimationFrame,Element.prototype.classList,URL"></script>';
 echo $output->heading(format_string($treasurehunt->name));
 echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
 $controls = '<label><input type="checkbox" value="refresh" id="refreshtracks"></input>' .

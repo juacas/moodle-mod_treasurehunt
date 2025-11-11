@@ -45,7 +45,6 @@ define("NUMBER_NEW_ANSWERS", 2);
 class stage_form extends moodleform {
     /**
      * Defines forms elements
-     * @global type $CFG
      */
     public function definition() {
         global $CFG;
@@ -54,8 +53,6 @@ class stage_form extends moodleform {
         $editoroptions = $this->_customdata['editoroptions'];
         $currentstage = $this->_customdata['current'];
         $completionactivities = $this->_customdata['completionactivities'];
-        // Get previous lockedactivities from editstage.php.
-        $lockableactivities = $this->_customdata['lockableactivities'];
 
         // Adding the "general" fieldset, where all the common settings are showed.
         $mform->addElement('header', 'general', get_string('general', 'form'));
@@ -68,9 +65,8 @@ class stage_form extends moodleform {
             $mform->setType('name', PARAM_CLEANHTML);
         }
         $mform->addRule('name', null, 'required', null, 'client');
-        // Aqui anadimos la regla del tamano maximo de la cadena.
         $mform->addRule('name', get_string('maximumchars', '', 255), 'maxlength', 255, 'client');
-
+        // Play stage without moving checkbox.
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
 
@@ -100,7 +96,7 @@ class stage_form extends moodleform {
             'restrictionsdiscoverstage',
             get_string('restrictionsdiscoverstage', 'treasurehunt')
         );
-        // Add restrict access completion activity.
+        // Add restrict access upon completion of an activity.
         $options = [];
         $options[0] = get_string('none');
         foreach ($completionactivities as $option) {
@@ -109,9 +105,9 @@ class stage_form extends moodleform {
         $mform->addElement('select', 'activitytoend', get_string('activitytoend', 'treasurehunt'), $options);
         $mform->addHelpButton('activitytoend', 'activitytoend', 'treasurehunt');
 
-        // Seleccionar si quiero pregunta opcional. En el caso de cambio recargo la pagina con truco:
-        // llamo al cancel que no necesita comprobar la validacion
-        // ... y le doy un valor a una variable escondida.
+        // Select whether to include an optional question. In case of a change, reload the page using a trick:
+        // call the cancel button, which does not require validation,
+        // and set a value to a hidden variable.
         $form = "document.forms['" . $formid . "']";
         $javascript = "$form.reloaded.value='1';$form.cancel.click();"; // Create javascript: set reloaded field to "1".
         $attributes = ["onChange" => $javascript]; // Set onChange attribute.
@@ -143,23 +139,32 @@ class stage_form extends moodleform {
                 NUMBER_NEW_ANSWERS
             );
         }
-        // Lock activities.
+        // Lock other activities using availability_treasurehunt condition.
         $mform->addElement('header', 'lockactivitiessection', get_string('lockactivitiessection', 'treasurehunt'));
         // Bypass if no availability treasurehunt installed and enabled.
         if (treasurehunt_availability_available()) {
+            // Get previous lockedactivities from editstage.php. Each has a cm_info and locked status.
+            $lockableactivities = $this->_customdata['lockableactivities'];
             // Add restrict access completion activity.
             $options = [];
             $lockedmods = [];
             foreach ($lockableactivities as $option) {
-                $options[$option->cmid] = $option->name;
+                $options[$option->cm_info->id] = format_string($option->cm_info->name);
                 if ($option->locked) {
-                    $lockedmods[] = $option->cmid;
+                    $lockedmods[] = $option->cm_info->id;
                 }
             }
             $select = $mform->addElement('select', 'lockactivity', get_string('lockactivity', 'treasurehunt'), $options);
             $mform->addHelpButton('lockactivity', 'lockactivity', 'treasurehunt');
             $select->setMultiple(true);
             $select->setSelected($lockedmods);
+            // Offer to add a return link to intro field of locked activities.
+            $mform->addElement(
+                'advcheckbox',
+                'managereturnlinktolockedactivities',
+                get_string('managereturnlinktolockedactivities', 'treasurehunt')
+            );
+            $mform->addHelpButton('managereturnlinktolockedactivities', 'managereturnlinktolockedactivities', 'treasurehunt');
         } else {
             $mform->addElement('html', get_string('lockactivityannounce', 'treasurehunt'));
         }
