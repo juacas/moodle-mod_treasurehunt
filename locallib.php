@@ -28,7 +28,6 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-use core\notification;
 use core\session\exception;
 use mod_treasurehunt\model\stage;
 
@@ -732,7 +731,7 @@ function treasurehunt_get_all_roads_and_stages($treasurehuntid, $context) {
 /**
  * Get all stages in a treasurehunt instance.
  * @param int $treasurehuntid instace id.
- * @global moodle_database $DB
+ * @param context $context The context object.
  */
 function treasurehunt_get_stages($treasurehuntid, $context) {
     global $DB;
@@ -1312,7 +1311,6 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid) {
 
 /**
  * Difference from the first and last attempt.
- * @global moodle_database $DB
  * @param int $treasurehuntid
  * @param int|null $userid
  * @param int|null $groupid
@@ -1719,7 +1717,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
             if ($groupingid->groupingid == 0) {
                 $groupingid->groupingid = -1;
             }
-            $grouplist = groups_get_all_groups($courseid, null, $groupingid->groupingid);
+            $grouplist = groups_get_all_groups($courseid, [], $groupingid->groupingid);
 
             // Check if there is more than one road assigned to each group.
             [$totalparticipantsgroups, $duplicategroupsingroupings] = treasurehunt_get_all_users_has_multiple_groups_or_roads(
@@ -1939,7 +1937,13 @@ function treasurehunt_check_question_and_activity_solved(
         if (!$lastattempt->activitysolved) {
             // If there is an activity to overcome.
             if (treasurehunt_check_activity_completion($lastattempt->activitytoend)) {
-                if ($usercompletion = treasurehunt_check_completion_activity($lastattempt->activitytoend, $userid, $groupid, $context)) {
+                $usercompletion = treasurehunt_check_completion_activity(
+                    $lastattempt->activitytoend,
+                    $userid,
+                    $groupid,
+                    $context
+                    );
+                if ($usercompletion) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
                     $return->updates[] = get_string(
@@ -2369,9 +2373,9 @@ function treasurehunt_clear_activities($treasurehuntid) {
  * @param string global function name to initialice the code.
  */
 function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
-    // $page->requires->js(new moodle_url('https://unpkg.com/vue@3/dist/vue.global.prod.js'), false);
-    // $page->requires->js(new moodle_url('https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js'));
+    // From 'https://unpkg.com/vue@3/dist/vue.global.prod.js'.
     echo '<script src="js/vue.global.prod.js"></script>';
+    // From 'https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js'.
     echo '<script src="js/vue-qrcode-reader.umd.js"></script>';
     $page->requires->js_call_amd(
         'mod_treasurehunt/webqr',
@@ -2422,7 +2426,14 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
     } else {
         $outoftime = false;
     }
-    $renderable = new mod_treasurehunt\output\user_attempt_history($attempts, $cmid, $username, $outoftime, $roadfinished, $teacherreview);
+    $renderable = new mod_treasurehunt\output\user_attempt_history(
+        $attempts,
+        $cmid,
+        $username,
+        $outoftime,
+        $roadfinished,
+        $teacherreview
+    );
     return $renderable;
 }
 

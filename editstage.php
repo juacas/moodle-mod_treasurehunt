@@ -322,7 +322,12 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     }
 } else {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', ['id' => $cmid]);
-    throw new moodle_exception('treasurehuntislocked', 'treasurehunt', $returnurl, treasurehunt_get_username_blocking_edition($treasurehunt->id));
+    throw new moodle_exception(
+        'treasurehuntislocked',
+        'treasurehunt',
+        $returnurl,
+        treasurehunt_get_username_blocking_edition($treasurehunt->id)
+    );
 }
 $PAGE->navbar->add(get_string('edittreasurehunt', 'treasurehunt'), $returnurl);
 $PAGE->navbar->add(get_string('editstage', 'treasurehunt'), $url);

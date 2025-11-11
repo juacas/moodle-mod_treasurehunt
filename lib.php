@@ -68,9 +68,8 @@ function treasurehunt_supports($feature) {
  * (defined by the form in mod_form.php) this function
  * will create a new instance and return the id number
  * of the new instance.
- * @global moodle_database $DB
  * @param stdClass $treasurehunt Submitted data from the form in mod_form.php
- * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
+ * @param mod_treasurehunt_mod_form $mform Nullable. The form instance itself (if needed)
  * @return int The id of the newly inserted treasurehunt record
  */
 function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
@@ -137,12 +136,11 @@ function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_m
  * Given an ID of an instance of this module,
  * this function will permanently delete the instance
  * and any data that depends on it.
- * @global moodle_database $DB
  * @param int $id Id of the module instance
  * @return boolean Success/Failure
  */
 function treasurehunt_delete_instance($id) {
-    /** @var moodle_database $DB */
+    /** @global moodle_database $DB */ // phpcs:ignore
     global $DB;
     $treasurehunt = $DB->get_record('treasurehunt', ['id' => $id], '*', MUST_EXIST);
     // Delete any dependent records here.
@@ -202,6 +200,7 @@ function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
  */
 function treasurehunt_user_complete($course, $user, $mod, $treasurehunt) {
     // TODO: implement user briefing.
+    echo "No user completion implemented yet";
 }
 
 /**
@@ -265,8 +264,7 @@ function treasurehunt_get_coursemodule_info($coursemodule) {
     global $DB;
 
     $dbparams = ['id' => $coursemodule->instance];
-    $fields = 'id, name, alwaysshowdescription, allowattemptsfromdate, intro, introformat, allowattemptsfromdate, cutoffdate, tracking';
-    $treasurehunt = $DB->get_record('treasurehunt', $dbparams, $fields, MUST_EXIST);
+    $treasurehunt = $DB->get_record('treasurehunt', $dbparams, '*', MUST_EXIST);
 
     $result = new cached_cm_info();
     $result->name = $treasurehunt->name;

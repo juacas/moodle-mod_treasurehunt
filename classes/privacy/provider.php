@@ -26,8 +26,6 @@ use core_privacy\local\request\userlist;
 use core_privacy\local\request\writer;
 use moodle_database;
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Privacy provider for all user data stored in treasurehunt.
  * @package    mod_treasurehunt
@@ -164,10 +162,9 @@ class provider implements
      * User and context information is contained within the contextlist.
      *
      * @param approved_contextlist $contextlist a list of contexts approved for export.
-     * @global moodle_database $DB
      */
     public static function export_user_data(approved_contextlist $contextlist) {
-        /** @var moodle_database $DB */
+        /** @global moodle_database $DB */ // phpcs:ignore
         global $DB;
 
         if (empty($contextlist->count())) {
@@ -249,7 +246,11 @@ class provider implements
      * @param \context_module $context the context of the treasurehunt.
      * @param \stdClass $user the user record
      */
-    protected static function export_treasurehunt_data_for_user(array $treasurehuntdata, \context_module $context, \stdClass $user) {
+    protected static function export_treasurehunt_data_for_user(
+        array $treasurehuntdata,
+        \context_module $context,
+        \stdClass $user
+    ) {
         // Fetch the generic module data for the treasurehunt.
         $contextdata = helper::get_context_data($context, $user);
 
@@ -267,7 +268,7 @@ class provider implements
      * @param \context $context the context to delete in.
      */
     public static function delete_data_for_all_users_in_context(\context $context) {
-        /** @var moodle_database $DB */
+        /** @global moodle_database $DB */ // phpcs:ignore
         global $DB;
 
         if (!$context instanceof \context_module) {
@@ -286,7 +287,7 @@ class provider implements
      * @param approved_contextlist $contextlist a list of contexts approved for deletion.
      */
     public static function delete_data_for_user(approved_contextlist $contextlist) {
-        /** @var moodle_database $DB */
+        /** @global moodle_database $DB */ // phpcs:ignore
         global $DB;
 
         if (empty($contextlist->count())) {

@@ -257,9 +257,9 @@ $string['locktimeediting'] = 'Lock time editing';
 $string['locktimeediting_help'] = 'Time in seconds for which a user can edit an instance without renewing the lock.
 The larger, fewer requests for renewal lock must be made, but more time is locked the edit page once the user has finished.
 It must be greater than 5 seconds, but the time will be set by default.';
-$string['managereturnlinktolockedactivities'] = 'Add return link to locked activities';
+$string['managereturnlinktolockedactivities'] = 'Auto-edit return links';
 $string['managereturnlinktolockedactivities_help'] = 'If enabled, when an activity retriction is applied to an activity from this form, a link with a ' .
-    'message will be added to the introduction field of the activity, so that the user can return to the treasure hunt activity easily.';
+    'message will be added to the introduction field of the activity, so that the user can return to the treasure hunt activity easily. Links are also deleted when the restriction is removed.';
 $string['map_tour'] = 'In this map you can manage all the components of a funny geolocated game!';
 $string['mapplay_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="pix/success_mark.png" width="28"/><br>Failed ones: <img src="pix/failure_mark.png" width="28"/>';
 $string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>Successful ones: <img src="{$a->successurl}" width="28"/><br>Failed ones: <img src="{$a->failureurl}" width="28"/>';

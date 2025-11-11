@@ -45,7 +45,6 @@ define("NUMBER_NEW_ANSWERS", 2);
 class stage_form extends moodleform {
     /**
      * Defines forms elements
-     * @global type $CFG
      */
     public function definition() {
         global $CFG;
