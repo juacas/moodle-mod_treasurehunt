@@ -655,8 +655,8 @@ function treasurehunt_reset_gradebook($courseid, $type = '') {
     $treasurehunts = $DB->get_records_sql(
         "SELECT t.*, cm.idnumber as cmidnumber, t.course as courseid " .
         "FROM {modules} m " .
-        "JOIN {course_modules} cm ON m.id = cm.module" .
-        "JOIN {treasurehunt} t ON cm.instance = t.id" .
+        "JOIN {course_modules} cm ON m.id = cm.module " .
+        "JOIN {treasurehunt} t ON cm.instance = t.id " .
         "WHERE m.name = 'treasurehunt' AND cm.course = ?",
         [$courseid]
     );
