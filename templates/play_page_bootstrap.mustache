@@ -205,10 +205,10 @@
         {{$popupcontent}}
         {{/popupcontent}}
         {{$popupfootercontent}}
-            <a href="view.php?id={{cmid}}" class="btn play-btn">
-                <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <button type="button" class="btn play-btn close-modal" id="erroraccept">
+                <i class="fa fa-check" aria-hidden="true"></i>
                 {{#str}} continue, mod_treasurehunt{{/str}}
-            </a>
+            </button>
         {{/popupfootercontent}}
     {{/treasurehunt/popup_play_page}}
 
