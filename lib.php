@@ -72,7 +72,7 @@ function treasurehunt_supports($feature) {
  * @param mod_treasurehunt_mod_form $mform Nullable. The form instance itself (if needed)
  * @return int The id of the newly inserted treasurehunt record
  */
-function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
+function treasurehunt_add_instance(stdClass $treasurehunt, ?mod_treasurehunt_mod_form $mform = null) {
     global $DB;
     $timenow = time();
     $treasurehunt->timecreated = $timenow;
@@ -97,7 +97,7 @@ function treasurehunt_add_instance(stdClass $treasurehunt, mod_treasurehunt_mod_
  * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
  * @return boolean Success/Fail
  */
-function treasurehunt_update_instance(stdClass $treasurehunt, mod_treasurehunt_mod_form $mform = null) {
+function treasurehunt_update_instance(stdClass $treasurehunt, ?mod_treasurehunt_mod_form $mform = null) {
     global $DB;
     // Get the current value, so we can see what changed.
     $oldtreasurehunt = $DB->get_record('treasurehunt', ['id' => $treasurehunt->instance]);
@@ -431,10 +431,11 @@ function treasurehunt_scale_used_anywhere($scaleid) {
  * Needed by {@link grade_update_mod_grades()}.
  *
  * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
- * @param bool $reset reset grades in the gradebook
+ * @param array $grades reset grades in the gradebook
+ * @param bool $reset whether to reset the grades in the gradebook
  * @return void
  */
-function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) {
+function treasurehunt_grade_item_update(stdClass $treasurehunt, ?array $grades = null, $reset = false) {
     global $CFG;
     require_once($CFG->libdir . '/gradelib.php');
 
@@ -453,7 +454,7 @@ function treasurehunt_grade_item_update(stdClass $treasurehunt, $grades = null) 
         $item['gradetype'] = GRADE_TYPE_NONE;
     }
 
-    if ($grades === 'reset') {
+    if ($reset) {
         $item['reset'] = true;
         $grades = null;
     }
@@ -662,7 +663,7 @@ function treasurehunt_reset_gradebook($courseid, $type = '') {
     );
 
     foreach ($treasurehunts as $treasurehunt) {
-        treasurehunt_grade_item_update($treasurehunt, 'reset');
+        treasurehunt_grade_item_update($treasurehunt, null, 'reset');
     }
 }
 

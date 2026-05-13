@@ -51,18 +51,18 @@ class Polygon extends Collection {
      * @param boolean $pointOnVertex - whether a vertex should be considered "in" or not
      * @return boolean
      */
-    public function pointInPolygon(Point $point, $pointOnBoundary = true, $pointOnVertex = true) {
+    public function pointInPolygon(Point $point, bool $pointOnBoundary = true, bool $pointOnVertex = true) {
         $vertices = $this->getComponents()[0]->getComponents();
-        
+
         // Check if the point sits exactly on a vertex
         if ($this->pointOnVertex($point, $vertices)) {
             return $pointOnVertex ? true : false;
         }
-        
+
         // Check if the point is inside the polygon or on the boundary
         $intersections = 0;
         $vertices_count = count($vertices);
-        
+
         for ($i = 1; $i < $vertices_count; $i++) {
             $vertex1 = $vertices[$i - 1];
             $vertex2 = $vertices[$i];
@@ -93,11 +93,12 @@ class Polygon extends Collection {
         }
     }
 
-    public function pointOnVertex($point, $vertices) {
+    public function pointOnVertex(Point $point, array $vertices): bool {
         foreach ($vertices as $vertex) {
             if ($point->getX() == $vertex->getX() && $point->getY() == $vertex->getY()) {
                 return true;
             }
         }
+        return false;
     }
 }

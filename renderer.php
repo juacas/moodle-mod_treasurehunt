@@ -46,7 +46,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @param array|null $colspan Array with the colspan of each cell
      * @return void
      */
-    private function add_table_row(html_table $table, array $text, $header, ?array $class = null, ?array $colspan = null) {
+    private function add_table_row(html_table $table, array $text, bool $header, ?array $class = null, ?array $colspan = null) {
         $row = new html_table_row();
         $cells = [];
         for ($i = 0, $f = count($text); $i < $f; $i++) {

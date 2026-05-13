@@ -177,7 +177,7 @@ function treasurehunt_wkt_to_object($text) {
  * @param int|null $cur_tm utc timestamp to compare to. If null current time.
  * @return string formatted interval
  */
-function treasurehunt_get_nice_date($time, $longdate = 200, $mediumdate = 4, $curtm = null) {
+function treasurehunt_get_nice_date($time, $longdate = 200, $mediumdate = 4, ?int $curtm = null) {
     if ($curtm === null) {
         $curtm = time();
     }
@@ -392,7 +392,7 @@ function treasurehunt_get_customplayerconfig($treasurehunt) {
  * @param context_module $context for retrieving text editor content, files.
  * @return null|mixed
  */
-function treasurehunt_get_custommappingconfig($treasurehunt, $context = null) {
+function treasurehunt_get_custommappingconfig($treasurehunt, ?context_module $context = null) {
     if (empty($treasurehunt->custommapconfig)) {
         return null;
     }
@@ -676,7 +676,7 @@ function treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid) {
  * @param int $roadid The road id.
  * @param bool $valid If not set, check actual state of the road.
  */
-function treasurehunt_set_valid_road($roadid, $valid = null) {
+function treasurehunt_set_valid_road($roadid, ?bool $valid = null) {
     global $DB;
     $road = new stdClass();
     $road->id = $roadid;

@@ -249,7 +249,7 @@ class user_progress extends external_api {
      * Check events and return new game state.
      * TODO: Design cache strategy. This service is polled.
      */
-    public static function execute($userprogress) {
+    public static function execute(array $userprogress) {
         global $USER, $DB;
         $nextstagegeom = null;
         $userattempts = null;

@@ -43,7 +43,7 @@ class Feature {
      * @param Geometry $geometry The feature geometry
      * @param array $properties The feature properties
      */
-    public function __construct($id = null, Geometry $geometry = null, array $properties = null, array $bbox = null) {
+    public function __construct($id = null, ?Geometry $geometry = null, ?array $properties = null, ?array $bbox = null) {
         $this->id = $id;
         $this->geometry = $geometry;
         $this->properties = $properties;

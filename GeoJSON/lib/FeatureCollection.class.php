@@ -14,7 +14,7 @@
  * @subpackage Geometry
  * @author     Camptocamp <info@camptocamp.com>
  */
- 
+
 class FeatureCollection implements Iterator
 {
   private $features = null;
@@ -24,7 +24,7 @@ class FeatureCollection implements Iterator
    *
    * @param array $features The features used to build the collection
    */
-  public function __construct(array $features = null)
+  public function __construct(?array $features = null)
   {
     $this->features = $features;
   }
@@ -48,7 +48,7 @@ class FeatureCollection implements Iterator
 
     if (is_array($this->features))
     {
-      foreach ($this->features as $feature) 
+      foreach ($this->features as $feature)
       {
         $features[] = $feature->getGeoInterface();
       }
@@ -106,5 +106,5 @@ class FeatureCollection implements Iterator
   {
     return $this->current() !== false;
   }
-  
+
 }

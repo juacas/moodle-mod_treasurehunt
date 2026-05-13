@@ -14,16 +14,16 @@
  * @subpackage Geometry
  * @author     Camptocamp <info@camptocamp.com>
  */
-class GeometryCollection extends Collection 
+class GeometryCollection extends Collection
 {
   protected $geom_type = 'GeometryCollection';
-  
+
   /**
    * Constructor
    *
    * @param array $geometries The Geometries array
    */
-  public function __construct(array $geometries = null) 
+  public function __construct(?array $geometries = null)
   {
     parent::__construct($geometries);
   }
@@ -35,10 +35,10 @@ class GeometryCollection extends Collection
    *
    * @return array
    */
-  public function getGeoInterface() 
+  public function getGeoInterface()
   {
     $geometries = array();
-    foreach ($this->components as $geometry) 
+    foreach ($this->components as $geometry)
     {
       $geometries[] = $geometry->getGeoInterface();
     }

@@ -266,7 +266,7 @@ class GeoJSON {
      * @param object $obj A geometry object
      * @param string $typeValue Value expected for 'type' property
      */
-    static private function checkType($obj, $typeValue = null) {
+    static private function checkType(object $obj, ?string $typeValue = null) {
         if (!is_object($obj) || get_class($obj) != 'stdClass') {
             throw new Exception("Bad geojson");
         }
@@ -288,7 +288,7 @@ class GeoJSON {
      * @param boolean $allowNull Whether to allow a null value or not (defaults to false)
      * @param string $type Check also $property type (object, array ...)
      */
-    static private function checkExists($obj, $property, $allowNull = false, $type = null) {
+    static private function checkExists(object $obj, string $property, bool $allowNull = false, ?string $type = null) {
         if (!property_exists($obj, $property)) {
             throw new Exception("Bad geojson: Missing '$property' property");
         }

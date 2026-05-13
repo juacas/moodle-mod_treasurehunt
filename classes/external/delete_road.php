@@ -77,7 +77,7 @@ class delete_road extends external_api {
      * @param mixed $lockid
      * @return array<array<int|string>>
      */
-    public static function execute($roadid, $treasurehuntid, $lockid) {
+    public static function execute(int $roadid, int $treasurehuntid, string $lockid) {
         global $DB;
         $params = self::validate_parameters(
             self::execute_parameters(),
