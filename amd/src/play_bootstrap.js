@@ -925,8 +925,10 @@ function initplaytreasurehunt(
               }
             }
           }
-          // Check if it is the first geometry or it is being initialized and center the map.
-          if (!response.lastsuccessfulstage && isfirststage || initialize) {
+          // Center on previous attempts when loading, unless the clue already revealed the next area.
+          if ((!response.lastsuccessfulstage && isfirststage || initialize)
+              && !(response.lastsuccessfulstage && !roadfinished && customplayerconfig.shownextareahint
+                  && nextstagefeature)) {
             fitmap = true;
             if (isfirststage && isfirstload) {
               fit_map_to_sources([stageSource]);
@@ -1035,9 +1037,13 @@ function initplaytreasurehunt(
       sources.forEach((source) => {
         extent = ol.extent.extend(extent, source.getExtent());
       });
-      let size = extent[2] - extent[0];
+      if (extent[0] === Infinity) {
+        fitmap = false;
+        return;
+      }
+      let size = Math.max(extent[2] - extent[0], extent[3] - extent[1]);
       let p = [(extent[0] + extent[2]) / 2, (extent[1] + extent[3]) / 2];
-      if (extent[0] !== Infinity && size > 0) {
+      if (size > 0) {
         // Buffer the extent to better fit the map.
         extent = ol.extent.buffer(extent, size * 0.25);
         fly_to(map, null, extent);
@@ -1548,15 +1554,8 @@ function initplaytreasurehunt(
 
   /* Modal events */
   $(document).on("click", '*[data-rel="modal"]', (e) => {
-    closeModal();
     const target = e.currentTarget;
-    const modal = $(target.dataset.ref);
-    modal.trigger("modal:open");
-    modal.addClass("active");
-    $(target.dataset.ref + " .modal-mask").addClass("active");
-    if (target.dataset.dismissible !== null) {
-      $(target.dataset.ref + " .modal-mask").addClass("dismissible");
-    }
+    openModal(target.dataset.ref);
   });
 
   $(document).on("click", ".close-modal, .modal-mask.dismissible", () => {
@@ -1588,6 +1587,11 @@ function initplaytreasurehunt(
     const modal = $(id);
     modal.addClass("active");
     $(`${id} .modal-mask`).addClass("active dismissible");
+    if (id === "#cluepage" && !roadfinished && customplayerconfig.shownextareahint
+        && nextstagefeature) {
+      fitmap = true;
+      fit_map_to_sources([stageSource]);
+    }
     modal.trigger("modal:open");
   }
   /**

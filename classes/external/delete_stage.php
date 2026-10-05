@@ -48,7 +48,7 @@ class delete_stage extends external_api
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-            'stageid' => new external_value(PARAM_RAW, 'id of stage'),
+            'stageid' => new external_value(PARAM_INT, 'id of stage'),
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
             'lockid' => new external_value(PARAM_INT, 'id of lock'),
                 ]
@@ -78,6 +78,7 @@ class delete_stage extends external_api
      * @return array<array<int|string>>
      */
     public static function execute($stageid, $treasurehuntid, $lockid) {
+        global $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
             ['stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid]
@@ -88,7 +89,8 @@ class delete_stage extends external_api
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+        if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+            treasurehunt_require_stage_in_activity($params['stageid'], $params['treasurehuntid']);
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la etapa se ha realizado con éxito';

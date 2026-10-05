@@ -15,7 +15,6 @@
 
 /**
  * @module    mod_treasurehunt/tutorial
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
@@ -40,11 +39,20 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                 },
                 editpage: function () {
                     var cook = {};
-                    $('#edition_maintitle > h2 > a').on('click', this.launchedittutorial);
+                    var $mainheading = $('.page-context-header h1, #page-header h1').first();
+                    if (!$mainheading.length) {
+                        $mainheading = $('main h1').first();
+                    }
+                    if ($mainheading.length) {
+                        $('#edition_mainhelp').removeClass('visually-hidden').appendTo($mainheading);
+                    }
+                    $('#edition_mainhelp a').on('click', this.launchedittutorial);
 
                     document.cookie.split(';').forEach(function (x) {
                         var arr = x.split('=');
-                        arr[1] && (cook[arr[0].trim()] = arr[1].trim());
+                        if (arr[1]) {
+                            cook[arr[0].trim()] = arr[1].trim();
+                        }
                     });
                     if (cook["introEditProgress"] != 'Done') {
                         this.launchedittutorial();
@@ -53,6 +61,12 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
             }; // ...end of init var.
             return init;
 
+            /**
+             * Configure the guided tour for the editor.
+             * @param {Object} intro IntroJS instance.
+             * @param {Array} strings Localised strings.
+             * @param {Array} keys String keys in the same order.
+             */
             function configureEditIntro(intro, strings, keys) {
                 intro.setOptions({
                     nextLabel: strings[keys.indexOf('nextstep')],
@@ -102,10 +116,10 @@ define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notifi
                         }
                     ]
                 });
-                intro.onexit(function (target) {
+                intro.onexit(function () {
                     document.cookie = "introEditProgress = Done";
                 });
-                intro.oncomplete(function (target) {
+                intro.oncomplete(function () {
                     document.cookie = "introEditProgress = Done";
                 });
                 intro.onchange(function (target) {

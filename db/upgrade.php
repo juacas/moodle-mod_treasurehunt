@@ -190,5 +190,14 @@ function xmldb_treasurehunt_upgrade($oldversion) {
             $dbman->rename_field($table, $field, 'customplayerconfig');
         }
     }
+    if ($oldversion < 2026100300) {
+        $table = new xmldb_table('treasurehunt_track');
+        $index = new xmldb_index('hunt_user_time_idx', XMLDB_INDEX_NOTUNIQUE,
+            ['treasurehuntid', 'userid', 'timestamp']);
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        upgrade_mod_savepoint(true, 2026100300, 'treasurehunt');
+    }
     return true;
 }

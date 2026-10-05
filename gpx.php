@@ -41,7 +41,9 @@ if (count($userids) > 1 || $USER->id != $userid) {
     require_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 }
 date_default_timezone_set("UTC");
+$tracks = [];
 foreach ($userids as $userid) {
+    $segments = [];
     $trackpoints = $DB->get_records('treasurehunt_track', ['userid' => $userid, 'treasurehuntid' => $treasurehunt->id]);
     $description = "Track for user:" . fullname($DB->get_record('user', ['id' => $userid]));
     $segment = makesegment($trackpoints);
@@ -115,6 +117,7 @@ GPX;
  * @package mod_treasurehunt
  */
 function maketrack($description, $segments) {
+    $description = htmlspecialchars($description, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     $xml = '<trk>
         <name>Treasurehunt trace</name>
          <desc>' . $description . '</desc>';
@@ -160,11 +163,12 @@ function maketrackpoint(&$data) {
     if ($data->type == 'place') {
         $starttime = getisotime($data->startTime);
         $endtime = getisotime($data->endTime);
+        $placename = htmlspecialchars($data->place->name, ENT_XML1 | ENT_QUOTES, 'UTF-8');
 
         $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon
-                . "\"><time>$starttime</time><location>" . $data->place->name . "</location></trkpt>";
+                . "\"><time>$starttime</time><location>" . $placename . "</location></trkpt>";
         $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon
-                . "\"><time>$endtime</time><location>" . $data->place->name . "</location></trkpt>";
+                . "\"><time>$endtime</time><location>" . $placename . "</location></trkpt>";
     } else {
         $time = getisotime($data->time);
         $return .= "<trkpt lat=\"$data->lat\" lon=\"$data->lon\"><time>$time</time>";

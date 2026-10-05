@@ -274,26 +274,17 @@ class user_progress extends external_api {
         $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
         // Get the total number of stages of the road of the user.
         $numberofstages = treasurehunt_get_total_stages($userparams->roadid);
+        if ($numberofstages < 1) {
+            throw new \moodle_exception('invalidentry');
+        }
         // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
         $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $context);
         if ($currentstage) {
-            $nextnostage = min([$currentstage->position + 1, $numberofstages]);
+            $nextnostage = min($currentstage->position + (int)$currentstage->success, $numberofstages);
         } else {
             $nextnostage = 1;
         }
-        $currentworkingstage = $DB->get_record(
-            'treasurehunt_stages',
-            ['position' => $nextnostage, 'roadid' => $userparams->roadid],
-            '*',
-            MUST_EXIST
-        );
-        // Track path.
-        if ($treasurehunt->tracking && isset($params['currentposition'])) {
-            $location = treasurehunt_geojson_to_object($params['currentposition']);
-            $locationwkt = treasurehunt_geometry_to_wkt($location);
-
-            treasurehunt_track_user($USER->id, $treasurehunt, $currentworkingstage->id, time(), $locationwkt);
-        }
+        $currentworkingstage = self::load_working_stage($userparams->roadid, $nextnostage);
         // Check if the user has finished the road.
         $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
@@ -315,6 +306,15 @@ class user_progress extends external_api {
             $updateroad = false;
         }
         $available = treasurehunt_is_available($treasurehunt);
+        // Tracking is only useful while the user is allowed to play an active road.
+        if ($treasurehunt->tracking && isset($params['currentposition']) && !isset($params['location'])
+                && $available->available && !$roadfinished
+                && has_capability('mod/treasurehunt:play', $context)) {
+            self::validate_point($params['currentposition']);
+            $location = treasurehunt_geojson_to_object($params['currentposition']);
+            treasurehunt_track_user($USER->id, $treasurehunt, $currentworkingstage->id, time(),
+                treasurehunt_geometry_to_wkt($location), 15);
+        }
         $playmode = $params['playwithoutmoving'];
         // Teacher previewing mode.
         $previewing = $available->actnotavailableyet && has_capability('mod/treasurehunt:managetreasurehunt', $context);
@@ -343,7 +343,8 @@ class user_progress extends external_api {
                     $context,
                     $treasurehunt,
                     $numberofstages,
-                    $qoaremoved
+                    $qoaremoved,
+                    $currentstage
                 );
             } else {
                 $qocsolved = new stdClass();
@@ -353,15 +354,18 @@ class user_progress extends external_api {
                 $qocsolved->newattempt = false;
                 $qocsolved->attemptsolved = false;
                 $qocsolved->roadfinished = false;
+                $qocsolved->qoaremoved = $qoaremoved;
             }
             // Refresh the attempts updates (mainly for reporting).
-            $updates = treasurehunt_check_attempts_updates(
-                $params['attempttimestamp'],
-                $userparams->groupid,
-                $USER->id,
-                $userparams->roadid,
-                $changesingroupmode
-            );
+            if ($qocsolved->newattempt) {
+                $updates = treasurehunt_check_attempts_updates(
+                    $params['attempttimestamp'],
+                    $userparams->groupid,
+                    $USER->id,
+                    $userparams->roadid,
+                    $changesingroupmode
+                );
+            }
 
             if ($qocsolved->msg !== '') {
                 $status['msg'] = $qocsolved->msg;
@@ -393,6 +397,9 @@ class user_progress extends external_api {
                 && !$changesingroupmode
             ) {
                 $qrtextparam = isset($params['qrtext']) ? $params['qrtext'] : null;
+                if (isset($params['location'])) {
+                    self::validate_point($params['location']);
+                }
                 $locationparam = isset($params['location']) ? treasurehunt_geojson_to_object($params['location']) : null;
                 $checklocation = treasurehunt_check_user_location(
                     $USER->id,
@@ -449,7 +456,8 @@ class user_progress extends external_api {
                 $numberofstages,
                 $available->outoftime,
                 $available->actnotavailableyet,
-                $context
+                $context,
+                ($qocsolved->newattempt ?? false) || ($checklocation->newattempt ?? false) ? null : $currentstage
             );
         }
 
@@ -471,7 +479,7 @@ class user_progress extends external_api {
         }
         // If the road has been edited, warn the user.
         if ($updateroad) {
-            if ($params['location']) {
+            if (isset($params['location'])) {
                 $status = [];
                 $status['msg'] = get_string('errsendinglocation', 'treasurehunt');
                 $status['code'] = 1;
@@ -518,19 +526,10 @@ class user_progress extends external_api {
 
         // Check if last successful stage is the same as current working stage.
         // This means that the user has just solved the current stage.
-        if ($lastsuccessfulstage && $currentworkingstage && $currentworkingstage->position == $lastsuccessfulstage->position) {
+        if (($qocsolved->success ?? false) || ($checklocation->success ?? false)) {
             // Update current working stage.
-            if ($lastsuccessfulstage) {
-                $nextnostage = min([$lastsuccessfulstage->position + 1, $numberofstages]);
-            } else {
-                $nextnostage = 1;
-            }
-            $currentworkingstage = $DB->get_record(
-                'treasurehunt_stages',
-                ['position' => $nextnostage, 'roadid' => $userparams->roadid],
-                '*',
-                MUST_EXIST
-            );
+            $nextnostage = min($currentworkingstage->position + 1, $numberofstages);
+            $currentworkingstage = self::load_working_stage($userparams->roadid, $nextnostage);
         }
         // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.
         if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)) {
@@ -563,6 +562,32 @@ class user_progress extends external_api {
             $result['playerconfig'] = $playerconfig;
         }
         return $result;
+    }
+
+    /**
+     * Reject malformed point geometries before storing or checking them.
+     * Coordinates may be non-geographic on a custom image map.
+     *
+     * @param array $point GeoJSON point.
+     */
+    private static function validate_point(array $point): void {
+        if ($point['type'] !== 'Point' || count($point['coordinates']) !== 2
+                || !is_finite((float)$point['coordinates'][0]) || !is_finite((float)$point['coordinates'][1])) {
+            throw new \invalid_parameter_exception('Invalid point geometry');
+        }
+    }
+
+    /**
+     * Load only the stage fields needed by a progress poll.
+     *
+     * @param int $roadid Road identifier.
+     * @param int $position Stage position.
+     * @return stdClass
+     */
+    private static function load_working_stage(int $roadid, int $position): stdClass {
+        global $DB;
+        return $DB->get_record('treasurehunt_stages', ['roadid' => $roadid, 'position' => $position],
+            'id,roadid,position,geom,qrtext', MUST_EXIST);
     }
     /**
      * Can this function be called directly from ajax?

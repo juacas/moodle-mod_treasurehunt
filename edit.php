@@ -91,9 +91,8 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
 }
 /** @global core_renderer $OUTPUT */ // phpcs:ignore
 echo $OUTPUT->header();
-echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
-echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
-echo $OUTPUT->container_end();
+echo '<span id="edition_mainhelp" class="visually-hidden">'
+    . $OUTPUT->help_icon('edition', 'treasurehunt') . '</span>';
 
 treasurehunt_notify_info(get_string('editactivity_help', 'treasurehunt'));
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
@@ -101,33 +100,64 @@ echo $OUTPUT->container_start("treasurehunt-editor-loader");
 echo $OUTPUT->box(null, 'loader-circle-outside');
 echo $OUTPUT->box(null, 'loader-circle-inside');
 echo $OUTPUT->container_end();
-echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
-echo $OUTPUT->box(get_string('erremptystage', 'treasurehunt'), 'alert alert-error invisible', 'erremptystage');
-$buttons = "<button id=\"addroad\" class=\"btn btn-secondary\" >"
-            . get_string('treasurehunt:addroad', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"addstage\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('treasurehunt:addstage', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"drawmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('drawmode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"editmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('editmode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"navmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('browsemode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"savestage\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('save', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"removefeature\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('remove', 'treasurehunt')
-            . "</button>";
-echo $OUTPUT->box($buttons, "box py-3 ui-widget-header ui-corner-all", 'controlpanel');
-echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
+$buttons = '<div class="treasurehunt-map-tools treasurehunt-editor-actions d-flex flex-nowrap align-items-center gap-2"'
+    . ' role="toolbar" aria-label="'
+    . s(get_string('editortools', 'treasurehunt')) . '">';
+$buttons .= '<div class="treasurehunt-editor-actions-group" role="group" aria-label="'
+    . s(get_string('editormap', 'treasurehunt')) . '">';
+$buttons .= '<div class="btn-group btn-group-sm" role="group" aria-label="'
+    . s(get_string('editorgeometry', 'treasurehunt')) . '">';
+foreach (['drawmode' => 'drawmode', 'editmode' => 'editmode'] as $buttonid => $stringkey) {
+    $buttons .= '<button type="button" id="' . $buttonid . '" class="btn btn-outline-secondary" disabled>'
+        . s(get_string($stringkey, 'treasurehunt')) . '</button>';
+}
+$buttons .= '<button type="button" id="removefeature" class="btn btn-outline-danger" disabled>'
+    . s(get_string('remove', 'treasurehunt')) . '</button>';
+$buttons .= '</div>' . $OUTPUT->help_icon('editorgeometry', 'treasurehunt');
+$buttons .= '<button type="button" id="navmode" class="btn btn-outline-secondary btn-sm" disabled>'
+    . s(get_string('browsemode', 'treasurehunt')) . '</button>';
+$buttons .= '</div><div class="treasurehunt-editor-actions-group" role="group" aria-label="'
+    . s(get_string('editorsave', 'treasurehunt')) . '">';
+$buttons .= '<button type="button" id="savestage" class="btn btn-primary btn-sm" disabled>'
+    . s(get_string('save', 'treasurehunt')) . '</button>';
+$buttons .= $OUTPUT->help_icon('editorsave', 'treasurehunt');
+$buttons .= '</div></div>';
+echo '<div id="roadlistpanel" class="treasurehunt-road-tabs border-bottom" role="navigation" aria-label="'
+    . s(get_string('editorroads', 'treasurehunt')) . '">'
+    . '<div id="roadtabscontainer"></div>'
+    . $OUTPUT->help_icon('editorroads', 'treasurehunt')
+    . '<button type="button" id="addroad" class="btn btn-outline-primary btn-sm treasurehunt-add-road"'
+    . ' data-bs-toggle="tooltip" data-bs-placement="top"'
+    . ' title="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '"'
+    . ' aria-label="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '">+</button></div>';
+echo $OUTPUT->container_start('treasurehunt-editor-workspace', 'editorworkspace');
+echo $buttons;
+echo '<span class="visually-hidden" id="treasurehunt-map-label">'
+    . s(get_string('editormap', 'treasurehunt')) . '</span>';
 echo $OUTPUT->box(null, null, 'mapedit');
-echo $OUTPUT->box(null, null, 'roadlistpanel');
+echo $OUTPUT->container_start('treasurehunt-editor-aside border rounded bg-body', 'editoraside');
+echo '<div class="treasurehunt-editor-aside-heading">'
+    . '<span class="treasurehunt-panel-title">' . s(get_string('stages', 'treasurehunt')) . '</span>'
+    . $OUTPUT->help_icon('editorstages', 'treasurehunt') . '</div>';
+echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
+echo '<div class="treasurehunt-stage-actions">'
+    . '<button type="button" id="addstage" class="btn btn-outline-primary btn-sm" disabled'
+    . ' aria-label="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '">'
+    . '<i class="fa fa-plus" aria-hidden="true"></i>'
+    . '<span class="treasurehunt-addstage-label"> '
+    . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '</span></button>'
+    . '</div>';
+echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondary btn-sm"'
+    . ' aria-controls="editoraside" aria-expanded="true"'
+    . ' aria-label="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' data-collapse-label="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' data-expand-label="' . s(get_string('editorexpandpanel', 'treasurehunt')) . '">'
+    . '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
+    . '</button>';
+echo $OUTPUT->container_end();
+echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 
 // Finish the page.

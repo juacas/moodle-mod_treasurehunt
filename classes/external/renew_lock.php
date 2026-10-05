@@ -88,7 +88,7 @@ class renew_lock extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         $status = [];
         if (isset($params['lockid'])) {
-            if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+            if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
                 $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
                 $status['code'] = 0;
                 $status['msg'] = 'Se ha renovado el bloqueo con exito';

@@ -69,7 +69,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
 
-        $stage = $DB->get_record('treasurehunt_stages', ['id' => $id], '*', MUST_EXIST);
+        $stage = treasurehunt_require_stage_in_activity($id, $treasurehunt->id);
         // Si existe la pregunta recojo las respuestas.
         if ($stage->questiontext !== '') {
             // Hago que se muestre la pregunta.
@@ -89,8 +89,8 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
-        $select = 'id = ?';
-        $params = [$roadid];
+        $select = 'id = ? AND treasurehuntid = ?';
+        $params = [$roadid, $treasurehunt->id];
         // Check if the road exists.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             throw new moodle_exception('invalidentry');
@@ -149,6 +149,13 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
     } else if ($stage = $mform->get_data()) {
+        if (!empty($stage->id)) {
+            $storedstage = treasurehunt_require_stage_in_activity($stage->id, $treasurehunt->id);
+            if ((int)$storedstage->roadid !== (int)$stage->roadid) {
+                throw new moodle_exception('invalidentry');
+            }
+        }
+        treasurehunt_require_road_in_activity($stage->roadid, $treasurehunt->id);
         // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);

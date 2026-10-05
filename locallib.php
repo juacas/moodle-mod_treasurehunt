@@ -551,6 +551,7 @@ function treasurehunt_delete_stage($id, $context) {
 
     $DB->delete_records('treasurehunt_stages', ['id' => $id]);
     $DB->delete_records('treasurehunt_attempts', ['stageid' => $id]);
+    $DB->delete_records('treasurehunt_answers', ['stageid' => $id]);
     $sql = 'UPDATE {treasurehunt_stages} '
         . 'SET position = position - 1 WHERE roadid = (?) AND position > (?)';
     $params = [$stageresult->roadid, $stageresult->position];
@@ -648,10 +649,10 @@ function treasurehunt_get_users_with_attempts($treasurehuntid) {
 function treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid) {
     global $DB;
     if ($groupid) {
-        $grouptype = 'a.groupid=(?)';
+        $grouptype = 'a.groupid=?';
         $params = [$roadid, $groupid];
     } else {
-        $grouptype = 'a.groupid=0 AND a.userid=(?)';
+        $grouptype = 'a.groupid=0 AND a.userid=?';
         $params = [$roadid, $userid];
     }
     $sql = "SELECT MAX(a.timecreated) as finished FROM "
@@ -852,12 +853,49 @@ function treasurehunt_is_edition_locked($treasurehuntid, $userid) {
  * Check if a locking session still exists.
  *
  * @param int $lockid The identifier of lock to check.
- * @return int Return 1 if lock exists, else 0.
+ * @param int $treasurehuntid Activity instance identifier.
+ * @param int $userid Editor identifier.
+ * @return bool True when the lock is active and belongs to the editor and activity.
  */
-function treasurehunt_edition_lock_id_is_valid($lockid) {
+function treasurehunt_edition_lock_id_is_valid($lockid, $treasurehuntid, $userid) {
     global $DB;
 
-    return $DB->record_exists_select('treasurehunt_locks', "id = ?", [$lockid]);
+    return $DB->record_exists_select('treasurehunt_locks',
+        'id = ? AND treasurehuntid = ? AND userid = ? AND lockedtill > ?',
+        [$lockid, $treasurehuntid, $userid, time()]);
+}
+
+/**
+ * Require a road to belong to the activity being edited.
+ *
+ * @param int $roadid Road identifier.
+ * @param int $treasurehuntid Activity instance identifier.
+ */
+function treasurehunt_require_road_in_activity($roadid, $treasurehuntid) {
+    global $DB;
+
+    if (!$DB->record_exists('treasurehunt_roads', ['id' => $roadid, 'treasurehuntid' => $treasurehuntid])) {
+        throw new moodle_exception('invalidentry');
+    }
+}
+
+/**
+ * Require a stage to belong to the activity being edited.
+ *
+ * @param int $stageid Stage identifier.
+ * @param int $treasurehuntid Activity instance identifier.
+ * @return stdClass Stage record.
+ */
+function treasurehunt_require_stage_in_activity($stageid, $treasurehuntid) {
+    global $DB;
+
+    $stage = $DB->get_record_sql('SELECT s.* FROM {treasurehunt_stages} s '
+        . 'JOIN {treasurehunt_roads} r ON r.id = s.roadid '
+        . 'WHERE s.id = ? AND r.treasurehuntid = ?', [$stageid, $treasurehuntid]);
+    if (!$stage) {
+        throw new moodle_exception('invalidentry');
+    }
+    return $stage;
 }
 
 /**
@@ -1382,15 +1420,15 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
             $geometrysolved = true;
         }
     }
-    // If the user does not have any progress, the geometry of the first stage of the road shows.
-    // if (count($userprogress) == 0 || !$geometrysolved) {.
+    // Show the first stage until a location has been discovered.
+    if (!$geometrysolved) {
         $query = "SELECT position -1 as position,geom as geometry,"
             . "roadid FROM {treasurehunt_stages}  WHERE  roadid=? AND position=1";
         $params = [$roadid];
         $firststagegeom = $DB->get_records_sql($query, $params);
         // Convert the feature format in GeoJSON.
         $nextstagegeomgeojson = treasurehunt_features_to_geojson($firststagegeom, $context, $treasurehuntid, $groupid);
-    // Removed }.
+    }
 
     // Convert the features format in GeoJSON.
     $attemptsgeojson = treasurehunt_features_to_geojson($userprogress, $context, $treasurehuntid, $groupid);
@@ -1796,11 +1834,11 @@ function treasurehunt_get_last_timestamps($userid, $groupid, $roadid) {
         $grouptype = 'a.groupid=0 AND a.userid=(?)';
         $params = [$userid, $roadid];
     }
-    $query = "SELECT coalesce(attempttimestamp,0) as attempttimestamp, "
-        . "ro.timemodified as roadtimestamp FROM  {treasurehunt_roads} ro LEFT JOIN (SELECT "
-        . "MAX(a.timecreated) as attempttimestamp, r.roadid FROM {treasurehunt_attempts} a INNER JOIN "
-        . "{treasurehunt_stages} r ON a.stageid=r.id where $grouptype group by r.roadid) q "
-        . "ON q.roadid = ro.id WHERE ro.id=?";
+    $query = "SELECT COALESCE(MAX(a.timecreated), 0) AS attempttimestamp, "
+        . "ro.timemodified AS roadtimestamp FROM {treasurehunt_roads} ro "
+        . "LEFT JOIN {treasurehunt_stages} r ON r.roadid=ro.id "
+        . "LEFT JOIN {treasurehunt_attempts} a ON a.stageid=r.id AND $grouptype "
+        . "WHERE ro.id=? GROUP BY ro.id, ro.timemodified";
     $timestamp = $DB->get_record_sql($query, $params);
     if (!isset($timestamp->attempttimestamp)) {
         $timestamp->attempttimestamp = 0;
@@ -1821,24 +1859,20 @@ function treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid) 
     global $DB;
 
     if ($groupid) {
-        $grouptypewithin = 'at.groupid=a.groupid';
-        $grouptype = 'a.groupid=(?)';
-        $params = [$groupid, $roadid];
+        $grouptype = 'a.groupid=?';
+        $params = [$roadid, $groupid];
     } else {
-        $grouptypewithin = 'at.groupid=a.groupid AND at.userid=a.userid';
-        $grouptype = 'a.groupid=0 AND a.userid=(?)';
-        $params = [$userid, $roadid];
+        $grouptype = 'a.groupid=0 AND a.userid=?';
+        $params = [$roadid, $userid];
     }
     $sql = "SELECT a.id,a.stageid,a.success,a.location AS location,"
         . "a.geometrysolved,a.questionsolved,a.activitysolved,r.name,r.cluetext,"
         . "r.questiontext,r.position,r.activitytoend FROM {treasurehunt_stages} r "
-        . "INNER JOIN {treasurehunt_attempts} a ON a.stageid=r.id WHERE "
-        . "a.timecreated=(SELECT MAX(at.timecreated) FROM {treasurehunt_stages} ri "
-        . "INNER JOIN {treasurehunt_attempts} at ON at.stageid=ri.id  WHERE "
-        . "$grouptypewithin AND ri.roadid=r.roadid AND at.geometrysolved=1) "
-        . "AND $grouptype AND r.roadid = ?";
-    $lastsuccesfulattempt = $DB->get_record_sql($sql, $params);
-    return $lastsuccesfulattempt;
+        . "INNER JOIN {treasurehunt_attempts} a ON a.stageid=r.id "
+        . "WHERE r.roadid=? AND a.geometrysolved=1 AND $grouptype "
+        . "ORDER BY a.timecreated DESC, a.id DESC";
+    $attempts = $DB->get_records_sql($sql, $params, 0, 1);
+    return $attempts ? reset($attempts) : false;
 }
 /**
  * Calculate the last_successful_attempt and format texts.
@@ -1902,6 +1936,7 @@ function treasurehunt_format_texts($attempt, $context) {
  * @param object $treasurehunt The treasurehunt instance.
  * @param int $nostages The total number of stages in the road.
  * @param bool $qoaremoved If the question or activity to end has been removed or not.
+ * @param stdClass|false $lastattempt Last geometry-solved attempt already loaded by the caller.
  * @return object The control parameters.
  */
 function treasurehunt_check_question_and_activity_solved(
@@ -1913,7 +1948,8 @@ function treasurehunt_check_question_and_activity_solved(
     $context,
     $treasurehunt,
     $nostages,
-    $qoaremoved
+    $qoaremoved,
+    $lastattempt
 ) {
     global $DB;
 
@@ -1925,8 +1961,6 @@ function treasurehunt_check_question_and_activity_solved(
     $return->roadfinished = false;
     $return->qoaremoved = false;
     $return->success = false;
-
-    $lastattempt = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context);
 
     // If the last attempt has resolved geometry but the stage is not exceeded.
     if ($lastattempt && !$lastattempt->success && $lastattempt->geometrysolved) {
@@ -2143,16 +2177,24 @@ function treasurehunt_get_last_location($treasurehunt, $userid) {
  * @param int $currentstageid
  * @param int $time
  * @param string $locationwkt The point in WKT format.
+ * @param int $mininterval Minimum seconds between passive position samples.
  */
-function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time, $locationwkt) {
+function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time, $locationwkt, $mininterval = 0) {
     global $DB;
+    if ($mininterval > 0) {
+        $lasttime = $DB->get_field_sql('SELECT MAX(timestamp) FROM {treasurehunt_track} '
+            . 'WHERE treasurehuntid = ? AND userid = ?', [$treasurehunt->id, $userid]);
+        if ($lasttime !== false && $time - (int)$lasttime < $mininterval) {
+            return;
+        }
+    }
     $tracking = new stdClass();
     $tracking->treasurehuntid = $treasurehunt->id;
     $tracking->userid = $userid;
     $tracking->timestamp = $time;
     $tracking->location = $locationwkt;
     $tracking->stageid = $currentstageid;
-    $id = $DB->insert_record("treasurehunt_track", $tracking);
+    $DB->insert_record("treasurehunt_track", $tracking);
 }
 
 /**
@@ -2166,13 +2208,17 @@ function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time,
  * @param bool $outoftime If the instance is out of time.
  * @param bool $actnotavailableyet If the instance is not avaible yet.
  * @param context $context The context object.
+ * @param stdClass|false|null $attempt Last geometry-solved attempt, or null to query it.
  * @return object The last succesful stage.
  */
-function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nostages, $outoftime, $actnotavailableyet, $context) {
+function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nostages, $outoftime,
+        $actnotavailableyet, $context, $attempt = null) {
     $lastsuccessfulstage = new stdClass();
 
     // Get the last attempt with geometry solved by the user / group for the road.
-    $attempt = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context);
+    if ($attempt === null) {
+        $attempt = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context);
+    }
     if ($attempt && !$outoftime && !$actnotavailableyet) {
         $lastsuccessfulstage = treasurehunt_get_name_and_clue($attempt, $context);
         $lastsuccessfulstage->id = intval($attempt->stageid);
@@ -2239,7 +2285,6 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
     $return->newgeometry = false;
     $return->attemptsolved = false;
     $return->geometrysolved = false;
-    $return->geometrysolved = false;
     $newattempts = [];
 
     [$return->newattempttimestamp, $return->newroadtimestamp] = treasurehunt_get_last_timestamps($userid, $groupid, $roadid);
@@ -2254,7 +2299,7 @@ function treasurehunt_check_attempts_updates($timestamp, $groupid, $userid, $roa
             $params = [$userid, $roadid];
             $return->strings[] = get_string('changetoindividualmode', 'treasurehunt');
         }
-        $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,"
+        $query = "SELECT a.id,a.type,a.timecreated,a.questionsolved,a.activitysolved,"
             . "a.success,a.geometrysolved,a.penalty,r.position,a.userid as \"user\" "
             . "FROM {treasurehunt_stages} r INNER JOIN {treasurehunt_attempts} a "
             . "ON a.stageid=r.id WHERE $grouptype AND r.roadid=? ORDER BY "

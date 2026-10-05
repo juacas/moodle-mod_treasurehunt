@@ -66,8 +66,8 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
-        $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
-        $parms = ['id' => $id];
+        $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads} WHERE id=? AND treasurehuntid=?';
+        $parms = [$id, $treasurehunt->id];
         if (!$road = $DB->get_record_sql($sql, $parms)) {
             throw new moodle_exception('invalidentry');
         }
@@ -109,6 +109,9 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
         redirect($returnurl);
     } else if ($road = $mform->get_data()) {
+        if (!empty($road->id)) {
+            treasurehunt_require_road_in_activity($road->id, $treasurehunt->id);
+        }
         // Actualizamos los campos.
         $road->name = trim($road->name);
         $road = treasurehunt_add_update_road($treasurehunt, $road, $context);

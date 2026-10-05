@@ -152,6 +152,7 @@
             </KEYS>
              <INDEXES>
                 <INDEX NAME="timestamp_idx" UNIQUE="false" FIELDS="timestamp"/>
+                <INDEX NAME="hunt_user_time_idx" UNIQUE="false" FIELDS="treasurehuntid,userid,timestamp"/>
             </INDEXES>
         </TABLE>
     </TABLES>
