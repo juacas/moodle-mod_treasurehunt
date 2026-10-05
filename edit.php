@@ -18,9 +18,9 @@
  * Page to edit instances
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -124,12 +124,14 @@ $buttons .= $OUTPUT->help_icon('editorsave', 'treasurehunt');
 $buttons .= '</div></div>';
 echo '<div id="roadlistpanel" class="treasurehunt-road-tabs border-bottom" role="navigation" aria-label="'
     . s(get_string('editorroads', 'treasurehunt')) . '">'
-    . '<div id="roadtabscontainer"></div>'
-    . $OUTPUT->help_icon('editorroads', 'treasurehunt')
+    . '<div id="roadtabscontainer">'
+    . '<ul id="roadlist" class="nav nav-tabs flex-nowrap" role="tablist"'
+    . ' aria-label="' . s(get_string('road', 'treasurehunt')) . '"></ul>'
     . '<button type="button" id="addroad" class="btn btn-outline-primary btn-sm treasurehunt-add-road"'
     . ' data-bs-toggle="tooltip" data-bs-placement="top"'
     . ' title="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '"'
-    . ' aria-label="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '">+</button></div>';
+    . ' aria-label="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '">+</button></div>'
+    . $OUTPUT->help_icon('editorroads', 'treasurehunt') . '</div>';
 echo $OUTPUT->container_start('treasurehunt-editor-workspace', 'editorworkspace');
 echo $buttons;
 echo '<span class="visually-hidden" id="treasurehunt-map-label">'

@@ -84,6 +84,8 @@
 }
 
 .path-mod-treasurehunt #roadtabscontainer {
+  display: flex;
+  align-items: stretch;
   flex: 1 1 auto;
   min-width: 0;
   overflow-x: auto;
@@ -788,6 +790,7 @@
 .path-mod-treasurehunt #roadlist {
   display: flex;
   flex: 0 0 auto;
+  order: 0;
   gap: 0.2rem;
   width: max-content;
   margin: 0;
@@ -848,6 +851,7 @@
   position: relative;
   z-index: 2;
   display: grid;
+  order: 1;
   place-items: center;
   flex: 0 0 2.5rem;
   align-self: stretch;

@@ -16,9 +16,9 @@
  * @module mod_treasurehunt/editmod
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>,
- *            Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ *            Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>*
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>*
  * @license http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 import $ from "jquery";
@@ -40,7 +40,7 @@ let init = {
         "remove", "searchlocation", "savewarning", "removewarning", "areyousure",
         "removeroadwarning", "confirm", "cancel", "pegmanlabel", "custommapimageerror",
         "editorstatussaved", "editorstatusunsaved", "editorroaddeleted", "editorstagedeleted",
-        "errvalidroad", "erremptystage", "editorinvalidstage",
+        "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage",
       ];
       var stringsqueried = terms.map(function (term) {
         let comp = 'treasurehunt';
@@ -169,50 +169,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       .attr("aria-label", strings.stage).prependTo($("#stagelistpanel"));
     $("#stagelistpanel").attr({role: "region", "aria-label": strings.stage});
     $("#editorworkspace").attr({role: "tabpanel", "aria-labelledby": "treasurehunt-map-label"});
-    // Lo cargo como un sortable.
-    $("#stagelist")
-      .sortable({
-        handle: ".handle",
-        tolerance: "pointer",
-        zIndex: 9999,
-        opacity: 0.5,
-        forcePlaceholderSize: true,
-        cursorAt: {
-          top: -7,
-        },
-        cursor: "n-resize",
-        axis: "y",
-        items: "li:not(:hidden , .blocked)",
-        helper: "clone",
-        start: function (event, ui) {
-          var scrollParent = $(this).data("ui-sortable").scrollParent,
-            maxScrollTop =
-              scrollParent[0].scrollHeight -
-              scrollParent[0].clientHeight -
-              ui.helper.height();
-          // Set max scrollTop for sortable
-          // scrolling.
-          $(this).data("maxScrollTop", maxScrollTop);
-        },
-        sort: function (/*e, ui*/) {
-          // Check if scrolling is out of
-          // boundaries.
-          var scrollParent = $(this).data("ui-sortable").scrollParent,
-            maxScrollTop = $(this).data("maxScrollTop");
-          if (scrollParent.scrollTop() > maxScrollTop) {
-            scrollParent.scrollTop(maxScrollTop);
-          }
-        },
-        update: function (event, ui) {
-          var roadid = ui.item.attr("roadid");
-          var $listitems = $(this).children('li[roadid="' + roadid + '"]');
-          if (renumberStages($listitems, dirtyStages, originalStages, treasurehunt.roads[roadid].vector)) {
-            activateSaveButton();
-            dirty = true;
-          }
-        },
-      })
-      .disableSelection();
+    setupStageReordering();
 
     /**
      * Renumber a road's stages from N to 1 in their visible order.
@@ -242,9 +199,189 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       return changed;
     }
 
-    // Creo el roadlistpanel.
-    $("<ul>", {id: "roadlist", role: "tablist", class: "nav nav-tabs flex-nowrap"})
-      .attr("aria-label", strings.road).appendTo($("#roadtabscontainer"));
+    /** Reorder stages with pointer and keyboard events, without jQuery UI sortable. */
+    function setupStageReordering() {
+      var list = document.getElementById("stagelist");
+      var scrollpanel = document.getElementById("stagelistpanel");
+      var drag = null;
+      var suppressClickUntil = 0;
+
+      function visibleStages(roadid) {
+        return Array.from(list.children).filter(function (item) {
+          return item.matches('li[roadid="' + roadid + '"]') && item.getClientRects().length > 0 &&
+            !item.classList.contains("treasurehunt-stage-placeholder");
+        });
+      }
+
+      function saveOrder(roadid) {
+        var $items = $(list).children('li[roadid="' + roadid + '"]');
+        if (renumberStages($items, dirtyStages, originalStages, treasurehunt.roads[roadid].vector)) {
+          activateSaveButton();
+          dirty = true;
+        }
+      }
+
+      function movePlaceholder(clientY) {
+        var stages = visibleStages(drag.roadid).filter(function (item) {
+          return item !== drag.row;
+        });
+        var before = stages.find(function (item) {
+          var bounds = item.getBoundingClientRect();
+          return clientY < bounds.top + bounds.height / 2;
+        });
+        if (before) {
+          list.insertBefore(drag.placeholder, before);
+        } else if (stages.length) {
+          list.insertBefore(drag.placeholder, stages[stages.length - 1].nextSibling);
+        }
+      }
+
+      function scrollWhileDragging() {
+        if (!drag || !drag.active) {
+          return;
+        }
+        var bounds = scrollpanel.getBoundingClientRect();
+        var scroll = drag.clientY < bounds.top + 32 ? -12 :
+          drag.clientY > bounds.bottom - 32 ? 12 : 0;
+        if (scroll) {
+          var previous = scrollpanel.scrollTop;
+          scrollpanel.scrollTop += scroll;
+          if (scrollpanel.scrollTop !== previous) {
+            movePlaceholder(drag.clientY);
+          }
+        }
+        drag.frame = window.requestAnimationFrame(scrollWhileDragging);
+      }
+
+      function startDrag() {
+        var bounds = drag.row.getBoundingClientRect();
+        drag.placeholder = document.createElement("li");
+        drag.placeholder.className = "treasurehunt-stage-placeholder";
+        drag.placeholder.setAttribute("aria-hidden", "true");
+        drag.placeholder.style.height = bounds.height + "px";
+        drag.row.before(drag.placeholder);
+        drag.originalStyle = drag.row.getAttribute("style");
+        Object.assign(drag.row.style, {
+          position: "fixed",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          width: bounds.width + "px",
+          height: bounds.height + "px",
+          zIndex: "1000",
+        });
+        drag.row.classList.add("treasurehunt-stage-dragging");
+        drag.active = true;
+        drag.frame = window.requestAnimationFrame(scrollWhileDragging);
+      }
+
+      function finishDrag(event, cancelled) {
+        if (!drag || event.pointerId !== drag.pointerId) {
+          return;
+        }
+        var completed = drag;
+        drag = null;
+        if (completed.frame) {
+          window.cancelAnimationFrame(completed.frame);
+        }
+        if (completed.active) {
+          if (cancelled) {
+            completed.placeholder.remove();
+          } else {
+            completed.placeholder.replaceWith(completed.row);
+          }
+          completed.row.classList.remove("treasurehunt-stage-dragging");
+          if (completed.originalStyle === null) {
+            completed.row.removeAttribute("style");
+          } else {
+            completed.row.setAttribute("style", completed.originalStyle);
+          }
+          suppressClickUntil = Date.now() + 250;
+          if (!cancelled) {
+            saveOrder(completed.roadid);
+          }
+        }
+        if (completed.handle.hasPointerCapture(completed.pointerId)) {
+          completed.handle.releasePointerCapture(completed.pointerId);
+        }
+      }
+
+      list.addEventListener("pointerdown", function (event) {
+        var handle = event.target.closest(".handle");
+        if (drag || !handle || !list.contains(handle) || !event.isPrimary || event.button !== 0) {
+          return;
+        }
+        var row = handle.closest("li");
+        if (!row || row.classList.contains("blocked") || !row.getClientRects().length) {
+          return;
+        }
+        var bounds = row.getBoundingClientRect();
+        drag = {
+          row: row,
+          handle: handle,
+          roadid: row.getAttribute("roadid"),
+          pointerId: event.pointerId,
+          startY: event.clientY,
+          offsetY: event.clientY - bounds.top,
+          clientY: event.clientY,
+          active: false,
+        };
+        handle.setPointerCapture(event.pointerId);
+      });
+
+      list.addEventListener("pointermove", function (event) {
+        if (!drag || event.pointerId !== drag.pointerId) {
+          return;
+        }
+        drag.clientY = event.clientY;
+        if (!drag.active && Math.abs(event.clientY - drag.startY) > 5) {
+          startDrag();
+        }
+        if (drag.active) {
+          event.preventDefault();
+          drag.row.style.top = event.clientY - drag.offsetY + "px";
+          movePlaceholder(event.clientY);
+        }
+      });
+
+      list.addEventListener("pointerup", function (event) {
+        finishDrag(event, false);
+      });
+      list.addEventListener("pointercancel", function (event) {
+        finishDrag(event, true);
+      });
+      list.addEventListener("lostpointercapture", function (event) {
+        finishDrag(event, true);
+      });
+      list.addEventListener("click", function (event) {
+        if (Date.now() < suppressClickUntil && event.target.closest(".handle")) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+
+      list.addEventListener("keydown", function (event) {
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+          return;
+        }
+        var handle = event.target.closest(".handle");
+        if (!handle || !list.contains(handle)) {
+          return;
+        }
+        var row = handle.closest("li");
+        var roadid = row.getAttribute("roadid");
+        var stages = visibleStages(roadid);
+        var target = stages[stages.indexOf(row) + (event.key === "ArrowUp" ? -1 : 1)];
+        if (!target) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        list.insertBefore(row, event.key === "ArrowUp" ? target : target.nextSibling);
+        saveOrder(roadid);
+        handle.focus();
+      });
+    }
+
     // Get style, vectors, map and interactions.
     var defaultstageStyle = new ol.style.Style({
       fill: new ol.style.Fill({

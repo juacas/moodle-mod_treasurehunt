@@ -17,8 +17,8 @@
  * Scans page for timestamps and format them as relative-dynamic dates.
  *
  * @package   mod_treasurehunt
- * @copyright 2018 Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2018 Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'core/str'], function ($, str) {

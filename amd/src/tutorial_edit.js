@@ -15,12 +15,12 @@
 
 /**
  * @module    mod_treasurehunt/tutorial
- * @copyright 2016 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'jqueryui', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
-        function ($, jqui, introJS, str, notification) {
+define(['jquery', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
+        function ($, introJS, str, notification) {
             var init = {
                 launchedittutorial: function() {
                     var intro = introJS();

@@ -27,7 +27,7 @@ use core\session\exception;
  * Mobile output class for Treasure Hunt
  *
  * @package   mod_treasurehunt
- * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license  http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile {
