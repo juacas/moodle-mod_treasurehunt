@@ -60,6 +60,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
 
         $stage = new backup_nested_element('stage', ['id'], [
             'name', 'position', 'cluetext', 'cluetextformat', 'cluetexttrust',
+            'clueforstage', 'clueforstageformat', 'clueforstagetrust', 'discoveroutofsequence',
             'timecreated', 'timemodified', 'playstagewithoutmoving', 'activitytoend', 'questiontext',
             'questiontextformat', 'questiontexttrust', 'qrtext', 'geom']);
 
@@ -117,6 +118,7 @@ class backup_treasurehunt_activity_structure_step extends backup_activity_struct
         // Define file annotations.
         $treasurehunt->annotate_files('mod_treasurehunt', 'intro', null);
         $stage->annotate_files('mod_treasurehunt', 'cluetext', 'id');
+        $stage->annotate_files('mod_treasurehunt', 'clueforstage', 'id');
         $stage->annotate_files('mod_treasurehunt', 'questiontext', 'id');
         $answer->annotate_files('mod_treasurehunt', 'answertext', 'id');
 

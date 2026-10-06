@@ -24,6 +24,36 @@ Operation
 8. adjust the grading method and penalizations.
 9. let your students play the game.
 
+Modalidad de descubrimiento fuera de secuencia
+===============================================
+
+La configuración se hace por etapa, dentro de cada camino. Por defecto, las etapas se
+descubren en el orden del camino. Al editar una etapa se puede activar **Permitir descubrir
+fuera de secuencia** y escribir una **Pista para descubrir esta etapa**. El campo de pista
+admite texto HTML e imágenes del editor de Moodle. Una etapa marcada puede descubrirse
+cuando se encuentre su geometría o se escanee su QR, aunque todavía haya etapas anteriores
+pendientes. Las etapas sin esa marca conservan el orden normal. Al guardar una etapa, al
+menos una de sus dos pistas debe tener contenido; la otra puede quedar vacía.
+
+La siguiente etapa de la secuencia es siempre la primera etapa del camino que queda sin
+completar. Si una etapa ya se descubrió fuera de orden, el recorrido la salta al llegar a
+ella. El progreso y la finalización se calculan por la cantidad de etapas distintas
+completadas; una etapa ya resuelta no vuelve a contar.
+
+Al pulsar **Ver pista**, se evalúa cada etapa pendiente según su predecesora inmediata en
+el camino. Si la predecesora está completada y tiene **Pista para localizar la siguiente
+etapa**, se muestra esa pista. Si está completada pero no tiene pista de salida, se usa
+**Pista para descubrir esta etapa** de la etapa pendiente. Cuando la predecesora aún no
+está completada, solo se muestra la pista propia si la etapa permite descubrirse fuera
+de secuencia. La primera etapa usa su pista propia. Las pistas disponibles aparecen en
+pestañas «Pista 1», «Pista 2», etc.; los campos vacíos no generan pestañas. Los indicadores
+espaciales del mapa tienen en cuenta las etapas pendientes habilitadas y señalan la más
+cercana a la posición actual.
+
+En el juego por grupos, las etapas completadas y las pistas disponibles son compartidas
+por los integrantes del grupo. Las preguntas y actividades obligatorias de una etapa
+deben superarse para que esta cuente como completada.
+
 
 See also
 =========

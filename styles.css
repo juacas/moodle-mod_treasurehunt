@@ -399,8 +399,10 @@
 
 .path-mod-treasurehunt .treasurehunt-editor-loader .treasurehunt-loading-icon {
   display: block;
-  width: 96px;
-  height: 96px;
+  width: 200px;
+  height: 200px;
+  max-width: 40vw;
+  max-height: 40vh;
   object-fit: contain;
   margin: 0 auto;
   transform: translateY(-50%);

@@ -653,7 +653,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
-    $fileareas = ['cluetext', 'questiontext', 'answertext', 'custombackground'];
+    $fileareas = ['cluetext', 'clueforstage', 'questiontext', 'answertext', 'custombackground'];
     if (!in_array($filearea, $fileareas)) {
         return false;
     }
@@ -705,6 +705,19 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
             new pix_icon('t/edit', '')
         );
         $treasurehuntnode->add_node($node, $beforekey);
+    }
+    if (has_capability('mod/treasurehunt:viewusershistoricalattempts', $PAGE->context)) {
+        $tracknode = navigation_node::create(
+            get_string('trackviewer', 'treasurehunt'),
+            new moodle_url('/mod/treasurehunt/gpx_viewer.php', ['id' => $PAGE->cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'mod_treasurehunt_trackviewer',
+            new pix_icon('i/location', '')
+        );
+        $treasurehuntnode->add_node($tracknode, $beforekey);
+    }
+    if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->context)) {
         $resetnode = navigation_node::create(
             get_string('cleartreasurehunt', 'treasurehunt'),
             new moodle_url('/mod/treasurehunt/clearhunt.php', ['id' => $PAGE->cm->id]),

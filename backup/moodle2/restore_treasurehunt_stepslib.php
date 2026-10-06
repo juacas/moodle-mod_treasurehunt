@@ -180,6 +180,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         // Add treasurehunt related files.
         $this->add_related_files('mod_treasurehunt', 'intro', null);
         $this->add_related_files('mod_treasurehunt', 'cluetext', 'treasurehunt_stage');
+        $this->add_related_files('mod_treasurehunt', 'clueforstage', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'answertext', 'treasurehunt_answer');
         $this->add_related_files('mod_treasurehunt', 'custombackground', null);

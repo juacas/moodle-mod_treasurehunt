@@ -193,12 +193,5 @@ if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
         'get'
     );
 }
-if (has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)) {
-    echo $output->single_button(
-        new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams),
-        get_string('trackviewer', 'treasurehunt'),
-        'get'
-    );
-}
 // Finish the page.
 echo $output->footer();

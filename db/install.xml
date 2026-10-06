@@ -62,6 +62,10 @@
                 <FIELD NAME="cluetext" TYPE="text" NOTNULL="true" SEQUENCE="false" COMMENT="Clue to reach the next stage"/>
                 <FIELD NAME="cluetextformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="cluetexttrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="clueforstage" TYPE="text" NOTNULL="false" SEQUENCE="false" COMMENT="Clue for finding this stage"/>
+                <FIELD NAME="clueforstageformat" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="1" SEQUENCE="false"/>
+                <FIELD NAME="clueforstagetrust" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false"/>
+                <FIELD NAME="discoveroutofsequence" TYPE="int" LENGTH="1" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="Whether the stage can be discovered before its turn"/>
                 <FIELD NAME="timecreated" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="timemodified" TYPE="int" LENGTH="10" NOTNULL="true" UNSIGNED="true" DEFAULT="0" SEQUENCE="false"/>
                 <FIELD NAME="playstagewithoutmoving" TYPE="int" LENGTH="2" NOTNULL="true" DEFAULT="0" SEQUENCE="false" COMMENT="If true, students can play from their computers without moving to places only during the performance of the stage associated. Then it will continue using the game settings"/>

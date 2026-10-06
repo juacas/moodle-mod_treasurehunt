@@ -42,26 +42,22 @@ if (!has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
     redirect($return);
 }
 
+if (data_submitted() && $confirm && confirm_sesskey()) {
+    treasurehunt_clear_activities($treasurehuntid);
+    redirect($return, get_string('cleartreasurehunt_done', 'treasurehunt'), null,
+        \core\output\notification::NOTIFY_SUCCESS);
+}
+
 $clearhunt = get_string('cleartreasurehunt', 'treasurehunt');
 $PAGE->navbar->add(get_string('modulename', 'treasurehunt'));
 $PAGE->navbar->add($clearhunt);
 $PAGE->set_title($clearhunt);
 $PAGE->set_heading($COURSE->fullname);
+$PAGE->activityheader->set_description('');
 echo $OUTPUT->header();
 echo $OUTPUT->heading($clearhunt);
-
-if (data_submitted() && $confirm && confirm_sesskey()) {
-    treasurehunt_clear_activities($treasurehuntid);
-
-    echo $OUTPUT->box(get_string('cleartreasurehunt_done', 'treasurehunt'));
-    echo $OUTPUT->continue_button($return);
-    echo $OUTPUT->footer();
-    die;
-} else {
-    $attempts = treasurehunt_get_all_attempts($treasurehuntid);
-    $count = count($attempts);
-    $msg = get_string('cleartreasurehuntconfirm', 'treasurehunt', $count);
-    echo $OUTPUT->confirm($msg, new moodle_url('clearhunt.php', ['confirm' => 1, 'id' => $cm->id]), $return);
-    echo $OUTPUT->footer();
-    die;
-}
+$attempts = treasurehunt_get_all_attempts($treasurehuntid);
+$count = count($attempts);
+$msg = get_string('cleartreasurehuntconfirm', 'treasurehunt', $count);
+echo $OUTPUT->confirm($msg, new moodle_url('clearhunt.php', ['confirm' => 1, 'id' => $cm->id]), $return);
+echo $OUTPUT->footer();

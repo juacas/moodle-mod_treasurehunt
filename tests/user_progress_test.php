@@ -44,7 +44,9 @@ final class user_progress_test extends \advanced_testcase {
             'course' => $course->id, 'name' => 'Test hunt', 'intro' => '',
             'playwithoutmoving' => 1, 'tracking' => 0, 'groupmode' => 0,
             'allowattemptsfromdate' => 0, 'cutoffdate' => 0,
-            'customplayerconfig' => '{"showheadinghint":true}',
+            'customplayerconfig' => '{"searchpaneldisabled":false,"localizationbuttondisabled":false,'
+                . '"showheadinghint":true,"showinzonehint":false,"showdistancehint":false,'
+                . '"shownextareahint":false}',
         ];
         $hunt->id = $DB->insert_record('treasurehunt', $hunt);
         $moduleid = $DB->get_field('modules', 'id', ['name' => 'treasurehunt'], MUST_EXIST);
@@ -119,6 +121,118 @@ final class user_progress_test extends \advanced_testcase {
     }
 
     /**
+     * A free stage may be found early and is skipped when the ordered route reaches it.
+     */
+    public function test_out_of_sequence_discovery_and_clue_tabs(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course);
+        $roadid = $DB->insert_record('treasurehunt_roads', (object)[
+            'treasurehuntid' => $hunt->id, 'name' => 'Road', 'validated' => 1,
+            'timecreated' => time(), 'timemodified' => time(),
+        ]);
+        foreach ([1, 2, 3] as $position) {
+            $low = ($position - 1) * 2;
+            $high = $low + 1;
+            $DB->insert_record('treasurehunt_stages', (object)[
+                'roadid' => $roadid, 'name' => 'Stage ' . $position, 'position' => $position,
+                'cluetext' => $position === 1 ? 'Next stage clue' : '',
+                'clueforstage' => 'Own clue ' . $position,
+                'discoveroutofsequence' => $position === 3 ? 1 : 0,
+                'questiontext' => '',
+                'geom' => "MULTIPOLYGON ((($low 0, $low 1, $high 1, $high 0, $low 0)))",
+            ]);
+        }
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $params = [
+            'treasurehuntid' => $hunt->id, 'attempttimestamp' => 0, 'roadtimestamp' => 0,
+            'playwithoutmoving' => true, 'groupmode' => false, 'initialize' => true,
+            'selectedanswerid' => 0, 'qoaremoved' => false,
+        ];
+        $initial = user_progress::execute($params);
+        \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $initial);
+        $this->assertCount(2, $initial['nextstage']['features']);
+        $this->assertCount(2, $initial['clues']);
+        $params['initialize'] = false;
+        $params['attempttimestamp'] = $initial['attempttimestamp'];
+        $params['roadtimestamp'] = $initial['roadtimestamp'];
+        $params['location'] = ['type' => 'Point', 'coordinates' => [4.5, 0.5]];
+        $early = user_progress::execute($params);
+        $this->assertFalse($early['roadfinished']);
+        $this->assertEquals(1, $early['nextstage']['features'][0]['properties']['stageposition']);
+        $this->assertCount(1, $early['clues']);
+        $params['attempttimestamp'] = $early['attempttimestamp'];
+        $params['location']['coordinates'] = [0.5, 0.5];
+        $first = user_progress::execute($params);
+        $this->assertEquals(2, $first['nextstage']['features'][0]['properties']['stageposition']);
+        $this->assertStringContainsString('Next stage clue', $first['clues'][0]['html']);
+        $params['attempttimestamp'] = $first['attempttimestamp'];
+        $params['location']['coordinates'] = [2.5, 0.5];
+        $last = user_progress::execute($params);
+        \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $last);
+        $this->assertTrue($last['roadfinished']);
+        $this->assertTrue(treasurehunt_check_if_user_has_finished($student->id, 0, $roadid));
+    }
+
+    /**
+     * A completed predecessor provides the clue even when its successor is not a free stage.
+     */
+    public function test_clues_follow_each_immediate_predecessor(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course);
+        $roadid = $DB->insert_record('treasurehunt_roads', (object)[
+            'treasurehuntid' => $hunt->id, 'name' => 'Road', 'validated' => 1,
+            'timecreated' => time(), 'timemodified' => time(),
+        ]);
+        $stageids = [];
+        foreach ([1, 2, 3, 4] as $position) {
+            $low = ($position - 1) * 2;
+            $high = $low + 1;
+            $stageids[$position] = $DB->insert_record('treasurehunt_stages', (object)[
+                'roadid' => $roadid, 'name' => 'Stage ' . $position, 'position' => $position,
+                'cluetext' => in_array($position, [1, 3]) ? 'Exit clue ' . $position : '',
+                'clueforstage' => 'Own clue ' . $position,
+                'discoveroutofsequence' => $position === 3 ? 1 : 0,
+                'questiontext' => '',
+                'geom' => "MULTIPOLYGON ((($low 0, $low 1, $high 1, $high 0, $low 0)))",
+            ]);
+        }
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $params = [
+            'treasurehuntid' => $hunt->id, 'attempttimestamp' => 0, 'roadtimestamp' => 0,
+            'playwithoutmoving' => true, 'groupmode' => false, 'initialize' => true,
+            'selectedanswerid' => 0, 'qoaremoved' => false,
+        ];
+        $initial = user_progress::execute($params);
+        $this->assertSame([$stageids[1], $stageids[3]], array_column($initial['clues'], 'stageid'));
+        $this->assertSame([1, 3], array_column($initial['clues'], 'position'));
+
+        $params['initialize'] = false;
+        $params['attempttimestamp'] = $initial['attempttimestamp'];
+        $params['roadtimestamp'] = $initial['roadtimestamp'];
+        $params['location'] = ['type' => 'Point', 'coordinates' => [4.5, 0.5]];
+        $third = user_progress::execute($params);
+        $params['attempttimestamp'] = $third['attempttimestamp'];
+        $params['location']['coordinates'] = [0.5, 0.5];
+        $first = user_progress::execute($params);
+        \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $first);
+
+        $this->assertSame([$stageids[2], $stageids[4]], array_column($first['clues'], 'stageid'));
+        $this->assertSame([2, 4], array_column($first['clues'], 'position'));
+        $this->assertStringContainsString('Exit clue 1', $first['clues'][0]['html']);
+        $this->assertStringContainsString('Exit clue 3', $first['clues'][1]['html']);
+        $this->assertStringNotContainsString('Own clue 2', $first['clues'][0]['html']);
+        $this->assertStringNotContainsString('Own clue 4', $first['clues'][1]['html']);
+    }
+
+    /**
      * A manager can preview a selected road without belonging to its group.
      */
     public function test_manager_can_preview_selected_road_without_group_membership(): void {
@@ -140,7 +254,8 @@ final class user_progress_test extends \advanced_testcase {
             $roadids[] = $roadid;
             $DB->insert_record('treasurehunt_stages', (object)[
                 'roadid' => $roadid, 'name' => 'First stage', 'position' => 1,
-                'cluetext' => '', 'questiontext' => '',
+                'cluetext' => '', 'clueforstage' => 'Preview clue',
+                'discoveroutofsequence' => 1, 'questiontext' => '',
                 'geom' => 'MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)))',
             ]);
         }
@@ -157,6 +272,17 @@ final class user_progress_test extends \advanced_testcase {
         ]);
         $this->assertTrue($result['available']);
         $this->assertEquals($roadids[1], $result['nextstage']['features'][0]['properties']['roadid']);
+        $this->assertCount(1, $result['clues']);
+        $this->assertStringContainsString('Preview clue', $result['clues'][0]['html']);
+
+        $unchanged = user_progress::execute([
+            'treasurehuntid' => $hunt->id, 'previewroadid' => $roadids[1],
+            'attempttimestamp' => $result['attempttimestamp'], 'roadtimestamp' => $result['roadtimestamp'],
+            'playwithoutmoving' => true, 'groupmode' => true,
+            'initialize' => false, 'selectedanswerid' => 0, 'qoaremoved' => false,
+        ]);
+        $this->assertArrayNotHasKey('lastsuccessfulstage', $unchanged);
+        $this->assertCount(1, $unchanged['clues']);
 
         $this->expectException(\dml_missing_record_exception::class);
         treasurehunt_get_user_group_and_road($USER->id, $hunt, $cm->id, false, '', $roadids[2]);

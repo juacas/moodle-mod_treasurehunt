@@ -49,7 +49,7 @@ let init = {
       "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
       "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
       "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
-      "successlocation",
+      "successlocation", "clue", "nextclue", "nextclues",
     ];
     // console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
@@ -150,6 +150,9 @@ function initplaytreasurehunt(
   tracking = tracking == true;
   let isfirststage = false;
   let nextstagefeature = null;
+  let nextstagefeatures = [];
+  let availableclues = [];
+  let selectedclueindex = 0;
   let mapprojection = "EPSG:3857";
   let custombaselayer = null;
   let usegeographictools = true;
@@ -398,7 +401,8 @@ function initplaytreasurehunt(
       }),
     });
     let geom1 = markerFeature.getGeometry();
-    let geom2 = nextstagefeature ? nextstagefeature.getGeometry() : null;
+    let target = nearestStageFeature(geom1);
+    let geom2 = target ? target.getGeometry() : null;
     // Check if the marker is in the zone.
     let isinzone = geom2 && geom1 && geom2.intersectsCoordinate(geom1.getFirstCoordinate());
     // If in-zone hint is enabled and if the marker is in the zone change the style.
@@ -447,8 +451,9 @@ function initplaytreasurehunt(
    * @param {ol.Feature} feature The feature to style.
    */
   function distanceLabelStyle(feature) {
-    let geomtarget = nextstagefeature ? nextstagefeature.getGeometry() : null;
     let geomfeature = feature.getGeometry();
+    let target = nearestStageFeature(geomfeature);
+    let geomtarget = target ? target.getGeometry() : null;
     // Calculate distance to the target.
     let originpoint = geomfeature.getFirstCoordinate();
     let closestpoint = geomtarget && geomfeature ? geomtarget.getClosestPoint(originpoint) : null;
@@ -527,10 +532,11 @@ function initplaytreasurehunt(
    * @returns {ol.style.Style} An array of styles for the marker.
    */
   function headingFeatureStyle(feature) {
-    if (!nextstagefeature) {
+    let target = nearestStageFeature(feature.getGeometry());
+    if (!target) {
       return null;
     }
-    let rotation = calculateHeading(feature.getGeometry(), nextstagefeature.getGeometry()) ?? null;
+    let rotation = calculateHeading(feature.getGeometry(), target.getGeometry()) ?? null;
     if (rotation === null) {
       return null;
     }
@@ -544,6 +550,28 @@ function initplaytreasurehunt(
       }),
     });
     return style;
+  }
+  /**
+   * Find the closest eligible stage to a point on the map.
+   * @param {ol.geom.Geometry} geometry Current position geometry.
+   * @returns {ol.Feature|null} Closest stage.
+   */
+  function nearestStageFeature(geometry) {
+    if (!geometry || nextstagefeatures.length === 0) {
+      return null;
+    }
+    const origin = geometry.getFirstCoordinate();
+    let closest = null;
+    let minimum = Infinity;
+    nextstagefeatures.forEach((candidate) => {
+      const point = candidate.getGeometry().getClosestPoint(origin);
+      const squared = (point[0] - origin[0]) ** 2 + (point[1] - origin[1]) ** 2;
+      if (squared < minimum) {
+        minimum = squared;
+        closest = candidate;
+      }
+    });
+    return closest;
   }
   /*-------------------------------Layers---------------------------------*/
   let layers = [];
@@ -847,40 +875,46 @@ function initplaytreasurehunt(
         set_player_config(response.playerconfig);
 
         // Update stages layer.
-        let nextstagefeatures = null;
+        let loadedstagefeatures = [];
         if (response && response.nextstage) {
-          nextstagefeatures = geoJSONFormat.readFeatures(response.nextstage,
+          loadedstagefeatures = geoJSONFormat.readFeatures(response.nextstage,
                                               {
                                                 dataProjection: "EPSG:4326",
                                                 featureProjection: "EPSG:3857",
                                               });
         }
-        let newnextstagefeature = (nextstagefeatures && nextstagefeatures[0]) ?? null;
-        let stagepositionold = nextstagefeature ? nextstagefeature.get("stageposition") : null;
-        let stagepositionnew = newnextstagefeature ? newnextstagefeature.get("stageposition") : null;
+        let newnextstagefeature = loadedstagefeatures[0] ?? null;
+        let stagepositionold = nextstagefeatures.map((stage) => stage.get("stageposition")).join(",");
+        let stagepositionnew = loadedstagefeatures.map((stage) => stage.get("stageposition")).join(",");
         isfirststage = newnextstagefeature && newnextstagefeature.get("stageposition") === 1;
         let isfirstload = nextstagefeature === null;
         // If the next stage is first or different from the previous one, update it.
-        if (newnextstagefeature !== null
-          && (nextstagefeature === null || stagepositionold != stagepositionnew)) {
+        if (stagepositionold !== stagepositionnew || (newnextstagefeature && nextstagefeature === null)) {
 
           nextstagefeature = newnextstagefeature;
+          nextstagefeatures = loadedstagefeatures;
           stageSource.clear();
           // Add the feature to be shown in the map.
-          let shouldrender = isfirststage || customplayerconfig.shownextareahint;
-          if (shouldrender) {
-            nextstagefeature.set("shouldrender", true);
-          } else {
-            nextstagefeature.set("shouldrender", false);
-          }
-          // Render as stage, not as attempt.
-          nextstagefeature.set("is_stage", true);
-          stageSource.addFeatures([nextstagefeature]);
+          nextstagefeatures.forEach((stage) => {
+            stage.set("shouldrender", (isfirststage && stage.get("stageposition") === 1)
+              || customplayerconfig.shownextareahint);
+            stage.set("is_stage", true);
+          });
+          stageSource.addFeatures(nextstagefeatures);
           // If the stage is the first one, center the map on it.
           if (isfirststage === true && (isfirstload || initialize)) {
             fitmap = true;
-            fit_map_to_sources([stageSource]);
+            map.getView().fit(nextstagefeature.getGeometry().getExtent(),
+              {size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18});
           }
+        }
+        if (response.clues) {
+          const selectedclue = availableclues[selectedclueindex] ?? null;
+          availableclues = response.clues;
+          selectedclueindex = Math.max(0,
+            availableclues.findIndex((clue) => selectedclue && clue.stageid === selectedclue.stageid
+              && clue.html === selectedclue.html));
+          renderAvailableClues();
         }
 
         if (
@@ -935,7 +969,8 @@ function initplaytreasurehunt(
                   && nextstagefeature)) {
             fitmap = true;
             if (isfirststage && isfirstload) {
-              fit_map_to_sources([stageSource]);
+              map.getView().fit(nextstagefeature.getGeometry().getExtent(),
+                {size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18});
             } else {
               // If it is not the first stage, fit the map to the attempts.
               fit_map_to_sources([attemptSource]);
@@ -945,12 +980,13 @@ function initplaytreasurehunt(
           set_question();
           set_attempts_history();
         }
-        if (response.infomsg.length > 0) {
+        const dialogmessages = response.infomsg.filter((msg) => msg !== strings["successlocation"]);
+        if (dialogmessages.length > 0) {
           let body = "";
           infomsgs.forEach((msg) => {
             body += "<p>" + msg + "</p>";
           });
-          response.infomsg.forEach((msg) => {
+          dialogmessages.forEach((msg) => {
             infomsgs.push(msg);
             body += "<p>" + msg + "</p>";
           });
@@ -1080,6 +1116,61 @@ function initplaytreasurehunt(
         $("#questionbutton").hide();
       }
       changesinlastsuccessfulstage = false;
+    }
+  }
+  /** Render the available clues as accessible Bootstrap tabs. */
+  function renderAvailableClues() {
+    const container = $("#availableclues");
+    const tabs = $("#availablecluetabs").empty();
+    const content = $("#availablecluecontent").empty();
+    if (availableclues.length === 0) {
+      container.addClass("d-none");
+      $("#lastsuccessfulstageclue").toggle(roadfinished || !available);
+      $("#lastsuccessfulstageheading").toggle(roadfinished || !available);
+      $("#cluetitle").text(strings.nextclue);
+      return;
+    }
+    container.removeClass("d-none");
+    $("#lastsuccessfulstageclue").hide();
+    $("#lastsuccessfulstageheading").hide();
+    $("#cluetitle").text(availableclues.length > 1 ? strings.nextclues : strings.nextclue);
+    availableclues.forEach((clue, index) => {
+      $("<button>", {
+        type: "button",
+        id: "cluetab-" + index,
+        class: "nav-link",
+        role: "tab",
+        text: strings.clue + " " + clue.position,
+        "aria-controls": "cluepanel-" + index,
+      }).on("click", () => {
+        selectedclueindex = index;
+        tabs.children().removeClass("active").attr("aria-selected", "false");
+        tabs.children().eq(index).addClass("active").attr("aria-selected", "true");
+        content.children().removeClass("is-active").attr("aria-hidden", "true");
+        content.children().eq(index).addClass("is-active").attr("aria-hidden", "false");
+        fitMapToSelectedClue();
+      }).appendTo(tabs);
+      $("<div>", {
+        id: "cluepanel-" + index,
+        class: "treasurehunt-clue-pane" + (index === selectedclueindex ? " is-active" : ""),
+        role: "tabpanel",
+        "aria-labelledby": "cluetab-" + index,
+        "aria-hidden": index === selectedclueindex ? "false" : "true",
+      }).html(clue.html).appendTo(content);
+    });
+    tabs.children().eq(selectedclueindex).addClass("active").attr("aria-selected", "true");
+  }
+  /** Frame the geometry associated with the selected clue, if the map may reveal it. */
+  function fitMapToSelectedClue() {
+    if (!customplayerconfig.shownextareahint) {
+      return;
+    }
+    const clue = availableclues[selectedclueindex];
+    const target = clue ? nextstagefeatures.find((stage) => Number(stage.getId()) === Number(clue.stageid))
+      : nextstagefeature;
+    if (target) {
+      const extent = target.getGeometry().getExtent();
+      map.getView().fit(extent, {size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18});
     }
   }
   /**
@@ -1461,6 +1552,11 @@ function initplaytreasurehunt(
     map.updateSize();
   });
   $('#fitmap').on('click', () => {
+    if (isfirststage && !customplayerconfig.shownextareahint && nextstagefeature) {
+      map.getView().fit(nextstagefeature.getGeometry().getExtent(),
+        {size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18});
+      return;
+    }
     let attentionSources = [attemptSource, markerSource];
     if (usegeographictools) {
       attentionSources.push(userPositionSource);
@@ -1569,7 +1665,7 @@ function initplaytreasurehunt(
   /**
    * Show a toast message.
    * It shows a message in the bottom of the screen.
-   * The message is removed after 3.5 seconds.
+   * A successful location remains visible for 6.5 seconds.
    * @param {string} msg Message to display.
    * @param {boolean} showchest Show the animated treasure chest for a correct location.
    */
@@ -1580,10 +1676,9 @@ function initplaytreasurehunt(
       $("<img>", {src: treasurechesturl, alt: "", "aria-hidden": "true"}).prependTo(toast);
     }
     toast.appendTo($(".play-toast-container"));
-    // Out animation after 3s
-    setTimeout(() => toast.addClass("slide-out-top"), 3000);
-    // Remove element after 3,5s
-    setTimeout(() => toast.remove(), 3500);
+    const duration = showchest ? 6500 : 3500;
+    setTimeout(() => toast.addClass("slide-out-top"), duration - 500);
+    setTimeout(() => toast.remove(), duration);
   }
   /**
    * Open a modal with the given id.
@@ -1596,10 +1691,8 @@ function initplaytreasurehunt(
     const modal = $(id);
     modal.addClass("active");
     $(`${id} .modal-mask`).addClass("active dismissible");
-    if (id === "#cluepage" && !roadfinished && customplayerconfig.shownextareahint
-        && nextstagefeature) {
-      fitmap = true;
-      fit_map_to_sources([stageSource]);
+    if (id === "#cluepage" && !roadfinished) {
+      fitMapToSelectedClue();
     }
     modal.trigger("modal:open");
   }

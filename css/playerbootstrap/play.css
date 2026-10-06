@@ -318,8 +318,8 @@ body {
 }
 
 #page-mod-treasurehunt-play .play-toast-success img {
-  width: 64px;
-  height: 64px;
+  width: 128px;
+  height: 128px;
   flex: 0 0 auto;
   margin-right: 12px;
   object-fit: contain;
@@ -423,6 +423,10 @@ body {
   opacity: 1;
 }
 
+#page-mod-treasurehunt-play #cluepage:not(.active) {
+  display: none;
+}
+
 #page-mod-treasurehunt-play .play-modal-dialog,
 #page-mod-treasurehunt-play .play-modal-popup {
   position: relative;
@@ -473,6 +477,51 @@ body {
   flex: 1;
   overflow: auto;
   padding: 1.25rem;
+}
+
+#page-mod-treasurehunt-play #cluepage .play-modal-content,
+#page-mod-treasurehunt-play #cluepage .card-body {
+  padding: 0;
+}
+
+#page-mod-treasurehunt-play #cluepage .card {
+  margin: 0;
+  border: 0;
+  border-radius: 0;
+}
+
+#page-mod-treasurehunt-play #availableclues {
+  width: 100%;
+}
+
+#page-mod-treasurehunt-play #availablecluetabs {
+  width: 100%;
+  margin: 0;
+}
+
+#page-mod-treasurehunt-play #availablecluecontent {
+  display: grid;
+  width: 100%;
+  border-top: 0;
+  padding: 10px;
+}
+
+#page-mod-treasurehunt-play #availablecluecontent .treasurehunt-clue-pane {
+  grid-area: 1 / 1;
+  min-width: 0;
+  padding: 1rem;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+#page-mod-treasurehunt-play #availablecluecontent .treasurehunt-clue-pane.is-active {
+  visibility: visible;
+  pointer-events: auto;
+}
+
+#page-mod-treasurehunt-play #availablecluecontent img {
+  max-width: 100%;
+  height: auto;
 }
 
 #page-mod-treasurehunt-play .play-modal .play-modal-footer {

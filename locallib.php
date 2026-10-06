@@ -647,27 +647,48 @@ function treasurehunt_get_users_with_attempts($treasurehuntid) {
  * @return bool True if user or group has finished the road, else false.
  */
 function treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid) {
+    $state = treasurehunt_get_road_stage_state($userid, $groupid, $roadid);
+    return !empty($state->stages) && count($state->completed) === count($state->stages);
+}
+
+/**
+ * Return the ordered stages and distinct completed stages for a player or group.
+ *
+ * @param int $userid User id.
+ * @param int $groupid Group id, or zero for individual play.
+ * @param int $roadid Road id.
+ * @return stdClass Road state.
+ */
+function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
     global $DB;
-    if ($groupid) {
-        $grouptype = 'a.groupid=?';
-        $params = [$roadid, $groupid];
-    } else {
-        $grouptype = 'a.groupid=0 AND a.userid=?';
-        $params = [$roadid, $userid];
+
+    $state = new stdClass();
+    $state->stages = array_values($DB->get_records('treasurehunt_stages', ['roadid' => $roadid], 'position ASC, id ASC'));
+    $condition = $groupid ? 'a.groupid = ?' : 'a.groupid = 0 AND a.userid = ?';
+    $params = [$roadid, $groupid ?: $userid];
+    $sql = "SELECT DISTINCT a.stageid FROM {treasurehunt_attempts} a
+              JOIN {treasurehunt_stages} s ON s.id = a.stageid
+             WHERE s.roadid = ? AND a.success = 1 AND $condition";
+    $state->completed = $DB->get_records_sql($sql, $params);
+    $state->next = null;
+    $state->previous = null;
+    $state->candidates = [];
+    foreach ($state->stages as $stage) {
+        if (isset($state->completed[$stage->id])) {
+            if ($state->next === null) {
+                $state->previous = $stage;
+            }
+        } else if ($state->next === null) {
+            $state->next = $stage;
+        }
     }
-    $sql = "SELECT MAX(a.timecreated) as finished FROM "
-        . "{treasurehunt_attempts} a INNER JOIN {treasurehunt_stages} r "
-        . "ON r.id = a.stageid WHERE a.success=1 AND r.position=(SELECT "
-        . "max(ri.position) FROM {treasurehunt_stages} ri where "
-        . "ri.roadid=r.roadid) AND r.roadid = ? "
-        . "AND (a.type='location' OR a.type='qr') "
-        . "AND  $grouptype";
-    $finished = $DB->get_record_sql($sql, $params);
-    if (isset($finished->finished)) {
-        return true;
-    } else {
-        return false;
+    foreach ($state->stages as $stage) {
+        if (!isset($state->completed[$stage->id]) &&
+                ($stage === $state->next || !empty($stage->discoveroutofsequence))) {
+            $state->candidates[] = $stage;
+        }
     }
+    return $state;
 }
 
 /**
@@ -754,7 +775,7 @@ function treasurehunt_get_stages($treasurehuntid, $context) {
     // Get all stages from the instance of treasure hunt.
     $stagessql = "SELECT stage.id, "
         . "stage.name, stage.cluetext, roadid, roads.name as roadname, position,"
-        . "stage.activitytoend, stage.playstagewithoutmoving,"
+        . "stage.activitytoend, stage.playstagewithoutmoving, stage.discoveroutofsequence,"
         . "CASE WHEN stage.qrtext IS NOT NULL AND stage.qrtext <> '' THEN 1 ELSE 0 END AS hasqr,"
         . "CASE WHEN stage.questiontext IS NOT NULL AND stage.questiontext <> '' THEN 1 ELSE 0 END AS hasquestion,"
         . "geom as geometry FROM {treasurehunt_stages}  stage"
@@ -1014,6 +1035,7 @@ function treasurehunt_copy_stages($sourceid, $targetid, $treasurehuntid, $replac
                 $filestorage->delete_area_files($context->id, 'mod_treasurehunt', 'answertext', $answer->id);
             }
             $filestorage->delete_area_files($context->id, 'mod_treasurehunt', 'cluetext', $stage->id);
+            $filestorage->delete_area_files($context->id, 'mod_treasurehunt', 'clueforstage', $stage->id);
             $filestorage->delete_area_files($context->id, 'mod_treasurehunt', 'questiontext', $stage->id);
             $DB->delete_records('treasurehunt_answers', ['stageid' => $stage->id]);
             $DB->delete_records('treasurehunt_stages', ['id' => $stage->id]);
@@ -1036,7 +1058,7 @@ function treasurehunt_copy_stages($sourceid, $targetid, $treasurehuntid, $replac
         $stage->timecreated = time();
         $stage->timemodified = $stage->timecreated;
         $stage->id = $DB->insert_record('treasurehunt_stages', $stage);
-        foreach (['cluetext', 'questiontext'] as $area) {
+        foreach (['cluetext', 'clueforstage', 'questiontext'] as $area) {
             treasurehunt_copy_stage_files($filestorage, $context->id, $area, $oldid, $stage->id);
         }
         $answers = $DB->get_records('treasurehunt_answers', ['stageid' => $oldid], 'id ASC');
@@ -1119,27 +1141,11 @@ function treasurehunt_delete_old_locks($treasurehuntid) {
  * @return int 1 for play without moving and 0 otherwise.
  */
 function treasurehunt_get_play_mode($userid, $groupid, $roadid, $treasurehunt) {
-    global $DB;
-
     if ($treasurehunt->playwithoutmoving) {
         return 1;
     }
-    if ($groupid) {
-        $grouptype = 'a.groupid=(?)';
-        $params = [$groupid, $roadid];
-    } else {
-        $grouptype = 'a.groupid=0 AND a.userid=(?)';
-        $params = [$userid, $roadid];
-    }
-    $sql = "SELECT r.playstagewithoutmoving FROM {treasurehunt_stages} r "
-        . "WHERE r.position = (SELECT COALESCE(MAX(ri.position) +1,1) FROM {treasurehunt_stages} ri "
-        . "INNER JOIN {treasurehunt_attempts} a ON ri.id= a.stageid WHERE "
-        . "a.success = 1 AND ri.roadid = r.roadid AND $grouptype) AND r.roadid = ?";
-    $playmode = $DB->get_record_sql($sql, $params);
-    if ($playmode) {
-        return $playmode->playstagewithoutmoving;
-    }
-    return 0;
+    $state = treasurehunt_get_road_stage_state($userid, $groupid, $roadid);
+    return (int)($state->next->playstagewithoutmoving ?? 0);
 }
 
 /**
@@ -1165,14 +1171,25 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
     $return->success = false;
     // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
     $currentstage = treasurehunt_get_last_successful_attempt($userid, $groupid, $roadid, $context);
+    $state = treasurehunt_get_road_stage_state($userid, $groupid, $roadid);
+    $nextstage = $state->next;
     if (!$currentstage || $currentstage->success) {
         $return->newattempt = true;
-        if ($currentstage) {
-            $nextnostage = $currentstage->position + 1;
-        } else {
-            $nextnostage = 1;
+        if (!$nextstage) {
+            $return->newattempt = false;
+            $return->newstage = false;
+            $return->msg = get_string('roadended', 'treasurehunt');
+            return $return;
         }
-        $nextstage = $DB->get_record('treasurehunt_stages', ['position' => $nextnostage, 'roadid' => $roadid], '*', MUST_EXIST);
+        // The first incomplete stage remains the sequential target. A matching free stage may be found earlier.
+        foreach ($state->candidates as $candidate) {
+            $candidategeom = treasurehunt_wkt_to_object($candidate->geom);
+            if (($point !== null && treasurehunt_check_point_in_multipolygon($candidategeom, $point)) ||
+                    ($qrtext !== null && $qrtext !== '' && $candidate->qrtext === $qrtext)) {
+                $nextstage = $candidate;
+                break;
+            }
+        }
         // Check qrtext or location.
         $nextstagegeom = treasurehunt_wkt_to_object($nextstage->geom);
         $inside = $point == null ? false : treasurehunt_check_point_in_multipolygon($nextstagegeom, $point);
@@ -1264,7 +1281,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
             $return->success = true;
         }
 
-        if ($attempt->success && $nextnostage == $nostages) {
+        if ($attempt->success && treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid)) {
             treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context);
 
             $return->roadfinished = true;
@@ -1285,7 +1302,7 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
     }
     // Track user's position.
     if ($treasurehunt->tracking && $point != null) {
-        $currentworkingstage = $nextstage ? $nextstage : $currentstage;
+        $currentworkingstage = $nextstage ?: $currentstage;
         treasurehunt_track_user($userid, $treasurehunt, $currentworkingstage->id, time(), treasurehunt_geometry_to_wkt($point));
     }
     return $return;
@@ -1396,6 +1413,7 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         if (isset($feature->inverserestrictions)) {
             $attr['hasqr'] = (bool)$feature->hasqr;
             $attr['playstagewithoutmoving'] = (bool)$feature->playstagewithoutmoving;
+            $attr['discoveroutofsequence'] = (bool)$feature->discoveroutofsequence;
             $attr['activitytoendname'] = $feature->activitytoendname;
             $attr['hasquestion'] = (bool)$feature->hasquestion;
             $attr['inverserestrictions'] = $feature->inverserestrictions;
@@ -2301,7 +2319,7 @@ function treasurehunt_check_question_and_activity_solved(
             if ($lastattempt->success) {
                 $return->success = true;
             }
-            if ($lastattempt->success && $lastattempt->position == $nostages) {
+            if ($lastattempt->success && treasurehunt_check_if_user_has_finished($userid, $groupid, $roadid)) {
                 treasurehunt_road_finished($treasurehunt, $groupid, $userid, $context);
                 $return->roadfinished = true;
             } else {
@@ -3033,7 +3051,7 @@ SQL;
                 AND at.type='question'
                 AND at.penalty=1
                 AND $groupidwithin) as noanswersfailed,
-        (SELECT COUNT(*) from {treasurehunt_attempts} at
+        (SELECT COUNT(DISTINCT at.stageid) from {treasurehunt_attempts} at
             INNER JOIN {treasurehunt_stages} ri ON ri.id = at.stageid
             INNER JOIN {treasurehunt_roads} roa ON ri.roadid=roa.id
             where roa.treasurehuntid=ro.treasurehuntid

@@ -189,6 +189,14 @@ class user_progress extends external_api {
                     'Next stage geometry in geojson format',
                     VALUE_OPTIONAL
                 ),
+                'clues' => new external_multiple_structure(
+                    new external_single_structure([
+                        'stageid' => new external_value(PARAM_INT, 'Target stage id'),
+                        'position' => new external_value(PARAM_INT, 'Target stage position in the road'),
+                        'html' => new external_value(PARAM_RAW, 'Formatted clue HTML'),
+                    ]),
+                    'Clues currently available to the player'
+                ),
                 'attempttimestamp' => new external_value(PARAM_INT, 'Last updated timestamp attempt'),
                 'roadtimestamp' => new external_value(PARAM_INT, 'Last updated timestamp road'),
                 'infomsg' => new external_multiple_structure(
@@ -298,12 +306,8 @@ class user_progress extends external_api {
         }
         // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
         $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $context);
-        if ($currentstage) {
-            $nextnostage = min($currentstage->position + (int)$currentstage->success, $numberofstages);
-        } else {
-            $nextnostage = 1;
-        }
-        $currentworkingstage = self::load_working_stage($userparams->roadid, $nextnostage);
+        $roadstate = treasurehunt_get_road_stage_state($USER->id, $userparams->groupid, $userparams->roadid);
+        $currentworkingstage = $roadstate->next;
         // Check if the user has finished the road.
         $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
         $changesingroupmode = false;
@@ -346,6 +350,7 @@ class user_progress extends external_api {
         // Teacher previewing mode.
         $previewing = ($params['previewroadid'] || $available->actnotavailableyet)
             && has_capability('mod/treasurehunt:managetreasurehunt', $context);
+        $effectiveavailable = $previewing || $available->available;
         $canplay = has_capability('mod/treasurehunt:play', $context) || $previewing;
         if ($previewing || ($available->available && !$roadfinished)) {
             $changesinplaymode = false;
@@ -473,7 +478,7 @@ class user_progress extends external_api {
         $lastsuccessfulstage = null;
         if (
             $updates->geometrysolved
-            || !$available->available
+            || !$effectiveavailable
             || $updateroad
             || $updates->attemptsolved
             || $params['initialize']
@@ -539,8 +544,12 @@ class user_progress extends external_api {
                 $updates->strings[] = get_string('changetoplaywithoutmoving', 'treasurehunt');
             }
         }
-        if ($currentworkingstage->qrtext != '') {
-            $qrmode = true;
+        $roadstate = treasurehunt_get_road_stage_state($USER->id, $userparams->groupid, $userparams->roadid);
+        $currentworkingstage = $roadstate->next;
+        foreach ($roadstate->candidates as $candidate) {
+            if ($candidate->qrtext !== '') {
+                $qrmode = true;
+            }
         }
         $result = [];
         $result['infomsg'] = $updates->strings;
@@ -552,29 +561,55 @@ class user_progress extends external_api {
         $playerconfig = treasurehunt_get_customplayerconfig($treasurehunt);
         $showheadinghint = $playerconfig->showheadinghint ?? false;
         $showinzonehint = $playerconfig->showinzonehint ?? false;
+        $showdistancehint = $playerconfig->showdistancehint ?? false;
         $shownextareahint = $playerconfig->shownextareahint ?? false;
 
         // Check if last successful stage is the same as current working stage.
         // This means that the user has just solved the current stage.
-        if (($qocsolved->success ?? false) || ($checklocation->success ?? false)) {
-            // Update current working stage.
-            $nextnostage = min($currentworkingstage->position + 1, $numberofstages);
-            $currentworkingstage = self::load_working_stage($userparams->roadid, $nextnostage);
-        }
         // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.
         if (
             $currentworkingstage &&
-            ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)
+            ($showheadinghint || $showinzonehint || $showdistancehint || $shownextareahint ||
+                $currentworkingstage->position == 1)
         ) {
-            // Subset of properties.
-            $currentstagebrief = new stdClass();
-            $currentstagebrief->treasurehuntid = $treasurehuntid;
-            $currentstagebrief->roadid = $currentworkingstage->roadid;
-            $currentstagebrief->position = $currentworkingstage->position;
-            $currentstagebrief->geometry = $currentworkingstage->geom;
-            // Convert to geojson FeatureCollection.
-            $currentstagecoll = treasurehunt_features_to_geojson([$currentstagebrief], $context, $treasurehuntid);
+            $briefstages = [];
+            foreach ($roadstate->candidates as $candidate) {
+                $brief = new stdClass();
+                $brief->id = $candidate->id;
+                $brief->treasurehuntid = $treasurehuntid;
+                $brief->roadid = $candidate->roadid;
+                $brief->position = $candidate->position;
+                $brief->geometry = $candidate->geom;
+                $briefstages[] = $brief;
+            }
+            $currentstagecoll = treasurehunt_features_to_geojson($briefstages, $context, $treasurehuntid);
             $result['nextstage'] = $currentstagecoll;
+        }
+
+        $result['clues'] = [];
+        if (!$roadfinished && $effectiveavailable) {
+            $previous = null;
+            foreach ($roadstate->stages as $stage) {
+                if (!isset($roadstate->completed[$stage->id])) {
+                    $source = null;
+                    $area = 'clueforstage';
+                    if ($previous && isset($roadstate->completed[$previous->id])) {
+                        if (self::has_clue_content($previous->cluetext)) {
+                            $source = $previous;
+                            $area = 'cluetext';
+                        } else if (self::has_clue_content($stage->clueforstage)) {
+                            $source = $stage;
+                        }
+                    } else if ((!$previous || !empty($stage->discoveroutofsequence)) &&
+                            self::has_clue_content($stage->clueforstage)) {
+                        $source = $stage;
+                    }
+                    if ($source) {
+                        $result['clues'][] = self::format_stage_clue($source, $area, $stage, $context);
+                    }
+                }
+                $previous = $stage;
+            }
         }
 
         if ($userattempts) {
@@ -585,7 +620,7 @@ class user_progress extends external_api {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }
         $result['roadfinished'] = $roadfinished;
-        $result['available'] = $previewing ? true : $available->available;
+        $result['available'] = $effectiveavailable;
         $result['playwithoutmoving'] = intval($playmode);
         $result['qrexpected'] = intval($qrmode);
         $result['groupmode'] = intval($treasurehunt->groupmode);
@@ -613,21 +648,38 @@ class user_progress extends external_api {
     }
 
     /**
-     * Load only the stage fields needed by a progress poll.
+     * Format an editor clue and resolve its files in the stage file area.
      *
-     * @param int $roadid Road identifier.
-     * @param int $position Stage position.
-     * @return stdClass
+     * @param stdClass $stage Source stage.
+     * @param string $area Editor file area.
+     * @param stdClass $target Stage to discover.
+     * @param context_module $context Activity context.
+     * @return array Clue data.
      */
-    private static function load_working_stage(int $roadid, int $position): stdClass {
-        global $DB;
-        return $DB->get_record(
-            'treasurehunt_stages',
-            ['roadid' => $roadid, 'position' => $position],
-            'id,roadid,position,geom,qrtext',
-            MUST_EXIST
-        );
+    private static function format_stage_clue(stdClass $stage, string $area, stdClass $target,
+            context_module $context): array {
+        $html = file_rewrite_pluginfile_urls($stage->{$area}, 'pluginfile.php', $context->id,
+            'mod_treasurehunt', $area, $stage->id);
+        return [
+            'stageid' => (int)$target->id,
+            'position' => (int)$target->position,
+            'html' => format_text($html, $stage->{$area . 'format'}),
+        ];
     }
+
+    /**
+     * Whether a rich text clue has text or embedded media.
+     *
+     * @param string|null $html Editor HTML.
+     * @return bool True when the clue is meaningful.
+     */
+    private static function has_clue_content(?string $html): bool {
+        $html = $html ?? '';
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        return (bool)preg_match('/[^\s\x{00A0}\x{200B}]/u', $text) ||
+            (bool)preg_match('/<(?:img|video|audio|iframe|object|embed|svg|math)\b/i', $html);
+    }
+
     /**
      * Can this function be called directly from ajax?
      *

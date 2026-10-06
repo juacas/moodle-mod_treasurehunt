@@ -38,6 +38,14 @@ class stage {
     public $name;
     /** @var string text to discover the next stage */
     public $cluetext;
+    /** @var string HTML clue for finding this stage. */
+    public $clueforstage = '';
+    /** @var int Format of the current-stage clue. */
+    public $clueforstageformat = FORMAT_HTML;
+    /** @var int Trust level of the current-stage clue. */
+    public $clueforstagetrust = 0;
+    /** @var bool Whether the stage may be discovered ahead of its turn. */
+    public $discoveroutofsequence = false;
     /** @var int The format for the clue text field, using constant FORMAT_HTML (default value) */
     public $cluetextformat = FORMAT_HTML;
     /** @var int $cluetexttrust Trust level of clue text (see moodle api) */

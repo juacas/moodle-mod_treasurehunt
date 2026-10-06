@@ -165,6 +165,9 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $stage->cluetext = '';          // Updated later.
         $stage->cluetextformat = FORMAT_HTML;  // Updated later.
         $stage->cluetexttrust = 0;            // Updated later.
+        $stage->clueforstage = '';
+        $stage->clueforstageformat = FORMAT_HTML;
+        $stage->clueforstagetrust = 0;
         $stage->questiontext = '';           // Updated later.
         $stage->questiontextformat = FORMAT_HTML;  // Updated later.
         $stage->questiontexttrust = 0;            // Updated later.
@@ -190,6 +193,15 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             $context,
             'mod_treasurehunt',
             'cluetext',
+            $stage->id
+        );
+        $stage = file_postupdate_standard_editor(
+            $stage,
+            'clueforstage',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'clueforstage',
             $stage->id
         );
         // Store the updated value values.
