@@ -13,7 +13,7 @@
 // You should have received a copy of the GNU General Public License.
 // along with Moodle.  If not, see <http:// www.gnu.org/licenses/>.
 /**
- * @module mod_treasurehunt/editmod
+ * @module mod_treasurehunt/editmod405
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>,
  *            Juan Pablo de Castro <juanpablo.decastro@uva.es>
@@ -26,7 +26,9 @@ import ol from "mod_treasurehunt/ol";
 import ajax from "core/ajax";
 import notification from "core/notification";
 import { add as addToast } from "core/toast";
-import * as Bootstrap from "bootstrap";
+import Modal from "theme_boost/bootstrap/modal";
+import Popover from "theme_boost/bootstrap/popover";
+import Tooltip from "theme_boost/bootstrap/tooltip";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import initAddressAutocomplete from "mod_treasurehunt/addressautocomplete";
 import viewgpx from "mod_treasurehunt/viewgpx";
@@ -168,7 +170,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     if (geographictools) {
       var searchgroup = $("<div>", {class: "treasurehunt-editor-actions-group treasurehunt-editor-search"})
         .appendTo($(".treasurehunt-editor-actions"));
-      $("<label>", {class: "visually-hidden", for: "searchaddress"})
+      $("<label>", {class: "sr-only", for: "searchaddress"})
         .text(strings.searchlocation).appendTo(searchgroup);
       var searchcontainer = $("<div>", {id: "searchcontainer"}).appendTo(searchgroup);
       $("<input>", {type: "text", inputmode: "search", enterkeyhint: "search",
@@ -1313,14 +1315,17 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       if (!$target.length || $target.data("issue") === message) {
         return;
       }
-      var tooltip = Bootstrap.Tooltip.getInstance($target[0]);
+      var tooltip = $target.data("treasurehuntIssueTooltip");
       if (tooltip) {
         tooltip.dispose();
       }
-      $target.data("issue", message).removeAttr("title data-bs-original-title");
+      $target.removeData("treasurehuntIssueTooltip");
+      $target.data("issue", message).removeAttr("title data-original-title data-bs-original-title");
       if (message) {
         $target.attr("title", message);
-        new Bootstrap.Tooltip($target[0], {trigger: "hover focus", container: "body"});
+        $target.data("treasurehuntIssueTooltip", new Tooltip($target[0], {
+          trigger: "hover", container: "body",
+        }));
       }
     }
 
@@ -1954,7 +1959,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     });
     var copyModalElement = document.getElementById("copystagesmodal");
-    var copyModal = copyModalElement ? new Bootstrap.Modal(copyModalElement) : null;
+    var copyModal = copyModalElement ? new Modal(copyModalElement) : null;
     var sourceRoadId = null;
     /** Update the description and available action for the chosen source road. */
     function updateCopySummary() {
@@ -1965,7 +1970,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         $("#copystagessave").prop("disabled", true);
         return;
       }
-      $("<div>", {class: "fw-bold mb-2"}).text(source.name).appendTo($summary);
+      $("<div>", {class: "font-weight-bold mb-2"}).text(source.name).appendTo($summary);
       $("<p>", {class: "mb-2"}).text(strings.editorcopycount + " " + source.stagecount)
         .appendTo($summary);
       $("<p>", {class: "mb-2"}).text(strings.editorcopytarget + " " + target.name)
@@ -1994,7 +1999,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }
         var $label = $("<label>", {class: "list-group-item list-group-item-action p-3 border rounded mb-2 " +
           "d-flex align-items-center"}).appendTo($options);
-        $("<input>", {type: "radio", name: "copystagessource", class: "form-check-input me-3 flex-shrink-0"})
+        $("<input>", {type: "radio", name: "copystagessource", class: "form-check-input mr-3 flex-shrink-0"})
           .val(source.id).appendTo($label);
         $("<span>").text(strings.editorcopyfrom + " " + source.name).appendTo($label);
       });
@@ -2075,7 +2080,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       closeStagePopover();
       var info = $(this).data("stageInfo");
       var $card = $("<div>", {class: "card border-0 treasurehunt-stage-summary"});
-      $("<div>", {class: "card-header fw-semibold"}).text(info.title).appendTo($card);
+      $("<div>", {class: "card-header font-weight-bold"}).text(info.title).appendTo($card);
       var $body = $("<div>", {class: "card-body"}).appendTo($card);
       $("<div>", {class: "treasurehunt-stage-clue-label"}).text(strings.editorclueshort).appendTo($body);
       var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
@@ -2170,7 +2175,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       addStatus(["mouse-pointer", "hand-pointer-o"], strings.editorwithoutgpsshort,
         strings.playstagewithoutmoving, Boolean(info.withoutgps),
         info.withoutgps ? strings.editorenabled : strings.editordisabled);
-      openStagePopover = Bootstrap.Popover.getOrCreateInstance(this, {
+      openStagePopover = new Popover(this, {
         content: $card[0],
         html: true,
         trigger: "manual",

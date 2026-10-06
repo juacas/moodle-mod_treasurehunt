@@ -254,13 +254,6 @@
   border: 3px solid darkgray;
   z-index: 10;
 }
-.path-mod-treasurehunt .ui-icon-trash,
-.path-mod-treasurehunt .ui-icon-pencil,
-.path-mod-treasurehunt .ui-icon-alert,
-.path-mod-treasurehunt .ui-icon-info {
-  cursor: pointer;
-}
-
 .path-mod-treasurehunt .modifystage .treasurehunt-icon-button,
 .path-mod-treasurehunt .modifyroad .treasurehunt-icon-button {
   display: flex;
@@ -284,15 +277,26 @@
   outline-offset: 2px;
 }
 
-.path-mod-treasurehunt .ui-autocomplete-loading {
-  background: white
-    url("pix/ui-anim_basic_16x16.gif")
-    right center no-repeat;
-}
-
-.path-mod-treasurehunt .ui-autocomplete {
+.treasurehunt-address-suggestions {
+  position: fixed;
+  z-index: 1060;
+  max-width: calc(100vw - 1rem);
+  max-height: min(40vh, 20rem);
   overflow-y: auto;
   overflow-x: hidden;
+  border: 1px solid var(--bs-border-color, #d6d6d6);
+  border-radius: 0.25rem;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 0.35rem 1rem rgba(0, 0, 0, 0.2);
+}
+
+.treasurehunt-address-suggestions[hidden] {
+  display: none;
+}
+
+.treasurehunt-address-suggestions .list-group-item {
+  white-space: normal;
+  text-align: left;
 }
 /** Usado para meter el icono dentro del input**/
 .path-mod-treasurehunt #searchcontainer {
@@ -315,6 +319,8 @@
   bottom: 8px;
   left: 9px;
   width: 15px;
+  font-size: 0.9rem;
+  line-height: 1;
 }
 
 .path-mod-treasurehunt .closeicon {
@@ -322,6 +328,8 @@
   bottom: 7px;
   right: 25px;
   width: 15px;
+  font-size: 0.9rem;
+  line-height: 1;
   cursor: pointer;
 }
 
@@ -549,9 +557,6 @@
   .path-mod-treasurehunt .treasurehunt-editor-loader {
     margin-top: 75px;
   }
-  .path-mod-treasurehunt .ui-autocomplete {
-    max-height: 192px;
-  }
 }
 
 @media screen and (min-height: 481px) {
@@ -563,9 +568,6 @@
   }
   .path-mod-treasurehunt .treasurehunt-editor-loader {
     margin-top: 157px;
-  }
-  .path-mod-treasurehunt .ui-autocomplete {
-    max-height: 357px;
   }
 }
 
@@ -579,9 +581,6 @@
   .path-mod-treasurehunt .treasurehunt-editor-loader {
     margin-top: 220px;
   }
-  .path-mod-treasurehunt .ui-autocomplete {
-    max-height: 482px;
-  }
 }
 
 @media screen and (min-height: 750px) {
@@ -593,9 +592,6 @@
   }
   .path-mod-treasurehunt .treasurehunt-editor-loader {
     margin-top: 275px;
-  }
-  .path-mod-treasurehunt .ui-autocomplete {
-    max-height: 592px;
   }
 }
 
