@@ -100,6 +100,16 @@ class fetch_treasurehunt extends external_api {
                                         'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                         'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                         'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
+                                        'hasqr' => new external_value(PARAM_BOOL, 'Whether QR discovery is enabled'),
+                                        'playstagewithoutmoving' => new external_value(PARAM_BOOL,
+                                            'Whether the stage can be discovered without moving'),
+                                        'activitytoendname' => new external_value(PARAM_TEXT,
+                                            'Activity required before the clue is shown'),
+                                        'hasquestion' => new external_value(PARAM_BOOL,
+                                            'Whether a question is required before the clue is shown'),
+                                        'inverserestrictions' => new external_multiple_structure(
+                                            new external_value(PARAM_TEXT, 'Activity restricted to this stage'),
+                                            'Activities restricted to this stage'),
                                         ]
                                     ),
                                     ]

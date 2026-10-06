@@ -217,7 +217,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
                 title: strings['roadmap'],
                 type: 'base',
                 visible: true,
-                source: new ol.source.OSM()
+                source: new ol.source.OSM({maxZoom: 19})
             })
         ]
     });
@@ -254,7 +254,8 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         view: new ol.View({
             center: [0, 0],
             zoom: 2,
-            minZoom: 2
+            minZoom: 2,
+            maxZoom: 19
         }),
         controls: ol.control.defaults().extend([layerSwitcher])
     });
@@ -365,11 +366,11 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     var interval = null;
     $('#refreshtracks').change(function () {
         if ($(this).is(':checked')) {
-            this.refreshCounter = 0;
-            $("#timecircle").show();
+            init.refreshCounter = 0;
+            $("#timecircle").text(init.refreshTracksInterval).show();
             interval = setInterval(function () {
-                $("#timecircle").text(this.refreshTracksInterval - (this.refreshCounter++) % this.refreshTracksInterval);
-            }.bind(this), 1000);
+                $("#timecircle").text(init.refreshTracksInterval - (++init.refreshCounter) % init.refreshTracksInterval);
+            }, 1000);
         } else {
             $("#timecircle").hide();
             clearInterval(interval);
@@ -451,11 +452,11 @@ function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
         vector.iconurl = iconurl;
         setInterval(function () {
             if ($('#refreshtracks').is(':checked')) {
-                this.refreshCounter = 0;
+                init.refreshCounter = 0;
                 gpxsource.clear();
                 gpxsource.refresh();
             }
-        }, this.refreshTracksInterval * 1000);
+        }, init.refreshTracksInterval * 1000);
         vector.on('change:visible', function () {
             if (this.getVisible()) {
                 var extent = this.getSource().getExtent();

@@ -47,6 +47,10 @@ define(['jquery', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
                         $('#edition_mainhelp').removeClass('visually-hidden').appendTo($mainheading);
                     }
                     $('#edition_mainhelp a').on('click', this.launchedittutorial);
+                    $(document).on('click', 'a[href="#treasurehunt-editor-tutorial"]', function(event) {
+                        event.preventDefault();
+                        init.launchedittutorial();
+                    });
 
                     document.cookie.split(';').forEach(function (x) {
                         var arr = x.split('=');

@@ -90,14 +90,14 @@ class delete_road extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
             treasurehunt_require_road_in_activity($params['roadid'], $params['treasurehuntid']);
             treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con ÃƒÂ©xito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
 
         $result = [];

@@ -57,8 +57,11 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 $PAGE->requires->jquery();
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
-    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);
+    if (!$lockid) {
+        throw new moodle_exception('editorlocktaken', 'treasurehunt');
+    }
+    $renewlocktime = max(1000, (int)floor(treasurehunt_get_setting_lock_time() * 500));
     $PAGE->requires->js_call_amd(
         'mod_treasurehunt/renewlock',
         'renew_edition_lock',

@@ -27,7 +27,6 @@ namespace mod_treasurehunt\external;
 
 use core_external\external_function_parameters;
 use core_external\external_single_structure;
-use core_external\external_multiple_structure;
 use core_external\external_value;
 use core_external\external_api;
 use context_module;
@@ -86,30 +85,17 @@ class renew_lock extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
-        $status = [];
-        if (isset($params['lockid'])) {
-            if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
-                $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
-                $status['code'] = 0;
-                $status['msg'] = 'Se ha renovado el bloqueo con exito';
-            } else {
-                $status['code'] = 1;
-                $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
-            }
+        $currentlockid = treasurehunt_try_renew_edition_lock(
+            $params['treasurehuntid'], $USER->id, $params['lockid'] ?? 0
+        );
+        if ($currentlockid) {
+            $status = ['code' => 0, 'msg' => get_string('editorlockrenewed', 'treasurehunt')];
+        } else if (treasurehunt_is_edition_locked($params['treasurehuntid'], $USER->id)) {
+            $status = ['code' => 1, 'msg' => get_string('editorlocktaken', 'treasurehunt')];
         } else {
-            if (!treasurehunt_is_edition_locked($params['treasurehuntid'], $USER->id)) {
-                $lockid = treasurehunt_renew_edition_lock($params['treasurehuntid'], $USER->id);
-                $status['code'] = 0;
-                $status['msg'] = 'Se ha creado el bloqueo con exito';
-            } else {
-                $status['code'] = 1;
-                $status['msg'] = 'La caza del tesoro está siendo editada';
-            }
+            $status = ['code' => 1, 'msg' => get_string('editorlockchanged', 'treasurehunt')];
         }
-        $result = [];
-        $result['status'] = $status;
-        $result['lockid'] = $lockid;
-        return $result;
+        return ['status' => $status, 'lockid' => $currentlockid];
     }
     /**
      * Can this function be called directly from ajax?

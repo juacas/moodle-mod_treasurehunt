@@ -96,6 +96,101 @@ final class security_test extends \advanced_testcase {
     }
 
     /**
+     * A suspended tab can recover its own expired lease when no one else is editing.
+     */
+    public function test_expired_editor_lock_is_renewed_for_its_owner(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course->id);
+        $editor = $this->getDataGenerator()->create_user();
+        $lockid = $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $editor->id, 'lockedtill' => time() - 1,
+        ]);
+
+        $this->assertEquals($lockid, treasurehunt_try_renew_edition_lock($hunt->id, $editor->id, $lockid));
+        $this->assertTrue(treasurehunt_edition_lock_id_is_valid($lockid, $hunt->id, $editor->id));
+
+        $DB->delete_records('treasurehunt_locks', ['id' => $lockid]);
+        $newid = treasurehunt_try_renew_edition_lock($hunt->id, $editor->id, $lockid);
+        $this->assertNotEquals($lockid, $newid);
+        $this->assertTrue(treasurehunt_edition_lock_id_is_valid($newid, $hunt->id, $editor->id));
+    }
+
+    /**
+     * Renewal must not take an active lock from a different editor.
+     */
+    public function test_expired_editor_lock_does_not_override_another_editor(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course->id);
+        $editor = $this->getDataGenerator()->create_user();
+        $other = $this->getDataGenerator()->create_user();
+        $oldid = $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $editor->id, 'lockedtill' => time() - 1,
+        ]);
+        $otherid = $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $other->id, 'lockedtill' => time() + 60,
+        ]);
+
+        $this->assertSame(0, treasurehunt_try_renew_edition_lock($hunt->id, $editor->id, $oldid));
+        $this->assertFalse(treasurehunt_ensure_editor_lock($oldid, $hunt->id, $editor->id));
+        $this->assertFalse(treasurehunt_edition_lock_id_is_valid($oldid, $hunt->id, $editor->id));
+        $this->assertTrue(treasurehunt_edition_lock_id_is_valid($otherid, $hunt->id, $other->id));
+    }
+
+    /**
+     * A save from an open editor also recovers its own expired lease.
+     */
+    public function test_save_recovers_expired_owned_lock(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course->id);
+        $editor = $this->getDataGenerator()->create_user();
+        $lockid = $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $editor->id, 'lockedtill' => time() - 1,
+        ]);
+
+        $this->assertTrue(treasurehunt_ensure_editor_lock($lockid, $hunt->id, $editor->id));
+        $this->assertTrue(treasurehunt_edition_lock_id_is_valid($lockid, $hunt->id, $editor->id));
+    }
+
+    /**
+     * The renewal service reports success after an owned lease expires.
+     */
+    public function test_renewal_service_recovers_expired_lock(): void {
+        global $DB, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course->id);
+        $moduleid = $DB->get_field('modules', 'id', ['name' => 'treasurehunt'], MUST_EXIST);
+        $cmid = $DB->insert_record('course_modules', (object)[
+            'course' => $course->id, 'module' => $moduleid, 'instance' => $hunt->id,
+            'added' => time(), 'visible' => 1,
+        ]);
+        course_add_cm_to_section($course, $cmid, 0, null, 'treasurehunt');
+        $lockid = $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $USER->id, 'lockedtill' => time() - 1,
+        ]);
+
+        $result = \mod_treasurehunt\external\renew_lock::execute($hunt->id, $lockid);
+        $this->assertEquals(0, $result['status']['code']);
+        $this->assertEquals($lockid, $result['lockid']);
+
+        $DB->set_field('treasurehunt_locks', 'lockedtill', time() - 1, ['id' => $lockid]);
+        $other = $this->getDataGenerator()->create_user();
+        $DB->insert_record('treasurehunt_locks', (object)[
+            'treasurehuntid' => $hunt->id, 'userid' => $other->id, 'lockedtill' => time() + 60,
+        ]);
+        $result = \mod_treasurehunt\external\renew_lock::execute($hunt->id, $lockid);
+        $this->assertEquals(1, $result['status']['code']);
+        $this->assertSame(get_string('editorlocktaken', 'treasurehunt'), $result['status']['msg']);
+    }
+
+    /**
      * The latest geometry-solved attempt wins when several attempts share a timestamp.
      */
     public function test_latest_attempt_uses_id_to_break_timestamp_ties(): void {

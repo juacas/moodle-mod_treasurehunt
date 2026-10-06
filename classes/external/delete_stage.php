@@ -89,14 +89,14 @@ class delete_stage extends external_api
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
             treasurehunt_require_stage_in_activity($params['stageid'], $params['treasurehuntid']);
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la etapa se ha realizado con éxito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
 
         $result = [];

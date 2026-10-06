@@ -2,6 +2,21 @@
   min-height: 100%;
 }
 
+#page-mod-treasurehunt-gpx_viewer #page.drawers .main-inner {
+  max-width: none;
+}
+
+#page-mod-treasurehunt-gpx_viewer .treasurehunt-gpx-viewer {
+  width: 100%;
+}
+
+#page-mod-treasurehunt-gpx_viewer #mapgpx {
+  width: 100%;
+  height: max(30rem, calc(100vh - 13rem));
+  height: max(30rem, calc(100dvh - 13rem));
+  min-height: 30rem;
+}
+
 .path-mod-treasurehunt .treasurehunt-editor {
   width: 100%;
   position: relative;
@@ -148,7 +163,28 @@
 }
 
 .path-mod-treasurehunt .handle {
-  cursor: n-resize;
+  cursor: grab;
+  touch-action: none;
+  user-select: none;
+}
+
+.path-mod-treasurehunt .handle:focus-visible {
+  outline: 3px solid var(--bs-primary, #0d6efd);
+  outline-offset: -3px;
+}
+
+.path-mod-treasurehunt #stagelist li.treasurehunt-stage-placeholder {
+  display: block;
+  box-sizing: border-box;
+  width: 100%;
+  border: 2px dashed var(--bs-primary, #0d6efd);
+  background: rgba(13, 110, 253, 0.12);
+}
+
+.path-mod-treasurehunt #stagelist li.treasurehunt-stage-dragging {
+  cursor: grabbing;
+  opacity: 0.9;
+  box-shadow: 0 0.4rem 1rem rgba(0, 0, 0, 0.25);
 }
 
 .path-mod-treasurehunt .modifystage,
@@ -766,6 +802,38 @@
   white-space: nowrap;
 }
 
+.path-mod-treasurehunt .treasurehunt-tool-tooltip {
+  display: inline-flex;
+  flex: 0 0 auto;
+}
+
+.path-mod-treasurehunt .treasurehunt-tool-tooltip > .btn:disabled {
+  pointer-events: none;
+}
+
+.path-mod-treasurehunt .treasurehunt-geometry-mode-group {
+  border: 1px solid var(--bs-secondary-color, #6c757d);
+  border-radius: var(--bs-border-radius-sm, 0.25rem);
+  overflow: hidden;
+}
+
+.path-mod-treasurehunt .treasurehunt-geometry-mode-group > .treasurehunt-tool-tooltip:not(:first-child) {
+  border-left: 1px solid var(--bs-secondary-color, #6c757d);
+}
+
+.path-mod-treasurehunt .treasurehunt-geometry-mode-group .treasurehunt-tool-tooltip > .btn {
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+.path-mod-treasurehunt .treasurehunt-geometry-mode-group .treasurehunt-tool-tooltip > .btn.selectedbutton {
+  border: 0;
+  background: var(--bs-primary, #0d6efd);
+  color: var(--bs-white, #fff);
+  box-shadow: none;
+}
+
 .path-mod-treasurehunt .treasurehunt-editor-search {
   padding-right: 0.5rem;
 }
@@ -955,6 +1023,7 @@
 
 .path-mod-treasurehunt .treasurehunt-stage-actions {
   display: flex;
+  gap: 0.25rem;
   padding: 0.5rem;
   border-top: 1px solid var(--bs-border-color, #ddd);
 }
@@ -964,16 +1033,23 @@
   padding: 0.25rem;
 }
 
-.path-mod-treasurehunt #addstage {
-  width: 100%;
+.path-mod-treasurehunt .treasurehunt-stage-actions > .btn {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 0.25rem;
+  white-space: nowrap;
 }
 
-.path-mod-treasurehunt #editorworkspace.is-collapsed #addstage {
+.path-mod-treasurehunt .treasurehunt-stage-action-label {
+  margin-left: 0.25rem;
+}
+
+.path-mod-treasurehunt #editorworkspace.is-collapsed .treasurehunt-stage-actions > .btn {
   min-height: 2rem;
   padding: 0.25rem;
 }
 
-.path-mod-treasurehunt #editorworkspace.is-collapsed .treasurehunt-addstage-label {
+.path-mod-treasurehunt #editorworkspace.is-collapsed .treasurehunt-stage-action-label {
   display: none;
 }
 
@@ -1078,6 +1154,85 @@
   width: 1.5rem;
   height: 1.5rem;
   margin: 0;
+}
+
+.treasurehunt-stage-popover {
+  --bs-popover-max-width: 25rem;
+  max-width: min(25rem, calc(100vw - 1rem));
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-summary .card-body {
+  max-height: 60vh;
+  overflow-y: auto;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-clue-label {
+  margin-bottom: 0.25rem;
+  font-weight: 600;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-clue {
+  margin-bottom: 0.8rem;
+  line-height: 1.4;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-clue p,
+.treasurehunt-stage-popover .treasurehunt-stage-clue ul,
+.treasurehunt-stage-popover .treasurehunt-stage-clue ol {
+  margin-bottom: 0.25rem;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-statuses {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-width: 0;
+  padding: 0.55rem 0.4rem;
+  border: 1px solid currentColor;
+  border-radius: 0.5rem;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status.is-active {
+  color: #087c43;
+  background: #e5f8ed;
+  border-color: #0dbd62;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status.is-inactive {
+  color: #68717a;
+  background: var(--bs-tertiary-bg, #f5f5f5);
+  border-color: var(--bs-border-color, #adb5bd);
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status-icons {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.25rem;
+  min-height: 2rem;
+  font-size: 1.4rem;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status-icons .fa-arrow-right {
+  font-size: 0.75rem;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status-label {
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.treasurehunt-stage-popover .treasurehunt-stage-status-detail {
+  font-size: 0.7rem;
+  line-height: 1.25;
 }
 
 @media (max-width: 767px) {

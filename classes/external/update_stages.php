@@ -132,7 +132,7 @@ class update_stages extends external_api {
         require_capability('mod/treasurehunt:editstage', $context);
         $features = treasurehunt_geojson_to_object($params['stages']);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
@@ -150,7 +150,7 @@ class update_stages extends external_api {
             }
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
         $result = [];
         $result['status'] = $status;

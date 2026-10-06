@@ -47,7 +47,7 @@ $PAGE->set_url($url);
 $PAGE->set_title($course->shortname . ': ' . format_string($treasurehunt->name) .
     ' : ' . get_string('trackviewer', 'treasurehunt'));
 $PAGE->set_heading(format_string($course->fullname));
-$PAGE->set_pagelayout('standard');
+$PAGE->set_pagelayout('incourse');
 $PAGE->activityheader->disable();
 $PAGE->requires->jquery();
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
@@ -77,24 +77,45 @@ echo $output->header();
 echo "\n<script>\n";
 echo "users_param = " . json_encode($users) . ";\n";
 echo "</script>\n";
-echo $output->heading(format_string($treasurehunt->name));
-echo $OUTPUT->container_start("treasurehunt-gpx", "treasurehunt-gpx");
-$controls = '<label><input type="checkbox" value="refresh" id="refreshtracks"></input>' .
-    get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval) .
-    ' <span id="timecircle"></span></label>';
-
-echo $OUTPUT->box($controls, 'visible', 'controlpanel');
-echo $OUTPUT->box('', null, 'mapgpx');
-echo $OUTPUT->container_end();
-// Add a button to download all gpx.
-echo $OUTPUT->single_button(
-    new moodle_url(
-        '/mod/treasurehunt/gpx.php',
-        ['id' => $id, 'userid' => implode(',', array_keys($userrecords))]
-    ),
-    "Download GPXs",
-    method: 'get'
-);
-echo $OUTPUT->box('', null, 'info');
+$downloadurl = new moodle_url('/mod/treasurehunt/gpx.php', [
+    'id' => $id,
+    'userid' => implode(',', array_keys($userrecords)),
+]);
+echo html_writer::start_tag('section', ['id' => 'treasurehunt-gpx', 'class' => 'card treasurehunt-gpx-viewer']);
+echo html_writer::start_tag('div', ['class' => 'card-header d-flex flex-wrap align-items-center gap-2']);
+echo html_writer::tag('h2', format_string($treasurehunt->name), [
+    'class' => 'h5 mb-0 me-auto',
+]);
+echo html_writer::start_tag('div', ['class' => 'form-check form-switch mb-0']);
+echo html_writer::empty_tag('input', [
+    'type' => 'checkbox',
+    'id' => 'refreshtracks',
+    'class' => 'form-check-input',
+    'value' => 'refresh',
+]);
+echo html_writer::tag('label', get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval), [
+    'class' => 'form-check-label',
+    'for' => 'refreshtracks',
+]);
+echo ' ' . html_writer::tag('span', '', [
+    'id' => 'timecircle',
+    'class' => 'badge rounded-pill text-bg-secondary',
+    'style' => 'display: none;',
+    'aria-live' => 'off',
+]);
+echo html_writer::end_tag('div');
+echo html_writer::link($downloadurl, get_string('trackviewerdownloadgpx', 'treasurehunt'), [
+    'class' => 'btn btn-outline-primary btn-sm',
+]);
+echo html_writer::end_tag('div');
+echo html_writer::start_tag('div', ['class' => 'card-body p-0']);
+echo html_writer::tag('div', '', [
+    'id' => 'mapgpx',
+    'role' => 'region',
+    'aria-label' => get_string('trackviewer', 'treasurehunt'),
+]);
+echo html_writer::end_tag('div');
+echo html_writer::end_tag('section');
+echo html_writer::tag('div', '', ['id' => 'info']);
 
 echo $output->footer();

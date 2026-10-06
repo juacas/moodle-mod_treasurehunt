@@ -59,8 +59,11 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', ['cmid' => $id]);
         redirect($roadurl);
     }
-    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);
+    if (!$lockid) {
+        throw new moodle_exception('editorlocktaken', 'treasurehunt');
+    }
+    $renewlocktime = max(1000, (int)floor(treasurehunt_get_setting_lock_time() * 500));
     $PAGE->requires->js_call_amd(
         'mod_treasurehunt/renewlock',
         'renew_edition_lock',
@@ -105,17 +108,27 @@ $buttons = '<div class="treasurehunt-map-tools treasurehunt-editor-actions d-fle
     . s(get_string('editortools', 'treasurehunt')) . '">';
 $buttons .= '<div class="treasurehunt-editor-actions-group" role="group" aria-label="'
     . s(get_string('editormap', 'treasurehunt')) . '">';
-$buttons .= '<div class="btn-group btn-group-sm" role="group" aria-label="'
+$buttons .= '<span class="treasurehunt-tool-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover"'
+    . ' data-bs-container="body" data-bs-placement="bottom"'
+    . ' title="' . s(get_string('navmodetooltip', 'treasurehunt')) . '">'
+    . '<button type="button" id="navmode" class="btn btn-outline-secondary btn-sm" disabled>'
+    . s(get_string('browsemode', 'treasurehunt')) . '</button></span>';
+$buttons .= '<div class="btn-group btn-group-sm treasurehunt-geometry-mode-group" role="group" aria-label="'
     . s(get_string('editorgeometry', 'treasurehunt')) . '">';
 foreach (['drawmode' => 'drawmode', 'editmode' => 'editmode'] as $buttonid => $stringkey) {
-    $buttons .= '<button type="button" id="' . $buttonid . '" class="btn btn-outline-secondary" disabled>'
-        . s(get_string($stringkey, 'treasurehunt')) . '</button>';
+    $buttons .= '<span class="treasurehunt-tool-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover"'
+        . ' data-bs-container="body" data-bs-placement="bottom"'
+        . ' title="' . s(get_string($stringkey . 'tooltip', 'treasurehunt')) . '">'
+        . '<button type="button" id="' . $buttonid . '" class="btn btn-outline-secondary" disabled>'
+        . s(get_string($stringkey, 'treasurehunt')) . '</button></span>';
 }
-$buttons .= '<button type="button" id="removefeature" class="btn btn-outline-danger" disabled>'
-    . s(get_string('remove', 'treasurehunt')) . '</button>';
-$buttons .= '</div>' . $OUTPUT->help_icon('editorgeometry', 'treasurehunt');
-$buttons .= '<button type="button" id="navmode" class="btn btn-outline-secondary btn-sm" disabled>'
-    . s(get_string('browsemode', 'treasurehunt')) . '</button>';
+$buttons .= '</div>';
+$buttons .= '<span class="treasurehunt-tool-tooltip" data-bs-toggle="tooltip" data-bs-trigger="hover"'
+    . ' data-bs-container="body" data-bs-placement="bottom"'
+    . ' title="' . s(get_string('removefeaturetooltip', 'treasurehunt')) . '">'
+    . '<button type="button" id="removefeature" class="btn btn-outline-danger btn-sm" disabled>'
+    . s(get_string('remove', 'treasurehunt')) . '</button></span>';
+$buttons .= $OUTPUT->help_icon('editorgeometry', 'treasurehunt');
 $buttons .= '</div><div class="treasurehunt-editor-actions-group" role="group" aria-label="'
     . s(get_string('editorsave', 'treasurehunt')) . '">';
 $buttons .= '<button type="button" id="savestage" class="btn btn-primary btn-sm" disabled>'
@@ -147,8 +160,14 @@ echo '<div class="treasurehunt-stage-actions">'
     . ' aria-label="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '"'
     . ' title="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '">'
     . '<i class="fa fa-plus" aria-hidden="true"></i>'
-    . '<span class="treasurehunt-addstage-label"> '
+    . '<span class="treasurehunt-stage-action-label">'
     . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '</span></button>'
+    . '<button type="button" id="copystages" class="btn btn-outline-primary btn-sm" hidden'
+    . ' aria-label="' . s(get_string('editorcopystages', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editorcopystages', 'treasurehunt')) . '">'
+    . '<i class="fa fa-copy" aria-hidden="true"></i>'
+    . '<span class="treasurehunt-stage-action-label">'
+    . s(get_string('editorcopybutton', 'treasurehunt')) . '</span></button>'
     . '</div>';
 echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondary btn-sm"'
     . ' aria-controls="editoraside" aria-expanded="true"'
@@ -161,6 +180,29 @@ echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondar
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
+echo '<div class="modal fade" id="copystagesmodal" tabindex="-1" aria-labelledby="copystagesmodaltitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content shadow border-0">'
+    . '<div class="modal-header bg-light border-bottom">'
+    . '<h5 class="modal-title fw-bold" id="copystagesmodaltitle">'
+    . '<i class="fa fa-copy text-primary me-2" aria-hidden="true"></i>'
+    . s(get_string('editorcopystages', 'treasurehunt')) . '</h5>'
+    . '<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '"></button></div>'
+    . '<div class="modal-body p-0"><div class="row g-0">'
+    . '<div class="col-md-5 border-end bg-light p-3">'
+    . '<div class="text-uppercase small fw-bold text-dark mb-2 px-1">'
+    . s(get_string('editorcopysource', 'treasurehunt')) . '</div>'
+    . '<div id="copystagesroads" class="list-group"></div></div>'
+    . '<div class="col-md-7 p-4"><div id="copystagessummary" class="mb-3" role="status"></div>'
+    . '<div class="form-check"><input class="form-check-input" type="checkbox" id="copystagesreplace">'
+    . '<label class="form-check-label" for="copystagesreplace">'
+    . s(get_string('editorcopyreplace', 'treasurehunt')) . '</label></div>'
+    . '</div></div></div><div class="modal-footer bg-light border-top">'
+    . '<button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">'
+    . s(get_string('cancel', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="copystagessave" class="btn btn-primary btn-sm" disabled>'
+    . s(get_string('save', 'treasurehunt')) . '</button></div></div></div></div>';
 
 // Finish the page.
 echo $OUTPUT->footer();

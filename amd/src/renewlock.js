@@ -15,49 +15,112 @@
 
 /**
  * @module    mod_treasurehunt/renewlock
- * @package   mod_treasurehunt
+ * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-define(['jquery', 'core/notification', 'core/ajax'], function ($, notification, ajax) {
+define(['core/notification', 'core/ajax'], function(notification, ajax) {
+    let timer;
+    let treasurehuntid;
+    let lockid;
+    let renewtime;
+    let active = false;
+    let inFlight = false;
+    let retries = 0;
+    let listenersInstalled = false;
 
-    var repeat;
-    var lockidTreasure;
-    var renewLock = {
-        renewLockAjax: function (treasurehuntid, lockid) {
-            lockidTreasure = lockid;
-            var json = ajax.call([{
-                    methodname: 'mod_treasurehunt_renew_lock',
-                    args: {
-                        treasurehuntid: treasurehuntid,
-                        lockid: lockid
-                    }
-                }]);
-            json[0].done(function (response) {
-                console.log(response);
+    /**
+     * Schedule the next renewal without overlapping requests.
+     *
+     * @param {number} delay Time until the next attempt in milliseconds.
+     */
+    const schedule = function(delay) {
+        clearTimeout(timer);
+        if (active) {
+            timer = setTimeout(function() {
+                renewLock.renewLockAjax();
+            }, delay);
+        }
+    };
+
+    const renewLock = {
+        /** Renew the current lock and retry temporary request failures. */
+        renewLockAjax: function() {
+            if (!active || inFlight) {
+                return;
+            }
+            inFlight = true;
+            ajax.call([{
+                methodname: 'mod_treasurehunt_renew_lock',
+                args: {treasurehuntid: treasurehuntid, lockid: lockid}
+            }])[0].done(function(response) {
+                inFlight = false;
                 if (response.status.code) {
-                    notification.alert('Error', response.status.msg, 'Continue');
                     renewLock.stoprenew_edition_lock();
+                    notification.alert('Error', response.status.msg, 'Continue');
+                    return;
                 }
-            }).fail(function (error) {
-                console.log(error);
-                notification.exception(error);
-                renewLock.stoprenew_edition_lock();
+                retries = 0;
+                if (response.lockid !== lockid) {
+                    lockid = response.lockid;
+                    document.dispatchEvent(new CustomEvent('treasurehunt:lockrenewed', {
+                        detail: {treasurehuntid: treasurehuntid, lockid: lockid}
+                    }));
+                }
+                schedule(renewtime);
+            }).fail(function(error) {
+                inFlight = false;
+                retries++;
+                if (retries === 3) {
+                    notification.exception(error);
+                }
+                schedule(Math.min(renewtime, retries * 5000));
             });
         },
-        /**Renuevo de continuo el bloqueo de edicion **/
-        renew_edition_lock: function (treasurehuntid, lockid, renewtime) {
-            repeat = setInterval(this.renewLockAjax, renewtime, treasurehuntid, lockid);
-        },
-        stoprenew_edition_lock: function () {
-            clearInterval(repeat);
-        },
-        getlockid: function () {
-            return lockidTreasure;
-        }
 
+        /**
+         * Start renewing while the page remains open.
+         *
+         * @param {number} activityid Activity instance id.
+         * @param {number} initiallockid Current lock id.
+         * @param {number} interval Renewal interval in milliseconds.
+         */
+        renew_edition_lock: function(activityid, initiallockid, interval) {
+            treasurehuntid = activityid;
+            lockid = initiallockid;
+            renewtime = interval;
+            active = true;
+            retries = 0;
+            schedule(renewtime);
+            if (!listenersInstalled) {
+                document.addEventListener('visibilitychange', function() {
+                    if (!document.hidden && active) {
+                        schedule(0);
+                    }
+                });
+                window.addEventListener('focus', function() {
+                    if (active) {
+                        schedule(0);
+                    }
+                });
+                listenersInstalled = true;
+            }
+        },
+
+        /** Stop renewing after another editor takes the lock. */
+        stoprenew_edition_lock: function() {
+            active = false;
+            clearTimeout(timer);
+        },
+
+        /**
+         * @return {number} Current lock id.
+         */
+        getlockid: function() {
+            return lockid;
+        }
     };
     return renewLock;
 });
