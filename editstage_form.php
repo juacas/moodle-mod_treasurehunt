@@ -174,10 +174,11 @@ class stage_form extends moodleform {
         $mform->addElement(
             'header',
             'cluetextsection',
-            get_string('stageclue', 'treasurehunt')
+            get_string('stagecluesection', 'treasurehunt')
         );
         // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
-        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
+        $mform->addElement('editor', 'cluetext_editor', get_string('stageclueeditor', 'treasurehunt'), null,
+            $editoroptions);
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
         $mform->addElement('editor', 'clueforstage_editor', get_string('clueforstage', 'treasurehunt'), null,

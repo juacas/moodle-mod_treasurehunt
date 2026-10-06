@@ -73,7 +73,7 @@ $string['cleartreasurehunt_done'] = 'La actividad se ha inicializado. Toda la ac
 $string['cleartreasurehuntconfirm'] = 'Cuidado con esta acción. Si continua se eliminará toda la actividad de los participantes. Normalmente sólo es necesario para reiniciar la actividad y poder modificar el número de caminos o etapas en una Caza del Tesoro en la que haya participado alguien por error o para pruebas. Actualmente hay {$a} registros de actividad.';
 $string['clue'] = 'Pista';
 $string['clueforstage'] = 'Pista para descubrir esta etapa';
-$string['clueforstage_help'] = 'Se muestra cuando la etapa anterior no tiene pista siguiente y para las etapas que pueden descubrirse fuera de secuencia.';
+$string['clueforstage_help'] = 'Esta pista es opcional, pero debes rellenar al menos uno de los dos campos de pistas. Los jugadores la verán si la etapa anterior está completada y no tiene pista para la siguiente etapa. También la verán si esta etapa permite descubrirse fuera de secuencia y la anterior aún no está completada.';
 $string['configintro'] = 'Los valores fijados aquí definen los valores por defecto usados en el formulario de especificaciones
 cuando usted crea una nueva Caza del Tesoro.';
 $string['configmaximumgrade'] = 'Valor por defecto al que se ajustará la calificación de la Caza del Tesoro.';
@@ -415,9 +415,9 @@ $string['showclue'] = 'Mostrar pista';
 $string['skiptutorial'] = 'Salir';
 $string['stage'] = 'Etapa';
 $string['stageclue'] = 'Pista para localizar la siguiente etapa';
-$string['stageclue_help'] = 'Aquí se debe describir la pista para alcanzar
-la siguiente localización. En el caso de que esta sea la última etapa debe dejar
-un mensaje de retroalimentación indicando que la Caza del Tesoro ha finalizado';
+$string['stageclueeditor'] = 'Pista para la siguiente etapa o fin de caza del tesoro';
+$string['stagecluesection'] = 'Pistas de la etapa';
+$string['stageclue_help'] = 'Esta pista es opcional. La pista para descubrir esta etapa también es opcional, pero debes rellenar al menos uno de los dos campos. Si esta etapa está completada, los jugadores verán este texto para encontrar la siguiente, con prioridad sobre la pista propia de esa etapa. Si lo dejas vacío, verán la pista propia de la etapa siguiente, si existe. En la última etapa puedes escribir aquí un mensaje de fin de la caza del tesoro.';
 $string['stagename'] = 'Nombre de la etapa';
 $string['stageovercome'] = 'Etapa superada';
 $string['stages'] = 'Etapas';
