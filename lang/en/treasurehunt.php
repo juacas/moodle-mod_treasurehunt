@@ -38,7 +38,19 @@ $string['activitysummaryqrpending'] = 'Pending';
 $string['activitysummaryqrpending_help'] = 'The QR scanning test starts automatically. You can select this button to open or repeat it and scan the sample code.';
 $string['activitysummaryqrfailed'] = 'Test failed';
 $string['activitysummaryqrloadfailed'] = 'The QR scanner could not be loaded. Please try again.';
+$string['activitysummaryqrscan'] = 'Scan with your phone';
+$string['activitysummaryjointeam'] = 'Join a team';
+$string['activitysummarytracking'] = 'The route is saved';
+$string['activitysummaryoutofsequence'] = 'Out-of-sequence hunt';
+$string['activitysummaryoutofsequencedetail'] = 'Stages open for discovery';
+$string['activitysummaryoutofsequence_help'] = 'Some stages can be discovered before earlier stages are completed. ' .
+    'Their clues appear alongside the clue for the next stage on the road.';
+$string['activitysummarysequential'] = 'Follow-the-road hunt';
+$string['activitysummarysequentialdetail'] = 'Stages in order';
+$string['activitysummarysequential_help'] = 'Stages are discovered in road order. ' .
+    'To progress, players complete the first unfinished stage.';
 $string['activitysummarygps'] = 'Uses the phone\'s GPS';
+$string['activitysummarymapmark'] = 'Mark on the map';
 $string['activitysummarytracking_help'] = 'When enabled, your movements are monitored while the game screen is open, and your teacher can see your position.';
 $string['atleastonecluerequired'] = 'Enter a clue in at least one of the two clue fields.';
 $string['actnotavailableyet'] = 'The activity is not available yet';
@@ -73,7 +85,7 @@ $string['bigbutton_play_tour'] = 'This is your best friend.<br>A click and you a
 $string['browsemode'] = 'Navigate';
 $string['cancel'] = 'Cancel';
 $string['changecamera'] = 'Change camera';
-$string['changetogroupmode'] = 'The game mode has changed to play in groups';
+$string['changetogroupmode'] = 'The game mode has changed to team play';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to "playing with GPS location".';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to "playing with pegmen" <img src="pix/my_location.png" width="32" align="middle" /> (click on map)';
@@ -284,7 +296,7 @@ $string['groupingid_help'] = 'Groups in this grouping are assigned to this road 
 $string['groupinvalidroad'] = '{$a} has assigned an invalid road.';
 $string['grouplocationfailed'] = '<b>Failed "stage {$a->position}" location</b> by {$a->user} of  {$a->date}';
 $string['grouplocationovercome'] = '<b>Successful stage {$a->position} location</b> by {$a->user} {$a->date}';
-$string['groupmode'] = 'Students play in groups';
+$string['groupmode'] = 'Team play';
 $string['groupmode_help'] = 'If enabled students will be divided into groups based on the configuration of course groups.
 Every team-member can solve the current stage and the progress is common to every partner. <br/>
 This allows to “parallelize” the hunt and cover more territory. The participants see the same information but team-oriented.';

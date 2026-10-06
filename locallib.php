@@ -2844,6 +2844,7 @@ function treasurehunt_get_road_userlist($data, $userlist, $attempts) {
     $road = new stdClass();
     $road->id = $data->roadid;
     $road->name = $data->roadname;
+    $road->groupid = $data->groupid ?? 0;
     $road->validated = boolval($data->validated);
     $road->totalstages = $data->totalstages;
     $road->userlist = treasurehunt_get_stage_progress_in_road_userlist($userlist, $attempts);

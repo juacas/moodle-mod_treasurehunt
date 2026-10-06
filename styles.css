@@ -1138,7 +1138,12 @@
 }
 
 #page-mod-treasurehunt-view .treasurehunt-activity-summary .treasurehunt-stage-statuses {
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(8.5rem, 1fr));
+}
+
+#page-mod-treasurehunt-view .treasurehunt-road-groups {
+  font-size: 0.875rem;
+  font-weight: 400;
 }
 
 @media (max-width: 575px) {

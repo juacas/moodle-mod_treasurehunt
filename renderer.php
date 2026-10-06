@@ -200,9 +200,34 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
+                $roadheading = format_string($roadusersprogress->name);
+                $grouplinks = [];
+                if ($progress->groupmode) {
+                    foreach ($roadusersprogress->userlist as $group) {
+                        $url = new moodle_url('/user/index.php', [
+                            'id' => $this->page->course->id, 'group' => $group->id,
+                        ]);
+                        $grouplinks[] = html_writer::link($url, format_string($group->name));
+                    }
+                } else if (!empty($roadusersprogress->groupid)) {
+                    $groupname = groups_get_group_name($roadusersprogress->groupid);
+                    if ($groupname) {
+                        $url = new moodle_url('/user/index.php', [
+                            'id' => $this->page->course->id, 'group' => $roadusersprogress->groupid,
+                        ]);
+                        $grouplinks[] = html_writer::link($url, format_string($groupname));
+                    }
+                }
+                if ($grouplinks) {
+                    $grouplabel = get_string(count($grouplinks) === 1 ? 'group' : 'groups', 'treasurehunt');
+                    $roadheading .= ' ' . html_writer::tag('small',
+                        $grouplabel . ': ' . implode(', ', $grouplinks),
+                        ['class' => 'treasurehunt-road-groups']
+                    );
+                }
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
-                        $s .= $this->output->heading($roadusersprogress->name, 4);
+                        $s .= $this->output->heading($roadheading, 4);
                         $s .= $this->output->box_start('boxaligncenter usersprogresstable');
                         $t = new html_table();
                         if ($progress->groupmode) {
@@ -289,7 +314,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         $s .= $this->output->box_end();
                     } else {
                         if ($progress->managepermission) {
-                            $s .= $this->output->heading($roadusersprogress->name, 4);
+                            $s .= $this->output->heading($roadheading, 4);
                             if ($progress->groupmode) {
                                 $notification = get_string('nogroupassigned', 'treasurehunt');
                             } else {
@@ -300,7 +325,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                     }
                 } else {
                     if ($progress->managepermission) {
-                        $s .= $this->output->heading($roadusersprogress->name, 4);
+                        $s .= $this->output->heading($roadheading, 4);
                         $s .= $this->output->notification(get_string('invalroadid', 'treasurehunt'));
                     }
                 }
@@ -399,17 +424,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
         }
 
-        // Type of geolocation: GPS or Desktop.
-        if ($info->treasurehunt->playwithoutmoving) {
-            $gamemode = get_string('playwithoutmoving', 'treasurehunt');
-        } else {
-            $gamemode = get_string('movingplay', 'treasurehunt');
-        }
+
         // Group or individual playing.
-        if ($info->treasurehunt->groupmode) {
-            $gamemode = get_string('groupmode', 'treasurehunt') . '. ' . $gamemode;
-        }
-        $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
+
         // Information about the groups/groupings involved in the game.
         $groupsmessages = [];
         foreach ($info->roads as $road) {
@@ -433,13 +450,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $groupsmessages[] = html_writer::link($link, $gname);
             }
         }
-        if (count($groupsmessages) != 0) {
-            $message .= '. ' . get_string('groups', 'treasurehunt') . ': ' . implode(', ', $groupsmessages);
+        if ($groupsmessages) {
+            $message = get_string('groups', 'treasurehunt') . ': ' . implode(', ', $groupsmessages);
+            $o .= html_writer::tag('p', $message);
         }
-        $o .= html_writer::tag('p', $message);
 
         // Summarise the activity settings with the same status icons used for stages in the editor.
-        $yes = get_string('editorenabled', 'treasurehunt');
         $no = get_string('editordisabled', 'treasurehunt');
         $qrpassed = $info->numqrs > 0 && ($_COOKIE['QRScanPassed'] ?? '') === 'Done';
         $qrstate = $info->numqrs === 0 ? 'inactive' : ($qrpassed ? 'active' : 'pending');
@@ -450,44 +466,72 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             [
                 'icons' => ['qrcode'], 'label' => get_string('activitysummaryqr', 'treasurehunt'),
                 'state' => $qrstate, 'detail' => $info->numqrs === 0 ? $no :
-                    ($qrpassed ? $yes : get_string('activitysummaryqrpending', 'treasurehunt')),
+                    ($qrpassed ? get_string('activitysummaryqrscan', 'treasurehunt') :
+                        get_string('activitysummaryqrpending', 'treasurehunt')),
                 'tooltip' => $qrtooltip, 'id' => 'treasurehunt-qr-status',
             ],
             [
-                'icons' => ['random'], 'label' => get_string('discoveroutofsequence', 'treasurehunt'),
+                'icons' => [$info->hasoutofsequence ? 'random' : 'road'],
+                'label' => get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequence' : 'activitysummarysequential',
+                    'treasurehunt'
+                ),
                 'state' => $info->hasoutofsequence ? 'active' : 'inactive',
-                'detail' => $info->hasoutofsequence ? $yes : $no,
+                'detail' => get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequencedetail' : 'activitysummarysequentialdetail',
+                    'treasurehunt'
+                ),
+                'tooltip' => get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequence_help' : 'activitysummarysequential_help',
+                    'treasurehunt'
+                ),
             ],
             [
-                'icons' => ['mouse-pointer', 'hand-pointer-o'],
-                'label' => get_string('playwithoutmoving', 'treasurehunt'),
+                'icons' => $info->treasurehunt->playwithoutmoving ?
+                    ['mouse-pointer', 'hand-pointer-o'] : ['satellite', 'map-marked-alt'],
+                'label' => get_string(
+                    $info->treasurehunt->playwithoutmoving ? 'playwithoutmoving' : 'movingplay',
+                    'treasurehunt'
+                ),
                 'state' => 'inactive',
-                'detail' => $info->treasurehunt->playwithoutmoving ? $yes :
+                'detail' => $info->treasurehunt->playwithoutmoving ?
+                    get_string('activitysummarymapmark', 'treasurehunt') :
                     get_string('activitysummarygps', 'treasurehunt'),
             ],
             [
-                'icons' => ['map-marker', 'road'], 'label' => get_string('trackusers', 'treasurehunt'),
+                'icons' => ['map-marker', 'road'],
+                'label' => get_string('activitysummarytracking', 'treasurehunt'),
                 'state' => $info->treasurehunt->tracking ? 'active' : 'inactive',
-                'detail' => $info->treasurehunt->tracking ? $yes : $no,
+                'detail' => '',
                 'tooltip' => get_string('activitysummarytracking_help', 'treasurehunt'),
             ],
         ];
+        if ($info->treasurehunt->groupmode) {
+            $statuses[] = [
+                'icons' => ['users'], 'label' => get_string('groupmode', 'treasurehunt'),
+                'state' => 'active', 'detail' => get_string('activitysummaryjointeam', 'treasurehunt'),
+            ];
+        }
         $cards = '';
         foreach ($statuses as $status) {
             $iconhtml = '';
             foreach ($status['icons'] as $icon) {
                 $iconhtml .= html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']);
             }
-            $attributes = [
-                'role' => 'group', 'tabindex' => '0',
-                'aria-label' => $status['label'] . ': ' . $status['detail'] . '. ' . ($status['tooltip'] ?? ''),
-            ];
+            $arialabel = $status['label'];
+            if ($status['detail'] !== '') {
+                $arialabel .= ': ' . $status['detail'];
+            }
+            if (!empty($status['tooltip'])) {
+                $arialabel .= '. ' . $status['tooltip'];
+            }
+            $attributes = ['role' => 'group', 'tabindex' => '0', 'aria-label' => $arialabel];
             if (!empty($status['tooltip'])) {
                 $attributes['title'] = $status['tooltip'];
             }
             if (!empty($status['id'])) {
                 $attributes['id'] = $status['id'];
-                $attributes['data-qr-passed-label'] = $yes;
+                $attributes['data-qr-passed-label'] = get_string('activitysummaryqrscan', 'treasurehunt');
                 $attributes['data-qr-passed-title'] = get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs);
                 $attributes['data-qr-pending-label'] = get_string('activitysummaryqrpending', 'treasurehunt');
                 $attributes['data-qr-pending-title'] = get_string('activitysummaryqrpending_help', 'treasurehunt');
@@ -500,8 +544,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
             $cardcontent =
                 html_writer::div($iconhtml, 'treasurehunt-stage-status-icons', ['aria-hidden' => 'true']) .
-                html_writer::span($status['label'], 'treasurehunt-stage-status-label') .
-                html_writer::span($status['detail'], 'treasurehunt-stage-status-detail');
+                html_writer::span($status['label'], 'treasurehunt-stage-status-label');
+            if ($status['detail'] !== '') {
+                $cardcontent .= html_writer::span($status['detail'], 'treasurehunt-stage-status-detail');
+            }
             $attributes['class'] = 'treasurehunt-stage-status is-' . $status['state'];
             if (!empty($status['id']) && $info->numqrs > 0) {
                 unset($attributes['role'], $attributes['tabindex']);

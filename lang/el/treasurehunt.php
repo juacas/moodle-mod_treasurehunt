@@ -36,7 +36,24 @@ $string['activitysummaryqrpending'] = 'Σε εκκρεμότητα';
 $string['activitysummaryqrpending_help'] = 'Η δοκιμή σάρωσης QR ξεκινά αυτόματα. Μπορείτε να πατήσετε αυτό το κουμπί για να την ανοίξετε ή να την επαναλάβετε και να σαρώσετε τον δοκιμαστικό κωδικό.';
 $string['activitysummaryqrfailed'] = 'Η δοκιμή απέτυχε';
 $string['activitysummaryqrloadfailed'] = 'Δεν ήταν δυνατή η φόρτωση του σαρωτή QR. Δοκιμάστε ξανά.';
+$string['activitysummaryqrscan'] = 'Σάρωσε με το κινητό';
+$string['activitysummaryjointeam'] = 'Μπες σε μια ομάδα';
+$string['activitysummarytracking'] = 'Η διαδρομή αποθηκεύεται';
+$string['activitysummaryoutofsequence'] = 'Κυνήγι εκτός σειράς';
+$string['activitysummaryoutofsequencedetail'] = 'Στάδια ελεύθερης ανακάλυψης';
+$string['activitysummaryoutofsequence_help'] =
+    'Ορισμένα στάδια μπορούν να ανακαλυφθούν πριν ολοκληρωθούν ' .
+    'τα προηγούμενα. Οι ενδείξεις τους εμφανίζονται μαζί με την ένδειξη ' .
+    'για το επόμενο στάδιο ' .
+    'της διαδρομής.';
+$string['activitysummarysequential'] = 'Κυνήγι στη διαδρομή';
+$string['activitysummarysequentialdetail'] = 'Στάδια με τη σειρά';
+$string['activitysummarysequential_help'] =
+    'Τα στάδια ανακαλύπτονται με τη σειρά της διαδρομής. ' .
+    'Για να προχωρήσουν, οι παίκτες ολοκληρώνουν το πρώτο στάδιο ' .
+    'που εκκρεμεί.';
 $string['activitysummarygps'] = 'Χρησιμοποιεί το GPS του κινητού';
+$string['activitysummarymapmark'] = 'Σημείωσε στον χάρτη';
 $string['activitysummarytracking_help'] = 'Όταν είναι ενεργό, οι μετακινήσεις σας παρακολουθούνται όσο είναι ανοιχτή η οθόνη του παιχνιδιού και ο διδάσκων μπορεί να δει τη θέση σας.';
 $string['actnotavailableyet'] = 'Η δραστηριότητα δεν είναι ακόμα διαθέσιμη';
 $string['add'] = 'Προσθέστε';
@@ -66,7 +83,7 @@ $string['backtocourse'] = 'Επιστροφή στο μάθημα';
 $string['baselayers'] = 'Βασικά στρώματα';
 $string['basemaps'] = 'Βασικοί χάρτες';
 $string['cancel'] = 'Άκυρο';
-$string['changetogroupmode'] = 'Η λειτουργία παιχνιδιού έχει αλλάξει σε Παιχνίδι με Ομάδες';
+$string['changetogroupmode'] = 'Η λειτουργία παιχνιδιού έχει αλλάξει σε ομαδικό παιχνίδι';
 $string['changetoindividualmode'] = 'Η λειτουργία παιχνιδιού έχει αλλάξει σε Ατομικό Παιχνίδι';
 $string['changetoplaywithmove'] = 'Η λειτουργία παιχνιδιού έχει αλλάξει σε Δυναμικό Παιχνίδι';
 $string['changetoplaywithoutmoving'] = 'Η λειτουργία παιχνιδιού έχει αλλάξει σε Στατικό Παιχνίδι';
@@ -172,7 +189,7 @@ $string['groupingid_help'] = 'Ομάδες σε αυτήν την ομαδοπο
 $string['groupinvalidroad'] = '{$a} έχει συσχετισθεί με μη έγκυρη διαδρομή.';
 $string['grouplocationfailed'] = 'Εσφαλμένη τοποθεσία από τον παιχτη {$a->user} στο στάδιο {$a->position} στις: {$a->date}';
 $string['grouplocationovercome'] = 'Επιτυχής τοποθεσία από τον παιχτη {$a->user} στο στάδιο {$a->position} στις: {$a->date}';
-$string['groupmode'] = 'Οι παίχτες παίζουν σε ομάδες';
+$string['groupmode'] = 'Ομαδικό παιχνίδι';
 $string['groupmode_help'] = 'Αν είναι  ενεργοποιημένο οι μαθητές θα χωριστούν σε ομάδες με βάση τις ρυθμίσειω των ομάδων του κυνηγιού.
 Ένα ομαδικό παιχνίδι θα μοιραστεί μεταξύ των μελών της ομάδας και θα ενημερώνονται για τις αλλαγές του παιχνιδιού.';
 $string['groupmultipleroads'] = '{$a} έχει περισσότερες από μία διαδρομές ανατεθειμένες.';

@@ -38,7 +38,19 @@ $string['activitysummaryqrpending'] = 'Pendiente';
 $string['activitysummaryqrpending_help'] = 'La prueba de escaneo QR se inicia automáticamente. Puedes pulsar este botón para abrirla o repetirla y leer el código de ejemplo.';
 $string['activitysummaryqrfailed'] = 'Prueba fallida';
 $string['activitysummaryqrloadfailed'] = 'No se pudo cargar el escáner QR. Inténtalo de nuevo.';
+$string['activitysummaryqrscan'] = 'Escanea con el móvil';
+$string['activitysummaryjointeam'] = 'Apúntate a un equipo';
+$string['activitysummarytracking'] = 'Se guarda el itinerario';
+$string['activitysummaryoutofsequence'] = 'Caza fuera de secuencia';
+$string['activitysummaryoutofsequencedetail'] = 'Etapas de libre descubrimiento';
+$string['activitysummaryoutofsequence_help'] = 'Algunas etapas pueden descubrirse antes de completar las anteriores. ' .
+    'Sus pistas se muestran junto a la pista de la siguiente etapa del camino.';
+$string['activitysummarysequential'] = 'Caza en el camino';
+$string['activitysummarysequentialdetail'] = 'Etapas en orden';
+$string['activitysummarysequential_help'] = 'Las etapas se descubren siguiendo el orden del camino. ' .
+    'Para avanzar hay que completar la primera etapa pendiente.';
 $string['activitysummarygps'] = 'Usa el GPS del celular';
+$string['activitysummarymapmark'] = 'Marca en el mapa';
 $string['activitysummarytracking_help'] = 'Si está activado, se monitorizan tus movimientos mientras está abierta la pantalla del juego y tu profesor puede ver tu posición.';
 $string['atleastonecluerequired'] = 'Escribe una pista en al menos uno de los dos campos.';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
@@ -73,7 +85,7 @@ $string['bigbutton_play_tour'] = 'Este es tu mejor amigo.<br>Un clic y te muestr
 $string['browsemode'] = 'Navegar';
 $string['cancel'] = 'Cancelar';
 $string['changecamera'] = 'Cambiar cámara';
-$string['changetogroupmode'] = 'El modo de juego ha cambiado a jugar en grupos';
+$string['changetogroupmode'] = 'El modo de juego ha cambiado a jugar por equipos';
 $string['changetoindividualmode'] = 'El modo de juego ha cambiado a jugar individual';
 $string['changetoplaywithmove'] = 'El modo de juego ha cambiado a jugar desplazándose (con GPS)';
 $string['changetoplaywithoutmoving'] = 'El modo de juego ha cambiado a jugar sin desplazarse. Posiciona el "pegman" <img src="pix/my_location.png" width="32" align="middle" /> (click en el mapa) para marcar la posición.';
@@ -272,7 +284,7 @@ $string['groupingid_help'] = 'Los grupos de esta agrupación son asignados a est
 $string['groupinvalidroad'] = '{$a} tiene asignado un camino no validado.';
 $string['grouplocationfailed'] = 'Localización fallida por {$a->user} de la etapa {$a->position} {$a->date}';
 $string['grouplocationovercome'] = 'Localización encontrada por {$a->user} de la etapa {$a->position} {$a->date}';
-$string['groupmode'] = 'Juego en grupos';
+$string['groupmode'] = 'Juego por equipos';
 $string['groupmode_help'] = 'Si está habilitado los estudiantes se dividirán en grupos en función de la configuración de grupos del curso.
 El juego del grupo será compartido entre los miembros del grupo y todos ellos verán los cambios producidos en el juego.';
 $string['groupmultipleroads'] = '{$a} tiene más de un camino asignado.';
