@@ -29,6 +29,15 @@ $string['activitytoend_help'] = 'Η επιλεγμένη δραστηριότη�
 ρυθμίσεις του Moodle, στο μάθημα και στην ίδια τη δραστηριότητα.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'Θα πρέπει πρώτα να ολοκληρώσετε την δραστηριότητα για να λύσετε';
+$string['activitysummary'] = 'Χαρακτηριστικά δραστηριότητας';
+$string['activitysummaryqr'] = 'Στάδια με QR';
+$string['activitysummaryqrnone'] = 'Κανένα στάδιο δεν απαιτεί κωδικό QR.';
+$string['activitysummaryqrpending'] = 'Σε εκκρεμότητα';
+$string['activitysummaryqrpending_help'] = 'Η δοκιμή σάρωσης QR ξεκινά αυτόματα. Μπορείτε να πατήσετε αυτό το κουμπί για να την ανοίξετε ή να την επαναλάβετε και να σαρώσετε τον δοκιμαστικό κωδικό.';
+$string['activitysummaryqrfailed'] = 'Η δοκιμή απέτυχε';
+$string['activitysummaryqrloadfailed'] = 'Δεν ήταν δυνατή η φόρτωση του σαρωτή QR. Δοκιμάστε ξανά.';
+$string['activitysummarygps'] = 'Χρησιμοποιεί το GPS του κινητού';
+$string['activitysummarytracking_help'] = 'Όταν είναι ενεργό, οι μετακινήσεις σας παρακολουθούνται όσο είναι ανοιχτή η οθόνη του παιχνιδιού και ο διδάσκων μπορεί να δει τη θέση σας.';
 $string['actnotavailableyet'] = 'Η δραστηριότητα δεν είναι ακόμα διαθέσιμη';
 $string['add'] = 'Προσθέστε';
 $string['addingroad'] = 'Adding road';

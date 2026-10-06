@@ -2666,10 +2666,19 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
     // Get roads.
     $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
     $output = $PAGE->get_renderer('mod_treasurehunt');
-    [$select, $params] = $DB->get_in_or_equal(array_keys($roads));
-    $select = "roadid $select and qrtext <> ''";
-    $hasqr = $DB->count_records_select('treasurehunt_stages', $select, $params, 'count(qrtext)');
-    $renderable = new mod_treasurehunt\output\info($treasurehunt, $timenow, $courseid, $roads, $hasqr);
+    $numqrs = 0;
+    $hasoutofsequence = false;
+    if ($roads) {
+        [$insql, $params] = $DB->get_in_or_equal(array_keys($roads));
+        $stages = $DB->get_record_sql("SELECT COUNT(CASE WHEN qrtext IS NOT NULL AND qrtext <> '' THEN 1 END) AS numqrs,
+                                            MAX(discoveroutofsequence) AS hasoutofsequence
+                                       FROM {treasurehunt_stages}
+                                      WHERE roadid $insql", $params);
+        $numqrs = (int)$stages->numqrs;
+        $hasoutofsequence = (bool)$stages->hasoutofsequence;
+    }
+    $renderable = new mod_treasurehunt\output\info($treasurehunt, $timenow, $courseid, $roads, $numqrs,
+        $hasoutofsequence);
     return $output->render($renderable);
 }
 

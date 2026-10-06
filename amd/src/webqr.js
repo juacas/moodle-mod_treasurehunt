@@ -32,6 +32,25 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
     //var currentStream = null;
 
     /**
+     * Update the QR test result shown on the activity page.
+     * @param {string} status Pending, passed or failed.
+     */
+    function setQrTestStatus(status) {
+        var card = $('#treasurehunt-qr-status');
+        if (!card.length) {
+            return;
+        }
+        var label = card.attr('data-qr-' + status + '-label');
+        var message = card.attr('data-qr-' + status + '-title');
+        var feature = card.find('.treasurehunt-stage-status-label').text();
+        card.removeClass('is-pending is-active is-danger')
+            .addClass(status === 'passed' ? 'is-active' : status === 'pending' ? 'is-pending' : 'is-danger')
+            .attr({title: message, 'aria-expanded': status === 'pending' ? 'true' : 'false',
+                'aria-label': feature + ': ' + label + '. ' + message});
+        card.find('.treasurehunt-stage-status-detail').text(label);
+    }
+
+    /**
      * Check if Vue and vue-qrcode-reader are available
      */
     function isVueQRAvailable() {
@@ -303,6 +322,8 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
     // webQR functions
     var webqr = {
 
+        setTestStatus: setQrTestStatus,
+
         setup: function () {
             // Check for Vue availability
             if (!isVueQRAvailable()) {
@@ -310,7 +331,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        enableTest: function (successString) {
+        enableTest: function () {
             var cook = {};
             document.cookie.split(';').forEach(function (x) {
                 var arr = x.split('=');
@@ -319,10 +340,12 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 }
             });
             if (cook["QRScanPassed"] != 'Done') {
-                $('#idbuttonnextcam').click(() => this.setnextwebcam(this.reportTestForm.bind(this)));
-                this.loadQR(this.handleScanTest.bind(this, successString), this.reportTestForm.bind(this));
+                $('#idbuttonnextcam').off('click.treasurehunt-qr')
+                    .on('click.treasurehunt-qr', () => this.setnextwebcam(this.reportTestForm.bind(this)));
+                this.loadQR(this.handleScanTest.bind(this), this.reportTestForm.bind(this));
             } else {
-                $('#QRStatusDiv').html(successString);
+                setQrTestStatus('passed');
+                $('#QRStatusDiv').hide();
             }
         },
 
@@ -332,6 +355,8 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 $('#previewQR').hide();
             } else if (typeof (info) === 'object') {
                 if (info.name == 'NotAllowedError' || info.code == 0) {
+                    setQrTestStatus('failed');
+                    this.unloadQR();
                     notification.addNotification({
                         message: $('#errorQR').text() + "<p>(" + info.messagetext + ")</p>",
                         type: "error"
@@ -391,11 +416,11 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             $('#id_scanQR').show();
             return false;
         },
-        handleScanTest: function (successString, value) {
-            document.cookie = "QRScanPassed = Done";
-            this.unloadQR(function () {
-                $('#QRStatusDiv').html(successString + " - " + value);
-            });
+        handleScanTest: function () {
+            document.cookie = "QRScanPassed=Done; SameSite=Lax";
+            this.unloadQR();
+            setQrTestStatus('passed');
+            $('#QRStatusDiv').hide();
         },
         handleScanEditStage: function () {
             this.loadQR(function (value) {
@@ -520,7 +545,4 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
     return webqr;
 });
-
-
-
 

@@ -31,6 +31,15 @@ For the activities of the course to be displayed in the list it must be enabled 
 Moodle\'s configuration, in the course and the activity itself.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'You must complete first the activity to solve';
+$string['activitysummary'] = 'Activity features';
+$string['activitysummaryqr'] = 'Stages with QR';
+$string['activitysummaryqrnone'] = 'No stages require QR codes.';
+$string['activitysummaryqrpending'] = 'Pending';
+$string['activitysummaryqrpending_help'] = 'The QR scanning test starts automatically. You can select this button to open or repeat it and scan the sample code.';
+$string['activitysummaryqrfailed'] = 'Test failed';
+$string['activitysummaryqrloadfailed'] = 'The QR scanner could not be loaded. Please try again.';
+$string['activitysummarygps'] = 'Uses the phone\'s GPS';
+$string['activitysummarytracking_help'] = 'When enabled, your movements are monitored while the game screen is open, and your teacher can see your position.';
 $string['atleastonecluerequired'] = 'Enter a clue in at least one of the two clue fields.';
 $string['actnotavailableyet'] = 'The activity is not available yet';
 $string['add'] = 'Add';

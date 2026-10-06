@@ -31,6 +31,15 @@ Para que las actividades del curso se muestren en la lista debe estar habilitada
 la terminación de actividad en la configuración de Moodle, en el curso y en la propia actividad.';
 $string['activitytoendovercome'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['activitytoendwarning'] = 'Debes completar primero la actividad a resolver';
+$string['activitysummary'] = 'Características de la actividad';
+$string['activitysummaryqr'] = 'Etapas con QR';
+$string['activitysummaryqrnone'] = 'No hay etapas que requieran códigos QR.';
+$string['activitysummaryqrpending'] = 'Pendiente';
+$string['activitysummaryqrpending_help'] = 'La prueba de escaneo QR se inicia automáticamente. Puedes pulsar este botón para abrirla o repetirla y leer el código de ejemplo.';
+$string['activitysummaryqrfailed'] = 'Prueba fallida';
+$string['activitysummaryqrloadfailed'] = 'No se pudo cargar el escáner QR. Inténtalo de nuevo.';
+$string['activitysummarygps'] = 'Usa el GPS del celular';
+$string['activitysummarytracking_help'] = 'Si está activado, se monitorizan tus movimientos mientras está abierta la pantalla del juego y tu profesor puede ver tu posición.';
 $string['atleastonecluerequired'] = 'Escribe una pista en al menos uno de los dos campos.';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
 $string['add'] = 'Añadir';

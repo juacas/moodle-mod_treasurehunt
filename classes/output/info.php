@@ -48,15 +48,21 @@ class info implements renderable {
      * @var int
      */
     public $numqrs = 0;
+    /**
+     * Whether any stage can be discovered out of sequence.
+     * @var bool
+     */
+    public $hasoutofsequence = false;
 
     /**
      * constructor
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs) {
+    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs, $hasoutofsequence) {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;
         $this->roads = $roads;
         $this->numqrs = $numqrs;
+        $this->hasoutofsequence = $hasoutofsequence;
     }
 }
