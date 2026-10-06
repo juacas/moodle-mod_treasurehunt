@@ -29,13 +29,16 @@ require_once($CFG->libdir . '/formslib.php');
 global $USER;
 
 $id = required_param('id', PARAM_INT);
+$previewroadid = optional_param('previewroadid', 0, PARAM_INT);
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
 require_login($course, true, $cm);
 
 $context = context_module::instance($cm->id);
-require_capability('mod/treasurehunt:enterplayer', $context, null, false);
+if (!has_any_capability(['mod/treasurehunt:enterplayer', 'mod/treasurehunt:managetreasurehunt'], $context)) {
+    throw new required_capability_exception($context, 'mod/treasurehunt:enterplayer', 'nopermissions', '');
+}
 // Check availability.
 if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', ['id' => $id]);
@@ -56,12 +59,16 @@ $event->add_record_snapshot("treasurehunt", $treasurehunt);
 $event->trigger();
 
 // Print the page header.
-$PAGE->set_url('/mod/treasurehunt/play.php', ['id' => $cm->id]);
+$pageparams = ['id' => $cm->id];
+if ($previewroadid) {
+    $pageparams['previewroadid'] = $previewroadid;
+}
+$PAGE->set_url('/mod/treasurehunt/play.php', $pageparams);
 $PAGE->set_title(null); // We do not want it on the HTML.
 $PAGE->set_heading(format_string($course->fullname));
 
 // Get last timestamp.
-$user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
+$user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
 [$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
 // Instance selected player renderable.
 $playerstyle = $treasurehunt->playerstyle;
@@ -72,6 +79,7 @@ $output = $PAGE->get_renderer('mod_treasurehunt');
 $renderable->lastattempttimestamp = $lastattempttimestamp;
 $renderable->lastroadtimestamp = $lastroadtimestamp;
 $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
+$renderable->previewroadid = $previewroadid;
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);

@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Security checks for activity-scoped editing.
@@ -23,11 +23,15 @@
  */
 namespace mod_treasurehunt;
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once(__DIR__ . '/../locallib.php');
 
 /**
  * Exercise ownership and lock checks used by the editing endpoints.
+ *
+ * @coversNothing
  */
 final class security_test extends \advanced_testcase {
     /**

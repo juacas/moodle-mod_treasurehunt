@@ -51,8 +51,11 @@ class user_progress extends external_api {
                 'userprogress' => new external_single_structure(
                     [
                         'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
-                        'attempttimestamp' => new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
-                        'roadtimestamp' => new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
+                        'previewroadid' => new external_value(PARAM_INT, 'Road selected for manager preview', VALUE_DEFAULT, 0),
+                        'attempttimestamp' =>
+                            new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+                        'roadtimestamp' =>
+                            new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
                         'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
                         'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
                         'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
@@ -60,7 +63,8 @@ class user_progress extends external_api {
                         'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                         'qrtext' => new external_value(PARAM_TEXT, 'Text scanned', VALUE_OPTIONAL),
                         'applang' => new external_value(PARAM_TEXT, 'Mobile app language', VALUE_OPTIONAL),
-                        'changedapplang' => new external_value(PARAM_BOOL, 'If true, mobile app language has changed', VALUE_OPTIONAL),
+                        'changedapplang' =>
+                            new external_value(PARAM_BOOL, 'If true, mobile app language has changed', VALUE_OPTIONAL),
                         'location' => new external_single_structure(
                             [
                                 'type' => new external_value(PARAM_TEXT, 'Geometry type'),
@@ -130,7 +134,8 @@ class user_progress extends external_api {
                                             'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                             'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                             'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
-                                            'geometrysolved' => new external_value(PARAM_BOOL, "If true, geometry of attempt is solved"),
+                                            'geometrysolved' =>
+                                                new external_value(PARAM_BOOL, "If true, geometry of attempt is solved"),
                                             'info' => new external_value(PARAM_RAW, "The info text of attempt"),
                                         ]
                                     ),
@@ -227,11 +232,16 @@ class user_progress extends external_api {
                 'playerconfig' => new external_single_structure(
                     [
                         'searchpaneldisabled' => new external_value(PARAM_BOOL, 'If true the search panel is disabled'),
-                        'localizationbuttondisabled' => new external_value(PARAM_BOOL, 'If true the localization button is disabled'),
-                        'showdistancehint' => new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
-                        'showheadinghint' => new external_value(PARAM_BOOL, 'If true the heading hint is shown', VALUE_DEFAULT, false),
-                        'showinzonehint' => new external_value(PARAM_BOOL, 'If true the in-zone hint is shown', VALUE_DEFAULT, false),
-                        'shownextareahint' => new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false),
+                        'localizationbuttondisabled' =>
+                            new external_value(PARAM_BOOL, 'If true the localization button is disabled'),
+                        'showdistancehint' =>
+                            new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
+                        'showheadinghint' =>
+                            new external_value(PARAM_BOOL, 'If true the heading hint is shown', VALUE_DEFAULT, false),
+                        'showinzonehint' =>
+                            new external_value(PARAM_BOOL, 'If true the in-zone hint is shown', VALUE_DEFAULT, false),
+                        'shownextareahint' =>
+                            new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false),
                     ],
                     'Custom player configuration',
                     VALUE_OPTIONAL
@@ -264,14 +274,23 @@ class user_progress extends external_api {
         $context = context_module::instance($cm->id);
         self::validate_context($context);
         // Check if the user has permission to view player.
-        require_capability('mod/treasurehunt:enterplayer', $context, null, false);
+        if (!has_any_capability(['mod/treasurehunt:enterplayer', 'mod/treasurehunt:managetreasurehunt'], $context)) {
+            throw new \required_capability_exception($context, 'mod/treasurehunt:enterplayer', 'nopermissions', '');
+        }
         $status = [];
-        // Force mobile app language
+        // Force mobile app language.
         if (isset($params['applang']) && $params['applang'] != current_language()) {
             force_current_language($params['applang']);
         }
         // Get the group and road to which the user belongs.
-        $userparams = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
+        $userparams = treasurehunt_get_user_group_and_road(
+            $USER->id,
+            $treasurehunt,
+            $cm->id,
+            false,
+            '',
+            $params['previewroadid']
+        );
         // Get the total number of stages of the road of the user.
         $numberofstages = treasurehunt_get_total_stages($userparams->roadid);
         if ($numberofstages < 1) {
@@ -307,23 +326,34 @@ class user_progress extends external_api {
         }
         $available = treasurehunt_is_available($treasurehunt);
         // Tracking is only useful while the user is allowed to play an active road.
-        if ($treasurehunt->tracking && isset($params['currentposition']) && !isset($params['location'])
+        if (
+            $treasurehunt->tracking && isset($params['currentposition']) && !isset($params['location'])
                 && $available->available && !$roadfinished
-                && has_capability('mod/treasurehunt:play', $context)) {
+                && has_capability('mod/treasurehunt:play', $context)
+        ) {
             self::validate_point($params['currentposition']);
             $location = treasurehunt_geojson_to_object($params['currentposition']);
-            treasurehunt_track_user($USER->id, $treasurehunt, $currentworkingstage->id, time(),
-                treasurehunt_geometry_to_wkt($location), 15);
+            treasurehunt_track_user(
+                $USER->id,
+                $treasurehunt,
+                $currentworkingstage->id,
+                time(),
+                treasurehunt_geometry_to_wkt($location),
+                15
+            );
         }
         $playmode = $params['playwithoutmoving'];
         // Teacher previewing mode.
-        $previewing = $available->actnotavailableyet && has_capability('mod/treasurehunt:managetreasurehunt', $context);
+        $previewing = ($params['previewroadid'] || $available->actnotavailableyet)
+            && has_capability('mod/treasurehunt:managetreasurehunt', $context);
+        $canplay = has_capability('mod/treasurehunt:play', $context) || $previewing;
         if ($previewing || ($available->available && !$roadfinished)) {
             $changesinplaymode = false;
             if ($previewing) {
                 // Play without moving is always available for teachers for previewing.
                 $playmode = 1;
                 $available->actnotavailableyet = false;
+                $available->outoftime = false;
             } else {
                 $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
             }
@@ -332,7 +362,7 @@ class user_progress extends external_api {
             }
 
             // If the user can play process the submission.
-            if (has_capability('mod/treasurehunt:play', $context)) {
+            if ($canplay) {
                 // Process if the user has correctly completed the question and the required activity.
                 $qocsolved = treasurehunt_check_question_and_activity_solved(
                     $params['selectedanswerid'],
@@ -371,7 +401,7 @@ class user_progress extends external_api {
                 $status['msg'] = $qocsolved->msg;
                 $status['code'] = 0;
             }
-            if ($qocsolved->success) {
+            if ($qocsolved->success && !$previewing) {
                 $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
             }
             if (count($qocsolved->updates)) {
@@ -390,7 +420,7 @@ class user_progress extends external_api {
             // If the stage location is not solved, check if the user can play and has found the location.
             if (
                 !$updates->geometrysolved
-                && has_capability('mod/treasurehunt:play', $context)
+                && $canplay
                 && (isset($params['location']) || isset($params['qrtext']))
                 && !$updateroad
                 && !$changesinplaymode
@@ -418,7 +448,7 @@ class user_progress extends external_api {
                 }
                 if ($checklocation->newstage) {
                     $updates->geometrysolved = true;
-                    if ($checklocation->success) {
+                    if ($checklocation->success && !$previewing) {
                         $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
                     }
                 }
@@ -532,7 +562,10 @@ class user_progress extends external_api {
             $currentworkingstage = self::load_working_stage($userparams->roadid, $nextnostage);
         }
         // Send the next stage geometry if its the first stage or if the heading hint or in-zone hint is enabled.
-        if ($currentworkingstage && ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)) {
+        if (
+            $currentworkingstage &&
+            ($showheadinghint || $showinzonehint || $shownextareahint || $currentworkingstage->position == 1)
+        ) {
             // Subset of properties.
             $currentstagebrief = new stdClass();
             $currentstagebrief->treasurehuntid = $treasurehuntid;
@@ -571,8 +604,10 @@ class user_progress extends external_api {
      * @param array $point GeoJSON point.
      */
     private static function validate_point(array $point): void {
-        if ($point['type'] !== 'Point' || count($point['coordinates']) !== 2
-                || !is_finite((float)$point['coordinates'][0]) || !is_finite((float)$point['coordinates'][1])) {
+        if (
+            $point['type'] !== 'Point' || count($point['coordinates']) !== 2
+                || !is_finite((float)$point['coordinates'][0]) || !is_finite((float)$point['coordinates'][1])
+        ) {
             throw new \invalid_parameter_exception('Invalid point geometry');
         }
     }
@@ -586,8 +621,12 @@ class user_progress extends external_api {
      */
     private static function load_working_stage(int $roadid, int $position): stdClass {
         global $DB;
-        return $DB->get_record('treasurehunt_stages', ['roadid' => $roadid, 'position' => $position],
-            'id,roadid,position,geom,qrtext', MUST_EXIST);
+        return $DB->get_record(
+            'treasurehunt_stages',
+            ['roadid' => $roadid, 'position' => $position],
+            'id,roadid,position,geom,qrtext',
+            MUST_EXIST
+        );
     }
     /**
      * Can this function be called directly from ajax?

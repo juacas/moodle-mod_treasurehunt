@@ -20,7 +20,8 @@
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>* @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 require_once('../../config.php');
@@ -90,10 +91,9 @@ echo treasurehunt_view_info($treasurehunt, $course->id);
 // Render the list the attempts of the users or the groups.
 if (
         (
-        // has_capability('mod/treasurehunt:play', $context, null, false) &&
         time() > $treasurehunt->allowattemptsfromdate && $userid == $USER->id && $groupid == -1)
         ||
-        ( // has_capability('mod/treasurehunt:play', $context, $userid, false) &&
+        (
          has_capability('mod/treasurehunt:viewusershistoricalattempts', $context) && $groupid == -1 && $userid != $USER->id)
         ||
         (count(get_enrolled_users($context, 'mod/treasurehunt:enterplayer', $groupid)) > 0 &&
@@ -152,11 +152,28 @@ if (
     } catch (Exception $e) {
         treasurehunt_notify_error($e->getMessage());
     }
-} else {
-    // If the user can manage the treasurehunt, show "preview" button.
-    if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-        $urlparams = ['id' => $cm->id];
-        echo $output->single_button(new moodle_url('/mod/treasurehunt/play.php', $urlparams), get_string('preview', 'treasurehunt'), 'get', ['class' => 'continuebutton']);
+}
+// Managers can preview any road without joining its group or grouping.
+if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
+    $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id], 'id ASC', 'id,name');
+    $singleroad = count($roads) === 1;
+    if ($roads) {
+        echo html_writer::start_div('treasurehunt-preview-buttons d-flex flex-nowrap align-items-center');
+    }
+    foreach ($roads as $road) {
+        $label = $singleroad
+            ? get_string('preview', 'treasurehunt')
+            : get_string('previewroad', 'treasurehunt', strip_tags(format_string($road->name, true, [
+                'context' => $context, 'escape' => false,
+            ])));
+        echo $output->single_button(
+            new moodle_url('/mod/treasurehunt/play.php', ['id' => $cm->id, 'previewroadid' => $road->id]),
+            $label,
+            'get'
+        );
+    }
+    if ($roads) {
+        echo html_writer::end_div();
     }
 }
 echo $output->box_end();
@@ -170,11 +187,18 @@ if (
 }
 $urlparams = ['id' => $cm->id];
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-    echo $output->single_button(new moodle_url('/mod/treasurehunt/edit.php', $urlparams), get_string('edittreasurehunt', 'treasurehunt'), 'get');
-    echo $output->single_button(new moodle_url('/mod/treasurehunt/clearhunt.php', $urlparams), get_string('cleartreasurehunt', 'treasurehunt'), 'get');
+    echo $output->single_button(
+        new moodle_url('/mod/treasurehunt/edit.php', $urlparams),
+        get_string('edittreasurehunt', 'treasurehunt'),
+        'get'
+    );
 }
 if (has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)) {
-    echo $output->single_button(new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams), get_string('trackviewer', 'treasurehunt'), 'get');
+    echo $output->single_button(
+        new moodle_url('/mod/treasurehunt/gpx_viewer.php', $urlparams),
+        get_string('trackviewer', 'treasurehunt'),
+        'get'
+    );
 }
 // Finish the page.
 echo $output->footer();

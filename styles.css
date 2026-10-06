@@ -375,6 +375,17 @@
   text-align: center;
 }
 
+.path-mod-treasurehunt .treasurehunt-preview-buttons {
+  gap: .5rem;
+  overflow-x: auto;
+  padding: .25rem 0;
+}
+
+.path-mod-treasurehunt .treasurehunt-preview-buttons .singlebutton {
+  flex: 0 0 auto;
+  margin-left: 0;
+}
+
 .path-mod-treasurehunt .treasurehunt-editor-loader {
   position: absolute;
   margin-left: auto;
@@ -382,171 +393,19 @@
   left: 0;
   right: 0;
   z-index: 100;
+  pointer-events: none;
+  text-align: center;
 }
 
-.path-mod-treasurehunt .loader-circle-outside {
-  background-color: rgba(19, 19, 19, 1);
-  border: 5px solid rgba(255, 255, 255, 1);
-  opacity: 0.9;
-  border-right: 5px solid rgba(19, 19, 19, 1);
-  border-left: 5px solid rgba(19, 19, 19, 1);
-  border-radius: 50px;
-  box-shadow: 0 0 35px #131313;
-  width: 50px;
-  height: 50px;
+.path-mod-treasurehunt .treasurehunt-editor-loader .treasurehunt-loading-icon {
+  display: block;
+  width: 96px;
+  height: 96px;
+  object-fit: contain;
   margin: 0 auto;
-  animation: spinPulse 1s infinite ease-in-out;
-  -moz-animation: spinPulse 1s infinite ease-in-out;
-  -webkit-animation: spinPulse 1s infinite ease-in-out;
-  -o-animation: spinPulse 1s infinite ease-in-out;
-  -ms-animation: spinPulse 1s infinite ease-in-out;
+  transform: translateY(-50%);
 }
 
-.path-mod-treasurehunt .loader-circle-inside {
-  background-color: rgba(19, 19, 19, 0);
-  border: 5px solid rgba(255, 255, 255, 1);
-  opacity: 0.9;
-  border-left: 5px solid rgba(19, 19, 19, 1);
-  border-right: 5px solid rgba(19, 19, 19, 1);
-  border-radius: 50px;
-  box-shadow: 0 0 15px #131313;
-  width: 30px;
-  height: 30px;
-  margin: 0 auto;
-  position: relative;
-  top: -50px;
-  animation: spinoffPulse 1s infinite linear;
-  -moz-animation: spinoffPulse 1s infinite linear;
-  -webkit-animation: spinoffPulse 1s infinite linear;
-  -o-animation: spinoffPulse 1s infinite linear;
-  -ms-animation: spinoffPulse 1s infinite linear;
-}
-
-@keyframes spinPulse {
-  0% {
-    transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #131313;
-  }
-
-  50% {
-    transform: rotate(145deg);
-    opacity: 1;
-  }
-  100% {
-    transform: rotate(-320deg);
-    opacity: 0;
-  }
-}
-@keyframes spinoffPulse {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-@-moz-keyframes spinPulse {
-  0% {
-    -moz-transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #131313;
-  }
-
-  50% {
-    -moz-transform: rotate(145deg);
-    opacity: 1;
-  }
-  100% {
-    -moz-transform: rotate(-320deg);
-    opacity: 0;
-  }
-}
-@-moz-keyframes spinoffPulse {
-  0% {
-    -moz-transform: rotate(0deg);
-  }
-
-  100% {
-    -moz-transform: rotate(360deg);
-  }
-}
-@-webkit-keyframes spinPulse {
-  0% {
-    -webkit-transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #131313;
-  }
-
-  50% {
-    -webkit-transform: rotate(145deg);
-    opacity: 1;
-  }
-  100% {
-    -webkit-transform: rotate(-320deg);
-    opacity: 0;
-  }
-}
-@-webkit-keyframes spinoffPulse {
-  0% {
-    -webkit-transform: rotate(0deg);
-  }
-
-  100% {
-    -webkit-transform: rotate(360deg);
-  }
-}
-@-o-keyframes spinPulse {
-  0% {
-    -o-transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #131313;
-  }
-
-  50% {
-    -o-transform: rotate(145deg);
-    opacity: 1;
-  }
-  100% {
-    -o-transform: rotate(-320deg);
-    opacity: 0;
-  }
-}
-@-o-keyframes spinoffPulse {
-  0% {
-    -o-transform: rotate(0deg);
-  }
-
-  100% {
-    -o-transform: rotate(360deg);
-  }
-}
-@-ms-keyframes spinPulse {
-  0% {
-    -ms-transform: rotate(160deg);
-    opacity: 0;
-    box-shadow: 0 0 1px #131313;
-  }
-
-  50% {
-    -ms-transform: rotate(145deg);
-    opacity: 1;
-  }
-  100% {
-    -ms-transform: rotate(-320deg);
-    opacity: 0;
-  }
-}
-@-ms-keyframes spinoffPulse {
-  0% {
-    -ms-transform: rotate(0deg);
-  }
-
-  100% {
-    -ms-transform: rotate(360deg);
-  }
-}
 @media screen and (max-height: 480px) {
   .path-mod-treasurehunt #mapedit {
     height: 160px;

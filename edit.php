@@ -106,8 +106,12 @@ echo '<span id="edition_mainhelp" class="' . $visuallyhiddenclass . '">'
 treasurehunt_notify_info(get_string('editactivity_help', 'treasurehunt'));
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
-echo $OUTPUT->box(null, 'loader-circle-outside');
-echo $OUTPUT->box(null, 'loader-circle-inside');
+echo $OUTPUT->image_icon(
+    'treasurechest_loading',
+    get_string('loading', 'treasurehunt'),
+    'treasurehunt',
+    ['class' => 'treasurehunt-loading-icon']
+);
 echo $OUTPUT->container_end();
 $buttons = '<div class="treasurehunt-map-tools treasurehunt-editor-actions d-flex flex-nowrap align-items-center'
     . ($isbootstrap5 ? ' gap-2' : '') . '"'

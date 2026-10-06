@@ -33,6 +33,14 @@ body {
   align-items: center;
 }
 
+#page-mod-treasurehunt-play .global-loader img {
+  width: 160px;
+  height: 160px;
+  max-width: 40vw;
+  max-height: 40vh;
+  object-fit: contain;
+}
+
 #page-mod-treasurehunt-play .play-container {
   position: fixed;
   width: 100%;
@@ -93,7 +101,7 @@ body {
 }
 
 #page-mod-treasurehunt-play .treasureoverlay .treasurehunticon {
-    width: 100px;
+    width: 200px;
     float: left;
 }
 
@@ -309,6 +317,14 @@ body {
     0 3px 1px -2px rgba(0, 0, 0, 0.12), 0 1px 5px 0 rgba(0, 0, 0, 0.2);
 }
 
+#page-mod-treasurehunt-play .play-toast-success img {
+  width: 64px;
+  height: 64px;
+  flex: 0 0 auto;
+  margin-right: 12px;
+  object-fit: contain;
+}
+
 /* TOAST Animations */
 .slide-in-bottom {
   -webkit-animation: slide-in-bottom 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94)
@@ -516,8 +532,10 @@ body {
 }
 
 #page-mod-treasurehunt-play .search-loading img {
-  width: 100px;
-  height: 100px;
+  width: 200px;
+  height: 200px;
+  max-width: 40vw;
+  max-height: 40vh;
 }
 
 /* Zoom map buttons */

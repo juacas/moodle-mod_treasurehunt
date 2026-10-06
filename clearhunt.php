@@ -31,8 +31,8 @@ require_once("locallib.php");
 
 $confirm = optional_param('confirm', false, PARAM_BOOL);
 
-$PAGE->set_url('/mod/trasurehunt/clearhunt.php');
 [$course, $cm] = get_course_and_cm_from_cmid(required_param('id', PARAM_INTEGER), 'treasurehunt');
+$PAGE->set_url('/mod/treasurehunt/clearhunt.php', ['id' => $cm->id]);
 $context = context_module::instance($cm->id);
 require_login($course, true, $cm);
 $treasurehuntid = $cm->instance;

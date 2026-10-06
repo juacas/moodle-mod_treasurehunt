@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Player progress service tests.
@@ -28,6 +28,8 @@ use mod_treasurehunt\external\delete_stage;
 
 /**
  * Exercise the polling contract on a playable road.
+ *
+ * @coversNothing
  */
 final class user_progress_test extends \advanced_testcase {
     /**
@@ -114,6 +116,68 @@ final class user_progress_test extends \advanced_testcase {
         $params['location'] = ['type' => 'LineString', 'coordinates' => [0.5, 0.5]];
         $this->expectException(\invalid_parameter_exception::class);
         user_progress::execute($params);
+    }
+
+    /**
+     * A manager can preview a selected road without belonging to its group.
+     */
+    public function test_manager_can_preview_selected_road_without_group_membership(): void {
+        global $DB, $USER;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course);
+        $hunt->groupmode = 1;
+        $hunt->allowattemptsfromdate = time() + 3600;
+        $DB->update_record('treasurehunt', $hunt);
+        $otherhunt = $this->create_hunt($course);
+        $roadids = [];
+        foreach ([$hunt->id, $hunt->id, $otherhunt->id] as $huntid) {
+            $roadid = $DB->insert_record('treasurehunt_roads', (object)[
+                'treasurehuntid' => $huntid, 'name' => 'Road', 'validated' => 1,
+                'timecreated' => time(), 'timemodified' => time(),
+            ]);
+            $roadids[] = $roadid;
+            $DB->insert_record('treasurehunt_stages', (object)[
+                'roadid' => $roadid, 'name' => 'First stage', 'position' => 1,
+                'cluetext' => '', 'questiontext' => '',
+                'geom' => 'MULTIPOLYGON (((0 0, 0 1, 1 1, 1 0, 0 0)))',
+            ]);
+        }
+        $cm = get_coursemodule_from_instance('treasurehunt', $hunt->id);
+        $selected = treasurehunt_get_user_group_and_road($USER->id, $hunt, $cm->id, false, '', $roadids[1]);
+        $this->assertEquals($roadids[1], $selected->roadid);
+        $this->assertEquals(0, $selected->groupid);
+
+        $result = user_progress::execute([
+            'treasurehuntid' => $hunt->id, 'previewroadid' => $roadids[1],
+            'attempttimestamp' => 0, 'roadtimestamp' => 0,
+            'playwithoutmoving' => true, 'groupmode' => true,
+            'initialize' => true, 'selectedanswerid' => 0, 'qoaremoved' => false,
+        ]);
+        $this->assertTrue($result['available']);
+        $this->assertEquals($roadids[1], $result['nextstage']['features'][0]['properties']['roadid']);
+
+        $this->expectException(\dml_missing_record_exception::class);
+        treasurehunt_get_user_group_and_road($USER->id, $hunt, $cm->id, false, '', $roadids[2]);
+    }
+
+    /**
+     * A player cannot choose a road by supplying the preview parameter.
+     */
+    public function test_player_cannot_select_preview_road(): void {
+        global $DB, $USER;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course);
+        $roadid = $DB->insert_record('treasurehunt_roads', (object)[
+            'treasurehuntid' => $hunt->id, 'name' => 'Road', 'validated' => 1,
+        ]);
+        $cm = get_coursemodule_from_instance('treasurehunt', $hunt->id);
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $this->expectException(\required_capability_exception::class);
+        treasurehunt_get_user_group_and_road($USER->id, $hunt, $cm->id, false, '', $roadid);
     }
 
     /**

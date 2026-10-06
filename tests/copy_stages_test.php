@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Copying stages between roads.
@@ -23,11 +23,15 @@
  */
 namespace mod_treasurehunt;
 
+defined('MOODLE_INTERNAL') || die();
+
 global $CFG;
 require_once(__DIR__ . '/../locallib.php');
 
 /**
  * Verify append, replacement and road boundaries.
+ *
+ * @coversNothing
  */
 final class copy_stages_test extends \advanced_testcase {
     /**
@@ -51,6 +55,8 @@ final class copy_stages_test extends \advanced_testcase {
     }
 
     /**
+     * Create a road for the test.
+     *
      * @param int $huntid Activity id.
      * @param string $name Road name.
      * @return int Road id.
@@ -64,6 +70,8 @@ final class copy_stages_test extends \advanced_testcase {
     }
 
     /**
+     * Create a stage for the test.
+     *
      * @param int $roadid Road id.
      * @param int $position Stage position.
      * @param string $name Stage name.
@@ -114,17 +122,35 @@ final class copy_stages_test extends \advanced_testcase {
         $this->assertSame('QR First', $stages[1]->qrtext);
         $this->assertSame(1, $DB->count_records('treasurehunt_answers', ['stageid' => $stages[1]->id]));
         $copiedanswer = $DB->get_record('treasurehunt_answers', ['stageid' => $stages[1]->id], '*', MUST_EXIST);
-        $this->assertCount(1, $storage->get_area_files($context->id, 'mod_treasurehunt',
-            'answertext', $copiedanswer->id, 'id', false));
-        $this->assertCount(1, $storage->get_area_files($context->id, 'mod_treasurehunt',
-            'cluetext', $stages[1]->id, 'id', false));
+        $this->assertCount(1, $storage->get_area_files(
+            $context->id,
+            'mod_treasurehunt',
+            'answertext',
+            $copiedanswer->id,
+            'id',
+            false
+        ));
+        $this->assertCount(1, $storage->get_area_files(
+            $context->id,
+            'mod_treasurehunt',
+            'cluetext',
+            $stages[1]->id,
+            'id',
+            false
+        ));
 
         $this->assertSame(2, treasurehunt_copy_stages($sourceid, $targetid, $huntid, true, $context));
         $stages = array_values($DB->get_records('treasurehunt_stages', ['roadid' => $targetid], 'position ASC'));
         $this->assertSame(['First', 'Second'], array_column($stages, 'name'));
         $this->assertFalse($DB->record_exists('treasurehunt_stages', ['id' => $oldid]));
-        $this->assertCount(0, $storage->get_area_files($context->id, 'mod_treasurehunt',
-            'cluetext', $oldid, 'id', false));
+        $this->assertCount(0, $storage->get_area_files(
+            $context->id,
+            'mod_treasurehunt',
+            'cluetext',
+            $oldid,
+            'id',
+            false
+        ));
     }
 
     /**

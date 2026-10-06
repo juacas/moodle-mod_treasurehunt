@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * AJAX endpoint for copying stages between roads.
@@ -39,6 +39,8 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  */
 class copy_stages extends external_api {
     /**
+     * Describe the input parameters.
+     *
      * @return external_function_parameters Input description.
      */
     public static function execute_parameters(): external_function_parameters {
@@ -52,6 +54,8 @@ class copy_stages extends external_api {
     }
 
     /**
+     * Describe the return value.
+     *
      * @return external_single_structure Output description.
      */
     public static function execute_returns(): external_single_structure {
@@ -61,6 +65,8 @@ class copy_stages extends external_api {
     }
 
     /**
+     * Copy stages between roads.
+     *
      * @param int $treasurehuntid Activity instance id.
      * @param int $sourceroadid Source road id.
      * @param int $targetroadid Destination road id.
@@ -72,7 +78,11 @@ class copy_stages extends external_api {
         global $USER;
 
         $params = self::validate_parameters(self::execute_parameters(), compact(
-            'treasurehuntid', 'sourceroadid', 'targetroadid', 'replaceexisting', 'lockid'
+            'treasurehuntid',
+            'sourceroadid',
+            'targetroadid',
+            'replaceexisting',
+            'lockid'
         ));
         $cm = get_coursemodule_from_instance('treasurehunt', $params['treasurehuntid'], 0, false, MUST_EXIST);
         $context = context_module::instance($cm->id);
@@ -83,12 +93,17 @@ class copy_stages extends external_api {
             throw new \moodle_exception('editorlockchanged', 'treasurehunt');
         }
         return ['copied' => treasurehunt_copy_stages(
-            $params['sourceroadid'], $params['targetroadid'], $params['treasurehuntid'],
-            $params['replaceexisting'], $context
+            $params['sourceroadid'],
+            $params['targetroadid'],
+            $params['treasurehuntid'],
+            $params['replaceexisting'],
+            $context
         )];
     }
 
     /**
+     * Allow the service to be called through AJAX.
+     *
      * @return bool Whether AJAX calls are permitted.
      */
     public static function execute_is_allowed_from_ajax(): bool {

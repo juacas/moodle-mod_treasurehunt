@@ -19,22 +19,22 @@
  *
  * @package   mod_treasurehunt
  * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
- * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
 defined('MOODLE_INTERNAL') || die;
 $addons = [
     "mod_treasurehunt" => [
         "handlers" => [ // Different places where the add-on will display content.
-            'coursetreasurehunt' => [ // Handler unique name (can be anything)
+            'coursetreasurehunt' => [ // Handler unique name (can be anything).
                 'displaydata' => [
                     'title' => 'Treasure Hunt',
                     'icon' => $CFG->wwwroot . '/mod/treasurehunt/pix/icon.svg',
                     'class' => '',
                 ],
-                'delegate' => 'CoreCourseModuleDelegate', // Delegate (where to display the link to the add-on)
-                'method' => 'mobile_treasurehunt_view', // Main function in \mod\treasurehunt\classes\output\mobile.php
-                'init' => 'mobile_treasurehunt_init', // Init function in \mod\treasurehunt\classes\output\mobile.php
+                'delegate' => 'CoreCourseModuleDelegate', // Delegate (where to display the link to the add-on).
+                'method' => 'mobile_treasurehunt_view', // Main function in \mod\treasurehunt\classes\output\mobile.php.
+                'init' => 'mobile_treasurehunt_init', // Init function in \mod\treasurehunt\classes\output\mobile.php.
                 'offlinefunctions' => [
                     'mobile_treasurehunt_view' => [],
                 ], // Function needs caching for offline.

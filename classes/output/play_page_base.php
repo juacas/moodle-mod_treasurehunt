@@ -69,6 +69,11 @@ class play_page_base implements renderable, templatable {
      */
     public $gameupdatetime;
     /**
+     * Road selected for a manager's preview, or zero for normal play.
+     * @var int
+     */
+    public $previewroadid = 0;
+    /**
      * Export this data so it can be used as the context for a mustache template.
      *
      * @param renderer_base $output

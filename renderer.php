@@ -89,6 +89,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $renderablepage->user,
                 $renderablepage->custommapping,
                 $renderablepage->customplayerconfig,
+                $renderablepage->previewroadid,
             ]
         );
         // Adds support for QR scan.
@@ -96,7 +97,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->js_call_amd('mod_treasurehunt/tutorial_bootstrap', 'playpage');
         $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
-        $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->set_title('');// Empty to avoid render on top.
@@ -255,7 +255,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 if ($progress->viewpermission) {
                                     $params = ['id' => $progress->coursemoduleid, 'userid' => $userorgroup->id];
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon(
+                                        't/preview',
+                                        get_string('userattempthistory', 'treasurehunt', $fullname)
+                                    );
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
@@ -306,7 +309,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
 
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
-            $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
+            $o .= $this->output->heading_with_help(
+                get_string('usersprogress', 'treasurehunt'),
+                'usersprogress',
+                'treasurehunt',
+                null,
+                null,
+                3
+            );
             $o .= $s;
             // Close the container and insert a spacer.
             $o .= $this->output->container_end();
@@ -403,12 +413,20 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             if ($info->treasurehunt->groupmode == 0) {
                 if ($road->groupid > 0) {
                     $gname = groups_get_group_name($road->groupid);
-                    $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => $road->groupid, 'grouping' => 0]);
+                    $link = new moodle_url('/group/overview.php', [
+                        'id' => $info->treasurehunt->course,
+                        'group' => $road->groupid,
+                        'grouping' => 0,
+                    ]);
                     $groupsmessages[] = html_writer::link($link, $gname);
                 }
             } else if ($road->groupingid > 0) {
                 $gname = groups_get_grouping_name($road->groupingid);
-                $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => 0, 'grouping' => $road->groupingid]);
+                $link = new moodle_url('/group/overview.php', [
+                    'id' => $info->treasurehunt->course,
+                    'group' => 0,
+                    'grouping' => $road->groupingid,
+                ]);
                 $groupsmessages[] = html_writer::link($link, $gname);
             }
         }

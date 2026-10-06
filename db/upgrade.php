@@ -27,13 +27,11 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 /**
  * Execute treasurehunt upgrade from the given old version
  *
- * @global moodle_database $DB
  * @param int $oldversion
  * @return bool
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB;
-    /** @var moodle_database $DB*/
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -189,11 +187,15 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, 'customplayerconfig');
         }
+        upgrade_mod_savepoint(true, 2025070302, 'treasurehunt');
     }
     if ($oldversion < 2026100300) {
         $table = new xmldb_table('treasurehunt_track');
-        $index = new xmldb_index('hunt_user_time_idx', XMLDB_INDEX_NOTUNIQUE,
-            ['treasurehuntid', 'userid', 'timestamp']);
+        $index = new xmldb_index(
+            'hunt_user_time_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['treasurehuntid', 'userid', 'timestamp']
+        );
         if (!$dbman->index_exists($table, $index)) {
             $dbman->add_index($table, $index);
         }

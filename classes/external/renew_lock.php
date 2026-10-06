@@ -86,7 +86,9 @@ class renew_lock extends external_api {
         self::validate_context($context);
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         $currentlockid = treasurehunt_try_renew_edition_lock(
-            $params['treasurehuntid'], $USER->id, $params['lockid'] ?? 0
+            $params['treasurehuntid'],
+            $USER->id,
+            $params['lockid'] ?? 0
         );
         if ($currentlockid) {
             $status = ['code' => 0, 'msg' => get_string('editorlockrenewed', 'treasurehunt')];

@@ -22,8 +22,7 @@ use renderable;
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class user_attempt_history implements renderable
-{
+class user_attempt_history implements renderable {
     /**
      * List of attempts.
      * @var array[object]

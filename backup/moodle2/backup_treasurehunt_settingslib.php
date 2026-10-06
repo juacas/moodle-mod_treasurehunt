@@ -13,9 +13,11 @@
 //
 // You should have received a copy of the GNU General Public License
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
 /**
- * @package moodlecore
- * @subpackage backup-moodle2
+ * Backup settings for the treasurehunt activity.
+ *
+ * @package mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -23,4 +25,3 @@
  // This activity has not particular settings but the inherited from the generic
  // backup_activity_task so here there isn't any class definition, like the ones
  // existing in /backup/moodle2/backup_settingslib.php (activities section).
-defined('MOODLE_INTERNAL') || die();

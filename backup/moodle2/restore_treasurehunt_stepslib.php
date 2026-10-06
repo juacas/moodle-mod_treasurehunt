@@ -85,7 +85,6 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
     }
     /**
      *
-     * @global moodle_database $DB
      * @param object $data
      */
     protected function process_treasurehunt_road($data) {

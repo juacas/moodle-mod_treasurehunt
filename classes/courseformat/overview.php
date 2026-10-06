@@ -38,7 +38,7 @@ class overview extends \core_courseformat\activityoverviewbase {
     #[\Override]
     public function get_extra_overview_items(): array {
         return [
-            // TODO: add extra info such as 'status' => $this->get_extra_status_overview(),
+            'status' => $this->get_extra_status_overview(),
         ];
     }
 
@@ -99,7 +99,12 @@ class overview extends \core_courseformat\activityoverviewbase {
              // Get the total number of stages of the road of the user.
             $total = treasurehunt_get_total_stages($userparams->roadid);
             // Get usr progress in the treasure hunt.
-            $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $this->context);
+            $currentstage = treasurehunt_get_last_successful_attempt(
+                $USER->id,
+                $userparams->groupid,
+                $userparams->roadid,
+                $this->context
+            );
             $stagesuccessed = $currentstage->success ?? 0;
             $button = new action_link(
                 url: new url('/mod/treasurehunt/view.php', ['id' => $this->cm->id, 'userid' => $USER->id]),

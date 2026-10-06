@@ -769,7 +769,6 @@ function treasurehunt_get_stages($treasurehuntid, $context) {
 /**
  * Get one stage by id with road and treasurehunt ids and names.
  * @param int $stageid instace id.
- * @global moodle_database $DB
  */
 function treasurehunt_get_stage($stageid) {
     global $DB;
@@ -789,7 +788,6 @@ function treasurehunt_get_stage($stageid) {
 /**
  * Get all roads in a treasurehunt instance.
  * @param int $treasurehuntid instace id.
- * @global moodle_database $DB
  */
 function treasurehunt_get_roads($treasurehuntid) {
     global $DB;
@@ -850,10 +848,12 @@ function treasurehunt_try_renew_edition_lock($treasurehuntid, $userid, $previous
             return 0;
         }
         // An existing id for another editor or activity cannot be reused.
-        if ($previouslockid && $DB->record_exists('treasurehunt_locks', ['id' => $previouslockid]) &&
+        if (
+            $previouslockid && $DB->record_exists('treasurehunt_locks', ['id' => $previouslockid]) &&
                 !$DB->record_exists('treasurehunt_locks', [
                     'id' => $previouslockid, 'treasurehuntid' => $treasurehuntid, 'userid' => $userid,
-                ])) {
+                ])
+        ) {
             return 0;
         }
         return treasurehunt_renew_edition_lock($treasurehuntid, $userid);
@@ -914,9 +914,11 @@ function treasurehunt_is_edition_locked($treasurehuntid, $userid) {
 function treasurehunt_edition_lock_id_is_valid($lockid, $treasurehuntid, $userid) {
     global $DB;
 
-    return $DB->record_exists_select('treasurehunt_locks',
+    return $DB->record_exists_select(
+        'treasurehunt_locks',
         'id = ? AND treasurehuntid = ? AND userid = ? AND lockedtill > ?',
-        [$lockid, $treasurehuntid, $userid, time()]);
+        [$lockid, $treasurehuntid, $userid, time()]
+    );
 }
 
 /**
@@ -933,9 +935,11 @@ function treasurehunt_ensure_editor_lock($lockid, $treasurehuntid, $userid) {
     if (treasurehunt_edition_lock_id_is_valid($lockid, $treasurehuntid, $userid)) {
         return !treasurehunt_is_edition_locked($treasurehuntid, $userid);
     }
-    if (!$DB->record_exists('treasurehunt_locks', [
+    if (
+        !$DB->record_exists('treasurehunt_locks', [
         'id' => $lockid, 'treasurehuntid' => $treasurehuntid, 'userid' => $userid,
-    ])) {
+        ])
+    ) {
         return false;
     }
     return (int)treasurehunt_try_renew_edition_lock($treasurehuntid, $userid, $lockid) === (int)$lockid;
@@ -1734,12 +1738,34 @@ function treasurehunt_get_group_road($groupid, $treasurehuntid, $groupname = '')
  * @param int $cmid The identifier of treasure hunt course module activity for the URL.
  * @param bool $teacherreview If the function is invoked by a review of the teacher.
  * @param string $username The user name.
+ * @param int $previewroadid Road explicitly selected by a manager for preview.
  * @return object
  */
-function treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cmid, $teacherreview = false, $username = '') {
-    global $DB;
+function treasurehunt_get_user_group_and_road(
+    $userid,
+    $treasurehunt,
+    $cmid,
+    $teacherreview = false,
+    $username = '',
+    $previewroadid = 0
+) {
+    global $DB, $USER;
 
     $returnurl = new moodle_url('/mod/treasurehunt/view.php', ['id' => $cmid]);
+    if ($previewroadid) {
+        $context = context_module::instance($cmid);
+        if ($userid != $USER->id || !has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
+            throw new required_capability_exception($context, 'mod/treasurehunt:managetreasurehunt', 'nopermissions', '');
+        }
+        $road = $DB->get_record(
+            'treasurehunt_roads',
+            ['id' => $previewroadid, 'treasurehuntid' => $treasurehunt->id],
+            'id,validated',
+            MUST_EXIST
+        );
+        // Group 0 keeps preview attempts separate from the real group assigned to the road.
+        return (object)['roadid' => $road->id, 'groupid' => 0, 'validated' => $road->validated];
+    }
     if ($treasurehunt->groupmode) {
         // Group mode.
         $cond = "{groupings_groups} gg ON gg.groupingid = r.groupingid "
@@ -2154,7 +2180,7 @@ function treasurehunt_check_question_and_activity_solved(
                     $userid,
                     $groupid,
                     $context
-                    );
+                );
                 if ($usercompletion) {
                     $return->newattempt = true;
                     $return->attemptsolved = true;
@@ -2319,7 +2345,6 @@ function treasurehunt_insert_attempt($attempt, $context) {
 
 /**
  *
- * @global moodle_database $DB
  * @param int $treasurehuntid
  * @return array userids
  */
@@ -2331,7 +2356,6 @@ function treasurehunt_get_users_with_tracks($treasurehuntid) {
 }
 /**
  * Get last recorded track location.
- * @global moodle_database $DB
  * @param stdClass $treasurehunt
  * @param int $userid
  * @return Geometry|null
@@ -2349,7 +2373,6 @@ function treasurehunt_get_last_location($treasurehunt, $userid) {
 
 /**
  * Inserts one point in a tracked game.
- * @global moodle_database $DB
  * @param int $userid
  * @param stdClass $treasurehunt
  * @param int $currentstageid
@@ -2389,8 +2412,16 @@ function treasurehunt_track_user($userid, $treasurehunt, $currentstageid, $time,
  * @param stdClass|false|null $attempt Last geometry-solved attempt, or null to query it.
  * @return object The last succesful stage.
  */
-function treasurehunt_get_last_successful_stage($userid, $groupid, $roadid, $nostages, $outoftime,
-        $actnotavailableyet, $context, $attempt = null) {
+function treasurehunt_get_last_successful_stage(
+    $userid,
+    $groupid,
+    $roadid,
+    $nostages,
+    $outoftime,
+    $actnotavailableyet,
+    $context,
+    $attempt = null
+) {
     $lastsuccessfulstage = new stdClass();
 
     // Get the last attempt with geometry solved by the user / group for the road.
@@ -2560,7 +2591,6 @@ function treasurehunt_get_user_attempt_history($groupid, $userid, $roadid) {
 
 /**
  * Get all attempts in a treasurehunt.
- * @global moodle_database $DB
  * @param integer $treasurehuntid record id in table treasurehunt
  * @return array
  */
@@ -2579,7 +2609,6 @@ SQL;
 
 /**
  * Clear all recorded activity of this instance.
- * @global moodle_database $DB
  * @param int $treasurehuntid record id in treasurehunt table.
  */
 function treasurehunt_clear_activities($treasurehuntid) {
@@ -2688,7 +2717,6 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
         unassignedusers: $unassignedusers,
         viewpermission: $viewpermission,
         managepermission: $managepermission,
-        // ...$availablegroups.
     );
     return $output->render($renderable);
 }
@@ -3112,12 +3140,14 @@ function treasurehunt_calculate_grades($treasurehunt, $stats, $students) {
                 $msgparams->yourtime = userdate($stats[$student->id]->usertime);
                 $feedback = get_string('grade_explaination_fromabsolutetime', 'treasurehunt', $msgparams);
             } else if ($treasurehunt->grademethod == TREASUREHUNT_GRADEFROMSTAGES) {
-                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / ($stats[$student->id]->nostages);
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) /
+                    $stats[$student->id]->nostages;
                 $msgparams->rawscore = $positiverate;
                 $feedback = get_string('grade_explaination_fromstages', 'treasurehunt', $msgparams);
             } else {
                 // Default grading when there is no data for calculation.
-                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) / (2 * $stats[$student->id]->nostages);
+                $positiverate = ($stats[$student->id]->nosuccessfulstages * $treasurehunt->grade) /
+                    (2 * $stats[$student->id]->nostages);
                 $msgparams->rawscore = $positiverate;
                 $feedback = get_string('grade_explaination_temporary', 'treasurehunt', $msgparams);
             }

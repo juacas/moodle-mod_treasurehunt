@@ -39,8 +39,7 @@ require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 /**
  * Service for deleting stages.
  */
-class delete_stage extends external_api
-{
+class delete_stage extends external_api {
     /**
      * Returns description of method parameters
      * @return external_function_parameters

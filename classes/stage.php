@@ -23,8 +23,7 @@ namespace mod_treasurehunt\model;
  * @copyright 2024 Juan Pablo de Castro
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class stage
-{
+class stage {
     /** @var int id of the parent road */
     public $id;
     /** @var int The ID of the road this stage belongs to */

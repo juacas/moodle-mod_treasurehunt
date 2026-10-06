@@ -42,13 +42,14 @@ import "mod_treasurehunt/dropdown";
 let init = {
   playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
     lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user,
-    custommapconfig, customplayerconfig = null) {
+    custommapconfig, customplayerconfig = null, previewroadid = 0) {
 
     // I18n strings.
     let terms = ["stageovercome", "failedlocation", "stage", "stagename", "stageclue",
       "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
       "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
       "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
+      "successlocation",
     ];
     // console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
@@ -76,14 +77,14 @@ let init = {
 
           initplaytreasurehunt($, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
             lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
-            user, custommapconfig, customplayerconfig);
+            user, custommapconfig, customplayerconfig, previewroadid);
         });
         img.src = custommapconfig.custombackgroundurl;
       } else {
         initplaytreasurehunt(
           $, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
           lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
-          user, custommapconfig, customplayerconfig);
+          user, custommapconfig, customplayerconfig, previewroadid);
       }
     });
   }, // End of function playtreasurehunt.
@@ -136,10 +137,11 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {Object} user The user object.
  * @param {Object} custommapconfig The custom map configuration.
  * @param {Object} playerconfig The custom player configurations for extension.
+ * @param {number} previewroadid Road selected for a manager's preview.
  */
 function initplaytreasurehunt(
   $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp,
-  lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, playerconfig = null) {
+  lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
 
   setLoading(true);
   // Cast to boolean.
@@ -212,6 +214,7 @@ function initplaytreasurehunt(
   let successurl = url.imageUrl("success_mark", "treasurehunt");
   let failureurl = url.imageUrl("failure_mark", "treasurehunt");
   let markerurl = url.imageUrl("bootstrap/my_location_3", "treasurehunt");
+  let treasurechesturl = url.imageUrl("treasurechest_loading", "treasurehunt");
   let lastsuccessfulstage = {};
   let interval;
   let infomsgs = [];
@@ -787,6 +790,7 @@ function initplaytreasurehunt(
     let currentpositionarg = tracking && !playwithoutmoving ? currentposition : null; // only for tracking in mobility.
     let params = {
       treasurehuntid: treasurehuntid,
+      previewroadid: previewroadid,
       attempttimestamp: lastattempttimestamp,
       roadtimestamp: lastroadtimestamp,
       playwithoutmoving: playwithoutmoving,
@@ -818,7 +822,7 @@ function initplaytreasurehunt(
         // If I have sent a location or an answer I print out whether it is correct or not.
         if (location || selectedanswerid) {
           if (response.status !== null && available) {
-            toast(response.status.msg);
+            toast(response.status.msg, response.status.msg === strings["successlocation"]);
           }
           //markerFeature.setGeometry(null);
         }
@@ -1566,10 +1570,15 @@ function initplaytreasurehunt(
    * Show a toast message.
    * It shows a message in the bottom of the screen.
    * The message is removed after 3.5 seconds.
-   * @param {string} msg
+   * @param {string} msg Message to display.
+   * @param {boolean} showchest Show the animated treasure chest for a correct location.
    */
-  function toast(msg) {
+  function toast(msg, showchest = false) {
     const toast = $(`<div class='play-toast slide-in-bottom'>${msg}</div>`);
+    if (showchest) {
+      toast.addClass("play-toast-success");
+      $("<img>", {src: treasurechesturl, alt: "", "aria-hidden": "true"}).prependTo(toast);
+    }
     toast.appendTo($(".play-toast-container"));
     // Out animation after 3s
     setTimeout(() => toast.addClass("slide-out-top"), 3000);
