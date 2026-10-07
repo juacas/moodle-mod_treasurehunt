@@ -155,8 +155,12 @@ if (
 }
 // Managers can preview any road without joining its group or grouping.
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-    $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id],
-        'id ASC', 'id,name,validated');
+    $roads = $DB->get_records(
+        'treasurehunt_roads',
+        ['treasurehuntid' => $treasurehunt->id],
+        'id ASC',
+        'id,name,validated'
+    );
     $singleroad = count($roads) === 1;
     $invalidroadnames = [];
     if ($roads) {

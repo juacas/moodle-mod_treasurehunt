@@ -25,34 +25,33 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+$string['activitysummary'] = 'Características de la actividad';
+$string['activitysummarygps'] = 'Usa el GPS del celular';
+$string['activitysummaryjointeam'] = 'Apúntate a un equipo';
+$string['activitysummarymapmark'] = 'Marca en el mapa';
+$string['activitysummaryoutofsequence'] = 'Caza fuera de secuencia';
+$string['activitysummaryoutofsequence_help'] = 'Algunas etapas pueden descubrirse antes de completar las anteriores. ' .
+    'Sus pistas se muestran junto a la pista de la siguiente etapa del camino.';
+$string['activitysummaryoutofsequencedetail'] = 'Etapas de libre descubrimiento';
+$string['activitysummaryqr'] = 'Etapas con QR';
+$string['activitysummaryqrfailed'] = 'Prueba fallida';
+$string['activitysummaryqrloadfailed'] = 'No se pudo cargar el escáner QR. Inténtalo de nuevo.';
+$string['activitysummaryqrnone'] = 'No hay etapas que requieran códigos QR.';
+$string['activitysummaryqrpending'] = 'Pendiente';
+$string['activitysummaryqrpending_help'] = 'La prueba de escaneo QR se inicia automáticamente. Puedes pulsar este botón para abrirla o repetirla y leer el código de ejemplo.';
+$string['activitysummaryqrscan'] = 'Escanea con el móvil';
+$string['activitysummarysequential'] = 'Caza en el camino';
+$string['activitysummarysequential_help'] = 'Las etapas se descubren siguiendo el orden del camino. ' .
+    'Para avanzar hay que completar la primera etapa pendiente.';
+$string['activitysummarysequentialdetail'] = 'Etapas en orden';
+$string['activitysummarytracking'] = 'Se guarda el itinerario';
+$string['activitysummarytracking_help'] = 'Si está activado, se monitorizan tus movimientos mientras está abierta la pantalla del juego y tu profesor puede ver tu posición.';
 $string['activitytoend'] = 'Completar antes la actividad seleccionada';
 $string['activitytoend_help'] = 'La actividad seleccionada deberá completarse antes de que se muestre la pista actual.
 Para que las actividades del curso se muestren en la lista debe estar habilitada
 la terminación de actividad en la configuración de Moodle, en el curso y en la propia actividad.';
 $string['activitytoendovercome'] = 'Actividad \'<strong>{$a}</strong>\' superada';
 $string['activitytoendwarning'] = 'Debes completar primero la actividad a resolver';
-$string['activitysummary'] = 'Características de la actividad';
-$string['activitysummaryqr'] = 'Etapas con QR';
-$string['activitysummaryqrnone'] = 'No hay etapas que requieran códigos QR.';
-$string['activitysummaryqrpending'] = 'Pendiente';
-$string['activitysummaryqrpending_help'] = 'La prueba de escaneo QR se inicia automáticamente. Puedes pulsar este botón para abrirla o repetirla y leer el código de ejemplo.';
-$string['activitysummaryqrfailed'] = 'Prueba fallida';
-$string['activitysummaryqrloadfailed'] = 'No se pudo cargar el escáner QR. Inténtalo de nuevo.';
-$string['activitysummaryqrscan'] = 'Escanea con el móvil';
-$string['activitysummaryjointeam'] = 'Apúntate a un equipo';
-$string['activitysummarytracking'] = 'Se guarda el itinerario';
-$string['activitysummaryoutofsequence'] = 'Caza fuera de secuencia';
-$string['activitysummaryoutofsequencedetail'] = 'Etapas de libre descubrimiento';
-$string['activitysummaryoutofsequence_help'] = 'Algunas etapas pueden descubrirse antes de completar las anteriores. ' .
-    'Sus pistas se muestran junto a la pista de la siguiente etapa del camino.';
-$string['activitysummarysequential'] = 'Caza en el camino';
-$string['activitysummarysequentialdetail'] = 'Etapas en orden';
-$string['activitysummarysequential_help'] = 'Las etapas se descubren siguiendo el orden del camino. ' .
-    'Para avanzar hay que completar la primera etapa pendiente.';
-$string['activitysummarygps'] = 'Usa el GPS del celular';
-$string['activitysummarymapmark'] = 'Marca en el mapa';
-$string['activitysummarytracking_help'] = 'Si está activado, se monitorizan tus movimientos mientras está abierta la pantalla del juego y tu profesor puede ver tu posición.';
-$string['atleastonecluerequired'] = 'Escribe una pista en al menos uno de los dos campos.';
 $string['actnotavailableyet'] = 'La actividad aún no está disponible';
 $string['add'] = 'Añadir';
 $string['addingroad'] = 'Añadiendo camino';
@@ -71,6 +70,7 @@ $string['alwaysshowdescription_help'] = 'Si está deshabilitado, la Descripción
 visible para los estudiantes en la fecha "Permitir intentos desde".';
 $string['answerwarning'] = 'Debes responder primero a la pregunta';
 $string['areyousure'] = '¿Estás seguro?';
+$string['atleastonecluerequired'] = 'Escribe una pista en al menos uno de los dos campos.';
 $string['attempt'] = 'Intento';
 $string['attempthistory'] = 'Historial de intentos';
 $string['attemptsdeleted'] = 'Eliminados intentos de resolver la Caza del Tesoro';
@@ -174,9 +174,9 @@ $string['editorlocktaken'] = 'Otra persona ha obtenido el bloqueo de edición de
 $string['editorlocktimeout'] = 'No se pudo comprobar el bloqueo de edición. Inténtalo de nuevo.';
 $string['editormap'] = 'Mapa';
 $string['editornone'] = 'Ninguna';
+$string['editoroutofsequenceshort'] = 'Fuera de secuencia';
 $string['editorpanel'] = 'Panel de etapas';
 $string['editorpanel_help'] = 'Expande o contrae el panel de etapas sobre el mapa. Al contraerlo siguen visibles los números, los tiradores y los botones de información. Selecciona una etapa para editar su geometría.';
-$string['editoroutofsequenceshort'] = 'Fuera de secuencia';
 $string['editorpreviousshort'] = 'Requisitos';
 $string['editorqrshort'] = 'QR';
 $string['editorroaddeleted'] = 'Camino eliminado';
@@ -390,8 +390,8 @@ borrando la anterior si existiese, indicando el último punto deseado';
 $string['pluginadministration'] = 'Administración de la Caza del Tesoro';
 $string['pluginname'] = 'Caza del Tesoro';
 $string['preview'] = 'Probar';
-$string['previewroad'] = 'Probar {$a}';
 $string['previewinvalidroad'] = 'No se puede probar el camino "{$a}" porque no está validado. Revisa sus etapas y geometrías en el editor.';
+$string['previewroad'] = 'Probar {$a}';
 $string['prevstep'] = 'Ant.';
 $string['privacy:metadata_treasurehunt_attempts_userid'] = 'Treasure hunt almacena el histórico de los intentos realizados por cada usuario incluyendo tiempo, tipo y éxito o fracaso en cada intento.';
 $string['privacy:metadata_treasurehunt_track_userid'] = 'Treasure hunt almacena la secuencia de posiciones del usuario durante la actividad (si el profesor ha activado esa opción).';
@@ -437,9 +437,9 @@ $string['showclue'] = 'Mostrar pista';
 $string['skiptutorial'] = 'Salir';
 $string['stage'] = 'Etapa';
 $string['stageclue'] = 'Pista para localizar la siguiente etapa';
+$string['stageclue_help'] = 'Esta pista es opcional. La pista para descubrir esta etapa también es opcional, pero debes rellenar al menos uno de los dos campos. Si esta etapa está completada, los jugadores verán este texto para encontrar la siguiente, con prioridad sobre la pista propia de esa etapa. Si lo dejas vacío, verán la pista propia de la etapa siguiente, si existe. En la última etapa puedes escribir aquí un mensaje de fin de la caza del tesoro.';
 $string['stageclueeditor'] = 'Pista para la siguiente etapa o fin de caza del tesoro';
 $string['stagecluesection'] = 'Pistas de la etapa';
-$string['stageclue_help'] = 'Esta pista es opcional. La pista para descubrir esta etapa también es opcional, pero debes rellenar al menos uno de los dos campos. Si esta etapa está completada, los jugadores verán este texto para encontrar la siguiente, con prioridad sobre la pista propia de esa etapa. Si lo dejas vacío, verán la pista propia de la etapa siguiente, si existe. En la última etapa puedes escribir aquí un mensaje de fin de la caza del tesoro.';
 $string['stagename'] = 'Nombre de la etapa';
 $string['stageovercome'] = 'Etapa superada';
 $string['stages'] = 'Etapas';

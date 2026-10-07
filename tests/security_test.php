@@ -31,6 +31,14 @@ require_once(__DIR__ . '/../locallib.php');
 /**
  * Exercise ownership and lock checks used by the editing endpoints.
  *
+ * @covers ::treasurehunt_require_road_in_activity
+ * @covers ::treasurehunt_require_stage_in_activity
+ * @covers ::treasurehunt_edition_lock_id_is_valid
+ * @covers ::treasurehunt_try_renew_edition_lock
+ * @covers ::treasurehunt_ensure_editor_lock
+ * @covers ::treasurehunt_query_last_successful_attempt
+ * @covers ::treasurehunt_track_user
+ * @covers \mod_treasurehunt\external\renew_lock
  */
 final class security_test extends \advanced_testcase {
     /**

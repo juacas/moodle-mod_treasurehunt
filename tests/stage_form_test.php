@@ -27,6 +27,8 @@ namespace mod_treasurehunt;
 /**
  * Verify that either rich text clue can satisfy the stage requirement.
  *
+ * @covers \stage_form
+ * @covers \mod_treasurehunt\external\fetch_treasurehunt
  */
 final class stage_form_test extends \advanced_testcase {
     /**

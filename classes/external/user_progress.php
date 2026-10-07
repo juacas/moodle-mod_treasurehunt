@@ -242,8 +242,12 @@ class user_progress extends external_api {
                         'searchpaneldisabled' =>
                             new external_value(PARAM_BOOL, 'If true the search panel is disabled', VALUE_DEFAULT, false),
                         'localizationbuttondisabled' =>
-                            new external_value(PARAM_BOOL, 'If true the localization button is disabled',
-                                VALUE_DEFAULT, false),
+                            new external_value(
+                                PARAM_BOOL,
+                                'If true the localization button is disabled',
+                                VALUE_DEFAULT,
+                                false
+                            ),
                         'showdistancehint' =>
                             new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
                         'showheadinghint' =>
@@ -606,8 +610,10 @@ class user_progress extends external_api {
                         } else if (self::has_clue_content($stage->clueforstage)) {
                             $source = $stage;
                         }
-                    } else if ((!$previous || !empty($stage->discoveroutofsequence)) &&
-                            self::has_clue_content($stage->clueforstage)) {
+                    } else if (
+                        (!$previous || !empty($stage->discoveroutofsequence)) &&
+                            self::has_clue_content($stage->clueforstage)
+                    ) {
                         $source = $stage;
                     }
                     if ($source) {
@@ -662,10 +668,20 @@ class user_progress extends external_api {
      * @param context_module $context Activity context.
      * @return array Clue data.
      */
-    private static function format_stage_clue(stdClass $stage, string $area, stdClass $target,
-            context_module $context): array {
-        $html = file_rewrite_pluginfile_urls($stage->{$area}, 'pluginfile.php', $context->id,
-            'mod_treasurehunt', $area, $stage->id);
+    private static function format_stage_clue(
+        stdClass $stage,
+        string $area,
+        stdClass $target,
+        context_module $context
+    ): array {
+        $html = file_rewrite_pluginfile_urls(
+            $stage->{$area},
+            'pluginfile.php',
+            $context->id,
+            'mod_treasurehunt',
+            $area,
+            $stage->id
+        );
         return [
             'stageid' => (int)$target->id,
             'position' => (int)$target->position,

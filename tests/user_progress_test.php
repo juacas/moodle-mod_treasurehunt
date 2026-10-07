@@ -29,6 +29,10 @@ use mod_treasurehunt\external\delete_stage;
 /**
  * Exercise the polling contract on a playable road.
  *
+ * @covers \mod_treasurehunt\external\user_progress
+ * @covers \mod_treasurehunt\external\delete_stage
+ * @covers ::treasurehunt_get_user_group_and_road
+ * @covers ::treasurehunt_get_road_stage_state
  */
 final class user_progress_test extends \advanced_testcase {
     /**
@@ -162,7 +166,9 @@ final class user_progress_test extends \advanced_testcase {
         $cm = get_coursemodule_from_instance('treasurehunt', $hunt->id);
         $context = \context_module::instance($cm->id);
         $this->assertEquals($roads[0], treasurehunt_get_user_group_and_road(
-            $players[1]->id, $hunt, $cm->id
+            $players[1]->id,
+            $hunt,
+            $cm->id
         )->roadid);
         // Prime the request cache for both teams before an attempt is written.
         $this->assertEmpty(treasurehunt_get_road_stage_state($players[1]->id, $groups[0]->id, $roads[0])->completed);
@@ -196,7 +202,11 @@ final class user_progress_test extends \advanced_testcase {
         $this->assertEquals(1, $otherview['nextstage']['features'][0]['properties']['stageposition']);
         $qrid = $this->complete_stage($stages[0][1], $players[0]->id, $groups[0]->id, $context, 'qr');
         $qrdelta = treasurehunt_check_attempts_updates(
-            $attemptid, $groups[0]->id, $players[1]->id, $roads[0], false
+            $attemptid,
+            $groups[0]->id,
+            $players[1]->id,
+            $roads[0],
+            false
         );
         $this->assertEquals($qrid, $qrdelta->newattemptid);
         $this->assertTrue($qrdelta->newgeometry);

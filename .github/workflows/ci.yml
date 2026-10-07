@@ -59,16 +59,16 @@ jobs:
           MOODLE_BRANCH: ${{ matrix.moodle-branch }}
 
       - name: PHP syntax
-        run: moodle-plugin-ci phplint
+        run: moodle-plugin-ci phplint ./plugin
 
       - name: Moodle Code Checker
-        run: moodle-plugin-ci phpcs --max-warnings 0
+        run: moodle-plugin-ci phpcs --max-warnings 0 ./plugin
 
       - name: Validate plugin
-        run: moodle-plugin-ci validate
+        run: moodle-plugin-ci validate --moodle ./moodle ./plugin
 
       - name: Check upgrade savepoints
-        run: moodle-plugin-ci savepoints
+        run: moodle-plugin-ci savepoints ./plugin
 
       - name: PHPUnit
-        run: moodle-plugin-ci phpunit --fail-on-warning
+        run: moodle-plugin-ci phpunit --moodle ./moodle --fail-on-warning ./plugin

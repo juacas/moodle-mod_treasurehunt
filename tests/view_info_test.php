@@ -29,6 +29,7 @@ use mod_treasurehunt\output\users_progress;
 /**
  * Check the activity information and progress shown on the main page.
  *
+ * @covers \mod_treasurehunt_renderer
  */
 final class view_info_test extends \advanced_testcase {
     /**

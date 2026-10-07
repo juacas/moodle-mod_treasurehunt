@@ -31,6 +31,7 @@ require_once(__DIR__ . '/../locallib.php');
 /**
  * Verify append, replacement and road boundaries.
  *
+ * @covers ::treasurehunt_copy_stages
  */
 final class copy_stages_test extends \advanced_testcase {
     /**

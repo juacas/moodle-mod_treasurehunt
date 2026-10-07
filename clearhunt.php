@@ -44,8 +44,12 @@ if (!has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
 
 if (data_submitted() && $confirm && confirm_sesskey()) {
     treasurehunt_clear_activities($treasurehuntid);
-    redirect($return, get_string('cleartreasurehunt_done', 'treasurehunt'), null,
-        \core\output\notification::NOTIFY_SUCCESS);
+    redirect(
+        $return,
+        get_string('cleartreasurehunt_done', 'treasurehunt'),
+        null,
+        \core\output\notification::NOTIFY_SUCCESS
+    );
 }
 
 $clearhunt = get_string('cleartreasurehunt', 'treasurehunt');

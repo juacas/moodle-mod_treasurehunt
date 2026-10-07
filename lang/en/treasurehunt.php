@@ -25,34 +25,33 @@
  */
 defined('MOODLE_INTERNAL') || die();
 
+$string['activitysummary'] = 'Activity features';
+$string['activitysummarygps'] = 'Uses the phone\'s GPS';
+$string['activitysummaryjointeam'] = 'Join a team';
+$string['activitysummarymapmark'] = 'Mark on the map';
+$string['activitysummaryoutofsequence'] = 'Out-of-sequence hunt';
+$string['activitysummaryoutofsequence_help'] = 'Some stages can be discovered before earlier stages are completed. ' .
+    'Their clues appear alongside the clue for the next stage on the road.';
+$string['activitysummaryoutofsequencedetail'] = 'Stages open for discovery';
+$string['activitysummaryqr'] = 'Stages with QR';
+$string['activitysummaryqrfailed'] = 'Test failed';
+$string['activitysummaryqrloadfailed'] = 'The QR scanner could not be loaded. Please try again.';
+$string['activitysummaryqrnone'] = 'No stages require QR codes.';
+$string['activitysummaryqrpending'] = 'Pending';
+$string['activitysummaryqrpending_help'] = 'The QR scanning test starts automatically. You can select this button to open or repeat it and scan the sample code.';
+$string['activitysummaryqrscan'] = 'Scan with your phone';
+$string['activitysummarysequential'] = 'Follow-the-road hunt';
+$string['activitysummarysequential_help'] = 'Stages are discovered in road order. ' .
+    'To progress, players complete the first unfinished stage.';
+$string['activitysummarysequentialdetail'] = 'Stages in order';
+$string['activitysummarytracking'] = 'The route is saved';
+$string['activitysummarytracking_help'] = 'When enabled, your movements are monitored while the game screen is open, and your teacher can see your position.';
 $string['activitytoend'] = 'Complete selected activity before';
 $string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed.
 For the activities of the course to be displayed in the list it must be enabled the completion activity in
 Moodle\'s configuration, in the course and the activity itself.';
 $string['activitytoendovercome'] = 'Activity \'<strong>{$a}</strong>\' overcome';
 $string['activitytoendwarning'] = 'You must complete first the activity to solve';
-$string['activitysummary'] = 'Activity features';
-$string['activitysummaryqr'] = 'Stages with QR';
-$string['activitysummaryqrnone'] = 'No stages require QR codes.';
-$string['activitysummaryqrpending'] = 'Pending';
-$string['activitysummaryqrpending_help'] = 'The QR scanning test starts automatically. You can select this button to open or repeat it and scan the sample code.';
-$string['activitysummaryqrfailed'] = 'Test failed';
-$string['activitysummaryqrloadfailed'] = 'The QR scanner could not be loaded. Please try again.';
-$string['activitysummaryqrscan'] = 'Scan with your phone';
-$string['activitysummaryjointeam'] = 'Join a team';
-$string['activitysummarytracking'] = 'The route is saved';
-$string['activitysummaryoutofsequence'] = 'Out-of-sequence hunt';
-$string['activitysummaryoutofsequencedetail'] = 'Stages open for discovery';
-$string['activitysummaryoutofsequence_help'] = 'Some stages can be discovered before earlier stages are completed. ' .
-    'Their clues appear alongside the clue for the next stage on the road.';
-$string['activitysummarysequential'] = 'Follow-the-road hunt';
-$string['activitysummarysequentialdetail'] = 'Stages in order';
-$string['activitysummarysequential_help'] = 'Stages are discovered in road order. ' .
-    'To progress, players complete the first unfinished stage.';
-$string['activitysummarygps'] = 'Uses the phone\'s GPS';
-$string['activitysummarymapmark'] = 'Mark on the map';
-$string['activitysummarytracking_help'] = 'When enabled, your movements are monitored while the game screen is open, and your teacher can see your position.';
-$string['atleastonecluerequired'] = 'Enter a clue in at least one of the two clue fields.';
 $string['actnotavailableyet'] = 'The activity is not available yet';
 $string['add'] = 'Add';
 $string['addingroad'] = 'Adding road';
@@ -71,6 +70,7 @@ $string['alwaysshowdescription_help'] = 'If disabled, the Treasure hunt Descript
 at the "Allow attempts from" date.';
 $string['answerwarning'] = 'You must first answer the question';
 $string['areyousure'] = 'Are you sure?';
+$string['atleastonecluerequired'] = 'Enter a clue in at least one of the two clue fields.';
 $string['attempt'] = 'Attempt';
 $string['attempthistory'] = 'Attempt history';
 $string['attemptsdeleted'] = 'Treasure hunt attempts deleted';
@@ -188,9 +188,9 @@ $string['editorlocktaken'] = 'Another editor now holds the lock for this treasur
 $string['editorlocktimeout'] = 'The editing lock could not be checked. Please try again.';
 $string['editormap'] = 'Map';
 $string['editornone'] = 'None';
+$string['editoroutofsequenceshort'] = 'Out of sequence';
 $string['editorpanel'] = 'Stages panel';
 $string['editorpanel_help'] = 'Expand or collapse the stages overlay. Stage numbers, drag handles and information buttons remain visible when collapsed. Select a stage to edit its geometry on the map.';
-$string['editoroutofsequenceshort'] = 'Out of sequence';
 $string['editorpreviousshort'] = 'Prerequisites';
 $string['editorqrshort'] = 'QR';
 $string['editorroaddeleted'] = 'Road deleted';
@@ -406,8 +406,8 @@ if any, indicating the last desired point.';
 $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
 $string['preview'] = 'Preview';
-$string['previewroad'] = 'Preview {$a}';
 $string['previewinvalidroad'] = 'Road "{$a}" cannot be previewed because it is not validated. Check its stages and geometries in the editor.';
+$string['previewroad'] = 'Preview {$a}';
 $string['prevstep'] = 'Prev';
 
 $string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
@@ -479,9 +479,9 @@ $string['shownextareahint_help'] = 'If enabled, the player will see the area of 
 $string['skiptutorial'] = 'Quit';
 $string['stage'] = 'Stage';
 $string['stageclue'] = 'Clue to locate the next stage';
+$string['stageclue_help'] = 'This clue is optional. The clue for finding this stage is optional too, but you must fill in at least one of the two fields. Once this stage is completed, players see this clue for finding the next stage; it takes priority over that stage\'s own clue. If you leave it empty, they see the next stage\'s own clue, if available. On the last stage, you can write an end-of-hunt message here.';
 $string['stageclueeditor'] = 'Clue for the next stage or end of the treasure hunt';
 $string['stagecluesection'] = 'Stage clues';
-$string['stageclue_help'] = 'This clue is optional. The clue for finding this stage is optional too, but you must fill in at least one of the two fields. Once this stage is completed, players see this clue for finding the next stage; it takes priority over that stage\'s own clue. If you leave it empty, they see the next stage\'s own clue, if available. On the last stage, you can write an end-of-hunt message here.';
 $string['stagename'] = 'Stage\'s name';
 $string['stageovercome'] = 'Stage overcome';
 $string['stages'] = 'Stages';

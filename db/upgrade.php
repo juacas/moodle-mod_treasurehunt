@@ -205,12 +205,36 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $table = new xmldb_table('treasurehunt_stages');
         $fields = [
             new xmldb_field('clueforstage', XMLDB_TYPE_TEXT, null, null, null, null, null, 'cluetexttrust'),
-            new xmldb_field('clueforstageformat', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, FORMAT_HTML,
-                'clueforstage'),
-            new xmldb_field('clueforstagetrust', XMLDB_TYPE_INTEGER, '2', null, XMLDB_NOTNULL, null, 0,
-                'clueforstageformat'),
-            new xmldb_field('discoveroutofsequence', XMLDB_TYPE_INTEGER, '1', null, XMLDB_NOTNULL, null, 0,
-                'clueforstagetrust'),
+            new xmldb_field(
+                'clueforstageformat',
+                XMLDB_TYPE_INTEGER,
+                '2',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                FORMAT_HTML,
+                'clueforstage'
+            ),
+            new xmldb_field(
+                'clueforstagetrust',
+                XMLDB_TYPE_INTEGER,
+                '2',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                0,
+                'clueforstageformat'
+            ),
+            new xmldb_field(
+                'discoveroutofsequence',
+                XMLDB_TYPE_INTEGER,
+                '1',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                0,
+                'clueforstagetrust'
+            ),
         ];
         foreach ($fields as $field) {
             if (!$dbman->field_exists($table, $field)) {

@@ -26,6 +26,7 @@ namespace mod_treasurehunt;
 /**
  * Verify report scoping and group progress.
  *
+ * @covers ::treasurehunt_user_complete
  */
 final class user_complete_test extends \advanced_testcase {
     /**

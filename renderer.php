@@ -220,7 +220,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 }
                 if ($grouplinks) {
                     $grouplabel = get_string(count($grouplinks) === 1 ? 'group' : 'groups', 'treasurehunt');
-                    $roadheading .= ' ' . html_writer::tag('small',
+                    $roadheading .= ' ' . html_writer::tag(
+                        'small',
                         $grouplabel . ': ' . implode(', ', $grouplinks),
                         ['class' => 'treasurehunt-road-groups']
                     );
@@ -429,7 +430,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $o .= html_writer::tag('p', $message) . "\n";
             }
         }
-
 
         // Group or individual playing.
 

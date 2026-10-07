@@ -69,8 +69,11 @@ class stage_form extends moodleform {
         // Play stage without moving checkbox.
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
-        $mform->addElement('advcheckbox', 'discoveroutofsequence',
-            get_string('discoveroutofsequence', 'treasurehunt'));
+        $mform->addElement(
+            'advcheckbox',
+            'discoveroutofsequence',
+            get_string('discoveroutofsequence', 'treasurehunt')
+        );
         $mform->addHelpButton('discoveroutofsequence', 'discoveroutofsequence', 'treasurehunt');
 
         $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), ['size' => '64']);
@@ -177,12 +180,22 @@ class stage_form extends moodleform {
             get_string('stagecluesection', 'treasurehunt')
         );
         // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
-        $mform->addElement('editor', 'cluetext_editor', get_string('stageclueeditor', 'treasurehunt'), null,
-            $editoroptions);
+        $mform->addElement(
+            'editor',
+            'cluetext_editor',
+            get_string('stageclueeditor', 'treasurehunt'),
+            null,
+            $editoroptions
+        );
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
-        $mform->addElement('editor', 'clueforstage_editor', get_string('clueforstage', 'treasurehunt'), null,
-            $editoroptions);
+        $mform->addElement(
+            'editor',
+            'clueforstage_editor',
+            get_string('clueforstage', 'treasurehunt'),
+            null,
+            $editoroptions
+        );
         $mform->addHelpButton('clueforstage_editor', 'clueforstage', 'treasurehunt');
         $mform->setType('clueforstage_editor', PARAM_RAW);
         // Anado los campos ocultos.

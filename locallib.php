@@ -697,8 +697,10 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
     [$attemptid, $roadrevision] = treasurehunt_get_progress_markers($userid, $groupid, $roadid);
     $progresscache = cache::make('mod_treasurehunt', 'progressstate');
     $snapshot = $progresscache->get($scopekey);
-    if ($snapshot !== false && $snapshot->attemptid === $attemptid &&
-            $snapshot->roadrevision === $roadrevision) {
+    if (
+        $snapshot !== false && $snapshot->attemptid === $attemptid &&
+            $snapshot->roadrevision === $roadrevision
+    ) {
         $verifiedcache->set($scopekey, $snapshot->state);
         return $snapshot->state;
     }
@@ -729,8 +731,10 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
         }
     }
     foreach ($state->stages as $stage) {
-        if (!isset($state->completed[$stage->id]) &&
-                ($stage === $state->next || !empty($stage->discoveroutofsequence))) {
+        if (
+            !isset($state->completed[$stage->id]) &&
+                ($stage === $state->next || !empty($stage->discoveroutofsequence))
+        ) {
             $state->candidates[] = $stage;
         }
     }
@@ -1239,8 +1243,10 @@ function treasurehunt_check_user_location($userid, $groupid, $roadid, $point, $q
         // The first incomplete stage remains the sequential target. A matching free stage may be found earlier.
         foreach ($state->candidates as $candidate) {
             $candidategeom = treasurehunt_wkt_to_object($candidate->geom);
-            if (($point !== null && treasurehunt_check_point_in_multipolygon($candidategeom, $point)) ||
-                    ($qrtext !== null && $qrtext !== '' && $candidate->qrtext === $qrtext)) {
+            if (
+                ($point !== null && treasurehunt_check_point_in_multipolygon($candidategeom, $point)) ||
+                    ($qrtext !== null && $qrtext !== '' && $candidate->qrtext === $qrtext)
+            ) {
                 $nextstage = $candidate;
                 break;
             }
@@ -2749,8 +2755,14 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
         $numqrs = (int)$stages->numqrs;
         $hasoutofsequence = (bool)$stages->hasoutofsequence;
     }
-    $renderable = new mod_treasurehunt\output\info($treasurehunt, $timenow, $courseid, $roads, $numqrs,
-        $hasoutofsequence);
+    $renderable = new mod_treasurehunt\output\info(
+        $treasurehunt,
+        $timenow,
+        $courseid,
+        $roads,
+        $numqrs,
+        $hasoutofsequence
+    );
     return $output->render($renderable);
 }
 
