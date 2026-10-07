@@ -30,8 +30,18 @@ use mod_treasurehunt\output\users_progress;
  * Check the activity information and progress shown on the main page.
  *
  * @covers \mod_treasurehunt_renderer
+ * @covers ::treasurehunt_get_group_mode_diagnostics
  */
 final class view_info_test extends \advanced_testcase {
+    /**
+     * Load the diagnostic helper.
+     */
+    protected function setUp(): void {
+        parent::setUp();
+        global $CFG;
+        require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
+    }
+
     /**
      * The scanner panel starts hidden even when the activity contains QR stages.
      */
@@ -101,6 +111,23 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString(get_string('activitysummaryoutofsequence', 'treasurehunt'), $infohtml);
         $this->assertStringContainsString(get_string('activitysummaryoutofsequence_help', 'treasurehunt'), $infohtml);
         $this->assertStringContainsString('fa fa-random', $infohtml);
+        $this->assertStringNotContainsString('treasurehunt-stage-status is-danger', $infohtml);
+
+        $roads = [(object)['name' => 'Path One', 'groupingid' => 7, 'validated' => 1]];
+        $progressdata = [$roads, [], [], ['Student One', 'Student Two']];
+        $diagnostics = treasurehunt_get_group_mode_diagnostics($roads, $progressdata);
+        $warning = get_string('warnusersoutside', 'treasurehunt', 'Student One, Student Two');
+        $this->assertSame('pending', $diagnostics['state']);
+        $this->assertSame(get_string('activitysummarygroupwarning', 'treasurehunt'), $diagnostics['detail']);
+        $this->assertSame($warning, $diagnostics['tooltip']);
+        $warninghtml = $renderer->render(new info($hunt, time(), $course->id, $roads, 0, true, '', $diagnostics));
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*class="treasurehunt-stage-status is-pending"[^>]*>.*?' .
+                preg_quote(get_string('groupmode', 'treasurehunt'), '/') . '<\/span>/s',
+            $warninghtml
+        );
+        $this->assertStringContainsString(get_string('activitysummarygroupwarning', 'treasurehunt'), $warninghtml);
+        $this->assertStringContainsString('data-treasurehunt-tooltip="' . s($warning) . '"', $warninghtml);
 
         $group = (object)['id' => 23, 'name' => 'Team Alpha', 'ratings' => []];
         $road = (object)['name' => 'Path One', 'validated' => true, 'userlist' => [$group], 'totalstages' => 2];
@@ -109,6 +136,55 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString('Path One', $progresshtml);
         $this->assertStringContainsString('Team Alpha', $progresshtml);
         $this->assertStringContainsString('group=23', $progresshtml);
+    }
+
+    /**
+     * Missing groupings take priority over user warnings and invalid roads mark the hunt card.
+     */
+    public function test_teacher_cards_show_grouping_and_road_errors(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $PAGE->set_url(new \moodle_url('/mod/treasurehunt/view.php', ['id' => 1]));
+        $PAGE->set_context(\context_course::instance($course->id));
+        $PAGE->set_course($course);
+        $hunt = (object)[
+            'course' => $course->id,
+            'allowattemptsfromdate' => 0,
+            'cutoffdate' => 0,
+            'playwithoutmoving' => 0,
+            'groupmode' => 1,
+            'tracking' => 0,
+            'grade' => 0,
+        ];
+        $roads = [
+            (object)['name' => 'Path One', 'groupingid' => 0, 'validated' => 1],
+            (object)['name' => 'Path Two', 'groupingid' => 4, 'validated' => 0],
+        ];
+        $diagnostics = treasurehunt_get_group_mode_diagnostics($roads, [$roads, [], [], ['Student One']]);
+        $this->assertSame('danger', $diagnostics['state']);
+        $this->assertStringContainsString('Path One', $diagnostics['tooltip']);
+        $this->assertStringContainsString('Student One', $diagnostics['tooltip']);
+
+        $html = $PAGE->get_renderer('mod_treasurehunt')->render(
+            new info($hunt, time(), $course->id, $roads, 0, false, '', $diagnostics)
+        );
+        $this->assertStringContainsString('data-treasurehunt-tooltip="' . s($diagnostics['tooltip']) . '"', $html);
+        $this->assertStringContainsString(get_string('activitysummarygroupingerror', 'treasurehunt'), $html);
+        $this->assertStringContainsString(get_string('invalroadid', 'treasurehunt') . ': Path Two', $html);
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*class="treasurehunt-stage-status is-danger"[^>]*>.*?' .
+                preg_quote(get_string('activitysummarysequential', 'treasurehunt'), '/') . '<\/span>/s',
+            $html
+        );
+
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $studenthtml = $PAGE->get_renderer('mod_treasurehunt')->render(
+            new info($hunt, time(), $course->id, $roads, 0, false, '', $diagnostics)
+        );
+        $this->assertStringNotContainsString('treasurehunt-stage-status is-danger', $studenthtml);
     }
 
     /**
@@ -153,5 +229,41 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString(get_string('activitysummaryqr', 'treasurehunt'), $manager);
         $this->assertStringContainsString(get_string('activitysummarytracking', 'treasurehunt'), $manager);
         $this->assertStringContainsString(get_string('groupmode', 'treasurehunt'), $manager);
+    }
+
+    /**
+     * A player without an assigned team sees the assignment error on the team card.
+     */
+    public function test_unassigned_team_card_shows_error(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $PAGE->set_url(new \moodle_url('/mod/treasurehunt/view.php', ['id' => 1]));
+        $PAGE->set_context(\context_course::instance($course->id));
+        $PAGE->set_course($course);
+        $hunt = (object)[
+            'course' => $course->id,
+            'allowattemptsfromdate' => 0,
+            'cutoffdate' => 0,
+            'playwithoutmoving' => 0,
+            'groupmode' => 1,
+            'tracking' => 0,
+            'grade' => 0,
+        ];
+        $message = get_string('nogroupingplay', 'treasurehunt');
+        $renderer = $PAGE->get_renderer('mod_treasurehunt');
+        $html = $renderer->render(new info($hunt, time(), $course->id, [], 0, false, $message));
+
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*class="treasurehunt-stage-status is-danger"[^>]*>.*?' .
+                preg_quote(get_string('groupmode', 'treasurehunt'), '/') . '<\/span>/s',
+            $html
+        );
+        $this->assertStringContainsString('data-treasurehunt-tooltip="' . s($message) . '"', $html);
+
+        $html = $renderer->render(new info($hunt, time(), $course->id, [], 0, false));
+        $this->assertStringNotContainsString('treasurehunt-stage-status is-danger', $html);
     }
 }

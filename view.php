@@ -85,8 +85,27 @@ if ($CFG->version < 2022112800) { // Moodle 4 renders the heading and the descri
 if ($treasurehunt->playwithoutmoving == false && (empty($_SERVER['HTTPS']) || $_SERVER['HTTPS'] == 'off')) {
     treasurehunt_notify_error(get_string('warnunsecuregeolocation', 'treasurehunt'));
 }
+$currentroad = null;
+$currentroaderror = null;
+if (
+    $treasurehunt->groupmode && time() > $treasurehunt->allowattemptsfromdate &&
+        $userid == $USER->id && $groupid == -1
+) {
+    try {
+        $currentroad = treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cm->id);
+    } catch (\core\session\exception $e) {
+        $currentroaderror = $e;
+    }
+}
+$canmanage = has_capability('mod/treasurehunt:managetreasurehunt', $context);
+$usersprogressdata = null;
+if ($canmanage && $treasurehunt->groupmode) {
+    $usersprogressdata = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $course->id, $context);
+}
+$groupassignmenterror = !$canmanage && $currentroaderror && $currentroaderror->errorcode === 'nogroupingplay'
+    ? $currentroaderror->getMessage() : '';
 echo $output->box_start('treasurehuntinfo', 'treasurehuntinfo');
-echo treasurehunt_view_info($treasurehunt, $course->id);
+echo treasurehunt_view_info($treasurehunt, $course->id, $groupassignmenterror, $usersprogressdata);
 
 // Render the list the attempts of the users or the groups.
 if (
@@ -112,7 +131,11 @@ if (
             } else {
                 $username = treasurehunt_get_user_fullname_from_id($userid);
             }
-            $params = treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cm->id, $teacherreview, $username);
+            if ($currentroaderror && !$teacherreview) {
+                throw $currentroaderror;
+            }
+            $params = $currentroad && !$teacherreview ? $currentroad :
+                treasurehunt_get_user_group_and_road($userid, $treasurehunt, $cm->id, $teacherreview, $username);
             if ($userid == $USER->id) {
                 if ($params->groupid) {
                     $username = groups_get_group_name($params->groupid);
@@ -154,7 +177,7 @@ if (
     }
 }
 // Managers can preview any road without joining its group or grouping.
-if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
+if ($canmanage) {
     $roads = $DB->get_records(
         'treasurehunt_roads',
         ['treasurehuntid' => $treasurehunt->id],
@@ -200,14 +223,14 @@ if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
 echo $output->box_end();
 // Render a briefing of the progress of the participants of the Treasurehunt.
 if (
-    has_capability('mod/treasurehunt:managetreasurehunt', $context)
+    $canmanage
     || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
     || $treasurehunt->showboard == true
 ) {
-    echo treasurehunt_view_users_progress_table($cm, $course->id, $context);
+    echo treasurehunt_view_users_progress_table($cm, $course->id, $context, $usersprogressdata);
 }
 $urlparams = ['id' => $cm->id];
-if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
+if ($canmanage) {
     echo $output->single_button(
         new moodle_url('/mod/treasurehunt/edit.php', $urlparams),
         get_string('edittreasurehunt', 'treasurehunt'),

@@ -25,6 +25,9 @@
 defined('MOODLE_INTERNAL') || die();
 $string['activitysummary'] = 'Χαρακτηριστικά δραστηριότητας';
 $string['activitysummarygps'] = 'Χρησιμοποιεί το GPS του κινητού';
+$string['activitysummarygroupingerror'] = 'Διαδρομή χωρίς ομαδοποίηση';
+$string['activitysummarygroupingmissing'] = 'Οι ακόλουθες διαδρομές δεν έχουν ορισμένη ομαδοποίηση: {$a}.';
+$string['activitysummarygroupwarning'] = 'Πιθανά προβλήματα ομάδων';
 $string['activitysummaryjointeam'] = 'Μπες σε μια ομάδα';
 $string['activitysummarymapmark'] = 'Σημείωσε στον χάρτη';
 $string['activitysummaryoutofsequence'] = 'Κυνήγι εκτός σειράς';

@@ -27,6 +27,9 @@ defined('MOODLE_INTERNAL') || die();
 
 $string['activitysummary'] = 'Activity features';
 $string['activitysummarygps'] = 'Uses the phone\'s GPS';
+$string['activitysummarygroupingerror'] = 'Road without grouping';
+$string['activitysummarygroupingmissing'] = 'The following roads have no grouping assigned: {$a}.';
+$string['activitysummarygroupwarning'] = 'Possible group problems';
 $string['activitysummaryjointeam'] = 'Join a team';
 $string['activitysummarymapmark'] = 'Mark on the map';
 $string['activitysummaryoutofsequence'] = 'Out-of-sequence hunt';

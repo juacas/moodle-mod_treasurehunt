@@ -463,6 +463,23 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
 
         // Summarise the activity settings with the same status icons used for stages in the editor.
         $no = get_string('editordisabled', 'treasurehunt');
+        $canmanage = has_capability('mod/treasurehunt:managetreasurehunt', $this->page->context);
+        $invalidroadmessages = [];
+        if ($canmanage) {
+            foreach ($info->roads as $road) {
+                if (empty($road->validated)) {
+                    $invalidroadmessages[] = get_string('invalroadid', 'treasurehunt') . ': ' .
+                        strip_tags(format_string($road->name));
+                }
+            }
+        }
+        $modeerror = implode(' ', $invalidroadmessages);
+        $groupdiagnostics = $canmanage ? $info->groupdiagnostics : [];
+        $groupstate = $groupdiagnostics['state'] ?? ($info->groupassignmenterror ? 'danger' :
+            ($info->treasurehunt->groupmode ? 'active' : 'inactive'));
+        $groupdetail = $groupdiagnostics['detail'] ?? ($info->treasurehunt->groupmode ?
+            get_string('activitysummaryjointeam', 'treasurehunt') : $no);
+        $grouptooltip = $groupdiagnostics['tooltip'] ?? ($info->groupassignmenterror ?: $groupdetail);
         $qrpassed = $info->numqrs > 0 && ($_COOKIE['QRScanPassed'] ?? '') === 'Done';
         $qrstate = $info->numqrs === 0 ? 'inactive' : ($qrpassed ? 'active' : 'pending');
         $qrtooltip = $info->numqrs === 0 ? get_string('activitysummaryqrnone', 'treasurehunt') :
@@ -483,12 +500,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                     $info->hasoutofsequence ? 'activitysummaryoutofsequence' : 'activitysummarysequential',
                     'treasurehunt'
                 ),
-                'state' => $info->hasoutofsequence ? 'active' : 'inactive',
+                'state' => $modeerror ? 'danger' : ($info->hasoutofsequence ? 'active' : 'inactive'),
                 'detail' => get_string(
                     $info->hasoutofsequence ? 'activitysummaryoutofsequencedetail' : 'activitysummarysequentialdetail',
                     'treasurehunt'
                 ),
-                'tooltip' => get_string(
+                'tooltip' => ($modeerror ? $modeerror . ' ' : '') . get_string(
                     $info->hasoutofsequence ? 'activitysummaryoutofsequence_help' : 'activitysummarysequential_help',
                     'treasurehunt'
                 ),
@@ -518,15 +535,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             ],
             [
                 'icons' => ['users'], 'label' => get_string('groupmode', 'treasurehunt'),
-                'state' => $info->treasurehunt->groupmode ? 'active' : 'inactive',
-                'detail' => $info->treasurehunt->groupmode ?
-                    get_string('activitysummaryjointeam', 'treasurehunt') : $no,
-                'tooltip' => $info->treasurehunt->groupmode ?
-                    get_string('activitysummaryjointeam', 'treasurehunt') : $no,
+                'state' => $groupstate,
+                'detail' => $groupdetail,
+                'tooltip' => $grouptooltip,
                 'optional' => true, 'enabled' => (bool)$info->treasurehunt->groupmode,
             ],
         ];
-        $canmanage = has_capability('mod/treasurehunt:managetreasurehunt', $this->page->context);
         $cards = '';
         foreach ($statuses as $status) {
             if (!empty($status['optional']) && empty($status['enabled']) && !$canmanage) {

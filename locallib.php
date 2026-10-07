@@ -2736,9 +2736,11 @@ function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
  *
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $courseid The identifier of course.
+ * @param string $groupassignmenterror Message shown when the player has no assigned team.
+ * @param array|null $usersprogressdata Progress data already loaded for a teacher.
  * @return string
  */
-function treasurehunt_view_info($treasurehunt, $courseid) {
+function treasurehunt_view_info($treasurehunt, $courseid, $groupassignmenterror = '', $usersprogressdata = null) {
     global $PAGE, $DB;
     $timenow = time();
     // Get roads.
@@ -2755,15 +2757,59 @@ function treasurehunt_view_info($treasurehunt, $courseid) {
         $numqrs = (int)$stages->numqrs;
         $hasoutofsequence = (bool)$stages->hasoutofsequence;
     }
+    $groupdiagnostics = $usersprogressdata === null ? [] :
+        treasurehunt_get_group_mode_diagnostics($roads, $usersprogressdata);
     $renderable = new mod_treasurehunt\output\info(
         $treasurehunt,
         $timenow,
         $courseid,
         $roads,
         $numqrs,
-        $hasoutofsequence
+        $hasoutofsequence,
+        $groupassignmenterror,
+        $groupdiagnostics
     );
     return $output->render($renderable);
+}
+
+/**
+ * Report team assignment problems in the activity summary for a teacher.
+ *
+ * @param array $roads Roads of the activity.
+ * @param array $usersprogressdata Participant data used by the progress panel.
+ * @return array Card state, detail and tooltip, or an empty array when there is no problem.
+ */
+function treasurehunt_get_group_mode_diagnostics($roads, $usersprogressdata) {
+    $missinggroupings = [];
+    foreach ($roads as $road) {
+        if (empty($road->groupingid)) {
+            $missinggroupings[] = strip_tags(format_string($road->name));
+        }
+    }
+
+    $messages = [];
+    if ($missinggroupings) {
+        $messages[] = get_string('activitysummarygroupingmissing', 'treasurehunt', implode(', ', $missinggroupings));
+    }
+    if ($roads && !empty($usersprogressdata[3])) {
+        $messages[] = get_string('warnusersoutside', 'treasurehunt', implode(', ', $usersprogressdata[3]));
+    }
+
+    if ($missinggroupings) {
+        return [
+            'state' => 'danger',
+            'detail' => get_string('activitysummarygroupingerror', 'treasurehunt'),
+            'tooltip' => implode(' ', $messages),
+        ];
+    }
+    if ($messages) {
+        return [
+            'state' => 'pending',
+            'detail' => get_string('activitysummarygroupwarning', 'treasurehunt'),
+            'tooltip' => $messages[0],
+        ];
+    }
+    return [];
 }
 
 /**
@@ -2807,15 +2853,16 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
  * @param course_modinfo $cm The treasure hunt course module activity.
  * @param int $courseid The identifier of course.
  * @param context $context The context object.
+ * @param array|null $progressdata Already loaded progress data, when available.
  * @return string
  */
-function treasurehunt_view_users_progress_table($cm, $courseid, $context) {
+function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progressdata = null) {
     global $PAGE;
 
     [
         $roads, $duplicategroupsingroupings, $duplicateusersingroups,
         $unassignedusers, $availablegroups
-    ] = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
+    ] = $progressdata ?? treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid, $context);
     $viewpermission = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
     $managepermission = has_capability('mod/treasurehunt:managetreasurehunt', $context);
     $output = $PAGE->get_renderer('mod_treasurehunt');

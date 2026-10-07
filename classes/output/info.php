@@ -53,16 +53,37 @@ class info implements renderable {
      * @var bool
      */
     public $hasoutofsequence = false;
+    /**
+     * Message shown when the player has no team assigned to a road.
+     * @var string
+     */
+    public $groupassignmenterror = '';
+    /**
+     * Team assignment diagnostics for teachers.
+     * @var array
+     */
+    public $groupdiagnostics = [];
 
     /**
      * constructor
      */
-    public function __construct($treasurehunt, $timenow, $courseid, $roads, $numqrs, $hasoutofsequence) {
+    public function __construct(
+        $treasurehunt,
+        $timenow,
+        $courseid,
+        $roads,
+        $numqrs,
+        $hasoutofsequence,
+        $groupassignmenterror = '',
+        $groupdiagnostics = []
+    ) {
         $this->treasurehunt = $treasurehunt;
         $this->timenow = $timenow;
         $this->courseid = $courseid;
         $this->roads = $roads;
         $this->numqrs = $numqrs;
         $this->hasoutofsequence = $hasoutofsequence;
+        $this->groupassignmenterror = $groupassignmenterror;
+        $this->groupdiagnostics = $groupdiagnostics;
     }
 }
