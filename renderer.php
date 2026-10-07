@@ -500,7 +500,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                     $info->hasoutofsequence ? 'activitysummaryoutofsequence' : 'activitysummarysequential',
                     'treasurehunt'
                 ),
-                'state' => $modeerror ? 'danger' : ($info->hasoutofsequence ? 'active' : 'inactive'),
+                'state' => $modeerror ? 'danger' : ($canmanage && $info->hasoutofsequence ? 'active' : 'inactive'),
                 'detail' => get_string(
                     $info->hasoutofsequence ? 'activitysummaryoutofsequencedetail' : 'activitysummarysequentialdetail',
                     'treasurehunt'

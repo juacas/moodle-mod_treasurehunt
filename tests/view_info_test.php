@@ -214,6 +214,19 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringNotContainsString(get_string('activitysummarytracking', 'treasurehunt'), $disabled);
         $this->assertStringNotContainsString(get_string('groupmode', 'treasurehunt'), $disabled);
         $this->assertStringContainsString(get_string('activitysummarysequential', 'treasurehunt'), $disabled);
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*class="treasurehunt-stage-status is-inactive"[^>]*>.*?' .
+                preg_quote(get_string('activitysummarysequential', 'treasurehunt'), '/') . '<\/span>/s',
+            $disabled
+        );
+
+        $outofsequence = $renderer->render(new info($hunt, time(), $course->id, [], 0, true));
+        $this->assertMatchesRegularExpression(
+            '/<button[^>]*class="treasurehunt-stage-status is-inactive"[^>]*>.*?' .
+                preg_quote(get_string('activitysummaryoutofsequence', 'treasurehunt'), '/') . '<\/span>/s',
+            $outofsequence
+        );
+        $this->assertStringContainsString(get_string('activitysummaryoutofsequence_help', 'treasurehunt'), $outofsequence);
 
         $hunt->groupmode = 1;
         $hunt->tracking = 1;
