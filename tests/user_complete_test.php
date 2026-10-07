@@ -113,14 +113,13 @@ final class user_complete_test extends \advanced_testcase {
         $otherhunt = $this->create_hunt($course->id);
         $otherstageid = $this->create_stage($otherhunt->id, 'Foreign stage');
 
-        foreach (
-            [
+        $attempts = [
             ['stageid' => $stageid, 'userid' => $user->id, 'success' => 0],
             ['stageid' => $stageid, 'userid' => $user->id, 'success' => 1],
             ['stageid' => $stageid, 'userid' => $otheruser->id, 'success' => 1],
             ['stageid' => $otherstageid, 'userid' => $user->id, 'success' => 1],
-            ] as $attempt
-        ) {
+        ];
+        foreach ($attempts as $attempt) {
             $DB->insert_record('treasurehunt_attempts', (object)($attempt + [
                 'groupid' => 0,
                 'timecreated' => time(),
