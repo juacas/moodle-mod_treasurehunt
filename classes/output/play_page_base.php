@@ -55,9 +55,9 @@ class play_page_base implements renderable, templatable {
     public $user = null;
     /**
      * Last attempt.
-     * @var int unix timestamp.
+     * @var int Attempt ID.
      */
-    public $lastattempttimestamp;
+    public $lastattemptid;
     /**
      * Last road attempt.
      * @var int unix timestamp.

@@ -692,7 +692,7 @@ class TreasureHuntPlayMobile {
       {
         userprogress: {
           treasurehuntid: this.playConfig.treasurehuntid,
-          attempttimestamp: this.playConfig.lastattempttimestamp,
+          attemptid: this.playConfig.lastattemptid,
           roadtimestamp: this.playConfig.lastroadtimestamp,
           playwithoutmoving: this.playConfig.playwithoutmoving,
           groupmode: this.playConfig.groupmode,
@@ -748,13 +748,13 @@ class TreasureHuntPlayMobile {
           this.playConfig.groupmode = response.groupmode;
         }
         if (
-          this.playConfig.lastattempttimestamp !== response.attempttimestamp ||
+          this.playConfig.lastattemptid !== response.attemptid ||
           this.playConfig.lastroadtimestamp !== response.roadtimestamp ||
           initialize ||
           !response.available ||
           response.attempts
         ) {
-          this.playConfig.lastattempttimestamp = response.attempttimestamp;
+          this.playConfig.lastattemptid = response.attemptid;
           this.playConfig.lastroadtimestamp = response.roadtimestamp;
           if (response.attempthistory.length > 0) {
             this.gameStatus.attemptshistory = response.attempthistory;

@@ -190,13 +190,13 @@ class mobile {
 
         // Get last timestamp.
         $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-        [$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+        [$lastattemptid, $lastroadtimestamp] = treasurehunt_get_progress_markers($USER->id, $user->groupid, $user->roadid);
 
         $playconfig = [
             'treasurehuntid' => $treasurehunt->id,
             'playwithoutmoving' => boolval($treasurehunt->playwithoutmoving),
             'groupmode' => boolval($treasurehunt->groupmode),
-            'lastattempttimestamp' => $lastattempttimestamp,
+            'lastattemptid' => $lastattemptid,
             'lastroadtimestamp' => $lastroadtimestamp,
             'tracking' => boolval($treasurehunt->tracking),
             'gameupdatetime' => treasurehunt_get_setting_game_update_time() * 1000,

@@ -407,6 +407,7 @@ $string['pluginadministration'] = 'Treasure hunt administration';
 $string['pluginname'] = 'Treasure Hunt';
 $string['preview'] = 'Preview';
 $string['previewroad'] = 'Preview {$a}';
+$string['previewinvalidroad'] = 'Road "{$a}" cannot be previewed because it is not validated. Check its stages and geometries in the editor.';
 $string['prevstep'] = 'Prev';
 
 $string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';

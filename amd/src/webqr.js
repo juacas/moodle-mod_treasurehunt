@@ -45,7 +45,8 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
         var feature = card.find('.treasurehunt-stage-status-label').text();
         card.removeClass('is-pending is-active is-danger')
             .addClass(status === 'passed' ? 'is-active' : status === 'pending' ? 'is-pending' : 'is-danger')
-            .attr({title: message, 'aria-expanded': status === 'pending' ? 'true' : 'false',
+            .attr({'data-treasurehunt-tooltip': message,
+                'aria-expanded': status === 'pending' ? 'true' : 'false',
                 'aria-label': feature + ': ' + label + '. ' + message});
         card.find('.treasurehunt-stage-status-detail').text(label);
     }
@@ -545,4 +546,3 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
     return webqr;
 });
-

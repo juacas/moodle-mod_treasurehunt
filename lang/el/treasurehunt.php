@@ -501,6 +501,7 @@ $string['playerstyle'] = 'Στυλ οθόνης παιχνιδιού';
 $string['playerstyle_help'] = 'Ο διδάσκων μπορεί να επιλέξει ανάμεσα σε διαφορετικά στυλ οθόνης παιχνιδιού.';
 $string['preview'] = 'Δοκιμή';
 $string['previewroad'] = 'Δοκιμή {$a}';
+$string['previewinvalidroad'] = 'Δεν μπορείτε να δοκιμάσετε τη διαδρομή «{$a}» επειδή δεν έχει επικυρωθεί. Ελέγξτε τα στάδια και τις γεωμετρίες της στον επεξεργαστή.';
 $string['privacy:metadata:treasurehunt_attempts'] = 'Το κυνήγι θησαυρού αποθηκεύει τον τύπο, την ώρα και την τοποθεσία των προσπαθειών, επιτυχιών και αποτυχιών των χρηστών.';
 $string['privacy:metadata:treasurehunt_attempts:groupid'] = 'Η ομάδα στην οποία συμμετείχε ο χρήστης.';
 $string['privacy:metadata:treasurehunt_attempts:location'] = 'Η τοποθεσία του χρήστη τη στιγμή της προσπάθειας.';

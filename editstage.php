@@ -335,10 +335,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $event->trigger();
 
         // Actualizo el tiempo de modificacion del camino.
-        $road = new stdClass();
-        $road->id = $stage->roadid;
-        $road->timemodified = time();
-        $DB->update_record('treasurehunt_roads', $road);
+        treasurehunt_set_valid_road($stage->roadid);
 
         redirect($returnurl);
     }

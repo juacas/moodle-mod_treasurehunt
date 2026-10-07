@@ -82,7 +82,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $cm->id, $cm->instance,
                 intval($treasurehunt->playwithoutmoving),
                 intval($treasurehunt->groupmode),
-                $renderablepage->lastattempttimestamp,
+                $renderablepage->lastattemptid,
                 $renderablepage->lastroadtimestamp,
                 $renderablepage->gameupdatetime,
                 $treasurehunt->tracking,
@@ -357,7 +357,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_info(mod_treasurehunt\output\info $info) {
+        global $CFG;
+
         $o = '';
+        $this->page->requires->js_call_amd(
+            $CFG->version >= 2025041400 ? 'mod_treasurehunt/view_tooltips' : 'mod_treasurehunt/view_tooltips405',
+            'init'
+        );
         // Prepare the QR test and load its scanner libraries after the page renders.
         if ($info->numqrs > 0) {
             $this->page->requires->js_call_amd('mod_treasurehunt/view_qr-lazy', 'init', [
@@ -469,6 +475,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                     ($qrpassed ? get_string('activitysummaryqrscan', 'treasurehunt') :
                         get_string('activitysummaryqrpending', 'treasurehunt')),
                 'tooltip' => $qrtooltip, 'id' => 'treasurehunt-qr-status',
+                'optional' => true, 'enabled' => $info->numqrs > 0,
             ],
             [
                 'icons' => [$info->hasoutofsequence ? 'random' : 'road'],
@@ -497,6 +504,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 'detail' => $info->treasurehunt->playwithoutmoving ?
                     get_string('activitysummarymapmark', 'treasurehunt') :
                     get_string('activitysummarygps', 'treasurehunt'),
+                'tooltip' => $info->treasurehunt->playwithoutmoving ?
+                    get_string('activitysummarymapmark', 'treasurehunt') :
+                    get_string('activitysummarygps', 'treasurehunt'),
             ],
             [
                 'icons' => ['map-marker', 'road'],
@@ -504,16 +514,24 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 'state' => $info->treasurehunt->tracking ? 'active' : 'inactive',
                 'detail' => '',
                 'tooltip' => get_string('activitysummarytracking_help', 'treasurehunt'),
+                'optional' => true, 'enabled' => (bool)$info->treasurehunt->tracking,
+            ],
+            [
+                'icons' => ['users'], 'label' => get_string('groupmode', 'treasurehunt'),
+                'state' => $info->treasurehunt->groupmode ? 'active' : 'inactive',
+                'detail' => $info->treasurehunt->groupmode ?
+                    get_string('activitysummaryjointeam', 'treasurehunt') : $no,
+                'tooltip' => $info->treasurehunt->groupmode ?
+                    get_string('activitysummaryjointeam', 'treasurehunt') : $no,
+                'optional' => true, 'enabled' => (bool)$info->treasurehunt->groupmode,
             ],
         ];
-        if ($info->treasurehunt->groupmode) {
-            $statuses[] = [
-                'icons' => ['users'], 'label' => get_string('groupmode', 'treasurehunt'),
-                'state' => 'active', 'detail' => get_string('activitysummaryjointeam', 'treasurehunt'),
-            ];
-        }
+        $canmanage = has_capability('mod/treasurehunt:managetreasurehunt', $this->page->context);
         $cards = '';
         foreach ($statuses as $status) {
+            if (!empty($status['optional']) && empty($status['enabled']) && !$canmanage) {
+                continue;
+            }
             $iconhtml = '';
             foreach ($status['icons'] as $icon) {
                 $iconhtml .= html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']);
@@ -522,12 +540,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             if ($status['detail'] !== '') {
                 $arialabel .= ': ' . $status['detail'];
             }
-            if (!empty($status['tooltip'])) {
+            if (!empty($status['tooltip']) && $status['tooltip'] !== $status['detail']) {
                 $arialabel .= '. ' . $status['tooltip'];
             }
-            $attributes = ['role' => 'group', 'tabindex' => '0', 'aria-label' => $arialabel];
+            $attributes = ['aria-label' => $arialabel];
             if (!empty($status['tooltip'])) {
-                $attributes['title'] = $status['tooltip'];
+                $attributes['data-treasurehunt-tooltip'] = $status['tooltip'];
             }
             if (!empty($status['id'])) {
                 $attributes['id'] = $status['id'];
@@ -549,13 +567,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $cardcontent .= html_writer::span($status['detail'], 'treasurehunt-stage-status-detail');
             }
             $attributes['class'] = 'treasurehunt-stage-status is-' . $status['state'];
-            if (!empty($status['id']) && $info->numqrs > 0) {
-                unset($attributes['role'], $attributes['tabindex']);
-                $attributes['type'] = 'button';
-                $cards .= html_writer::tag('button', $cardcontent, $attributes);
-            } else {
-                $cards .= html_writer::tag('div', $cardcontent, $attributes);
-            }
+            $attributes['type'] = 'button';
+            $cards .= html_writer::tag('button', $cardcontent, $attributes);
         }
         $o .= html_writer::div(
             html_writer::tag('h3', get_string('activitysummary', 'treasurehunt'), ['class' => 'h5']) .

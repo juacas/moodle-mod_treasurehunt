@@ -155,8 +155,10 @@ if (
 }
 // Managers can preview any road without joining its group or grouping.
 if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
-    $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id], 'id ASC', 'id,name');
+    $roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id],
+        'id ASC', 'id,name,validated');
     $singleroad = count($roads) === 1;
+    $invalidroadnames = [];
     if ($roads) {
         echo html_writer::start_div('treasurehunt-preview-buttons d-flex flex-nowrap align-items-center');
     }
@@ -166,14 +168,29 @@ if (has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
             : get_string('previewroad', 'treasurehunt', strip_tags(format_string($road->name, true, [
                 'context' => $context, 'escape' => false,
             ])));
-        echo $output->single_button(
-            new moodle_url('/mod/treasurehunt/play.php', ['id' => $cm->id, 'previewroadid' => $road->id]),
-            $label,
-            'get'
-        );
+        if ($road->validated) {
+            echo $output->single_button(
+                new moodle_url('/mod/treasurehunt/play.php', ['id' => $cm->id, 'previewroadid' => $road->id]),
+                $label,
+                'get'
+            );
+        } else {
+            $invalidroadnames[] = format_string($road->name, true, ['context' => $context]);
+            $disabled = html_writer::tag('button', s($label), [
+                'type' => 'button',
+                'class' => 'btn btn-secondary',
+                'disabled' => 'disabled',
+            ]);
+            echo html_writer::span($disabled, 'd-inline-block', [
+                'title' => get_string('previewinvalidroad', 'treasurehunt', $road->name),
+            ]);
+        }
     }
     if ($roads) {
         echo html_writer::end_div();
+    }
+    foreach ($invalidroadnames as $invalidroadname) {
+        echo $output->notification(get_string('previewinvalidroad', 'treasurehunt', $invalidroadname), 'warning');
     }
 }
 echo $output->box_end();

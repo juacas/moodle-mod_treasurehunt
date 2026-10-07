@@ -48,7 +48,7 @@ let init = {
         "remove", "searchlocation", "savewarning", "removewarning", "areyousure",
         "removeroadwarning", "confirm", "cancel", "pegmanlabel", "custommapimageerror",
         "editorstatussaved", "editorstatusunsaved", "editorroaddeleted", "editorstagedeleted",
-        "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage",
+        "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage", "preview",
         "playstagewithqr", "playstagewithoutmoving", "discoveroutofsequence", "activitytoend",
         "addsimplequestion", "editorinverserestrictions", "editordirectrestrictions",
         "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorqrshort",
@@ -1224,6 +1224,10 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             "aria-selected": "false", "aria-controls": "editorworkspace"})
           .append($("<div>", {class: "roadname"}).text(name));
         var controls = $("<div>", {class: "modifyroad"}).appendTo(li);
+        $("<button>", {type: "button", "class": "btn btn-sm btn-outline-success treasurehunt-play-road", disabled: true})
+          .attr("aria-label", strings.preview + " " + name)
+          .append('<i class="fa fa-play" aria-hidden="true"></i> ' + strings.preview)
+          .appendTo(controls);
         $("<button>", {type: "button", class: "treasurehunt-icon-button treasurehunt-delete-item"})
           .attr("aria-label", strings.remove + " " + name)
           .append('<i class="fa fa-trash" aria-hidden="true"></i>')
@@ -1343,6 +1347,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       var $tab = $('#roadlist li[roadid="' + currentRoadId + '"]');
       $tab.toggleClass("invalidroad", Boolean(problem));
       setIssueTooltip($tab, problem);
+      $tab.find(".treasurehunt-play-road").prop("disabled", Boolean(problem));
     }
 
     /**
@@ -2308,6 +2313,19 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
                     editFormRoadEntry, [roadid, idModule], lockState.id);
       } else {
         editFormRoadEntry(roadid, idModule);
+      }
+    });
+    $("#roadlist").on("click", ".treasurehunt-play-road", function(event) {
+      event.stopPropagation();
+      var previewroadid = Number($(this).closest("li").attr("roadid"));
+      var url = "play.php?id=" + encodeURIComponent(idModule) +
+        "&previewroadid=" + encodeURIComponent(previewroadid);
+      if (dirty) {
+        savestages(dirtyStages, originalStages, treasurehuntid, function() {
+          window.location.assign(url);
+        }, [], lockState.id);
+      } else {
+        window.location.assign(url);
       }
     });
     $("#roadlist").on("click", ".treasurehunt-delete-item", function () {

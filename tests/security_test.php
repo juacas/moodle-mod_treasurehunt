@@ -31,7 +31,6 @@ require_once(__DIR__ . '/../locallib.php');
 /**
  * Exercise ownership and lock checks used by the editing endpoints.
  *
- * @coversNothing
  */
 final class security_test extends \advanced_testcase {
     /**

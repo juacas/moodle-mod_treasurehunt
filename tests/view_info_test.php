@@ -29,7 +29,6 @@ use mod_treasurehunt\output\users_progress;
 /**
  * Check the activity information and progress shown on the main page.
  *
- * @coversNothing
  */
 final class view_info_test extends \advanced_testcase {
     /**
@@ -64,6 +63,7 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString(get_string('activitysummarysequential', 'treasurehunt'), $html);
         $this->assertStringContainsString(get_string('activitysummarysequential_help', 'treasurehunt'), $html);
         $this->assertStringContainsString('fa fa-road', $html);
+        $this->assertStringContainsString('data-treasurehunt-tooltip=', $html);
     }
 
     /**
@@ -72,6 +72,7 @@ final class view_info_test extends \advanced_testcase {
     public function test_team_mode_card_and_road_group_link(): void {
         global $PAGE;
         $this->resetAfterTest();
+        $this->setAdminUser();
         $course = $this->getDataGenerator()->create_course();
         $PAGE->set_url(new \moodle_url('/mod/treasurehunt/view.php', ['id' => 1]));
         $PAGE->set_context(\context_course::instance($course->id));
@@ -93,7 +94,7 @@ final class view_info_test extends \advanced_testcase {
         $this->assertMatchesRegularExpression(
             '/<span class="treasurehunt-stage-status-label">' .
                 preg_quote(get_string('activitysummarytracking', 'treasurehunt'), '/') .
-                '<\/span>\s*<\/div>/',
+                '<\/span>\s*<\/button>/',
             $infohtml
         );
         $this->assertStringContainsString(get_string('activitysummaryoutofsequence', 'treasurehunt'), $infohtml);
@@ -107,5 +108,49 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString('Path One', $progresshtml);
         $this->assertStringContainsString('Team Alpha', $progresshtml);
         $this->assertStringContainsString('group=23', $progresshtml);
+    }
+
+    /**
+     * Students see optional feature cards only when the feature is enabled.
+     */
+    public function test_student_sees_only_enabled_optional_cards(): void {
+        global $PAGE;
+        $this->resetAfterTest();
+        $course = $this->getDataGenerator()->create_course();
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $this->setUser($student);
+        $PAGE->set_url(new \moodle_url('/mod/treasurehunt/view.php', ['id' => 1]));
+        $PAGE->set_context(\context_course::instance($course->id));
+        $PAGE->set_course($course);
+        $hunt = (object)[
+            'course' => $course->id,
+            'allowattemptsfromdate' => 0,
+            'cutoffdate' => 0,
+            'playwithoutmoving' => 0,
+            'groupmode' => 0,
+            'tracking' => 0,
+            'grade' => 0,
+        ];
+        $renderer = $PAGE->get_renderer('mod_treasurehunt');
+        $disabled = $renderer->render(new info($hunt, time(), $course->id, [], 0, false));
+        $this->assertStringNotContainsString(get_string('activitysummaryqr', 'treasurehunt'), $disabled);
+        $this->assertStringNotContainsString(get_string('activitysummarytracking', 'treasurehunt'), $disabled);
+        $this->assertStringNotContainsString(get_string('groupmode', 'treasurehunt'), $disabled);
+        $this->assertStringContainsString(get_string('activitysummarysequential', 'treasurehunt'), $disabled);
+
+        $hunt->groupmode = 1;
+        $hunt->tracking = 1;
+        $enabled = $renderer->render(new info($hunt, time(), $course->id, [], 1, false));
+        $this->assertStringContainsString(get_string('activitysummaryqr', 'treasurehunt'), $enabled);
+        $this->assertStringContainsString(get_string('activitysummarytracking', 'treasurehunt'), $enabled);
+        $this->assertStringContainsString(get_string('groupmode', 'treasurehunt'), $enabled);
+
+        $this->setAdminUser();
+        $hunt->groupmode = 0;
+        $hunt->tracking = 0;
+        $manager = $renderer->render(new info($hunt, time(), $course->id, [], 0, false));
+        $this->assertStringContainsString(get_string('activitysummaryqr', 'treasurehunt'), $manager);
+        $this->assertStringContainsString(get_string('activitysummarytracking', 'treasurehunt'), $manager);
+        $this->assertStringContainsString(get_string('groupmode', 'treasurehunt'), $manager);
     }
 }

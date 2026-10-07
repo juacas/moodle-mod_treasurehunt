@@ -391,6 +391,7 @@ $string['pluginadministration'] = 'Administración de la Caza del Tesoro';
 $string['pluginname'] = 'Caza del Tesoro';
 $string['preview'] = 'Probar';
 $string['previewroad'] = 'Probar {$a}';
+$string['previewinvalidroad'] = 'No se puede probar el camino "{$a}" porque no está validado. Revisa sus etapas y geometrías en el editor.';
 $string['prevstep'] = 'Ant.';
 $string['privacy:metadata_treasurehunt_attempts_userid'] = 'Treasure hunt almacena el histórico de los intentos realizados por cada usuario incluyendo tiempo, tipo y éxito o fracaso en cada intento.';
 $string['privacy:metadata_treasurehunt_track_userid'] = 'Treasure hunt almacena la secuencia de posiciones del usuario durante la actividad (si el profesor ha activado esa opción).';

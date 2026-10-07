@@ -154,6 +154,10 @@ function treasurehunt_delete_instance($id) {
         $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', [$road->id]);
     }
     $DB->delete_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
+    cache::make('mod_treasurehunt', 'roadstages')->purge();
+    cache::make('mod_treasurehunt', 'progressstate')->purge();
+    cache::make('mod_treasurehunt', 'progressverified')->purge();
+    cache::make('mod_treasurehunt', 'progressmarkers')->purge();
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehunt->id]);
     $DB->delete_records('treasurehunt_locks', ['treasurehuntid' => $treasurehunt->id]);
     treasurehunt_grade_item_delete($treasurehunt);
@@ -793,6 +797,9 @@ function treasurehunt_reset_userdata($data) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
                 . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
                 . '{treasurehunt_stages} ri ON r.id=ri.roadid WHERE t.course = ?)', [$data->courseid]);
+        cache::make('mod_treasurehunt', 'progressstate')->purge();
+        cache::make('mod_treasurehunt', 'progressverified')->purge();
+        cache::make('mod_treasurehunt', 'progressmarkers')->purge();
         $status[] = ['component' => $componentstr,
             'item' => get_string('attemptsdeleted', 'treasurehunt'),
             'error' => false];

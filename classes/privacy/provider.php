@@ -277,6 +277,9 @@ class provider implements
         $stages = treasurehunt_get_stages($cm->instance, $context);
         $stagesids = array_keys($stages);
         $DB->delete_records_list('treasurehunt_attempts', 'stageid', $stagesids);
+        \cache::make('mod_treasurehunt', 'progressstate')->purge();
+        \cache::make('mod_treasurehunt', 'progressverified')->purge();
+        \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
         $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $context->instanceid]);
     }
 
@@ -310,6 +313,9 @@ class provider implements
             $where = "userid = :userid AND stageid $insql";
             $params = ['userid' => $userid] + $inparam;
             $DB->delete_records_select('treasurehunt_attempts', $where, $params);
+            \cache::make('mod_treasurehunt', 'progressstate')->purge();
+            \cache::make('mod_treasurehunt', 'progressverified')->purge();
+            \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
             $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $cm->instance, 'userid' => $userid]);
         }
     }
@@ -342,5 +348,8 @@ class provider implements
         $select = "stageid $stagesql AND userid $usersql";
         $params = $stageparams + $userparams;
         $DB->delete_records_select('treasurehunt_attempts', $select, $params);
+        \cache::make('mod_treasurehunt', 'progressstate')->purge();
+        \cache::make('mod_treasurehunt', 'progressverified')->purge();
+        \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
     }
 }

@@ -41,7 +41,7 @@ import "mod_treasurehunt/dropdown";
  */
 let init = {
   playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
-    lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking, user,
+    lastattemptid, lastroadtimestamp, gameupdatetime, tracking, user,
     custommapconfig, customplayerconfig = null, previewroadid = 0) {
 
     // I18n strings.
@@ -76,14 +76,14 @@ let init = {
           custommapconfig.imgheight = this.naturalHeight;
 
           initplaytreasurehunt($, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-            lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
+            lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
             user, custommapconfig, customplayerconfig, previewroadid);
         });
         img.src = custommapconfig.custombackgroundurl;
       } else {
         initplaytreasurehunt(
           $, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-          lastattempttimestamp, lastroadtimestamp, gameupdatetime, tracking,
+          lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
           user, custommapconfig, customplayerconfig, previewroadid);
       }
     });
@@ -130,7 +130,7 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {int} treasurehuntid The treasure hunt id.
  * @param {boolean} playwithoutmoving If true, the player does not move.
  * @param {boolean} groupmode If true, the game is played in group mode.
- * @param {int} lastattempttimestamp The last attempt timestamp.
+ * @param {int} lastattemptid The last attempt ID.
  * @param {int} lastroadtimestamp The last road timestamp.
  * @param {int} gameupdatetime The game update time in milliseconds.
  * @param {boolean} tracking If true, the player is being tracked.
@@ -140,7 +140,7 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {number} previewroadid Road selected for a manager's preview.
  */
 function initplaytreasurehunt(
-  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattempttimestamp,
+  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattemptid,
   lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
 
   setLoading(true);
@@ -231,6 +231,7 @@ function initplaytreasurehunt(
   let qoaremoved = false;
   let osmGeocoderXHR;
   let osmTimer = 0;
+  const loadingRequests = new Set();
   /*-------------------------------Styles-----------------------------------*/
   let textStyle = new ol.style.Text({
     textAlign: "center",
@@ -808,18 +809,17 @@ function initplaytreasurehunt(
       });
     }
     if (selectedanswerid) {
-      setLoading(true);
       answerid = selectedanswerid;
     }
     if (location) {
       position = currentposition;
-      setLoading(true);
     }
+    const loadingRequest = (initialize || selectedanswerid || location) ? beginLoading() : null;
     let currentpositionarg = tracking && !playwithoutmoving ? currentposition : null; // only for tracking in mobility.
     let params = {
       treasurehuntid: treasurehuntid,
       previewroadid: previewroadid,
-      attempttimestamp: lastattempttimestamp,
+      attemptid: lastattemptid,
       roadtimestamp: lastroadtimestamp,
       playwithoutmoving: playwithoutmoving,
       groupmode: groupmode,
@@ -832,20 +832,27 @@ function initplaytreasurehunt(
     if (currentpositionarg) {
       params.currentposition = currentpositionarg;
     }
-    let geojson = ajax.call([
-      {
-        methodname: "mod_treasurehunt_user_progress",
-        args: {
-          userprogress: params,
+    let geojson;
+    try {
+      geojson = ajax.call([
+        {
+          methodname: "mod_treasurehunt_user_progress",
+          args: {
+            userprogress: params,
+          },
         },
-      },
-    ]);
+      ]);
+    } catch (error) {
+      finishLoading(loadingRequest);
+      showCommunicationError(error);
+      return;
+    }
     geojson[0]
+      .always(() => finishLoading(loadingRequest))
       .done((response) => {
         qoaremoved = response.qoaremoved;
         roadfinished = response.roadfinished;
         available = response.available;
-        setLoading(false);
 
         // If I have sent a location or an answer I print out whether it is correct or not.
         if (location || selectedanswerid) {
@@ -918,12 +925,12 @@ function initplaytreasurehunt(
         }
 
         if (
-          lastattempttimestamp !== response.attempttimestamp ||
+          lastattemptid !== response.attemptid ||
           lastroadtimestamp !== response.roadtimestamp ||
           initialize ||
           !available
         ) {
-          lastattempttimestamp = response.attempttimestamp;
+          lastattemptid = response.attemptid;
           lastroadtimestamp = response.roadtimestamp;
           if (response.attempthistory.length > 0) {
             attemptshistory = response.attempthistory;
@@ -1012,17 +1019,21 @@ function initplaytreasurehunt(
         }
       })
       .fail((error) => {
-        let message;
-        if (error.errorcode === "generalexceptionmessage") {
-          message = "System Error: " + error.error;
-        } else {
-          message = strings['webserviceerror'] + " : " + error.error;
-        }
-        // If the error is unknown, show a generic message.
-        $("#errorPopup .play-modal-content").text(message);
-        openModal("#errorPopup");
+        showCommunicationError(error);
         //clearInterval(interval);
       });
+  }
+  /**
+   * Show a service failure after releasing any loading overlay.
+   *
+   * @param {Object} error The service error.
+   */
+  function showCommunicationError(error) {
+    const detail = error?.error || error?.message || error?.errorcode || "";
+    const message = error?.errorcode === "generalexceptionmessage"
+      ? "System Error: " + detail : strings.webserviceerror + " : " + detail;
+    $("#errorPopup .play-modal-content").text(message);
+    openModal("#errorPopup");
   }
   /**
    * Update player configuration.
@@ -1686,6 +1697,7 @@ function initplaytreasurehunt(
    * @param {string} id The id of the modal to open.
    */
   function openModal(id) {
+    clearLoading();
     // Close previous modal
     closeModal();
     const modal = $(id);
@@ -1760,6 +1772,40 @@ function initplaytreasurehunt(
     } else {
       $(".global-loader").removeClass("active");
     }
+  }
+
+  /**
+   * Start a request that owns the loading overlay.
+   *
+   * @returns {Object} Request token.
+   */
+  function beginLoading() {
+    const token = {};
+    loadingRequests.add(token);
+    setLoading(true);
+    return token;
+  }
+
+  /**
+   * Release the loading overlay when the last owning request ends.
+   *
+   * @param {Object|null} token Request token, or null for a background poll.
+   */
+  function finishLoading(token) {
+    if (token) {
+      loadingRequests.delete(token);
+      if (loadingRequests.size === 0) {
+        setLoading(false);
+      }
+    }
+  }
+
+  /**
+   * A dialog takes precedence over any pending loading operation.
+   */
+  function clearLoading() {
+    loadingRequests.clear();
+    setLoading(false);
   }
 
   /**

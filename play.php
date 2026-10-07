@@ -69,14 +69,14 @@ $PAGE->set_heading(format_string($course->fullname));
 
 // Get last timestamp.
 $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
-[$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+[$lastattemptid, $lastroadtimestamp] = treasurehunt_get_progress_markers($USER->id, $user->groupid, $user->roadid);
 // Instance selected player renderable.
 $playerstyle = $treasurehunt->playerstyle;
 $renderableclass = "mod_treasurehunt\output\play_page_$playerstyle";
 $renderable = new $renderableclass($treasurehunt, $cm);
 /**@var core_renderer $output */
 $output = $PAGE->get_renderer('mod_treasurehunt');
-$renderable->lastattempttimestamp = $lastattempttimestamp;
+$renderable->lastattemptid = $lastattemptid;
 $renderable->lastroadtimestamp = $lastroadtimestamp;
 $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $renderable->previewroadid = $previewroadid;

@@ -52,8 +52,8 @@ class user_progress extends external_api {
                     [
                         'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
                         'previewroadid' => new external_value(PARAM_INT, 'Road selected for manager preview', VALUE_DEFAULT, 0),
-                        'attempttimestamp' =>
-                            new external_value(PARAM_INT, 'last known timestamp since user\'s progress has not been updated'),
+                        'attemptid' =>
+                            new external_value(PARAM_INT, 'last attempt ID seen by the client'),
                         'roadtimestamp' =>
                             new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
                         'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
@@ -197,7 +197,7 @@ class user_progress extends external_api {
                     ]),
                     'Clues currently available to the player'
                 ),
-                'attempttimestamp' => new external_value(PARAM_INT, 'Last updated timestamp attempt'),
+                'attemptid' => new external_value(PARAM_INT, 'Last attempt ID seen by the client'),
                 'roadtimestamp' => new external_value(PARAM_INT, 'Last updated timestamp road'),
                 'infomsg' => new external_multiple_structure(
                     new external_value(PARAM_RAW, 'The info text of attempt'),
@@ -239,9 +239,11 @@ class user_progress extends external_api {
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                 'playerconfig' => new external_single_structure(
                     [
-                        'searchpaneldisabled' => new external_value(PARAM_BOOL, 'If true the search panel is disabled'),
+                        'searchpaneldisabled' =>
+                            new external_value(PARAM_BOOL, 'If true the search panel is disabled', VALUE_DEFAULT, false),
                         'localizationbuttondisabled' =>
-                            new external_value(PARAM_BOOL, 'If true the localization button is disabled'),
+                            new external_value(PARAM_BOOL, 'If true the localization button is disabled',
+                                VALUE_DEFAULT, false),
                         'showdistancehint' =>
                             new external_value(PARAM_BOOL, 'If true the distance hint is shown', VALUE_DEFAULT, false),
                         'showheadinghint' =>
@@ -299,17 +301,17 @@ class user_progress extends external_api {
             '',
             $params['previewroadid']
         );
-        // Get the total number of stages of the road of the user.
-        $numberofstages = treasurehunt_get_total_stages($userparams->roadid);
+        // The ordered state also supplies the stage count and the current target.
+        $roadstate = treasurehunt_get_road_stage_state($USER->id, $userparams->groupid, $userparams->roadid);
+        $numberofstages = count($roadstate->stages);
         if ($numberofstages < 1) {
             throw new \moodle_exception('invalidentry');
         }
         // Last attempt data with correct geometry to know if it has resolved geometry and the stage is overcome.
         $currentstage = treasurehunt_get_last_successful_attempt($USER->id, $userparams->groupid, $userparams->roadid, $context);
-        $roadstate = treasurehunt_get_road_stage_state($USER->id, $userparams->groupid, $userparams->roadid);
         $currentworkingstage = $roadstate->next;
         // Check if the user has finished the road.
-        $roadfinished = treasurehunt_check_if_user_has_finished($USER->id, $userparams->groupid, $userparams->roadid);
+        $roadfinished = $roadstate->next === null;
         $changesingroupmode = false;
         $qoaremoved = $params['qoaremoved'];
         if ($params['groupmode'] != $treasurehunt->groupmode) {
@@ -317,7 +319,7 @@ class user_progress extends external_api {
         }
         // Get the info of the newly discovered stages if any , and the new timestamp if they have changed.
         $updates = treasurehunt_check_attempts_updates(
-            $params['attempttimestamp'],
+            $params['attemptid'],
             $userparams->groupid,
             $USER->id,
             $userparams->roadid,
@@ -394,7 +396,7 @@ class user_progress extends external_api {
             // Refresh the attempts updates (mainly for reporting).
             if ($qocsolved->newattempt) {
                 $updates = treasurehunt_check_attempts_updates(
-                    $params['attempttimestamp'],
+                    $params['attemptid'],
                     $userparams->groupid,
                     $USER->id,
                     $userparams->roadid,
@@ -413,7 +415,7 @@ class user_progress extends external_api {
                 $updates->strings = array_merge($updates->strings, $qocsolved->updates);
             }
             if ($qocsolved->newattempt) {
-                $updates->newattempttimestamp = $qocsolved->attempttimestamp;
+                $updates->newattemptid = $qocsolved->attemptid;
             }
             if ($qocsolved->attemptsolved) {
                 $updates->attemptsolved = true;
@@ -448,7 +450,7 @@ class user_progress extends external_api {
                 );
 
                 if ($checklocation->newattempt) {
-                    $updates->newattempttimestamp = $checklocation->attempttimestamp;
+                    $updates->newattemptid = $checklocation->attemptid;
                     $updates->newgeometry = true;
                 }
                 if ($checklocation->newstage) {
@@ -472,7 +474,7 @@ class user_progress extends external_api {
         $attempthistory = [];
         $changedapplang = isset($params['changedapplang']) ? $params['changedapplang'] : false;
         // If there was any new attempt, reload the history of attempts.
-        if ($updates->newattempttimestamp != $params['attempttimestamp'] || $params['initialize'] || $changedapplang) {
+        if ($updates->newattemptid != $params['attemptid'] || $params['initialize'] || $changedapplang) {
             $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
         $lastsuccessfulstage = null;
@@ -553,7 +555,7 @@ class user_progress extends external_api {
         }
         $result = [];
         $result['infomsg'] = $updates->strings;
-        $result['attempttimestamp'] = $updates->newattempttimestamp;
+        $result['attemptid'] = $updates->newattemptid;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
         $result['status'] = $status;
         // Get custom player configuration.
@@ -574,6 +576,9 @@ class user_progress extends external_api {
         ) {
             $briefstages = [];
             foreach ($roadstate->candidates as $candidate) {
+                if (empty($candidate->geom)) {
+                    continue;
+                }
                 $brief = new stdClass();
                 $brief->id = $candidate->id;
                 $brief->treasurehuntid = $treasurehuntid;
@@ -582,8 +587,9 @@ class user_progress extends external_api {
                 $brief->geometry = $candidate->geom;
                 $briefstages[] = $brief;
             }
-            $currentstagecoll = treasurehunt_features_to_geojson($briefstages, $context, $treasurehuntid);
-            $result['nextstage'] = $currentstagecoll;
+            if ($briefstages) {
+                $result['nextstage'] = treasurehunt_features_to_geojson($briefstages, $context, $treasurehuntid);
+            }
         }
 
         $result['clues'] = [];

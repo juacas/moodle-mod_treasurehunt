@@ -729,7 +729,7 @@
   gap: 0.25rem;
   flex: 0 0 auto;
   width: auto;
-  max-width: 13rem;
+  max-width: 17rem;
   padding: 0.25rem 0.4rem;
   border: 2px solid var(--bs-secondary-color, #6c757d);
   border-bottom: 0;
@@ -770,6 +770,13 @@
   width: 1.6rem;
   height: 1.6rem;
   margin: 0;
+}
+
+.path-mod-treasurehunt #roadlist .treasurehunt-play-road {
+  width: auto;
+  height: 1.6rem;
+  padding: 0 0.35rem;
+  white-space: nowrap;
 }
 
 .path-mod-treasurehunt #addroad {
@@ -1124,7 +1131,7 @@
   margin-bottom: 0.5rem;
 }
 
-#page-mod-treasurehunt-view .treasurehunt-activity-summary .treasurehunt-stage-status[title] {
+#page-mod-treasurehunt-view .treasurehunt-activity-summary .treasurehunt-stage-status[data-treasurehunt-tooltip] {
   cursor: help;
 }
 

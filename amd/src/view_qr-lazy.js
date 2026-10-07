@@ -102,7 +102,7 @@ define(['jquery', 'core/notification', 'require'], function($, notification, req
                     var failed = card.attr('data-qr-failed-label');
                     var feature = card.find('.treasurehunt-stage-status-label').text();
                     card.removeClass('is-pending is-active').addClass('is-danger')
-                        .attr({title: errormessage, 'aria-expanded': 'false',
+                        .attr({'data-treasurehunt-tooltip': errormessage, 'aria-expanded': 'false',
                             'aria-label': feature + ': ' + failed + '. ' + errormessage});
                     card.find('.treasurehunt-stage-status-detail').text(failed);
                     panel.prop('hidden', true).hide();
