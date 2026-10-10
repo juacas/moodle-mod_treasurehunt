@@ -56,6 +56,7 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
 define('TREASUREHUNT_PLAYERFANCY', 'fancy');
 define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
+define('TREASUREHUNT_PLAYERCESSIUM', 'cessium_player');
 /* * #@- */
 
 // Load classes needed for GeoJSON library.
@@ -2062,7 +2063,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $availablegroups = $DB->get_records_sql($roadsquery, $params);
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
-            // TODO: play has write flag and is removed in freeze mode.
+            // The play capability has a write flag and is removed in freeze mode.
             $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:enterplayer');
             $roads[] = treasurehunt_get_road_userlist(current($availablegroups), $totalparticipants, $attempts);
         } else {
@@ -3373,6 +3374,7 @@ function treasurehunt_get_installedplayerstyles() {
         // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),.
         // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),.
         TREASUREHUNT_PLAYERBOOTSTRAP => get_string('playerbootstrap', 'treasurehunt'),
+        TREASUREHUNT_PLAYERCESSIUM => get_string('playercessium', 'treasurehunt'),
     ];
 }
 

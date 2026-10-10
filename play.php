@@ -80,6 +80,9 @@ $renderable->lastattemptid = $lastattemptid;
 $renderable->lastroadtimestamp = $lastroadtimestamp;
 $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $renderable->previewroadid = $previewroadid;
+if ($playerstyle === TREASUREHUNT_PLAYERCESSIUM) {
+    $renderable->totalstages = treasurehunt_get_total_stages($user->roadid);
+}
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);

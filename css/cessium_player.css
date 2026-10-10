@@ -1,0 +1,744 @@
+/* This file is part of Moodle - http://moodle.org/ */
+/* stylelint-disable csstree/validator -- The bundled validator does not support CSS clamp() or env(). */
+
+#page-mod-treasurehunt-play .cessium-player,
+.cessium-player {
+    --cessium-ink: #eefbff;
+    --cessium-muted: #a4bfce;
+    --cessium-cyan: #5ce8f6;
+    --cessium-gold: #ffd386;
+    --cessium-surface: rgba(8, 23, 39, .77);
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    overflow: hidden;
+    color: var(--cessium-ink);
+    background: #061322;
+    font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+.cessium-player [hidden] {
+    display: none;
+}
+
+.cessium-globe,
+.cessium-vignette,
+.cessium-grid {
+    position: absolute;
+    inset: 0;
+}
+
+.cessium-globe {
+    background: radial-gradient(circle at 50% 45%, #175168 0, #061322 67%);
+}
+
+.cessium-vignette,
+.cessium-grid {
+    pointer-events: none;
+}
+
+.cessium-vignette {
+    background:
+        radial-gradient(ellipse 69% 70% at 50% 48%, transparent 40%, rgba(1, 9, 20, .53) 100%),
+        linear-gradient(180deg, rgba(2, 13, 24, .42), transparent 30%, transparent 68%, rgba(2, 13, 24, .55));
+}
+
+.cessium-grid {
+    opacity: .18;
+    background-image:
+        linear-gradient(rgba(116, 217, 237, .27) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(116, 217, 237, .27) 1px, transparent 1px);
+    background-size: 72px 72px;
+    mask-image: linear-gradient(90deg, #000, transparent 32%, transparent 68%, #000);
+}
+
+.cessium-topbar,
+.cessium-objective,
+.cessium-navigation,
+.cessium-map-actions,
+.cessium-dock,
+.cessium-finished,
+.cessium-toast {
+    position: absolute;
+    z-index: 2;
+}
+
+.cessium-topbar {
+    top: 0;
+    left: 0;
+    right: 0;
+    min-height: 88px;
+    padding: 18px clamp(18px, 3vw, 48px);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    background: linear-gradient(180deg, rgba(3, 14, 28, .9), rgba(3, 14, 28, .07));
+}
+
+.cessium-brand,
+.cessium-mission-status,
+.cessium-exit,
+.cessium-navigation,
+.cessium-dock,
+.cessium-progress-caption,
+.cessium-dialog-header {
+    display: flex;
+    align-items: center;
+}
+
+.cessium-brand {
+    min-width: 0;
+    gap: 14px;
+}
+
+.cessium-brand-mark {
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    color: var(--cessium-gold);
+    border: 1px solid rgba(255, 211, 134, .7);
+    border-radius: 14px;
+    box-shadow: 0 0 24px rgba(255, 211, 134, .2), inset 0 0 18px rgba(255, 211, 134, .12);
+    font-size: 23px;
+}
+
+.cessium-brand-copy {
+    min-width: 0;
+}
+
+.cessium-brand-copy small,
+.cessium-eyebrow,
+.cessium-dialog-kicker {
+    display: block;
+    color: var(--cessium-cyan);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .26em;
+}
+
+.cessium-brand-copy strong {
+    display: block;
+    max-width: min(39vw, 430px);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 18px;
+    letter-spacing: .025em;
+}
+
+.cessium-mission-status {
+    gap: 9px;
+    font-size: 11px;
+    color: var(--cessium-muted);
+    text-transform: uppercase;
+    letter-spacing: .15em;
+}
+
+.cessium-signal,
+.cessium-pulse {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--cessium-cyan);
+    box-shadow: 0 0 13px var(--cessium-cyan);
+    flex: 0 0 auto;
+    animation: cessium-pulse 2s ease-in-out infinite;
+}
+
+.cessium-exit {
+    gap: 10px;
+    padding: 10px 14px;
+    border: 1px solid rgba(139, 206, 224, .3);
+    border-radius: 12px;
+    color: var(--cessium-ink);
+    background: rgba(8, 23, 39, .64);
+    text-decoration: none;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.cessium-exit:hover,
+.cessium-exit:focus-visible {
+    color: var(--cessium-cyan);
+    border-color: var(--cessium-cyan);
+}
+
+.cessium-objective {
+    top: clamp(110px, 17vh, 182px);
+    left: clamp(18px, 3vw, 48px);
+    width: min(360px, calc(100vw - 36px));
+    padding: 24px 25px 22px;
+    border: 1px solid rgba(99, 220, 240, .38);
+    border-left: 3px solid var(--cessium-cyan);
+    border-radius: 16px;
+    background: var(--cessium-surface);
+    box-shadow: 0 24px 70px rgba(0, 6, 17, .45), inset 0 1px rgba(255, 255, 255, .08);
+    backdrop-filter: blur(20px);
+}
+
+.cessium-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 13px;
+}
+
+.cessium-objective h1 {
+    margin: 0;
+    color: var(--cessium-ink);
+    font-size: clamp(25px, 3vw, 38px);
+    font-weight: 800;
+    line-height: 1.12;
+    letter-spacing: -.035em;
+}
+
+.cessium-objective p {
+    min-height: 42px;
+    margin: 12px 0 25px;
+    color: var(--cessium-muted);
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+.cessium-progress-track {
+    display: block;
+    height: 6px;
+    overflow: hidden;
+    border-radius: 9px;
+    background: rgba(163, 211, 224, .18);
+}
+
+.cessium-progress-track > span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, #1bb5db, #74fff4);
+    box-shadow: 0 0 14px #55e8f6;
+    transition: width .55s ease;
+}
+
+.cessium-progress-caption {
+    justify-content: space-between;
+    margin-top: 11px;
+    color: var(--cessium-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .13em;
+}
+
+.cessium-navigation {
+    top: clamp(110px, 17vh, 182px);
+    right: clamp(18px, 3vw, 48px);
+    gap: 14px;
+    min-width: 182px;
+    padding: 15px;
+    border: 1px solid rgba(255, 211, 134, .46);
+    border-radius: 14px;
+    background: var(--cessium-surface);
+    backdrop-filter: blur(18px);
+}
+
+.cessium-nav-glyph {
+    display: grid;
+    place-items: center;
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    border: 1px solid rgba(255, 211, 134, .55);
+    color: var(--cessium-gold);
+    font-size: 20px;
+}
+
+.cessium-navigation span,
+.cessium-navigation small {
+    display: block;
+}
+
+.cessium-navigation span {
+    font-size: 17px;
+    font-weight: 800;
+}
+
+.cessium-navigation small {
+    color: var(--cessium-muted);
+    font-size: 10px;
+}
+
+.cessium-map-actions {
+    right: clamp(18px, 3vw, 48px);
+    bottom: 153px;
+    display: grid;
+    justify-items: end;
+    gap: 9px;
+}
+
+.cessium-layer-picker {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    width: 210px;
+    min-height: 44px;
+    padding: 0 11px;
+    border: 1px solid rgba(118, 209, 229, .55);
+    border-radius: 12px;
+    color: var(--cessium-cyan);
+    background: var(--cessium-surface);
+    backdrop-filter: blur(12px);
+}
+
+.cessium-layer-picker:focus-within {
+    border-color: var(--cessium-cyan);
+    outline: 2px solid var(--cessium-cyan);
+    outline-offset: 2px;
+}
+
+.cessium-layer-picker select {
+    width: 100%;
+    min-width: 0;
+    border: 0;
+    outline: 0;
+    color: var(--cessium-ink);
+    background: transparent;
+    font: inherit;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cessium-layer-picker option {
+    color: #081727;
+    background: #eefbff;
+}
+
+.cessium-map-actions button,
+.cessium-close {
+    display: grid;
+    place-items: center;
+    width: 44px;
+    height: 44px;
+    border: 1px solid rgba(118, 209, 229, .37);
+    border-radius: 12px;
+    color: var(--cessium-ink);
+    background: var(--cessium-surface);
+    backdrop-filter: blur(12px);
+}
+
+.cessium-map-actions button:hover,
+.cessium-map-actions button:focus-visible,
+.cessium-close:hover,
+.cessium-close:focus-visible {
+    color: var(--cessium-cyan);
+    border-color: var(--cessium-cyan);
+}
+
+.cessium-dock {
+    left: 50%;
+    bottom: max(25px, env(safe-area-inset-bottom));
+    transform: translateX(-50%);
+    gap: 7px;
+    max-width: calc(100vw - 32px);
+    padding: 8px;
+    border: 1px solid rgba(117, 219, 234, .37);
+    border-radius: 19px;
+    background: rgba(5, 18, 32, .86);
+    box-shadow: 0 25px 75px rgba(0, 6, 17, .56), inset 0 1px rgba(255, 255, 255, .1);
+    backdrop-filter: blur(22px);
+}
+
+.cessium-dock-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 11px;
+    min-height: 58px;
+    padding: 0 18px;
+    border: 1px solid transparent;
+    border-radius: 12px;
+    color: var(--cessium-ink);
+    background: transparent;
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.cessium-dock-button i {
+    font-size: 18px;
+}
+
+.cessium-dock-button:hover,
+.cessium-dock-button:focus-visible {
+    color: var(--cessium-cyan);
+    background: rgba(89, 207, 226, .13);
+}
+
+.cessium-dock-primary {
+    color: #062131;
+    background: linear-gradient(120deg, #5cf4f3, #a3fff0);
+    box-shadow: 0 0 25px rgba(62, 239, 240, .35);
+}
+
+.cessium-dock-primary:hover,
+.cessium-dock-primary:focus-visible {
+    color: #05202d;
+    background: #c1fff3;
+}
+
+.cessium-dock-button:disabled {
+    opacity: .43;
+    cursor: not-allowed;
+    box-shadow: none;
+}
+
+.cessium-finished {
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    width: min(480px, calc(100vw - 40px));
+    padding: 22px;
+    border: 1px solid rgba(255, 211, 134, .7);
+    border-radius: 16px;
+    color: var(--cessium-gold);
+    background: rgba(10, 21, 32, .89);
+    box-shadow: 0 0 65px rgba(255, 194, 90, .24);
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.cessium-finished i {
+    font-size: 30px;
+}
+
+.cessium-toast {
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: max-content;
+    max-width: min(560px, calc(100vw - 32px));
+    padding: 12px 18px;
+    border: 1px solid var(--cessium-cyan);
+    border-radius: 12px;
+    color: var(--cessium-ink);
+    background: rgba(5, 26, 42, .93);
+    box-shadow: 0 14px 38px rgba(0, 0, 0, .4);
+    text-align: center;
+}
+
+.cessium-toast.is-error {
+    border-color: #fa817f;
+}
+
+.cessium-attempt-popup {
+    position: absolute;
+    z-index: 4;
+    width: min(340px, calc(100vw - 24px));
+    max-height: min(420px, 65vh);
+    overflow: auto;
+    padding: 17px 40px 17px 18px;
+    border: 1px solid rgba(92, 232, 246, .75);
+    border-radius: 14px;
+    color: var(--cessium-ink);
+    background: rgba(5, 22, 37, .96);
+    box-shadow: 0 16px 42px rgba(0, 0, 0, .56), 0 0 24px rgba(92, 232, 246, .16);
+    transform: translate(-50%, calc(-100% - 22px));
+    backdrop-filter: blur(15px);
+}
+
+.cessium-attempt-popup.is-below {
+    transform: translate(-50%, 22px);
+}
+
+.cessium-attempt-popup strong {
+    display: block;
+    margin-bottom: 10px;
+    color: var(--cessium-cyan);
+    font-size: 15px;
+}
+
+.cessium-attempt-popup p {
+    margin: 7px 0;
+}
+
+.cessium-attempt-popup .cessium-attempt-field {
+    margin-top: 10px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(153, 217, 230, .18);
+}
+
+.cessium-attempt-popup .cessium-attempt-field span {
+    display: block;
+    color: var(--cessium-muted);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .09em;
+}
+
+.cessium-attempt-close {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    width: 30px;
+    height: 30px;
+    border: 0;
+    border-radius: 7px;
+    color: var(--cessium-ink);
+    background: rgba(255, 255, 255, .08);
+}
+
+.cessium-loading {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    background: rgba(2, 12, 23, .84);
+    backdrop-filter: blur(12px);
+    text-transform: uppercase;
+    letter-spacing: .2em;
+    font-size: 12px;
+}
+
+.cessium-loading-core {
+    display: grid;
+    place-items: center;
+    width: 88px;
+    height: 88px;
+    border: 2px solid rgba(92, 232, 246, .2);
+    border-top-color: var(--cessium-cyan);
+    border-radius: 50%;
+    color: var(--cessium-gold);
+    font-size: 30px;
+    animation: cessium-spin 1.4s linear infinite;
+}
+
+.cessium-loading button {
+    margin-top: 15px;
+    padding: 10px 16px;
+    border: 1px solid var(--cessium-cyan);
+    border-radius: 9px;
+    color: var(--cessium-ink);
+    background: rgba(22, 88, 105, .6);
+    letter-spacing: normal;
+    text-transform: none;
+}
+
+.cessium-dialog {
+    width: min(560px, calc(100vw - 30px));
+    max-height: min(80dvh, 680px);
+    padding: 24px;
+    overflow: auto;
+    border: 1px solid rgba(92, 232, 246, .56);
+    border-radius: 18px;
+    color: var(--cessium-ink);
+    background: rgba(7, 24, 41, .97);
+    box-shadow: 0 28px 85px rgba(0, 6, 17, .7), 0 0 40px rgba(92, 232, 246, .12);
+}
+
+.cessium-dialog::backdrop {
+    background: rgba(2, 9, 20, .59);
+    backdrop-filter: blur(5px);
+}
+
+.cessium-dialog-header {
+    justify-content: space-between;
+}
+
+.cessium-dialog h2 {
+    margin: 5px 0 22px;
+    color: var(--cessium-ink);
+    font-size: 27px;
+    font-weight: 800;
+}
+
+.cessium-richtext {
+    color: #dcebf1;
+    line-height: 1.65;
+    overflow-wrap: anywhere;
+}
+
+.cessium-richtext img,
+.cessium-richtext video {
+    max-width: 100%;
+    height: auto;
+}
+
+.cessium-richtext a {
+    color: var(--cessium-cyan);
+}
+
+#cessium-answers {
+    min-width: 0;
+    margin: 20px 0;
+    padding: 0;
+    border: 0;
+}
+
+.cessium-answer {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin: 8px 0;
+    padding: 12px;
+    border: 1px solid rgba(118, 209, 229, .24);
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.cessium-answer:has(input:checked) {
+    border-color: var(--cessium-cyan);
+    background: rgba(69, 195, 220, .14);
+}
+
+.cessium-answer input {
+    margin-top: 5px;
+}
+
+.cessium-dialog-action {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    min-height: 44px;
+    margin-top: 20px;
+    border: 1px solid rgba(92, 232, 246, .64);
+    border-radius: 10px;
+    color: #05212d;
+    background: linear-gradient(100deg, #5ce8f6, #a9fff0);
+    font-weight: 800;
+}
+
+#previewQRdiv {
+    min-height: 220px;
+}
+
+#cessium-camera-status {
+    color: var(--cessium-muted);
+    font-size: 12px;
+}
+
+@keyframes cessium-spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes cessium-pulse {
+    50% {
+        opacity: .35;
+        box-shadow: 0 0 2px var(--cessium-cyan);
+    }
+}
+
+@media (max-width: 720px) {
+    .cessium-topbar {
+        min-height: 69px;
+        padding: 12px 15px;
+    }
+    .cessium-brand-mark {
+        width: 37px;
+        height: 37px;
+        font-size: 19px;
+    }
+    .cessium-brand-copy strong {
+        max-width: 42vw;
+        font-size: 14px;
+    }
+    .cessium-brand-copy small {
+        font-size: 8px;
+    }
+    .cessium-mission-status {
+        display: none;
+    }
+    .cessium-exit {
+        padding: 8px 10px;
+    }
+    .cessium-exit span {
+        display: none;
+    }
+    .cessium-objective {
+        top: 80px;
+        left: 12px;
+        width: min(315px, calc(100vw - 72px));
+        padding: 15px;
+    }
+    .cessium-objective h1 {
+        font-size: 23px;
+    }
+    .cessium-objective p {
+        min-height: 0;
+        margin: 7px 0 14px;
+        font-size: 11px;
+    }
+    .cessium-navigation {
+        top: auto;
+        bottom: 173px;
+        left: 12px;
+        right: auto;
+        min-width: 0;
+        padding: 8px 10px;
+    }
+    .cessium-nav-glyph {
+        width: 32px;
+        height: 32px;
+    }
+    .cessium-navigation span {
+        font-size: 13px;
+    }
+    .cessium-map-actions {
+        right: 12px;
+        bottom: 173px;
+    }
+    .cessium-layer-picker {
+        width: min(180px, 48vw);
+        min-height: 38px;
+    }
+    .cessium-map-actions button {
+        width: 38px;
+        height: 38px;
+    }
+    .cessium-dock {
+        bottom: max(12px, env(safe-area-inset-bottom));
+        gap: 2px;
+        padding: 5px;
+        width: calc(100vw - 18px);
+        justify-content: space-around;
+    }
+    .cessium-dock-button {
+        min-width: 0;
+        min-height: 58px;
+        flex: 1;
+        flex-direction: column;
+        gap: 4px;
+        padding: 5px 4px;
+        font-size: 9px;
+        white-space: normal;
+        line-height: 1.05;
+        text-align: center;
+    }
+    .cessium-dock-button i {
+        font-size: 17px;
+    }
+    .cessium-dialog {
+        padding: 17px;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .cessium-player *,
+    .cessium-player *::before,
+    .cessium-player *::after {
+        /* stylelint-disable-next-line declaration-no-important, time-min-milliseconds */
+        animation-duration: .01ms !important;
+        /* stylelint-disable-next-line declaration-no-important, time-min-milliseconds */
+        transition-duration: .01ms !important;
+    }
+}

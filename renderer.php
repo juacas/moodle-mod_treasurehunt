@@ -111,6 +111,77 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
     }
 
     /**
+     * Render the experimental Cesium globe player.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return string
+     */
+    public function render_play_page_cessium_player(play_page_base $renderablepage) {
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        // A non-geographic image uses its own coordinate system and cannot be placed on a globe.
+        if (isset($renderablepage->custommapping->geographic) && !$renderablepage->custommapping->geographic) {
+            return $this->render_play_page_bootstrap($renderablepage);
+        }
+
+        $this->page->set_pagelayout('embedded');
+        $this->page->activityheader->disable();
+        $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $config = [
+            'cmid' => (int)$cm->id,
+            'treasurehuntid' => (int)$cm->instance,
+            'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
+            'groupmode' => (bool)$treasurehunt->groupmode,
+            'attempttimestamp' => (int)$renderablepage->lastattempttimestamp,
+            'roadtimestamp' => (int)$renderablepage->lastroadtimestamp,
+            'pollinterval' => (int)$renderablepage->gameupdatetime,
+            'tracking' => (bool)$treasurehunt->tracking,
+            'previewroadid' => (int)$renderablepage->previewroadid,
+            'totalstages' => (int)($renderablepage->totalstages ?? 0),
+            'custommapping' => $renderablepage->custommapping,
+            'playerconfig' => $renderablepage->customplayerconfig,
+            'labels' => [
+                'stage' => get_string('stage', 'treasurehunt'),
+                'stageovercome' => get_string('stageovercome', 'treasurehunt'),
+                'failedlocation' => get_string('failedlocation', 'treasurehunt'),
+                'discoveredlocation' => get_string('discoveredlocation', 'treasurehunt'),
+                'stagename' => get_string('stagename', 'treasurehunt'),
+                'stageclue' => get_string('stageclue', 'treasurehunt'),
+                'completed' => get_string('huntcompleted', 'treasurehunt'),
+                'webserviceerror' => get_string('webserviceerror', 'treasurehunt'),
+                'nomarks' => get_string('nomarks', 'treasurehunt'),
+                'noattempts' => get_string('noattempts', 'treasurehunt'),
+                'noanswerselected' => get_string('noanswerselected', 'treasurehunt'),
+                'geolocationproblem' => get_string('geolocation_problem', 'treasurehunt'),
+                'activitywarning' => get_string('activitytoendwarning', 'treasurehunt'),
+                'answerwarning' => get_string('answerwarning', 'treasurehunt'),
+                'timeexceeded' => get_string('timeexceeded', 'treasurehunt'),
+                'startfromhere' => get_string('startfromhere', 'treasurehunt'),
+                'nohint' => get_string('cessium_nohint', 'treasurehunt'),
+                'selectedposition' => get_string('cessium_selectedposition', 'treasurehunt'),
+                'gpsposition' => get_string('cessium_gpsposition', 'treasurehunt'),
+                'insidezone' => get_string('cessium_insidezone', 'treasurehunt'),
+                'layercustom' => get_string('cessium_layercustom', 'treasurehunt'),
+                'layererror' => get_string('cessium_layererror', 'treasurehunt'),
+                'wait' => get_string('cessium_wait', 'treasurehunt'),
+            ],
+        ];
+        $this->page->requires->js_call_amd('mod_treasurehunt/cessium_player', 'init');
+        treasurehunt_qr_support($this->page, 'setup', []);
+
+        $data = $renderablepage->export_for_template($this);
+        $data->cmid = $cm->id;
+        $data->huntname = format_string($treasurehunt->name);
+        $data->playerconfigjson = json_encode(
+            $config,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
+        return $this->header() .
+            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
+            $this->footer();
+    }
+
+    /**
      * Render a table containing the current status of the user attempts.
      *
      * @param mod_treasurehunt\output\user_attempt_history  $historical
