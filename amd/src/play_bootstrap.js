@@ -41,7 +41,7 @@ import "mod_treasurehunt/dropdown";
  */
 let init = {
   playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
-    lastattemptid, lastroadtimestamp, gameupdatetime, tracking, user,
+    gameupdatetime, tracking, user,
     custommapconfig, customplayerconfig = null, previewroadid = 0) {
 
     // I18n strings.
@@ -76,14 +76,14 @@ let init = {
           custommapconfig.imgheight = this.naturalHeight;
 
           initplaytreasurehunt($, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-            lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
+            gameupdatetime, tracking,
             user, custommapconfig, customplayerconfig, previewroadid);
         });
         img.src = custommapconfig.custombackgroundurl;
       } else {
         initplaytreasurehunt(
           $, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-          lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
+          gameupdatetime, tracking,
           user, custommapconfig, customplayerconfig, previewroadid);
       }
     });
@@ -130,8 +130,6 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {int} treasurehuntid The treasure hunt id.
  * @param {boolean} playwithoutmoving If true, the player does not move.
  * @param {boolean} groupmode If true, the game is played in group mode.
- * @param {int} lastattemptid The last attempt ID.
- * @param {int} lastroadtimestamp The last road timestamp.
  * @param {int} gameupdatetime The game update time in milliseconds.
  * @param {boolean} tracking If true, the player is being tracked.
  * @param {Object} user The user object.
@@ -140,10 +138,13 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {number} previewroadid Road selected for a manager's preview.
  */
 function initplaytreasurehunt(
-  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattemptid,
-  lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
+  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, gameupdatetime,
+  tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
 
   setLoading(true);
+  // The initialize response supplies the current cursors for later polls.
+  let lastattemptid = 0;
+  let lastroadtimestamp = 0;
   // Cast to boolean.
   playwithoutmoving = playwithoutmoving == true;
   groupmode = groupmode == true;
@@ -712,10 +713,6 @@ function initplaytreasurehunt(
   map.addInteraction(select);
   // It initializes the game.
   renew_source(false, true);
-  // For the game is updated every gameupdatetime seconds.
-  interval = setInterval(() => {
-    renew_source(false, false);
-  }, gameupdatetime);
   // Initialize the page layers.
 
   add_layergroup_to_list(layergroup);
@@ -848,7 +845,13 @@ function initplaytreasurehunt(
       return;
     }
     geojson[0]
-      .always(() => finishLoading(loadingRequest))
+      .always(() => {
+        finishLoading(loadingRequest);
+        // Wait for the first response before polling with its returned cursors.
+        if (initialize && !interval) {
+          interval = setInterval(() => renew_source(false, false), gameupdatetime);
+        }
+      })
       .done((response) => {
         qoaremoved = response.qoaremoved;
         roadfinished = response.roadfinished;

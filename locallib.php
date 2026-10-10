@@ -2573,9 +2573,17 @@ function treasurehunt_get_last_successful_stage(
  * @param int $userid The identifier of user.
  * @param int $roadid The identifier of the road of user.
  * @param bool $changesingroupmode If the instance has change the group mode.
+ * @param bool $initialize Whether the client is loading its complete state for the first time.
  * @return stdClass Update parameters.
  */
-function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roadid, $changesingroupmode) {
+function treasurehunt_check_attempts_updates(
+    $attemptid,
+    $groupid,
+    $userid,
+    $roadid,
+    $changesingroupmode,
+    $initialize = false
+) {
     global $DB;
     $return = new stdClass();
     $return->strings = [];
@@ -2592,7 +2600,7 @@ function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roa
         $return->attemptsolved = true;
     }
     // If there has been a change in the group mode.
-    if ($changesingroupmode) {
+    if ($changesingroupmode && !$initialize) {
         if ($groupid) {
             $grouptype = 'a.groupid=?';
             $params = [$groupid, $roadid];
@@ -2611,7 +2619,7 @@ function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roa
         $newattempts = $DB->get_records_sql($query, $params);
     }
     // Read only attempts after the client cursor.
-    if ($return->newattemptid > $attemptid && !$changesingroupmode) {
+    if ($return->newattemptid > $attemptid && !$changesingroupmode && !$initialize) {
         // Get user/group actions after the given attempt ID.
         if ($groupid) {
             $grouptype = 'a.groupid=(?)';

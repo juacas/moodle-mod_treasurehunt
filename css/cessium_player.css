@@ -95,13 +95,16 @@
 .cessium-brand-mark {
     width: 48px;
     height: 48px;
+    flex: 0 0 48px;
     display: grid;
     place-items: center;
-    color: var(--cessium-gold);
-    border: 1px solid rgba(255, 211, 134, .7);
-    border-radius: 14px;
-    box-shadow: 0 0 24px rgba(255, 211, 134, .2), inset 0 0 18px rgba(255, 211, 134, .12);
-    font-size: 23px;
+}
+
+.cessium-brand-mark img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transform: scale(1.5);
 }
 
 .cessium-brand-copy {
@@ -506,17 +509,10 @@
     font-size: 12px;
 }
 
-.cessium-loading-core {
-    display: grid;
-    place-items: center;
-    width: 88px;
-    height: 88px;
-    border: 2px solid rgba(92, 232, 246, .2);
-    border-top-color: var(--cessium-cyan);
-    border-radius: 50%;
-    color: var(--cessium-gold);
-    font-size: 30px;
-    animation: cessium-spin 1.4s linear infinite;
+.cessium-loading-image {
+    width: 160px;
+    height: 160px;
+    object-fit: contain;
 }
 
 .cessium-loading button {
@@ -625,12 +621,6 @@
     font-size: 12px;
 }
 
-@keyframes cessium-spin {
-    to {
-        transform: rotate(360deg);
-    }
-}
-
 @keyframes cessium-pulse {
     50% {
         opacity: .35;
@@ -646,7 +636,7 @@
     .cessium-brand-mark {
         width: 37px;
         height: 37px;
-        font-size: 19px;
+        flex-basis: 37px;
     }
     .cessium-brand-copy strong {
         max-width: 42vw;

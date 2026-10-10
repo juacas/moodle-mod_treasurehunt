@@ -23,7 +23,6 @@
 import ajax from 'core/ajax';
 import webqr from 'mod_treasurehunt/webqr';
 
-const CESIUM_BASE_URL = 'https://cesium.com/downloads/cesiumjs/releases/1.145/Build/Cesium/';
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
 let cesiumPromise;
 
@@ -38,26 +37,27 @@ const isEnabled = (value) => value === true || value === 1 || value === '1' || v
 /**
  * Load the pinned Cesium build and its widget stylesheet once.
  *
+ * @param {string} baseUrl URL of the plugin's bundled Cesium distribution.
  * @returns {Promise<Object>} Cesium global.
  */
-const loadCesium = () => {
+const loadCesium = (baseUrl) => {
     if (window.Cesium) {
         return Promise.resolve(window.Cesium);
     }
     if (cesiumPromise) {
         return cesiumPromise;
     }
-    window.CESIUM_BASE_URL = CESIUM_BASE_URL;
+    window.CESIUM_BASE_URL = baseUrl;
     if (!document.getElementById('cessium-widgets-css')) {
         const css = document.createElement('link');
         css.id = 'cessium-widgets-css';
         css.rel = 'stylesheet';
-        css.href = CESIUM_BASE_URL + 'Widgets/widgets.css';
+        css.href = baseUrl + 'Widgets/widgets.css';
         document.head.appendChild(css);
     }
     cesiumPromise = new Promise((resolve, reject) => {
         const script = document.createElement('script');
-        script.src = CESIUM_BASE_URL + 'Cesium.js';
+        script.src = baseUrl + 'Cesium.js';
         // Cesium's bundled protobuf.js calls define() when Moodle's RequireJS is present.
         // It is an internal module, so do not register it as an anonymous Moodle module.
         const originalDefine = window.define;
@@ -321,14 +321,16 @@ export const init = async() => {
     let geowatch = null;
     let stage = null;
     let stageposition = 1;
+    let totalstages = 0;
     let roadfinished = false;
     let available = true;
     let qrexpected = false;
     let qoaremoved = false;
     let playwithoutmoving = isEnabled(config.playwithoutmoving) || Boolean(config.previewroadid);
     let groupmode = config.groupmode;
-    let attempttimestamp = config.attempttimestamp;
-    let roadtimestamp = config.roadtimestamp;
+    // The initialize response supplies the real markers for all later polls.
+    let attemptid = 0;
+    let roadtimestamp = 0;
     let history = [];
     let pollTimer;
     let toastTimer;
@@ -431,7 +433,7 @@ export const init = async() => {
                     image: './pix/bootstrap/my_location_3.png',
                     verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    disableDepthTestDistance: 0,
                 },
                 label: {
                     show: false,
@@ -444,7 +446,7 @@ export const init = async() => {
                     verticalOrigin: Cesium.VerticalOrigin.TOP,
                     pixelOffset: new Cesium.Cartesian2(0, 11),
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    disableDepthTestDistance: 0,
                 },
             });
         }
@@ -546,10 +548,10 @@ export const init = async() => {
                     stageSource.entities.add({
                         polygon: {
                             hierarchy,
-                            height: 8,
+                            // Ground classification follows the globe's curvature, including very large areas.
+                            heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                            classificationType: Cesium.ClassificationType.TERRAIN,
                             material: outline.withAlpha(0.26),
-                            outline: true,
-                            outlineColor: outline,
                         },
                     });
                     rings.forEach((ring) => stageSource.entities.add({
@@ -564,7 +566,7 @@ export const init = async() => {
                 const centre = geometryCentre({features: [feature]});
                 if (centre) {
                     stageSource.entities.add({
-                        position: Cesium.Cartesian3.fromDegrees(...centre),
+                        position: Cesium.Cartesian3.fromDegrees(centre[0], centre[1]),
                         label: {
                             text: Number(feature.properties?.stageposition) === 1 ? labels.startfromhere : labels.stage + ' ' +
                                 (feature.properties?.stageposition || stageposition),
@@ -574,7 +576,7 @@ export const init = async() => {
                             outlineWidth: 4,
                             style: Cesium.LabelStyle.FILL_AND_OUTLINE,
                             heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                            disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                            disableDepthTestDistance: 0,
                         },
                     });
                 }
@@ -613,7 +615,7 @@ export const init = async() => {
                     scale: 0.5,
                     verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    disableDepthTestDistance: 0,
                 },
                 label: {
                     text: String(feature.properties?.stageposition || ''),
@@ -623,7 +625,8 @@ export const init = async() => {
                     outlineColor: Cesium.Color.BLACK,
                     outlineWidth: 3,
                     pixelOffset: new Cesium.Cartesian2(0, -37),
-                    disableDepthTestDistance: Number.POSITIVE_INFINITY,
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    disableDepthTestDistance: 0,
                 },
             });
             entity.treasurehuntAttempt = feature.properties;
@@ -639,6 +642,11 @@ export const init = async() => {
         }
         const popup = element('attempt-popup');
         const world = selectedAttempt.position.getValue(viewer.clock.currentTime);
+        if (viewer.scene.mode === Cesium.SceneMode.SCENE3D &&
+                !new Cesium.EllipsoidalOccluder(viewer.scene.globe.ellipsoid, viewer.camera.positionWC).isPointVisible(world)) {
+            popup.hidden = true;
+            return;
+        }
         const screen = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, world);
         if (!screen) {
             popup.hidden = true;
@@ -722,8 +730,8 @@ export const init = async() => {
 
     /** Show the current progress and the possible actions. */
     const updateActions = () => {
-        const completed = roadfinished ? config.totalstages : Number(stage?.position || 0);
-        const total = Math.max(Number(stage?.totalnumber || config.totalstages || 0), completed);
+        const completed = roadfinished ? totalstages : Number(stage?.position || 0);
+        const total = Math.max(totalstages, completed);
         element('progress-label').textContent = completed + ' / ' + (total || '—');
         const percent = total ? Math.round(100 * completed / total) : 0;
         element('progress-bar').style.width = percent + '%';
@@ -746,7 +754,7 @@ export const init = async() => {
      * @param {Object} response Service result.
      */
     const updateMode = (response) => {
-        attempttimestamp = response.attempttimestamp;
+        attemptid = response.attemptid;
         roadtimestamp = response.roadtimestamp;
         roadfinished = isEnabled(response.roadfinished);
         available = isEnabled(response.available);
@@ -786,7 +794,7 @@ export const init = async() => {
         } else if (previousStage !== stage?.id || roadfinished) {
             stageSignature = '';
             await renderStage(null, false);
-            stageposition = Math.min(Number(stage?.position || 0) + 1, config.totalstages || Infinity);
+            stageposition = Math.min(Number(stage?.position || 0) + 1, totalstages || Infinity);
             element('stage-number').textContent = roadfinished ? '✓' : String(stageposition);
         }
     };
@@ -826,6 +834,7 @@ export const init = async() => {
         }
         if (response.lastsuccessfulstage) {
             stage = response.lastsuccessfulstage;
+            totalstages = Number(stage.totalnumber || 0);
             renderClue();
         } else if (action.initialize) {
             stage = null;
@@ -860,7 +869,7 @@ export const init = async() => {
             const params = {
                 treasurehuntid: config.treasurehuntid,
                 previewroadid: config.previewroadid,
-                attempttimestamp,
+                attemptid,
                 roadtimestamp,
                 playwithoutmoving,
                 groupmode,
@@ -921,10 +930,11 @@ export const init = async() => {
                         outlineColor: Cesium.Color.WHITE,
                         outlineWidth: 2,
                         heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                        disableDepthTestDistance: 0,
                     },
                 });
             }
-            gpsmarker.position = Cesium.Cartesian3.fromDegrees(...gpsposition);
+            gpsmarker.position = Cesium.Cartesian3.fromDegrees(gpsposition[0], gpsposition[1]);
             viewer.scene.requestRender();
         }, (error) => toast(labels.geolocationproblem + ': ' + error.message, true), {
             enableHighAccuracy: true,
@@ -1071,7 +1081,7 @@ export const init = async() => {
         retry.hidden = true;
         try {
             if (!viewer) {
-                Cesium = await loadCesium();
+                Cesium = await loadCesium(config.cesiumbaseurl);
                 const baseLayer = await createBaseLayer(Cesium, null);
                 viewer = new Cesium.Viewer('cessium-globe', {
                     baseLayer,
@@ -1089,6 +1099,7 @@ export const init = async() => {
                     requestRenderMode: true,
                 });
                 mapLayers.osm = baseLayer;
+                viewer.scene.globe.depthTestAgainstTerrain = true;
                 viewer.scene.maximumRenderTimeChange = 60;
                 if (config.custommapping?.custombackgroundurl || config.custommapping?.wmsurl) {
                     try {
@@ -1103,6 +1114,10 @@ export const init = async() => {
                     } catch (error) {
                         toast(error.message, true);
                     }
+                }
+                if (!mapLayers.custom) {
+                    element('layer-select').value = 'satellite';
+                    selectMapLayer('satellite');
                 }
                 viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
                 viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(0, 25, 15000000), duration: 0});

@@ -67,22 +67,16 @@ $PAGE->set_url('/mod/treasurehunt/play.php', $pageparams);
 $PAGE->set_title(null); // We do not want it on the HTML.
 $PAGE->set_heading(format_string($course->fullname));
 
-// Get last timestamp.
-$user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
-[$lastattemptid, $lastroadtimestamp] = treasurehunt_get_progress_markers($USER->id, $user->groupid, $user->roadid);
+// Check that the player has a road before rendering the page.
+treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
 // Instance selected player renderable.
 $playerstyle = $treasurehunt->playerstyle;
 $renderableclass = "mod_treasurehunt\output\play_page_$playerstyle";
 $renderable = new $renderableclass($treasurehunt, $cm);
 /**@var core_renderer $output */
 $output = $PAGE->get_renderer('mod_treasurehunt');
-$renderable->lastattemptid = $lastattemptid;
-$renderable->lastroadtimestamp = $lastroadtimestamp;
 $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $renderable->previewroadid = $previewroadid;
-if ($playerstyle === TREASUREHUNT_PLAYERCESSIUM) {
-    $renderable->totalstages = treasurehunt_get_total_stages($user->roadid);
-}
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);

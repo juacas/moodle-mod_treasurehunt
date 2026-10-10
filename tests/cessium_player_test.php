@@ -42,7 +42,6 @@ final class cessium_player_test extends \advanced_testcase {
         $styles = treasurehunt_get_installedplayerstyles();
         $this->assertArrayHasKey(TREASUREHUNT_PLAYERCESSIUM, $styles);
         $this->assertTrue(class_exists(\mod_treasurehunt\output\play_page_cessium_player::class));
-        $this->assertTrue(property_exists(\mod_treasurehunt\output\play_page_cessium_player::class, 'totalstages'));
 
         $PAGE->set_url('/mod/treasurehunt/play.php', ['id' => 1]);
         $PAGE->set_context(\context_system::instance());
@@ -54,6 +53,7 @@ final class cessium_player_test extends \advanced_testcase {
         $this->assertStringContainsString('id="cessium-globe"', $html);
         $this->assertStringContainsString('id="cessium-clue-dialog"', $html);
         $this->assertStringContainsString('id="cessium-submit"', $html);
+        $this->assertStringContainsString('id="cessium-layer-select"', $html);
         $this->assertStringContainsString('Cesium test mission', $html);
     }
 
@@ -95,10 +95,7 @@ final class cessium_player_test extends \advanced_testcase {
         $PAGE->set_cm($cm, $course);
         $PAGE->set_context(\context_module::instance($cmid));
         $renderable = new \mod_treasurehunt\output\play_page_cessium_player($hunt, $cm);
-        $renderable->lastattempttimestamp = 0;
-        $renderable->lastroadtimestamp = 0;
         $renderable->gameupdatetime = 10000;
-        $renderable->totalstages = 2;
 
         ob_start();
         try {
@@ -107,6 +104,9 @@ final class cessium_player_test extends \advanced_testcase {
             ob_end_clean();
         }
         $this->assertStringContainsString('id="cessium-globe"', $html);
+        $this->assertStringContainsString('cesium-1.145.0', $html);
+        $this->assertStringNotContainsString('"roadtimestamp":', $html);
+        $this->assertStringNotContainsString('"totalstages":', $html);
         $this->assertStringNotContainsString('core_courseformat/local/content/activity_header', $html);
     }
 }

@@ -193,6 +193,8 @@ final class user_progress_test extends \advanced_testcase {
         $teammateview = user_progress::execute($params);
         \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $teammateview);
         $this->assertEquals($attemptid, $teammateview['attemptid']);
+        $this->assertSame([], $teammateview['infomsg']);
+        $this->assertEquals(2, $teammateview['lastsuccessfulstage']->totalnumber);
         $this->assertEquals(2, $teammateview['nextstage']['features'][0]['properties']['stageposition']);
         $this->setUser($players[2]);
         $otherview = user_progress::execute($params);
@@ -372,6 +374,7 @@ final class user_progress_test extends \advanced_testcase {
         $initial = user_progress::execute($params);
         $this->assertEquals(0, $initial['status']['code']);
         $this->assertFalse($initial['roadfinished']);
+        $this->assertEquals(2, $initial['lastsuccessfulstage']->totalnumber);
         $this->assertArrayHasKey('nextstage', $initial);
         $this->assertEquals(1, $initial['nextstage']['features'][0]['properties']['stageposition']);
 
@@ -390,6 +393,17 @@ final class user_progress_test extends \advanced_testcase {
         $this->assertEquals(2, $found['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertGreaterThan(0, $DB->count_records('treasurehunt_attempts'));
 
+        unset($params['location']);
+        $params['initialize'] = true;
+        $params['attemptid'] = 0;
+        $params['roadtimestamp'] = 0;
+        $reloaded = user_progress::execute($params);
+        $this->assertSame([], $reloaded['infomsg']);
+        $this->assertNotEmpty($reloaded['attempthistory']);
+        $this->assertEquals($found['attemptid'], $reloaded['attemptid']);
+        $this->assertEquals(2, $reloaded['lastsuccessfulstage']->totalnumber);
+
+        $params['initialize'] = false;
         $params['attemptid'] = $found['attemptid'];
         $params['roadtimestamp'] = $found['roadtimestamp'];
         $params['location'] = ['type' => 'LineString', 'coordinates' => [0.5, 0.5]];

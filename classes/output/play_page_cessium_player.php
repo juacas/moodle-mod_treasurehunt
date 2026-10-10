@@ -24,10 +24,4 @@ namespace mod_treasurehunt\output;
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class play_page_cessium_player extends play_page_base {
-    /**
-     * Number of stages in the selected road.
-     *
-     * @var int
-     */
-    public int $totalstages = 0;
 }

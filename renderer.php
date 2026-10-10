@@ -82,8 +82,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $cm->id, $cm->instance,
                 intval($treasurehunt->playwithoutmoving),
                 intval($treasurehunt->groupmode),
-                $renderablepage->lastattemptid,
-                $renderablepage->lastroadtimestamp,
                 $renderablepage->gameupdatetime,
                 $treasurehunt->tracking,
                 $renderablepage->user,
@@ -129,15 +127,13 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
         $config = [
             'cmid' => (int)$cm->id,
+            'cesiumbaseurl' => (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false),
             'treasurehuntid' => (int)$cm->instance,
             'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
             'groupmode' => (bool)$treasurehunt->groupmode,
-            'attempttimestamp' => (int)$renderablepage->lastattempttimestamp,
-            'roadtimestamp' => (int)$renderablepage->lastroadtimestamp,
             'pollinterval' => (int)$renderablepage->gameupdatetime,
             'tracking' => (bool)$treasurehunt->tracking,
             'previewroadid' => (int)$renderablepage->previewroadid,
-            'totalstages' => (int)($renderablepage->totalstages ?? 0),
             'custommapping' => $renderablepage->custommapping,
             'playerconfig' => $renderablepage->customplayerconfig,
             'labels' => [
