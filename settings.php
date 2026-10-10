@@ -93,4 +93,15 @@ if ($ADMIN->fulltree) {
             TREASUREHUNT_GAMEUPDATETIME,
             PARAM_INT
         ));
+        $settings->add(new admin_setting_heading(
+            'treasurehuntopendataheading',
+            get_string('opendatasettingsheading', 'treasurehunt'),
+            ''
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'mod_treasurehunt/europeanaapikey',
+            get_string('opendataeuropeanaapikey', 'treasurehunt'),
+            get_string('opendataeuropeanaapikey_desc', 'treasurehunt'),
+            ''
+        ));
 }
