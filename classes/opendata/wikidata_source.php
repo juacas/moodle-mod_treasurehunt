@@ -35,6 +35,11 @@ final class wikidata_source implements source {
         return 'wikidata';
     }
 
+    /** Return the public Wikidata website. */
+    public function website(): string {
+        return 'https://www.wikidata.org/';
+    }
+
     /**
      * Return available theme IDs and language keys.
      */

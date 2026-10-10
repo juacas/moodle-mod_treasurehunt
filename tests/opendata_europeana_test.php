@@ -90,4 +90,43 @@ final class opendata_europeana_test extends \advanced_testcase {
         $this->assertSame([-3.5, 40.5], $feature['geometry']['coordinates']);
         $this->assertSame('abc', $result['nextcursor']);
     }
+
+    /**
+     * Record metadata supplies readable type and subject tags with trusted links.
+     */
+    public function test_parse_record_details(): void {
+        $record = [
+            'proxies' => [[
+                'dcType' => ['en' => ['Image', 'Photography'],
+                    'def' => ['http://vocab.getty.edu/aat/300162056']],
+                'dcSubject' => ['def' => ['http://data.europeana.eu/concept/94',
+                    'http://data.europeana.eu/place/204487']],
+                'dcCreator' => ['en' => ['Photographer']],
+                'dcDate' => ['def' => ['1932']],
+            ]],
+            'concepts' => [[
+                'about' => 'http://vocab.getty.edu/aat/300162056',
+                'prefLabel' => ['en' => ['black-and-white photography']],
+            ], [
+                'about' => 'http://data.europeana.eu/concept/94',
+                'prefLabel' => ['es' => ['Arquitectura']],
+            ]],
+            'places' => [[
+                'about' => 'http://data.europeana.eu/place/204487',
+                'prefLabel' => ['es' => ['Cataluña']],
+            ]],
+            'europeanaAggregation' => [
+                'edmPreview' => 'https://api.europeana.eu/thumbnail/v2/url.json?uri=sample',
+            ],
+        ];
+        $details = europeana::parse_details($record, 'es');
+        $this->assertSame(['Image', 'Photography', 'black-and-white photography'],
+            array_column($details['types'], 'label'));
+        $this->assertSame(['Arquitectura', 'Cataluña'], array_column($details['subjects'], 'label'));
+        $this->assertSame('https://www.europeana.eu/en/collections/topic/94', $details['subjects'][0]['url']);
+        $this->assertSame('https://api.europeana.eu/thumbnail/v2/url.json?uri=sample', $details['image']);
+        $this->assertSame(['Photographer'], $details['fields']['creator']);
+        $this->assertSame(['1932'], $details['fields']['date']);
+        $this->assertSame('', europeana::thumbnail_url('https://example.com/thumbnail/v2/sample'));
+    }
 }

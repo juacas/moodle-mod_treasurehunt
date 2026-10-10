@@ -34,6 +34,12 @@ interface source {
      */
     public function id(): string;
 
+    /** Return the public website URL for this provider.
+     *
+     * @return string HTTPS URL.
+     */
+    public function website(): string;
+
     /** Return the selectable themes.
      *
      * @return array Theme ID to language-string key.

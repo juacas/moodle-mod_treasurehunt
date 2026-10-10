@@ -45,17 +45,29 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const typeInputs = Array.from(dialog.querySelectorAll('input[name="opendatatype"]'));
     const sourceInputs = Array.from(dialog.querySelectorAll('input[name="opendatasource"]'));
     const loadMoreButton = document.getElementById('opendataloadmore');
-    const saveButton = document.getElementById('opendatasave');
+    const addButton = document.getElementById('opendataadd');
+    const replaceButton = document.getElementById('opendatareplace');
     const previewList = document.getElementById('opendatapreview');
-    const storageKey = 'treasurehuntOpenData:' + dialog.dataset.cmid;
+    const sourceProgress = document.getElementById('opendatasourceprogress');
+    const fieldLabels = JSON.parse(dialog.dataset.fieldLabels || '{}');
+    const storageKey = 'treasurehuntOpenData:' + window.location.pathname + ':' +
+        dialog.dataset.treasurehuntid + ':' + dialog.dataset.userid;
     const vectorSource = new ol.source.Vector();
     let openDataLayer = null;
     let jobs = [];
     let searchParameters = null;
     const seenItems = new Set();
     let pendingItems = [];
-    let loadedPages = 0;
+    let savedItems = [];
     let requestNumber = 0;
+    const activeControllers = new Set();
+
+    /** Stop outstanding requests before replacing or committing the pending results. */
+    const cancelRequests = () => {
+        requestNumber++;
+        activeControllers.forEach((controller) => controller.abort());
+        activeControllers.clear();
+    };
 
     /**
      * Show search progress or a result without inserting service HTML.
@@ -70,14 +82,15 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
 
     /** Invalidate an in-flight search and discard results that were not saved. */
     const clearStatus = () => {
-        requestNumber++;
+        cancelRequests();
         jobs = [];
         pendingItems = [];
-        loadedPages = 0;
         seenItems.clear();
         previewList.replaceChildren();
+        sourceProgress.replaceChildren();
         loadMoreButton.hidden = true;
-        saveButton.disabled = true;
+        addButton.disabled = true;
+        replaceButton.disabled = true;
         searchButton.disabled = false;
         showStatus('', 'info');
     };
@@ -90,6 +103,38 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             row.className = 'list-group-item py-1';
             row.textContent = item.properties?.name || item.properties?.id || '';
             previewList.appendChild(row);
+        });
+    };
+
+    /** Show the state and result count of each selected source during a batch. */
+    const renderProgress = () => {
+        sourceProgress.replaceChildren();
+        sourceInputs.filter((input) => jobs.some((job) => job.source === input.value)).forEach((input) => {
+            const sourceJobs = jobs.filter((job) => job.source === input.value);
+            const active = sourceJobs.some((job) => job.state === 'active');
+            const queued = sourceJobs.some((job) => job.state === 'queued');
+            const failed = sourceJobs.some((job) => job.state === 'failed');
+            const completed = sourceJobs.filter((job) => job.state === 'done' || job.state === 'failed').length;
+            const count = sourceJobs.reduce((total, job) => total + (job.count || 0), 0);
+            const row = document.createElement('div');
+            row.className = 'd-flex flex-wrap align-items-center justify-content-between border rounded px-2 py-1 mb-1 small';
+            const name = document.createElement('strong');
+            name.textContent = input.closest('label').textContent.trim();
+            const detail = document.createElement('span');
+            detail.className = failed ? 'text-warning' : 'text-muted';
+            if (active) {
+                const spinner = document.createElement('span');
+                spinner.className = 'spinner-border spinner-border-sm';
+                spinner.style.marginRight = '0.25rem';
+                spinner.setAttribute('aria-hidden', 'true');
+                detail.appendChild(spinner);
+            }
+            const state = active ? dialog.dataset.sourceSearching : queued ? dialog.dataset.sourceWaiting :
+                failed ? dialog.dataset.sourceFailed : dialog.dataset.sourceDone;
+            detail.appendChild(document.createTextNode(state + ' · ' + completed + '/' + sourceJobs.length +
+                ' · ' + count + ' ' + dialog.dataset.resultsLabel));
+            row.append(name, detail);
+            sourceProgress.appendChild(row);
         });
     };
 
@@ -162,9 +207,12 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const loadPage = async(currentRequest) => {
         searchButton.disabled = true;
         loadMoreButton.disabled = true;
-        saveButton.disabled = true;
         showStatus(dialog.dataset.loadingMoreLabel, 'info');
         const pending = jobs.filter((job) => job.cursor !== null);
+        pending.forEach((job) => {
+            job.state = 'queued';
+        });
+        renderProgress();
         const errors = [];
         let offset = 0;
         /** Fetch jobs through a small worker pool. */
@@ -174,23 +222,32 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                     return;
                 }
                 const job = pending[offset++];
+                job.state = 'active';
+                renderProgress();
                 const parameters = new URLSearchParams(searchParameters);
                 parameters.set('source', job.source);
                 parameters.set('cursor', job.cursor);
                 job.types.forEach((type) => parameters.append('types[]', type));
+                const controller = new AbortController();
+                activeControllers.add(controller);
                 try {
                     const response = await fetch(dialog.dataset.searchUrl, {
                         method: 'POST',
                         credentials: 'same-origin',
                         headers: {'Content-Type': 'application/x-www-form-urlencoded; charset=UTF-8'},
                         body: parameters.toString(),
+                        signal: controller.signal,
                     });
-                    const data = await response.json();
+                    const data = await response.json().catch(() => null);
                     if (currentRequest !== requestNumber) {
                         return;
                     }
-                    if (!response.ok || data.error || !Array.isArray(data.geojson?.features)) {
-                        throw new Error(data.error || dialog.dataset.serviceError);
+                    if (!response.ok || data?.error || !Array.isArray(data?.geojson?.features)) {
+                        const error = new Error(data?.error || dialog.dataset.serviceError);
+                        error.httpStatus = response.status;
+                        error.code = data?.code;
+                        error.diagnostic = data?.diagnostic;
+                        throw error;
                     }
                     const fresh = data.geojson.features.filter((item) => {
                         const key = job.source + ':' + item.properties?.id;
@@ -202,11 +259,30 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                     });
                     pendingItems.push(...fresh);
                     renderPreview();
+                    addButton.disabled = pendingItems.length === 0;
+                    replaceButton.disabled = pendingItems.length === 0;
+                    showStatus(dialog.dataset.resultsLabel + ': ' + pendingItems.length + '\n' +
+                        dialog.dataset.searchingLabel, 'info');
                     job.cursor = data.nextcursor || null;
-                    loadedPages++;
+                    job.count = (job.count || 0) + fresh.length;
+                    job.state = 'done';
                 } catch (error) {
                     if (currentRequest === requestNumber) {
+                        window.console.error('Treasurehunt OpenData search failed', {
+                            source: job.source,
+                            types: job.types,
+                            httpStatus: error.httpStatus ?? null,
+                            code: error.code ?? null,
+                            diagnostic: error.diagnostic ?? null,
+                            error,
+                        });
                         errors.push(error.message || dialog.dataset.serviceError);
+                        job.state = 'failed';
+                    }
+                } finally {
+                    activeControllers.delete(controller);
+                    if (currentRequest === requestNumber) {
+                        renderProgress();
                     }
                 }
             }
@@ -218,10 +294,12 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         loadMoreButton.hidden = !jobs.some((job) => job.cursor !== null);
         loadMoreButton.disabled = false;
         searchButton.disabled = false;
-        saveButton.disabled = loadedPages === 0;
+        addButton.disabled = pendingItems.length === 0;
+        replaceButton.disabled = pendingItems.length === 0;
         const count = pendingItems.length;
-        const message = (count ? dialog.dataset.resultsLabel + ': ' + count : dialog.dataset.emptyLabel) +
-            (errors.length ? '\n' + [...new Set(errors)].join('\n') : '');
+        const summary = count ? dialog.dataset.resultsLabel + ': ' + count :
+            errors.length ? '' : dialog.dataset.emptyLabel;
+        const message = [summary, ...new Set(errors)].filter(Boolean).join('\n');
         showStatus(message, errors.length ? 'warning' : count ? 'success' : 'info');
     };
 
@@ -234,7 +312,7 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             const selected = typeInputs.filter((input) => input.dataset.source === source.value && input.checked)
                 .map((input) => input.value);
             for (const type of selected) {
-                jobs.push({source: source.value, types: [type], cursor: ''});
+                jobs.push({source: source.value, types: [type], cursor: '', state: 'queued', count: 0});
             }
         }
         if (!jobs.length) {
@@ -244,10 +322,6 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         const bounds = visibleBounds();
         if (bounds.some((value) => !Number.isFinite(value)) || bounds[0] >= bounds[2] || bounds[1] >= bounds[3]) {
             showStatus(dialog.dataset.areaError, 'warning');
-            return;
-        }
-        if (bounds[2] - bounds[0] > 5 || bounds[3] - bounds[1] > 5) {
-            showStatus(dialog.dataset.zoomError, 'warning');
             return;
         }
         searchParameters = new URLSearchParams({
@@ -260,30 +334,38 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             north: String(bounds[3]),
         });
         loadMoreButton.hidden = true;
+        renderProgress();
         showStatus(dialog.dataset.searchingLabel, 'info');
         await loadPage(currentRequest);
     };
 
-    /** Commit the complete pending search to the one OpenData map layer. */
-    const save = () => {
-        if (saveButton.disabled || loadedPages === 0) {
+    /**
+     * Commit pending results to the one OpenData layer.
+     *
+     * @param {boolean} replace Whether to remove existing map items first.
+     */
+    const save = (replace) => {
+        if (pendingItems.length === 0 || (replace ? replaceButton : addButton).disabled) {
             return;
         }
-        const features = new ol.format.GeoJSON().readFeatures({type: 'FeatureCollection', features: pendingItems}, {
+        cancelRequests();
+        const existing = new Set(savedItems.map((item) => item.properties?.source + ':' + item.properties?.id));
+        const items = replace ? pendingItems : savedItems.concat(pendingItems.filter((item) =>
+            !existing.has(item.properties?.source + ':' + item.properties?.id)));
+        const features = new ol.format.GeoJSON().readFeatures({type: 'FeatureCollection', features: items}, {
             dataProjection: 'EPSG:4326', featureProjection: map.getView().getProjection(),
         });
         vectorSource.clear();
         vectorSource.addFeatures(features);
+        savedItems = items;
         try {
-            sessionStorage.setItem(storageKey, JSON.stringify(pendingItems));
+            localStorage.setItem(storageKey, JSON.stringify(savedItems));
         } catch (error) {
-            // The current layer remains available if browser storage is full or disabled.
+            addToast(dialog.dataset.storageError, {type: 'warning'});
         }
-        activeFeature = null;
-        overlay.setPosition(undefined);
-        popup.style.display = 'none';
+        closePopup();
         ensureLayer();
-        addToast(dialog.dataset.addedLabel, {type: 'success'});
+        addToast(replace ? dialog.dataset.replacedLabel : dialog.dataset.addedLabel, {type: 'success'});
         modal.hide();
     };
 
@@ -302,6 +384,21 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const detailCache = new Map();
     const detailRequests = new Map();
     let activeFeature = null;
+
+    /** Close the OpenData card and ignore any detail request still in flight. */
+    const closePopup = () => {
+        activeFeature = null;
+        overlay.setPosition(undefined);
+        popup.style.display = 'none';
+    };
+    const closeButton = document.createElement('a');
+    closeButton.href = '#';
+    closeButton.className = 'ol-popup-closer treasurehunt-opendata-closer';
+    closeButton.setAttribute('aria-label', dialog.dataset.closeLabel);
+    closeButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        closePopup();
+    });
 
     /**
      * Create an external link without interpreting text from Wikidata as HTML.
@@ -325,6 +422,24 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     };
 
     /**
+     * Add the selected search theme to any categories reported by the provider.
+     *
+     * @param {Object} feature Saved OpenData feature.
+     * @param {Object|null} details Additional provider metadata.
+     * @returns {Array<Object>} Category tags.
+     */
+    const itemCategories = (feature, details) => {
+        const categories = [...(details?.categories || [])];
+        const theme = feature.get('theme');
+        const themeInput = typeInputs.find((input) => input.dataset.source === feature.get('source') &&
+            input.value === theme);
+        if (theme && theme !== 'all' && themeInput) {
+            categories.push({label: themeInput.closest('label').textContent.trim()});
+        }
+        return categories;
+    };
+
+    /**
      * Create a stage at the item location, then open its normal editing form.
      *
      * @param {Object} feature Saved OpenData feature.
@@ -333,22 +448,50 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const createStage = (feature, button) => {
         const context = editor.stageContext();
         if (!context.canCreate || !context.roadid) {
+            addToast(dialog.dataset.cannotCreateStage, {type: 'warning'});
             return;
         }
         button.disabled = true;
+        button.textContent = dialog.dataset.creatingStageLabel;
+        /** Restore the button after a failed request or save. */
+        const restoreButton = () => {
+            button.disabled = false;
+            button.textContent = dialog.dataset.createStageLabel;
+        };
         editor.beforeCreate(async() => {
             try {
+                const source = feature.get('source');
+                const itemId = feature.get('id');
+                let details = detailCache.get(source + ':' + itemId);
+                if (!details && !feature.get('detailsready')) {
+                    try {
+                        details = await loadDetails(itemId, source);
+                    } catch (error) {
+                        // Search result metadata can still initialize the teacher's stage.
+                    }
+                }
+                const metadata = {
+                    description: details?.description || feature.get('description') || '',
+                    image: details?.image || feature.get('image') || '',
+                    url: feature.get('url') || '',
+                    aliases: details?.aliases || feature.get('aliases') || [],
+                    websites: details?.websites || feature.get('websites') || [],
+                    types: details?.types || [],
+                    subjects: details?.subjects || [],
+                    categories: itemCategories(feature, details),
+                    fields: details?.fields || {},
+                };
                 const point = ol.proj.transform(feature.getGeometry().getCoordinates(),
                     map.getView().getProjection(), 'EPSG:4326');
                 const parameters = new URLSearchParams({
                     action: 'createstage',
                     id: dialog.dataset.cmid,
                     sesskey: dialog.dataset.sesskey,
-                    source: feature.get('source'),
+                    source,
                     roadid: String(context.roadid),
                     lockid: String(editor.stageContext().lockid),
                     name: feature.get('name'),
-                    description: feature.get('description') || '',
+                    metadata: JSON.stringify(metadata),
                     longitude: String(point[0]),
                     latitude: String(point[1]),
                 });
@@ -364,12 +507,10 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                 }
                 window.location.assign(data.editurl);
             } catch (error) {
-                button.disabled = false;
+                restoreButton();
                 addToast(error.message || dialog.dataset.serviceError, {type: 'warning'});
             }
-        }, () => {
-            button.disabled = false;
-        });
+        }, restoreButton);
     };
 
     /**
@@ -380,12 +521,13 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
      * @param {string} state loading, error or complete.
      */
     const renderCard = (feature, details, state) => {
-        popup.replaceChildren();
+        popup.replaceChildren(closeButton);
         const name = feature.get('name') || feature.get('id');
-        if (details?.image) {
+        const image = details?.image || feature.get('image');
+        if (image) {
             const picture = document.createElement('img');
             picture.className = 'card-img-top treasurehunt-opendata-image';
-            picture.src = details.image;
+            picture.src = image;
             picture.alt = name;
             picture.loading = 'lazy';
             picture.addEventListener('error', () => picture.remove());
@@ -408,21 +550,60 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             summary.textContent = description;
             body.appendChild(summary);
         }
-        if (details?.aliases?.length) {
+        const aliases = details?.aliases || feature.get('aliases');
+        if (aliases?.length) {
             const aliasHeading = document.createElement('div');
             aliasHeading.className = 'small text-muted text-uppercase mt-2 mb-1';
             aliasHeading.textContent = dialog.dataset.aliasesLabel;
             body.appendChild(aliasHeading);
-            const aliases = document.createElement('div');
-            aliases.className = 'treasurehunt-opendata-aliases';
-            details.aliases.forEach((alias) => {
+            const aliasList = document.createElement('div');
+            aliasList.className = 'treasurehunt-opendata-aliases';
+            aliases.forEach((alias) => {
                 const chip = document.createElement('span');
                 chip.className = 'treasurehunt-opendata-alias';
                 chip.textContent = alias;
-                aliases.appendChild(chip);
+                aliasList.appendChild(chip);
             });
-            body.appendChild(aliases);
+            body.appendChild(aliasList);
         }
+        [['types', dialog.dataset.itemTypesLabel], ['subjects', dialog.dataset.subjectsLabel],
+            ['categories', dialog.dataset.categoriesLabel]].forEach(([field, label]) => {
+            const values = field === 'categories' ? itemCategories(feature, details) : details?.[field];
+            if (!values?.length) {
+                return;
+            }
+            const heading = document.createElement('div');
+            heading.className = 'small text-muted text-uppercase mt-2 mb-1';
+            heading.textContent = label;
+            body.appendChild(heading);
+            const tags = document.createElement('div');
+            tags.className = 'treasurehunt-opendata-tags';
+            values.forEach((tag) => {
+                const linked = typeof tag.url === 'string' &&
+                    /^https:\/\/(www\.europeana\.eu|www\.wikidata\.org)\//.test(tag.url);
+                const element = document.createElement(linked ? 'a' : 'span');
+                element.className = 'treasurehunt-opendata-tag';
+                element.textContent = tag.label;
+                if (linked) {
+                    element.href = tag.url;
+                    element.target = '_blank';
+                    element.rel = 'noopener noreferrer';
+                }
+                tags.appendChild(element);
+            });
+            body.appendChild(tags);
+        });
+        Object.entries(details?.fields || {}).forEach(([field, values]) => {
+            if (!fieldLabels[field] || !Array.isArray(values) || !values.length) {
+                return;
+            }
+            const line = document.createElement('p');
+            line.className = 'small mb-1';
+            const label = document.createElement('strong');
+            label.textContent = fieldLabels[field] + ': ';
+            line.append(label, document.createTextNode(values.join(', ')));
+            body.appendChild(line);
+        });
         if (state === 'loading' || state === 'error') {
             const note = document.createElement('div');
             note.className = 'small text-muted mt-2';
@@ -440,7 +621,7 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         const footer = document.createElement('div');
         footer.className = 'card-footer treasurehunt-opendata-links p-2';
         footer.appendChild(externalLink(feature.get('url'), feature.get('source') === 'europeana' ? 'Europeana' : 'Wikidata'));
-        details?.websites?.forEach((website) => footer.appendChild(externalLink(website.url,
+        (details?.websites || feature.get('websites') || []).forEach((website) => footer.appendChild(externalLink(website.url,
             website.type === 'official' ? dialog.dataset.officialLabel : dialog.dataset.aboutLabel)));
         popup.appendChild(footer);
         const action = document.createElement('div');
@@ -449,7 +630,6 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         createButton.type = 'button';
         createButton.className = 'btn btn-primary btn-sm w-100';
         createButton.textContent = dialog.dataset.createStageLabel;
-        createButton.disabled = !editor.stageContext().canCreate;
         createButton.addEventListener('click', () => createStage(feature, createButton));
         action.appendChild(createButton);
         popup.appendChild(action);
@@ -458,20 +638,22 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     /**
      * Fetch one card when opened; cache it for later clicks on the same resource.
      *
-     * @param {string} itemId Wikidata item identifier.
+     * @param {string} itemId Provider item identifier.
+     * @param {string} source Provider ID.
      * @returns {Promise<Object>} Card details.
      */
-    const loadDetails = (itemId) => {
-        if (detailCache.has(itemId)) {
-            return Promise.resolve(detailCache.get(itemId));
+    const loadDetails = (itemId, source) => {
+        const key = source + ':' + itemId;
+        if (detailCache.has(key)) {
+            return Promise.resolve(detailCache.get(key));
         }
-        if (!detailRequests.has(itemId)) {
+        if (!detailRequests.has(key)) {
             const parameters = new URLSearchParams({
                 action: 'details',
                 id: dialog.dataset.cmid,
                 sesskey: dialog.dataset.sesskey,
                 itemid: itemId,
-                source: 'wikidata',
+                source,
             });
             const request = fetch(dialog.dataset.searchUrl, {
                 method: 'POST',
@@ -483,32 +665,31 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                 if (!response.ok || data.error) {
                     throw new Error(data.error || dialog.dataset.serviceError);
                 }
-                detailCache.set(itemId, data);
+                detailCache.set(key, data);
                 return data;
-            }).finally(() => detailRequests.delete(itemId));
-            detailRequests.set(itemId, request);
+            }).finally(() => detailRequests.delete(key));
+            detailRequests.set(key, request);
         }
-        return detailRequests.get(itemId);
+        return detailRequests.get(key);
     };
 
     map.on('singleclick', (event) => {
         const feature = map.forEachFeatureAtPixel(event.pixel, (candidate) => candidate,
             {hitTolerance: 6, layerFilter: (layer) => layer.get('treasurehuntOpenData')});
-        activeFeature = feature || null;
-        tooltip.style.display = 'none';
         if (!feature) {
-            overlay.setPosition(undefined);
-            popup.style.display = 'none';
             return;
         }
-        const cached = feature.get('detailsready') ? {
+        activeFeature = feature;
+        tooltip.style.display = 'none';
+        const key = feature.get('source') + ':' + feature.get('id');
+        const cached = feature.get('source') !== 'europeana' && feature.get('detailsready') ? {
             image: feature.get('image'), websites: feature.get('websites'), aliases: feature.get('aliases'),
-        } : detailCache.get(feature.get('id'));
+        } : detailCache.get(key);
         renderCard(feature, cached, cached ? 'complete' : 'loading');
         popup.style.display = 'block';
         overlay.setPosition(event.coordinate);
         if (!cached) {
-            loadDetails(feature.get('id')).then((details) => {
+            loadDetails(feature.get('id'), feature.get('source')).then((details) => {
                 if (activeFeature === feature) {
                     renderCard(feature, details, 'complete');
                 }
@@ -539,10 +720,22 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         tooltip.style.display = 'none';
     });
 
-    // Preserve the confirmed layer while navigating to and from a stage form in this tab.
+    // Restore the confirmed layer for this activity and editor across browser sessions.
     try {
-        const stored = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
-        if (Array.isArray(stored) && stored.length && stored.length <= 5000) {
+        let serialized = localStorage.getItem(storageKey);
+        let previousKey = null;
+        if (!serialized) {
+            // Move results saved by the earlier tab-only implementation into persistent storage.
+            previousKey = 'treasurehuntOpenData:' + dialog.dataset.cmid;
+            serialized = sessionStorage.getItem(previousKey);
+        }
+        const stored = JSON.parse(serialized || 'null');
+        if (Array.isArray(stored) && stored.length) {
+            if (previousKey) {
+                localStorage.setItem(storageKey, serialized);
+                sessionStorage.removeItem(previousKey);
+            }
+            savedItems = stored;
             const features = new ol.format.GeoJSON().readFeatures({type: 'FeatureCollection', features: stored}, {
                 dataProjection: 'EPSG:4326', featureProjection: map.getView().getProjection(),
             });
@@ -550,11 +743,12 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             ensureLayer();
         }
     } catch (error) {
-        // Ignore unavailable or stale tab storage; the editor can run without it.
+        // Ignore unavailable or stale browser storage; the editor can run without it.
     }
 
     searchButton.addEventListener('click', search);
-    saveButton.addEventListener('click', save);
+    addButton.addEventListener('click', () => save(false));
+    replaceButton.addEventListener('click', () => save(true));
     loadMoreButton.addEventListener('click', () => loadPage(requestNumber));
     termInput.addEventListener('input', clearStatus);
     typeInputs.forEach((input) => input.addEventListener('change', () => {

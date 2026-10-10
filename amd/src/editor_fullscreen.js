@@ -33,6 +33,8 @@ export default function init(map) {
         return;
     }
     const icon = button.querySelector('i');
+    const storageKey = 'treasurehuntEditorFullscreen:' + window.location.pathname + ':' +
+        button.dataset.cmid + ':' + button.dataset.userid;
     let expanded = false;
     let requestedFullscreen = false;
     let requestSerial = 0;
@@ -43,12 +45,26 @@ export default function init(map) {
         window.setTimeout(() => map.updateSize(), 120);
     };
 
+    /** Put the editor at the top of the visible page, below Moodle's fixed navigation bar. */
+    const alignEditor = () => {
+        const navigation = document.querySelector('nav.navbar.fixed-top, .navbar.fixed-top');
+        const offset = navigation ? navigation.getBoundingClientRect().height : 0;
+        const top = editor.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({top: Math.max(0, top), behavior: 'instant'});
+    };
+
+    /** Wait until the normal layout has been applied before positioning the page. */
+    const alignAfterLayout = () => {
+        window.requestAnimationFrame(() => window.setTimeout(alignEditor, 0));
+    };
+
     /**
      * Apply the editor layout and the accessible button state.
      *
      * @param {boolean} active Whether the editor fills the screen.
+     * @param {boolean} remember Whether to save the user's new preference.
      */
-    const setExpanded = (active) => {
+    const setExpanded = (active, remember = true) => {
         expanded = active;
         editor.classList.toggle('is-fullscreen', active);
         document.body.classList.toggle('treasurehunt-editor-fullscreen', active);
@@ -59,8 +75,33 @@ export default function init(map) {
         icon.classList.toggle('fa-arrows-alt', !active);
         icon.classList.toggle('fa-compress', active);
         button.blur();
+        if (remember) {
+            try {
+                localStorage.setItem(storageKey, active ? '1' : '0');
+            } catch (error) {
+                // The editor remains usable when browser storage is disabled.
+            }
+        }
         resizeMap();
+        if (!active && remember) {
+            alignAfterLayout();
+        }
     };
+
+    let savedExpanded = false;
+    try {
+        savedExpanded = localStorage.getItem(storageKey) === '1';
+    } catch (error) {
+        // Use the normal layout when browser storage is disabled.
+    }
+    setExpanded(savedExpanded, false);
+    if (!savedExpanded) {
+        if (document.readyState === 'complete') {
+            alignAfterLayout();
+        } else {
+            window.addEventListener('load', alignAfterLayout, {once: true});
+        }
+    }
 
     button.addEventListener('click', async() => {
         if (expanded) {

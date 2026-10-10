@@ -45,7 +45,14 @@ try {
         $roadid = required_param('roadid', PARAM_INT);
         $lockid = required_param('lockid', PARAM_INT);
         $name = trim(required_param('name', PARAM_TEXT));
-        $description = trim(optional_param('description', '', PARAM_TEXT));
+        $metadatajson = optional_param('metadata', '{}', PARAM_RAW);
+        if (strlen($metadatajson) > 20000) {
+            throw new moodle_exception('opendatainvalidsearch', 'treasurehunt');
+        }
+        $metadata = json_decode($metadatajson, true);
+        if (!is_array($metadata)) {
+            throw new moodle_exception('opendatainvalidsearch', 'treasurehunt');
+        }
         $longitude = required_param('longitude', PARAM_FLOAT);
         $latitude = required_param('latitude', PARAM_FLOAT);
         treasurehunt_require_road_in_activity($roadid, $cm->instance);
@@ -55,8 +62,8 @@ try {
         if (!treasurehunt_ensure_editor_lock($lockid, $cm->instance, $USER->id)) {
             throw new moodle_exception('editorlocktaken', 'treasurehunt');
         }
-        $stageid = \mod_treasurehunt\opendata\stage_creator::create($roadid, $name, $description,
-            $longitude, $latitude, context_module::instance($cm->id));
+        $stageid = \mod_treasurehunt\opendata\stage_creator::create($roadid, $name,
+            $longitude, $latitude, context_module::instance($cm->id), $sourceid, $metadata);
         $result = ['editurl' => (new moodle_url('/mod/treasurehunt/editstage.php',
             ['cmid' => $cm->id, 'id' => $stageid]))->out(false)];
     } else if ($action === 'details') {
@@ -82,9 +89,16 @@ try {
     }
     echo json_encode($result, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR);
 } catch (moodle_exception $exception) {
-    http_response_code(400);
-    echo json_encode(['error' => $exception->getMessage()], JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR);
+    $providererror = in_array($exception->errorcode,
+        ['opendataserviceerror', 'opendataeuropeanaserviceerror'], true);
+    http_response_code($providererror ? 502 : 400);
+    $error = ['error' => $exception->getMessage(), 'code' => $exception->errorcode, 'source' => $sourceid];
+    if ($providererror && $sourceid === 'wikidata' && $exception->debuginfo) {
+        $error['diagnostic'] = $exception->debuginfo;
+    }
+    echo json_encode($error, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR);
 } catch (Throwable $exception) {
     http_response_code(502);
-    echo json_encode(['error' => get_string('opendataserviceerror', 'treasurehunt')], JSON_THROW_ON_ERROR);
+    echo json_encode(['error' => get_string('opendataserviceerror', 'treasurehunt'),
+        'code' => 'unexpected', 'source' => $sourceid], JSON_THROW_ON_ERROR);
 }

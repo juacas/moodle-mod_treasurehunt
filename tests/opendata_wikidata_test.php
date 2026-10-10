@@ -35,11 +35,20 @@ final class opendata_wikidata_test extends \advanced_testcase {
     /**
      * The search area grows by one full viewport width and height on each side.
      */
-    public function test_buffer_and_limit(): void {
+    public function test_buffer_without_size_limit(): void {
         $this->assertSame([-1.0, -2.0, 2.0, 4.0], wikidata::buffered_bounds([0, 0, 1, 2]));
         $this->assertSame([178.0, 75.0, 180.0, 90.0], wikidata::buffered_bounds([179, 80, 180, 85]));
+        $this->assertSame([-6.0, -1.0, 12.0, 2.0], wikidata::buffered_bounds([0, 0, 6, 1]));
+        $this->assertSame([-180.0, -90.0, 180.0, 90.0],
+            wikidata::buffered_bounds([-180, -90, 180, 90]));
+    }
+
+    /**
+     * Invalid geographic bounds remain rejected.
+     */
+    public function test_buffer_rejects_invalid_bounds(): void {
         $this->expectException(\moodle_exception::class);
-        wikidata::buffered_bounds([0, 0, 6, 1]);
+        wikidata::buffered_bounds([5, 0, 1, 2]);
     }
 
     /**
@@ -143,6 +152,8 @@ final class opendata_wikidata_test extends \advanced_testcase {
         $query = wikidata::build_details_query('Q42');
         $this->assertStringContainsString('VALUES ?item { wd:Q42 }', $query);
         $this->assertStringContainsString('wdt:P18', $query);
+        $this->assertStringContainsString('wdt:P31', $query);
+        $this->assertStringContainsString('wdt:P373', $query);
         $this->assertStringContainsString('wdt:P856', $query);
         $this->assertStringContainsString('wdt:P973', $query);
         $this->assertStringContainsString('skos:altLabel', $query);
@@ -170,6 +181,10 @@ final class opendata_wikidata_test extends \advanced_testcase {
             $binding('official', 'https://example.org/castle'),
             $binding('official', 'javascript:alert(1)'),
             $binding('about', 'https://example.org/history'),
+            ['kind' => ['value' => 'type'], 'value' => ['value' => 'http://www.wikidata.org/entity/Q23413'],
+                'valueLabel' => ['value' => 'castle']],
+            $binding('category', 'Castles in Spain'),
+            $binding('date', '1932-01-01T00:00:00Z'),
         ]]];
         $details = wikidata::parse_details($response, 'es');
         $this->assertSame('Castillo medieval', $details['description']);
@@ -180,5 +195,8 @@ final class opendata_wikidata_test extends \advanced_testcase {
         );
         $this->assertCount(2, $details['websites']);
         $this->assertSame('https://example.org/history', $details['websites'][1]['url']);
+        $this->assertSame('castle', $details['types'][0]['label']);
+        $this->assertSame('Castles in Spain', $details['categories'][0]['label']);
+        $this->assertSame(['1932-01-01'], $details['fields']['date']);
     }
 }

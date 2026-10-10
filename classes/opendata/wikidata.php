@@ -31,9 +31,6 @@ final class wikidata {
     /** Maximum number of items returned to the editor. */
     public const MAX_RESULTS = 100;
 
-    /** Maximum viewport width or height in degrees before applying the buffer. */
-    public const MAX_VIEW_SPAN = 5;
-
     /** Semantic category roots; IDs are controlled here, never supplied as SPARQL by the browser. */
     private const TYPES = [
         'all' => [],
@@ -62,9 +59,6 @@ final class wikidata {
         }
         $width = $east - $west;
         $height = $north - $south;
-        if ($width > self::MAX_VIEW_SPAN || $height > self::MAX_VIEW_SPAN) {
-            throw new \moodle_exception('opendatazoomrequired', 'treasurehunt');
-        }
         return [max(-180.0, $west - $width), max(-90.0, $south - $height),
             min(180.0, $east + $width), min(90.0, $north + $height)];
     }
@@ -185,14 +179,20 @@ final class wikidata {
         if (!preg_match('/^Q[1-9][0-9]*$/', $itemid)) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
-        return "SELECT ?kind ?value WHERE {\n  VALUES ?item { wd:" . $itemid . " }\n  " .
+        return "SELECT ?kind ?value ?valueLabel WHERE {\n  VALUES ?item { wd:" . $itemid . " }\n  " .
             '{ ?item wdt:P18 ?value. BIND("image" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P856 ?value. BIND("official" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P973 ?value. BIND("about" AS ?kind) }' . "\n  UNION " .
             '{ ?item skos:altLabel ?value. FILTER(LANG(?value) IN ("es", "en", "el")) ' .
             'BIND("alias" AS ?kind) }' . "\n  UNION " .
             '{ ?item schema:description ?value. FILTER(LANG(?value) IN ("es", "en", "el")) ' .
-            'BIND("description" AS ?kind) }' . "\n}" .
+            'BIND("description" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P31 ?value. BIND("type" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P373 ?value. BIND("category" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P571 ?value. BIND("date" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P131 ?value. BIND("location" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P170 ?value. BIND("creator" AS ?kind) }' . "\n  " .
+            'SERVICE wikibase:label { bd:serviceParam wikibase:language "es,en,el". }' . "\n}" .
             ' ORDER BY (IF(?kind = "image", 0, IF(?kind = "official", 1, ' .
             'IF(?kind = "about", 2, IF(?kind = "description", 3, 4))))) LIMIT 200';
     }
@@ -203,7 +203,7 @@ final class wikidata {
      * @param string $url Commons FilePath URL returned by Wikidata.
      * @return string Thumbnail URL, or empty string for unsupported values.
      */
-    private static function image_url(string $url): string {
+    public static function image_url(string $url): string {
         $parts = parse_url($url);
         $prefix = '/wiki/Special:FilePath/';
         if (!is_array($parts) || strtolower($parts['host'] ?? '') !== 'commons.wikimedia.org' ||
@@ -245,6 +245,9 @@ final class wikidata {
         $aboutwebsites = [];
         $image = '';
         $descriptions = [];
+        $types = [];
+        $categories = [];
+        $fields = [];
         foreach ($response['results']['bindings'] ?? [] as $binding) {
             $kind = $binding['kind']['value'] ?? '';
             $value = $binding['value']['value'] ?? '';
@@ -269,6 +272,28 @@ final class wikidata {
                         $descriptions[$lang] = \core_text::substr($value, 0, 500);
                     }
                     break;
+                case 'type':
+                case 'category':
+                case 'date':
+                case 'location':
+                case 'creator':
+                    $label = $binding['valueLabel']['value'] ?? $value;
+                    if ($kind === 'date') {
+                        $label = substr($value, 0, 10);
+                    }
+                    if (!is_string($label) || $label === '' || \core_text::strlen($label) > 200) {
+                        break;
+                    }
+                    if ($kind === 'type' && count($types) < 12) {
+                        $url = preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match) ?
+                            'https://www.wikidata.org/wiki/' . $match[1] : '';
+                        $types[$label] = ['label' => $label, 'url' => $url];
+                    } else if ($kind === 'category' && count($categories) < 12) {
+                        $categories[$label] = ['label' => $label, 'url' => ''];
+                    } else if (in_array($kind, ['date', 'location', 'creator'], true) && count($fields[$kind] ?? []) < 8) {
+                        $fields[$kind][$label] = $label;
+                    }
+                    break;
                 case 'official':
                 case 'about':
                     if (!self::valid_website($value) || isset($officialwebsites[$value]) ||
@@ -290,6 +315,9 @@ final class wikidata {
             'websites' => array_values($officialwebsites + $aboutwebsites),
             'description' => $descriptions[$language] ?? $descriptions['es'] ?? $descriptions['en'] ??
                 $descriptions['el'] ?? '',
+            'types' => array_values($types),
+            'categories' => array_values($categories),
+            'fields' => array_map('array_values', $fields),
         ];
     }
 
@@ -335,12 +363,20 @@ final class wikidata {
         $body = $curl->get('https://query.wikidata.org/sparql', ['query' => $query],
             ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20]);
         $info = $curl->get_info();
-        if ($curl->get_errno() || ($info['http_code'] ?? 0) !== 200 || strlen($body) > 2000000) {
-            throw new \moodle_exception('opendataserviceerror', 'treasurehunt');
+        $httpcode = (int)($info['http_code'] ?? 0);
+        if ($curl->get_errno() || $httpcode !== 200 || strlen((string)$body) > 2000000) {
+            $diagnostic = 'Wikidata Query Service HTTP ' . $httpcode . ', cURL ' . $curl->get_errno();
+            if ($httpcode === 400) {
+                // The query service explains malformed SPARQL in its response body.
+                $detail = trim(preg_replace('/\s+/', ' ', strip_tags(substr((string)$body, 0, 1500))));
+                $diagnostic .= ': ' . \core_text::substr($detail, 0, 400);
+            }
+            throw new \moodle_exception('opendataserviceerror', 'treasurehunt', '', null, $diagnostic);
         }
         $response = json_decode($body, true);
         if (!is_array($response) || !isset($response['results']['bindings'])) {
-            throw new \moodle_exception('opendataserviceerror', 'treasurehunt');
+            throw new \moodle_exception('opendataserviceerror', 'treasurehunt', '', null,
+                'Wikidata Query Service returned invalid SPARQL JSON');
         }
         return $response;
     }
