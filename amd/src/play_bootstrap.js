@@ -852,6 +852,7 @@ function initplaytreasurehunt(
       .done((response) => {
         qoaremoved = response.qoaremoved;
         roadfinished = response.roadfinished;
+        $("#roadendedstage").html(response.endmessage || "").toggleClass("d-none", !response.endmessage);
         available = response.available;
 
         // If I have sent a location or an answer I print out whether it is correct or not.
@@ -921,7 +922,6 @@ function initplaytreasurehunt(
           selectedclueindex = Math.max(0,
             availableclues.findIndex((clue) => selectedclue && clue.stageid === selectedclue.stageid
               && clue.html === selectedclue.html));
-          renderAvailableClues();
         }
 
         if (
@@ -987,6 +987,7 @@ function initplaytreasurehunt(
           set_question();
           set_attempts_history();
         }
+        renderAvailableClues();
         const dialogmessages = response.infomsg.filter((msg) => msg !== strings["successlocation"]);
         if (dialogmessages.length > 0) {
           let body = "";
@@ -1115,7 +1116,7 @@ function initplaytreasurehunt(
         /color/gm,
         "color-disabled"
       );
-      $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+      $("#lastsuccessfulstagelegacy").html(lastsuccessfulstage.clue);
 
       $("#lastsuccessfulstagename").text(lastsuccessfulstage.name);
       $("#lastsuccesfulstagepos").text(
@@ -1132,17 +1133,22 @@ function initplaytreasurehunt(
   /** Render the available clues as accessible Bootstrap tabs. */
   function renderAvailableClues() {
     const container = $("#availableclues");
+    const clueBody = $("#lastsuccessfulstageclue");
+    const legacyClue = $("#lastsuccessfulstagelegacy");
     const tabs = $("#availablecluetabs").empty();
     const content = $("#availablecluecontent").empty();
     if (availableclues.length === 0) {
+      const showLegacy = roadfinished || !available || Boolean(lastsuccessfulstage.clue);
       container.addClass("d-none");
-      $("#lastsuccessfulstageclue").toggle(roadfinished || !available);
-      $("#lastsuccessfulstageheading").toggle(roadfinished || !available);
+      legacyClue.toggle(showLegacy);
+      clueBody.toggle(showLegacy);
+      $("#lastsuccessfulstageheading").toggle(showLegacy);
       $("#cluetitle").text(strings.nextclue);
       return;
     }
     container.removeClass("d-none");
-    $("#lastsuccessfulstageclue").hide();
+    legacyClue.hide();
+    clueBody.show();
     $("#lastsuccessfulstageheading").hide();
     $("#cluetitle").text(availableclues.length > 1 ? strings.nextclues : strings.nextclue);
     availableclues.forEach((clue, index) => {
@@ -1429,15 +1435,17 @@ function initplaytreasurehunt(
         body = "<p>" + info + "</p>";
       }
       if (features.selected[0].get("geometrysolved")) {
-        if (stagename && stageclue) {
+        if (stagename) {
           title = strings["stageovercome"];
           body += get_block_text(strings["stagename"], stagename);
-          body += get_block_text(strings["stageclue"], stageclue);
         } else {
           title = strings["discoveredlocation"];
         }
       } else {
         title = strings["failedlocation"];
+      }
+      if (stageclue) {
+        body += get_block_text(strings["stageclue"], stageclue);
       }
       $("#infoStagePopup .title").text(title);
       $("#infoStagePopup .play-modal-content").html(body);
@@ -1742,7 +1750,7 @@ function initplaytreasurehunt(
     return `<div class="card">
           <div class="card-body">
             <h5 class="card-title">${title}</h5>
-            <h6 class="card-subtitle text-muted">${body}</h6>
+            <div class="card-text">${body}</div>
           </div>
       </div>`;
   }
