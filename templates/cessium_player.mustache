@@ -96,8 +96,9 @@
 
     <dialog id="cessium-clue-dialog" class="cessium-dialog" aria-labelledby="cessium-clue-title">
         <div class="cessium-dialog-header"><span class="cessium-dialog-kicker">{{#str}}showclue, mod_treasurehunt{{/str}}</span><button type="button" class="cessium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
-        <h2 id="cessium-clue-title">{{#str}}showclue, mod_treasurehunt{{/str}}</h2>
-        <div id="cessium-clue-content" class="cessium-richtext"></div>
+        <h2 id="cessium-clue-title">{{#str}}nextclue, mod_treasurehunt{{/str}}</h2>
+        <div id="cessium-clue-tabs" class="cessium-clue-tabs" role="tablist" aria-label="{{#str}}nextclues, mod_treasurehunt{{/str}}" hidden></div>
+        <div id="cessium-clue-content" class="cessium-clue-content"></div>
         <button type="button" id="cessium-question-open" class="cessium-dialog-action" hidden>{{#str}}question, mod_treasurehunt{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
     </dialog>
 

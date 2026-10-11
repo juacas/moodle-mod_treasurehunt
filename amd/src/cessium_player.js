@@ -25,8 +25,13 @@ import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
 const TERRAIN_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
-const PEGMAN_HEIGHT = 1.85;
-const MARKER_HEIGHT_PX = 64;
+const PEGMAN_HEIGHT = 1.7;
+const PEGMAN_REFERENCE_HEIGHT_PX = 100;
+const PEGMAN_ZOOM_FACTOR = 2;
+const PEGMAN_SCALE_SHAKE_MS = 500;
+const PEGMAN_SCALE_SHAKE_HZ = 10;
+const PEGMAN_SCALE_BOUNCE_MS = 2000;
+const COMPASS_ARROW_LENGTH_PX = 64;
 let cesiumPromise;
 
 /**
@@ -324,6 +329,13 @@ export const init = async() => {
     let stageSignature = '';
     let attempts = [];
     let marker;
+    let markerScaleCalculated = false;
+    let markerScaleReference = null;
+    let markerScaleFrame = null;
+    let cameraReady = false;
+    let fitInProgress = false;
+    let flightCompletion = Promise.resolve();
+    let gameStateLoaded = false;
     let compassArrow;
     let compassBearing = null;
     let gpsmarker;
@@ -332,6 +344,9 @@ export const init = async() => {
     let gpsposition = null;
     let geowatch = null;
     let stage = null;
+    let availableClues = [];
+    let selectedClueIndex = 0;
+    let clueSignature = '';
     let stageposition = 1;
     let totalstages = 0;
     let roadfinished = false;
@@ -439,14 +454,12 @@ export const init = async() => {
         layerSelectionSubscription = selection.subscribe((item) => {
             const isSatellite = item === satellite;
             viewer.scene.globe.enableLighting = isSatellite;
-            viewer.clock.shouldAnimate = isSatellite;
             if (isSatellite) {
                 viewer.clock.currentTime = Cesium.JulianDate.now();
             }
             viewer.scene.requestRender();
         });
         viewer.scene.globe.enableLighting = selectedImagery === satellite;
-        viewer.clock.shouldAnimate = selectedImagery === satellite;
         if (selectedImagery === satellite) {
             viewer.clock.currentTime = Cesium.JulianDate.now();
         }
@@ -487,8 +500,10 @@ export const init = async() => {
                 name: labels.selectedposition,
                 model: {
                     uri: config.pegmanmodelurl,
-                    scale: 0.15,
+                    show: false,
+                    scale: 1,
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    runAnimations: true,
                     imageBasedLightingFactor: new Cesium.Cartesian2(2.5, 1),
                 },
                 label: {
@@ -505,29 +520,118 @@ export const init = async() => {
                     disableDepthTestDistance: 0,
                 },
             });
+            // The glTF animation needs a clock tick and a rendered frame on every cycle.
+            viewer.scene.maximumRenderTimeChange = 0;
         }
         marker.position = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
-        updateMarkerScale();
+        if (cameraReady) {
+            updateMarkerScale();
+        }
         element('submit').disabled = roadfinished || !available || !position ||
             Boolean(stage?.question) || stage?.activitysolved === false;
         updateNavigation();
         viewer.scene.requestRender();
     };
 
-    /** Keep the model close to the 64 px PNG attempt markers while the camera zooms. */
-    const updateMarkerScale = () => {
-        if (!marker || !position) {
-            return;
+    /**
+     * Find metres per CSS pixel at the camera's ground focus.
+     *
+     * @returns {number|null} Ground scale, or null if the viewport is not ready.
+     */
+    const getMarkerMetresPerPixel = () => {
+        if (!marker || !position || !cameraReady) {
+            return null;
         }
-        const cartographic = Cesium.Cartographic.fromDegrees(position[0], position[1]);
-        const height = viewer.scene.globe.getHeight(cartographic) || 0;
-        const centre = Cesium.Cartesian3.fromDegrees(position[0], position[1], height);
-        const sphere = new Cesium.BoundingSphere(centre, 0.01);
-        const metresPerPixel = viewer.camera.getPixelSize(sphere, viewer.scene.canvas.width, viewer.scene.canvas.height);
+        const canvas = viewer.scene.canvas;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (!width || !height) {
+            return null;
+        }
+        const screenCentre = new Cesium.Cartesian2(width / 2, height / 2);
+        const ray = viewer.camera.getPickRay(screenCentre);
+        const focus = ray && viewer.scene.globe.pick(ray, viewer.scene) ||
+            viewer.camera.pickEllipsoid(screenCentre, viewer.scene.globe.ellipsoid) ||
+            Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        // Passing CSS dimensions gives metres per CSS pixel, regardless of devicePixelRatio.
+        const metresPerPixel = viewer.camera.getPixelSize(new Cesium.BoundingSphere(focus, 0.01), width, height);
         if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
+            return null;
+        }
+        return metresPerPixel;
+    };
+
+    /** Fix the pegman's physical size from 100 CSS pixels at the camera's ground focus when positioned. */
+    const updateMarkerScale = () => {
+        const metresPerPixel = getMarkerMetresPerPixel();
+        if (metresPerPixel === null) {
             return;
         }
-        marker.model.scale = MARKER_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
+        if (markerScaleFrame !== null) {
+            window.cancelAnimationFrame(markerScaleFrame);
+            markerScaleFrame = null;
+        }
+        markerScaleReference = metresPerPixel;
+        marker.model.scale = PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
+        marker.model.show = true;
+        markerScaleCalculated = true;
+        viewer.scene.requestRender();
+    };
+
+    /**
+     * Tremble at the current size, then grow towards the new physical size and settle.
+     *
+     * @param {number} target New model scale.
+     */
+    const animateMarkerScale = (target) => {
+        if (markerScaleFrame !== null) {
+            window.cancelAnimationFrame(markerScaleFrame);
+            markerScaleFrame = null;
+        }
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            marker.model.scale = target;
+            viewer.scene.requestRender();
+            return;
+        }
+        const scaleProperty = marker.model.scale;
+        const current = scaleProperty?.getValue ? scaleProperty.getValue(viewer.clock.currentTime) : scaleProperty;
+        const from = Number.isFinite(Number(current)) && Number(current) > 0 ? Number(current) : target;
+        const started = performance.now();
+        const tick = (now) => {
+            const elapsed = Math.min(now - started, PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS);
+            let scale;
+            if (elapsed < PEGMAN_SCALE_SHAKE_MS) {
+                const phase = elapsed / PEGMAN_SCALE_SHAKE_MS;
+                const shake = 0.09 * Math.sin(Math.PI * phase) *
+                    Math.sin(2 * Math.PI * PEGMAN_SCALE_SHAKE_HZ * elapsed / 1000);
+                scale = from * (1 + shake);
+            } else {
+                const phase = (elapsed - PEGMAN_SCALE_SHAKE_MS) / PEGMAN_SCALE_BOUNCE_MS;
+                const remaining = phase - 1;
+                const easing = 1 + 2.5 * remaining ** 3 + 1.5 * remaining ** 2;
+                scale = from + (target - from) * easing;
+            }
+            marker.model.scale = elapsed === PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
+                target : Math.max(0.0001, scale);
+            viewer.scene.requestRender();
+            markerScaleFrame = elapsed < PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
+                window.requestAnimationFrame(tick) : null;
+        };
+        markerScaleFrame = window.requestAnimationFrame(tick);
+    };
+
+    /** Recalibrate only after zooming beyond twice the last calibrated view scale. */
+    const updateMarkerScaleAfterZoom = () => {
+        if (!markerScaleCalculated || markerScaleReference === null) {
+            return;
+        }
+        const metresPerPixel = getMarkerMetresPerPixel();
+        if (metresPerPixel === null || (metresPerPixel <= markerScaleReference * PEGMAN_ZOOM_FACTOR &&
+                metresPerPixel >= markerScaleReference / PEGMAN_ZOOM_FACTOR)) {
+            return;
+        }
+        markerScaleReference = metresPerPixel;
+        animateMarkerScale(PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT);
     };
 
     /**
@@ -560,7 +664,7 @@ export const init = async() => {
         if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
             return;
         }
-        const length = metresPerPixel * MARKER_HEIGHT_PX;
+        const length = metresPerPixel * COMPASS_ARROW_LENGTH_PX;
         const enu = Cesium.Transforms.eastNorthUpToFixedFrame(centre);
         const radians = Cesium.Math.toRadians(bearing);
         const east = Math.sin(radians);
@@ -620,8 +724,9 @@ export const init = async() => {
         const second = Cesium.Cartographic.fromDegrees(target[0], target[1]);
         const line = new Cesium.EllipsoidGeodesic(first, second);
         const distance = line.surfaceDistance;
-        const inside = playerconfig.showinzonehint && nextstage.features.some((feature) =>
+        const inZone = nextstage.features.some((feature) =>
             inGeometry(position, feature.geometry));
+        const inside = playerconfig.showinzonehint && inZone;
         let distanceText = '—';
         if (inside) {
             distanceText = labels.insidezone;
@@ -631,7 +736,7 @@ export const init = async() => {
         element('distance').textContent = distanceText;
         element('position-status').textContent = playwithoutmoving ? labels.selectedposition : labels.gpsposition;
         const bearing = Cesium.Math.toDegrees(line.startHeading || 0);
-        if (playerconfig.showheadinghint) {
+        if (playerconfig.showheadinghint && !inZone && distance >= 0.5) {
             updateCompass(bearing);
         } else {
             if (compassArrow) {
@@ -650,15 +755,48 @@ export const init = async() => {
 
     /** Fly to the visible stage, a recent attempt or the player's marker. */
     const fitMap = () => {
+        fitInProgress = true;
+        let resolveFlight;
+        flightCompletion = new Promise((resolve) => {
+            resolveFlight = resolve;
+        });
+        const finish = () => {
+            fitInProgress = false;
+            if (!cameraReady) {
+                cameraReady = true;
+                if (marker && !markerScaleCalculated) {
+                    updateMarkerScale();
+                }
+            }
+            resolveFlight();
+        };
         if (visibleStageBounds) {
-            viewer.camera.flyTo({destination: Cesium.Rectangle.fromDegrees(...visibleStageBounds), duration: 1.2});
+            viewer.camera.flyTo({
+                destination: Cesium.Rectangle.fromDegrees(...visibleStageBounds),
+                duration: 1.2,
+                complete: finish,
+                cancel: finish,
+            });
         } else if (attempts.length) {
-            viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2});
+            viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2}).then(finish, finish);
         } else if (marker || gpsmarker) {
-            viewer.flyTo(marker || gpsmarker, {duration: 1.2});
+            const target = marker && !marker.model.show ? gpsmarker : (marker || gpsmarker);
+            if (target) {
+                viewer.flyTo(target, {duration: 1.2}).then(finish, finish);
+            } else {
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(position[0], position[1], 1800),
+                    duration: 1.2,
+                    complete: finish,
+                    cancel: finish,
+                });
+            }
         } else {
             viewer.camera.flyHome(1.2);
+            fitInProgress = false;
+            resolveFlight();
         }
+        return flightCompletion;
     };
 
     /**
@@ -845,13 +983,8 @@ export const init = async() => {
         positionAttemptPopup();
     };
 
-    /** Update clue and question dialogs from a resolved stage. */
+    /** Update the question and objective from the last resolved stage. */
     const renderClue = () => {
-        const content = element('clue-content');
-        content.innerHTML = stage?.clue || '';
-        if (!content.textContent.trim() && !content.querySelector('img, video, iframe')) {
-            content.textContent = labels.nohint;
-        }
         const questionOpen = element('question-open');
         questionOpen.hidden = !stage?.question;
         const question = element('question-content');
@@ -871,6 +1004,118 @@ export const init = async() => {
             answers.appendChild(choice);
         });
         element('objective-text').textContent = stage?.name || labels.nohint;
+    };
+
+    /** Frame the geometry of the selected clue when the hunt reveals target areas. */
+    const focusSelectedClue = () => {
+        if (!playerconfig.shownextareahint) {
+            return;
+        }
+        const clue = availableClues[selectedClueIndex];
+        const feature = nextstage?.features?.find((item) => Number(item.id) === Number(clue?.stageid));
+        const bounds = feature && geometryBounds({features: [feature]});
+        if (bounds) {
+            viewer.camera.flyTo({destination: Cesium.Rectangle.fromDegrees(...bounds), duration: 1.2});
+        }
+    };
+
+    /**
+     * Select a clue without moving the map during a response refresh.
+     *
+     * @param {number} index Clue index.
+     * @param {boolean} focusMap Whether to frame its visible geometry.
+     */
+    const selectClue = (index, focusMap) => {
+        selectedClueIndex = index;
+        const tabs = element('clue-tabs');
+        tabs.querySelectorAll('[role="tab"]').forEach((button, tabIndex) => {
+            button.classList.toggle('is-active', tabIndex === index);
+            button.setAttribute('aria-selected', String(tabIndex === index));
+            button.tabIndex = tabIndex === index ? 0 : -1;
+        });
+        Array.from(element('clue-content').children).forEach((pane, paneIndex) => {
+            pane.classList.toggle('is-active', paneIndex === index);
+            pane.setAttribute('aria-hidden', String(paneIndex !== index));
+        });
+        if (focusMap) {
+            focusSelectedClue();
+        }
+    };
+
+    /**
+     * Show one tab per clue supplied by the game service.
+     *
+     * @param {Array<Object>} clues Current available clues.
+     * @returns {boolean} Whether the available clues changed.
+     */
+    const renderAvailableClues = (clues) => {
+        const signature = JSON.stringify(clues.length ? clues : [clues, stage?.clue || '', roadfinished]);
+        if (signature === clueSignature) {
+            return false;
+        }
+        const tabs = element('clue-tabs');
+        const content = element('clue-content');
+        const restoreFocus = tabs.contains(document.activeElement);
+        const previouslySelected = availableClues[selectedClueIndex];
+        availableClues = clues;
+        const previousIndex = clues.findIndex((clue) => previouslySelected &&
+            clue.stageid === previouslySelected.stageid && clue.html === previouslySelected.html);
+        selectedClueIndex = Math.max(0, previousIndex);
+        clueSignature = signature;
+        tabs.replaceChildren();
+        content.replaceChildren();
+        tabs.hidden = clues.length === 0;
+        element('clue-title').textContent = clues.length > 1 ? labels.nextclues : labels.nextclue;
+        if (!clues.length) {
+            const fallback = document.createElement('div');
+            fallback.className = 'cessium-richtext';
+            fallback.innerHTML = stage?.clue || '';
+            if (!fallback.textContent.trim() && !fallback.querySelector('img, video, iframe')) {
+                fallback.textContent = labels.nohint;
+            }
+            content.appendChild(fallback);
+            return true;
+        }
+        clues.forEach((clue, index) => {
+            const tab = document.createElement('button');
+            tab.type = 'button';
+            tab.id = 'cessium-clue-tab-' + index;
+            tab.className = 'cessium-clue-tab';
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-controls', 'cessium-clue-panel-' + index);
+            tab.textContent = labels.clue + ' ' + clue.position;
+            tab.addEventListener('click', () => selectClue(index, true));
+            tab.addEventListener('keydown', (event) => {
+                let nextIndex = index;
+                if (event.key === 'ArrowRight') {
+                    nextIndex = (index + 1) % clues.length;
+                } else if (event.key === 'ArrowLeft') {
+                    nextIndex = (index + clues.length - 1) % clues.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = clues.length - 1;
+                } else {
+                    return;
+                }
+                event.preventDefault();
+                selectClue(nextIndex, true);
+                tabs.children[nextIndex].focus();
+            });
+            tabs.appendChild(tab);
+            const pane = document.createElement('div');
+            pane.id = 'cessium-clue-panel-' + index;
+            pane.className = 'cessium-clue-pane cessium-richtext';
+            pane.setAttribute('role', 'tabpanel');
+            pane.setAttribute('aria-labelledby', tab.id);
+            pane.innerHTML = clue.html;
+            content.appendChild(pane);
+        });
+        selectClue(selectedClueIndex, false);
+        if (restoreFocus) {
+            tabs.children[selectedClueIndex].focus({preventScroll: true});
+        }
+        return true;
     };
 
     /** Show the current progress and the possible actions. */
@@ -992,14 +1237,21 @@ export const init = async() => {
             stage = null;
             renderClue();
         }
+        const cluesChanged = renderAvailableClues(Array.isArray(response.clues) ? response.clues : []);
         await updateGeometry(response, action, previousStage);
+        if (action.initialize && !fitInProgress && !cameraReady && (position || attempts.length)) {
+            fitMap();
+        }
+        // Keep the initial message and clue closed until the destination is in view.
+        await flightCompletion;
         if (Array.isArray(response.attempthistory) && (response.attempthistory.length || action.initialize)) {
             history = response.attempthistory;
         }
         updateActions();
         updateNavigation();
         showMessages(response, action);
-        if (stage && previousStage !== stage.id && !roadfinished) {
+        if (!roadfinished && ((stage && previousStage !== stage.id) ||
+                (availableClues.length && (action.initialize || cluesChanged)))) {
             openDialog('clue');
         }
     };
@@ -1088,6 +1340,9 @@ export const init = async() => {
             }
             gpsmarker.position = Cesium.Cartesian3.fromDegrees(gpsposition[0], gpsposition[1]);
             viewer.scene.requestRender();
+            if (gameStateLoaded && !cameraReady && !fitInProgress && !playwithoutmoving) {
+                fitMap();
+            }
         }, (error) => toast(labels.geolocationproblem + ': ' + error.message, true), {
             enableHighAccuracy: true,
             maximumAge: 5000,
@@ -1192,11 +1447,11 @@ export const init = async() => {
         const removePopupPositioner = viewer.scene.postRender.addEventListener(positionAttemptPopup);
         viewer.camera.percentageChanged = 0.05;
         const removeCompassResizer = viewer.camera.changed.addEventListener(() => {
-            updateMarkerScale();
             if (compassBearing !== null && compassArrow?.show) {
                 updateCompass(compassBearing);
             }
         });
+        const removeZoomResizer = viewer.camera.moveEnd.addEventListener(updateMarkerScaleAfterZoom);
         handler.setInputAction((event) => {
             const picked = viewer.scene.pick(event.position);
             if (picked?.id?.treasurehuntAttempt) {
@@ -1233,6 +1488,11 @@ export const init = async() => {
             handler.destroy();
             removePopupPositioner();
             removeCompassResizer();
+            removeZoomResizer();
+            if (markerScaleFrame !== null) {
+                window.cancelAnimationFrame(markerScaleFrame);
+                markerScaleFrame = null;
+            }
             layerSelectionSubscription.dispose();
             layerPicker.destroy();
             viewer.destroy();
@@ -1274,6 +1534,7 @@ export const init = async() => {
                 initLayerPicker(custommapping);
                 viewer.scene.globe.depthTestAgainstTerrain = true;
                 viewer.scene.maximumRenderTimeChange = 60;
+                viewer.clock.shouldAnimate = true;
                 viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
                 viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(0, 25, 15000000), duration: 0});
                 bindInterface();
@@ -1282,6 +1543,14 @@ export const init = async() => {
                 }
             }
             await request({initialize: true});
+            gameStateLoaded = true;
+            if (!cameraReady && !fitInProgress) {
+                if (position || attempts.length) {
+                    fitMap();
+                } else if (playwithoutmoving) {
+                    cameraReady = true;
+                }
+            }
         } catch (error) {
             toast(labels.webserviceerror + ': ' + error.message, true);
             retry.hidden = false;

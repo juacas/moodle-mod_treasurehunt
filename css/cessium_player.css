@@ -539,7 +539,6 @@
 
 .cessium-dialog::backdrop {
     background: rgba(2, 9, 20, .59);
-    backdrop-filter: blur(5px);
 }
 
 .cessium-dialog-header {
@@ -551,6 +550,51 @@
     color: var(--cessium-ink);
     font-size: 27px;
     font-weight: 800;
+}
+
+.cessium-clue-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.cessium-clue-tabs[hidden] {
+    display: none;
+}
+
+.cessium-clue-tab {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: 1px solid rgba(92, 232, 246, .42);
+    border-radius: 10px;
+    color: var(--cessium-ink);
+    background: rgba(92, 232, 246, .08);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cessium-clue-tab:hover,
+.cessium-clue-tab:focus-visible,
+.cessium-clue-tab.is-active {
+    border-color: var(--cessium-cyan);
+    color: #05212d;
+    background: var(--cessium-cyan);
+}
+
+.cessium-clue-content {
+    display: grid;
+}
+
+.cessium-clue-pane {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.cessium-clue-pane.is-active {
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .cessium-richtext {
