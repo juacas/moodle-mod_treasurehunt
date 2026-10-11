@@ -699,7 +699,7 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
     $progresscache = cache::make('mod_treasurehunt', 'progressstate');
     $snapshot = $progresscache->get($scopekey);
     if (
-        $snapshot !== false && $snapshot->attemptid === $attemptid &&
+        $snapshot !== false && ($snapshot->schema ?? 0) === 2 && $snapshot->attemptid === $attemptid &&
             $snapshot->roadrevision === $roadrevision
     ) {
         $verifiedcache->set($scopekey, $snapshot->state);
@@ -715,9 +715,10 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
     $state->stages = $stages;
     $condition = $groupid ? 'a.groupid = ?' : 'a.groupid = 0 AND a.userid = ?';
     $params = [$roadid, $groupid ?: $userid];
-    $sql = "SELECT DISTINCT a.stageid FROM {treasurehunt_attempts} a
+    $sql = "SELECT a.stageid, MIN(a.id) AS firstsuccessid FROM {treasurehunt_attempts} a
               JOIN {treasurehunt_stages} s ON s.id = a.stageid
-             WHERE s.roadid = ? AND a.success = 1 AND $condition";
+             WHERE s.roadid = ? AND a.success = 1 AND $condition
+          GROUP BY a.stageid";
     $state->completed = $DB->get_records_sql($sql, $params);
     $state->next = null;
     $state->previous = null;
@@ -740,6 +741,7 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
         }
     }
     $progresscache->set($scopekey, (object)[
+        'schema' => 2,
         'attemptid' => $attemptid,
         'roadrevision' => $roadrevision,
         'state' => $state,
@@ -1450,7 +1452,9 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
     $featuresarray = [];
     foreach ($features as $feature) {
         $geometry = treasurehunt_wkt_to_object($feature->geometry);
-        if (isset($feature->cluetext)) {
+        if (property_exists($feature, 'playclue')) {
+            $cluetext = $feature->playclue;
+        } else if (isset($feature->cluetext)) {
             $cluetext = file_rewrite_pluginfile_urls(
                 $feature->cluetext,
                 'pluginfile.php',
@@ -1462,8 +1466,10 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         } else {
             $cluetext = null;
         }
-        // Format string to apply moodle filters.
-        $cluetext = format_text($cluetext);
+        // Attempt clues were formatted using the source stage and its file area.
+        if (!property_exists($feature, 'playclue')) {
+            $cluetext = format_text($cluetext);
+        }
         $name = isset($feature->name) ? format_text($feature->name) : '';
         $attr = [
             'roadid' => intval($feature->roadid),
@@ -1650,6 +1656,42 @@ SQL;
 }
 
 /**
+ * Check whether editor HTML contains visible text or embedded media.
+ *
+ * @param string|null $html Editor HTML.
+ * @return bool Whether the clue has content.
+ */
+function treasurehunt_has_clue_content(?string $html): bool {
+    $html = $html ?? '';
+    $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+    return (bool)preg_match('/[^\s\x{00A0}\x{200B}]/u', $text) ||
+        (bool)preg_match('/<(?:img|video|audio|iframe|object|embed|svg|math)\b/i', $html);
+}
+
+/**
+ * Choose the clue shown while searching for a stage.
+ *
+ * @param stdClass $stage Target stage.
+ * @param stdClass|null $previous Previous stage in the road.
+ * @param bool $previouscompleted Whether the previous stage was already completed.
+ * @return array|null Source stage and file area, or null when no clue is available.
+ */
+function treasurehunt_select_stage_clue_source($stage, $previous, $previouscompleted): ?array {
+    if ($previous && $previouscompleted) {
+        if (treasurehunt_has_clue_content($previous->cluetext)) {
+            return [$previous, 'cluetext'];
+        }
+        if (treasurehunt_has_clue_content($stage->clueforstage)) {
+            return [$stage, 'clueforstage'];
+        }
+    } else if ((!$previous || !empty($stage->discoveroutofsequence)) &&
+            treasurehunt_has_clue_content($stage->clueforstage)) {
+        return [$stage, 'clueforstage'];
+    }
+    return null;
+}
+
+/**
  * Get the user or group progress for a given road of an instance.
  * If the group identifier provided is not 0, the group is checked, else the user is checked.
  * TODO: Add caching.
@@ -1685,6 +1727,41 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
         . "a.id = apt.id INNER JOIN {treasurehunt_stages} r ON a.stageid=r.id WHERE "
         . "r.roadid=? AND $grouptype";
     $userprogress = $DB->get_records_sql($query, $params);
+    if ($userprogress) {
+        $roadstate = treasurehunt_get_road_stage_state($userid, $groupid, $roadid);
+        $stagebyid = [];
+        $previousbyid = [];
+        $previous = null;
+        foreach ($roadstate->stages as $stage) {
+            $stagebyid[$stage->id] = $stage;
+            $previousbyid[$stage->id] = $previous;
+            $previous = $stage;
+        }
+        foreach ($userprogress as $attempt) {
+            $stage = $stagebyid[$attempt->stageid] ?? null;
+            if (!$stage) {
+                continue;
+            }
+            $previous = $previousbyid[$stage->id];
+            // Compare attempt IDs so a stage solved later does not change an earlier marker's clue.
+            $previouscompleted = $previous && isset($roadstate->completed[$previous->id]) &&
+                $roadstate->completed[$previous->id]->firstsuccessid < $attempt->id;
+            $cluesource = treasurehunt_select_stage_clue_source($stage, $previous, $previouscompleted);
+            $attempt->playclue = '';
+            if ($cluesource) {
+                [$source, $area] = $cluesource;
+                $html = file_rewrite_pluginfile_urls(
+                    $source->{$area},
+                    'pluginfile.php',
+                    $context->id,
+                    'mod_treasurehunt',
+                    $area,
+                    $source->id
+                );
+                $attempt->playclue = format_text($html, $source->{$area . 'format'});
+            }
+        }
+    }
     $geometrysolved = false;
     foreach ($userprogress as $attempt) {
         if ($attempt->geometrysolved) {

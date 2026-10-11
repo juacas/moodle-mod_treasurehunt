@@ -249,6 +249,7 @@ class user_progress extends external_api {
                     VALUE_OPTIONAL
                 ),
                 'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
+                'endmessage' => new external_value(PARAM_RAW, 'Formatted final-stage road completion message.'),
                 'available' => new external_value(PARAM_BOOL, 'If true the hunt is available.'),
                 'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
                 'qrexpected' => new external_value(PARAM_BOOL, 'If true the QRScanner can be used.'),
@@ -645,22 +646,13 @@ class user_progress extends external_api {
             $previous = null;
             foreach ($roadstate->stages as $stage) {
                 if (!isset($roadstate->completed[$stage->id])) {
-                    $source = null;
-                    $area = 'clueforstage';
-                    if ($previous && isset($roadstate->completed[$previous->id])) {
-                        if (self::has_clue_content($previous->cluetext)) {
-                            $source = $previous;
-                            $area = 'cluetext';
-                        } else if (self::has_clue_content($stage->clueforstage)) {
-                            $source = $stage;
-                        }
-                    } else if (
-                        (!$previous || !empty($stage->discoveroutofsequence)) &&
-                            self::has_clue_content($stage->clueforstage)
-                    ) {
-                        $source = $stage;
-                    }
-                    if ($source) {
+                    $cluesource = treasurehunt_select_stage_clue_source(
+                        $stage,
+                        $previous,
+                        $previous && isset($roadstate->completed[$previous->id])
+                    );
+                    if ($cluesource) {
+                        [$source, $area] = $cluesource;
                         $result['clues'][] = self::format_stage_clue($source, $area, $stage, $context);
                     }
                 }
@@ -676,6 +668,18 @@ class user_progress extends external_api {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }
         $result['roadfinished'] = $roadfinished;
+        $result['endmessage'] = '';
+        if ($roadfinished) {
+            $finalstage = end($roadstate->stages);
+            if ($finalstage && treasurehunt_has_clue_content($finalstage->cluetext)) {
+                $result['endmessage'] = self::format_stage_clue(
+                    $finalstage,
+                    'cluetext',
+                    $finalstage,
+                    $context
+                )['html'];
+            }
+        }
         $result['available'] = $effectiveavailable;
         $result['playwithoutmoving'] = intval($playmode);
         $result['qrexpected'] = intval($qrmode);
@@ -731,19 +735,6 @@ class user_progress extends external_api {
             'position' => (int)$target->position,
             'html' => format_text($html, $stage->{$area . 'format'}),
         ];
-    }
-
-    /**
-     * Whether a rich text clue has text or embedded media.
-     *
-     * @param string|null $html Editor HTML.
-     * @return bool True when the clue is meaningful.
-     */
-    private static function has_clue_content(?string $html): bool {
-        $html = $html ?? '';
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        return (bool)preg_match('/[^\s\x{00A0}\x{200B}]/u', $text) ||
-            (bool)preg_match('/<(?:img|video|audio|iframe|object|embed|svg|math)\b/i', $html);
     }
 
     /**

@@ -415,6 +415,19 @@
 
 .cessium-finished i {
     font-size: 30px;
+    flex: 0 0 auto;
+    align-self: flex-start;
+}
+
+.cessium-finished-copy {
+    min-width: 0;
+}
+
+.cessium-finished-stage {
+    margin-top: 12px;
+    max-height: min(55vh, 420px);
+    overflow-y: auto;
+    font-weight: 400;
 }
 
 .cessium-toast {

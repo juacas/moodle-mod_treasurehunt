@@ -672,7 +672,7 @@ export const init = async() => {
         const solved = isEnabled(properties.geometrysolved);
         let title = labels.failedlocation;
         if (solved) {
-            title = properties.name && properties.clue ? labels.stageovercome : labels.discoveredlocation;
+            title = properties.name ? labels.stageovercome : labels.discoveredlocation;
         }
         element('attempt-title').textContent = title;
         const content = element('attempt-content');
@@ -682,20 +682,18 @@ export const init = async() => {
             info.innerHTML = properties.info;
             content.appendChild(info);
         }
-        if (solved) {
-            [[labels.stagename, properties.name], [labels.stageclue, properties.clue]].forEach(([label, value]) => {
-                if (value) {
-                    const field = document.createElement('div');
-                    field.className = 'cessium-attempt-field';
-                    const heading = document.createElement('span');
-                    heading.textContent = label;
-                    const body = document.createElement('div');
-                    body.innerHTML = value;
-                    field.append(heading, body);
-                    content.appendChild(field);
-                }
-            });
-        }
+        [[labels.stagename, solved ? properties.name : null], [labels.stageclue, properties.clue]].forEach(([label, value]) => {
+            if (value) {
+                const field = document.createElement('div');
+                field.className = 'cessium-attempt-field';
+                const heading = document.createElement('span');
+                heading.textContent = label;
+                const body = document.createElement('div');
+                body.innerHTML = value;
+                field.append(heading, body);
+                content.appendChild(field);
+            }
+        });
         selectedAttempt = entity;
         positionAttemptPopup();
     };
@@ -737,6 +735,7 @@ export const init = async() => {
         element('progress-bar').style.width = percent + '%';
         element('progress-track').setAttribute('aria-valuenow', String(percent));
         element('finished').hidden = !roadfinished;
+        element('clue').disabled = roadfinished;
         element('submit').disabled = roadfinished || !available || !position ||
             Boolean(stage?.question) || stage?.activitysolved === false;
         element('qr').hidden = !qrexpected || roadfinished || !available ||
@@ -829,6 +828,12 @@ export const init = async() => {
     const applyResponse = async(response, action) => {
         const previousStage = stage?.id;
         updateMode(response);
+        const finishstage = element('finished-stage');
+        finishstage.innerHTML = roadfinished ? response.endmessage || '' : '';
+        finishstage.hidden = !roadfinished || !response.endmessage;
+        if (roadfinished && element('clue-dialog').open) {
+            element('clue-dialog').close();
+        }
         if (response.attempts) {
             renderAttempts(response.attempts);
         }
@@ -847,7 +852,7 @@ export const init = async() => {
         updateActions();
         updateNavigation();
         showMessages(response, action);
-        if (stage && previousStage !== stage.id) {
+        if (stage && previousStage !== stage.id && !roadfinished) {
             openDialog('clue');
         }
     };
