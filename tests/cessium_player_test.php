@@ -55,7 +55,7 @@ final class cessium_player_test extends \advanced_testcase {
         $this->assertStringContainsString('id="cessium-finished-stage"', $html);
         $this->assertStringContainsString(get_string('roadended', 'treasurehunt'), $html);
         $this->assertStringContainsString('id="cessium-submit"', $html);
-        $this->assertStringContainsString('id="cessium-layer-select"', $html);
+        $this->assertStringContainsString('id="cessium-layer-picker"', $html);
         $this->assertStringContainsString('Cesium test mission', $html);
     }
 

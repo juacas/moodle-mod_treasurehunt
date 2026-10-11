@@ -115,6 +115,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_play_page_cessium_player(play_page_base $renderablepage) {
+        global $CFG;
+
         $treasurehunt = $renderablepage->treasurehunt;
         $cm = $renderablepage->cm;
         // A non-geographic image uses its own coordinate system and cannot be placed on a globe.
@@ -128,6 +130,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $config = [
             'cmid' => (int)$cm->id,
             'cesiumbaseurl' => (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false),
+            'pegmanmodelurl' => (new moodle_url('/mod/treasurehunt/pix/pegman_location_pin.glb', [
+                'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_location_pin.glb'),
+            ]))->out(false),
             'treasurehuntid' => (int)$cm->instance,
             'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
             'groupmode' => (bool)$treasurehunt->groupmode,
@@ -159,6 +164,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 'insidezone' => get_string('cessium_insidezone', 'treasurehunt'),
                 'layercustom' => get_string('cessium_layercustom', 'treasurehunt'),
                 'layererror' => get_string('cessium_layererror', 'treasurehunt'),
+                'terrainflat' => get_string('cessium_terrainflat', 'treasurehunt'),
+                'terrainrelief' => get_string('cessium_terrainrelief', 'treasurehunt'),
                 'wait' => get_string('cessium_wait', 'treasurehunt'),
             ],
         ];

@@ -49,19 +49,11 @@
     </section>
 
     <aside id="cessium-navigation" class="cessium-navigation" aria-live="polite" hidden>
-        <div class="cessium-nav-glyph" aria-hidden="true"><i class="fa fa-location-arrow" id="cessium-bearing-icon"></i></div>
         <div><span id="cessium-distance">—</span><small id="cessium-position-status">{{#str}}cessium_position, mod_treasurehunt{{/str}}</small></div>
     </aside>
 
     <div class="cessium-map-actions" role="group" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}">
-        <label class="cessium-layer-picker" for="cessium-layer-select">
-            <i class="fa fa-map-o" aria-hidden="true"></i>
-            <span class="sr-only">{{#str}}cessium_layers, mod_treasurehunt{{/str}}</span>
-            <select id="cessium-layer-select" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}">
-                <option value="osm">{{#str}}cessium_layerosm, mod_treasurehunt{{/str}}</option>
-                <option value="satellite">{{#str}}cessium_layersatellite, mod_treasurehunt{{/str}}</option>
-            </select>
-        </label>
+        <div id="cessium-layer-picker" class="cessium-layer-picker" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}"></div>
         <button type="button" id="cessium-fit" title="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}"><i class="fa fa-crosshairs" aria-hidden="true"></i></button>
         <button type="button" id="cessium-locate" title="{{#str}}cessium_position, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_position, mod_treasurehunt{{/str}}"><i class="fa fa-location-arrow" aria-hidden="true"></i></button>
         <button type="button" id="cessium-viewmode" title="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}"><i class="fa fa-globe" aria-hidden="true"></i></button>

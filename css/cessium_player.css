@@ -244,17 +244,6 @@
     backdrop-filter: blur(18px);
 }
 
-.cessium-nav-glyph {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 211, 134, .55);
-    color: var(--cessium-gold);
-    font-size: 20px;
-}
-
 .cessium-navigation span,
 .cessium-navigation small {
     display: block;
@@ -279,44 +268,41 @@
 }
 
 .cessium-layer-picker {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    width: 210px;
-    min-height: 44px;
-    padding: 0 11px;
+    position: relative;
+    order: 4;
+    width: 44px;
+    height: 44px;
+}
+
+.cessium-layer-picker .cesium-baseLayerPicker-selected {
     border: 1px solid rgba(118, 209, 229, .55);
     border-radius: 12px;
     color: var(--cessium-cyan);
     background: var(--cessium-surface);
-    backdrop-filter: blur(12px);
+    overflow: hidden;
 }
 
-.cessium-layer-picker:focus-within {
+.cessium-layer-picker .cesium-baseLayerPicker-selected:focus-visible {
     border-color: var(--cessium-cyan);
     outline: 2px solid var(--cessium-cyan);
     outline-offset: 2px;
 }
 
-.cessium-layer-picker select {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    color: var(--cessium-ink);
-    background: transparent;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
-    cursor: pointer;
+.cessium-layer-picker .cesium-baseLayerPicker-dropDown {
+    top: auto;
+    bottom: calc(100% + 8px);
+    right: 0;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(600px, var(--cessium-picker-available-height, 70vh));
+    margin: 0;
+    overflow-y: auto;
+    border-color: rgba(118, 209, 229, .55);
+    background: rgba(13, 23, 31, .96);
+    box-shadow: 0 20px 55px rgba(0, 6, 17, .6);
 }
 
-.cessium-layer-picker option {
-    color: #081727;
-    background: #eefbff;
-}
-
-.cessium-map-actions button,
+.cessium-map-actions > button,
 .cessium-close {
     display: grid;
     place-items: center;
@@ -329,8 +315,8 @@
     backdrop-filter: blur(12px);
 }
 
-.cessium-map-actions button:hover,
-.cessium-map-actions button:focus-visible,
+.cessium-map-actions > button:hover,
+.cessium-map-actions > button:focus-visible,
 .cessium-close:hover,
 .cessium-close:focus-visible {
     color: var(--cessium-cyan);
@@ -689,10 +675,6 @@
         min-width: 0;
         padding: 8px 10px;
     }
-    .cessium-nav-glyph {
-        width: 32px;
-        height: 32px;
-    }
     .cessium-navigation span {
         font-size: 13px;
     }
@@ -701,10 +683,10 @@
         bottom: 173px;
     }
     .cessium-layer-picker {
-        width: min(180px, 48vw);
-        min-height: 38px;
+        width: 38px;
+        height: 38px;
     }
-    .cessium-map-actions button {
+    .cessium-map-actions > button {
         width: 38px;
         height: 38px;
     }

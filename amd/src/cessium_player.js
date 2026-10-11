@@ -24,6 +24,9 @@ import ajax from 'core/ajax';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
+const TERRAIN_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
+const PEGMAN_HEIGHT = 1.85;
+const MARKER_HEIGHT_PX = 64;
 let cesiumPromise;
 
 /**
@@ -103,9 +106,9 @@ const loadCesium = (baseUrl) => {
  *
  * @param {Object} Cesium Cesium namespace.
  * @param {Object} mapping Activity map configuration.
- * @returns {Promise<Object>} Cesium imagery layer.
+ * @returns {Promise<Object>} Cesium imagery provider.
  */
-const createBaseLayer = async(Cesium, mapping) => {
+const createBaseProvider = async(Cesium, mapping) => {
     let provider;
     if (mapping && mapping.custombackgroundurl && Array.isArray(mapping.bbox)) {
         provider = await Cesium.SingleTileImageryProvider.fromUrl(mapping.custombackgroundurl, {
@@ -130,18 +133,16 @@ const createBaseLayer = async(Cesium, mapping) => {
             credit: '© OpenStreetMap contributors',
         });
     }
-    return new Cesium.ImageryLayer(provider);
+    return provider;
 };
 
 /**
- * Create the photographic globe layer; Cesium's sun lighting supplies its day/night shading.
+ * Create the initial OpenStreetMap layer while the base layer picker starts.
  *
  * @param {Object} Cesium Cesium namespace.
- * @returns {Promise<Object>} Satellite imagery layer.
+ * @returns {Promise<Object>} Cesium imagery layer.
  */
-const createSatelliteLayer = async(Cesium) => new Cesium.ImageryLayer(
-    await Cesium.ArcGisMapServerImageryProvider.fromUrl(SATELLITE_URL)
-);
+const createBaseLayer = async(Cesium) => new Cesium.ImageryLayer(await createBaseProvider(Cesium, null));
 
 /**
  * Get all longitude/latitude pairs from a GeoJSON geometry.
@@ -307,13 +308,24 @@ export const init = async() => {
     const retry = element('retry');
     let viewer;
     let Cesium;
-    const mapLayers = {};
+    let layerPicker;
+    let layerSelectionSubscription;
+    /** Keep the gallery inside the visible area when the viewport changes. */
+    const updateLayerPickerLayout = () => {
+        const picker = element('layer-picker');
+        if (picker) {
+            const available = Math.max(0, Math.floor(picker.getBoundingClientRect().top - 12));
+            picker.style.setProperty('--cessium-picker-available-height', available + 'px');
+        }
+    };
     let stageSource;
     let visibleStageBounds;
     let nextstage = null;
     let stageSignature = '';
     let attempts = [];
     let marker;
+    let compassArrow;
+    let compassBearing = null;
     let gpsmarker;
     let selectedAttempt;
     let position = null;
@@ -335,8 +347,6 @@ export const init = async() => {
     let pollTimer;
     let toastTimer;
     let requestQueue = Promise.resolve();
-    let activeMapLayer = 'osm';
-    let layerRequest = 0;
 
     /**
      * Display an accessible status message without blocking the map.
@@ -359,40 +369,86 @@ export const init = async() => {
     };
 
     /**
-     * Change the visible map without recreating the globe or its game markers.
+     * Initialise Cesium's thumbnail picker with the activity map and flat terrain selected.
      *
-     * @param {string} layerId OSM, satellite or custom layer identifier.
+     * @param {Object|null} custommapping Validated custom activity map, if available.
      */
-    const selectMapLayer = async(layerId) => {
-        const requestId = ++layerRequest;
-        try {
-            if (layerId === 'satellite' && !mapLayers.satellite) {
-                const layer = await createSatelliteLayer(Cesium);
-                layer.show = false;
-                viewer.imageryLayers.add(layer);
-                mapLayers.satellite = layer;
-            }
-            if (requestId !== layerRequest) {
-                return;
-            }
-            if (mapLayers.satellite) {
-                mapLayers.satellite.show = layerId === 'satellite';
-            }
-            if (mapLayers.custom) {
-                mapLayers.custom.show = layerId === 'custom';
-            }
-            viewer.scene.globe.enableLighting = layerId === 'satellite';
-            viewer.clock.shouldAnimate = layerId === 'satellite';
-            if (layerId === 'satellite') {
+    const initLayerPicker = (custommapping) => {
+        const imagery = Cesium.createDefaultImageryProviderViewModels();
+        const satelliteIndex = imagery.findIndex((item) => item.name === 'ArcGIS World Imagery');
+        const officialSatellite = imagery[satelliteIndex];
+        const satellite = new Cesium.ProviderViewModel({
+            name: officialSatellite?.name || labels.layersatellite,
+            tooltip: officialSatellite?.tooltip || labels.layersatellite,
+            iconUrl: officialSatellite?.iconUrl ||
+                Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+            category: officialSatellite?.category || 'Other',
+            creationFunction: () => Cesium.ArcGisMapServerImageryProvider.fromUrl(SATELLITE_URL),
+        });
+        if (satelliteIndex >= 0) {
+            imagery[satelliteIndex] = satellite;
+        } else {
+            imagery.push(satellite);
+        }
+
+        let selectedImagery = satellite;
+        if (custommapping) {
+            const custom = new Cesium.ProviderViewModel({
+                name: labels.layercustom,
+                tooltip: labels.layercustom,
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+                category: 'Other',
+                creationFunction: async() => [
+                    await createBaseProvider(Cesium, null),
+                    await createBaseProvider(Cesium, custommapping),
+                ],
+            });
+            imagery.push(custom);
+            selectedImagery = custom;
+        }
+
+        const flat = new Cesium.ProviderViewModel({
+            name: labels.terrainflat,
+            tooltip: labels.terrainflat,
+            iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/Ellipsoid.png'),
+            category: 'Other',
+            creationFunction: () => new Cesium.EllipsoidTerrainProvider(),
+        });
+        const relief = new Cesium.ProviderViewModel({
+            name: labels.terrainrelief,
+            tooltip: labels.terrainrelief,
+            iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/CesiumWorldTerrain.png'),
+            category: 'Other',
+            creationFunction: () => Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(TERRAIN_URL)
+                .catch((error) => {
+                    toast(labels.layererror + ': ' + error.message, true);
+                    return new Cesium.EllipsoidTerrainProvider();
+                }),
+        });
+
+        layerPicker = new Cesium.BaseLayerPicker('cessium-layer-picker', {
+            globe: viewer.scene.globe,
+            imageryProviderViewModels: imagery,
+            selectedImageryProviderViewModel: selectedImagery,
+            terrainProviderViewModels: [flat, relief],
+            selectedTerrainProviderViewModel: flat,
+        });
+        updateLayerPickerLayout();
+        window.addEventListener('resize', updateLayerPickerLayout);
+        const selection = Cesium.knockout.getObservable(layerPicker.viewModel, 'selectedImagery');
+        layerSelectionSubscription = selection.subscribe((item) => {
+            const isSatellite = item === satellite;
+            viewer.scene.globe.enableLighting = isSatellite;
+            viewer.clock.shouldAnimate = isSatellite;
+            if (isSatellite) {
                 viewer.clock.currentTime = Cesium.JulianDate.now();
             }
             viewer.scene.requestRender();
-            activeMapLayer = layerId;
-        } catch (error) {
-            if (requestId === layerRequest) {
-                element('layer-select').value = activeMapLayer;
-                toast(labels.layererror + ': ' + error.message, true);
-            }
+        });
+        viewer.scene.globe.enableLighting = selectedImagery === satellite;
+        viewer.clock.shouldAnimate = selectedImagery === satellite;
+        if (selectedImagery === satellite) {
+            viewer.clock.currentTime = Cesium.JulianDate.now();
         }
     };
 
@@ -429,11 +485,11 @@ export const init = async() => {
         if (!marker) {
             marker = viewer.entities.add({
                 name: labels.selectedposition,
-                billboard: {
-                    image: './pix/bootstrap/my_location_3.png',
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
+                model: {
+                    uri: config.pegmanmodelurl,
+                    scale: 0.15,
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    disableDepthTestDistance: 0,
+                    imageBasedLightingFactor: new Cesium.Cartesian2(2.5, 1),
                 },
                 label: {
                     show: false,
@@ -444,17 +500,101 @@ export const init = async() => {
                     backgroundColor: Cesium.Color.fromCssColorString('#071d2f').withAlpha(0.9),
                     backgroundPadding: new Cesium.Cartesian2(10, 7),
                     verticalOrigin: Cesium.VerticalOrigin.TOP,
-                    pixelOffset: new Cesium.Cartesian2(0, 11),
+                    pixelOffset: new Cesium.Cartesian2(0, 24),
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                     disableDepthTestDistance: 0,
                 },
             });
         }
         marker.position = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        updateMarkerScale();
         element('submit').disabled = roadfinished || !available || !position ||
             Boolean(stage?.question) || stage?.activitysolved === false;
         updateNavigation();
         viewer.scene.requestRender();
+    };
+
+    /** Keep the model close to the 64 px PNG attempt markers while the camera zooms. */
+    const updateMarkerScale = () => {
+        if (!marker || !position) {
+            return;
+        }
+        const cartographic = Cesium.Cartographic.fromDegrees(position[0], position[1]);
+        const height = viewer.scene.globe.getHeight(cartographic) || 0;
+        const centre = Cesium.Cartesian3.fromDegrees(position[0], position[1], height);
+        const sphere = new Cesium.BoundingSphere(centre, 0.01);
+        const metresPerPixel = viewer.camera.getPixelSize(sphere, viewer.scene.canvas.width, viewer.scene.canvas.height);
+        if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
+            return;
+        }
+        marker.model.scale = MARKER_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
+    };
+
+    /**
+     * Face the pegman towards the navigation hint, or restore its default orientation.
+     * The model faces glTF +Z. Cesium's zero heading puts that axis to the east,
+     * so subtract 90 degrees to make a zero bearing face north.
+     *
+     * @param {number|null} bearing Direction clockwise from north, or null to reset.
+     */
+    const updateMarkerHeading = (bearing) => {
+        if (!marker) {
+            return;
+        }
+        marker.orientation = bearing === null ? undefined : Cesium.Transforms.headingPitchRollQuaternion(
+            Cesium.Cartesian3.fromDegrees(position[0], position[1]),
+            new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(bearing) - Cesium.Math.PI_OVER_TWO, 0, 0));
+    };
+
+    /**
+     * Place a bright green direction arrow on the terrain below the position model.
+     *
+     * @param {number} bearing Direction in degrees clockwise from north.
+     */
+    const updateCompass = (bearing) => {
+        const cartographic = Cesium.Cartographic.fromDegrees(position[0], position[1]);
+        const height = viewer.scene.globe.getHeight(cartographic) || 0;
+        const centre = Cesium.Cartesian3.fromDegrees(position[0], position[1], height);
+        const sphere = new Cesium.BoundingSphere(centre, 0.01);
+        const metresPerPixel = viewer.camera.getPixelSize(sphere, viewer.scene.canvas.width, viewer.scene.canvas.height);
+        if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
+            return;
+        }
+        const length = metresPerPixel * MARKER_HEIGHT_PX;
+        const enu = Cesium.Transforms.eastNorthUpToFixedFrame(centre);
+        const radians = Cesium.Math.toRadians(bearing);
+        const east = Math.sin(radians);
+        const north = Math.cos(radians);
+        const point = (forward, sideways) => {
+            const tangent = Cesium.Matrix4.multiplyByPoint(enu,
+                new Cesium.Cartesian3(east * forward + north * sideways,
+                    north * forward - east * sideways, 0), new Cesium.Cartesian3());
+            const onGlobe = Cesium.Cartographic.fromCartesian(tangent);
+            return Cesium.Cartesian3.fromRadians(onGlobe.longitude, onGlobe.latitude);
+        };
+        const arrow = new Cesium.PolygonHierarchy([
+            point(length * 1.2, 0),
+            point(length * 0.62, -length * 0.32),
+            point(length * 0.62, -length * 0.13),
+            point(length * 0.2, -length * 0.13),
+            point(length * 0.2, length * 0.13),
+            point(length * 0.62, length * 0.13),
+            point(length * 0.62, length * 0.32),
+        ]);
+        if (!compassArrow) {
+            compassArrow = viewer.entities.add({
+                polygon: {
+                    hierarchy: arrow,
+                    material: Cesium.Color.fromCssColorString('#39ff72'),
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    classificationType: Cesium.ClassificationType.TERRAIN,
+                },
+            });
+        }
+        compassArrow.polygon.hierarchy = arrow;
+        compassArrow.show = true;
+        compassBearing = bearing;
+        updateMarkerHeading(bearing);
     };
 
     /** Update optional navigation hints from the current position. */
@@ -464,12 +604,18 @@ export const init = async() => {
         if (!position || !target || !(
             playerconfig.showdistancehint || playerconfig.showheadinghint || playerconfig.showinzonehint)) {
             panel.hidden = true;
+            if (compassArrow) {
+                compassArrow.show = false;
+            }
+            compassBearing = null;
+            updateMarkerHeading(null);
             if (marker) {
                 marker.label.show = false;
             }
+            viewer.scene.requestRender();
             return;
         }
-        panel.hidden = false;
+        panel.hidden = !(playerconfig.showdistancehint || playerconfig.showinzonehint);
         const first = Cesium.Cartographic.fromDegrees(position[0], position[1]);
         const second = Cesium.Cartographic.fromDegrees(target[0], target[1]);
         const line = new Cesium.EllipsoidGeodesic(first, second);
@@ -484,17 +630,18 @@ export const init = async() => {
         }
         element('distance').textContent = distanceText;
         element('position-status').textContent = playwithoutmoving ? labels.selectedposition : labels.gpsposition;
-        const dx = (target[0] - position[0]) * Math.cos(first.latitude);
-        const dy = target[1] - position[1];
-        const bearing = Math.atan2(dx, dy) * 180 / Math.PI;
-        element('bearing-icon').style.transform = playerconfig.showheadinghint ? 'rotate(' + bearing + 'deg)' : '';
+        const bearing = Cesium.Math.toDegrees(line.startHeading || 0);
+        if (playerconfig.showheadinghint) {
+            updateCompass(bearing);
+        } else {
+            if (compassArrow) {
+                compassArrow.show = false;
+            }
+            compassBearing = null;
+            updateMarkerHeading(null);
+        }
         if (marker) {
-            const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-            const arrow = arrows[Math.round(((bearing + 360) % 360) / 45) % arrows.length];
-            const hint = inside ? labels.insidezone : [
-                playerconfig.showheadinghint ? arrow : '',
-                playerconfig.showdistancehint ? distanceText : '',
-            ].filter(Boolean).join(' ');
+            const hint = inside ? labels.insidezone : (playerconfig.showdistancehint ? distanceText : '');
             marker.label.text = hint;
             marker.label.show = Boolean(hint);
             viewer.scene.requestRender();
@@ -950,7 +1097,6 @@ export const init = async() => {
 
     /** Attach all player buttons and modal controls. */
     const bindInterface = () => {
-        element('layer-select').addEventListener('change', (event) => selectMapLayer(event.target.value));
         element('attempt-close').addEventListener('click', () => {
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
@@ -1044,6 +1190,13 @@ export const init = async() => {
         retry.addEventListener('click', () => start());
         const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         const removePopupPositioner = viewer.scene.postRender.addEventListener(positionAttemptPopup);
+        viewer.camera.percentageChanged = 0.05;
+        const removeCompassResizer = viewer.camera.changed.addEventListener(() => {
+            updateMarkerScale();
+            if (compassBearing !== null && compassArrow?.show) {
+                updateCompass(compassBearing);
+            }
+        });
         handler.setInputAction((event) => {
             const picked = viewer.scene.pick(event.position);
             if (picked?.id?.treasurehuntAttempt) {
@@ -1055,7 +1208,9 @@ export const init = async() => {
             if (!playwithoutmoving || roadfinished || !available) {
                 return;
             }
-            const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
+            const ray = viewer.camera.getPickRay(event.position);
+            const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene) ||
+                viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
             if (!cartesian) {
                 return;
             }
@@ -1070,12 +1225,16 @@ export const init = async() => {
                 (playwithoutmoving ? 'crosshair' : 'grab');
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
         window.addEventListener('pagehide', () => {
+            window.removeEventListener('resize', updateLayerPickerLayout);
             clearTimeout(pollTimer);
             if (geowatch !== null) {
                 navigator.geolocation.clearWatch(geowatch);
             }
             handler.destroy();
             removePopupPositioner();
+            removeCompassResizer();
+            layerSelectionSubscription.dispose();
+            layerPicker.destroy();
             viewer.destroy();
         }, {once: true});
     };
@@ -1087,7 +1246,7 @@ export const init = async() => {
         try {
             if (!viewer) {
                 Cesium = await loadCesium(config.cesiumbaseurl);
-                const baseLayer = await createBaseLayer(Cesium, null);
+                const baseLayer = await createBaseLayer(Cesium);
                 viewer = new Cesium.Viewer('cessium-globe', {
                     baseLayer,
                     terrainProvider: new Cesium.EllipsoidTerrainProvider(),
@@ -1103,27 +1262,18 @@ export const init = async() => {
                     selectionIndicator: false,
                     requestRenderMode: true,
                 });
-                mapLayers.osm = baseLayer;
-                viewer.scene.globe.depthTestAgainstTerrain = true;
-                viewer.scene.maximumRenderTimeChange = 60;
+                let custommapping = null;
                 if (config.custommapping?.custombackgroundurl || config.custommapping?.wmsurl) {
                     try {
-                        mapLayers.custom = await createBaseLayer(Cesium, config.custommapping);
-                        viewer.imageryLayers.add(mapLayers.custom);
-                        const option = document.createElement('option');
-                        option.value = 'custom';
-                        option.textContent = labels.layercustom;
-                        element('layer-select').appendChild(option);
-                        element('layer-select').value = 'custom';
-                        activeMapLayer = 'custom';
+                        await createBaseProvider(Cesium, config.custommapping);
+                        custommapping = config.custommapping;
                     } catch (error) {
-                        toast(error.message, true);
+                        toast(labels.layererror + ': ' + error.message, true);
                     }
                 }
-                if (!mapLayers.custom) {
-                    element('layer-select').value = 'satellite';
-                    selectMapLayer('satellite');
-                }
+                initLayerPicker(custommapping);
+                viewer.scene.globe.depthTestAgainstTerrain = true;
+                viewer.scene.maximumRenderTimeChange = 60;
                 viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
                 viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(0, 25, 15000000), duration: 0});
                 bindInterface();
