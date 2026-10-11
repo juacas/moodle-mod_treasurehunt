@@ -161,6 +161,7 @@ final class user_progress_test extends \advanced_testcase {
             [$roads[$index], $stages[$index]] = $this->create_road($hunt->id, 'Team ' . $index, 0, $grouping->id);
         }
         $DB->set_field('treasurehunt_stages', 'cluetext', 'Team next clue', ['id' => $stages[0][0]]);
+        $DB->set_field('treasurehunt_stages', 'cluetext', 'Team next clue', ['id' => $stages[0][0]]);
         groups_add_member($groups[0]->id, $players[0]->id);
         groups_add_member($groups[0]->id, $players[1]->id);
         groups_add_member($groups[1]->id, $players[2]->id);
@@ -194,6 +195,8 @@ final class user_progress_test extends \advanced_testcase {
         $teammateview = user_progress::execute($params);
         \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $teammateview);
         $this->assertEquals($attemptid, $teammateview['attemptid']);
+        $this->assertSame([], $teammateview['infomsg']);
+        $this->assertEquals(2, $teammateview['lastsuccessfulstage']->totalnumber);
         $this->assertEquals(2, $teammateview['nextstage']['features'][0]['properties']['stageposition']);
         $this->setUser($players[2]);
         $otherview = user_progress::execute($params);
@@ -211,6 +214,13 @@ final class user_progress_test extends \advanced_testcase {
         );
         $this->assertEquals($qrid, $qrdelta->newattemptid);
         $this->assertTrue($qrdelta->newgeometry);
+        $this->setUser($players[1]);
+        $finishedteamview = user_progress::execute($params);
+        $secondmarkers = array_filter($finishedteamview['attempts']['features'], static function ($feature) {
+            return $feature['properties']['stageposition'] === 2;
+        });
+        $this->assertCount(1, $secondmarkers);
+        $this->assertStringContainsString('Team next clue', reset($secondmarkers)['properties']['clue']);
         $this->setUser($players[1]);
         $finishedteamview = user_progress::execute($params);
         $secondmarkers = array_filter($finishedteamview['attempts']['features'], static function ($feature) {
@@ -380,6 +390,7 @@ final class user_progress_test extends \advanced_testcase {
         $initial = user_progress::execute($params);
         $this->assertEquals(0, $initial['status']['code']);
         $this->assertFalse($initial['roadfinished']);
+        $this->assertEquals(2, $initial['lastsuccessfulstage']->totalnumber);
         $this->assertArrayHasKey('nextstage', $initial);
         $this->assertEquals(1, $initial['nextstage']['features'][0]['properties']['stageposition']);
 
@@ -398,6 +409,17 @@ final class user_progress_test extends \advanced_testcase {
         $this->assertEquals(2, $found['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertGreaterThan(0, $DB->count_records('treasurehunt_attempts'));
 
+        unset($params['location']);
+        $params['initialize'] = true;
+        $params['attemptid'] = 0;
+        $params['roadtimestamp'] = 0;
+        $reloaded = user_progress::execute($params);
+        $this->assertSame([], $reloaded['infomsg']);
+        $this->assertNotEmpty($reloaded['attempthistory']);
+        $this->assertEquals($found['attemptid'], $reloaded['attemptid']);
+        $this->assertEquals(2, $reloaded['lastsuccessfulstage']->totalnumber);
+
+        $params['initialize'] = false;
         $params['attemptid'] = $found['attemptid'];
         $params['roadtimestamp'] = $found['roadtimestamp'];
         $params['location'] = ['type' => 'LineString', 'coordinates' => [0.5, 0.5]];
@@ -457,6 +479,7 @@ final class user_progress_test extends \advanced_testcase {
         $first = user_progress::execute($params);
         $this->assertEquals(2, $first['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertStringContainsString('Next stage clue', $first['clues'][0]['html']);
+        $this->assertStringContainsString('Next stage clue', $first['lastsuccessfulstage']->clue);
         $this->assertStringContainsString('Next stage clue', $first['lastsuccessfulstage']->clue);
         $params['attemptid'] = $first['attemptid'];
         $params['location']['coordinates'] = [10.5, 0.5];

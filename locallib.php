@@ -56,6 +56,7 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
 define('TREASUREHUNT_PLAYERFANCY', 'fancy');
 define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
+define('TREASUREHUNT_PLAYERCESSIUM', 'cessium_player');
 /* * #@- */
 
 // Load classes needed for GeoJSON library.
@@ -698,7 +699,7 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
     $progresscache = cache::make('mod_treasurehunt', 'progressstate');
     $snapshot = $progresscache->get($scopekey);
     if (
-        $snapshot !== false && $snapshot->attemptid === $attemptid &&
+        $snapshot !== false && ($snapshot->schema ?? 0) === 2 && $snapshot->attemptid === $attemptid &&
             $snapshot->roadrevision === $roadrevision
     ) {
         $verifiedcache->set($scopekey, $snapshot->state);
@@ -740,6 +741,7 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
         }
     }
     $progresscache->set($scopekey, (object)[
+        'schema' => 2,
         'attemptid' => $attemptid,
         'roadrevision' => $roadrevision,
         'state' => $state,
@@ -1464,7 +1466,7 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
         } else {
             $cluetext = null;
         }
-        // Attempt clues are already formatted using the source stage and file area.
+        // Attempt clues were formatted using the source stage and its file area.
         if (!property_exists($feature, 'playclue')) {
             $cluetext = format_text($cluetext);
         }
@@ -1744,25 +1746,23 @@ function treasurehunt_get_user_progress($roadid, $groupid, $userid, $treasurehun
     $userprogress = $DB->get_records_sql($query, $params);
     if ($userprogress) {
         $roadstate = treasurehunt_get_road_stage_state($userid, $groupid, $roadid);
-        $stages = $roadstate->stages;
         $stagebyid = [];
         $previousbyid = [];
         $previous = null;
-        foreach ($stages as $stage) {
+        foreach ($roadstate->stages as $stage) {
             $stagebyid[$stage->id] = $stage;
             $previousbyid[$stage->id] = $previous;
             $previous = $stage;
         }
-        // The cached completion IDs show what was resolved when each attempt was made.
-        $firstsuccesses = $roadstate->completed;
         foreach ($userprogress as $attempt) {
             $stage = $stagebyid[$attempt->stageid] ?? null;
             if (!$stage) {
                 continue;
             }
             $previous = $previousbyid[$stage->id];
-            $previouscompleted = $previous && isset($firstsuccesses[$previous->id]) &&
-                $firstsuccesses[$previous->id]->firstsuccessid < $attempt->id;
+            // Compare attempt IDs so later success cannot change an earlier marker's clue.
+            $previouscompleted = $previous && isset($roadstate->completed[$previous->id]) &&
+                $roadstate->completed[$previous->id]->firstsuccessid < $attempt->id;
             $cluesource = treasurehunt_select_stage_clue_source($stage, $previous, $previouscompleted);
             $attempt->playclue = '';
             if ($cluesource) {
@@ -2157,7 +2157,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $availablegroups = $DB->get_records_sql($roadsquery, $params);
         // If there is only one road validated and no groups.
         if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
-            // TODO: play has write flag and is removed in freeze mode.
+            // The play capability has a write flag and is removed in freeze mode.
             $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:enterplayer');
             $roads[] = treasurehunt_get_road_userlist(current($availablegroups), $totalparticipants, $attempts);
         } else {
@@ -2669,9 +2669,17 @@ function treasurehunt_get_last_successful_stage(
  * @param int $userid The identifier of user.
  * @param int $roadid The identifier of the road of user.
  * @param bool $changesingroupmode If the instance has change the group mode.
+ * @param bool $initialize Whether the client is loading its complete state for the first time.
  * @return stdClass Update parameters.
  */
-function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roadid, $changesingroupmode) {
+function treasurehunt_check_attempts_updates(
+    $attemptid,
+    $groupid,
+    $userid,
+    $roadid,
+    $changesingroupmode,
+    $initialize = false
+) {
     global $DB;
     $return = new stdClass();
     $return->strings = [];
@@ -2688,7 +2696,7 @@ function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roa
         $return->attemptsolved = true;
     }
     // If there has been a change in the group mode.
-    if ($changesingroupmode) {
+    if ($changesingroupmode && !$initialize) {
         if ($groupid) {
             $grouptype = 'a.groupid=?';
             $params = [$groupid, $roadid];
@@ -2707,7 +2715,7 @@ function treasurehunt_check_attempts_updates($attemptid, $groupid, $userid, $roa
         $newattempts = $DB->get_records_sql($query, $params);
     }
     // Read only attempts after the client cursor.
-    if ($return->newattemptid > $attemptid && !$changesingroupmode) {
+    if ($return->newattemptid > $attemptid && !$changesingroupmode && !$initialize) {
         // Get user/group actions after the given attempt ID.
         if ($groupid) {
             $grouptype = 'a.groupid=(?)';
@@ -3470,6 +3478,7 @@ function treasurehunt_get_installedplayerstyles() {
         // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),.
         // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),.
         TREASUREHUNT_PLAYERBOOTSTRAP => get_string('playerbootstrap', 'treasurehunt'),
+        TREASUREHUNT_PLAYERCESSIUM => get_string('playercessium', 'treasurehunt'),
     ];
 }
 
