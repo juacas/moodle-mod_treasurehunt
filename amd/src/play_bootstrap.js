@@ -41,7 +41,7 @@ import "mod_treasurehunt/dropdown";
  */
 let init = {
   playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
-    lastattemptid, lastroadtimestamp, gameupdatetime, tracking, user,
+    gameupdatetime, tracking, user,
     custommapconfig, customplayerconfig = null, previewroadid = 0) {
 
     // I18n strings.
@@ -76,14 +76,14 @@ let init = {
           custommapconfig.imgheight = this.naturalHeight;
 
           initplaytreasurehunt($, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-            lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
+            gameupdatetime, tracking,
             user, custommapconfig, customplayerconfig, previewroadid);
         });
         img.src = custommapconfig.custombackgroundurl;
       } else {
         initplaytreasurehunt(
           $, i18n, cmid, treasurehuntid, playwithoutmoving, groupmode,
-          lastattemptid, lastroadtimestamp, gameupdatetime, tracking,
+          gameupdatetime, tracking,
           user, custommapconfig, customplayerconfig, previewroadid);
       }
     });
@@ -130,8 +130,6 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {int} treasurehuntid The treasure hunt id.
  * @param {boolean} playwithoutmoving If true, the player does not move.
  * @param {boolean} groupmode If true, the game is played in group mode.
- * @param {int} lastattemptid The last attempt ID.
- * @param {int} lastroadtimestamp The last road timestamp.
  * @param {int} gameupdatetime The game update time in milliseconds.
  * @param {boolean} tracking If true, the player is being tracked.
  * @param {Object} user The user object.
@@ -140,10 +138,13 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
  * @param {number} previewroadid Road selected for a manager's preview.
  */
 function initplaytreasurehunt(
-  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, lastattemptid,
-  lastroadtimestamp, gameupdatetime, tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
+  $, strings, cmid, treasurehuntid, playwithoutmoving, groupmode, gameupdatetime,
+  tracking, user, custommapconfig, playerconfig = null, previewroadid = 0) {
 
   setLoading(true);
+  // The initialize response supplies the current cursors for later polls.
+  let lastattemptid = 0;
+  let lastroadtimestamp = 0;
   // Cast to boolean.
   playwithoutmoving = playwithoutmoving == true;
   groupmode = groupmode == true;
@@ -712,10 +713,6 @@ function initplaytreasurehunt(
   map.addInteraction(select);
   // It initializes the game.
   renew_source(false, true);
-  // For the game is updated every gameupdatetime seconds.
-  interval = setInterval(() => {
-    renew_source(false, false);
-  }, gameupdatetime);
   // Initialize the page layers.
 
   add_layergroup_to_list(layergroup);
@@ -848,10 +845,21 @@ function initplaytreasurehunt(
       return;
     }
     geojson[0]
-      .always(() => finishLoading(loadingRequest))
+      .always(() => {
+        finishLoading(loadingRequest);
+        // Wait for the first response before polling with its returned cursors.
+        if (initialize && !interval) {
+          interval = setInterval(() => renew_source(false, false), gameupdatetime);
+        }
+      })
       .done((response) => {
         qoaremoved = response.qoaremoved;
         roadfinished = response.roadfinished;
+        $("#cluebutton").prop("disabled", roadfinished);
+        if (roadfinished) {
+          closeModal("#cluepage");
+        }
+        $("#roadendedstage").html(response.endmessage || "").toggleClass("d-none", !response.endmessage);
         available = response.available;
 
         // If I have sent a location or an answer I print out whether it is correct or not.
@@ -921,7 +929,6 @@ function initplaytreasurehunt(
           selectedclueindex = Math.max(0,
             availableclues.findIndex((clue) => selectedclue && clue.stageid === selectedclue.stageid
               && clue.html === selectedclue.html));
-          renderAvailableClues();
         }
 
         if (
@@ -955,7 +962,9 @@ function initplaytreasurehunt(
           if (response.lastsuccessfulstage) {
             lastsuccessfulstage = response.lastsuccessfulstage;
             changesinlastsuccessfulstage = true;
-            openModal("#cluepage");
+            if (!roadfinished) {
+              openModal("#cluepage");
+            }
             $("#validateqr").hide();
             // If the stage is not solved I will notify you that there are changes.
             if (lastsuccessfulstage.question !== "") {
@@ -987,6 +996,7 @@ function initplaytreasurehunt(
           set_question();
           set_attempts_history();
         }
+        renderAvailableClues();
         const dialogmessages = response.infomsg.filter((msg) => msg !== strings["successlocation"]);
         if (dialogmessages.length > 0) {
           let body = "";
@@ -998,12 +1008,16 @@ function initplaytreasurehunt(
             body += "<p>" + msg + "</p>";
           });
           $("#notificationsPopup .update-list").html(body);
+          $("#notificationsPopup").off("modal:close.treasurehuntclue");
           openModal("#notificationsPopup");
-          // On close the modal, show the clue model.
-          $("#notificationsPopup").on("modal:close", function () {
-            // Show the clue modal.
-            openModal("#cluepage");
-          });
+          if (!roadfinished) {
+            // Show the clue after the notification only while the road is in progress.
+            $("#notificationsPopup").one("modal:close.treasurehuntclue", () => {
+              if (!roadfinished) {
+                openModal("#cluepage");
+              }
+            });
+          }
         }
         if (!roadfinished) {
           $("#roadended").hide();
@@ -1115,7 +1129,7 @@ function initplaytreasurehunt(
         /color/gm,
         "color-disabled"
       );
-      $("#lastsuccessfulstageclue").html(lastsuccessfulstage.clue);
+      $("#lastsuccessfulstagelegacy").html(lastsuccessfulstage.clue);
 
       $("#lastsuccessfulstagename").text(lastsuccessfulstage.name);
       $("#lastsuccesfulstagepos").text(
@@ -1132,17 +1146,22 @@ function initplaytreasurehunt(
   /** Render the available clues as accessible Bootstrap tabs. */
   function renderAvailableClues() {
     const container = $("#availableclues");
+    const clueBody = $("#lastsuccessfulstageclue");
+    const legacyClue = $("#lastsuccessfulstagelegacy");
     const tabs = $("#availablecluetabs").empty();
     const content = $("#availablecluecontent").empty();
     if (availableclues.length === 0) {
+      const showLegacy = roadfinished || !available || Boolean(lastsuccessfulstage.clue);
       container.addClass("d-none");
-      $("#lastsuccessfulstageclue").toggle(roadfinished || !available);
-      $("#lastsuccessfulstageheading").toggle(roadfinished || !available);
+      legacyClue.toggle(showLegacy);
+      clueBody.toggle(showLegacy);
+      $("#lastsuccessfulstageheading").toggle(showLegacy);
       $("#cluetitle").text(strings.nextclue);
       return;
     }
     container.removeClass("d-none");
-    $("#lastsuccessfulstageclue").hide();
+    legacyClue.hide();
+    clueBody.show();
     $("#lastsuccessfulstageheading").hide();
     $("#cluetitle").text(availableclues.length > 1 ? strings.nextclues : strings.nextclue);
     availableclues.forEach((clue, index) => {
@@ -1429,15 +1448,17 @@ function initplaytreasurehunt(
         body = "<p>" + info + "</p>";
       }
       if (features.selected[0].get("geometrysolved")) {
-        if (stagename && stageclue) {
+        if (stagename) {
           title = strings["stageovercome"];
           body += get_block_text(strings["stagename"], stagename);
-          body += get_block_text(strings["stageclue"], stageclue);
         } else {
           title = strings["discoveredlocation"];
         }
       } else {
         title = strings["failedlocation"];
+      }
+      if (stageclue) {
+        body += get_block_text(strings["stageclue"], stageclue);
       }
       $("#infoStagePopup .title").text(title);
       $("#infoStagePopup .play-modal-content").html(body);
@@ -1698,6 +1719,9 @@ function initplaytreasurehunt(
    */
   function openModal(id) {
     clearLoading();
+    if (id === "#cluepage" && roadfinished) {
+      return;
+    }
     // Close previous modal
     closeModal();
     const modal = $(id);
@@ -1742,7 +1766,7 @@ function initplaytreasurehunt(
     return `<div class="card">
           <div class="card-body">
             <h5 class="card-title">${title}</h5>
-            <h6 class="card-subtitle text-muted">${body}</h6>
+            <div class="card-text">${body}</div>
           </div>
       </div>`;
   }

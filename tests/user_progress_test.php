@@ -160,6 +160,8 @@ final class user_progress_test extends \advanced_testcase {
             $groups[] = $group;
             [$roads[$index], $stages[$index]] = $this->create_road($hunt->id, 'Team ' . $index, 0, $grouping->id);
         }
+        $DB->set_field('treasurehunt_stages', 'cluetext', 'Team next clue', ['id' => $stages[0][0]]);
+        $DB->set_field('treasurehunt_stages', 'cluetext', 'Team next clue', ['id' => $stages[0][0]]);
         groups_add_member($groups[0]->id, $players[0]->id);
         groups_add_member($groups[0]->id, $players[1]->id);
         groups_add_member($groups[1]->id, $players[2]->id);
@@ -193,6 +195,8 @@ final class user_progress_test extends \advanced_testcase {
         $teammateview = user_progress::execute($params);
         \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $teammateview);
         $this->assertEquals($attemptid, $teammateview['attemptid']);
+        $this->assertSame([], $teammateview['infomsg']);
+        $this->assertEquals(2, $teammateview['lastsuccessfulstage']->totalnumber);
         $this->assertEquals(2, $teammateview['nextstage']['features'][0]['properties']['stageposition']);
         $this->setUser($players[2]);
         $otherview = user_progress::execute($params);
@@ -210,6 +214,20 @@ final class user_progress_test extends \advanced_testcase {
         );
         $this->assertEquals($qrid, $qrdelta->newattemptid);
         $this->assertTrue($qrdelta->newgeometry);
+        $this->setUser($players[1]);
+        $finishedteamview = user_progress::execute($params);
+        $secondmarkers = array_filter($finishedteamview['attempts']['features'], static function ($feature) {
+            return $feature['properties']['stageposition'] === 2;
+        });
+        $this->assertCount(1, $secondmarkers);
+        $this->assertStringContainsString('Team next clue', reset($secondmarkers)['properties']['clue']);
+        $this->setUser($players[1]);
+        $finishedteamview = user_progress::execute($params);
+        $secondmarkers = array_filter($finishedteamview['attempts']['features'], static function ($feature) {
+            return $feature['properties']['stageposition'] === 2;
+        });
+        $this->assertCount(1, $secondmarkers);
+        $this->assertStringContainsString('Team next clue', reset($secondmarkers)['properties']['clue']);
     }
 
     /**
@@ -372,6 +390,7 @@ final class user_progress_test extends \advanced_testcase {
         $initial = user_progress::execute($params);
         $this->assertEquals(0, $initial['status']['code']);
         $this->assertFalse($initial['roadfinished']);
+        $this->assertEquals(2, $initial['lastsuccessfulstage']->totalnumber);
         $this->assertArrayHasKey('nextstage', $initial);
         $this->assertEquals(1, $initial['nextstage']['features'][0]['properties']['stageposition']);
 
@@ -390,6 +409,17 @@ final class user_progress_test extends \advanced_testcase {
         $this->assertEquals(2, $found['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertGreaterThan(0, $DB->count_records('treasurehunt_attempts'));
 
+        unset($params['location']);
+        $params['initialize'] = true;
+        $params['attemptid'] = 0;
+        $params['roadtimestamp'] = 0;
+        $reloaded = user_progress::execute($params);
+        $this->assertSame([], $reloaded['infomsg']);
+        $this->assertNotEmpty($reloaded['attempthistory']);
+        $this->assertEquals($found['attemptid'], $reloaded['attemptid']);
+        $this->assertEquals(2, $reloaded['lastsuccessfulstage']->totalnumber);
+
+        $params['initialize'] = false;
         $params['attemptid'] = $found['attemptid'];
         $params['roadtimestamp'] = $found['roadtimestamp'];
         $params['location'] = ['type' => 'LineString', 'coordinates' => [0.5, 0.5]];
@@ -415,7 +445,8 @@ final class user_progress_test extends \advanced_testcase {
             $high = $low + 1;
             $DB->insert_record('treasurehunt_stages', (object)[
                 'roadid' => $roadid, 'name' => 'Stage ' . $position, 'position' => $position,
-                'cluetext' => $position === 1 ? 'Next stage clue' : '',
+                'cluetext' => $position === 1 ? 'Next stage clue' :
+                    ($position === 3 ? '<p>Final road message</p>' : ''),
                 'clueforstage' => 'Own clue ' . $position,
                 'discoveroutofsequence' => $position === 3 ? 1 : 0,
                 'questiontext' => '',
@@ -441,17 +472,69 @@ final class user_progress_test extends \advanced_testcase {
         $this->assertFalse($early['roadfinished']);
         $this->assertEquals(1, $early['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertCount(1, $early['clues']);
+        $this->assertStringContainsString('Own clue 3', $early['attempts']['features'][0]['properties']['clue']);
+        $this->assertStringNotContainsString('Final road message', $early['attempts']['features'][0]['properties']['clue']);
         $params['attemptid'] = $early['attemptid'];
         $params['location']['coordinates'] = [0.5, 0.5];
         $first = user_progress::execute($params);
         $this->assertEquals(2, $first['nextstage']['features'][0]['properties']['stageposition']);
         $this->assertStringContainsString('Next stage clue', $first['clues'][0]['html']);
+        $this->assertStringContainsString('Next stage clue', $first['lastsuccessfulstage']->clue);
+        $this->assertStringContainsString('Next stage clue', $first['lastsuccessfulstage']->clue);
         $params['attemptid'] = $first['attemptid'];
+        $params['location']['coordinates'] = [10.5, 0.5];
+        $failed = user_progress::execute($params);
+        $failedmarkers = array_filter($failed['attempts']['features'], static function ($feature) {
+            return $feature['properties']['stageposition'] === 2 && !$feature['properties']['geometrysolved'];
+        });
+        $this->assertCount(1, $failedmarkers);
+        $this->assertStringContainsString('Next stage clue', reset($failedmarkers)['properties']['clue']);
+        $params['attemptid'] = $failed['attemptid'];
         $params['location']['coordinates'] = [2.5, 0.5];
         $last = user_progress::execute($params);
         \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $last);
         $this->assertTrue($last['roadfinished']);
+        $this->assertStringContainsString('Own clue 2', $last['lastsuccessfulstage']->clue);
+        $solvedmarkers = array_filter($last['attempts']['features'], static function ($feature) {
+            return $feature['properties']['stageposition'] === 2 && $feature['properties']['geometrysolved'];
+        });
+        $this->assertCount(1, $solvedmarkers);
+        $this->assertStringContainsString('Next stage clue', reset($solvedmarkers)['properties']['clue']);
+        $this->assertStringContainsString('Final road message', $last['endmessage']);
+        $this->assertEmpty($last['clues']);
         $this->assertTrue(treasurehunt_check_if_user_has_finished($student->id, 0, $roadid));
+    }
+
+    /**
+     * The outgoing clue of the final stage is delivered as the road completion message.
+     */
+    public function test_final_stage_outgoing_clue_is_end_message(): void {
+        global $DB;
+        $this->resetAfterTest();
+        $this->setAdminUser();
+        $course = $this->getDataGenerator()->create_course();
+        $hunt = $this->create_hunt($course);
+        [$roadid, $stages] = $this->create_road($hunt->id, 'Road');
+        $DB->set_field('treasurehunt_stages', 'cluetext', '<p>End of the hunt</p>', ['id' => $stages[1]]);
+        $DB->set_field('treasurehunt_stages', 'clueforstage', '<p>Find this stage</p>', ['id' => $stages[1]]);
+        $student = $this->getDataGenerator()->create_and_enrol($course);
+        $context = \context_module::instance($DB->get_field('course_modules', 'id', [
+            'instance' => $hunt->id,
+            'module' => $DB->get_field('modules', 'id', ['name' => 'treasurehunt']),
+        ]));
+        $this->complete_stage($stages[0], $student->id, 0, $context);
+        $this->complete_stage($stages[1], $student->id, 0, $context);
+        $this->setUser($student);
+        $response = user_progress::execute([
+            'treasurehuntid' => $hunt->id, 'attemptid' => 0, 'roadtimestamp' => 0,
+            'playwithoutmoving' => true, 'groupmode' => false, 'initialize' => true,
+            'selectedanswerid' => 0, 'qoaremoved' => false,
+        ]);
+        \core_external\external_api::clean_returnvalue(user_progress::execute_returns(), $response);
+        $this->assertTrue($response['roadfinished']);
+        $this->assertStringContainsString('End of the hunt', $response['endmessage']);
+        $this->assertStringContainsString('Find this stage', $response['lastsuccessfulstage']->clue);
+        $this->assertStringNotContainsString('End of the hunt', $response['lastsuccessfulstage']->clue);
     }
 
     /**

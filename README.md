@@ -66,6 +66,33 @@ and point to the one nearest the player's current location.
 In group play, completed stages and available clues are shared by group members. A stage
 counts as completed only after its required question and activities have been passed.
 
+Experimental Cesium player
+==========================
+
+The `experiment/cessium` branch adds the **Cesium 3D (experimental)** player style,
+internally named `cessium_player`. Enable it in the activity module's admin setting
+**Available game screen styles**, then select it in the treasure hunt settings.
+The existing Bootstrap player remains available.
+
+The new player uses the existing `mod_treasurehunt_user_progress` service for
+individual and team play, teacher previews, location checks, questions, QR scans,
+attempt history and timed updates. Its globe shows completed attempts and only
+reveals the next stage's geometry when the activity's map hint settings allow it.
+The selected position uses the module's pegman, with direction and distance at
+its feet; attempts use the module's success and failure markers.
+Geographic custom maps can use a single image, XYZ tiles, WMS or ArcGIS imagery.
+Custom geographic layers are displayed over an OpenStreetMap basemap; XYZ URLs
+using OpenLayers' `{-y}` TMS placeholder are translated for Cesium.
+Activities using a non-geographic image coordinate system open in the Bootstrap
+player because those coordinates cannot be placed on a globe.
+
+CesiumJS 1.145 and its widget assets are loaded from Cesium's versioned CDN;
+the default basemap uses OpenStreetMap tiles. The browser therefore needs access
+to `cesium.com` and `tile.openstreetmap.org`, and the site's Content Security
+Policy must allow Cesium's scripts, styles, images and workers. The globe uses
+an ellipsoid terrain and does not require a Cesium ion token. GPS and QR scanning
+need browser permission and a secure origin.
+
 
 See also
 =========

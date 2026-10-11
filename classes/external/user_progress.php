@@ -38,11 +38,27 @@ global $CFG;
 require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
 require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 /**
- * Service: Get the status in the game os a group or user.
+ * Return the game state for one player or team, using client cursors for later polls.
+ *
+ * Both web players start with attemptid=0, roadtimestamp=0 and initialize=true. That request loads the complete
+ * state, including the attempt history and last successful stage, and returns the current cursor values. The
+ * client must send those returned values on subsequent requests with initialize=false. A zero cursor on the first
+ * request is not a request to replay all old attempts as new notifications.
+ *
+ * attemptid is the highest attempt record ID for the selected road and player/team. roadtimestamp is the road's
+ * timemodified value. They track different changes: new attempts and edits to the road. The server resolves the
+ * player's current road and scope on every call; the client cursors never select a road or grant access to one.
+ * If attempts are reset, the returned attemptid may decrease; clients still replace their old cursor with it.
+ * A roadtimestamp mismatch refreshes road dependent state and prevents submissions based on an old road revision.
  */
 class user_progress extends external_api {
     /**
-     * Returns description of method parameters
+     * Describe the client state, update cursors and optional player action.
+     *
+     * The first call sends zero for both cursors and initialize=true. Later calls send the values returned by the
+     * previous response. Clients should not combine initialization with a location, QR scan or answer submission:
+     * an unknown road revision prevents those actions from being accepted.
+     *
      * @return external_function_parameters
      */
     public static function execute_parameters() {
@@ -52,13 +68,18 @@ class user_progress extends external_api {
                     [
                         'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
                         'previewroadid' => new external_value(PARAM_INT, 'Road selected for manager preview', VALUE_DEFAULT, 0),
-                        'attemptid' =>
-                            new external_value(PARAM_INT, 'last attempt ID seen by the client'),
-                        'roadtimestamp' =>
-                            new external_value(PARAM_INT, 'last known timestamp since the road has not been updated'),
-                        'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
-                        'groupmode' => new external_value(PARAM_BOOL, 'If true the game is in groups.'),
-                        'initialize' => new external_value(PARAM_BOOL, 'If the map is initializing', VALUE_DEFAULT),
+                        'attemptid' => new external_value(PARAM_INT, 'Last attempt ID received; 0 on initial load'),
+                        'roadtimestamp' => new external_value(
+                            PARAM_INT,
+                            'Last road revision received; 0 on initial load'
+                        ),
+                        'playwithoutmoving' => new external_value(PARAM_BOOL, 'Client play mode for change detection'),
+                        'groupmode' => new external_value(PARAM_BOOL, 'Client team mode for change detection'),
+                        'initialize' => new external_value(
+                            PARAM_BOOL,
+                            'Load complete state without notifying old attempts as new events',
+                            VALUE_DEFAULT
+                        ),
                         'selectedanswerid' => new external_value(PARAM_INT, "id of selected answer", VALUE_DEFAULT, 0),
                         'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                         'qrtext' => new external_value(PARAM_TEXT, 'Text scanned', VALUE_OPTIONAL),
@@ -100,7 +121,12 @@ class user_progress extends external_api {
     }
 
     /**
-     * Describes the user_progress return values
+     * Describe the response, including fields that are omitted when unchanged.
+     *
+     * attemptid and roadtimestamp are always present. The initial response also contains lastsuccessfulstage,
+     * which carries totalnumber, and a complete attempthistory. Geometry fields are conditional: the service
+     * only sends the target area when the activity permits its disclosure.
+     *
      * @return external_single_structure
      */
     public static function execute_returns() {
@@ -197,11 +223,11 @@ class user_progress extends external_api {
                     ]),
                     'Clues currently available to the player'
                 ),
-                'attemptid' => new external_value(PARAM_INT, 'Last attempt ID seen by the client'),
-                'roadtimestamp' => new external_value(PARAM_INT, 'Last updated timestamp road'),
+                'attemptid' => new external_value(PARAM_INT, 'Current attempt cursor for the next request'),
+                'roadtimestamp' => new external_value(PARAM_INT, 'Current road revision for the next request'),
                 'infomsg' => new external_multiple_structure(
                     new external_value(PARAM_RAW, 'The info text of attempt'),
-                    'Array with all strings with attempts since the last stored timestamp'
+                    'New event messages since attemptid; old attempts are not replayed during initialization'
                 ),
                 'lastsuccessfulstage' => new external_single_structure(
                     [
@@ -219,10 +245,11 @@ class user_progress extends external_api {
                         'totalnumber' => new external_value(PARAM_INT, 'The total number of stages on the road.'),
                         'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.'),
                     ],
-                    'object with data from the last successful stage',
+                    'Stage summary, always sent on initialization and when relevant state changes',
                     VALUE_OPTIONAL
                 ),
                 'roadfinished' => new external_value(PARAM_RAW, 'If true the road is finished.'),
+                'endmessage' => new external_value(PARAM_RAW, 'Formatted final-stage road completion message.'),
                 'available' => new external_value(PARAM_BOOL, 'If true the hunt is available.'),
                 'playwithoutmoving' => new external_value(PARAM_BOOL, 'If true the play mode is without move.'),
                 'qrexpected' => new external_value(PARAM_BOOL, 'If true the QRScanner can be used.'),
@@ -234,7 +261,7 @@ class user_progress extends external_api {
                             'penalty' => new external_value(PARAM_BOOL, 'If true the attempt is penalized'),
                         ]
                     ),
-                    'Array with user/group historical attempts.'
+                    'Full history on initialization or attempt cursor change; empty also when unchanged'
                 ),
                 'qoaremoved' => new external_value(PARAM_BOOL, 'If true question or acivity to end has been removed.'),
                 'playerconfig' => new external_single_structure(
@@ -270,8 +297,14 @@ class user_progress extends external_api {
         );
     }
     /**
-     * Check events and return new game state.
-     * TODO: Design cache strategy. This service is polled.
+     * Process an initial snapshot, a later poll or a player action.
+     *
+     * initialize forces history, stage summary and geometry to be loaded even when the supplied cursors match.
+     * The first request uses zero cursors; the response contains the authoritative values for subsequent polls.
+     * Regular polls load the expensive state fields only when attempts, the road or relevant settings changed.
+     *
+     * @param array $userprogress Client state and optional action.
+     * @return array Current game state and cursors.
      */
     public static function execute(array $userprogress) {
         global $USER, $DB;
@@ -321,14 +354,18 @@ class user_progress extends external_api {
         if ($params['groupmode'] != $treasurehunt->groupmode) {
             $changesingroupmode = true;
         }
-        // Get the info of the newly discovered stages if any , and the new timestamp if they have changed.
+        // Resolve both authoritative cursors. Initial load skips the delta query and old-attempt messages because
+        // the full history and stage state are fetched below regardless of the client's zero cursors.
         $updates = treasurehunt_check_attempts_updates(
             $params['attemptid'],
             $userparams->groupid,
             $USER->id,
             $userparams->roadid,
-            $changesingroupmode
+            $changesingroupmode,
+            $params['initialize']
         );
+        // A road revision mismatch reloads stage state and rejects actions based on outdated geometry or answers.
+        // It is expected on the first request, where the client deliberately sends roadtimestamp=0.
         if ($updates->newroadtimestamp != $params['roadtimestamp']) {
             $updateroad = true;
         } else {
@@ -397,14 +434,16 @@ class user_progress extends external_api {
                 $qocsolved->roadfinished = false;
                 $qocsolved->qoaremoved = $qoaremoved;
             }
-            // Refresh the attempts updates (mainly for reporting).
+            // Refresh the attempt cursor after an automatic question/activity completion. During initialization,
+            // do not replay earlier attempts as notifications; the new completion message is merged below.
             if ($qocsolved->newattempt) {
                 $updates = treasurehunt_check_attempts_updates(
                     $params['attemptid'],
                     $userparams->groupid,
                     $USER->id,
                     $userparams->roadid,
-                    $changesingroupmode
+                    $changesingroupmode,
+                    $params['initialize']
                 );
             }
 
@@ -474,13 +513,17 @@ class user_progress extends external_api {
                 $status['code'] = 0;
             }
         }
-        // Get new user's state and report it.
+        // On initialize, return the complete history even when no new attempt exists. Later polls fetch it when
+        // the attempt cursor or application language changes. An empty array may mean unchanged or no attempts;
+        // compare the returned cursor as well when deciding whether a previous history has been reset.
         $attempthistory = [];
         $changedapplang = isset($params['changedapplang']) ? $params['changedapplang'] : false;
         // If there was any new attempt, reload the history of attempts.
         if ($updates->newattemptid != $params['attemptid'] || $params['initialize'] || $changedapplang) {
             $attempthistory = treasurehunt_get_user_attempt_history($userparams->groupid, $USER->id, $userparams->roadid);
         }
+        // The stage summary is also the source of totalnumber for the Cesium progress display. Initialization
+        // always returns it, including the placeholder stage when no stage has been completed yet.
         $lastsuccessfulstage = null;
         if (
             $updates->geometrysolved
@@ -498,10 +541,12 @@ class user_progress extends external_api {
                 $available->outoftime,
                 $available->actnotavailableyet,
                 $context,
-                ($qocsolved->newattempt ?? false) || ($checklocation->newattempt ?? false) ? null : $currentstage
+                ($qocsolved->newattempt ?? false) || ($checklocation->newattempt ?? false) ? null : $currentstage,
+                $roadfinished
             );
         }
 
+        // Initial load also forces the attempt markers and permitted target geometry needed to draw the map.
         if (
             $updates->newgeometry
             || $updateroad
@@ -559,6 +604,7 @@ class user_progress extends external_api {
         }
         $result = [];
         $result['infomsg'] = $updates->strings;
+        // Clients replace their cursors with these values even when no other response field changed.
         $result['attemptid'] = $updates->newattemptid;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
         $result['status'] = $status;
@@ -601,22 +647,13 @@ class user_progress extends external_api {
             $previous = null;
             foreach ($roadstate->stages as $stage) {
                 if (!isset($roadstate->completed[$stage->id])) {
-                    $source = null;
-                    $area = 'clueforstage';
-                    if ($previous && isset($roadstate->completed[$previous->id])) {
-                        if (self::has_clue_content($previous->cluetext)) {
-                            $source = $previous;
-                            $area = 'cluetext';
-                        } else if (self::has_clue_content($stage->clueforstage)) {
-                            $source = $stage;
-                        }
-                    } else if (
-                        (!$previous || !empty($stage->discoveroutofsequence)) &&
-                            self::has_clue_content($stage->clueforstage)
-                    ) {
-                        $source = $stage;
-                    }
-                    if ($source) {
+                    $cluesource = treasurehunt_select_stage_clue_source(
+                        $stage,
+                        $previous,
+                        $previous && isset($roadstate->completed[$previous->id])
+                    );
+                    if ($cluesource) {
+                        [$source, $area] = $cluesource;
                         $result['clues'][] = self::format_stage_clue($source, $area, $stage, $context);
                     }
                 }
@@ -632,6 +669,18 @@ class user_progress extends external_api {
             $result['lastsuccessfulstage'] = $lastsuccessfulstage;
         }
         $result['roadfinished'] = $roadfinished;
+        $result['endmessage'] = '';
+        if ($roadfinished) {
+            $finalstage = end($roadstate->stages);
+            if ($finalstage && treasurehunt_has_clue_content($finalstage->cluetext)) {
+                $result['endmessage'] = self::format_stage_clue(
+                    $finalstage,
+                    'cluetext',
+                    $finalstage,
+                    $context
+                )['html'];
+            }
+        }
         $result['available'] = $effectiveavailable;
         $result['playwithoutmoving'] = intval($playmode);
         $result['qrexpected'] = intval($qrmode);
@@ -687,19 +736,6 @@ class user_progress extends external_api {
             'position' => (int)$target->position,
             'html' => format_text($html, $stage->{$area . 'format'}),
         ];
-    }
-
-    /**
-     * Whether a rich text clue has text or embedded media.
-     *
-     * @param string|null $html Editor HTML.
-     * @return bool True when the clue is meaningful.
-     */
-    private static function has_clue_content(?string $html): bool {
-        $html = $html ?? '';
-        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
-        return (bool)preg_match('/[^\s\x{00A0}\x{200B}]/u', $text) ||
-            (bool)preg_match('/<(?:img|video|audio|iframe|object|embed|svg|math)\b/i', $html);
     }
 
     /**
