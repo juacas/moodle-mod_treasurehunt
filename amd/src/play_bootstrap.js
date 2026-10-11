@@ -855,6 +855,10 @@ function initplaytreasurehunt(
       .done((response) => {
         qoaremoved = response.qoaremoved;
         roadfinished = response.roadfinished;
+        $("#cluebutton").prop("disabled", roadfinished);
+        if (roadfinished) {
+          closeModal("#cluepage");
+        }
         $("#roadendedstage").html(response.endmessage || "").toggleClass("d-none", !response.endmessage);
         available = response.available;
 
@@ -958,7 +962,9 @@ function initplaytreasurehunt(
           if (response.lastsuccessfulstage) {
             lastsuccessfulstage = response.lastsuccessfulstage;
             changesinlastsuccessfulstage = true;
-            openModal("#cluepage");
+            if (!roadfinished) {
+              openModal("#cluepage");
+            }
             $("#validateqr").hide();
             // If the stage is not solved I will notify you that there are changes.
             if (lastsuccessfulstage.question !== "") {
@@ -1002,12 +1008,16 @@ function initplaytreasurehunt(
             body += "<p>" + msg + "</p>";
           });
           $("#notificationsPopup .update-list").html(body);
+          $("#notificationsPopup").off("modal:close.treasurehuntclue");
           openModal("#notificationsPopup");
-          // On close the modal, show the clue model.
-          $("#notificationsPopup").on("modal:close", function () {
-            // Show the clue modal.
-            openModal("#cluepage");
-          });
+          if (!roadfinished) {
+            // Show the clue after the notification only while the road is in progress.
+            $("#notificationsPopup").one("modal:close.treasurehuntclue", () => {
+              if (!roadfinished) {
+                openModal("#cluepage");
+              }
+            });
+          }
         }
         if (!roadfinished) {
           $("#roadended").hide();
@@ -1709,6 +1719,9 @@ function initplaytreasurehunt(
    */
   function openModal(id) {
     clearLoading();
+    if (id === "#cluepage" && roadfinished) {
+      return;
+    }
     // Close previous modal
     closeModal();
     const modal = $(id);

@@ -98,6 +98,7 @@ let init = {
  * @param {object} custommapconfig
  */
 function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockState, custommapconfig) {
+    var selectedRoadStorageKey = "treasurehuntSelectedRoad:" + treasurehuntid;
     var copyNotice = sessionStorage.getItem("treasurehuntCopySuccess");
     if (copyNotice) {
       sessionStorage.removeItem("treasurehuntCopySuccess");
@@ -1058,9 +1059,11 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
 
             // Ordeno la lista de etapas.
             sortList();
-            // I select the path of the URL if it exists or if not the first.
-            if (typeof treasurehunt.roads[selectedroadid] !== "undefined") {
-              roadid = selectedroadid;
+            // Prefer the road in the URL, then the road selected in this browser session.
+            var initialRoadId = typeof treasurehunt.roads[selectedroadid] !== "undefined" ?
+              selectedroadid : sessionStorage.getItem(selectedRoadStorageKey);
+            if (typeof treasurehunt.roads[initialRoadId] !== "undefined") {
+              roadid = initialRoadId;
               if (treasurehunt.roads[roadid].blocked) {
                 deactivateAddstage();
               } else {
@@ -1116,6 +1119,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }
       }
       if (noroads === 0) {
+        sessionStorage.removeItem(selectedRoadStorageKey);
         deactivateAddstage();
         $("#addroad").addClass("highlightbutton").blur();
         $("#stagelistpanel").addClass("invisible");
@@ -1560,6 +1564,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {ol.map} map
      */
     function selectRoad(roadid, vectorOfPolygons, map) {
+      sessionStorage.setItem(selectedRoadStorageKey, String(roadid));
       closeStagePopover();
       $("#copystages").prop("disabled", Boolean(treasurehunt.roads[roadid].blocked));
       // I clean all the selected features, hide all
