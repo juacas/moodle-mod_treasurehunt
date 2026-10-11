@@ -127,9 +127,70 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->disable();
         $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
-        $config = [
+        $config = $this->get_geographic_player_config($renderablepage);
+        $config['cesiumbaseurl'] = (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false);
+        $this->page->requires->js_call_amd('mod_treasurehunt/cessium_player', 'init');
+        treasurehunt_qr_support($this->page, 'setup', []);
+
+        $data = $renderablepage->export_for_template($this);
+        $data->cmid = $cm->id;
+        $data->huntname = format_string($treasurehunt->name);
+        $data->playerbrand = 'Cesium 3D';
+        $data->playerconfigjson = json_encode(
+            $config,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
+        return $this->header() .
+            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
+            $this->footer();
+    }
+
+    /**
+     * Render the Mapbox GL JS player using the geographic game interface.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return string
+     */
+    public function render_play_page_mapbox_player(play_page_base $renderablepage) {
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        if (isset($renderablepage->custommapping->geographic) && !$renderablepage->custommapping->geographic) {
+            return $this->render_play_page_bootstrap($renderablepage);
+        }
+        $this->page->set_pagelayout('embedded');
+        $this->page->activityheader->disable();
+        $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $this->page->requires->css(new moodle_url('https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css'));
+        $config = $this->get_geographic_player_config($renderablepage);
+        $config['mapboxaccesstoken'] = (string)get_config('mod_treasurehunt', 'mapboxaccesstoken');
+        $this->page->requires->js_call_amd('mod_treasurehunt/mapbox_player', 'init');
+        treasurehunt_qr_support($this->page, 'setup', []);
+
+        $data = $renderablepage->export_for_template($this);
+        $data->cmid = $cm->id;
+        $data->huntname = format_string($treasurehunt->name);
+        $data->playerbrand = 'Mapbox GL';
+        $data->playerconfigjson = json_encode(
+            $config,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
+        return $this->header() .
+            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
+            $this->footer();
+    }
+
+    /**
+     * Build the common game payload for geographic players.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return array
+     */
+    private function get_geographic_player_config(play_page_base $renderablepage): array {
+        global $CFG;
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        return [
             'cmid' => (int)$cm->id,
-            'cesiumbaseurl' => (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false),
             'pegmanmodelurl' => (new moodle_url('/mod/treasurehunt/pix/pegman_location_pin.glb', [
                 'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_location_pin.glb'),
             ]))->out(false),
@@ -170,21 +231,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 'terrainflat' => get_string('cessium_terrainflat', 'treasurehunt'),
                 'terrainrelief' => get_string('cessium_terrainrelief', 'treasurehunt'),
                 'wait' => get_string('cessium_wait', 'treasurehunt'),
+                'searchplaceholder' => get_string('cessium_search_placeholder', 'treasurehunt'),
+                'searching' => get_string('cessium_searching', 'treasurehunt'),
+                'searchempty' => get_string('cessium_search_empty', 'treasurehunt'),
+                'searcherror' => get_string('cessium_search_error', 'treasurehunt'),
+                'searchattribution' => get_string('cessium_search_attribution', 'treasurehunt'),
+                'buildings3d' => get_string('cessium_buildings_3d', 'treasurehunt'),
             ],
         ];
-        $this->page->requires->js_call_amd('mod_treasurehunt/cessium_player', 'init');
-        treasurehunt_qr_support($this->page, 'setup', []);
-
-        $data = $renderablepage->export_for_template($this);
-        $data->cmid = $cm->id;
-        $data->huntname = format_string($treasurehunt->name);
-        $data->playerconfigjson = json_encode(
-            $config,
-            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
-        );
-        return $this->header() .
-            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
-            $this->footer();
     }
 
     /**

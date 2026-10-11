@@ -86,6 +86,25 @@ using OpenLayers' `{-y}` TMS placeholder are translated for Cesium.
 Activities using a non-geographic image coordinate system open in the Bootstrap
 player because those coordinates cannot be placed on a globe.
 
+Mapbox GL player
+================
+
+The **Mapbox GL 3D** player uses the same game service and controls as the Cesium
+player. It renders `pix/pegman_location_pin.glb` as a geographic 3D model,
+alongside visible stage areas and attempt markers. It supports location checks,
+clues, questions, QR scanning, history, GPS and teacher previews. The basemap
+selector offers Mapbox satellite and streets, OpenStreetMap, and a configured
+geographic image, tiled, WMS or ArcGIS layer when available.
+
+The player starts on OpenStreetMap. Set an optional **Mapbox public access token**
+in the Treasurehunt administration settings to enable Mapbox satellite and streets,
+then enable **Mapbox GL 3D** under **Available game screen styles**. A teacher can
+preview it with `play.php?id=CMID&previewroadid=ROADID&playertype=mapbox_player`.
+Mapbox GL JS and its stylesheet load from Mapbox's official versioned CDN under
+Mapbox's terms; the plugin does not redistribute the library. The native Mapbox
+model layer displays the GLB at its geographic position but does not play its
+embedded glTF animation.
+
 CesiumJS 1.145 and its widget assets are loaded from Cesium's versioned CDN;
 the default basemap uses OpenStreetMap tiles. The browser therefore needs access
 to `cesium.com` and `tile.openstreetmap.org`, and the site's Content Security

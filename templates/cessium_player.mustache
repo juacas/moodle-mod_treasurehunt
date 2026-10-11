@@ -24,7 +24,7 @@
         <div class="cessium-brand">
             <span class="cessium-brand-mark"><img src="pix/treasurechest_loading.gif" alt=""></span>
             <div class="cessium-brand-copy">
-                <small>{{#str}}cessium_mode, mod_treasurehunt{{/str}}</small>
+                <small>{{#str}}cessium_mode, mod_treasurehunt{{/str}} · {{playerbrand}}</small>
                 <strong>{{huntname}}</strong>
             </div>
         </div>
@@ -37,6 +37,16 @@
             <span>{{#str}}exit, mod_treasurehunt{{/str}}</span>
         </a>
     </header>
+
+    <form id="cessium-search" class="cessium-search" role="search" hidden>
+        <label class="sr-only" for="cessium-search-input">{{#str}}cessium_search, mod_treasurehunt{{/str}}</label>
+        <div class="cessium-search-row">
+            <input id="cessium-search-input" type="search" placeholder="{{#str}}cessium_search_placeholder, mod_treasurehunt{{/str}}"
+                autocomplete="off" aria-controls="cessium-search-results" aria-expanded="false">
+            <button type="submit" aria-label="{{#str}}cessium_search, mod_treasurehunt{{/str}}"><i class="fa fa-search" aria-hidden="true"></i></button>
+        </div>
+        <div id="cessium-search-results" class="cessium-search-results" role="listbox" hidden></div>
+    </form>
 
     <section class="cessium-objective" aria-labelledby="cessium-objective-title">
         <div class="cessium-eyebrow"><span class="cessium-pulse"></span>{{#str}}cessium_objective, mod_treasurehunt{{/str}}</div>

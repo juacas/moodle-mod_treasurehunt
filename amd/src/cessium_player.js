@@ -21,6 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import ajax from 'core/ajax';
+import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
+import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
@@ -313,6 +315,9 @@ export const init = async() => {
     const retry = element('retry');
     let viewer;
     let Cesium;
+    let touchGuard;
+    let buildingsTileset;
+    let buildingsEnabled = true;
     let layerPicker;
     let layerSelectionSubscription;
     /** Keep the gallery inside the visible area when the viewport changes. */
@@ -446,8 +451,29 @@ export const init = async() => {
             imageryProviderViewModels: imagery,
             selectedImageryProviderViewModel: selectedImagery,
             terrainProviderViewModels: [flat, relief],
-            selectedTerrainProviderViewModel: flat,
+            // Cesium's OSM Buildings are georeferenced to real elevation; relief keeps them grounded.
+            selectedTerrainProviderViewModel: relief,
         });
+        const gallery = element('layer-picker').querySelector('.cesium-baseLayerPicker-dropDown');
+        if (gallery) {
+            const buildingToggle = document.createElement('label');
+            buildingToggle.className = 'cessium-buildings-toggle';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = buildingsEnabled;
+            checkbox.addEventListener('change', () => {
+                buildingsEnabled = checkbox.checked;
+                if (buildingsTileset) {
+                    buildingsTileset.show = buildingsEnabled;
+                }
+                viewer.scene.requestRender();
+            });
+            const label = document.createElement('span');
+            label.textContent = labels.buildings3d;
+            buildingToggle.append(checkbox, label);
+            buildingToggle.addEventListener('click', (event) => event.stopPropagation());
+            gallery.prepend(buildingToggle);
+        }
         updateLayerPickerLayout();
         window.addEventListener('resize', updateLayerPickerLayout);
         const selection = Cesium.knockout.getObservable(layerPicker.viewModel, 'selectedImagery');
@@ -884,6 +910,7 @@ export const init = async() => {
     const renderAttempts = (collection) => {
         selectedAttempt = null;
         element('attempt-popup').hidden = true;
+        root.classList.remove('has-attempt-popup');
         attempts.forEach((entity) => viewer.entities.remove(entity));
         attempts = [];
         (collection?.features || []).forEach((feature) => {
@@ -930,11 +957,13 @@ export const init = async() => {
         if (viewer.scene.mode === Cesium.SceneMode.SCENE3D &&
                 !new Cesium.EllipsoidalOccluder(viewer.scene.globe.ellipsoid, viewer.camera.positionWC).isPointVisible(world)) {
             popup.hidden = true;
+            root.classList.remove('has-attempt-popup');
             return;
         }
         const screen = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, world);
         if (!screen) {
             popup.hidden = true;
+            root.classList.remove('has-attempt-popup');
             return;
         }
         const canvas = viewer.scene.canvas.getBoundingClientRect();
@@ -942,6 +971,7 @@ export const init = async() => {
         const x = screen.x + canvas.left - viewport.left;
         const y = screen.y + canvas.top - viewport.top;
         popup.hidden = x < 0 || x > viewport.width || y < 0 || y > viewport.height;
+        root.classList.toggle('has-attempt-popup', !popup.hidden);
         popup.classList.toggle('is-below', y < 250);
         popup.style.left = Math.max(170, Math.min(viewport.width - 170, x)) + 'px';
         popup.style.top = y + 'px';
@@ -1352,9 +1382,16 @@ export const init = async() => {
 
     /** Attach all player buttons and modal controls. */
     const bindInterface = () => {
+        touchGuard = setupTouchGestureGuard(viewer.scene.canvas);
+        setupLocationSearch(element('search'), element('search-input'), element('search-results'),
+            isEnabled(playerconfig.localizationbuttondisabled), (longitude, latitude) => {
+                viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 2400),
+                    duration: 1.6});
+            }, labels);
         element('attempt-close').addEventListener('click', () => {
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
+            root.classList.remove('has-attempt-popup');
         });
         element('clue').addEventListener('click', () => openDialog('clue'));
         element('question-open').addEventListener('click', () => {
@@ -1452,7 +1489,12 @@ export const init = async() => {
             }
         });
         const removeZoomResizer = viewer.camera.moveEnd.addEventListener(updateMarkerScaleAfterZoom);
+        handler.setInputAction(() => touchGuard.suppressFor(1200), Cesium.ScreenSpaceEventType.PINCH_START);
+        handler.setInputAction(() => touchGuard.suppressFor(1200), Cesium.ScreenSpaceEventType.PINCH_MOVE);
         handler.setInputAction((event) => {
+            if (touchGuard.shouldIgnoreClick()) {
+                return;
+            }
             const picked = viewer.scene.pick(event.position);
             if (picked?.id?.treasurehuntAttempt) {
                 showAttemptPopup(picked.id);
@@ -1460,6 +1502,7 @@ export const init = async() => {
             }
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
+            root.classList.remove('has-attempt-popup');
             if (!playwithoutmoving || roadfinished || !available) {
                 return;
             }
@@ -1521,6 +1564,18 @@ export const init = async() => {
                     infoBox: false,
                     selectionIndicator: false,
                     requestRenderMode: true,
+                });
+                const activeViewer = viewer;
+                Cesium.createOsmBuildingsAsync().then((buildings) => {
+                    if (viewer === activeViewer && !viewer.isDestroyed()) {
+                        buildingsTileset = buildings;
+                        buildings.show = buildingsEnabled;
+                        viewer.scene.primitives.add(buildings);
+                        viewer.scene.requestRender();
+                    }
+                    return buildings;
+                }).catch((error) => {
+                    toast(labels.layererror + ': ' + error.message, true);
                 });
                 let custommapping = null;
                 if (config.custommapping?.custombackgroundurl || config.custommapping?.wmsurl) {

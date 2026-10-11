@@ -57,6 +57,7 @@ define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
 define('TREASUREHUNT_PLAYERFANCY', 'fancy');
 define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
 define('TREASUREHUNT_PLAYERCESSIUM', 'cessium_player');
+define('TREASUREHUNT_PLAYERMAPBOX', 'mapbox_player');
 /* * #@- */
 
 // Load classes needed for GeoJSON library.
@@ -3479,6 +3480,7 @@ function treasurehunt_get_installedplayerstyles() {
         // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),.
         TREASUREHUNT_PLAYERBOOTSTRAP => get_string('playerbootstrap', 'treasurehunt'),
         TREASUREHUNT_PLAYERCESSIUM => get_string('playercessium', 'treasurehunt'),
+        TREASUREHUNT_PLAYERMAPBOX => get_string('playermapbox', 'treasurehunt'),
     ];
 }
 
