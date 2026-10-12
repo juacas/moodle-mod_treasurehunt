@@ -21,6 +21,16 @@
     display: none;
 }
 
+.cessium-player.has-attempt-popup::after {
+    position: absolute;
+    z-index: 3;
+    inset: 0;
+    content: '';
+    pointer-events: none;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
 .cessium-globe,
 .cessium-vignette,
 .cessium-grid {
@@ -30,6 +40,57 @@
 
 .cessium-globe {
     background: radial-gradient(circle at 50% 45%, #175168 0, #061322 67%);
+}
+
+.mapbox-player .mapboxgl-map {
+    font-family: inherit;
+}
+
+.mapbox-player .mapboxgl-canvas-container,
+.mapbox-player .mapboxgl-canvas {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.cessium-player .cesium-widget canvas {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+#cessium-player.mapbox-player #cessium-globe {
+    width: 100%;
+    height: 100%;
+}
+
+.mapbox-player .cessium-vignette,
+.mapbox-player .cessium-grid {
+    display: none;
+}
+
+.mapbox-player .mapboxgl-ctrl-bottom-left,
+.mapbox-player .mapboxgl-ctrl-bottom-right {
+    z-index: 1;
+    bottom: 90px;
+}
+
+.mapbox-player .mapbox-layer-select {
+    max-width: min(210px, 40vw);
+    min-height: 40px;
+    padding: 0 12px;
+    color: #eefbff;
+    background: #102b3c;
+    border: 1px solid #5ce8f6;
+    border-radius: 10px;
+    cursor: pointer;
+}
+
+.mapbox-player .cessium-layer-picker {
+    width: auto;
+    height: auto;
 }
 
 .cessium-vignette,
@@ -74,6 +135,87 @@
     justify-content: space-between;
     gap: 20px;
     background: linear-gradient(180deg, rgba(3, 14, 28, .9), rgba(3, 14, 28, .07));
+}
+
+.cessium-search {
+    position: absolute;
+    z-index: 3;
+    top: 94px;
+    right: clamp(18px, 3vw, 48px);
+    width: min(360px, calc(100vw - 36px));
+}
+
+#cessium-player:not(.mapbox-player) .cessium-map-actions {
+    z-index: 4;
+}
+
+.cessium-search-row {
+    display: flex;
+    overflow: hidden;
+    border: 1px solid rgba(127, 210, 231, .7);
+    border-radius: 12px;
+    background: rgba(7, 23, 38, .94);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+}
+
+.cessium-search-row input {
+    min-width: 0;
+    flex: 1;
+    padding: 11px 13px;
+    color: var(--cessium-ink);
+    background: transparent;
+    border: 0;
+    outline: 0;
+}
+
+.cessium-search-row input::placeholder {
+    color: var(--cessium-muted);
+}
+
+.cessium-search-row button {
+    width: 46px;
+    color: var(--cessium-ink);
+    background: rgba(92, 232, 246, .14);
+    border: 0;
+}
+
+.cessium-search-results {
+    max-height: min(45vh, 320px);
+    margin-top: 6px;
+    overflow-y: auto;
+    border: 1px solid rgba(127, 210, 231, .45);
+    border-radius: 10px;
+    background: rgba(7, 23, 38, .97);
+    box-shadow: 0 8px 28px rgba(0, 0, 0, .35);
+}
+
+.cessium-search-result {
+    display: block;
+    width: 100%;
+    padding: 10px 13px;
+    color: var(--cessium-ink);
+    text-align: left;
+    background: transparent;
+    border: 0;
+    border-bottom: 1px solid rgba(127, 210, 231, .16);
+}
+
+.cessium-search-result:hover,
+.cessium-search-result:focus {
+    background: rgba(92, 232, 246, .16);
+}
+
+.cessium-search-status {
+    padding: 10px 13px;
+    color: var(--cessium-muted);
+}
+
+.cessium-search-attribution {
+    display: block;
+    padding: 6px 10px;
+    color: var(--cessium-muted);
+    font-size: 11px;
+    text-align: right;
 }
 
 .cessium-brand,
@@ -244,17 +386,6 @@
     backdrop-filter: blur(18px);
 }
 
-.cessium-nav-glyph {
-    display: grid;
-    place-items: center;
-    width: 42px;
-    height: 42px;
-    border-radius: 50%;
-    border: 1px solid rgba(255, 211, 134, .55);
-    color: var(--cessium-gold);
-    font-size: 20px;
-}
-
 .cessium-navigation span,
 .cessium-navigation small {
     display: block;
@@ -279,44 +410,59 @@
 }
 
 .cessium-layer-picker {
-    display: flex;
-    align-items: center;
-    gap: 9px;
-    width: 210px;
-    min-height: 44px;
-    padding: 0 11px;
+    position: relative;
+    order: 4;
+    width: 44px;
+    height: 44px;
+}
+
+.cessium-layer-picker .cesium-baseLayerPicker-selected {
     border: 1px solid rgba(118, 209, 229, .55);
     border-radius: 12px;
     color: var(--cessium-cyan);
     background: var(--cessium-surface);
-    backdrop-filter: blur(12px);
+    overflow: hidden;
 }
 
-.cessium-layer-picker:focus-within {
+.cessium-layer-picker .cesium-baseLayerPicker-selected:focus-visible {
     border-color: var(--cessium-cyan);
     outline: 2px solid var(--cessium-cyan);
     outline-offset: 2px;
 }
 
-.cessium-layer-picker select {
-    width: 100%;
-    min-width: 0;
-    border: 0;
-    outline: 0;
-    color: var(--cessium-ink);
-    background: transparent;
-    font: inherit;
-    font-size: 12px;
-    font-weight: 700;
+.cessium-layer-picker .cesium-baseLayerPicker-dropDown {
+    top: auto;
+    bottom: calc(100% + 8px);
+    right: 0;
+    box-sizing: border-box;
+    width: min(360px, calc(100vw - 24px));
+    max-height: min(600px, var(--cessium-picker-available-height, 70vh));
+    margin: 0;
+    overflow-y: auto;
+    border-color: rgba(118, 209, 229, .55);
+    background: rgba(13, 23, 31, .96);
+    box-shadow: 0 20px 55px rgba(0, 6, 17, .6);
+}
+
+.cessium-buildings-toggle {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 12px;
+    color: #eefbff;
+    background: rgba(13, 23, 31, .98);
+    border-bottom: 1px solid rgba(118, 209, 229, .3);
     cursor: pointer;
 }
 
-.cessium-layer-picker option {
-    color: #081727;
-    background: #eefbff;
+.cessium-buildings-toggle input {
+    accent-color: #5ce8f6;
 }
 
-.cessium-map-actions button,
+.cessium-map-actions > button,
 .cessium-close {
     display: grid;
     place-items: center;
@@ -329,8 +475,8 @@
     backdrop-filter: blur(12px);
 }
 
-.cessium-map-actions button:hover,
-.cessium-map-actions button:focus-visible,
+.cessium-map-actions > button:hover,
+.cessium-map-actions > button:focus-visible,
 .cessium-close:hover,
 .cessium-close:focus-visible {
     color: var(--cessium-cyan);
@@ -516,7 +662,6 @@
     justify-content: center;
     gap: 10px;
     background: rgba(2, 12, 23, .84);
-    backdrop-filter: blur(12px);
     text-transform: uppercase;
     letter-spacing: .2em;
     font-size: 12px;
@@ -553,7 +698,8 @@
 
 .cessium-dialog::backdrop {
     background: rgba(2, 9, 20, .59);
-    backdrop-filter: blur(5px);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
 }
 
 .cessium-dialog-header {
@@ -565,6 +711,51 @@
     color: var(--cessium-ink);
     font-size: 27px;
     font-weight: 800;
+}
+
+.cessium-clue-tabs {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    overflow-x: auto;
+}
+
+.cessium-clue-tabs[hidden] {
+    display: none;
+}
+
+.cessium-clue-tab {
+    flex: 0 0 auto;
+    padding: 8px 14px;
+    border: 1px solid rgba(92, 232, 246, .42);
+    border-radius: 10px;
+    color: var(--cessium-ink);
+    background: rgba(92, 232, 246, .08);
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.cessium-clue-tab:hover,
+.cessium-clue-tab:focus-visible,
+.cessium-clue-tab.is-active {
+    border-color: var(--cessium-cyan);
+    color: #05212d;
+    background: var(--cessium-cyan);
+}
+
+.cessium-clue-content {
+    display: grid;
+}
+
+.cessium-clue-pane {
+    grid-area: 1 / 1;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.cessium-clue-pane.is-active {
+    visibility: visible;
+    pointer-events: auto;
 }
 
 .cessium-richtext {
@@ -689,10 +880,6 @@
         min-width: 0;
         padding: 8px 10px;
     }
-    .cessium-nav-glyph {
-        width: 32px;
-        height: 32px;
-    }
     .cessium-navigation span {
         font-size: 13px;
     }
@@ -701,10 +888,10 @@
         bottom: 173px;
     }
     .cessium-layer-picker {
-        width: min(180px, 48vw);
-        min-height: 38px;
+        width: 38px;
+        height: 38px;
     }
-    .cessium-map-actions button {
+    .cessium-map-actions > button {
         width: 38px;
         height: 38px;
     }

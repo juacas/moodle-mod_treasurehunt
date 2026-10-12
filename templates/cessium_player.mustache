@@ -24,7 +24,7 @@
         <div class="cessium-brand">
             <span class="cessium-brand-mark"><img src="pix/treasurechest_loading.gif" alt=""></span>
             <div class="cessium-brand-copy">
-                <small>{{#str}}cessium_mode, mod_treasurehunt{{/str}}</small>
+                <small>{{#str}}cessium_mode, mod_treasurehunt{{/str}} · {{playerbrand}}</small>
                 <strong>{{huntname}}</strong>
             </div>
         </div>
@@ -38,6 +38,16 @@
         </a>
     </header>
 
+    <form id="cessium-search" class="cessium-search" role="search" hidden>
+        <label class="sr-only" for="cessium-search-input">{{#str}}cessium_search, mod_treasurehunt{{/str}}</label>
+        <div class="cessium-search-row">
+            <input id="cessium-search-input" type="search" placeholder="{{#str}}cessium_search_placeholder, mod_treasurehunt{{/str}}"
+                autocomplete="off" aria-controls="cessium-search-results" aria-expanded="false">
+            <button type="submit" aria-label="{{#str}}cessium_search, mod_treasurehunt{{/str}}"><i class="fa fa-search" aria-hidden="true"></i></button>
+        </div>
+        <div id="cessium-search-results" class="cessium-search-results" role="listbox" hidden></div>
+    </form>
+
     <section class="cessium-objective" aria-labelledby="cessium-objective-title">
         <div class="cessium-eyebrow"><span class="cessium-pulse"></span>{{#str}}cessium_objective, mod_treasurehunt{{/str}}</div>
         <h1 id="cessium-objective-title">{{#str}}stage, mod_treasurehunt{{/str}} <span id="cessium-stage-number">—</span></h1>
@@ -49,19 +59,11 @@
     </section>
 
     <aside id="cessium-navigation" class="cessium-navigation" aria-live="polite" hidden>
-        <div class="cessium-nav-glyph" aria-hidden="true"><i class="fa fa-location-arrow" id="cessium-bearing-icon"></i></div>
         <div><span id="cessium-distance">—</span><small id="cessium-position-status">{{#str}}cessium_position, mod_treasurehunt{{/str}}</small></div>
     </aside>
 
     <div class="cessium-map-actions" role="group" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}">
-        <label class="cessium-layer-picker" for="cessium-layer-select">
-            <i class="fa fa-map-o" aria-hidden="true"></i>
-            <span class="sr-only">{{#str}}cessium_layers, mod_treasurehunt{{/str}}</span>
-            <select id="cessium-layer-select" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}">
-                <option value="osm">{{#str}}cessium_layerosm, mod_treasurehunt{{/str}}</option>
-                <option value="satellite">{{#str}}cessium_layersatellite, mod_treasurehunt{{/str}}</option>
-            </select>
-        </label>
+        <div id="cessium-layer-picker" class="cessium-layer-picker" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}"></div>
         <button type="button" id="cessium-fit" title="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}"><i class="fa fa-crosshairs" aria-hidden="true"></i></button>
         <button type="button" id="cessium-locate" title="{{#str}}cessium_position, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_position, mod_treasurehunt{{/str}}"><i class="fa fa-location-arrow" aria-hidden="true"></i></button>
         <button type="button" id="cessium-viewmode" title="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}"><i class="fa fa-globe" aria-hidden="true"></i></button>
@@ -104,8 +106,9 @@
 
     <dialog id="cessium-clue-dialog" class="cessium-dialog" aria-labelledby="cessium-clue-title">
         <div class="cessium-dialog-header"><span class="cessium-dialog-kicker">{{#str}}showclue, mod_treasurehunt{{/str}}</span><button type="button" class="cessium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
-        <h2 id="cessium-clue-title">{{#str}}showclue, mod_treasurehunt{{/str}}</h2>
-        <div id="cessium-clue-content" class="cessium-richtext"></div>
+        <h2 id="cessium-clue-title">{{#str}}nextclue, mod_treasurehunt{{/str}}</h2>
+        <div id="cessium-clue-tabs" class="cessium-clue-tabs" role="tablist" aria-label="{{#str}}nextclues, mod_treasurehunt{{/str}}" hidden></div>
+        <div id="cessium-clue-content" class="cessium-clue-content"></div>
         <button type="button" id="cessium-question-open" class="cessium-dialog-action" hidden>{{#str}}question, mod_treasurehunt{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
     </dialog>
 

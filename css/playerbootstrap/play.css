@@ -13,6 +13,12 @@ body {
   padding: 0;
   margin: 0;
 }
+#page-mod-treasurehunt-play #mapplay .ol-viewport {
+  touch-action: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
 /* Moodle 4 renders an activity header.*/
 .path-mod .activity-header:not(:empty) {
   display: none;

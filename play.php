@@ -30,6 +30,7 @@ global $USER;
 
 $id = required_param('id', PARAM_INT);
 $previewroadid = optional_param('previewroadid', 0, PARAM_INT);
+$requestedplayertype = optional_param('playertype', '', PARAM_ALPHANUMEXT);
 [$course, $cm] = get_course_and_cm_from_cmid($id, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
 
@@ -38,6 +39,14 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 if (!has_any_capability(['mod/treasurehunt:enterplayer', 'mod/treasurehunt:managetreasurehunt'], $context)) {
     throw new required_capability_exception($context, 'mod/treasurehunt:enterplayer', 'nopermissions', '');
+}
+$playerstyle = $treasurehunt->playerstyle;
+if ($requestedplayertype !== '') {
+    require_capability('mod/treasurehunt:managetreasurehunt', $context);
+    if (!array_key_exists($requestedplayertype, treasurehunt_get_installedplayerstyles())) {
+        throw new moodle_exception('invaliddata', 'error');
+    }
+    $playerstyle = $requestedplayertype;
 }
 // Check availability.
 if ($treasurehunt->allowattemptsfromdate > time() && !has_capability('mod/treasurehunt:managetreasurehunt', $context)) {
@@ -63,6 +72,9 @@ $pageparams = ['id' => $cm->id];
 if ($previewroadid) {
     $pageparams['previewroadid'] = $previewroadid;
 }
+if ($requestedplayertype !== '') {
+    $pageparams['playertype'] = $requestedplayertype;
+}
 $PAGE->set_url('/mod/treasurehunt/play.php', $pageparams);
 $PAGE->set_title(null); // We do not want it on the HTML.
 $PAGE->set_heading(format_string($course->fullname));
@@ -70,7 +82,6 @@ $PAGE->set_heading(format_string($course->fullname));
 // Check that the player has a road before rendering the page.
 treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
 // Instance selected player renderable.
-$playerstyle = $treasurehunt->playerstyle;
 $renderableclass = "mod_treasurehunt\output\play_page_$playerstyle";
 $renderable = new $renderableclass($treasurehunt, $cm);
 /**@var core_renderer $output */

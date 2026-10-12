@@ -21,9 +21,20 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import ajax from 'core/ajax';
+import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
+import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
+import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
+const TERRAIN_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
+const PEGMAN_HEIGHT = 1.7;
+const PEGMAN_REFERENCE_HEIGHT_PX = 100;
+const PEGMAN_ZOOM_FACTOR = 2;
+const PEGMAN_SCALE_SHAKE_MS = 500;
+const PEGMAN_SCALE_SHAKE_HZ = 10;
+const PEGMAN_SCALE_BOUNCE_MS = 2000;
+const COMPASS_ARROW_LENGTH_PX = 64;
 let cesiumPromise;
 
 /**
@@ -103,9 +114,9 @@ const loadCesium = (baseUrl) => {
  *
  * @param {Object} Cesium Cesium namespace.
  * @param {Object} mapping Activity map configuration.
- * @returns {Promise<Object>} Cesium imagery layer.
+ * @returns {Promise<Object>} Cesium imagery provider.
  */
-const createBaseLayer = async(Cesium, mapping) => {
+const createBaseProvider = async(Cesium, mapping) => {
     let provider;
     if (mapping && mapping.custombackgroundurl && Array.isArray(mapping.bbox)) {
         provider = await Cesium.SingleTileImageryProvider.fromUrl(mapping.custombackgroundurl, {
@@ -114,7 +125,14 @@ const createBaseLayer = async(Cesium, mapping) => {
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'tiled') {
         // OpenLayers accepts {-y} for TMS tiles; Cesium calls the same coordinate {reverseY}.
         const url = mapping.wmsurl.replace(/\{-y\}/g, '{reverseY}');
-        provider = new Cesium.UrlTemplateImageryProvider({url, maximumLevel: 19});
+        // These custom XYZ layers use the standard EPSG:3857 tile grid. Set the scheme
+        // explicitly so Cesium always has a projection when it builds globe tiles.
+        provider = new Cesium.UrlTemplateImageryProvider({
+            url,
+            tilingScheme: new Cesium.WebMercatorTilingScheme(),
+            maximumLevel: 19,
+            enablePickFeatures: false,
+        });
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'wms') {
         provider = new Cesium.WebMapServiceImageryProvider({
             url: mapping.wmsurl,
@@ -130,18 +148,16 @@ const createBaseLayer = async(Cesium, mapping) => {
             credit: '© OpenStreetMap contributors',
         });
     }
-    return new Cesium.ImageryLayer(provider);
+    return provider;
 };
 
 /**
- * Create the photographic globe layer; Cesium's sun lighting supplies its day/night shading.
+ * Create the initial OpenStreetMap layer while the base layer picker starts.
  *
  * @param {Object} Cesium Cesium namespace.
- * @returns {Promise<Object>} Satellite imagery layer.
+ * @returns {Promise<Object>} Cesium imagery layer.
  */
-const createSatelliteLayer = async(Cesium) => new Cesium.ImageryLayer(
-    await Cesium.ArcGisMapServerImageryProvider.fromUrl(SATELLITE_URL)
-);
+const createBaseLayer = async(Cesium) => new Cesium.ImageryLayer(await createBaseProvider(Cesium, null));
 
 /**
  * Get all longitude/latitude pairs from a GeoJSON geometry.
@@ -307,19 +323,51 @@ export const init = async() => {
     const retry = element('retry');
     let viewer;
     let Cesium;
-    const mapLayers = {};
+    let touchGuard;
+    let buildingsTileset;
+    let buildingsEnabled = true;
+    let layerPicker;
+    let layerSelectionSubscription;
+    /** Keep the gallery inside the visible area when the viewport changes. */
+    const updateLayerPickerLayout = () => {
+        const picker = element('layer-picker');
+        if (picker) {
+            const available = Math.max(0, Math.floor(picker.getBoundingClientRect().top - 12));
+            picker.style.setProperty('--cessium-picker-available-height', available + 'px');
+        }
+    };
     let stageSource;
     let visibleStageBounds;
     let nextstage = null;
     let stageSignature = '';
     let attempts = [];
     let marker;
+    let markerModel;
+    let markerModelLoading = false;
+    let markerClip = 'Descansando';
+    let markerPlayingClip = null;
+    let markerBearing = null;
+    let markerScaleValue = 1;
+    let markerVisible = false;
+    let markerDisposed = false;
+    let markerScaleCalculated = false;
+    let markerScaleReference = null;
+    let markerScaleFrame = null;
+    let cameraReady = false;
+    let fitInProgress = false;
+    let flightCompletion = Promise.resolve();
+    let gameStateLoaded = false;
+    let compassArrow;
+    let compassBearing = null;
     let gpsmarker;
     let selectedAttempt;
     let position = null;
     let gpsposition = null;
     let geowatch = null;
     let stage = null;
+    let availableClues = [];
+    let selectedClueIndex = 0;
+    let clueSignature = '';
     let stageposition = 1;
     let totalstages = 0;
     let roadfinished = false;
@@ -334,9 +382,9 @@ export const init = async() => {
     let history = [];
     let pollTimer;
     let toastTimer;
+    let confusedUntil = 0;
+    let confusedTimer;
     let requestQueue = Promise.resolve();
-    let activeMapLayer = 'osm';
-    let layerRequest = 0;
 
     /**
      * Display an accessible status message without blocking the map.
@@ -359,40 +407,105 @@ export const init = async() => {
     };
 
     /**
-     * Change the visible map without recreating the globe or its game markers.
+     * Initialise Cesium's thumbnail picker with the activity map and flat terrain selected.
      *
-     * @param {string} layerId OSM, satellite or custom layer identifier.
+     * @param {Object|null} custommapping Validated custom activity map, if available.
      */
-    const selectMapLayer = async(layerId) => {
-        const requestId = ++layerRequest;
-        try {
-            if (layerId === 'satellite' && !mapLayers.satellite) {
-                const layer = await createSatelliteLayer(Cesium);
-                layer.show = false;
-                viewer.imageryLayers.add(layer);
-                mapLayers.satellite = layer;
-            }
-            if (requestId !== layerRequest) {
-                return;
-            }
-            if (mapLayers.satellite) {
-                mapLayers.satellite.show = layerId === 'satellite';
-            }
-            if (mapLayers.custom) {
-                mapLayers.custom.show = layerId === 'custom';
-            }
-            viewer.scene.globe.enableLighting = layerId === 'satellite';
-            viewer.clock.shouldAnimate = layerId === 'satellite';
-            if (layerId === 'satellite') {
+    const initLayerPicker = (custommapping) => {
+        const imagery = Cesium.createDefaultImageryProviderViewModels();
+        const satelliteIndex = imagery.findIndex((item) => item.name === 'ArcGIS World Imagery');
+        const officialSatellite = imagery[satelliteIndex];
+        const satellite = new Cesium.ProviderViewModel({
+            name: officialSatellite?.name || labels.layersatellite,
+            tooltip: officialSatellite?.tooltip || labels.layersatellite,
+            iconUrl: officialSatellite?.iconUrl ||
+                Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+            category: officialSatellite?.category || 'Other',
+            creationFunction: () => Cesium.ArcGisMapServerImageryProvider.fromUrl(SATELLITE_URL),
+        });
+        if (satelliteIndex >= 0) {
+            imagery[satelliteIndex] = satellite;
+        } else {
+            imagery.push(satellite);
+        }
+
+        let selectedImagery = satellite;
+        if (custommapping) {
+            const custom = new Cesium.ProviderViewModel({
+                name: labels.layercustom,
+                tooltip: labels.layercustom,
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+                category: 'Other',
+                creationFunction: () => [
+                    createBaseProvider(Cesium, null),
+                    createBaseProvider(Cesium, custommapping),
+                ],
+            });
+            imagery.push(custom);
+            selectedImagery = custom;
+        }
+
+        const flat = new Cesium.ProviderViewModel({
+            name: labels.terrainflat,
+            tooltip: labels.terrainflat,
+            iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/Ellipsoid.png'),
+            category: 'Other',
+            creationFunction: () => new Cesium.EllipsoidTerrainProvider(),
+        });
+        const relief = new Cesium.ProviderViewModel({
+            name: labels.terrainrelief,
+            tooltip: labels.terrainrelief,
+            iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/CesiumWorldTerrain.png'),
+            category: 'Other',
+            creationFunction: () => Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(TERRAIN_URL)
+                .catch((error) => {
+                    toast(labels.layererror + ': ' + error.message, true);
+                    return new Cesium.EllipsoidTerrainProvider();
+                }),
+        });
+
+        layerPicker = new Cesium.BaseLayerPicker('cessium-layer-picker', {
+            globe: viewer.scene.globe,
+            imageryProviderViewModels: imagery,
+            selectedImageryProviderViewModel: selectedImagery,
+            terrainProviderViewModels: [flat, relief],
+            // Cesium's OSM Buildings are georeferenced to real elevation; relief keeps them grounded.
+            selectedTerrainProviderViewModel: relief,
+        });
+        const gallery = element('layer-picker').querySelector('.cesium-baseLayerPicker-dropDown');
+        if (gallery) {
+            const buildingToggle = document.createElement('label');
+            buildingToggle.className = 'cessium-buildings-toggle';
+            const checkbox = document.createElement('input');
+            checkbox.type = 'checkbox';
+            checkbox.checked = buildingsEnabled;
+            checkbox.addEventListener('change', () => {
+                buildingsEnabled = checkbox.checked;
+                if (buildingsTileset) {
+                    buildingsTileset.show = buildingsEnabled;
+                }
+                viewer.scene.requestRender();
+            });
+            const label = document.createElement('span');
+            label.textContent = labels.buildings3d;
+            buildingToggle.append(checkbox, label);
+            buildingToggle.addEventListener('click', (event) => event.stopPropagation());
+            gallery.prepend(buildingToggle);
+        }
+        updateLayerPickerLayout();
+        window.addEventListener('resize', updateLayerPickerLayout);
+        const selection = Cesium.knockout.getObservable(layerPicker.viewModel, 'selectedImagery');
+        layerSelectionSubscription = selection.subscribe((item) => {
+            const isSatellite = item === satellite;
+            viewer.scene.globe.enableLighting = isSatellite;
+            if (isSatellite) {
                 viewer.clock.currentTime = Cesium.JulianDate.now();
             }
             viewer.scene.requestRender();
-            activeMapLayer = layerId;
-        } catch (error) {
-            if (requestId === layerRequest) {
-                element('layer-select').value = activeMapLayer;
-                toast(labels.layererror + ': ' + error.message, true);
-            }
+        });
+        viewer.scene.globe.enableLighting = selectedImagery === satellite;
+        if (selectedImagery === satellite) {
+            viewer.clock.currentTime = Cesium.JulianDate.now();
         }
     };
 
@@ -421,6 +534,71 @@ export const init = async() => {
         dialog.close();
     };
 
+    /** @returns {Object} Local east-north-up transform facing the navigation bearing. */
+    const markerModelMatrix = () => {
+        const location = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        const heading = markerBearing === null ? 0 :
+            Cesium.Math.toRadians(markerBearing) - Cesium.Math.PI_OVER_TWO;
+        return Cesium.Transforms.headingPitchRollToFixedFrame(location,
+            new Cesium.HeadingPitchRoll(heading, 0, 0));
+    };
+
+    /** Position the model at the selected point. */
+    const updateMarkerModelMatrix = () => {
+        if (markerModel && position) {
+            markerModel.modelMatrix = markerModelMatrix();
+        }
+    };
+
+    /** Play only the clip required by the current game state. */
+    const updateMarkerAnimation = () => {
+        if (!markerModel?.ready || markerPlayingClip === markerClip) {
+            return;
+        }
+        markerModel.activeAnimations.removeAll();
+        markerModel.activeAnimations.add({name: markerClip, loop: Cesium.ModelAnimationLoop.REPEAT});
+        markerPlayingClip = markerClip;
+        viewer.scene.requestRender();
+    };
+
+    /** Load one shared glTF model and keep it clamped to the terrain. */
+    const loadMarkerModel = async() => {
+        if (markerModel || markerModelLoading) {
+            return;
+        }
+        markerModelLoading = true;
+        try {
+            const model = await Cesium.Model.fromGltfAsync({
+                url: config.pegmananimationmodel,
+                scene: viewer.scene,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                modelMatrix: markerModelMatrix(),
+                show: markerVisible,
+                scale: markerScaleValue,
+            });
+            if (markerDisposed || viewer.isDestroyed()) {
+                model.destroy();
+                return;
+            }
+            markerModel = viewer.scene.primitives.add(model);
+            // Camera fitting and scale calculation may finish while the GLB is loading.
+            model.scale = markerScaleValue;
+            model.show = markerVisible;
+            model.imageBasedLighting.imageBasedLightingFactor = new Cesium.Cartesian2(2.5, 1);
+            updateMarkerModelMatrix();
+            if (model.ready) {
+                updateMarkerAnimation();
+            } else {
+                model.readyEvent.addEventListener(updateMarkerAnimation);
+            }
+            viewer.scene.requestRender();
+        } catch (error) {
+            toast(labels.layererror + ': ' + error.message, true);
+        } finally {
+            markerModelLoading = false;
+        }
+    };
+
     /** Update the coordinate marker on the globe. */
     const updateMarker = () => {
         if (!viewer || !position) {
@@ -429,12 +607,6 @@ export const init = async() => {
         if (!marker) {
             marker = viewer.entities.add({
                 name: labels.selectedposition,
-                billboard: {
-                    image: './pix/bootstrap/my_location_3.png',
-                    verticalOrigin: Cesium.VerticalOrigin.BOTTOM,
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    disableDepthTestDistance: 0,
-                },
                 label: {
                     show: false,
                     text: '',
@@ -444,38 +616,238 @@ export const init = async() => {
                     backgroundColor: Cesium.Color.fromCssColorString('#071d2f').withAlpha(0.9),
                     backgroundPadding: new Cesium.Cartesian2(10, 7),
                     verticalOrigin: Cesium.VerticalOrigin.TOP,
-                    pixelOffset: new Cesium.Cartesian2(0, 11),
+                    pixelOffset: new Cesium.Cartesian2(0, 24),
                     heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
                     disableDepthTestDistance: 0,
                 },
             });
+            // The glTF animation needs a clock tick and a rendered frame on every cycle.
+            // Keep the animated model responsive without forcing a 60 FPS render loop on mobile GPUs.
+            viewer.scene.maximumRenderTimeChange = 0.05;
         }
         marker.position = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        markerVisible = true;
+        updateMarkerScale();
+        updateMarkerModelMatrix();
+        loadMarkerModel();
         element('submit').disabled = roadfinished || !available || !position ||
             Boolean(stage?.question) || stage?.activitysolved === false;
         updateNavigation();
         viewer.scene.requestRender();
     };
 
+    /**
+     * Find metres per CSS pixel at the camera's ground focus.
+     *
+     * @returns {number|null} Ground scale, or null if the viewport is not ready.
+     */
+    const getMarkerMetresPerPixel = () => {
+        if (!marker || !position) {
+            return null;
+        }
+        const canvas = viewer.scene.canvas;
+        const width = canvas.clientWidth;
+        const height = canvas.clientHeight;
+        if (!width || !height) {
+            return null;
+        }
+        const screenCentre = new Cesium.Cartesian2(width / 2, height / 2);
+        const ray = viewer.camera.getPickRay(screenCentre);
+        const focus = ray && viewer.scene.globe.pick(ray, viewer.scene) ||
+            viewer.camera.pickEllipsoid(screenCentre, viewer.scene.globe.ellipsoid) ||
+            Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        // Passing CSS dimensions gives metres per CSS pixel, regardless of devicePixelRatio.
+        const metresPerPixel = viewer.camera.getPixelSize(new Cesium.BoundingSphere(focus, 0.01), width, height);
+        if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
+            return null;
+        }
+        return metresPerPixel;
+    };
+
+    /** Fix the pegman's physical size from 100 CSS pixels at the camera's ground focus when positioned. */
+    const updateMarkerScale = () => {
+        const metresPerPixel = getMarkerMetresPerPixel();
+        if (metresPerPixel === null) {
+            if (markerModel) {
+                markerModel.show = markerVisible;
+            }
+            return;
+        }
+        if (markerScaleFrame !== null) {
+            window.cancelAnimationFrame(markerScaleFrame);
+            markerScaleFrame = null;
+        }
+        markerScaleReference = metresPerPixel;
+        markerScaleValue = PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
+        markerVisible = true;
+        if (markerModel) {
+            markerModel.scale = markerScaleValue;
+            markerModel.show = true;
+        }
+        markerScaleCalculated = true;
+        viewer.scene.requestRender();
+    };
+
+    /**
+     * Tremble at the current size, then grow towards the new physical size and settle.
+     *
+     * @param {number} target New model scale.
+     */
+    const animateMarkerScale = (target) => {
+        if (markerScaleFrame !== null) {
+            window.cancelAnimationFrame(markerScaleFrame);
+            markerScaleFrame = null;
+        }
+        if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+            markerScaleValue = target;
+            if (markerModel) {
+                markerModel.scale = target;
+            }
+            viewer.scene.requestRender();
+            return;
+        }
+        const from = markerScaleValue > 0 ? markerScaleValue : target;
+        const started = performance.now();
+        const tick = (now) => {
+            const elapsed = Math.min(now - started, PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS);
+            let scale;
+            if (elapsed < PEGMAN_SCALE_SHAKE_MS) {
+                const phase = elapsed / PEGMAN_SCALE_SHAKE_MS;
+                const shake = 0.09 * Math.sin(Math.PI * phase) *
+                    Math.sin(2 * Math.PI * PEGMAN_SCALE_SHAKE_HZ * elapsed / 1000);
+                scale = from * (1 + shake);
+            } else {
+                const phase = (elapsed - PEGMAN_SCALE_SHAKE_MS) / PEGMAN_SCALE_BOUNCE_MS;
+                const remaining = phase - 1;
+                const easing = 1 + 2.5 * remaining ** 3 + 1.5 * remaining ** 2;
+                scale = from + (target - from) * easing;
+            }
+            markerScaleValue = elapsed === PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
+                target : Math.max(0.0001, scale);
+            if (markerModel) {
+                markerModel.scale = markerScaleValue;
+            }
+            viewer.scene.requestRender();
+            markerScaleFrame = elapsed < PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
+                window.requestAnimationFrame(tick) : null;
+        };
+        markerScaleFrame = window.requestAnimationFrame(tick);
+    };
+
+    /** Recalibrate only after zooming beyond twice the last calibrated view scale. */
+    const updateMarkerScaleAfterZoom = () => {
+        if (!markerScaleCalculated || markerScaleReference === null) {
+            return;
+        }
+        const metresPerPixel = getMarkerMetresPerPixel();
+        if (metresPerPixel === null || (metresPerPixel <= markerScaleReference * PEGMAN_ZOOM_FACTOR &&
+                metresPerPixel >= markerScaleReference / PEGMAN_ZOOM_FACTOR)) {
+            return;
+        }
+        markerScaleReference = metresPerPixel;
+        animateMarkerScale(PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT);
+    };
+
+    /** @returns {number} Bearing from the marker towards the camera, clockwise from north. */
+    const cameraFacingBearing = () => {
+        const location = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        const inverse = Cesium.Matrix4.inverseTransformation(
+            Cesium.Transforms.eastNorthUpToFixedFrame(location), new Cesium.Matrix4());
+        const camera = Cesium.Matrix4.multiplyByPoint(inverse, viewer.camera.positionWC, new Cesium.Cartesian3());
+        if (Math.hypot(camera.x, camera.y) < 1) {
+            return (Cesium.Math.toDegrees(viewer.camera.heading) + 180 + 360) % 360;
+        }
+        return (Cesium.Math.toDegrees(Math.atan2(camera.x, camera.y)) + 360) % 360;
+    };
+
+    /** @param {number|null} bearing Direction clockwise from north, or null to face the camera. */
+    const updateMarkerHeading = (bearing) => {
+        markerBearing = bearing === null && position ? cameraFacingBearing() : bearing;
+        updateMarkerModelMatrix();
+    };
+
+    /**
+     * Place a bright green direction arrow on the terrain below the position model.
+     *
+     * @param {number} bearing Direction in degrees clockwise from north.
+     */
+    const updateCompass = (bearing) => {
+        const cartographic = Cesium.Cartographic.fromDegrees(position[0], position[1]);
+        const height = viewer.scene.globe.getHeight(cartographic) || 0;
+        const centre = Cesium.Cartesian3.fromDegrees(position[0], position[1], height);
+        const sphere = new Cesium.BoundingSphere(centre, 0.01);
+        const metresPerPixel = viewer.camera.getPixelSize(sphere, viewer.scene.canvas.width, viewer.scene.canvas.height);
+        if (!Number.isFinite(metresPerPixel) || metresPerPixel <= 0) {
+            return;
+        }
+        const length = metresPerPixel * COMPASS_ARROW_LENGTH_PX;
+        const enu = Cesium.Transforms.eastNorthUpToFixedFrame(centre);
+        const radians = Cesium.Math.toRadians(bearing);
+        const east = Math.sin(radians);
+        const north = Math.cos(radians);
+        const point = (forward, sideways) => {
+            const tangent = Cesium.Matrix4.multiplyByPoint(enu,
+                new Cesium.Cartesian3(east * forward + north * sideways,
+                    north * forward - east * sideways, 0), new Cesium.Cartesian3());
+            const onGlobe = Cesium.Cartographic.fromCartesian(tangent);
+            return Cesium.Cartesian3.fromRadians(onGlobe.longitude, onGlobe.latitude);
+        };
+        const arrow = new Cesium.PolygonHierarchy([
+            point(length * 1.2, 0),
+            point(length * 0.62, -length * 0.32),
+            point(length * 0.62, -length * 0.13),
+            point(length * 0.2, -length * 0.13),
+            point(length * 0.2, length * 0.13),
+            point(length * 0.62, length * 0.13),
+            point(length * 0.62, length * 0.32),
+        ]);
+        if (!compassArrow) {
+            compassArrow = viewer.entities.add({
+                polygon: {
+                    hierarchy: arrow,
+                    material: Cesium.Color.fromCssColorString('#39ff72'),
+                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                    classificationType: Cesium.ClassificationType.TERRAIN,
+                },
+            });
+        }
+        compassArrow.polygon.hierarchy = arrow;
+        compassArrow.show = true;
+        compassBearing = bearing;
+        updateMarkerHeading(bearing);
+    };
+
     /** Update optional navigation hints from the current position. */
     const updateNavigation = () => {
         const panel = element('navigation');
         const target = position && closestStagePoint(position, nextstage);
+        const inZone = Boolean(position && nextstage?.features?.some((feature) =>
+            inGeometry(position, feature.geometry)));
         if (!position || !target || !(
             playerconfig.showdistancehint || playerconfig.showheadinghint || playerconfig.showinzonehint)) {
             panel.hidden = true;
+            if (compassArrow) {
+                compassArrow.show = false;
+            }
+            compassBearing = null;
+            updateMarkerHeading(null);
+            markerClip = selectClip({moving: !playwithoutmoving, finished: roadfinished,
+                visibleTarget: Boolean(position && nextstage?.features?.length && playerconfig.shownextareahint),
+                inside: inZone,
+                confused: Date.now() < confusedUntil});
+            updateMarkerAnimation();
             if (marker) {
                 marker.label.show = false;
             }
+            viewer.scene.requestRender();
             return;
         }
-        panel.hidden = false;
+        panel.hidden = !(playerconfig.showdistancehint || playerconfig.showinzonehint);
         const first = Cesium.Cartographic.fromDegrees(position[0], position[1]);
         const second = Cesium.Cartographic.fromDegrees(target[0], target[1]);
         const line = new Cesium.EllipsoidGeodesic(first, second);
         const distance = line.surfaceDistance;
-        const inside = playerconfig.showinzonehint && nextstage.features.some((feature) =>
-            inGeometry(position, feature.geometry));
+        const inside = playerconfig.showinzonehint && inZone;
         let distanceText = '—';
         if (inside) {
             distanceText = labels.insidezone;
@@ -484,34 +856,89 @@ export const init = async() => {
         }
         element('distance').textContent = distanceText;
         element('position-status').textContent = playwithoutmoving ? labels.selectedposition : labels.gpsposition;
-        const dx = (target[0] - position[0]) * Math.cos(first.latitude);
-        const dy = target[1] - position[1];
-        const bearing = Math.atan2(dx, dy) * 180 / Math.PI;
-        element('bearing-icon').style.transform = playerconfig.showheadinghint ? 'rotate(' + bearing + 'deg)' : '';
+        const bearing = Cesium.Math.toDegrees(line.startHeading || 0);
+        if (playerconfig.showheadinghint && !inZone && distance >= 0.5) {
+            updateCompass(bearing);
+        } else {
+            if (compassArrow) {
+                compassArrow.show = false;
+            }
+            compassBearing = null;
+            updateMarkerHeading(null);
+        }
+        markerClip = selectClip({
+            moving: !playwithoutmoving,
+            heading: Boolean(compassBearing !== null),
+            distanceHint: Boolean(playerconfig.showdistancehint && !inZone && distance >= 0.5),
+            visibleTarget: Boolean(playerconfig.shownextareahint),
+            inside: inZone || distance < 0.5,
+            finished: roadfinished,
+            confused: Date.now() < confusedUntil,
+        });
+        updateMarkerAnimation();
         if (marker) {
-            const arrows = ['↑', '↗', '→', '↘', '↓', '↙', '←', '↖'];
-            const arrow = arrows[Math.round(((bearing + 360) % 360) / 45) % arrows.length];
-            const hint = inside ? labels.insidezone : [
-                playerconfig.showheadinghint ? arrow : '',
-                playerconfig.showdistancehint ? distanceText : '',
-            ].filter(Boolean).join(' ');
+            const hint = inside ? labels.insidezone : (playerconfig.showdistancehint ? distanceText : '');
             marker.label.text = hint;
             marker.label.show = Boolean(hint);
             viewer.scene.requestRender();
         }
     };
 
+    /** Play the disoriented reaction for one cycle after a failed location attempt. */
+    const reactToFailedAttempt = () => {
+        confusedUntil = Date.now() + 3600;
+        clearTimeout(confusedTimer);
+        updateNavigation();
+        confusedTimer = window.setTimeout(() => {
+            confusedUntil = 0;
+            updateNavigation();
+        }, 3600);
+    };
+
     /** Fly to the visible stage, a recent attempt or the player's marker. */
     const fitMap = () => {
+        fitInProgress = true;
+        let resolveFlight;
+        flightCompletion = new Promise((resolve) => {
+            resolveFlight = resolve;
+        });
+        const finish = () => {
+            fitInProgress = false;
+            if (!cameraReady) {
+                cameraReady = true;
+            }
+            if (marker) {
+                updateMarkerScale();
+            }
+            resolveFlight();
+        };
         if (visibleStageBounds) {
-            viewer.camera.flyTo({destination: Cesium.Rectangle.fromDegrees(...visibleStageBounds), duration: 1.2});
+            viewer.camera.flyTo({
+                destination: Cesium.Rectangle.fromDegrees(...visibleStageBounds),
+                duration: 1.2,
+                complete: finish,
+                cancel: finish,
+            });
         } else if (attempts.length) {
-            viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2});
+            viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2}).then(finish, finish);
         } else if (marker || gpsmarker) {
-            viewer.flyTo(marker || gpsmarker, {duration: 1.2});
+            const target = marker && !markerVisible ? gpsmarker : (marker || gpsmarker);
+            if (target) {
+                viewer.flyTo(target, {duration: 1.2}).then(finish, finish);
+            } else {
+                viewer.camera.flyTo({
+                    destination: Cesium.Cartesian3.fromDegrees(position[0], position[1], 1800),
+                    duration: 1.2,
+                    complete: finish,
+                    cancel: finish,
+                });
+            }
         } else {
             viewer.camera.flyHome(1.2);
+            fitInProgress = false;
+            resolveFlight();
         }
+        return flightCompletion;
     };
 
     /**
@@ -599,6 +1026,7 @@ export const init = async() => {
     const renderAttempts = (collection) => {
         selectedAttempt = null;
         element('attempt-popup').hidden = true;
+        root.classList.remove('has-attempt-popup');
         attempts.forEach((entity) => viewer.entities.remove(entity));
         attempts = [];
         (collection?.features || []).forEach((feature) => {
@@ -645,11 +1073,13 @@ export const init = async() => {
         if (viewer.scene.mode === Cesium.SceneMode.SCENE3D &&
                 !new Cesium.EllipsoidalOccluder(viewer.scene.globe.ellipsoid, viewer.camera.positionWC).isPointVisible(world)) {
             popup.hidden = true;
+            root.classList.remove('has-attempt-popup');
             return;
         }
         const screen = Cesium.SceneTransforms.worldToWindowCoordinates(viewer.scene, world);
         if (!screen) {
             popup.hidden = true;
+            root.classList.remove('has-attempt-popup');
             return;
         }
         const canvas = viewer.scene.canvas.getBoundingClientRect();
@@ -657,6 +1087,7 @@ export const init = async() => {
         const x = screen.x + canvas.left - viewport.left;
         const y = screen.y + canvas.top - viewport.top;
         popup.hidden = x < 0 || x > viewport.width || y < 0 || y > viewport.height;
+        root.classList.toggle('has-attempt-popup', !popup.hidden);
         popup.classList.toggle('is-below', y < 250);
         popup.style.left = Math.max(170, Math.min(viewport.width - 170, x)) + 'px';
         popup.style.top = y + 'px';
@@ -698,13 +1129,8 @@ export const init = async() => {
         positionAttemptPopup();
     };
 
-    /** Update clue and question dialogs from a resolved stage. */
+    /** Update the question and objective from the last resolved stage. */
     const renderClue = () => {
-        const content = element('clue-content');
-        content.innerHTML = stage?.clue || '';
-        if (!content.textContent.trim() && !content.querySelector('img, video, iframe')) {
-            content.textContent = labels.nohint;
-        }
         const questionOpen = element('question-open');
         questionOpen.hidden = !stage?.question;
         const question = element('question-content');
@@ -724,6 +1150,118 @@ export const init = async() => {
             answers.appendChild(choice);
         });
         element('objective-text').textContent = stage?.name || labels.nohint;
+    };
+
+    /** Frame the geometry of the selected clue when the hunt reveals target areas. */
+    const focusSelectedClue = () => {
+        if (!playerconfig.shownextareahint) {
+            return;
+        }
+        const clue = availableClues[selectedClueIndex];
+        const feature = nextstage?.features?.find((item) => Number(item.id) === Number(clue?.stageid));
+        const bounds = feature && geometryBounds({features: [feature]});
+        if (bounds) {
+            viewer.camera.flyTo({destination: Cesium.Rectangle.fromDegrees(...bounds), duration: 1.2});
+        }
+    };
+
+    /**
+     * Select a clue without moving the map during a response refresh.
+     *
+     * @param {number} index Clue index.
+     * @param {boolean} focusMap Whether to frame its visible geometry.
+     */
+    const selectClue = (index, focusMap) => {
+        selectedClueIndex = index;
+        const tabs = element('clue-tabs');
+        tabs.querySelectorAll('[role="tab"]').forEach((button, tabIndex) => {
+            button.classList.toggle('is-active', tabIndex === index);
+            button.setAttribute('aria-selected', String(tabIndex === index));
+            button.tabIndex = tabIndex === index ? 0 : -1;
+        });
+        Array.from(element('clue-content').children).forEach((pane, paneIndex) => {
+            pane.classList.toggle('is-active', paneIndex === index);
+            pane.setAttribute('aria-hidden', String(paneIndex !== index));
+        });
+        if (focusMap) {
+            focusSelectedClue();
+        }
+    };
+
+    /**
+     * Show one tab per clue supplied by the game service.
+     *
+     * @param {Array<Object>} clues Current available clues.
+     * @returns {boolean} Whether the available clues changed.
+     */
+    const renderAvailableClues = (clues) => {
+        const signature = JSON.stringify(clues.length ? clues : [clues, stage?.clue || '', roadfinished]);
+        if (signature === clueSignature) {
+            return false;
+        }
+        const tabs = element('clue-tabs');
+        const content = element('clue-content');
+        const restoreFocus = tabs.contains(document.activeElement);
+        const previouslySelected = availableClues[selectedClueIndex];
+        availableClues = clues;
+        const previousIndex = clues.findIndex((clue) => previouslySelected &&
+            clue.stageid === previouslySelected.stageid && clue.html === previouslySelected.html);
+        selectedClueIndex = Math.max(0, previousIndex);
+        clueSignature = signature;
+        tabs.replaceChildren();
+        content.replaceChildren();
+        tabs.hidden = clues.length === 0;
+        element('clue-title').textContent = clues.length > 1 ? labels.nextclues : labels.nextclue;
+        if (!clues.length) {
+            const fallback = document.createElement('div');
+            fallback.className = 'cessium-richtext';
+            fallback.innerHTML = stage?.clue || '';
+            if (!fallback.textContent.trim() && !fallback.querySelector('img, video, iframe')) {
+                fallback.textContent = labels.nohint;
+            }
+            content.appendChild(fallback);
+            return true;
+        }
+        clues.forEach((clue, index) => {
+            const tab = document.createElement('button');
+            tab.type = 'button';
+            tab.id = 'cessium-clue-tab-' + index;
+            tab.className = 'cessium-clue-tab';
+            tab.setAttribute('role', 'tab');
+            tab.setAttribute('aria-controls', 'cessium-clue-panel-' + index);
+            tab.textContent = labels.clue + ' ' + clue.position;
+            tab.addEventListener('click', () => selectClue(index, true));
+            tab.addEventListener('keydown', (event) => {
+                let nextIndex = index;
+                if (event.key === 'ArrowRight') {
+                    nextIndex = (index + 1) % clues.length;
+                } else if (event.key === 'ArrowLeft') {
+                    nextIndex = (index + clues.length - 1) % clues.length;
+                } else if (event.key === 'Home') {
+                    nextIndex = 0;
+                } else if (event.key === 'End') {
+                    nextIndex = clues.length - 1;
+                } else {
+                    return;
+                }
+                event.preventDefault();
+                selectClue(nextIndex, true);
+                tabs.children[nextIndex].focus();
+            });
+            tabs.appendChild(tab);
+            const pane = document.createElement('div');
+            pane.id = 'cessium-clue-panel-' + index;
+            pane.className = 'cessium-clue-pane cessium-richtext';
+            pane.setAttribute('role', 'tabpanel');
+            pane.setAttribute('aria-labelledby', tab.id);
+            pane.innerHTML = clue.html;
+            content.appendChild(pane);
+        });
+        selectClue(selectedClueIndex, false);
+        if (restoreFocus) {
+            tabs.children[selectedClueIndex].focus({preventScroll: true});
+        }
+        return true;
     };
 
     /** Show the current progress and the possible actions. */
@@ -827,6 +1365,7 @@ export const init = async() => {
      */
     const applyResponse = async(response, action) => {
         const previousStage = stage?.id;
+        const previousAttemptId = attemptid;
         updateMode(response);
         const finishstage = element('finished-stage');
         finishstage.innerHTML = roadfinished ? response.endmessage || '' : '';
@@ -845,14 +1384,24 @@ export const init = async() => {
             stage = null;
             renderClue();
         }
+        const cluesChanged = renderAvailableClues(Array.isArray(response.clues) ? response.clues : []);
         await updateGeometry(response, action, previousStage);
+        if (action.initialize && !fitInProgress && !cameraReady && (position || attempts.length)) {
+            fitMap();
+        }
+        // Keep the initial message and clue closed until the destination is in view.
+        await flightCompletion;
         if (Array.isArray(response.attempthistory) && (response.attempthistory.length || action.initialize)) {
             history = response.attempthistory;
         }
         updateActions();
         updateNavigation();
         showMessages(response, action);
-        if (stage && previousStage !== stage.id && !roadfinished) {
+        if (failedLocationAttempt(previousAttemptId, response, action)) {
+            reactToFailedAttempt();
+        }
+        if (!roadfinished && ((stage && previousStage !== stage.id) ||
+                (availableClues.length && (action.initialize || cluesChanged)))) {
             openDialog('clue');
         }
     };
@@ -941,6 +1490,9 @@ export const init = async() => {
             }
             gpsmarker.position = Cesium.Cartesian3.fromDegrees(gpsposition[0], gpsposition[1]);
             viewer.scene.requestRender();
+            if (gameStateLoaded && !cameraReady && !fitInProgress && !playwithoutmoving) {
+                fitMap();
+            }
         }, (error) => toast(labels.geolocationproblem + ': ' + error.message, true), {
             enableHighAccuracy: true,
             maximumAge: 5000,
@@ -950,10 +1502,16 @@ export const init = async() => {
 
     /** Attach all player buttons and modal controls. */
     const bindInterface = () => {
-        element('layer-select').addEventListener('change', (event) => selectMapLayer(event.target.value));
+        touchGuard = setupTouchGestureGuard(viewer.scene.canvas);
+        setupLocationSearch(element('search'), element('search-input'), element('search-results'),
+            isEnabled(playerconfig.localizationbuttondisabled), (longitude, latitude) => {
+                viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(longitude, latitude, 2400),
+                    duration: 1.6});
+            }, labels);
         element('attempt-close').addEventListener('click', () => {
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
+            root.classList.remove('has-attempt-popup');
         });
         element('clue').addEventListener('click', () => openDialog('clue'));
         element('question-open').addEventListener('click', () => {
@@ -1044,7 +1602,17 @@ export const init = async() => {
         retry.addEventListener('click', () => start());
         const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         const removePopupPositioner = viewer.scene.postRender.addEventListener(positionAttemptPopup);
+        viewer.camera.percentageChanged = 0.05;
+        const removeCompassResizer = viewer.camera.changed.addEventListener(() => {
+            if (compassBearing !== null && compassArrow?.show) {
+                updateCompass(compassBearing);
+            }
+        });
+        const removeZoomResizer = viewer.camera.moveEnd.addEventListener(updateMarkerScaleAfterZoom);
         handler.setInputAction((event) => {
+            if (touchGuard.shouldIgnoreClick()) {
+                return;
+            }
             const picked = viewer.scene.pick(event.position);
             if (picked?.id?.treasurehuntAttempt) {
                 showAttemptPopup(picked.id);
@@ -1052,10 +1620,13 @@ export const init = async() => {
             }
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
+            root.classList.remove('has-attempt-popup');
             if (!playwithoutmoving || roadfinished || !available) {
                 return;
             }
-            const cartesian = viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
+            const ray = viewer.camera.getPickRay(event.position);
+            const cartesian = ray && viewer.scene.globe.pick(ray, viewer.scene) ||
+                viewer.camera.pickEllipsoid(event.position, viewer.scene.globe.ellipsoid);
             if (!cartesian) {
                 return;
             }
@@ -1070,12 +1641,23 @@ export const init = async() => {
                 (playwithoutmoving ? 'crosshair' : 'grab');
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
         window.addEventListener('pagehide', () => {
+            markerDisposed = true;
+            window.removeEventListener('resize', updateLayerPickerLayout);
             clearTimeout(pollTimer);
+            clearTimeout(confusedTimer);
             if (geowatch !== null) {
                 navigator.geolocation.clearWatch(geowatch);
             }
             handler.destroy();
             removePopupPositioner();
+            removeCompassResizer();
+            removeZoomResizer();
+            if (markerScaleFrame !== null) {
+                window.cancelAnimationFrame(markerScaleFrame);
+                markerScaleFrame = null;
+            }
+            layerSelectionSubscription.dispose();
+            layerPicker.destroy();
             viewer.destroy();
         }, {once: true});
     };
@@ -1087,7 +1669,7 @@ export const init = async() => {
         try {
             if (!viewer) {
                 Cesium = await loadCesium(config.cesiumbaseurl);
-                const baseLayer = await createBaseLayer(Cesium, null);
+                const baseLayer = await createBaseLayer(Cesium);
                 viewer = new Cesium.Viewer('cessium-globe', {
                     baseLayer,
                     terrainProvider: new Cesium.EllipsoidTerrainProvider(),
@@ -1103,28 +1685,32 @@ export const init = async() => {
                     selectionIndicator: false,
                     requestRenderMode: true,
                 });
-                mapLayers.osm = baseLayer;
-                viewer.scene.globe.depthTestAgainstTerrain = true;
-                viewer.scene.maximumRenderTimeChange = 60;
+                const activeViewer = viewer;
+                Cesium.createOsmBuildingsAsync().then((buildings) => {
+                    if (viewer === activeViewer && !viewer.isDestroyed()) {
+                        buildingsTileset = buildings;
+                        buildings.show = buildingsEnabled;
+                        viewer.scene.primitives.add(buildings);
+                        viewer.scene.requestRender();
+                    }
+                    return buildings;
+                }).catch((error) => {
+                    toast(labels.layererror + ': ' + error.message, true);
+                });
+                let custommapping = null;
                 if (config.custommapping?.custombackgroundurl || config.custommapping?.wmsurl) {
                     try {
-                        mapLayers.custom = await createBaseLayer(Cesium, config.custommapping);
-                        viewer.imageryLayers.add(mapLayers.custom);
-                        const option = document.createElement('option');
-                        option.value = 'custom';
-                        option.textContent = labels.layercustom;
-                        element('layer-select').appendChild(option);
-                        element('layer-select').value = 'custom';
-                        activeMapLayer = 'custom';
+                        await createBaseProvider(Cesium, config.custommapping);
+                        custommapping = config.custommapping;
                     } catch (error) {
-                        toast(error.message, true);
+                        toast(labels.layererror + ': ' + error.message, true);
                     }
                 }
-                if (!mapLayers.custom) {
-                    element('layer-select').value = 'satellite';
-                    selectMapLayer('satellite');
-                }
-                viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
+                initLayerPicker(custommapping);
+                viewer.scene.globe.depthTestAgainstTerrain = true;
+                viewer.scene.maximumRenderTimeChange = 60;
+                viewer.clock.shouldAnimate = true;
+                viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.25);
                 viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(0, 25, 15000000), duration: 0});
                 bindInterface();
                 if (!playwithoutmoving) {
@@ -1132,6 +1718,14 @@ export const init = async() => {
                 }
             }
             await request({initialize: true});
+            gameStateLoaded = true;
+            if (!cameraReady && !fitInProgress) {
+                if (position || attempts.length) {
+                    fitMap();
+                } else if (playwithoutmoving) {
+                    cameraReady = true;
+                }
+            }
         } catch (error) {
             toast(labels.webserviceerror + ': ' + error.message, true);
             retry.hidden = false;
