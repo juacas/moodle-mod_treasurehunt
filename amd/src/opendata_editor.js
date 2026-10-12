@@ -50,7 +50,8 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const previewList = document.getElementById('opendatapreview');
     const sourceProgress = document.getElementById('opendatasourceprogress');
     const fieldLabels = JSON.parse(dialog.dataset.fieldLabels || '{}');
-    const storageKey = 'treasurehuntOpenData:' + window.location.pathname + ':' +
+    const storageKey = 'treasurehuntOpenData:' + dialog.dataset.treasurehuntid + ':' + dialog.dataset.userid;
+    const previousLocalKey = 'treasurehuntOpenData:' + window.location.pathname + ':' +
         dialog.dataset.treasurehuntid + ':' + dialog.dataset.userid;
     const vectorSource = new ol.source.Vector();
     let openDataLayer = null;
@@ -227,6 +228,10 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                 const parameters = new URLSearchParams(searchParameters);
                 parameters.set('source', job.source);
                 parameters.set('cursor', job.cursor);
+                if (job.category) {
+                    parameters.set('action', 'related');
+                    parameters.set('category', job.category);
+                }
                 job.types.forEach((type) => parameters.append('types[]', type));
                 const controller = new AbortController();
                 activeControllers.add(controller);
@@ -336,6 +341,34 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         loadMoreButton.hidden = true;
         renderProgress();
         showStatus(dialog.dataset.searchingLabel, 'info');
+        await loadPage(currentRequest);
+    };
+
+    /**
+     * Search DBpedia for items in a selected category near the visible map area.
+     *
+     * @param {string} category DBpedia category URI.
+     */
+    const searchRelated = async(category) => {
+        clearStatus();
+        const currentRequest = requestNumber;
+        const bounds = visibleBounds();
+        if (bounds.some((value) => !Number.isFinite(value)) || bounds[0] >= bounds[2] || bounds[1] >= bounds[3]) {
+            showStatus(dialog.dataset.areaError, 'warning');
+            return;
+        }
+        jobs = [{source: 'dbpedia', types: [], category, cursor: '', state: 'queued', count: 0}];
+        searchParameters = new URLSearchParams({
+            id: dialog.dataset.cmid,
+            sesskey: dialog.dataset.sesskey,
+            west: String(bounds[0]),
+            south: String(bounds[1]),
+            east: String(bounds[2]),
+            north: String(bounds[3]),
+        });
+        closePopup();
+        modal.show();
+        renderProgress();
         await loadPage(currentRequest);
     };
 
@@ -473,6 +506,7 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
                 const metadata = {
                     description: details?.description || feature.get('description') || '',
                     image: details?.image || feature.get('image') || '',
+                    images: source === 'dbpedia' ? details?.images || [] : [],
                     url: feature.get('url') || '',
                     aliases: details?.aliases || feature.get('aliases') || [],
                     websites: details?.websites || feature.get('websites') || [],
@@ -523,8 +557,58 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
     const renderCard = (feature, details, state) => {
         popup.replaceChildren(closeButton);
         const name = feature.get('name') || feature.get('id');
+        const images = Array.isArray(details?.images) ? details.images : [];
         const image = details?.image || feature.get('image');
-        if (image) {
+        if (images.length) {
+            const carousel = document.createElement('div');
+            carousel.className = 'treasurehunt-opendata-carousel';
+            carousel.setAttribute('role', 'region');
+            carousel.setAttribute('aria-label', dialog.dataset.galleryLabel);
+            const link = document.createElement('a');
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            const picture = document.createElement('img');
+            picture.loading = 'lazy';
+            picture.addEventListener('error', () => {
+                picture.hidden = true;
+            });
+            link.appendChild(picture);
+            carousel.appendChild(link);
+            let index = 0;
+            const counter = document.createElement('span');
+            counter.setAttribute('aria-live', 'polite');
+            const showImage = () => {
+                picture.hidden = false;
+                link.href = images[index];
+                picture.src = images[index];
+                picture.alt = name + ' (' + (index + 1) + '/' + images.length + ')';
+                counter.textContent = (index + 1) + ' / ' + images.length;
+            };
+            if (images.length > 1) {
+                const controls = document.createElement('div');
+                controls.className = 'treasurehunt-opendata-carousel-controls';
+                const previous = document.createElement('button');
+                previous.type = 'button';
+                previous.textContent = '‹';
+                previous.setAttribute('aria-label', dialog.dataset.previousImageLabel);
+                previous.addEventListener('click', () => {
+                    index = (index + images.length - 1) % images.length;
+                    showImage();
+                });
+                const next = document.createElement('button');
+                next.type = 'button';
+                next.textContent = '›';
+                next.setAttribute('aria-label', dialog.dataset.nextImageLabel);
+                next.addEventListener('click', () => {
+                    index = (index + 1) % images.length;
+                    showImage();
+                });
+                controls.append(previous, counter, next);
+                carousel.appendChild(controls);
+            }
+            showImage();
+            popup.appendChild(carousel);
+        } else if (image) {
             const picture = document.createElement('img');
             picture.className = 'card-img-top treasurehunt-opendata-image';
             picture.src = image;
@@ -579,12 +663,18 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
             const tags = document.createElement('div');
             tags.className = 'treasurehunt-opendata-tags';
             values.forEach((tag) => {
+                const related = field === 'categories' && feature.get('source') === 'dbpedia' && tag.id;
                 const linked = typeof tag.url === 'string' &&
                     /^https:\/\/(www\.europeana\.eu|www\.wikidata\.org)\//.test(tag.url);
-                const element = document.createElement(linked ? 'a' : 'span');
+                const element = document.createElement(related ? 'button' : linked ? 'a' : 'span');
                 element.className = 'treasurehunt-opendata-tag';
                 element.textContent = tag.label;
-                if (linked) {
+                if (related) {
+                    element.type = 'button';
+                    element.title = dialog.dataset.searchSimilarLabel;
+                    element.setAttribute('aria-label', dialog.dataset.searchSimilarLabel + ': ' + tag.label);
+                    element.addEventListener('click', () => searchRelated(tag.id));
+                } else if (linked) {
                     element.href = tag.url;
                     element.target = '_blank';
                     element.rel = 'noopener noreferrer';
@@ -620,9 +710,11 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         popup.appendChild(body);
         const footer = document.createElement('div');
         footer.className = 'card-footer treasurehunt-opendata-links p-2';
-        footer.appendChild(externalLink(feature.get('url'), feature.get('source') === 'europeana' ? 'Europeana' : 'Wikidata'));
+        const sourceNames = {wikidata: 'Wikidata', europeana: 'Europeana', dbpedia: 'DBpedia'};
+        footer.appendChild(externalLink(feature.get('url'), sourceNames[feature.get('source')] || 'OpenData'));
         (details?.websites || feature.get('websites') || []).forEach((website) => footer.appendChild(externalLink(website.url,
-            website.type === 'official' ? dialog.dataset.officialLabel : dialog.dataset.aboutLabel)));
+            website.type === 'official' ? dialog.dataset.officialLabel :
+                website.type === 'primary' ? dialog.dataset.articleLabel : dialog.dataset.aboutLabel)));
         popup.appendChild(footer);
         const action = document.createElement('div');
         action.className = 'card-footer p-2';
@@ -720,27 +812,40 @@ export default function init(map, ol, layerSwitcher, modal, editor) {
         tooltip.style.display = 'none';
     });
 
-    // Restore the confirmed layer for this activity and editor across browser sessions.
+    // Restore the confirmed layer when the map starts, including data saved under the earlier key.
     try {
         let serialized = localStorage.getItem(storageKey);
-        let previousKey = null;
+        let previousKey = '';
+        let previousStorage = null;
+        if (!serialized) {
+            previousKey = previousLocalKey;
+            previousStorage = localStorage;
+            serialized = localStorage.getItem(previousKey);
+        }
         if (!serialized) {
             // Move results saved by the earlier tab-only implementation into persistent storage.
             previousKey = 'treasurehuntOpenData:' + dialog.dataset.cmid;
+            previousStorage = sessionStorage;
             serialized = sessionStorage.getItem(previousKey);
         }
         const stored = JSON.parse(serialized || 'null');
         if (Array.isArray(stored) && stored.length) {
-            if (previousKey) {
-                localStorage.setItem(storageKey, serialized);
-                sessionStorage.removeItem(previousKey);
-            }
-            savedItems = stored;
             const features = new ol.format.GeoJSON().readFeatures({type: 'FeatureCollection', features: stored}, {
                 dataProjection: 'EPSG:4326', featureProjection: map.getView().getProjection(),
             });
-            vectorSource.addFeatures(features);
-            ensureLayer();
+            if (features.length) {
+                savedItems = stored;
+                vectorSource.addFeatures(features);
+                ensureLayer();
+                if (previousKey) {
+                    try {
+                        localStorage.setItem(storageKey, serialized);
+                        previousStorage.removeItem(previousKey);
+                    } catch (error) {
+                        // Storage migration is optional; the restored map layer remains visible.
+                    }
+                }
+            }
         }
     } catch (error) {
         // Ignore unavailable or stale browser storage; the editor can run without it.

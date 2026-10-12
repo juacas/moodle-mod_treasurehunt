@@ -57,8 +57,29 @@ final class stage_creator {
         $html = '<p>' . s($description !== '' ? $description : $name) . '</p>';
         $image = is_string($metadata['image'] ?? null) ? $metadata['image'] : '';
         $image = $sourceid === 'wikidata' ? wikidata::image_url($image) :
-            ($sourceid === 'europeana' ? europeana::thumbnail_url($image) : '');
-        if ($image !== '') {
+            ($sourceid === 'europeana' ? europeana::thumbnail_url($image) :
+                ($sourceid === 'dbpedia' ? dbpedia::thumbnail_url($image) : ''));
+        if ($sourceid === 'dbpedia') {
+            $images = [];
+            $candidates = is_array($metadata['images'] ?? null) ? $metadata['images'] : [];
+            foreach ($candidates as $candidate) {
+                $url = dbpedia::thumbnail_url($candidate);
+                if ($url !== '') {
+                    $images[$url] = $url;
+                }
+            }
+            if (!$images && $image !== '') {
+                $images[$image] = $image;
+            }
+            if ($images) {
+                $html .= '<div class="treasurehunt-opendata-mosaic">';
+                foreach (array_values($images) as $index => $url) {
+                    $html .= '<img src="' . s($url) . '" alt="' . s($name) . ' (' . ($index + 1) . ')"' .
+                        ' width="200" height="200" loading="lazy">';
+                }
+                $html .= '</div>';
+            }
+        } else if ($image !== '') {
             $html .= '<p><img src="' . s($image) . '" alt="' . s($name) . '" class="img-fluid"></p>';
         }
         $groups = [
@@ -156,7 +177,7 @@ final class stage_creator {
             \context_module $context, string $sourceid, array $metadata): int {
         global $CFG, $DB;
         $name = trim($name);
-        if ($name === '' || \core_text::strlen($name) > 255 || !in_array($sourceid, ['wikidata', 'europeana'], true)) {
+        if ($name === '' || \core_text::strlen($name) > 255 || !in_array($sourceid, ['wikidata', 'europeana', 'dbpedia'], true)) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         $clue = self::clue_html($name, $sourceid, $metadata);

@@ -111,4 +111,18 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $this->assertStringContainsString('Castles in Spain', $html);
         $this->assertStringContainsString('https://www.wikidata.org/wiki/Q123', $html);
     }
+
+    /** DBpedia clues contain every safe image in a fixed-size mosaic. */
+    public function test_dbpedia_clue_mosaic(): void {
+        $first = 'https://commons.wikimedia.org/wiki/Special:FilePath/First.jpg?width=480';
+        $second = 'https://commons.wikimedia.org/wiki/Special:FilePath/Second.jpg?width=480';
+        $html = stage_creator::clue_html('Ateneo', 'dbpedia', [
+            'images' => [$first, $second, $first, 'https://example.com/unsafe.jpg'],
+        ]);
+        $this->assertStringContainsString('class="treasurehunt-opendata-mosaic"', $html);
+        $this->assertSame(2, substr_count($html, 'width="200" height="200"'));
+        $this->assertStringContainsString($first, $html);
+        $this->assertStringContainsString($second, $html);
+        $this->assertStringNotContainsString('example.com/unsafe.jpg', $html);
+    }
 }

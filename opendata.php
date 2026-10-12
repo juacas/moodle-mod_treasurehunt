@@ -46,7 +46,7 @@ try {
         $lockid = required_param('lockid', PARAM_INT);
         $name = trim(required_param('name', PARAM_TEXT));
         $metadatajson = optional_param('metadata', '{}', PARAM_RAW);
-        if (strlen($metadatajson) > 20000) {
+        if (strlen($metadatajson) > ($sourceid === 'dbpedia' ? 200000 : 20000)) {
             throw new moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         $metadata = json_decode($metadatajson, true);
@@ -69,6 +69,14 @@ try {
     } else if ($action === 'details') {
         $itemid = required_param('itemid', PARAM_RAW_TRIMMED);
         $result = $source->item_details($itemid, current_language());
+    } else if ($action === 'related' && $sourceid === 'dbpedia') {
+        $category = required_param('category', PARAM_RAW_TRIMMED);
+        $cursor = optional_param('cursor', '', PARAM_RAW_TRIMMED);
+        $west = required_param('west', PARAM_FLOAT);
+        $south = required_param('south', PARAM_FLOAT);
+        $east = required_param('east', PARAM_FLOAT);
+        $north = required_param('north', PARAM_FLOAT);
+        $result = $source->search_category_page($category, [$west, $south, $east, $north], $cursor);
     } else if ($action === 'search') {
         $types = optional_param_array('types', [], PARAM_ALPHANUMEXT);
         $cursor = optional_param('cursor', '', PARAM_RAW_TRIMMED);
@@ -90,7 +98,7 @@ try {
     echo json_encode($result, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR);
 } catch (moodle_exception $exception) {
     $providererror = in_array($exception->errorcode,
-        ['opendataserviceerror', 'opendataeuropeanaserviceerror'], true);
+        ['opendataserviceerror', 'opendataeuropeanaserviceerror', 'opendatadbpediaerror'], true);
     http_response_code($providererror ? 502 : 400);
     $error = ['error' => $exception->getMessage(), 'code' => $exception->errorcode, 'source' => $sourceid];
     if ($providererror && $sourceid === 'wikidata' && $exception->debuginfo) {

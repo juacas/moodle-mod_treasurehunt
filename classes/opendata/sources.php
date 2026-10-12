@@ -37,6 +37,7 @@ final class sources {
         return [
             'wikidata' => new wikidata_source(),
             'europeana' => new europeana(),
+            'dbpedia' => new dbpedia(),
         ];
     }
 
