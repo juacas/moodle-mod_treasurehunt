@@ -72,6 +72,9 @@
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
+.ol-viewport {
+  touch-action: none;
+}
 .ol-overlaycontainer,
 .ol-overlaycontainer-stopevent {
   pointer-events: none;

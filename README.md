@@ -90,7 +90,8 @@ Mapbox GL player
 ================
 
 The **Mapbox GL 3D** player uses the same game service and controls as the Cesium
-player. It renders `pix/pegman_location_pin.glb` as a geographic 3D model,
+player. It renders `pix/pegman_hiker_all_animations_matte.glb` and selects its
+walking, resting, pointing, disoriented and concatenated search animations according to game state,
 alongside visible stage areas and attempt markers. It supports location checks,
 clues, questions, QR scanning, history, GPS and teacher previews. The basemap
 selector offers Mapbox satellite and streets, OpenStreetMap, and a configured

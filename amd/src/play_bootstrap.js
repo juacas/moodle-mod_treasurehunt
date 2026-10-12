@@ -28,6 +28,7 @@ import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
 import { get_strings as getStrings, get_string as getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
+import { setup as setupTouchGestureGuard } from "mod_treasurehunt/touch_gesture_guard";
 // Side‑effect only imports
 import "mod_treasurehunt/dropdown";
 
@@ -710,6 +711,9 @@ function initplaytreasurehunt(
     loadTilesWhileAnimating: true,
     loadTilesWhileInteracting: true,
   });
+  // Do not let a completed touch gesture place the virtual GPS marker.
+  // OpenLayers still receives all pointer events and handles pinch/rotate itself.
+  const touchGuard = setupTouchGestureGuard(map.getViewport());
   map.addInteraction(select);
   // It initializes the game.
   renew_source(false, true);
@@ -1468,6 +1472,9 @@ function initplaytreasurehunt(
 
   // Change marker feature position on user click if play mode is play without moving
   map.on("click", (evt) => {
+    if (touchGuard.shouldIgnoreClick()) {
+      return;
+    }
     // Check if has a feature on click event position.
     let hasFeature = false;
     map.forEachFeatureAtPixel(

@@ -23,6 +23,9 @@
 import ajax from 'core/ajax';
 import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
+import {createLayer as createAnimatedPegmanLayer, loadLibrary as loadPegmanLibrary,
+    sizeForMapScale} from 'mod_treasurehunt/mapbox_animated_pegman';
+import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
@@ -211,6 +214,8 @@ export const init = async() => {
     const playerconfig = config.playerconfig || {};
     let map;
     let mapboxgl;
+    let pegmanLibrary;
+    let pegmanLayer;
     let touchGuard;
     let position = null;
     let gpsposition = null;
@@ -232,6 +237,8 @@ export const init = async() => {
     let attemptCollection = EMPTY;
     let pollTimer;
     let toastTimer;
+    let confusedUntil = 0;
+    let confusedTimer;
     let requestQueue = Promise.resolve();
     let selectedAttempt = null;
     let firstResponse = true;
@@ -282,6 +289,40 @@ export const init = async() => {
         }
     };
 
+    /** Keep the game usable with static models if the animation library cannot be loaded. */
+    const createStaticPegmanLayer = () => {
+        map.addSource('pegman', {type: 'geojson', data: EMPTY});
+        map.addModel('treasurehunt-walking', config.pegmanmodels.walking);
+        map.addModel('treasurehunt-pointing', config.pegmanmodels.pointing);
+        map.addLayer({id: 'pegman-model', type: 'model', source: 'pegman',
+            layout: {'model-id': 'treasurehunt-walking'}, paint: {'model-scale': [1, 1, 1]}});
+        let mode = 'walking';
+        return {
+            /** @param {Array<number>|null} coordinates Marker coordinates. */
+            setPosition(coordinates) {
+                map.getSource('pegman').setData(coordinates ? {type: 'FeatureCollection', features: [{type: 'Feature',
+                    properties: {}, geometry: {type: 'Point', coordinates}}]} : EMPTY);
+            },
+            /** @param {number} size Model size in metres. */
+            setScale(size) {
+                map.setPaintProperty('pegman-model', 'model-scale', [size, size, size]);
+            },
+            /**
+             * @param {number} bearing Direction clockwise from north.
+             * @param {boolean} pointing Whether the fallback model should point.
+             */
+            setBearing(bearing, pointing = false) {
+                const nextMode = pointing ? 'pointing' : 'walking';
+                if (nextMode !== mode) {
+                    mode = nextMode;
+                    map.setLayoutProperty('pegman-model', 'model-id', 'treasurehunt-' + mode);
+                }
+                map.setPaintProperty('pegman-model', 'model-rotation',
+                    [0, 0, (bearing + 180) % 360]);
+            },
+        };
+    };
+
     /** Repaint all GeoJSON layers after a style change. */
     const installLayers = () => {
         if (currentStyle !== 'custom' && map.getSource('composite') && !map.getLayer('mapbox-3d-buildings')) {
@@ -294,19 +335,23 @@ export const init = async() => {
                     'fill-extrusion-opacity': 0.72,
                 }}, labelLayer?.id);
         }
-        if (!map.getSource('pegman')) {
-            map.addSource('pegman', {type: 'geojson', data: EMPTY});
-            map.addModel('treasurehunt-pegman', config.pegmanmodelurl);
-            map.addLayer({id: 'pegman-model', type: 'model', source: 'pegman',
-                layout: {'model-id': 'treasurehunt-pegman'},
-                paint: {'model-scale': [12, 12, 12], 'model-type': 'location-indicator'}});
+        if (!map.getLayer('pegman-model')) {
+            if (pegmanLibrary) {
+                pegmanLayer = createAnimatedPegmanLayer(mapboxgl, pegmanLibrary, config.pegmananimationmodel,
+                    (error) => toast(labels.layererror + ': ' + error.message, true));
+                map.addLayer(pegmanLayer);
+            } else {
+                pegmanLayer = createStaticPegmanLayer();
+            }
+            pegmanLayer.setPosition(position);
+            updatePegmanScale();
         }
         if (!map.getSource('stage')) {
             map.addSource('stage', {type: 'geojson', data: EMPTY});
             map.addLayer({id: 'stage-fill', type: 'fill', source: 'stage',
-                paint: {'fill-color': '#5ce8f6', 'fill-opacity': 0.25}});
+                paint: {'fill-color': '#5ce8f6', 'fill-opacity': 0.25}}, 'pegman-model');
             map.addLayer({id: 'stage-outline', type: 'line', source: 'stage',
-                paint: {'line-color': '#5ce8f6', 'line-width': 4}});
+                paint: {'line-color': '#5ce8f6', 'line-width': 4}}, 'pegman-model');
         }
         if (!map.getSource('attempts')) {
             map.addSource('attempts', {type: 'geojson', data: EMPTY});
@@ -327,12 +372,6 @@ export const init = async() => {
                 'circle-stroke-color': '#fff',
             }});
         }
-        if (!map.getSource('navigation')) {
-            map.addSource('navigation', {type: 'geojson', data: EMPTY});
-            map.addLayer({id: 'navigation-line', type: 'line', source: 'navigation', paint: {
-                'line-color': '#39ff72', 'line-width': 4, 'line-dasharray': [2, 1],
-            }});
-        }
         if (!firstStyle) {
             updateStage();
             updateAttempts(attemptCollection);
@@ -345,11 +384,10 @@ export const init = async() => {
 
     /** Place the 3D pegman at the selected or device position. */
     const updatePosition = () => {
-        if (!map?.getSource('pegman')) {
+        if (!map?.getLayer('pegman-model')) {
             return;
         }
-        map.getSource('pegman').setData(position ? {type: 'FeatureCollection', features: [{type: 'Feature',
-            properties: {}, geometry: {type: 'Point', coordinates: position}}]} : EMPTY);
+        pegmanLayer.setPosition(position);
         updatePegmanScale();
         updateNavigation();
         node('submit').disabled = !position || roadfinished || !available || Boolean(stage?.question) ||
@@ -361,9 +399,9 @@ export const init = async() => {
         if (!position || !map?.getLayer('pegman-model')) {
             return;
         }
-        const metresPerPixel = 156543.03392 * Math.cos(position[1] * Math.PI / 180) / (2 ** map.getZoom());
-        const scale = Math.max(8, Math.min(5000, 90 * metresPerPixel / (0.9 * 4)));
-        map.setPaintProperty('pegman-model', 'model-scale', [scale, scale, scale]);
+        // Mapbox zoom levels use 512 CSS pixels per world tile.
+        const metresPerPixel = 78271.51696 * Math.cos(position[1] * Math.PI / 180) / (2 ** map.getZoom());
+        pegmanLayer.setScale(sizeForMapScale(metresPerPixel));
     };
 
     /** Place the separate GPS point when available. */
@@ -413,7 +451,8 @@ export const init = async() => {
         const showHeading = enabled(playerconfig.showheadinghint);
         const showInZone = enabled(playerconfig.showinzonehint);
         panel.hidden = !target || !(showDistance || showInZone);
-        let line = EMPTY;
+        let bearing = null;
+        let inside = false;
         if (target) {
             const radians = Math.PI / 180;
             const deltaLatitude = (target[1] - position[1]) * radians;
@@ -421,7 +460,7 @@ export const init = async() => {
             const a = Math.sin(deltaLatitude / 2) ** 2 + Math.cos(position[1] * radians) *
                 Math.cos(target[1] * radians) * Math.sin(deltaLongitude / 2) ** 2;
             const distance = 12742000 * Math.asin(Math.min(1, Math.sqrt(a)));
-            const inside = distance < 0.5;
+            inside = distance < 0.5;
             let distanceText = '—';
             if (showInZone && inside) {
                 distanceText = labels.insidezone;
@@ -431,20 +470,41 @@ export const init = async() => {
             node('distance').textContent = distanceText;
             node('position-status').textContent = playwithoutmoving ? labels.selectedposition : labels.gpsposition;
             if (showHeading && !inside) {
-                const from = map.project(position);
-                const toward = map.project(target);
-                const length = Math.hypot(toward.x - from.x, toward.y - from.y);
-                if (length > 1) {
-                    const arrowTip = map.unproject([from.x + 60 * (toward.x - from.x) / length,
-                        from.y + 60 * (toward.y - from.y) / length]);
-                    line = {type: 'FeatureCollection', features: [{type: 'Feature', properties: {},
-                        geometry: {type: 'LineString', coordinates: [position, [arrowTip.lng, arrowTip.lat]]}}]};
-                }
+                const longitudeDelta = (target[0] - position[0]) * Math.PI / 180;
+                const latitude1 = position[1] * Math.PI / 180;
+                const latitude2 = target[1] * Math.PI / 180;
+                bearing = (Math.atan2(
+                    Math.sin(longitudeDelta) * Math.cos(latitude2),
+                    Math.cos(latitude1) * Math.sin(latitude2) -
+                        Math.sin(latitude1) * Math.cos(latitude2) * Math.cos(longitudeDelta)
+                ) * 180 / Math.PI + 360) % 360;
             }
         }
-        if (map?.getSource('navigation')) {
-            map.getSource('navigation').setData(line);
+        if (map?.getLayer('pegman-model')) {
+            // Without a direction hint the hiker faces the camera at the selected position.
+            pegmanLayer.setBearing(bearing === null ? (map.getBearing() + 180) % 360 : bearing,
+                bearing !== null);
+            pegmanLayer.setClip?.(selectClip({
+                moving: !playwithoutmoving,
+                heading: bearing !== null,
+                distanceHint: showDistance && Boolean(target) && !inside,
+                visibleTarget: Boolean(target && enabled(playerconfig.shownextareahint)),
+                inside,
+                finished: roadfinished,
+                confused: Date.now() < confusedUntil,
+            }));
         }
+    };
+
+    /** Play the disoriented reaction for one cycle after a failed location attempt. */
+    const reactToFailedAttempt = () => {
+        confusedUntil = Date.now() + 3600;
+        clearTimeout(confusedTimer);
+        updateNavigation();
+        confusedTimer = window.setTimeout(() => {
+            confusedUntil = 0;
+            updateNavigation();
+        }, 3600);
     };
 
     /** @param {Object} collection Attempt locations. */
@@ -468,7 +528,7 @@ export const init = async() => {
                     context.fillStyle = '#fff';
                     context.strokeText(String(number), 24, 24);
                     context.fillText(String(number), 24, 24);
-                    map.addImage(imageid, canvas, {pixelRatio: 2});
+                    map.addImage(imageid, context.getImageData(0, 0, canvas.width, canvas.height), {pixelRatio: 2});
                 }
             });
             map.getSource('attempts').setData(attemptCollection);
@@ -701,6 +761,7 @@ export const init = async() => {
      */
     const applyResponse = (response, action) => {
         const previousStage = stage?.id;
+        const previousAttemptId = attemptid;
         updateMode(response);
         node('finished-stage').innerHTML = roadfinished ? response.endmessage || '' : '';
         node('finished-stage').hidden = !roadfinished || !response.endmessage;
@@ -720,6 +781,9 @@ export const init = async() => {
             fitMap();
         }
         showMessages(response, action);
+        if (failedLocationAttempt(previousAttemptId, response, action)) {
+            reactToFailedAttempt();
+        }
         if (!roadfinished && (action.initialize || previousStage !== stage?.id || cluesChanged)) {
             const showClue = () => openDialog('clue');
             if (map.isMoving()) {
@@ -911,6 +975,7 @@ export const init = async() => {
         map.on('moveend', updateNavigation);
         window.addEventListener('pagehide', () => {
             clearTimeout(pollTimer);
+            clearTimeout(confusedTimer);
             if (gpswatch !== null) {
                 navigator.geolocation.clearWatch(gpswatch);
             }
@@ -923,7 +988,11 @@ export const init = async() => {
         loading.hidden = false;
         retry.hidden = true;
         try {
-            mapboxgl = await loadMapbox();
+            [mapboxgl, pegmanLibrary] = await Promise.all([loadMapbox(), loadPegmanLibrary(config.threepegmanurl)
+                .catch((error) => {
+                    toast(labels.layererror + ': ' + error.message, true);
+                    return null;
+                })]);
             if (!map) {
                 map = new mapboxgl.Map({container: 'cessium-globe', accessToken: config.mapboxaccesstoken,
                     style: mapStyle(currentStyle, config.custommapping), center: [0, 25], zoom: 2,

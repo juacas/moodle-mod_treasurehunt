@@ -23,6 +23,10 @@ export const setup = (target) => {
     const pointers = new Map();
     let ignoreclickuntil = 0;
     let pinchstarted = false;
+    let lasttouchdown = 0;
+    let touchactive = false;
+    let touchstarttime = 0;
+    let longtouchendedat = 0;
 
     const suppressFor = (duration = 800) => {
         ignoreclickuntil = Math.max(ignoreclickuntil, Date.now() + duration);
@@ -32,7 +36,12 @@ export const setup = (target) => {
         if (event.pointerType !== 'touch') {
             return;
         }
-        pointers.set(event.pointerId, {x: event.clientX, y: event.clientY, moved: false});
+        lasttouchdown = Date.now();
+        if (!pointers.size) {
+            touchstarttime = lasttouchdown;
+        }
+        touchactive = true;
+        pointers.set(event.pointerId, {x: event.clientX, y: event.clientY, moved: false, started: lasttouchdown});
         if (pointers.size > 1) {
             pinchstarted = true;
             suppressFor(1200);
@@ -59,19 +68,35 @@ export const setup = (target) => {
         if (pointer?.moved) {
             suppressFor(pinchstarted ? 1200 : 650);
         }
+        if (pointer && Date.now() - pointer.started > 500) {
+            longtouchendedat = Date.now();
+        }
         pointers.delete(event.pointerId);
         if (!pointers.size) {
             pinchstarted = false;
+            touchactive = false;
         }
     };
 
+    // Long presses can open the browser context menu and cancel the map's active gesture.
+    target.addEventListener('contextmenu', (event) => {
+        if (touchactive || Date.now() - longtouchendedat < 2500 || Date.now() - lasttouchdown < 700) {
+            event.preventDefault();
+        }
+    });
+
     if (window.PointerEvent) {
         target.addEventListener('pointerdown', down, true);
-        target.addEventListener('pointermove', move, true);
-        target.addEventListener('pointerup', up, true);
-        target.addEventListener('pointercancel', up, true);
+        window.addEventListener('pointermove', move, true);
+        window.addEventListener('pointerup', up, true);
+        window.addEventListener('pointercancel', up, true);
     } else {
         target.addEventListener('touchstart', (event) => {
+            lasttouchdown = Date.now();
+            if (event.touches.length === 1) {
+                touchstarttime = lasttouchdown;
+            }
+            touchactive = true;
             if (event.touches.length > 1) {
                 pinchstarted = true;
                 suppressFor(1200);
@@ -82,13 +107,24 @@ export const setup = (target) => {
                 suppressFor(1200);
             }
         }, {capture: true, passive: true});
-        target.addEventListener('touchend', (event) => {
+        window.addEventListener('touchend', (event) => {
             if (pinchstarted) {
                 suppressFor(1200);
             }
             if (!event.touches.length) {
+                if (Date.now() - touchstarttime > 500) {
+                    longtouchendedat = Date.now();
+                }
                 pinchstarted = false;
+                touchactive = false;
             }
+        }, {capture: true, passive: true});
+        window.addEventListener('touchcancel', () => {
+            if (pinchstarted) {
+                suppressFor(1200);
+            }
+            pinchstarted = false;
+            touchactive = false;
         }, {capture: true, passive: true});
     }
 

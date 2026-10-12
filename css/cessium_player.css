@@ -46,6 +46,21 @@
     font-family: inherit;
 }
 
+.mapbox-player .mapboxgl-canvas-container,
+.mapbox-player .mapboxgl-canvas {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.cessium-player .cesium-widget canvas {
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
 #cessium-player.mapbox-player #cessium-globe {
     width: 100%;
     height: 100%;

@@ -107,6 +107,7 @@ final class cessium_player_test extends \advanced_testcase {
         }
         $this->assertStringContainsString('id="cessium-globe"', $html);
         $this->assertStringContainsString('cesium-1.145.0', $html);
+        $this->assertStringContainsString('pegman_hiker_all_animations_matte.glb', $html);
         $this->assertStringNotContainsString('"roadtimestamp":', $html);
         $this->assertStringNotContainsString('"totalstages":', $html);
         $this->assertStringNotContainsString('core_courseformat/local/content/activity_header', $html);

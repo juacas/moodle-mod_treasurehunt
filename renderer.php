@@ -152,6 +152,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_play_page_mapbox_player(play_page_base $renderablepage) {
+        global $CFG;
+
         $treasurehunt = $renderablepage->treasurehunt;
         $cm = $renderablepage->cm;
         if (isset($renderablepage->custommapping->geographic) && !$renderablepage->custommapping->geographic) {
@@ -163,6 +165,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->css(new moodle_url('https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css'));
         $config = $this->get_geographic_player_config($renderablepage);
         $config['mapboxaccesstoken'] = (string)get_config('mod_treasurehunt', 'mapboxaccesstoken');
+        $config['threepegmanurl'] = (new moodle_url('/mod/treasurehunt/js/three-pegman-0.170.0.min.js', [
+            'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/js/three-pegman-0.170.0.min.js'),
+        ]))->out(false);
         $this->page->requires->js_call_amd('mod_treasurehunt/mapbox_player', 'init');
         treasurehunt_qr_support($this->page, 'setup', []);
 
@@ -191,9 +196,17 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $cm = $renderablepage->cm;
         return [
             'cmid' => (int)$cm->id,
-            'pegmanmodelurl' => (new moodle_url('/mod/treasurehunt/pix/pegman_location_pin.glb', [
-                'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_location_pin.glb'),
+            'pegmananimationmodel' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb', [
+                'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb'),
             ]))->out(false),
+            'pegmanmodels' => [
+                'walking' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_walking.glb', [
+                    'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_walking.glb'),
+                ]))->out(false),
+                'pointing' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_pointing_beam.glb', [
+                    'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_pointing_beam.glb'),
+                ]))->out(false),
+            ],
             'treasurehuntid' => (int)$cm->instance,
             'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
             'groupmode' => (bool)$treasurehunt->groupmode,

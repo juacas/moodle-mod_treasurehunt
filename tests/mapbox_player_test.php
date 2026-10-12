@@ -83,7 +83,7 @@ final class mapbox_player_test extends \advanced_testcase {
         $this->assertStringContainsString('id="cessium-globe"', $html);
         $this->assertStringContainsString('Mapbox GL', $html);
         $this->assertStringContainsString('pk.test-public-token', $html);
-        $this->assertStringContainsString('pegman_location_pin.glb', $html);
+        $this->assertStringContainsString('pegman_hiker_all_animations_matte.glb', $html);
         $this->assertStringNotContainsString('"roadtimestamp":', $html);
     }
 }

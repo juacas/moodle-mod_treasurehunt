@@ -23,6 +23,7 @@
 import ajax from 'core/ajax';
 import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
+import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
@@ -124,7 +125,14 @@ const createBaseProvider = async(Cesium, mapping) => {
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'tiled') {
         // OpenLayers accepts {-y} for TMS tiles; Cesium calls the same coordinate {reverseY}.
         const url = mapping.wmsurl.replace(/\{-y\}/g, '{reverseY}');
-        provider = new Cesium.UrlTemplateImageryProvider({url, maximumLevel: 19});
+        // These custom XYZ layers use the standard EPSG:3857 tile grid. Set the scheme
+        // explicitly so Cesium always has a projection when it builds globe tiles.
+        provider = new Cesium.UrlTemplateImageryProvider({
+            url,
+            tilingScheme: new Cesium.WebMercatorTilingScheme(),
+            maximumLevel: 19,
+            enablePickFeatures: false,
+        });
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'wms') {
         provider = new Cesium.WebMapServiceImageryProvider({
             url: mapping.wmsurl,
@@ -334,6 +342,14 @@ export const init = async() => {
     let stageSignature = '';
     let attempts = [];
     let marker;
+    let markerModel;
+    let markerModelLoading = false;
+    let markerClip = 'Descansando';
+    let markerPlayingClip = null;
+    let markerBearing = null;
+    let markerScaleValue = 1;
+    let markerVisible = false;
+    let markerDisposed = false;
     let markerScaleCalculated = false;
     let markerScaleReference = null;
     let markerScaleFrame = null;
@@ -366,6 +382,8 @@ export const init = async() => {
     let history = [];
     let pollTimer;
     let toastTimer;
+    let confusedUntil = 0;
+    let confusedTimer;
     let requestQueue = Promise.resolve();
 
     /**
@@ -418,9 +436,9 @@ export const init = async() => {
                 tooltip: labels.layercustom,
                 iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
                 category: 'Other',
-                creationFunction: async() => [
-                    await createBaseProvider(Cesium, null),
-                    await createBaseProvider(Cesium, custommapping),
+                creationFunction: () => [
+                    createBaseProvider(Cesium, null),
+                    createBaseProvider(Cesium, custommapping),
                 ],
             });
             imagery.push(custom);
@@ -516,6 +534,71 @@ export const init = async() => {
         dialog.close();
     };
 
+    /** @returns {Object} Local east-north-up transform facing the navigation bearing. */
+    const markerModelMatrix = () => {
+        const location = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        const heading = markerBearing === null ? 0 :
+            Cesium.Math.toRadians(markerBearing) - Cesium.Math.PI_OVER_TWO;
+        return Cesium.Transforms.headingPitchRollToFixedFrame(location,
+            new Cesium.HeadingPitchRoll(heading, 0, 0));
+    };
+
+    /** Position the model at the selected point. */
+    const updateMarkerModelMatrix = () => {
+        if (markerModel && position) {
+            markerModel.modelMatrix = markerModelMatrix();
+        }
+    };
+
+    /** Play only the clip required by the current game state. */
+    const updateMarkerAnimation = () => {
+        if (!markerModel?.ready || markerPlayingClip === markerClip) {
+            return;
+        }
+        markerModel.activeAnimations.removeAll();
+        markerModel.activeAnimations.add({name: markerClip, loop: Cesium.ModelAnimationLoop.REPEAT});
+        markerPlayingClip = markerClip;
+        viewer.scene.requestRender();
+    };
+
+    /** Load one shared glTF model and keep it clamped to the terrain. */
+    const loadMarkerModel = async() => {
+        if (markerModel || markerModelLoading) {
+            return;
+        }
+        markerModelLoading = true;
+        try {
+            const model = await Cesium.Model.fromGltfAsync({
+                url: config.pegmananimationmodel,
+                scene: viewer.scene,
+                heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
+                modelMatrix: markerModelMatrix(),
+                show: markerVisible,
+                scale: markerScaleValue,
+            });
+            if (markerDisposed || viewer.isDestroyed()) {
+                model.destroy();
+                return;
+            }
+            markerModel = viewer.scene.primitives.add(model);
+            // Camera fitting and scale calculation may finish while the GLB is loading.
+            model.scale = markerScaleValue;
+            model.show = markerVisible;
+            model.imageBasedLighting.imageBasedLightingFactor = new Cesium.Cartesian2(2.5, 1);
+            updateMarkerModelMatrix();
+            if (model.ready) {
+                updateMarkerAnimation();
+            } else {
+                model.readyEvent.addEventListener(updateMarkerAnimation);
+            }
+            viewer.scene.requestRender();
+        } catch (error) {
+            toast(labels.layererror + ': ' + error.message, true);
+        } finally {
+            markerModelLoading = false;
+        }
+    };
+
     /** Update the coordinate marker on the globe. */
     const updateMarker = () => {
         if (!viewer || !position) {
@@ -524,14 +607,6 @@ export const init = async() => {
         if (!marker) {
             marker = viewer.entities.add({
                 name: labels.selectedposition,
-                model: {
-                    uri: config.pegmanmodelurl,
-                    show: false,
-                    scale: 1,
-                    heightReference: Cesium.HeightReference.CLAMP_TO_GROUND,
-                    runAnimations: true,
-                    imageBasedLightingFactor: new Cesium.Cartesian2(2.5, 1),
-                },
                 label: {
                     show: false,
                     text: '',
@@ -547,12 +622,14 @@ export const init = async() => {
                 },
             });
             // The glTF animation needs a clock tick and a rendered frame on every cycle.
-            viewer.scene.maximumRenderTimeChange = 0;
+            // Keep the animated model responsive without forcing a 60 FPS render loop on mobile GPUs.
+            viewer.scene.maximumRenderTimeChange = 0.05;
         }
         marker.position = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
-        if (cameraReady) {
-            updateMarkerScale();
-        }
+        markerVisible = true;
+        updateMarkerScale();
+        updateMarkerModelMatrix();
+        loadMarkerModel();
         element('submit').disabled = roadfinished || !available || !position ||
             Boolean(stage?.question) || stage?.activitysolved === false;
         updateNavigation();
@@ -565,7 +642,7 @@ export const init = async() => {
      * @returns {number|null} Ground scale, or null if the viewport is not ready.
      */
     const getMarkerMetresPerPixel = () => {
-        if (!marker || !position || !cameraReady) {
+        if (!marker || !position) {
             return null;
         }
         const canvas = viewer.scene.canvas;
@@ -591,6 +668,9 @@ export const init = async() => {
     const updateMarkerScale = () => {
         const metresPerPixel = getMarkerMetresPerPixel();
         if (metresPerPixel === null) {
+            if (markerModel) {
+                markerModel.show = markerVisible;
+            }
             return;
         }
         if (markerScaleFrame !== null) {
@@ -598,8 +678,12 @@ export const init = async() => {
             markerScaleFrame = null;
         }
         markerScaleReference = metresPerPixel;
-        marker.model.scale = PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
-        marker.model.show = true;
+        markerScaleValue = PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT;
+        markerVisible = true;
+        if (markerModel) {
+            markerModel.scale = markerScaleValue;
+            markerModel.show = true;
+        }
         markerScaleCalculated = true;
         viewer.scene.requestRender();
     };
@@ -615,13 +699,14 @@ export const init = async() => {
             markerScaleFrame = null;
         }
         if (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-            marker.model.scale = target;
+            markerScaleValue = target;
+            if (markerModel) {
+                markerModel.scale = target;
+            }
             viewer.scene.requestRender();
             return;
         }
-        const scaleProperty = marker.model.scale;
-        const current = scaleProperty?.getValue ? scaleProperty.getValue(viewer.clock.currentTime) : scaleProperty;
-        const from = Number.isFinite(Number(current)) && Number(current) > 0 ? Number(current) : target;
+        const from = markerScaleValue > 0 ? markerScaleValue : target;
         const started = performance.now();
         const tick = (now) => {
             const elapsed = Math.min(now - started, PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS);
@@ -637,8 +722,11 @@ export const init = async() => {
                 const easing = 1 + 2.5 * remaining ** 3 + 1.5 * remaining ** 2;
                 scale = from + (target - from) * easing;
             }
-            marker.model.scale = elapsed === PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
+            markerScaleValue = elapsed === PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
                 target : Math.max(0.0001, scale);
+            if (markerModel) {
+                markerModel.scale = markerScaleValue;
+            }
             viewer.scene.requestRender();
             markerScaleFrame = elapsed < PEGMAN_SCALE_SHAKE_MS + PEGMAN_SCALE_BOUNCE_MS ?
                 window.requestAnimationFrame(tick) : null;
@@ -660,20 +748,22 @@ export const init = async() => {
         animateMarkerScale(PEGMAN_REFERENCE_HEIGHT_PX * metresPerPixel / PEGMAN_HEIGHT);
     };
 
-    /**
-     * Face the pegman towards the navigation hint, or restore its default orientation.
-     * The model faces glTF +Z. Cesium's zero heading puts that axis to the east,
-     * so subtract 90 degrees to make a zero bearing face north.
-     *
-     * @param {number|null} bearing Direction clockwise from north, or null to reset.
-     */
-    const updateMarkerHeading = (bearing) => {
-        if (!marker) {
-            return;
+    /** @returns {number} Bearing from the marker towards the camera, clockwise from north. */
+    const cameraFacingBearing = () => {
+        const location = Cesium.Cartesian3.fromDegrees(position[0], position[1]);
+        const inverse = Cesium.Matrix4.inverseTransformation(
+            Cesium.Transforms.eastNorthUpToFixedFrame(location), new Cesium.Matrix4());
+        const camera = Cesium.Matrix4.multiplyByPoint(inverse, viewer.camera.positionWC, new Cesium.Cartesian3());
+        if (Math.hypot(camera.x, camera.y) < 1) {
+            return (Cesium.Math.toDegrees(viewer.camera.heading) + 180 + 360) % 360;
         }
-        marker.orientation = bearing === null ? undefined : Cesium.Transforms.headingPitchRollQuaternion(
-            Cesium.Cartesian3.fromDegrees(position[0], position[1]),
-            new Cesium.HeadingPitchRoll(Cesium.Math.toRadians(bearing) - Cesium.Math.PI_OVER_TWO, 0, 0));
+        return (Cesium.Math.toDegrees(Math.atan2(camera.x, camera.y)) + 360) % 360;
+    };
+
+    /** @param {number|null} bearing Direction clockwise from north, or null to face the camera. */
+    const updateMarkerHeading = (bearing) => {
+        markerBearing = bearing === null && position ? cameraFacingBearing() : bearing;
+        updateMarkerModelMatrix();
     };
 
     /**
@@ -731,6 +821,8 @@ export const init = async() => {
     const updateNavigation = () => {
         const panel = element('navigation');
         const target = position && closestStagePoint(position, nextstage);
+        const inZone = Boolean(position && nextstage?.features?.some((feature) =>
+            inGeometry(position, feature.geometry)));
         if (!position || !target || !(
             playerconfig.showdistancehint || playerconfig.showheadinghint || playerconfig.showinzonehint)) {
             panel.hidden = true;
@@ -739,6 +831,11 @@ export const init = async() => {
             }
             compassBearing = null;
             updateMarkerHeading(null);
+            markerClip = selectClip({moving: !playwithoutmoving, finished: roadfinished,
+                visibleTarget: Boolean(position && nextstage?.features?.length && playerconfig.shownextareahint),
+                inside: inZone,
+                confused: Date.now() < confusedUntil});
+            updateMarkerAnimation();
             if (marker) {
                 marker.label.show = false;
             }
@@ -750,8 +847,6 @@ export const init = async() => {
         const second = Cesium.Cartographic.fromDegrees(target[0], target[1]);
         const line = new Cesium.EllipsoidGeodesic(first, second);
         const distance = line.surfaceDistance;
-        const inZone = nextstage.features.some((feature) =>
-            inGeometry(position, feature.geometry));
         const inside = playerconfig.showinzonehint && inZone;
         let distanceText = '—';
         if (inside) {
@@ -771,12 +866,33 @@ export const init = async() => {
             compassBearing = null;
             updateMarkerHeading(null);
         }
+        markerClip = selectClip({
+            moving: !playwithoutmoving,
+            heading: Boolean(compassBearing !== null),
+            distanceHint: Boolean(playerconfig.showdistancehint && !inZone && distance >= 0.5),
+            visibleTarget: Boolean(playerconfig.shownextareahint),
+            inside: inZone || distance < 0.5,
+            finished: roadfinished,
+            confused: Date.now() < confusedUntil,
+        });
+        updateMarkerAnimation();
         if (marker) {
             const hint = inside ? labels.insidezone : (playerconfig.showdistancehint ? distanceText : '');
             marker.label.text = hint;
             marker.label.show = Boolean(hint);
             viewer.scene.requestRender();
         }
+    };
+
+    /** Play the disoriented reaction for one cycle after a failed location attempt. */
+    const reactToFailedAttempt = () => {
+        confusedUntil = Date.now() + 3600;
+        clearTimeout(confusedTimer);
+        updateNavigation();
+        confusedTimer = window.setTimeout(() => {
+            confusedUntil = 0;
+            updateNavigation();
+        }, 3600);
     };
 
     /** Fly to the visible stage, a recent attempt or the player's marker. */
@@ -790,9 +906,9 @@ export const init = async() => {
             fitInProgress = false;
             if (!cameraReady) {
                 cameraReady = true;
-                if (marker && !markerScaleCalculated) {
-                    updateMarkerScale();
-                }
+            }
+            if (marker) {
+                updateMarkerScale();
             }
             resolveFlight();
         };
@@ -806,7 +922,7 @@ export const init = async() => {
         } else if (attempts.length) {
             viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2}).then(finish, finish);
         } else if (marker || gpsmarker) {
-            const target = marker && !marker.model.show ? gpsmarker : (marker || gpsmarker);
+            const target = marker && !markerVisible ? gpsmarker : (marker || gpsmarker);
             if (target) {
                 viewer.flyTo(target, {duration: 1.2}).then(finish, finish);
             } else {
@@ -1249,6 +1365,7 @@ export const init = async() => {
      */
     const applyResponse = async(response, action) => {
         const previousStage = stage?.id;
+        const previousAttemptId = attemptid;
         updateMode(response);
         const finishstage = element('finished-stage');
         finishstage.innerHTML = roadfinished ? response.endmessage || '' : '';
@@ -1280,6 +1397,9 @@ export const init = async() => {
         updateActions();
         updateNavigation();
         showMessages(response, action);
+        if (failedLocationAttempt(previousAttemptId, response, action)) {
+            reactToFailedAttempt();
+        }
         if (!roadfinished && ((stage && previousStage !== stage.id) ||
                 (availableClues.length && (action.initialize || cluesChanged)))) {
             openDialog('clue');
@@ -1489,8 +1609,6 @@ export const init = async() => {
             }
         });
         const removeZoomResizer = viewer.camera.moveEnd.addEventListener(updateMarkerScaleAfterZoom);
-        handler.setInputAction(() => touchGuard.suppressFor(1200), Cesium.ScreenSpaceEventType.PINCH_START);
-        handler.setInputAction(() => touchGuard.suppressFor(1200), Cesium.ScreenSpaceEventType.PINCH_MOVE);
         handler.setInputAction((event) => {
             if (touchGuard.shouldIgnoreClick()) {
                 return;
@@ -1523,8 +1641,10 @@ export const init = async() => {
                 (playwithoutmoving ? 'crosshair' : 'grab');
         }, Cesium.ScreenSpaceEventType.MOUSE_MOVE);
         window.addEventListener('pagehide', () => {
+            markerDisposed = true;
             window.removeEventListener('resize', updateLayerPickerLayout);
             clearTimeout(pollTimer);
+            clearTimeout(confusedTimer);
             if (geowatch !== null) {
                 navigator.geolocation.clearWatch(geowatch);
             }
@@ -1590,7 +1710,7 @@ export const init = async() => {
                 viewer.scene.globe.depthTestAgainstTerrain = true;
                 viewer.scene.maximumRenderTimeChange = 60;
                 viewer.clock.shouldAnimate = true;
-                viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.5);
+                viewer.resolutionScale = Math.min(window.devicePixelRatio || 1, 1.25);
                 viewer.camera.flyTo({destination: Cesium.Cartesian3.fromDegrees(0, 25, 15000000), duration: 0});
                 bindInterface();
                 if (!playwithoutmoving) {
