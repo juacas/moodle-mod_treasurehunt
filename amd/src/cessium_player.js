@@ -253,9 +253,10 @@ const closestStagePoint = (point, collection) => {
  * Compute a camera rectangle with breathing space around all stage geometries.
  *
  * @param {Object} collection GeoJSON features.
+ * @param {number} marginRatio Fraction of the larger span to leave around the geometry.
  * @returns {Array<number>|null} West, south, east and north in degrees.
  */
-const geometryBounds = (collection) => {
+const geometryBounds = (collection, marginRatio = 0.18) => {
     const pairs = (collection?.features || []).flatMap((feature) => coordinatePairs(feature.geometry?.coordinates));
     if (!pairs.length) {
         return null;
@@ -264,7 +265,7 @@ const geometryBounds = (collection) => {
         Math.min(result[0], pair[0]), Math.min(result[1], pair[1]),
         Math.max(result[2], pair[0]), Math.max(result[3], pair[1]),
     ], [180, 90, -180, -90]);
-    const margin = Math.max(bounds[2] - bounds[0], bounds[3] - bounds[1], 0.002) * 0.18;
+    const margin = Math.max(bounds[2] - bounds[0], bounds[3] - bounds[1], 0.002) * marginRatio;
     return [bounds[0] - margin, Math.max(-89, bounds[1] - margin),
         bounds[2] + margin, Math.min(89, bounds[3] + margin)];
 };
@@ -325,7 +326,7 @@ export const init = async() => {
     let Cesium;
     let touchGuard;
     let buildingsTileset;
-    let buildingsEnabled = true;
+    let buildingsEnabled = false;
     let layerPicker;
     let layerSelectionSubscription;
     /** Keep the gallery inside the visible area when the viewport changes. */
@@ -338,6 +339,7 @@ export const init = async() => {
     };
     let stageSource;
     let visibleStageBounds;
+    let boundsFlightToken = 0;
     let nextstage = null;
     let stageSignature = '';
     let attempts = [];
@@ -519,6 +521,9 @@ export const init = async() => {
         const dialog = element(id + '-dialog');
         if (!dialog.open) {
             dialog.showModal();
+        }
+        if (id === 'clue') {
+            focusSelectedClue();
         }
     };
 
@@ -895,8 +900,61 @@ export const init = async() => {
         }, 3600);
     };
 
+    /**
+     * Fly above the terrain while keeping the whole requested rectangle in view.
+     * Cesium's rectangle camera coordinates are calculated against the ellipsoid.
+     *
+     * @param {Array<number>} bounds Padded geographic bounds in degrees.
+     * @param {Object} callbacks Camera flight completion and cancellation callbacks.
+     * @returns {Promise<void>} Completion of the terrain height lookup.
+     */
+    const flyToBounds = async(bounds, callbacks = {}) => {
+        const token = ++boundsFlightToken;
+        const rectangle = Cesium.Rectangle.fromDegrees(...bounds);
+        let destination = rectangle;
+        let orientation;
+        const terrainProvider = viewer.scene.terrainProvider;
+        const cameraPosition = viewer.camera.getRectangleCameraCoordinates(rectangle);
+        const cameraCartographic = Cesium.Cartographic.fromCartesian(cameraPosition);
+        if (!(terrainProvider instanceof Cesium.EllipsoidTerrainProvider) && cameraCartographic.height < 10000) {
+            const positions = [];
+            for (let row = 0; row <= 2; row++) {
+                for (let column = 0; column <= 2; column++) {
+                    positions.push(Cesium.Cartographic.fromDegrees(
+                        bounds[0] + (bounds[2] - bounds[0]) * column / 2,
+                        bounds[1] + (bounds[3] - bounds[1]) * row / 2));
+                }
+            }
+            let heights = [];
+            let timeout;
+            try {
+                const sample = terrainProvider.availability ?
+                    Cesium.sampleTerrainMostDetailed(terrainProvider, positions) :
+                    Cesium.sampleTerrain(terrainProvider, 11, positions);
+                await Promise.race([sample, new Promise((_, reject) => {
+                    timeout = window.setTimeout(() => reject(new Error('Terrain sample timed out')), 3000);
+                })]);
+                heights = positions.map((point) => point.height).filter(Number.isFinite);
+            } catch (error) {
+                // A conservative altitude still keeps the area visible if terrain sampling fails.
+            } finally {
+                window.clearTimeout(timeout);
+            }
+            const terrainHeight = heights.length ? Math.max(0, ...heights) : 10000;
+            destination = Cesium.Cartesian3.fromRadians(cameraCartographic.longitude, cameraCartographic.latitude,
+                cameraCartographic.height + terrainHeight + 100);
+            orientation = {heading: 0, pitch: -Cesium.Math.PI_OVER_TWO, roll: 0};
+        }
+        if (token !== boundsFlightToken || viewer.isDestroyed()) {
+            callbacks.cancel?.();
+            return;
+        }
+        viewer.camera.flyTo({destination, orientation, duration: 1.2, ...callbacks});
+    };
+
     /** Fly to the visible stage, a recent attempt or the player's marker. */
     const fitMap = () => {
+        boundsFlightToken++;
         fitInProgress = true;
         let resolveFlight;
         flightCompletion = new Promise((resolve) => {
@@ -913,12 +971,7 @@ export const init = async() => {
             resolveFlight();
         };
         if (visibleStageBounds) {
-            viewer.camera.flyTo({
-                destination: Cesium.Rectangle.fromDegrees(...visibleStageBounds),
-                duration: 1.2,
-                complete: finish,
-                cancel: finish,
-            });
+            flyToBounds(visibleStageBounds, {complete: finish, cancel: finish}).catch(finish);
         } else if (attempts.length) {
             viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2}).then(finish, finish);
         } else if (marker || gpsmarker) {
@@ -1159,9 +1212,9 @@ export const init = async() => {
         }
         const clue = availableClues[selectedClueIndex];
         const feature = nextstage?.features?.find((item) => Number(item.id) === Number(clue?.stageid));
-        const bounds = feature && geometryBounds({features: [feature]});
+        const bounds = feature && geometryBounds({features: [feature]}, 0.4);
         if (bounds) {
-            viewer.camera.flyTo({destination: Cesium.Rectangle.fromDegrees(...bounds), duration: 1.2});
+            flyToBounds(bounds);
         }
     };
 
@@ -1684,6 +1737,11 @@ export const init = async() => {
                     infoBox: false,
                     selectionIndicator: false,
                     requestRenderMode: true,
+                });
+                viewer.scene.terrainProviderChanged.addEventListener(() => {
+                    if (element('clue-dialog').open) {
+                        focusSelectedClue();
+                    }
                 });
                 const activeViewer = viewer;
                 Cesium.createOsmBuildingsAsync().then((buildings) => {
