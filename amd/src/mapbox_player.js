@@ -289,14 +289,12 @@ export const init = async() => {
         }
     };
 
-    /** Keep the game usable with static models if the animation library cannot be loaded. */
+    /** Keep the marker visible with the shared model if the animation library cannot be loaded. */
     const createStaticPegmanLayer = () => {
         map.addSource('pegman', {type: 'geojson', data: EMPTY});
-        map.addModel('treasurehunt-walking', config.pegmanmodels.walking);
-        map.addModel('treasurehunt-pointing', config.pegmanmodels.pointing);
+        map.addModel('treasurehunt-pegman', config.pegmananimationmodel);
         map.addLayer({id: 'pegman-model', type: 'model', source: 'pegman',
-            layout: {'model-id': 'treasurehunt-walking'}, paint: {'model-scale': [1, 1, 1]}});
-        let mode = 'walking';
+            layout: {'model-id': 'treasurehunt-pegman'}, paint: {'model-scale': [1, 1, 1]}});
         return {
             /** @param {Array<number>|null} coordinates Marker coordinates. */
             setPosition(coordinates) {
@@ -309,14 +307,8 @@ export const init = async() => {
             },
             /**
              * @param {number} bearing Direction clockwise from north.
-             * @param {boolean} pointing Whether the fallback model should point.
              */
-            setBearing(bearing, pointing = false) {
-                const nextMode = pointing ? 'pointing' : 'walking';
-                if (nextMode !== mode) {
-                    mode = nextMode;
-                    map.setLayoutProperty('pegman-model', 'model-id', 'treasurehunt-' + mode);
-                }
+            setBearing(bearing) {
                 map.setPaintProperty('pegman-model', 'model-rotation',
                     [0, 0, (bearing + 180) % 360]);
             },

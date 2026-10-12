@@ -199,14 +199,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             'pegmananimationmodel' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb', [
                 'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb'),
             ]))->out(false),
-            'pegmanmodels' => [
-                'walking' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_walking.glb', [
-                    'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_walking.glb'),
-                ]))->out(false),
-                'pointing' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_pointing_beam.glb', [
-                    'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_pointing_beam.glb'),
-                ]))->out(false),
-            ],
             'treasurehuntid' => (int)$cm->instance,
             'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
             'groupmode' => (bool)$treasurehunt->groupmode,
