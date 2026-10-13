@@ -25,7 +25,7 @@ import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
 import {createLayer as createAnimatedPegmanLayer, loadLibrary as loadPegmanLibrary,
     sizeForMapScale} from 'mod_treasurehunt/mapbox_animated_pegman';
-import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
+import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
@@ -36,7 +36,7 @@ let mapboxPromise;
 const enabled = (value) => value === true || value === 1 || value === '1' || value === 'true';
 
 /** @returns {Promise<Object>} Mapbox GL JS namespace. */
-const loadMapbox = () => {
+export const loadMapbox = () => {
     if (window.mapboxgl) {
         return Promise.resolve(window.mapboxgl);
     }
@@ -185,7 +185,7 @@ const customSource = (mapping) => {
  * @param {Object} mapping Activity map settings.
  * @returns {Object} Mapbox style.
  */
-const mapStyle = (kind, mapping) => {
+export const mapStyle = (kind, mapping) => {
     if (kind === 'satellite') {
         return 'mapbox://styles/mapbox/satellite-streets-v12';
     }
@@ -434,6 +434,14 @@ export const init = async() => {
     };
 
     /** Show distance and direction hints only when the activity enables them. */
+    let navigationClip = 'Descansando';
+    /** Match the animation to the camera without changing the game navigation state. */
+    const updatePegmanAnimation = () => {
+        if (map?.getLayer('pegman-model')) {
+            pegmanLayer.setClip?.(selectCameraClip(navigationClip, 90 - map.getPitch()));
+        }
+    };
+
     const updateNavigation = () => {
         const panel = node('navigation');
         const target = position ? closestStagePoint(position, nextstage) : null;
@@ -474,7 +482,7 @@ export const init = async() => {
             // Without a direction hint the hiker faces the camera at the selected position.
             pegmanLayer.setBearing(bearing === null ? (map.getBearing() + 180) % 360 : bearing,
                 bearing !== null);
-            pegmanLayer.setClip?.(selectClip({
+            navigationClip = selectClip({
                 moving: !playwithoutmoving,
                 heading: bearing !== null,
                 distanceHint: showDistance && Boolean(target) && !inside,
@@ -482,7 +490,8 @@ export const init = async() => {
                 inside,
                 finished: roadfinished,
                 confused: Date.now() < confusedUntil,
-            }));
+            });
+            updatePegmanAnimation();
         }
     };
 
@@ -976,6 +985,7 @@ export const init = async() => {
             map.getCanvas().style.cursor = cursor;
         });
         map.on('move', positionAttempt);
+        map.on('move', updatePegmanAnimation);
         map.on('moveend', updateNavigation);
         window.addEventListener('pagehide', () => {
             clearTimeout(pollTimer);

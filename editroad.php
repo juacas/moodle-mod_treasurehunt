@@ -38,6 +38,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // Print the page header.
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID.
 $id = optional_param('id', 0, PARAM_INT);  // EntryID.
+$editor = optional_param('editor', '', PARAM_ALPHA);
+$playertype = optional_param('playertype', '', PARAM_ALPHANUMEXT);
 
 [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -46,6 +48,12 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 $url = new moodle_url('/mod/treasurehunt/editroad.php', ['cmid' => $cmid]);
+if ($editor === 'edit2') {
+    $url->param('editor', $editor);
+    if ($playertype !== '' && array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $url->param('playertype', $playertype);
+    }
+}
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -53,7 +61,12 @@ $PAGE->set_url($url);
 $PAGE->activityheader->disable();
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/edit.php', ['id' => $cmid, 'roadid' => $id]);
+$returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+    ['id' => $cmid, 'roadid' => $id]);
+if ($editor === 'edit2' && $playertype !== '' &&
+        array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+    $returnurl->param('playertype', $playertype);
+}
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);

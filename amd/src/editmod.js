@@ -30,6 +30,7 @@ import * as Bootstrap from "bootstrap";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import initAddressAutocomplete from "mod_treasurehunt/addressautocomplete";
 import viewgpx from "mod_treasurehunt/viewgpx";
+import initEditorFullscreen from "mod_treasurehunt/editor_fullscreen";
 import { get_strings as str } from "core/str";
 
 let init = {
@@ -49,7 +50,8 @@ let init = {
         "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage", "preview",
         "playstagewithqr", "playstagewithoutmoving", "discoveroutofsequence", "activitytoend",
         "addsimplequestion", "editorinverserestrictions", "editordirectrestrictions",
-        "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorqrshort",
+        "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorownclueshort",
+        "editorviewfullclue", "editorqrshort",
         "editorpreviousshort", "editorblockedshort", "editorwithoutgpsshort", "editoroutofsequenceshort",
         "editorcopysource", "editorcopyfrom", "editorcopycount", "editorcopyexistingcount",
         "editorcopytarget", "editorcopyappenddesc",
@@ -552,9 +554,11 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }),
       controls: ol.control.defaults().extend([layerSwitcher]),
     });
+    initEditorFullscreen(map);
 
     var openStagePopover = null;
     var openStagePopoverButton = null;
+    var stageClueModal = new Bootstrap.Modal(document.getElementById("stagecluemodal"));
     /** Close the currently open stage information popover. */
     function closeStagePopover() {
       if (openStagePopover) {
@@ -1166,6 +1170,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           .data("stageInfo", {
             title: plainName,
             clue: clue,
+            ownclue: summary.ownclue,
             hasqr: summary.hasqr,
             discoveroutofsequence: summary.discoveroutofsequence,
             withoutgps: summary.playstagewithoutmoving,
@@ -1682,13 +1687,60 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     }
     /**
+     * Preserve the second editor and its selected map engine after editing a form.
+     * @param {string} url Form URL.
+     * @returns {string} URL with editor context when needed.
+     */
+    function edit2FormUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('editor', 'edit2');
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Return to the editor that opened the operation.
+     * @param {string} url Classic editor URL.
+     * @returns {string} Selected editor URL.
+     */
+    function currentEditorUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url.replace('edit.php', 'edit2.php'), window.location.href);
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Keep the explicitly requested player for a preview.
+     * @param {string} url Preview URL.
+     * @returns {string} URL with an optional player override.
+     */
+    function currentPreviewUrl(url) {
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (!player || !window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('playertype', player);
+      return target.href;
+    }
+    /**
      * Forms
      * @param {integer} stageid
      * @param {integer} idModule
      */
     function editFormstageEntry(stageid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&id=" + stageid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1697,7 +1749,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormstageEntry(roadid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&roadid=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Navigate to edit road page.
@@ -1706,7 +1758,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function editFormRoadEntry(roadid, idModule) {
       var url = "editroad.php?cmid=" + idModule + "&id=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1714,7 +1766,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormRoadEntry(idModule) {
       var url = "editroad.php?cmid=" + idModule;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Delete a road in the server via AJAX.
@@ -2042,8 +2094,8 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }])[0].done(function () {
           copyModal.hide();
           sessionStorage.setItem("treasurehuntCopySuccess", strings.editorcopysuccess);
-          window.location.assign("edit.php?id=" + encodeURIComponent(idModule) +
-            "&roadid=" + encodeURIComponent(targetid));
+          window.location.assign(currentEditorUrl("edit.php?id=" + encodeURIComponent(idModule) +
+            "&roadid=" + encodeURIComponent(targetid)));
         }).fail(function (error) {
           $("#copystagessave").prop("disabled", false);
           notification.exception(error);
@@ -2088,8 +2140,6 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       var $card = $("<div>", {class: "card border-0 treasurehunt-stage-summary"});
       $("<div>", {class: "card-header fw-semibold"}).text(info.title).appendTo($card);
       var $body = $("<div>", {class: "card-body"}).appendTo($card);
-      $("<div>", {class: "treasurehunt-stage-clue-label"}).text(strings.editorclueshort).appendTo($body);
-      var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
       /**
        * Copy a short HTML preview with only safe formatting tags.
        * @param {Node} node Source HTML node.
@@ -2131,16 +2181,38 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           target.appendChild(wrapper);
         }
       }
-      var cluehtml = new DOMParser().parseFromString(info.clue || "", "text/html").body;
-      var previewstate = {remaining: 160, truncated: false};
-      Array.from(cluehtml.childNodes).forEach(function (node) {
-        copyPreview(node, $clue[0], previewstate);
-      });
-      if (!$clue.text().trim()) {
-        $clue.text(strings.editornone);
-      } else if (previewstate.truncated) {
-        $clue.append(document.createTextNode("…"));
+      /**
+       * Show a short clue and a button to read its full content.
+       * @param {string} label Visible clue label.
+       * @param {string} html Formatted full clue.
+       * @param {string} kind Clue field to open.
+       */
+      function addCluePreview(label, html, kind) {
+        var cluehtml = new DOMParser().parseFromString(html || "", "text/html").body;
+        var hasContent = Boolean(cluehtml.textContent.trim() ||
+          cluehtml.querySelector("img, video, audio, iframe, object, embed"));
+        var $heading = $("<div>", {class: "treasurehunt-stage-clue-heading"}).appendTo($body);
+        $("<span>", {class: "treasurehunt-stage-clue-label"}).text(label).appendTo($heading);
+        if (hasContent) {
+          $("<button>", {type: "button", class: "btn btn-link btn-sm treasurehunt-open-full-clue"})
+            .attr({"data-clue-kind": kind, "aria-label": strings.editorviewfullclue + ": " + label + " " + info.title,
+              title: strings.editorviewfullclue})
+            .append('<i class="fa fa-arrow-right" aria-hidden="true"></i>')
+            .appendTo($heading);
+        }
+        var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
+        var previewstate = {remaining: 160, truncated: false};
+        Array.from(cluehtml.childNodes).forEach(function (node) {
+          copyPreview(node, $clue[0], previewstate);
+        });
+        if (!$clue.text().trim()) {
+          $clue.text(hasContent ? strings.editorviewfullclue : strings.editornone);
+        } else if (previewstate.truncated) {
+          $clue.append(document.createTextNode("…"));
+        }
       }
+      addCluePreview(strings.editorclueshort, info.clue, "next");
+      addCluePreview(strings.editorownclueshort, info.ownclue, "own");
 
       var direct = [];
       if (info.activitytoendname) {
@@ -2193,6 +2265,18 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       });
       openStagePopoverButton = this;
       openStagePopover.show();
+    });
+    $(document).on("click", ".treasurehunt-open-full-clue", function () {
+      var info = $(openStagePopoverButton).data("stageInfo");
+      if (!info) {
+        return;
+      }
+      var own = $(this).attr("data-clue-kind") === "own";
+      $("#stagecluemodaltitle").text(info.title + " — " +
+        (own ? strings.editorownclueshort : strings.editorclueshort));
+      $("#stagecluemodalbody").html(own ? info.ownclue : info.clue);
+      closeStagePopover();
+      stageClueModal.show();
     });
     $(document).on("pointerdown.treasurehunt-stage-info", function (event) {
       if (!$(event.target).closest(".treasurehunt-info-item, .popover").length) {
@@ -2320,6 +2404,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       var previewroadid = Number($(this).closest("li").attr("roadid"));
       var url = "play.php?id=" + encodeURIComponent(idModule) +
         "&previewroadid=" + encodeURIComponent(previewroadid);
+      url = currentPreviewUrl(url);
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid, function() {
           window.location.assign(url);

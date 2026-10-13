@@ -23,7 +23,7 @@
 import ajax from 'core/ajax';
 import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
-import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
+import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
@@ -50,7 +50,7 @@ const isEnabled = (value) => value === true || value === 1 || value === '1' || v
  * @param {string} baseUrl URL of the plugin's bundled Cesium distribution.
  * @returns {Promise<Object>} Cesium global.
  */
-const loadCesium = (baseUrl) => {
+export const loadCesium = (baseUrl) => {
     if (window.Cesium) {
         return Promise.resolve(window.Cesium);
     }
@@ -115,7 +115,7 @@ const loadCesium = (baseUrl) => {
  * @param {Object} mapping Activity map configuration.
  * @returns {Promise<Object>} Cesium imagery provider.
  */
-const createBaseProvider = async(Cesium, mapping) => {
+export const createBaseProvider = async(Cesium, mapping) => {
     let provider;
     if (mapping && mapping.custombackgroundurl && Array.isArray(mapping.bbox)) {
         provider = await Cesium.SingleTileImageryProvider.fromUrl(mapping.custombackgroundurl, {
@@ -627,12 +627,14 @@ export const init = async() => {
 
     /** Play only the clip required by the current game state. */
     const updateMarkerAnimation = () => {
-        if (!markerModel?.ready || markerPlayingClip === markerClip) {
+        const clip = selectCameraClip(markerClip, viewer.scene.mode === Cesium.SceneMode.SCENE3D ?
+            -Cesium.Math.toDegrees(viewer.camera.pitch) : 0);
+        if (!markerModel?.ready || markerPlayingClip === clip) {
             return;
         }
         markerModel.activeAnimations.removeAll();
-        markerModel.activeAnimations.add({name: markerClip, loop: Cesium.ModelAnimationLoop.REPEAT});
-        markerPlayingClip = markerClip;
+        markerModel.activeAnimations.add({name: clip, loop: Cesium.ModelAnimationLoop.REPEAT});
+        markerPlayingClip = clip;
         viewer.scene.requestRender();
     };
 
@@ -1684,6 +1686,7 @@ export const init = async() => {
         retry.addEventListener('click', () => start());
         const handler = new Cesium.ScreenSpaceEventHandler(viewer.scene.canvas);
         const removePopupPositioner = viewer.scene.postRender.addEventListener(positionAttemptPopup);
+        const removeCameraAnimationWatcher = viewer.scene.preRender.addEventListener(updateMarkerAnimation);
         viewer.camera.percentageChanged = 0.05;
         const removeCompassResizer = viewer.camera.changed.addEventListener(() => {
             if (compassBearing !== null && compassArrow?.show) {
@@ -1734,6 +1737,7 @@ export const init = async() => {
             }
             handler.destroy();
             removePopupPositioner();
+            removeCameraAnimationWatcher();
             removeCompassResizer();
             removeZoomResizer();
             removeBuildingsPositioner();

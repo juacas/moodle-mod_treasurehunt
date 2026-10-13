@@ -39,6 +39,8 @@ class users_progress implements renderable {
     public $viewpermission = false;
     /** @var bool can manage activity? */
     public $managepermission = false;
+    /** @var array roads with resettable activity, keyed by road ID */
+    public $showclearactions = [];
 
     /**
      * constructor
@@ -52,7 +54,8 @@ class users_progress implements renderable {
         $duplicateusersingroups,
         $unassignedusers,
         $viewpermission,
-        $managepermission
+        $managepermission,
+        $showclearactions = []
     ) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
@@ -62,5 +65,6 @@ class users_progress implements renderable {
         $this->unassignedusers = $unassignedusers;
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
+        $this->showclearactions = $showclearactions;
     }
 }

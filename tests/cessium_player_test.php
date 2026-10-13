@@ -40,6 +40,7 @@ final class cessium_player_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
         $styles = treasurehunt_get_installedplayerstyles();
+        $this->assertSame('cessium', TREASUREHUNT_PLAYERCESSIUM);
         $this->assertArrayHasKey(TREASUREHUNT_PLAYERCESSIUM, $styles);
         $this->assertTrue(class_exists(\mod_treasurehunt\output\play_page_cessium_player::class));
 

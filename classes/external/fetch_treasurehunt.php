@@ -100,6 +100,7 @@ class fetch_treasurehunt extends external_api {
                                         'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                         'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                         'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
+                                        'ownclue' => new external_value(PARAM_RAW, 'Clue for finding this stage'),
                                         'hasqr' => new external_value(PARAM_BOOL, 'Whether QR discovery is enabled'),
                                         'discoveroutofsequence' => new external_value(
                                             PARAM_BOOL,

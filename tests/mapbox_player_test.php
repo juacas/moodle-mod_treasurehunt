@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Mapbox player integration tests.
@@ -40,6 +40,7 @@ final class mapbox_player_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
         set_config('mapboxaccesstoken', 'pk.test-public-token', 'mod_treasurehunt');
 
+        $this->assertSame('mapbox', TREASUREHUNT_PLAYERMAPBOX);
         $this->assertArrayHasKey(TREASUREHUNT_PLAYERMAPBOX, treasurehunt_get_installedplayerstyles());
         $this->assertTrue(class_exists(\mod_treasurehunt\output\play_page_mapbox_player::class));
 

@@ -45,6 +45,16 @@ export const selectClip = (state) => {
 };
 
 /**
+ * Use the seated greeting when the camera looks down more than 70 degrees from the horizon.
+ *
+ * @param {string} gameClip Clip selected from the game state.
+ * @param {number} downwardAngle Camera angle below the horizontal, in degrees.
+ * @returns {string} Clip for the current camera view.
+ */
+export const selectCameraClip = (gameClip, downwardAngle) =>
+    downwardAngle > 70 ? 'sentarysaludar' : gameClip;
+
+/**
  * A new failed location attempt is represented by a new attempt ID and an unsolved geometry.
  *
  * @param {number} previousAttemptId Last attempt ID before the request.

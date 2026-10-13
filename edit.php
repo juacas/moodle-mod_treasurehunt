@@ -162,6 +162,13 @@ echo '<div id="roadlistpanel" class="treasurehunt-road-tabs border-bottom" role=
     . $OUTPUT->help_icon('editorroads', 'treasurehunt') . '</div>';
 echo $OUTPUT->container_start('treasurehunt-editor-workspace', 'editorworkspace');
 echo $buttons;
+echo '<button type="button" id="togglefullscreen" class="btn btn-light btn-sm treasurehunt-editor-fullscreen-toggle"'
+    . ' data-cmid="' . (int)$id . '" data-userid="' . (int)$USER->id . '"'
+    . ' aria-pressed="false" aria-label="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' data-maximize-label="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' data-restore-label="' . s(get_string('editorrestore', 'treasurehunt')) . '">'
+    . '<i class="fa fa-arrows-alt" aria-hidden="true"></i></button>';
 echo '<span class="' . $visuallyhiddenclass . '" id="treasurehunt-map-label">'
     . s(get_string('editormap', 'treasurehunt')) . '</span>';
 echo $OUTPUT->box(null, null, 'mapedit');
@@ -195,6 +202,16 @@ echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondar
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
+echo '<div class="modal fade" id="stagecluemodal" tabindex="-1" aria-labelledby="stagecluemodaltitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content"><div class="modal-header">'
+    . '<h5 class="modal-title" id="stagecluemodaltitle"></h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body treasurehunt-stage-full-clue" id="stagecluemodalbody"></div>'
+    . '</div></div></div>';
 echo '<div class="modal fade" id="copystagesmodal" tabindex="-1" aria-labelledby="copystagesmodaltitle" aria-hidden="true">'
     . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
     . '<div class="modal-content shadow border-0">'
