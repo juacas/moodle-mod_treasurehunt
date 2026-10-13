@@ -50,7 +50,7 @@ export default function init(map) {
         const navigation = document.querySelector('nav.navbar.fixed-top, .navbar.fixed-top');
         const offset = navigation ? navigation.getBoundingClientRect().height : 0;
         const top = editor.getBoundingClientRect().top + window.scrollY - offset;
-        window.scrollTo({top: Math.max(0, top), behavior: 'instant'});
+        window.scrollTo({top: Math.max(0, top), behavior: 'auto'});
     };
 
     /** Wait until the normal layout has been applied before positioning the page. */

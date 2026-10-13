@@ -1,5 +1,5 @@
 """
-Generador del modelo Pegman Hiker 3D con flecha adelantada y 10 animaciones.
+Generador del modelo Pegman Hiker 3D con flecha adelantada y 14 animaciones.
 Formato: glTF 2.0 binario (.glb)
 Requisitos: Python 3.8+ y numpy (pip install numpy)
  =================================================================================================
@@ -67,6 +67,18 @@ Requisitos: Python 3.8+ y numpy (pip install numpy)
 
 10. "buscando_brújula"        2.6s Loop   Activa (pulso Z)    Caminando_Apuntando_Flecha y
                                                                Apuntando_Flecha concatenados.
+
+11. "sentanse"                2.4s        Inactiva           Se agacha, apoya una mano y se sienta
+                                                               con una pierna flexionada y otra extendida.
+
+12. "Sentado saludando"      10.0s Loop   Inactiva           Apoya una mano detrás del cuerpo, mira
+                                                               al cielo y saluda con la otra.
+
+13. "Levantarse"             2.4s        Inactiva           Se inclina hacia delante y recupera
+                                                               la posición erguida.
+
+14. "sentarysaludar"        15.4s Loop   Inactiva           sentanse + Sentado saludando (10 s)
+                                                               + Levantarse, con transiciones.
 
 """
 import json
@@ -322,7 +334,7 @@ class FullGLBGenerator:
         gltf = {
             "asset": {
                 "version": "2.0",
-                "generator": "Pegman Hiker 10-Animation Generator (Matte PBR)"
+                "generator": "Pegman Hiker 14-Animation Generator (Matte PBR)"
             },
             "scenes": [{"nodes": [0]}],
             "nodes": self.nodes,
@@ -416,7 +428,8 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
     v_lua, n_lua, i_lua = combine_prims([make_box([-0.045, -0.26, -0.045], [0.045, 0.0, 0.045]), make_sphere(0.045, (0,0,0), 8, 12)])
     b.meshes.append({"name": "Mesh_Left_UpperArm", "primitives": [prim(v_lua, n_lua, i_lua, 0)]})
 
-    # Mesh 3: Antebrazo Izquierdo + Bastón Integrado
+    # Mesh 3: Antebrazo izquierdo. El bastón se mueve al nodo 12 para poder
+    # ocultarlo al apoyar esta mano en el suelo sin perderlo en los demás clips.
     v_lfa, n_lfa, i_lfa = combine_prims([make_box([-0.04, -0.26, -0.04], [0.04, 0.0, 0.04]), make_sphere(0.045, (0, -0.26, 0.0), 8, 12)])
     p_knob = [0.0, -0.18, 0.04]
     p_tip = [0.0, -1.00, -0.25]
@@ -425,9 +438,7 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
         make_cylinder_between_points(p_tip, [0.0, -1.04, -0.265], 0.012, 10),
         make_cylinder_between_points(p_knob, [0.0, -0.14, 0.05], 0.022, 10)
     ])
-    b.meshes.append({"name": "Mesh_Left_Forearm_Stick", "primitives": [
-        prim(v_lfa, n_lfa, i_lfa, 0), prim(v_sw, n_sw, i_sw, 5), prim(v_sm, n_sm, i_sm, 6)
-    ]})
+    b.meshes.append({"name": "Mesh_Left_Forearm", "primitives": [prim(v_lfa, n_lfa, i_lfa, 0)]})
 
     # Mesh 4: Brazo Superior Derecho
     v_rua, n_rua, i_rua = combine_prims([make_box([-0.045, -0.26, -0.045], [0.045, 0.0, 0.045]), make_sphere(0.045, (0,0,0), 8, 12)])
@@ -463,6 +474,9 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
         "name": "Mesh_Directional_Arrow_Ahead",
         "primitives": [prim(v_arr, n_arr, i_arr, 7)]
     })
+    b.meshes.append({"name": "Mesh_Hiking_Stick", "primitives": [
+        prim(v_sw, n_sw, i_sw, 5), prim(v_sm, n_sm, i_sm, 6)
+    ]})
 
     # --- JERARQUÍA DE NODOS ---
     q_id = [0.0, 0.0, 0.0, 1.0]
@@ -476,7 +490,8 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
         # Node 3: Left_UpperArm
         {"name": "Left_UpperArm", "mesh": 2, "children": [4], "translation": [-0.22, 0.44, 0.0], "rotation": q_id},
         # Node 4: Left_Forearm
-        {"name": "Left_Forearm", "mesh": 3, "translation": [0.0, -0.26, 0.0], "rotation": q_id},
+        {"name": "Left_Forearm", "mesh": 3, "children": [12],
+         "translation": [0.0, -0.26, 0.0], "rotation": q_id},
         # Node 5: Right_UpperArm
         {"name": "Right_UpperArm", "mesh": 4, "children": [6], "translation": [0.22, 0.44, 0.0], "rotation": q_id},
         # Node 6: Right_Forearm
@@ -491,7 +506,9 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
         {"name": "Right_Calf", "mesh": 9, "translation": [0.0, -0.38, 0.0], "rotation": q_id},
         # Node 11: el inicio está una longitud de flecha más lejos que antes.
         {"name": "Directional_Arrow", "mesh": 10, "translation": [0.0, 1.14, 0.10 + arrow_length],
-         "rotation": q_id, "scale": [0.0, 0.0, 0.0]}
+         "rotation": q_id, "scale": [0.0, 0.0, 0.0]},
+        {"name": "Hiking_Stick", "mesh": 11, "translation": [0.0, 0.0, 0.0],
+         "scale": [1.0, 1.0, 1.0]}
     ]
 
     animation_tracks = {}
@@ -503,6 +520,13 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
         # no permanezca activo al pasar a otra animación.
         tracks.setdefault(0, {})
         tracks[0].setdefault("rotation", np.tile(q_id, (len(times), 1)))
+        # Los clips sentados estiran ligeramente el brazo de apoyo. Restablecer
+        # siempre la escala evita que esta pose se filtre a otro clip.
+        for node in (3, 4, 5, 6):
+            tracks.setdefault(node, {})
+            tracks[node].setdefault("scale", np.ones((len(times), 3), dtype=np.float32))
+        tracks.setdefault(12, {})
+        tracks[12].setdefault("scale", np.ones((len(times), 3), dtype=np.float32))
         animation_tracks[anim_name] = (times, {
             node: {path: np.asarray(data, dtype=np.float32) for path, data in paths.items()}
             for node, paths in tracks.items()
@@ -880,6 +904,132 @@ def generate_pegman_hiker_fixed_arrow(output_filename=None):
 
     concatenate_animations("buscando", ["Caminando", "Descansando", "Desorientado"])
     concatenate_animations("buscando_brújula", ["Caminando_Apuntando_Flecha", "Apuntando_Flecha"])
+
+    # La referencia es una pose sentada asimétrica. La cadera toca el suelo,
+    # el brazo izquierdo se apoya detrás y a la izquierda, y el derecho saluda.
+    # Todas las pistas usan los mismos nodos para poder concatenarse sin saltos.
+    def rest_pose():
+        return {node: {path: values[0].copy() for path, values in paths.items()}
+                for node, paths in animation_tracks["Descansando"][1].items()}
+
+    def seated_pose(height=0.0, forward=-0.09, lean=-10.0, wave=0.0, look=0.0):
+        pose = rest_pose()
+        def joint(node, degrees, axis=(1, 0, 0)):
+            pose[node]["rotation"] = axis_angle_to_quat(axis, np.radians(degrees))
+        pose[1]["translation"] = np.array([0.0, height, forward], dtype=np.float32)
+        joint(1, lean)
+        joint(2, -18.0 + look)
+        # La cadera está en y=0. El muslo izquierdo alza la rodilla y la
+        # pantorrilla regresa al suelo; la pierna derecha queda extendida.
+        joint(7, -120.0)
+        joint(8, 67.0)
+        joint(9, -90.0)
+        joint(10, 0.0)
+        # Hombro izquierdo: x=-0.22. El giro lateral lleva la mano hasta
+        # x≈-0.50, y≈0.04, z≈-0.36, contando el desplazamiento del torso.
+        # Su esfera de 4.5 cm apoya en y=0; no hay estiramiento artificial.
+        pose[3]["rotation"] = quat_mul(
+            axis_angle_to_quat([0, 0, 1], np.radians(-38.0)),
+            axis_angle_to_quat([1, 0, 0], np.radians(30.0)))
+        joint(4, 0.0)
+        pose[12]["scale"] = np.zeros(3, dtype=np.float32)
+        # El brazo derecho saluda por encima de la cabeza; hombro y codo
+        # oscilan mientras la cabeza mira al cielo durante diez segundos.
+        pose[5]["rotation"] = quat_mul(
+            axis_angle_to_quat([0, 0, 1], np.radians(12.0 + wave)),
+            axis_angle_to_quat([1, 0, 0], np.radians(-130.0)))
+        joint(6, -10.0 + 0.7 * wave)
+        pose[11]["scale"] = np.zeros(3, dtype=np.float32)
+        return pose
+
+    def interpolate_pose(start, end, fraction):
+        """Smoothstep translation/scale and shortest-arc quaternion interpolation."""
+        fraction = np.clip(fraction, 0.0, 1.0)
+        fraction = fraction * fraction * (3.0 - 2.0 * fraction)
+        result = {}
+        for node, paths in start.items():
+            result[node] = {}
+            for path, first in paths.items():
+                last = end[node][path]
+                if path == "rotation":
+                    dot = float(np.dot(first, last))
+                    if dot < 0.0:
+                        last = -last
+                        dot = -dot
+                    if dot > 0.9995:
+                        value = first + fraction * (last - first)
+                    else:
+                        arc = np.arccos(np.clip(dot, -1.0, 1.0))
+                        value = (np.sin((1.0 - fraction) * arc) * first +
+                                 np.sin(fraction * arc) * last) / np.sin(arc)
+                    result[node][path] = value / np.linalg.norm(value)
+                else:
+                    result[node][path] = first + fraction * (last - first)
+        return result
+
+    def build_pose_clip(name, times, pose_at):
+        """Sample a coherent full-body pose on a common timeline."""
+        poses = [pose_at(float(t)) for t in times]
+        tracks = {node: {path: np.asarray([pose[node][path] for pose in poses], dtype=np.float32)
+                         for path in paths} for node, paths in poses[0].items()}
+        build_animation(name, times, tracks)
+
+    standing = rest_pose()
+    # Flexionar primero las rodillas, sin bajar aún la cadera: así los pies
+    # se despegan ligeramente del suelo en vez de atravesarlo al agacharse.
+    knees_bent = rest_pose()
+    prebent = rest_pose()
+    # La ligera elevación inicial de talones y cadera compensa el barrido de
+    # la puntera del modelo al flexionar; después comienza el descenso.
+    knees_bent[1]["translation"][1] = 0.86
+    prebent[1]["translation"][1] = 0.86
+    for thigh, calf in ((7, 8), (9, 10)):
+        knees_bent[calf]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(60.0))
+        prebent[thigh]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(-25.0))
+        prebent[calf]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(60.0))
+
+    crouched = seated_pose(height=0.67, forward=0.08, lean=20.0)
+    crouched[2]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(-15.0))
+    for thigh, calf in ((7, 8), (9, 10)):
+        crouched[thigh]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(-65.0))
+        crouched[calf]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(110.0))
+    crouched[3]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(35.0))
+    crouched[4]["rotation"] = axis_angle_to_quat([1, 0, 0], np.radians(-15.0))
+    crouched[5]["rotation"] = q_rua_jarras_base
+    crouched[6]["rotation"] = q_rfa_jarras_base
+    # Girar las piernas a la postura final antes del último descenso evita
+    # que las pantorrillas barran el suelo mientras cae la cadera.
+    ready_to_sit = seated_pose(height=0.56)
+    sitting = seated_pose()
+
+    def descending(t):
+        if t < 0.25:
+            return interpolate_pose(standing, knees_bent, t / 0.25)
+        if t < 0.5:
+            return interpolate_pose(knees_bent, prebent, (t - 0.25) / 0.25)
+        if t < 1.15:
+            return interpolate_pose(prebent, crouched, (t - 0.5) / 0.65)
+        if t < 1.75:
+            return interpolate_pose(crouched, ready_to_sit, (t - 1.15) / 0.6)
+        return interpolate_pose(ready_to_sit, sitting, (t - 1.75) / 0.65)
+
+    t_sit = np.linspace(0.0, 2.4, 49, dtype=np.float32)
+    build_pose_clip("sentanse", t_sit, descending)
+
+    def greeting(t):
+        phase = 2.0 * np.pi * t / 1.25
+        return seated_pose(wave=11.0 * np.sin(phase), look=-2.5 * np.sin(phase / 2.0))
+
+    t_greet = np.linspace(0.0, 10.0, 201, dtype=np.float32)
+    build_pose_clip("Sentado saludando", t_greet, greeting)
+
+    def ascending(t):
+        return descending(2.4 - t)
+
+    t_stand = np.linspace(0.0, 2.4, 49, dtype=np.float32)
+    build_pose_clip("Levantarse", t_stand, ascending)
+    concatenate_animations("sentarysaludar",
+                           ["sentanse", "Sentado saludando", "Levantarse"])
 
     b.build_glb(output_filename)
 

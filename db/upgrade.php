@@ -243,5 +243,29 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         }
         upgrade_mod_savepoint(true, 2026100601, 'treasurehunt');
     }
+    if ($oldversion < 2026101300) {
+        // Keep existing activities and administrator settings on the renamed player keys.
+        $renamedplayers = [
+            'cessium_player' => TREASUREHUNT_PLAYERCESSIUM,
+            'mapbox_player' => TREASUREHUNT_PLAYERMAPBOX,
+        ];
+        foreach ($renamedplayers as $oldkey => $newkey) {
+            $DB->set_field('treasurehunt', 'playerstyle', $newkey, ['playerstyle' => $oldkey]);
+        }
+        $defaultplayer = get_config('mod_treasurehunt', 'defaultplayerstyle');
+        if (isset($renamedplayers[$defaultplayer])) {
+            set_config('defaultplayerstyle', $renamedplayers[$defaultplayer], 'mod_treasurehunt');
+        }
+        $availableplayers = get_config('mod_treasurehunt', 'availableplayerstyles');
+        if ($availableplayers !== false) {
+            $playerkeys = array_map('trim', explode(',', $availableplayers));
+            $updatedkeys = array_map(
+                static fn($key) => $renamedplayers[$key] ?? $key,
+                $playerkeys
+            );
+            set_config('availableplayerstyles', implode(',', $updatedkeys), 'mod_treasurehunt');
+        }
+        upgrade_mod_savepoint(true, 2026101300, 'treasurehunt');
+    }
     return true;
 }

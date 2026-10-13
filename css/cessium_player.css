@@ -114,7 +114,6 @@
 }
 
 .cessium-topbar,
-.cessium-objective,
 .cessium-navigation,
 .cessium-map-actions,
 .cessium-dock,
@@ -137,12 +136,28 @@
     background: linear-gradient(180deg, rgba(3, 14, 28, .9), rgba(3, 14, 28, .07));
 }
 
-.cessium-search {
+.cessium-map-summary {
     position: absolute;
     z-index: 3;
     top: 94px;
+    left: clamp(18px, 3vw, 48px);
     right: clamp(18px, 3vw, 48px);
-    width: min(360px, calc(100vw - 36px));
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    pointer-events: none;
+}
+
+.cessium-map-summary > * {
+    pointer-events: auto;
+}
+
+.cessium-search {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+    max-width: 360px;
+    margin-left: auto;
 }
 
 #cessium-player:not(.mapbox-player) .cessium-map-actions {
@@ -311,40 +326,16 @@
 }
 
 .cessium-objective {
-    top: clamp(110px, 17vh, 182px);
-    left: clamp(18px, 3vw, 48px);
-    width: min(360px, calc(100vw - 36px));
-    padding: 24px 25px 22px;
+    order: -1;
+    flex: 0 0 96px;
+    padding: 8px 10px;
+    box-sizing: border-box;
     border: 1px solid rgba(99, 220, 240, .38);
     border-left: 3px solid var(--cessium-cyan);
     border-radius: 16px;
     background: var(--cessium-surface);
     box-shadow: 0 24px 70px rgba(0, 6, 17, .45), inset 0 1px rgba(255, 255, 255, .08);
     backdrop-filter: blur(20px);
-}
-
-.cessium-eyebrow {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 13px;
-}
-
-.cessium-objective h1 {
-    margin: 0;
-    color: var(--cessium-ink);
-    font-size: clamp(25px, 3vw, 38px);
-    font-weight: 800;
-    line-height: 1.12;
-    letter-spacing: -.035em;
-}
-
-.cessium-objective p {
-    min-height: 42px;
-    margin: 12px 0 25px;
-    color: var(--cessium-muted);
-    font-size: 13px;
-    line-height: 1.5;
 }
 
 .cessium-progress-track {
@@ -366,16 +357,17 @@
 }
 
 .cessium-progress-caption {
-    justify-content: space-between;
-    margin-top: 11px;
+    justify-content: center;
+    margin-top: 6px;
     color: var(--cessium-muted);
     font-size: 11px;
     text-transform: uppercase;
-    letter-spacing: .13em;
+    letter-spacing: .05em;
+    white-space: nowrap;
 }
 
 .cessium-navigation {
-    top: clamp(110px, 17vh, 182px);
+    top: 154px;
     right: clamp(18px, 3vw, 48px);
     gap: 14px;
     min-width: 182px;
@@ -697,11 +689,19 @@
 }
 
 #cessium-clue-dialog {
-    width: 80%;
-    max-width: 80%;
+    width: 80vw;
+    max-width: calc(100vw - 24px);
+    max-height: 90dvh;
     box-sizing: border-box;
 }
 
+#cessium-feedback-content {
+    white-space: pre-line;
+}
+
+#cessium-feedback-dialog .cessium-dialog-header {
+    justify-content: flex-end;
+}
 .cessium-dialog::backdrop {
     background: rgba(2, 9, 20, .59);
     backdrop-filter: blur(8px);
@@ -721,9 +721,9 @@
 
 .cessium-clue-tabs {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
     margin-bottom: 16px;
-    overflow-x: auto;
 }
 
 .cessium-clue-tabs[hidden] {
@@ -731,13 +731,17 @@
 }
 
 .cessium-clue-tab {
-    flex: 0 0 auto;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
     padding: 8px 14px;
     border: 1px solid rgba(92, 232, 246, .42);
     border-radius: 10px;
     color: var(--cessium-ink);
     background: rgba(92, 232, 246, .08);
     font-weight: 700;
+    white-space: normal;
+    overflow-wrap: anywhere;
     cursor: pointer;
 }
 
@@ -754,6 +758,7 @@
 }
 
 .cessium-clue-pane {
+    min-width: 0;
     grid-area: 1 / 1;
     visibility: hidden;
     pointer-events: none;
@@ -864,19 +869,11 @@
     .cessium-exit span {
         display: none;
     }
-    .cessium-objective {
+    .cessium-map-summary {
         top: 80px;
         left: 12px;
-        width: min(315px, calc(100vw - 72px));
-        padding: 15px;
-    }
-    .cessium-objective h1 {
-        font-size: 23px;
-    }
-    .cessium-objective p {
-        min-height: 0;
-        margin: 7px 0 14px;
-        font-size: 11px;
+        right: 12px;
+        gap: 8px;
     }
     .cessium-navigation {
         top: auto;
@@ -925,6 +922,9 @@
     }
     .cessium-dialog {
         padding: 17px;
+    }
+    #cessium-clue-dialog {
+        width: calc(100vw - 24px);
     }
 }
 

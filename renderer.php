@@ -362,6 +362,18 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         ['class' => 'treasurehunt-road-groups']
                     );
                 }
+                if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                    $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
+                        'id' => $progress->coursemoduleid,
+                        'scope' => 'road',
+                        'roadid' => $roadusersprogress->id,
+                    ]);
+                    $roadheading .= ' ' . html_writer::link(
+                        $clearurl,
+                        get_string('delete'),
+                        ['class' => 'btn btn-outline-danger btn-sm ms-2 ml-2']
+                    );
+                }
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
                         $s .= $this->output->heading($roadheading, 4);
@@ -424,6 +436,19 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
+                            }
+                            if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                                $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
+                                    'id' => $progress->coursemoduleid,
+                                    'scope' => $progress->groupmode ? 'group' : 'user',
+                                    'roadid' => $roadusersprogress->id,
+                                    'participantid' => $userorgroup->id,
+                                ]);
+                                $name .= ' ' . html_writer::link(
+                                    $clearurl,
+                                    get_string('delete'),
+                                    ['class' => 'btn btn-outline-danger btn-sm ms-2 ml-2']
+                                );
                             }
                             $cells = [$name];
                             $cells[] = treasurehunt_get_nice_duration($elapsed->duration);

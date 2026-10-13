@@ -56,8 +56,8 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
 define('TREASUREHUNT_PLAYERFANCY', 'fancy');
 define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
-define('TREASUREHUNT_PLAYERCESSIUM', 'cessium_player');
-define('TREASUREHUNT_PLAYERMAPBOX', 'mapbox_player');
+define('TREASUREHUNT_PLAYERCESSIUM', 'cessium');
+define('TREASUREHUNT_PLAYERMAPBOX', 'mapbox');
 /* * #@- */
 
 // Load classes needed for GeoJSON library.
@@ -1712,8 +1712,10 @@ function treasurehunt_select_stage_clue_source($stage, $previous, $previouscompl
         if (treasurehunt_has_clue_content($stage->clueforstage)) {
             return [$stage, 'clueforstage'];
         }
-    } else if ((!$previous || !empty($stage->discoveroutofsequence)) &&
-            treasurehunt_has_clue_content($stage->clueforstage)) {
+    } else if (
+        (!$previous || !empty($stage->discoveroutofsequence)) &&
+        treasurehunt_has_clue_content($stage->clueforstage)
+    ) {
         return [$stage, 'clueforstage'];
     }
     return null;
@@ -2831,6 +2833,122 @@ function treasurehunt_clear_activities($treasurehuntid) {
     cache::make('mod_treasurehunt', 'progressmarkers')->purge();
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehuntid]);
 }
+
+/**
+ * Find roads with attempts or recorded positions that can be deleted.
+ *
+ * @param int $treasurehuntid Activity ID.
+ * @return array Road IDs keyed by road ID.
+ */
+function treasurehunt_get_clearable_road_ids($treasurehuntid) {
+    global $DB;
+
+    $roads = [];
+    foreach (['treasurehunt_attempts', 'treasurehunt_track'] as $table) {
+        $records = $DB->get_records_sql(
+            "SELECT DISTINCT s.roadid FROM {{$table}} a "
+            . 'JOIN {treasurehunt_stages} s ON s.id = a.stageid '
+            . 'JOIN {treasurehunt_roads} r ON r.id = s.roadid '
+            . 'WHERE r.treasurehuntid = ?',
+            [$treasurehuntid]
+        );
+        foreach ($records as $roadid => $record) {
+            $roads[$roadid] = true;
+        }
+    }
+    return $roads;
+}
+
+/**
+ * Delete attempts and recorded positions for one road or one participant's sequence.
+ *
+ * @param int $treasurehuntid Activity ID.
+ * @param int $roadid Road ID.
+ * @param int $participantid User or group ID; zero clears the whole road.
+ * @param bool $groupmode Whether the participant ID denotes a group.
+ * @return int Number of deleted attempts.
+ */
+function treasurehunt_clear_road_activities($treasurehuntid, $roadid, $participantid = 0, $groupmode = false) {
+    global $DB;
+
+    $road = $DB->get_record('treasurehunt_roads', ['id' => $roadid, 'treasurehuntid' => $treasurehuntid], '*', MUST_EXIST);
+    $params = ['roadid' => $roadid];
+    $filter = '';
+    if ($participantid) {
+        if ($groupmode) {
+            $filter = ' AND a.groupid = :participantid';
+        } else {
+            $filter = ' AND a.groupid = 0 AND a.userid = :participantid';
+        }
+        $params['participantid'] = $participantid;
+    }
+    $attempts = $DB->get_records_sql(
+        'SELECT a.id, a.userid FROM {treasurehunt_attempts} a '
+        . 'JOIN {treasurehunt_stages} s ON s.id = a.stageid '
+        . 'WHERE s.roadid = :roadid' . $filter,
+        $params
+    );
+
+    // Tracks have a user and stage but no group. Include current group members and attempt authors.
+    $trackparams = ['treasurehuntid' => $treasurehuntid, 'roadid' => $roadid];
+    $trackfilter = '';
+    if ($participantid) {
+        if ($groupmode) {
+            $userids = array_unique(array_merge(
+                array_column($attempts, 'userid'),
+                $DB->get_fieldset_select('groups_members', 'userid', 'groupid = ?', [$participantid])
+            ));
+            // A member of two teams on this road has tracks with no team ID. Preserve ambiguous tracks.
+            if ($road->groupingid) {
+                $othergroups = $DB->get_fieldset_select(
+                    'groupings_groups',
+                    'groupid',
+                    'groupingid = ? AND groupid <> ?',
+                    [$road->groupingid, $participantid]
+                );
+                foreach ($othergroups as $othergroupid) {
+                    $othermembers = $DB->get_fieldset_select(
+                        'groups_members',
+                        'userid',
+                        'groupid = ?',
+                        [$othergroupid]
+                    );
+                    $userids = array_diff($userids, $othermembers);
+                }
+            }
+            if ($userids) {
+                [$insql, $inparams] = $DB->get_in_or_equal($userids, SQL_PARAMS_NAMED, 'trackuser');
+                $trackfilter = ' AND t.userid ' . $insql;
+                $trackparams += $inparams;
+            } else {
+                $trackfilter = ' AND 1 = 0';
+            }
+        } else {
+            $trackfilter = ' AND t.userid = :userid';
+            $trackparams['userid'] = $participantid;
+        }
+    }
+    $trackids = $DB->get_fieldset_sql(
+        'SELECT t.id FROM {treasurehunt_track} t '
+        . 'JOIN {treasurehunt_stages} s ON s.id = t.stageid '
+        . 'WHERE t.treasurehuntid = :treasurehuntid AND s.roadid = :roadid' . $trackfilter,
+        $trackparams
+    );
+
+    $transaction = $DB->start_delegated_transaction();
+    if ($attempts) {
+        $DB->delete_records_list('treasurehunt_attempts', 'id', array_keys($attempts));
+    }
+    if ($trackids) {
+        $DB->delete_records_list('treasurehunt_track', 'id', $trackids);
+    }
+    $transaction->allow_commit();
+
+    cache::make('mod_treasurehunt', 'progressstate')->purge();
+    cache::make('mod_treasurehunt', 'progressverified')->purge();
+    cache::make('mod_treasurehunt', 'progressmarkers')->purge();
+    return count($attempts);
+}
 /**
  * Initialices the javascript needed to use QRScanner.
  * @param moodle_page $page
@@ -2970,9 +3088,10 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
  * @param int $courseid The identifier of course.
  * @param context $context The context object.
  * @param array|null $progressdata Already loaded progress data, when available.
+ * @param array $showclearactions Roads with resettable activity, keyed by road ID.
  * @return string
  */
-function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progressdata = null) {
+function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progressdata = null, $showclearactions = []) {
     global $PAGE;
 
     [
@@ -2991,6 +3110,7 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progr
         unassignedusers: $unassignedusers,
         viewpermission: $viewpermission,
         managepermission: $managepermission,
+        showclearactions: $showclearactions,
     );
     return $output->render($renderable);
 }

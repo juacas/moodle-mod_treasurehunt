@@ -25,7 +25,7 @@ import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
 import {createLayer as createAnimatedPegmanLayer, loadLibrary as loadPegmanLibrary,
     sizeForMapScale} from 'mod_treasurehunt/mapbox_animated_pegman';
-import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animation_state';
+import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import webqr from 'mod_treasurehunt/webqr';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
@@ -36,7 +36,7 @@ let mapboxPromise;
 const enabled = (value) => value === true || value === 1 || value === '1' || value === 'true';
 
 /** @returns {Promise<Object>} Mapbox GL JS namespace. */
-const loadMapbox = () => {
+export const loadMapbox = () => {
     if (window.mapboxgl) {
         return Promise.resolve(window.mapboxgl);
     }
@@ -185,7 +185,7 @@ const customSource = (mapping) => {
  * @param {Object} mapping Activity map settings.
  * @returns {Object} Mapbox style.
  */
-const mapStyle = (kind, mapping) => {
+export const mapStyle = (kind, mapping) => {
     if (kind === 'satellite') {
         return 'mapbox://styles/mapbox/satellite-streets-v12';
     }
@@ -430,12 +430,18 @@ export const init = async() => {
         const visible = (nextstage?.features || []).filter((feature) =>
             Number(feature.properties?.stageposition) === 1 || enabled(playerconfig.shownextareahint));
         map.getSource('stage').setData({type: 'FeatureCollection', features: visible});
-        node('stage-number').textContent = String(nextstage?.features?.[0]?.properties?.stageposition ||
-            (roadfinished ? '✓' : (Number(stage?.position || 0) + 1)));
         updateNavigation();
     };
 
     /** Show distance and direction hints only when the activity enables them. */
+    let navigationClip = 'Descansando';
+    /** Match the animation to the camera without changing the game navigation state. */
+    const updatePegmanAnimation = () => {
+        if (map?.getLayer('pegman-model')) {
+            pegmanLayer.setClip?.(selectCameraClip(navigationClip, 90 - map.getPitch()));
+        }
+    };
+
     const updateNavigation = () => {
         const panel = node('navigation');
         const target = position ? closestStagePoint(position, nextstage) : null;
@@ -476,7 +482,7 @@ export const init = async() => {
             // Without a direction hint the hiker faces the camera at the selected position.
             pegmanLayer.setBearing(bearing === null ? (map.getBearing() + 180) % 360 : bearing,
                 bearing !== null);
-            pegmanLayer.setClip?.(selectClip({
+            navigationClip = selectClip({
                 moving: !playwithoutmoving,
                 heading: bearing !== null,
                 distanceHint: showDistance && Boolean(target) && !inside,
@@ -484,7 +490,8 @@ export const init = async() => {
                 inside,
                 finished: roadfinished,
                 confused: Date.now() < confusedUntil,
-            }));
+            });
+            updatePegmanAnimation();
         }
     };
 
@@ -632,7 +639,6 @@ export const init = async() => {
 
     /** Update question and answers from the latest completed stage. */
     const updateQuestion = () => {
-        node('objective-text').textContent = stage?.name || labels.nohint;
         node('question-open').hidden = !stage?.question;
         node('question-content').innerHTML = stage?.question || '';
         const answers = node('answers');
@@ -695,17 +701,26 @@ export const init = async() => {
     /**
      * @param {Object} response Game service response.
      * @param {Object} action Submitted action.
+     * @param {boolean} failedAttempt Whether the submitted location was incorrect.
      */
-    const showMessages = (response, action) => {
+    const showMessages = (response, action, failedAttempt) => {
+        const plainText = (item) => {
+            const div = document.createElement('div');
+            div.innerHTML = item;
+            return div.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const information = (response.infomsg || []).map(plainText).filter(Boolean);
+        const message = information.join(' · ');
+        if (failedAttempt || (action.location && Number(response.status?.code || 0) !== 0)) {
+            const messages = [...new Set([plainText(response.status?.msg || ''), ...information].filter(Boolean))];
+            node('feedback-content').textContent = messages.join('\n\n') || labels.failedlocation;
+            openDialog('feedback');
+            return;
+        }
         if (action.location || action.qrtext || action.selectedanswerid) {
             toast(response.status?.msg, Number(response.status?.code) !== 0);
         }
-        if (response.infomsg?.length) {
-            const message = response.infomsg.map((item) => {
-                const div = document.createElement('div');
-                div.innerHTML = item;
-                return div.textContent.trim();
-            }).filter(Boolean).join(' · ');
+        if (message) {
             toast(message);
         }
     };
@@ -772,12 +787,18 @@ export const init = async() => {
         } else if (previousStage !== stage?.id && nextstage) {
             fitMap();
         }
-        showMessages(response, action);
-        if (failedLocationAttempt(previousAttemptId, response, action)) {
+        const failedAttempt = failedLocationAttempt(previousAttemptId, response, action);
+        showMessages(response, action, failedAttempt);
+        if (failedAttempt) {
             reactToFailedAttempt();
         }
-        if (!roadfinished && (action.initialize || previousStage !== stage?.id || cluesChanged)) {
-            const showClue = () => openDialog('clue');
+        if (!node('feedback-dialog').open && !roadfinished &&
+                (action.initialize || previousStage !== stage?.id || cluesChanged)) {
+            const showClue = () => {
+                if (!node('feedback-dialog').open) {
+                    openDialog('clue');
+                }
+            };
             if (map.isMoving()) {
                 map.once('moveend', showClue);
             } else {
@@ -964,6 +985,7 @@ export const init = async() => {
             map.getCanvas().style.cursor = cursor;
         });
         map.on('move', positionAttempt);
+        map.on('move', updatePegmanAnimation);
         map.on('moveend', updateNavigation);
         window.addEventListener('pagehide', () => {
             clearTimeout(pollTimer);

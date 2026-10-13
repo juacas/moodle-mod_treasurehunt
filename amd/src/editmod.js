@@ -1711,13 +1711,60 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     }
     /**
+     * Preserve the second editor and its selected map engine after editing a form.
+     * @param {string} url Form URL.
+     * @returns {string} URL with editor context when needed.
+     */
+    function edit2FormUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('editor', 'edit2');
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Return to the editor that opened the operation.
+     * @param {string} url Classic editor URL.
+     * @returns {string} Selected editor URL.
+     */
+    function currentEditorUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url.replace('edit.php', 'edit2.php'), window.location.href);
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Keep the explicitly requested player for a preview.
+     * @param {string} url Preview URL.
+     * @returns {string} URL with an optional player override.
+     */
+    function currentPreviewUrl(url) {
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (!player || !window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('playertype', player);
+      return target.href;
+    }
+    /**
      * Forms
      * @param {integer} stageid
      * @param {integer} idModule
      */
     function editFormstageEntry(stageid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&id=" + stageid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1726,7 +1773,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormstageEntry(roadid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&roadid=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Navigate to edit road page.
@@ -1735,7 +1782,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function editFormRoadEntry(roadid, idModule) {
       var url = "editroad.php?cmid=" + idModule + "&id=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1743,7 +1790,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormRoadEntry(idModule) {
       var url = "editroad.php?cmid=" + idModule;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Delete a road in the server via AJAX.
@@ -2078,8 +2125,8 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }])[0].done(function () {
           copyModal.hide();
           sessionStorage.setItem("treasurehuntCopySuccess", strings.editorcopysuccess);
-          window.location.assign("edit.php?id=" + encodeURIComponent(idModule) +
-            "&roadid=" + encodeURIComponent(targetid));
+          window.location.assign(currentEditorUrl("edit.php?id=" + encodeURIComponent(idModule) +
+            "&roadid=" + encodeURIComponent(targetid)));
         }).fail(function (error) {
           $("#copystagessave").prop("disabled", false);
           notification.exception(error);
@@ -2166,7 +2213,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }
       }
       /**
-       * Show a short clue and a navigation button when its full content is available.
+       * Show a short clue and a button to read its full content.
        * @param {string} label Visible clue label.
        * @param {string} html Formatted full clue.
        * @param {string} kind Clue field to open.
@@ -2388,6 +2435,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       var previewroadid = Number($(this).closest("li").attr("roadid"));
       var url = "play.php?id=" + encodeURIComponent(idModule) +
         "&previewroadid=" + encodeURIComponent(previewroadid);
+      url = currentPreviewUrl(url);
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid, function() {
           window.location.assign(url);

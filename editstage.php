@@ -37,6 +37,8 @@ $cmid = required_param('cmid', PARAM_INT); // Course_module ID.
 $id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
+$editor = optional_param('editor', '', PARAM_ALPHA);
+$playertype = optional_param('playertype', '', PARAM_ALPHANUMEXT);
 
  [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -45,6 +47,12 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 $url = new moodle_url('/mod/treasurehunt/editstage.php', ['cmid' => $cmid]);
+if ($editor === 'edit2') {
+    $url->param('editor', $editor);
+    if ($playertype !== '' && array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $url->param('playertype', $playertype);
+    }
+}
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -114,7 +122,12 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
     }
     $stage->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', ['id' => $cmid, 'roadid' => $stage->roadid]);
+    $returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+        ['id' => $cmid, 'roadid' => $stage->roadid]);
+    if ($editor === 'edit2' && $playertype !== '' &&
+            array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $returnurl->param('playertype', $playertype);
+    }
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = ['trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,

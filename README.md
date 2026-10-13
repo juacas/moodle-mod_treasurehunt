@@ -174,7 +174,7 @@ Experimental Cesium player
 ==========================
 
 The `experiment/cessium` branch adds the **Cesium 3D (experimental)** player style,
-internally named `cessium_player`. Enable it in the activity module's admin setting
+internally named `cessium`. Enable it in the activity module's admin setting
 **Available game screen styles**, then select it in the treasure hunt settings.
 The existing Bootstrap player remains available.
 
@@ -193,7 +193,7 @@ player because those coordinates cannot be placed on a globe.
 Mapbox GL player
 ================
 
-The **Mapbox GL 3D** player uses the same game service and controls as the Cesium
+The **Mapbox GL 3D (experimental)** player uses the same game service and controls as the Cesium
 player. It renders `pix/pegman_hiker_all_animations_matte.glb` and selects its
 walking, resting, pointing, disoriented and concatenated search animations according to game state,
 alongside visible stage areas and attempt markers. It supports location checks,
@@ -203,19 +203,32 @@ geographic image, tiled, WMS or ArcGIS layer when available.
 
 The player starts on OpenStreetMap. Set an optional **Mapbox public access token**
 in the Treasurehunt administration settings to enable Mapbox satellite and streets,
-then enable **Mapbox GL 3D** under **Available game screen styles**. A teacher can
-preview it with `play.php?id=CMID&previewroadid=ROADID&playertype=mapbox_player`.
+then enable **Mapbox GL 3D (experimental)** under **Available game screen styles**. A teacher can
+preview it with `play.php?id=CMID&previewroadid=ROADID&playertype=mapbox`.
 Mapbox GL JS and its stylesheet load from Mapbox's official versioned CDN under
 Mapbox's terms; the plugin does not redistribute the library. The native Mapbox
-model layer displays the GLB at its geographic position but does not play its
-embedded glTF animation.
+model layer plays the GLB's embedded animations at its geographic position.
 
-CesiumJS 1.145 and its widget assets are loaded from Cesium's versioned CDN;
-the default basemap uses OpenStreetMap tiles. The browser therefore needs access
-to `cesium.com` and `tile.openstreetmap.org`, and the site's Content Security
-Policy must allow Cesium's scripts, styles, images and workers. The globe uses
-an ellipsoid terrain and does not require a Cesium ion token. GPS and QR scanning
-need browser permission and a secure origin.
+CesiumJS 1.145 and its widget assets are bundled with the plugin; the default
+basemap uses OpenStreetMap tiles. The globe starts with ellipsoid terrain and
+does not require a Cesium ion token. GPS and QR scanning need browser permission
+and a secure origin.
+
+Geographic editor with selectable map engine
+============================================
+
+Teachers can open `edit2.php?id=CMID` to edit roads and stage geometry with the
+map engine configured for the activity. Add `&playertype=bootstrap`,
+`&playertype=cessium`, or `&playertype=mapbox` to select an engine
+for that editor visit. The Bootstrap option uses the established OpenLayers
+editor. Cesium and Mapbox use their native map navigation and layer controls,
+show the animated 3D pegman, and provide polygon drawing, vertex dragging,
+polygon removal, and the same stage saving service. Selecting a stage in the
+left panel flies to its geometry. Polygon rings have visible outlines; in edit
+mode, clicking an edge inserts a vertex that can then be dragged. Both 3D maps
+also size the pegman automatically as the map zoom changes and provide a coordinate popup with a Street View
+link. A map with local image
+coordinates opens in OpenLayers, which supports that coordinate system.
 
 
 See also

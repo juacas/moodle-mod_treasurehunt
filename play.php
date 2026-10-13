@@ -82,7 +82,11 @@ $PAGE->set_heading(format_string($course->fullname));
 // Check that the player has a road before rendering the page.
 treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
 // Instance selected player renderable.
-$renderableclass = "mod_treasurehunt\output\play_page_$playerstyle";
+$renderableclass = match ($playerstyle) {
+    TREASUREHUNT_PLAYERCESSIUM => \mod_treasurehunt\output\play_page_cessium_player::class,
+    TREASUREHUNT_PLAYERMAPBOX => \mod_treasurehunt\output\play_page_mapbox_player::class,
+    default => "mod_treasurehunt\output\play_page_$playerstyle",
+};
 $renderable = new $renderableclass($treasurehunt, $cm);
 /**@var core_renderer $output */
 $output = $PAGE->get_renderer('mod_treasurehunt');
