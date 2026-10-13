@@ -53,7 +53,8 @@ let init = {
         "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage", "preview",
         "playstagewithqr", "playstagewithoutmoving", "discoveroutofsequence", "activitytoend",
         "addsimplequestion", "editorinverserestrictions", "editordirectrestrictions",
-        "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorqrshort",
+        "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorownclueshort",
+        "editorviewfullclue", "editorqrshort",
         "editorpreviousshort", "editorblockedshort", "editorwithoutgpsshort", "editoroutofsequenceshort",
         "editorcopysource", "editorcopyfrom", "editorcopycount", "editorcopyexistingcount",
         "editorcopytarget", "editorcopyappenddesc",
@@ -568,7 +569,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             ready();
           }
         },
-      });
+      }, new Modal(document.getElementById("opendatacollectormodal")));
     } else {
       document.getElementById("opendataopen").hidden = true;
       document.getElementById("opendataopen").style.display = "none";
@@ -576,6 +577,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
 
     var openStagePopover = null;
     var openStagePopoverButton = null;
+    var stageClueModal = new Modal(document.getElementById("stagecluemodal"));
     /** Close the currently open stage information popover. */
     function closeStagePopover() {
       if (openStagePopover) {
@@ -1194,6 +1196,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           .data("stageInfo", {
             title: plainName,
             clue: clue,
+            ownclue: summary.ownclue,
             hasqr: summary.hasqr,
             discoveroutofsequence: summary.discoveroutofsequence,
             withoutgps: summary.playstagewithoutmoving,
@@ -2126,8 +2129,6 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       var $card = $("<div>", {class: "card border-0 treasurehunt-stage-summary"});
       $("<div>", {class: "card-header font-weight-bold"}).text(info.title).appendTo($card);
       var $body = $("<div>", {class: "card-body"}).appendTo($card);
-      $("<div>", {class: "treasurehunt-stage-clue-label"}).text(strings.editorclueshort).appendTo($body);
-      var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
       /**
        * Copy a short HTML preview with only safe formatting tags.
        * @param {Node} node Source HTML node.
@@ -2169,16 +2170,38 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           target.appendChild(wrapper);
         }
       }
-      var cluehtml = new DOMParser().parseFromString(info.clue || "", "text/html").body;
-      var previewstate = {remaining: 160, truncated: false};
-      Array.from(cluehtml.childNodes).forEach(function (node) {
-        copyPreview(node, $clue[0], previewstate);
-      });
-      if (!$clue.text().trim()) {
-        $clue.text(strings.editornone);
-      } else if (previewstate.truncated) {
-        $clue.append(document.createTextNode("…"));
+      /**
+       * Show a short clue and a navigation button when its full content is available.
+       * @param {string} label Visible clue label.
+       * @param {string} html Formatted full clue.
+       * @param {string} kind Clue field to open.
+       */
+      function addCluePreview(label, html, kind) {
+        var cluehtml = new DOMParser().parseFromString(html || "", "text/html").body;
+        var hasContent = Boolean(cluehtml.textContent.trim() ||
+          cluehtml.querySelector("img, video, audio, iframe, object, embed"));
+        var $heading = $("<div>", {class: "treasurehunt-stage-clue-heading"}).appendTo($body);
+        $("<span>", {class: "treasurehunt-stage-clue-label"}).text(label).appendTo($heading);
+        if (hasContent) {
+          $("<button>", {type: "button", class: "btn btn-link btn-sm treasurehunt-open-full-clue"})
+            .attr({"data-clue-kind": kind, "aria-label": strings.editorviewfullclue + ": " + label + " " + info.title,
+              title: strings.editorviewfullclue})
+            .append('<i class="fa fa-arrow-right" aria-hidden="true"></i>')
+            .appendTo($heading);
+        }
+        var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
+        var previewstate = {remaining: 160, truncated: false};
+        Array.from(cluehtml.childNodes).forEach(function (node) {
+          copyPreview(node, $clue[0], previewstate);
+        });
+        if (!$clue.text().trim()) {
+          $clue.text(hasContent ? strings.editorviewfullclue : strings.editornone);
+        } else if (previewstate.truncated) {
+          $clue.append(document.createTextNode("…"));
+        }
       }
+      addCluePreview(strings.editorclueshort, info.clue, "next");
+      addCluePreview(strings.editorownclueshort, info.ownclue, "own");
 
       var direct = [];
       if (info.activitytoendname) {
@@ -2231,6 +2254,18 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       });
       openStagePopoverButton = this;
       openStagePopover.show();
+    });
+    $(document).on("click", ".treasurehunt-open-full-clue", function () {
+      var info = $(openStagePopoverButton).data("stageInfo");
+      if (!info) {
+        return;
+      }
+      var own = $(this).attr("data-clue-kind") === "own";
+      $("#stagecluemodaltitle").text(info.title + " — " +
+        (own ? strings.editorownclueshort : strings.editorclueshort));
+      $("#stagecluemodalbody").html(own ? info.ownclue : info.clue);
+      closeStagePopover();
+      stageClueModal.show();
     });
     $(document).on("pointerdown.treasurehunt-stage-info", function (event) {
       if (!$(event.target).closest(".treasurehunt-info-item, .popover").length) {

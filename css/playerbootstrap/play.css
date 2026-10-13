@@ -433,6 +433,11 @@ body {
   display: none;
 }
 
+#page-mod-treasurehunt-play #cluepage .play-modal-popup {
+  width: 80%;
+  max-width: 80%;
+}
+
 #page-mod-treasurehunt-play .play-modal-dialog,
 #page-mod-treasurehunt-play .play-modal-popup {
   position: relative;

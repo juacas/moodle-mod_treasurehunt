@@ -199,4 +199,33 @@ final class opendata_wikidata_test extends \advanced_testcase {
         $this->assertSame('Castles in Spain', $details['categories'][0]['label']);
         $this->assertSame(['1932-01-01'], $details['fields']['date']);
     }
+
+    /** A linked entity keeps a valid item and predicate for collector navigation. */
+    public function test_parse_details_returns_navigable_relations(): void {
+        $details = wikidata::parse_details(['results' => ['bindings' => [[
+            'kind' => ['value' => 'relation'],
+            'value' => ['value' => 'http://www.wikidata.org/entity/Q42'],
+            'valueLabel' => ['value' => 'Douglas Adams'],
+            'property' => ['value' => 'http://www.wikidata.org/prop/direct/P170'],
+            'propertyEntityLabel' => ['value' => 'creator'],
+        ]]]], 'en');
+        $this->assertSame([['source' => 'wikidata', 'id' => 'Q42', 'label' => 'Douglas Adams',
+            'property' => 'creator']], $details['relations']);
+    }
+
+    /** Wikidata exposes Commons geoshapes and DBpedia sameAs resources. */
+    public function test_geoshape_and_same_as_details(): void {
+        $details = wikidata::parse_details(['results' => ['bindings' => [
+            ['kind' => ['value' => 'geoshape'], 'value' => ['value' =>
+                'http://commons.wikimedia.org/data/main/Data:Neighbourhoods/New+York+City.map']],
+            ['kind' => ['value' => 'sameAs'], 'value' => ['value' =>
+                'http://dbpedia.org/resource/New_York_City']],
+        ]]], 'en');
+        $this->assertSame(['Data:Neighbourhoods/New York City.map'], $details['geoshapes']);
+        $this->assertSame('dbpedia', $details['relations'][0]['source']);
+        $this->assertSame('owl:sameAs', $details['relations'][0]['property']);
+        $query = wikidata::build_details_query('Q60');
+        $this->assertStringContainsString('wdt:P3896', $query);
+        $this->assertStringContainsString('owl:sameAs', $query);
+    }
 }

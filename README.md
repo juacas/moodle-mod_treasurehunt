@@ -24,6 +24,110 @@ Operation
 8. adjust the grading method and penalizations.
 9. let your students play the game.
 
+Stage creation in this version
+==============================
+
+The editor offers two ways to prepare a stage: create it manually or start with a geographic
+item from **DBpedia, Wikidata, or Europeana**. In either case, the stage belongs to the
+selected road and can be edited before players see it. The OpenData search also lets you
+collect reference places in a map layer without creating stages.
+
+Prepare the road and map
+------------------------
+
+1. Create the activity and at least one road. Open **Edit treasure hunt** and select the
+   destination road tab. If there is no road yet, the editor takes you to the form for
+   creating the first one.
+2. Make sure the road is **editable**. A blocked road cannot receive stages through either
+   **Add stage** or **Collect and compose stage**. The editor also holds an editing lock to
+   prevent simultaneous changes by other authors.
+3. Move the map to the area you want to explore. Maximize the editor or collapse the stage
+   panel if you need more room. OpenData searches cover the visible area plus a margin equal
+   to its width and height on each side, so zoom in for more focused results.
+
+Create a stage manually
+-----------------------
+
+1. Click **Add stage** in the stage panel. Enter the name and clues in the form. You can also
+   set a question, a QR code, and stage requirements. The editor saves pending map changes
+   before opening the form.
+2. Select the stage in the panel and use **Draw** to outline its area on the map. **Edit**
+   changes existing geometry, **Navigate** lets you move the map again, and **Remove** deletes
+   the selected geometry. Click **Save** after changing the area. A stage needs at least one
+   valid geometry.
+3. Use the stage information button to review the summary: **Next clue**, **Own clue**, QR,
+   discovery out of sequence, and restrictions. If a clue contains text or media, its
+   navigation icon opens the full clue. The stage edit button reopens its form.
+
+Search and review open data
+---------------------------
+
+1. Click the wand button, **Search open data**, in the map toolbar. **DBpedia** appears first
+   and is selected by default. You can also select Wikidata and Europeana. Each source has
+   an expandable list of types or themes; the search term is optional. Europeana requires
+   an API key configured for the site.
+2. Click **Search**. Progress is shown for each source, and results appear in a **pending**
+   list: searching does not change stages or the OpenData layer. **Load more** fetches
+   another page when available. If there are too many results, zoom in, select a narrower
+   theme, or enter a search term.
+3. Select a result to replace the instructions with its item card. The same card opens when
+   you click a point in the OpenData map layer. Depending on the source, it shows a
+   description, types, categories, subjects, links, images, and available geometries. If
+   additional details fail to load, click **Retry** on the card.
+4. To keep the whole search as map references, click **Add all to map**. Existing items are
+   kept and duplicates are skipped. **Replace** replaces the OpenData layer. You can also
+   save one enriched item with **Add to map** from the Data collector. None of these actions
+   creates a stage.
+
+Collect information and compose a stage
+---------------------------------------
+
+1. With an editable road selected, open a result or an OpenData map point and click
+   **Collect and compose a stage**. The **Data collector** opens in a large window. The left
+   panel keeps the original item and its attachments visible; the right panel shows the
+   current item and its navigable links.
+2. In the right panel, follow relation tags to explore other items. `owl:sameAs` links let
+   you move between DBpedia and Wikidata. DBpedia categories and Europeana subjects launch
+   related searches within the map area. Use **Back** or the breadcrumbs to return without
+   losing the original item.
+3. When a related item is useful, click **Attach to this item** at the top of the right
+   panel. It appears in the left panel and becomes part of the original item's card. You
+   can remove it later. Up to 12 items can be attached. Following a link does not attach
+   the destination automatically.
+4. Choose an action in the left panel:
+
+   - **Transfer to a new stage** creates the stage in the selected road and opens its edit
+     form. The collected information goes into **Own clue**. **Next clue** remains available
+     for directions to the following stage. Review and adapt the generated text to your
+     learning activity before using it.
+   - **Add to map** keeps the original item and its attachments in the OpenData layer for
+     later reference, without creating a stage.
+
+A DBpedia card can show `dct:subject` categories, a `dbo:description` summary, a carousel
+of `foaf:depiction` images, and a `foaf:isPrimaryTopicOf` link to longer text. When you
+create a stage, its images are included in a mosaic of 200-pixel images. Geometry badges
+identify WKT points and polygons from `geo:geometry`, `geosparql:asWKT`, or `dbo:polygon`.
+When a DBpedia item links to Wikidata, the collector also checks `wdt:P3896` map data.
+On transfer, a valid polygon takes priority over a point, including one found on an
+attached `owl:sameAs` item. For equal geometry types, the original item takes priority.
+If only a point is available, the editor creates a small area around it; otherwise it
+uses the item's search coordinates. Check the resulting area on the map and use **Edit**
+if the stage should cover a different place.
+
+Reuse stages and check the route
+--------------------------------
+
+If the activity has another road, **Copy stages** lets you choose it as the source. By
+default, its stages are appended to the selected road. **Delete existing stages** replaces
+the destination's stages instead. Check the counts before confirming, especially when
+replacing stages.
+
+When finished, inspect the road tabs, cards, clues, and areas, then open a **player
+preview**. The OpenData layer is stored locally in the browser for this activity and is
+loaded again when you open the editor in the same browser. Created stages are saved in
+Moodle as part of the road. Keeping a result only in the OpenData layer does not turn it
+into a stage or share it with players.
+
 Out-of-sequence discovery
 =========================
 

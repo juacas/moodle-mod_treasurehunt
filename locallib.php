@@ -837,7 +837,8 @@ function treasurehunt_get_stages($treasurehuntid, $context) {
     global $DB;
     // Get all stages from the instance of treasure hunt.
     $stagessql = "SELECT stage.id, "
-        . "stage.name, stage.cluetext, roadid, roads.name as roadname, position,"
+        . "stage.name, stage.cluetext, stage.clueforstage, stage.clueforstageformat,"
+        . " roadid, roads.name as roadname, position,"
         . "stage.activitytoend, stage.playstagewithoutmoving, stage.discoveroutofsequence,"
         . "CASE WHEN stage.qrtext IS NOT NULL AND stage.qrtext <> '' THEN 1 ELSE 0 END AS hasqr,"
         . "CASE WHEN stage.questiontext IS NOT NULL AND stage.questiontext <> '' THEN 1 ELSE 0 END AS hasquestion,"
@@ -1480,6 +1481,15 @@ function treasurehunt_features_to_geojson($features, $context, $treasurehuntid, 
             'clue' => $cluetext,
         ];
         if (isset($feature->inverserestrictions)) {
+            $ownclue = file_rewrite_pluginfile_urls(
+                $feature->clueforstage ?? '',
+                'pluginfile.php',
+                $context->id,
+                'mod_treasurehunt',
+                'clueforstage',
+                $feature->id
+            );
+            $attr['ownclue'] = format_text($ownclue, $feature->clueforstageformat ?? FORMAT_HTML);
             $attr['hasqr'] = (bool)$feature->hasqr;
             $attr['playstagewithoutmoving'] = (bool)$feature->playstagewithoutmoving;
             $attr['discoveroutofsequence'] = (bool)$feature->discoveroutofsequence;

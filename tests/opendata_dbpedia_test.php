@@ -119,4 +119,43 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         $details = dbpedia::parse_details(['results' => ['bindings' => $bindings]]);
         $this->assertCount(15, $details['images']);
     }
+
+    /** Only DBpedia resource targets become internal ontology links. */
+    public function test_ontology_relations_are_validated(): void {
+        $relation = ['kind' => ['value' => 'relation'],
+            'property' => ['value' => 'http://dbpedia.org/ontology/architect'],
+            'propertyLabel' => ['value' => 'architect'],
+            'value' => ['value' => 'http://dbpedia.org/resource/Example_Architect'],
+            'valueLabel' => ['value' => 'Example architect']];
+        $unsafe = $relation;
+        $unsafe['value']['value'] = 'https://example.org/resource/Other';
+        $details = dbpedia::parse_details(['results' => ['bindings' => [$relation, $unsafe]]]);
+        $this->assertSame([['source' => 'dbpedia', 'id' => 'http://dbpedia.org/resource/Example_Architect',
+            'label' => 'Example architect', 'property' => 'architect']], $details['relations']);
+    }
+
+    /** SameAs links cross to Wikidata and polygon predicates produce geometry badges. */
+    public function test_same_as_and_polygon_details(): void {
+        $details = dbpedia::parse_details(['results' => ['bindings' => [
+            ['kind' => ['value' => 'sameAs'],
+                'value' => ['value' => 'http://www.wikidata.org/entity/Q42']],
+            ['kind' => ['value' => 'asWKT'],
+                'value' => ['value' => 'POLYGON((-3 40,-2 40,-2 41,-3 40))']],
+            ['kind' => ['value' => 'polygon'],
+                'value' => ['value' => 'POINT(-3 40)']],
+            ['kind' => ['value' => 'geoGeometry'],
+                'value' => ['value' => 'POINT(-3 40)']],
+        ]]]);
+        $this->assertSame('wikidata', $details['relations'][0]['source']);
+        $this->assertSame('Q42', $details['relations'][0]['id']);
+        $this->assertSame('owl:sameAs', $details['relations'][0]['property']);
+        $this->assertSame('geosparql:asWKT', $details['geometries'][0]['source']);
+        $this->assertCount(2, $details['geometries']);
+        $this->assertSame('geo:geometry', $details['geometries'][1]['source']);
+        $this->assertSame('Point', $details['geometries'][1]['type']);
+        $query = dbpedia::build_details_query('http://dbpedia.org/resource/Example');
+        foreach (['owl:sameAs', 'geosparql:asWKT', 'dbo:polygon', 'geo:geometry'] as $predicate) {
+            $this->assertStringContainsString($predicate, $query);
+        }
+    }
 }

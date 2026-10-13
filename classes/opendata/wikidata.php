@@ -179,7 +179,9 @@ final class wikidata {
         if (!preg_match('/^Q[1-9][0-9]*$/', $itemid)) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
-        return "SELECT ?kind ?value ?valueLabel WHERE {\n  VALUES ?item { wd:" . $itemid . " }\n  " .
+        return "PREFIX owl: <http://www.w3.org/2002/07/owl#>\n" .
+            "SELECT ?kind ?value ?valueLabel ?property ?propertyEntityLabel WHERE {\n  VALUES ?item { wd:" .
+            $itemid . " }\n  " .
             '{ ?item wdt:P18 ?value. BIND("image" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P856 ?value. BIND("official" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P973 ?value. BIND("about" AS ?kind) }' . "\n  UNION " .
@@ -189,12 +191,20 @@ final class wikidata {
             'BIND("description" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P31 ?value. BIND("type" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P373 ?value. BIND("category" AS ?kind) }' . "\n  UNION " .
+            '{ ?item wdt:P3896 ?value. BIND("geoshape" AS ?kind) }' . "\n  UNION " .
+            '{ ?item owl:sameAs ?value. BIND("sameAs" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P571 ?value. BIND("date" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P131 ?value. BIND("location" AS ?kind) }' . "\n  UNION " .
             '{ ?item wdt:P170 ?value. BIND("creator" AS ?kind) }' . "\n  " .
+            'UNION { ?item ?property ?value. ' .
+            'FILTER(STRSTARTS(STR(?property), "http://www.wikidata.org/prop/direct/P") && ' .
+            'STRSTARTS(STR(?value), "http://www.wikidata.org/entity/Q")) ' .
+            'BIND(IRI(REPLACE(STR(?property), "/prop/direct/", "/entity/")) AS ?propertyEntity) ' .
+            'BIND("relation" AS ?kind) }' . "\n  " .
             'SERVICE wikibase:label { bd:serviceParam wikibase:language "es,en,el". }' . "\n}" .
-            ' ORDER BY (IF(?kind = "image", 0, IF(?kind = "official", 1, ' .
-            'IF(?kind = "about", 2, IF(?kind = "description", 3, 4))))) LIMIT 200';
+            ' ORDER BY (IF(?kind = "geoshape", 0, IF(?kind = "sameAs", 1, ' .
+            'IF(?kind = "image", 2, IF(?kind = "official", 3, ' .
+            'IF(?kind = "about", 4, IF(?kind = "description", 5, 6))))))) LIMIT 350';
     }
 
     /**
@@ -248,6 +258,8 @@ final class wikidata {
         $types = [];
         $categories = [];
         $fields = [];
+        $relations = [];
+        $geoshapes = [];
         foreach ($response['results']['bindings'] ?? [] as $binding) {
             $kind = $binding['kind']['value'] ?? '';
             $value = $binding['value']['value'] ?? '';
@@ -294,6 +306,44 @@ final class wikidata {
                         $fields[$kind][$label] = $label;
                     }
                     break;
+                case 'relation':
+                    if (count($relations) >= 80 ||
+                            !preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)) {
+                        break;
+                    }
+                    $propertyuri = $binding['property']['value'] ?? '';
+                    if (!is_string($propertyuri) ||
+                            !preg_match('~^https?://www\.wikidata\.org/prop/direct/(P[1-9][0-9]*)$~D',
+                                $propertyuri, $propertymatch)) {
+                        break;
+                    }
+                    $label = $binding['valueLabel']['value'] ?? $match[1];
+                    $propertylabel = $binding['propertyEntityLabel']['value'] ?? $propertymatch[1];
+                    if (is_string($label) && is_string($propertylabel)) {
+                        $relations[$propertymatch[1] . ':' . $match[1]] = [
+                            'source' => 'wikidata', 'id' => $match[1],
+                            'label' => \core_text::substr($label, 0, 100),
+                            'property' => \core_text::substr($propertylabel, 0, 100),
+                        ];
+                    }
+                    break;
+                case 'sameAs':
+                    if (count($relations) < 80 &&
+                            preg_match('~^http://dbpedia\.org/resource/[^\x00-\x20<>"{}|^`\\\\?#]{1,500}$~Du',
+                                $value)) {
+                        $slug = substr($value, strlen('http://dbpedia.org/resource/'));
+                        $relations['owl:sameAs:' . $value] = [
+                            'source' => 'dbpedia', 'id' => $value,
+                            'label' => str_replace('_', ' ', rawurldecode($slug)), 'property' => 'owl:sameAs',
+                        ];
+                    }
+                    break;
+                case 'geoshape':
+                    $title = self::geoshape_title($value);
+                    if ($title !== '' && count($geoshapes) < 2) {
+                        $geoshapes[$title] = $title;
+                    }
+                    break;
                 case 'official':
                 case 'about':
                     if (!self::valid_website($value) || isset($officialwebsites[$value]) ||
@@ -318,7 +368,70 @@ final class wikidata {
             'types' => array_values($types),
             'categories' => array_values($categories),
             'fields' => array_map('array_values', $fields),
+            'relations' => array_values($relations),
+            'geoshapes' => array_values($geoshapes),
+            'geometries' => [],
         ];
+    }
+
+    /** Convert a WDQS Commons data URI to a bounded MediaWiki page title. */
+    private static function geoshape_title(string $value): string {
+        if (preg_match('~^https?://commons\.wikimedia\.org/data/main/(Data:[^?#]+\.map)$~iD', $value, $match)) {
+            $value = rawurldecode(str_replace('+', ' ', $match[1]));
+        }
+        return strlen($value) <= 255 &&
+            (bool)preg_match('~^Data:[^\x00-\x1f<>"{}|\\\\?#]{1,240}\.map$~uD', $value) ? $value : '';
+    }
+
+    /** Resolve up to two Commons map files into bounded polygon WKT. */
+    private static function resolve_geoshapes(array $titles): array {
+        global $CFG;
+        require_once($CFG->libdir . '/filelib.php');
+        $geometries = [];
+        foreach (array_slice($titles, 0, 2) as $title) {
+            $title = self::geoshape_title($title);
+            if ($title === '') {
+                continue;
+            }
+            try {
+                $curl = new \curl();
+                $curl->setHeader('User-Agent: MoodleTreasurehunt/1.0');
+                $body = $curl->get('https://commons.wikimedia.org/w/api.php', [
+                    'action' => 'query', 'prop' => 'revisions', 'rvprop' => 'content', 'rvslots' => 'main',
+                    'titles' => $title, 'format' => 'json',
+                ], ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 15, 'CURLOPT_FOLLOWLOCATION' => 0]);
+                $info = $curl->get_info();
+                if ($curl->get_errno() || (int)($info['http_code'] ?? 0) !== 200 ||
+                        strlen((string)$body) > 2000000) {
+                    continue;
+                }
+                $response = json_decode($body, true);
+                $pages = $response['query']['pages'] ?? [];
+                $page = reset($pages);
+                $content = $page['revisions'][0]['slots']['main']['*'] ?? null;
+                $mapdata = is_string($content) ? json_decode($content, true) : null;
+                if (is_array($mapdata)) {
+                    $geometry = geometry::from_geojson($mapdata, 'wdt:P3896');
+                    if ($geometry) {
+                        $geometries[] = $geometry;
+                    }
+                }
+            } catch (\Throwable $exception) {
+                // Missing or oversized Commons data does not hide other item details.
+            }
+        }
+        return $geometries;
+    }
+
+    /** Fetch only P3896 geometries for a validated sameAs target. */
+    public static function geometries_for_item(string $itemid): array {
+        if (!preg_match('/^Q[1-9][0-9]*$/D', $itemid)) {
+            throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
+        }
+        $query = 'SELECT ?kind ?value WHERE { wd:' . $itemid .
+            ' wdt:P3896 ?value. BIND("geoshape" AS ?kind) } LIMIT 2';
+        $details = self::parse_details(self::request_query($query), 'en');
+        return self::resolve_geoshapes($details['geoshapes']);
     }
 
     /**
@@ -329,7 +442,9 @@ final class wikidata {
      * @return array Card metadata.
      */
     public static function details(string $itemid, string $language): array {
-        return self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
+        $details = self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
+        $details['geometries'] = self::resolve_geoshapes($details['geoshapes']);
+        return $details;
     }
 
     /**

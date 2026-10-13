@@ -46,7 +46,7 @@ try {
         $lockid = required_param('lockid', PARAM_INT);
         $name = trim(required_param('name', PARAM_TEXT));
         $metadatajson = optional_param('metadata', '{}', PARAM_RAW);
-        if (strlen($metadatajson) > ($sourceid === 'dbpedia' ? 200000 : 20000)) {
+        if (strlen($metadatajson) > 200000) {
             throw new moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         $metadata = json_decode($metadatajson, true);

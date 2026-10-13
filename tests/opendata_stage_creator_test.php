@@ -82,6 +82,21 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $geometry = \treasurehunt_wkt_to_object($stage->geom);
         $this->assertCount(1, $geometry->getComponents());
         $this->assertFalse((bool)$DB->get_field('treasurehunt_roads', 'validated', ['id' => $roadid]));
+        $polygon = 'POLYGON((-3.8 40.3,-3.6 40.3,-3.6 40.5,-3.8 40.3))';
+        $polygonstageid = stage_creator::create($roadid, 'Polygon place', -3.7, 40.4,
+            \context_module::instance($cmid), 'dbpedia', [
+                'geometries' => [['source' => 'dbo:polygon', 'wkt' => $polygon]],
+            ]);
+        $polygonstage = $DB->get_record('treasurehunt_stages', ['id' => $polygonstageid], '*', MUST_EXIST);
+        $this->assertStringContainsString('-3.80000000 40.30000000', $polygonstage->geom);
+        $this->assertStringNotContainsString('-3.70000000 40.40000000', $polygonstage->geom);
+        $pointstageid = stage_creator::create($roadid, 'Point place', -3.7, 40.4,
+            \context_module::instance($cmid), 'dbpedia', [
+                'geometries' => [['source' => 'geo:geometry', 'wkt' => 'POINT(-4 41)']],
+            ]);
+        $pointstage = $DB->get_record('treasurehunt_stages', ['id' => $pointstageid], '*', MUST_EXIST);
+        $this->assertStringContainsString('-4.000', $pointstage->geom);
+        $this->assertStringNotContainsString('-3.700', $pointstage->geom);
     }
 
     /**
@@ -124,5 +139,20 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $this->assertStringContainsString($first, $html);
         $this->assertStringContainsString($second, $html);
         $this->assertStringNotContainsString('example.com/unsafe.jpg', $html);
+    }
+
+    /** Attached resources enter the new stage without trusting their markup. */
+    public function test_collected_cards_enter_stage_clue(): void {
+        $html = stage_creator::clue_html('Bridge', 'wikidata', [
+            'collected' => [[
+                'source' => 'dbpedia', 'name' => '<script>Architect</script>', 'relation' => 'designer',
+                'metadata' => ['description' => 'Designed <b>the bridge</b>',
+                    'url' => 'https://dbpedia.org/page/Architect'],
+            ]],
+        ]);
+        $this->assertStringContainsString('Designed &lt;b&gt;the bridge&lt;/b&gt;', $html);
+        $this->assertStringContainsString('&lt;script&gt;Architect&lt;/script&gt;', $html);
+        $this->assertStringNotContainsString('<script>', $html);
+        $this->assertStringContainsString('designer', $html);
     }
 }

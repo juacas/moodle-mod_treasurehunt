@@ -198,7 +198,20 @@ final class dbpedia implements source {
 
     /** @inheritDoc */
     public function item_details(string $itemid, string $language): array {
-        return self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
+        $details = self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
+        foreach ($details['relations'] as $relation) {
+            if ($relation['source'] !== 'wikidata' || $relation['property'] !== 'owl:sameAs') {
+                continue;
+            }
+            try {
+                $details['geometries'] = array_merge($details['geometries'],
+                    wikidata::geometries_for_item($relation['id']));
+            } catch (\Throwable $exception) {
+                // A linked service must not hide the DBpedia card.
+            }
+            break;
+        }
+        return $details;
     }
 
     /** Build the detail query from one validated DBpedia resource. */
@@ -209,19 +222,35 @@ final class dbpedia implements source {
         return 'PREFIX dbo: <http://dbpedia.org/ontology/> ' .
             'PREFIX dct: <http://purl.org/dc/terms/> ' .
             'PREFIX foaf: <http://xmlns.com/foaf/0.1/> ' .
+            'PREFIX owl: <http://www.w3.org/2002/07/owl#> ' .
+            'PREFIX geosparql: <http://www.opengis.net/ont/geosparql#> ' .
+            'PREFIX geo: <http://www.w3.org/2003/01/geo/wgs84_pos#> ' .
             'PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ' .
-            'SELECT ?kind ?value ?valueLabel WHERE { VALUES ?item { <' . $itemid . '> } ' .
+            'SELECT ?kind ?value ?valueLabel ?property ?propertyLabel WHERE { VALUES ?item { <' . $itemid . '> } ' .
             '{ ?item dbo:description ?value. BIND("description" AS ?kind) } ' .
             'UNION { ?item dbo:abstract ?value. FILTER(LANG(?value) = "en") BIND("abstract" AS ?kind) } ' .
             'UNION { ?item dbo:thumbnail ?value. BIND("image" AS ?kind) } ' .
             'UNION { ?item foaf:depiction ?value. BIND("depiction" AS ?kind) } ' .
             'UNION { ?item foaf:isPrimaryTopicOf ?value. BIND("primary" AS ?kind) } ' .
+            'UNION { ?item owl:sameAs ?value. BIND("sameAs" AS ?kind) } ' .
+            'UNION { ?item geosparql:asWKT ?value. BIND("asWKT" AS ?kind) } ' .
+            'UNION { ?item geosparql:hasGeometry/geosparql:asWKT ?value. BIND("asWKT" AS ?kind) } ' .
+            'UNION { ?item dbo:polygon ?value. BIND("polygon" AS ?kind) } ' .
+            'UNION { ?item geo:geometry ?value. BIND("geoGeometry" AS ?kind) } ' .
             'UNION { ?item dct:subject ?value. ' .
             'FILTER(STRSTARTS(STR(?value), "http://dbpedia.org/resource/Category:")) ' .
             'BIND("category" AS ?kind) } ' .
             'UNION { ?item a ?value. FILTER(STRSTARTS(STR(?value), "http://dbpedia.org/ontology/")) ' .
             'OPTIONAL { ?value rdfs:label ?valueLabel. FILTER(LANG(?valueLabel) = "en") } ' .
-            'BIND("type" AS ?kind) } } LIMIT 500';
+            'BIND("type" AS ?kind) } ' .
+            'UNION { ?item ?property ?value. ' .
+            'FILTER(STRSTARTS(STR(?property), "http://dbpedia.org/ontology/") && ' .
+            'STRSTARTS(STR(?value), "http://dbpedia.org/resource/")) ' .
+            'OPTIONAL { ?value rdfs:label ?valueLabel. FILTER(LANG(?valueLabel) = "en") } ' .
+            'OPTIONAL { ?property rdfs:label ?propertyLabel. FILTER(LANG(?propertyLabel) = "en") } ' .
+            'BIND("relation" AS ?kind) } } ' .
+            'ORDER BY (IF(?kind = "asWKT", 0, IF(?kind = "polygon", 1, ' .
+            'IF(?kind = "geoGeometry", 2, IF(?kind = "sameAs", 3, 4))))) LIMIT 700';
     }
 
     /** Only display images served by Wikimedia Commons or its thumbnail host. */
@@ -245,7 +274,7 @@ final class dbpedia implements source {
     /** Convert the detail bindings to the editor's card schema. */
     public static function parse_details(array $response, string $language = 'en'): array {
         $details = ['description' => '', 'image' => '', 'images' => [], 'types' => [],
-            'categories' => [], 'websites' => []];
+            'categories' => [], 'websites' => [], 'relations' => [], 'geometries' => []];
         $descriptions = [];
         $abstract = '';
         $thumbnail = '';
@@ -256,9 +285,23 @@ final class dbpedia implements source {
             if (!is_string($value) || $value === '') {
                 continue;
             }
-            if ($kind === 'description') {
-                $lang = $binding['value']['xml:lang'] ?? '';
-                if ($lang !== '' && !isset($descriptions[$lang])) {
+            if (in_array($kind, ['asWKT', 'polygon', 'geoGeometry'], true)) {
+                $predicate = ['asWKT' => 'geosparql:asWKT', 'polygon' => 'dbo:polygon',
+                    'geoGeometry' => 'geo:geometry'][$kind];
+                $geometry = geometry::from_wkt($value, $predicate);
+                if ($geometry && !($kind === 'polygon' && $geometry['type'] === 'Point') &&
+                        count($details['geometries']) < 4 &&
+                        !in_array($geometry, $details['geometries'], true)) {
+                    $details['geometries'][] = $geometry;
+                }
+            } else if ($kind === 'sameAs' && count($details['relations']) < 80) {
+                $relation = self::same_as_relation($value);
+                if ($relation) {
+                    $details['relations'][$relation['source'] . ':' . $relation['id']] = $relation;
+                }
+            } else if ($kind === 'description') {
+                $lang = ($binding['value']['xml:lang'] ?? '') ?: 'en';
+                if (!isset($descriptions[$lang])) {
                     $descriptions[$lang] = \core_text::substr($value, 0, 500);
                 }
             } else if ($kind === 'abstract' && $abstract === '') {
@@ -280,6 +323,23 @@ final class dbpedia implements source {
                 if (is_string($label) && trim($label) !== '') {
                     $details['types'][$value] = ['label' => \core_text::substr($label, 0, 100), 'url' => ''];
                 }
+            } else if ($kind === 'relation' && self::valid_itemid($value) &&
+                    count($details['relations']) < 80) {
+                $property = $binding['property']['value'] ?? '';
+                if (!is_string($property) || !str_starts_with($property, 'http://dbpedia.org/ontology/')) {
+                    continue;
+                }
+                $slug = substr($value, strlen('http://dbpedia.org/resource/'));
+                $label = $binding['valueLabel']['value'] ?? str_replace('_', ' ', rawurldecode($slug));
+                $propertylabel = $binding['propertyLabel']['value'] ??
+                    substr($property, strlen('http://dbpedia.org/ontology/'));
+                if (is_string($label) && is_string($propertylabel)) {
+                    $details['relations'][$property . ':' . $value] = [
+                        'source' => 'dbpedia', 'id' => $value,
+                        'label' => \core_text::substr($label, 0, 100),
+                        'property' => \core_text::substr($propertylabel, 0, 100),
+                    ];
+                }
             } else if ($kind === 'primary' &&
                     filter_var($value, FILTER_VALIDATE_URL) &&
                     in_array(parse_url($value, PHP_URL_SCHEME), ['http', 'https'], true) &&
@@ -299,8 +359,23 @@ final class dbpedia implements source {
         $details['image'] = $details['images'][0] ?? $thumbnail;
         $details['types'] = array_values($details['types']);
         $details['categories'] = array_values($details['categories']);
+        $details['relations'] = array_values($details['relations']);
         $details['websites'] = array_values($primarywebsites);
         return $details;
+    }
+
+    /** Keep only known OpenData targets for collector navigation. */
+    private static function same_as_relation(string $value): ?array {
+        if (preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)) {
+            return ['source' => 'wikidata', 'id' => $match[1], 'label' => 'Wikidata ' . $match[1],
+                'property' => 'owl:sameAs'];
+        }
+        if (self::valid_itemid($value)) {
+            $slug = substr($value, strlen('http://dbpedia.org/resource/'));
+            return ['source' => 'dbpedia', 'id' => $value,
+                'label' => str_replace('_', ' ', rawurldecode($slug)), 'property' => 'owl:sameAs'];
+        }
+        return null;
     }
 
     /** Query only the fixed public endpoint, with bounded time and response size. */

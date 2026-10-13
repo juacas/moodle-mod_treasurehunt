@@ -96,5 +96,6 @@ final class stage_form_test extends \advanced_testcase {
         $road = reset($roads);
         $properties = $road->stages['features'][0]['properties'];
         $this->assertTrue($properties['discoveroutofsequence']);
+        $this->assertSame('Find me', $properties['ownclue']);
     }
 }

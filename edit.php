@@ -206,6 +206,16 @@ echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondar
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
 echo $OUTPUT->container_end();
+echo '<div class="modal fade" id="stagecluemodal" tabindex="-1" aria-labelledby="stagecluemodaltitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content"><div class="modal-header">'
+    . '<h5 class="modal-title" id="stagecluemodaltitle"></h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body treasurehunt-stage-full-clue" id="stagecluemodalbody"></div>'
+    . '</div></div></div>';
 echo '<div class="modal fade" id="copystagesmodal" tabindex="-1" aria-labelledby="copystagesmodaltitle" aria-hidden="true">'
     . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
     . '<div class="modal-content shadow border-0">'
@@ -252,6 +262,7 @@ echo '<div class="modal fade" id="opendatamodal" tabindex="-1" aria-labelledby="
     . ' data-source-failed="' . s(get_string('opendatasourcefailed', 'treasurehunt')) . '"'
     . ' data-layer-label="' . s(get_string('opendatalayer', 'treasurehunt')) . '"'
     . ' data-added-label="' . s(get_string('opendataadded', 'treasurehunt')) . '"'
+    . ' data-add-to-map-label="' . s(get_string('opendataaddtomap', 'treasurehunt')) . '"'
     . ' data-replaced-label="' . s(get_string('opendatareplaced', 'treasurehunt')) . '"'
     . ' data-storage-error="' . s(get_string('opendatastorageerror', 'treasurehunt')) . '"'
     . ' data-area-error="' . s(get_string('opendatainvalidarea', 'treasurehunt')) . '"'
@@ -262,6 +273,7 @@ echo '<div class="modal fade" id="opendatamodal" tabindex="-1" aria-labelledby="
     . ' data-subjects-label="' . s(get_string('opendatasubjects', 'treasurehunt')) . '"'
     . ' data-categories-label="' . s(get_string('opendatacategories', 'treasurehunt')) . '"'
     . ' data-gallery-label="' . s(get_string('opendatagallery', 'treasurehunt')) . '"'
+    . ' data-geometry-label="' . s(get_string('opendatageometry', 'treasurehunt')) . '"'
     . ' data-previous-image-label="' . s(get_string('opendatapreviousimage', 'treasurehunt')) . '"'
     . ' data-next-image-label="' . s(get_string('opendatanextimage', 'treasurehunt')) . '"'
     . ' data-search-similar-label="' . s(get_string('opendatasearchsimilar', 'treasurehunt')) . '"'
@@ -271,9 +283,19 @@ echo '<div class="modal fade" id="opendatamodal" tabindex="-1" aria-labelledby="
     . ' data-about-label="' . s(get_string('opendataaboutwebsite', 'treasurehunt')) . '"'
     . ' data-details-loading="' . s(get_string('opendatadetailsloading', 'treasurehunt')) . '"'
     . ' data-create-stage-label="' . s(get_string('opendatacreatestage', 'treasurehunt')) . '"'
+    . ' data-collector-label="' . s(get_string('opendatacollector', 'treasurehunt')) . '"'
+    . ' data-attach-label="' . s(get_string('opendataattach', 'treasurehunt')) . '"'
+    . ' data-transfer-label="' . s(get_string('opendatatransfer', 'treasurehunt')) . '"'
+    . ' data-original-label="' . s(get_string('opendataoriginal', 'treasurehunt')) . '"'
+    . ' data-attached-label="' . s(get_string('opendataattached', 'treasurehunt')) . '"'
+    . ' data-back-label="' . s(get_string('opendataback', 'treasurehunt')) . '"'
+    . ' data-removed-label="' . s(get_string('opendataremove', 'treasurehunt')) . '"'
+    . ' data-no-links-label="' . s(get_string('opendatanolinks', 'treasurehunt')) . '"'
+    . ' data-attachment-limit="' . s(get_string('opendataattachmentlimit', 'treasurehunt')) . '"'
     . ' data-creating-stage-label="' . s(get_string('opendatacreatingstage', 'treasurehunt')) . '"'
     . ' data-cannot-create-stage="' . s(get_string('opendatacannotcreatestage', 'treasurehunt')) . '"'
     . ' data-details-unavailable="' . s(get_string('opendatadetailsunavailable', 'treasurehunt')) . '"'
+    . ' data-retry-label="' . s(get_string('opendataretry', 'treasurehunt')) . '"'
     . ' data-close-label="' . s(get_string('closebuttontitle', 'moodle')) . '">'
     . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
     . '<div class="modal-content shadow border-0">'
@@ -296,30 +318,34 @@ foreach (\mod_treasurehunt\opendata\sources::all() as $source) {
     $sourcename = get_string('opendata' . $sourceid, 'treasurehunt');
     echo '<section class="card mb-2" data-opendata-source="' . s($sourceid) . '">'
         . '<div class="card-header p-2 d-flex align-items-center justify-content-between">'
-        . '<label class="mb-0 ' . $boldclass . '">'
+        . '<label class="mb-0">'
         . '<input type="checkbox" name="opendatasource" value="' . s($sourceid) . '" class="' . $marginendclass . '"'
-        . ($sourceid === 'wikidata' ? ' checked' : '') . ($available ? '' : ' disabled') . '> '
-        . s($sourcename) . '</label>'
+        . ' aria-label="' . s($sourcename) . '"'
+        . ($sourceid === 'dbpedia' ? ' checked' : '') . ($available ? '' : ' disabled') . '></label>'
+        . '<button type="button" class="btn btn-link btn-sm p-0 flex-grow-1 text-left text-start ' . $boldclass . '"'
+        . ' data-opendata-source-toggle="' . s($sourceid) . '" aria-expanded="'
+        . ($sourceid === 'dbpedia' ? 'true' : 'false') . '" aria-controls="opendata-themes-' . s($sourceid) . '">'
+        . s($sourcename) . ' <i class="fa fa-chevron-down small" aria-hidden="true"></i></button>'
         . '<a class="btn btn-link btn-sm p-0" href="' . s($source->website()) . '"'
         . ' target="_blank" rel="noopener noreferrer"'
         . ' aria-label="' . s(get_string('opendatavisitsource', 'treasurehunt', $sourcename)) . '"'
         . ' title="' . s(get_string('opendatavisitsource', 'treasurehunt', $sourcename)) . '">'
         . '<i class="fa fa-external-link" aria-hidden="true"></i></a></div>';
     if (!$available) {
-        echo '<div class="card-body p-2 small text-muted">'
+        echo '<div class="card-body p-2 small text-muted" id="opendata-themes-' . s($sourceid) . '"'
+            . ($sourceid === 'dbpedia' ? '' : ' hidden') . '>'
             . s(get_string('opendataeuropeananokey', 'treasurehunt')) . '</div>';
     } else {
-        echo '<details class="card-body p-2"' . ($sourceid === 'wikidata' ? ' open' : '') . '>'
-            . '<summary class="small text-primary">'
-            . s(get_string('opendatacategories', 'treasurehunt')) . '</summary>'
-            . '<div class="treasurehunt-opendata-themes mt-2">';
+        echo '<div class="card-body p-2" id="opendata-themes-' . s($sourceid) . '"'
+            . ($sourceid === 'dbpedia' ? '' : ' hidden') . '>'
+            . '<div class="treasurehunt-opendata-themes">';
         foreach ($source->themes() as $themeid => $stringkey) {
             echo '<label class="d-block small mb-1"><input type="checkbox" name="opendatatype"'
                 . ' data-source="' . s($sourceid) . '" value="' . s($themeid) . '"'
                 . ' class="' . $marginendclass . '"' . ($themeid === 'all' ? ' checked' : '') . '> '
                 . s(get_string($stringkey, 'treasurehunt')) . '</label>';
         }
-        echo '</div></details>';
+        echo '</div></div>';
     }
     echo '</section>';
 }
@@ -328,12 +354,14 @@ echo '</div><label class="d-block mt-3" for="opendataterm">'
     . '<input type="search" id="opendataterm" class="form-control" maxlength="100"'
     . ' placeholder="' . s(get_string('opendatatermplaceholder', 'treasurehunt')) . '">'
     . '</div><div class="col-md-7 p-4">'
+    . '<div id="opendatainstructions">'
     . '<h6 class="' . $boldclass . '"><i class="fa fa-map-o text-primary ' . $marginendclass . '"'
     . ' aria-hidden="true"></i>' . s(get_string('opendataoperation', 'treasurehunt')) . '</h6>'
     . '<p>' . s(get_string('opendataoperationdesc', 'treasurehunt')) . '</p>'
     . '<div class="alert alert-info small">' . s(get_string('opendataareadesc', 'treasurehunt')) . '</div>'
     . '<p class="small text-muted">' . s(get_string('opendatasource', 'treasurehunt')) . '</p>'
-    . '<div id="opendatastatus" role="status" aria-live="polite"></div>'
+    . '<div id="opendatastatus" role="status" aria-live="polite"></div></div>'
+    . '<div id="opendataitemviewer" class="treasurehunt-opendata-modal-card" hidden></div>'
     . '<div id="opendatasourceprogress" class="mt-2" role="status" aria-live="polite"></div>'
     . '<ul id="opendatapreview" class="list-group treasurehunt-opendata-preview mt-2"'
     . ' aria-label="' . s(get_string('opendataresults', 'treasurehunt')) . '"></ul>'
@@ -345,10 +373,33 @@ echo '</div><label class="d-block mt-3" for="opendataterm">'
     . '<button type="button" id="opendatasearch" class="btn btn-outline-primary btn-sm">'
     . s(get_string('opendatasearch', 'treasurehunt')) . '</button>'
     . '<button type="button" id="opendataadd" class="btn btn-primary btn-sm" disabled>'
-    . s(get_string('opendataaddtomap', 'treasurehunt')) . '</button>'
+    . s(get_string('opendataaddalltomap', 'treasurehunt')) . '</button>'
     . '<button type="button" id="opendatareplace" class="btn btn-outline-danger btn-sm" disabled>'
     . s(get_string('opendatareplace', 'treasurehunt')) . '</button>'
     . '</div></div></div></div>';
+
+echo '<div class="modal fade" id="opendatacollectormodal" tabindex="-1"'
+    . ' aria-labelledby="opendatacollectortitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-dialog-centered treasurehunt-opendata-collector-dialog">'
+    . '<div class="modal-content shadow border-0">'
+    . '<div class="modal-header bg-light border-bottom">'
+    . '<h5 class="modal-title ' . $boldclass . '" id="opendatacollectortitle">'
+    . s(get_string('opendatacollector', 'treasurehunt')) . '</h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body p-0 treasurehunt-opendata-collector-layout">'
+    . '<section class="treasurehunt-opendata-collector-panel treasurehunt-opendata-collector-left"'
+    . ' aria-label="' . s(get_string('opendataoriginal', 'treasurehunt')) . '">'
+    . '<div id="opendatacollectororiginal" class="treasurehunt-opendata-collector-scroll"></div>'
+    . '<div id="opendatacollectoractions" class="treasurehunt-opendata-collector-actions"></div>'
+    . '</section>'
+    . '<section class="treasurehunt-opendata-collector-panel treasurehunt-opendata-collector-right"'
+    . ' aria-label="' . s(get_string('opendatacollector', 'treasurehunt')) . '">'
+    . '<div id="opendatacollectorattach" class="treasurehunt-opendata-collector-actions"></div>'
+    . '<div id="opendatacollector" class="treasurehunt-opendata-collector-scroll"></div>'
+    . '</section></div></div></div></div>';
 
 // Finish the page.
 echo $OUTPUT->footer();

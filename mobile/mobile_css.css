@@ -228,6 +228,11 @@
   overflow: hidden;
 }
 
+.treasurehunt-play-page #cluepage .play-modal-popup {
+  width: 80%;
+  max-width: 80%;
+}
+
 .treasurehunt-play-page .play-modal-dialog .close-dialog {
   display: none;
 }

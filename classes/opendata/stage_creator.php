@@ -136,6 +136,24 @@ final class stage_creator {
             }
             $html .= implode(' · ', $parts) . '</p>';
         }
+        $collected = is_array($metadata['collected'] ?? null) ? array_slice($metadata['collected'], 0, 12) : [];
+        if ($collected) {
+            $html .= '<h3>' . s(get_string('opendataattached', 'treasurehunt')) . '</h3>';
+        }
+        foreach ($collected as $item) {
+            if (!is_array($item) || !in_array($item['source'] ?? '', ['wikidata', 'europeana', 'dbpedia'], true) ||
+                    !is_string($item['name'] ?? null) || trim($item['name']) === '') {
+                continue;
+            }
+            $itemname = \core_text::substr(trim($item['name']), 0, 255);
+            $itemmetadata = is_array($item['metadata'] ?? null) ? $item['metadata'] : [];
+            unset($itemmetadata['collected']);
+            $html .= '<section class="treasurehunt-opendata-attachment"><h4>' . s($itemname) . '</h4>';
+            if (is_string($item['relation'] ?? null) && $item['relation'] !== '') {
+                $html .= '<p class="small text-muted">' . s(\core_text::substr($item['relation'], 0, 100)) . '</p>';
+            }
+            $html .= self::clue_html($itemname, $item['source'], $itemmetadata) . '</section>';
+        }
         return $html;
     }
 
@@ -181,6 +199,9 @@ final class stage_creator {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         $clue = self::clue_html($name, $sourceid, $metadata);
+        $geometry = geometry::best_for_stage($metadata);
+        $stagewkt = $geometry && $geometry['type'] !== 'Point' ? $geometry['wkt'] :
+            self::geometry_for_point(...($geometry['coordinates'] ?? [$longitude, $latitude]));
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
         $stage = (object)[
             'roadid' => $roadid,
@@ -196,7 +217,7 @@ final class stage_creator {
             'questiontexttrust' => 0,
             'playstagewithoutmoving' => 0,
             'timecreated' => time(),
-            'geom' => self::geometry_for_point($longitude, $latitude),
+            'geom' => $stagewkt,
         ];
         $transaction = $DB->start_delegated_transaction();
         $stage->id = \treasurehunt_insert_stage_form($stage);

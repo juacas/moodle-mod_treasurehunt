@@ -35,9 +35,9 @@ final class sources {
      */
     public static function all(): array {
         return [
+            'dbpedia' => new dbpedia(),
             'wikidata' => new wikidata_source(),
             'europeana' => new europeana(),
-            'dbpedia' => new dbpedia(),
         ];
     }
 
