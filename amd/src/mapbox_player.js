@@ -430,8 +430,6 @@ export const init = async() => {
         const visible = (nextstage?.features || []).filter((feature) =>
             Number(feature.properties?.stageposition) === 1 || enabled(playerconfig.shownextareahint));
         map.getSource('stage').setData({type: 'FeatureCollection', features: visible});
-        node('stage-number').textContent = String(nextstage?.features?.[0]?.properties?.stageposition ||
-            (roadfinished ? '✓' : (Number(stage?.position || 0) + 1)));
         updateNavigation();
     };
 
@@ -632,7 +630,6 @@ export const init = async() => {
 
     /** Update question and answers from the latest completed stage. */
     const updateQuestion = () => {
-        node('objective-text').textContent = stage?.name || labels.nohint;
         node('question-open').hidden = !stage?.question;
         node('question-content').innerHTML = stage?.question || '';
         const answers = node('answers');
@@ -695,17 +692,26 @@ export const init = async() => {
     /**
      * @param {Object} response Game service response.
      * @param {Object} action Submitted action.
+     * @param {boolean} failedAttempt Whether the submitted location was incorrect.
      */
-    const showMessages = (response, action) => {
+    const showMessages = (response, action, failedAttempt) => {
+        const plainText = (item) => {
+            const div = document.createElement('div');
+            div.innerHTML = item;
+            return div.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const information = (response.infomsg || []).map(plainText).filter(Boolean);
+        const message = information.join(' · ');
+        if (failedAttempt || (action.location && Number(response.status?.code || 0) !== 0)) {
+            const messages = [...new Set([plainText(response.status?.msg || ''), ...information].filter(Boolean))];
+            node('feedback-content').textContent = messages.join('\n\n') || labels.failedlocation;
+            openDialog('feedback');
+            return;
+        }
         if (action.location || action.qrtext || action.selectedanswerid) {
             toast(response.status?.msg, Number(response.status?.code) !== 0);
         }
-        if (response.infomsg?.length) {
-            const message = response.infomsg.map((item) => {
-                const div = document.createElement('div');
-                div.innerHTML = item;
-                return div.textContent.trim();
-            }).filter(Boolean).join(' · ');
+        if (message) {
             toast(message);
         }
     };
@@ -772,12 +778,18 @@ export const init = async() => {
         } else if (previousStage !== stage?.id && nextstage) {
             fitMap();
         }
-        showMessages(response, action);
-        if (failedLocationAttempt(previousAttemptId, response, action)) {
+        const failedAttempt = failedLocationAttempt(previousAttemptId, response, action);
+        showMessages(response, action, failedAttempt);
+        if (failedAttempt) {
             reactToFailedAttempt();
         }
-        if (!roadfinished && (action.initialize || previousStage !== stage?.id || cluesChanged)) {
-            const showClue = () => openDialog('clue');
+        if (!node('feedback-dialog').open && !roadfinished &&
+                (action.initialize || previousStage !== stage?.id || cluesChanged)) {
+            const showClue = () => {
+                if (!node('feedback-dialog').open) {
+                    openDialog('clue');
+                }
+            };
             if (map.isMoving()) {
                 map.once('moveend', showClue);
             } else {

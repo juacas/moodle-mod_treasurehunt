@@ -27,7 +27,6 @@ import {failedLocationAttempt, selectClip} from 'mod_treasurehunt/pegman_animati
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
-const TERRAIN_URL = 'https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer';
 const PEGMAN_HEIGHT = 1.7;
 const PEGMAN_REFERENCE_HEIGHT_PX = 100;
 const PEGMAN_ZOOM_FACTOR = 2;
@@ -325,7 +324,10 @@ export const init = async() => {
     let Cesium;
     let touchGuard;
     let buildingsTileset;
-    let buildingsEnabled = true;
+    let buildingsEnabled = false;
+    let worldTerrainPromise;
+    let buildingsHeightRevision = 0;
+    let buildingsAnchorKey = '';
     let layerPicker;
     let layerSelectionSubscription;
     /** Keep the gallery inside the visible area when the viewport changes. */
@@ -406,6 +408,83 @@ export const init = async() => {
         }, 5500);
     };
 
+    /** @returns {Promise<Object>} The same elevation source used by Cesium OSM Buildings. */
+    const getWorldTerrain = () => {
+        if (!worldTerrainPromise) {
+            worldTerrainPromise = Cesium.createWorldTerrainAsync().catch((error) => {
+                worldTerrainPromise = null;
+                throw error;
+            });
+        }
+        return worldTerrainPromise;
+    };
+
+    /**
+     * Match OSM building elevation to the selected ground at the current map focus.
+     * World terrain uses the original heights; an ellipsoid needs a local vertical offset.
+     *
+     * @returns {Promise<void>} Completion of the height adjustment.
+     */
+    const updateBuildingsHeight = async() => {
+        const revision = ++buildingsHeightRevision;
+        if (!buildingsTileset || !viewer || viewer.isDestroyed()) {
+            return;
+        }
+        if (!buildingsEnabled) {
+            buildingsTileset.show = false;
+            viewer.scene.requestRender();
+            return;
+        }
+        if (!(viewer.scene.globe.terrainProvider instanceof Cesium.EllipsoidTerrainProvider)) {
+            buildingsAnchorKey = '';
+            buildingsTileset.modelMatrix = Cesium.Matrix4.clone(Cesium.Matrix4.IDENTITY);
+            buildingsTileset.show = true;
+            viewer.scene.requestRender();
+            return;
+        }
+        const canvas = viewer.scene.canvas;
+        const centre = new Cesium.Cartesian2(canvas.clientWidth / 2, canvas.clientHeight / 2);
+        const ray = viewer.camera.getPickRay(centre);
+        const focus = ray && viewer.scene.globe.pick(ray, viewer.scene) ||
+            viewer.camera.pickEllipsoid(centre, viewer.scene.globe.ellipsoid);
+        if (!focus) {
+            buildingsTileset.show = false;
+            viewer.scene.requestRender();
+            return;
+        }
+        const cartographic = Cesium.Cartographic.fromCartesian(focus);
+        const key = cartographic.longitude.toFixed(5) + ':' + cartographic.latitude.toFixed(5);
+        if (key === buildingsAnchorKey) {
+            buildingsTileset.show = true;
+            viewer.scene.requestRender();
+            return;
+        }
+        // Do not display the tiles at their old elevation while the new focus is sampled.
+        buildingsTileset.show = false;
+        viewer.scene.requestRender();
+        try {
+            const terrain = await getWorldTerrain();
+            const [sample] = await Cesium.sampleTerrainMostDetailed(terrain, [cartographic]);
+            if (revision !== buildingsHeightRevision || viewer.isDestroyed()) {
+                return;
+            }
+            if (!Number.isFinite(sample.height)) {
+                throw new Error(labels.layererror);
+            }
+            const ground = Cesium.Cartesian3.fromRadians(sample.longitude, sample.latitude, 0);
+            const original = Cesium.Cartesian3.fromRadians(sample.longitude, sample.latitude, sample.height);
+            const translation = Cesium.Cartesian3.subtract(ground, original, new Cesium.Cartesian3());
+            buildingsTileset.modelMatrix = Cesium.Matrix4.fromTranslation(translation);
+            buildingsAnchorKey = key;
+            buildingsTileset.show = buildingsEnabled;
+            viewer.scene.requestRender();
+        } catch (error) {
+            if (revision === buildingsHeightRevision && !viewer.isDestroyed()) {
+                toast(labels.layererror + ': ' + error.message, true);
+            }
+        }
+    };
+
     /**
      * Initialise Cesium's thumbnail picker with the activity map and flat terrain selected.
      *
@@ -457,7 +536,7 @@ export const init = async() => {
             tooltip: labels.terrainrelief,
             iconUrl: Cesium.buildModuleUrl('Widgets/Images/TerrainProviders/CesiumWorldTerrain.png'),
             category: 'Other',
-            creationFunction: () => Cesium.ArcGISTiledElevationTerrainProvider.fromUrl(TERRAIN_URL)
+            creationFunction: () => getWorldTerrain()
                 .catch((error) => {
                     toast(labels.layererror + ': ' + error.message, true);
                     return new Cesium.EllipsoidTerrainProvider();
@@ -469,8 +548,7 @@ export const init = async() => {
             imageryProviderViewModels: imagery,
             selectedImageryProviderViewModel: selectedImagery,
             terrainProviderViewModels: [flat, relief],
-            // Cesium's OSM Buildings are georeferenced to real elevation; relief keeps them grounded.
-            selectedTerrainProviderViewModel: relief,
+            selectedTerrainProviderViewModel: flat,
         });
         const gallery = element('layer-picker').querySelector('.cesium-baseLayerPicker-dropDown');
         if (gallery) {
@@ -481,10 +559,7 @@ export const init = async() => {
             checkbox.checked = buildingsEnabled;
             checkbox.addEventListener('change', () => {
                 buildingsEnabled = checkbox.checked;
-                if (buildingsTileset) {
-                    buildingsTileset.show = buildingsEnabled;
-                }
-                viewer.scene.requestRender();
+                updateBuildingsHeight();
             });
             const label = document.createElement('span');
             label.textContent = labels.buildings3d;
@@ -956,7 +1031,6 @@ export const init = async() => {
         visibleStageBounds = null;
         nextstage = collection?.features?.length ? collection : null;
         stageposition = Number(nextstage?.features?.[0]?.properties?.stageposition || stageposition);
-        element('stage-number').textContent = String(stageposition);
         const visibleFeatures = (nextstage?.features || []).filter((feature) =>
             Number(feature.properties?.stageposition) === 1 || playerconfig.shownextareahint);
         if (visibleFeatures.length) {
@@ -1149,7 +1223,6 @@ export const init = async() => {
             choice.append(input, body);
             answers.appendChild(choice);
         });
-        element('objective-text').textContent = stage?.name || labels.nohint;
     };
 
     /** Frame the geometry of the selected clue when the hunt reveals target areas. */
@@ -1332,7 +1405,6 @@ export const init = async() => {
             stageSignature = '';
             await renderStage(null, false);
             stageposition = Math.min(Number(stage?.position || 0) + 1, totalstages || Infinity);
-            element('stage-number').textContent = roadfinished ? '✓' : String(stageposition);
         }
     };
 
@@ -1341,17 +1413,26 @@ export const init = async() => {
      *
      * @param {Object} response Service result.
      * @param {Object} action Request that produced this result.
+     * @param {boolean} failedAttempt Whether the submitted location was incorrect.
      */
-    const showMessages = (response, action) => {
+    const showMessages = (response, action, failedAttempt) => {
+        const plainText = (item) => {
+            const node = document.createElement('div');
+            node.innerHTML = item;
+            return node.textContent.replace(/\s+/g, ' ').trim();
+        };
+        const information = (response.infomsg || []).map(plainText).filter(Boolean);
+        const message = information.join(' · ');
+        if (failedAttempt || (action.location && Number(response.status?.code || 0) !== 0)) {
+            const messages = [...new Set([plainText(response.status?.msg || ''), ...information].filter(Boolean))];
+            element('feedback-content').textContent = messages.join('\n\n') || labels.failedlocation;
+            openDialog('feedback');
+            return;
+        }
         if (action.location || action.qrtext || action.selectedanswerid) {
             toast(response.status?.msg, Number(response.status?.code) !== 0);
         }
-        if (response.infomsg?.length) {
-            const message = response.infomsg.map((item) => {
-                const node = document.createElement('div');
-                node.innerHTML = item;
-                return node.textContent.trim();
-            }).filter(Boolean).join(' · ');
+        if (message) {
             toast(message);
         }
     };
@@ -1396,11 +1477,12 @@ export const init = async() => {
         }
         updateActions();
         updateNavigation();
-        showMessages(response, action);
-        if (failedLocationAttempt(previousAttemptId, response, action)) {
+        const failedAttempt = failedLocationAttempt(previousAttemptId, response, action);
+        showMessages(response, action, failedAttempt);
+        if (failedAttempt) {
             reactToFailedAttempt();
         }
-        if (!roadfinished && ((stage && previousStage !== stage.id) ||
+        if (!element('feedback-dialog').open && !roadfinished && ((stage && previousStage !== stage.id) ||
                 (availableClues.length && (action.initialize || cluesChanged)))) {
             openDialog('clue');
         }
@@ -1609,6 +1691,8 @@ export const init = async() => {
             }
         });
         const removeZoomResizer = viewer.camera.moveEnd.addEventListener(updateMarkerScaleAfterZoom);
+        const removeBuildingsPositioner = viewer.camera.moveEnd.addEventListener(updateBuildingsHeight);
+        const removeBuildingsTerrainListener = viewer.scene.globe.terrainProviderChanged.addEventListener(updateBuildingsHeight);
         handler.setInputAction((event) => {
             if (touchGuard.shouldIgnoreClick()) {
                 return;
@@ -1652,6 +1736,9 @@ export const init = async() => {
             removePopupPositioner();
             removeCompassResizer();
             removeZoomResizer();
+            removeBuildingsPositioner();
+            removeBuildingsTerrainListener();
+            buildingsHeightRevision++;
             if (markerScaleFrame !== null) {
                 window.cancelAnimationFrame(markerScaleFrame);
                 markerScaleFrame = null;
@@ -1689,8 +1776,9 @@ export const init = async() => {
                 Cesium.createOsmBuildingsAsync().then((buildings) => {
                     if (viewer === activeViewer && !viewer.isDestroyed()) {
                         buildingsTileset = buildings;
-                        buildings.show = buildingsEnabled;
+                        buildings.show = false;
                         viewer.scene.primitives.add(buildings);
+                        updateBuildingsHeight();
                         viewer.scene.requestRender();
                     }
                     return buildings;
