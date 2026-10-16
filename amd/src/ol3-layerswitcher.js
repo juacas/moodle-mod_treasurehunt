@@ -22,9 +22,9 @@
  */
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
-        define(["mod_treasurehunt/ol4"], factory);
+        define(["mod_treasurehunt/ol"], factory);
     } else if (typeof module === "object" && module.exports) {
-        module.exports = factory(require("mod_treasurehunt/ol4"));
+        module.exports = factory(require("mod_treasurehunt/ol"));
     } else {
         root.LayerSwitcher = factory(root.ol);
     }

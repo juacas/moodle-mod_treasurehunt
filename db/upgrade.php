@@ -19,7 +19,7 @@
  *
  * @package mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro
- *            <jpdecastro@tel.uva.es>
+ *            <juanpablo.decastro@uva.es>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -27,13 +27,11 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 /**
  * Execute treasurehunt upgrade from the given old version
  *
- * @global moodle_database $DB
  * @param int $oldversion
  * @return bool
  */
 function xmldb_treasurehunt_upgrade($oldversion) {
     global $DB;
-    /** @var moodle_database $DB*/
     $dbman = $DB->get_manager(); // Loads ddl manager and xmldb classes.
     if ($oldversion < 2017042000) {
         $table = new xmldb_table('treasurehunt');
@@ -189,6 +187,85 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         if ($dbman->field_exists($table, $field)) {
             $dbman->rename_field($table, $field, 'customplayerconfig');
         }
+        upgrade_mod_savepoint(true, 2025070302, 'treasurehunt');
+    }
+    if ($oldversion < 2026100300) {
+        $table = new xmldb_table('treasurehunt_track');
+        $index = new xmldb_index(
+            'hunt_user_time_idx',
+            XMLDB_INDEX_NOTUNIQUE,
+            ['treasurehuntid', 'userid', 'timestamp']
+        );
+        if (!$dbman->index_exists($table, $index)) {
+            $dbman->add_index($table, $index);
+        }
+        upgrade_mod_savepoint(true, 2026100300, 'treasurehunt');
+    }
+    if ($oldversion < 2026100601) {
+        $table = new xmldb_table('treasurehunt_stages');
+        $fields = [
+            new xmldb_field('clueforstage', XMLDB_TYPE_TEXT, null, null, null, null, null, 'cluetexttrust'),
+            new xmldb_field(
+                'clueforstageformat',
+                XMLDB_TYPE_INTEGER,
+                '2',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                FORMAT_HTML,
+                'clueforstage'
+            ),
+            new xmldb_field(
+                'clueforstagetrust',
+                XMLDB_TYPE_INTEGER,
+                '2',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                0,
+                'clueforstageformat'
+            ),
+            new xmldb_field(
+                'discoveroutofsequence',
+                XMLDB_TYPE_INTEGER,
+                '1',
+                null,
+                XMLDB_NOTNULL,
+                null,
+                0,
+                'clueforstagetrust'
+            ),
+        ];
+        foreach ($fields as $field) {
+            if (!$dbman->field_exists($table, $field)) {
+                $dbman->add_field($table, $field);
+            }
+        }
+        upgrade_mod_savepoint(true, 2026100601, 'treasurehunt');
+    }
+    if ($oldversion < 2026101300) {
+        // Keep existing activities and administrator settings on the renamed player keys.
+        $renamedplayers = [
+            'cessium_player' => TREASUREHUNT_PLAYERCESSIUM,
+            'mapbox_player' => TREASUREHUNT_PLAYERMAPBOX,
+        ];
+        foreach ($renamedplayers as $oldkey => $newkey) {
+            $DB->set_field('treasurehunt', 'playerstyle', $newkey, ['playerstyle' => $oldkey]);
+        }
+        $defaultplayer = get_config('mod_treasurehunt', 'defaultplayerstyle');
+        if (isset($renamedplayers[$defaultplayer])) {
+            set_config('defaultplayerstyle', $renamedplayers[$defaultplayer], 'mod_treasurehunt');
+        }
+        $availableplayers = get_config('mod_treasurehunt', 'availableplayerstyles');
+        if ($availableplayers !== false) {
+            $playerkeys = array_map('trim', explode(',', $availableplayers));
+            $updatedkeys = array_map(
+                static fn($key) => $renamedplayers[$key] ?? $key,
+                $playerkeys
+            );
+            set_config('availableplayerstyles', implode(',', $updatedkeys), 'mod_treasurehunt');
+        }
+        upgrade_mod_savepoint(true, 2026101300, 'treasurehunt');
     }
     return true;
 }

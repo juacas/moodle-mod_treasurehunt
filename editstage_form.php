@@ -19,8 +19,8 @@
  *
  * @package   mod_treasurehunt
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -69,6 +69,12 @@ class stage_form extends moodleform {
         // Play stage without moving checkbox.
         $mform->addElement('advcheckbox', 'playstagewithoutmoving', get_string('playstagewithoutmoving', 'treasurehunt'));
         $mform->addHelpButton('playstagewithoutmoving', 'playstagewithoutmoving', 'treasurehunt');
+        $mform->addElement(
+            'advcheckbox',
+            'discoveroutofsequence',
+            get_string('discoveroutofsequence', 'treasurehunt')
+        );
+        $mform->addHelpButton('discoveroutofsequence', 'discoveroutofsequence', 'treasurehunt');
 
         $mform->addElement('text', 'qrtext', get_string('playstagewithqr', 'treasurehunt'), ['size' => '64']);
         $mform->addHelpButton('qrtext', 'playstagewithqr', 'treasurehunt');
@@ -171,13 +177,27 @@ class stage_form extends moodleform {
         $mform->addElement(
             'header',
             'cluetextsection',
-            get_string('stageclue', 'treasurehunt')
+            get_string('stagecluesection', 'treasurehunt')
         );
         // Adding the standard "intro" and "introformat" fields. This is the clue to find out the next stage in the game.
-        $mform->addElement('editor', 'cluetext_editor', get_string('stageclue_help', 'treasurehunt'), null, $editoroptions);
+        $mform->addElement(
+            'editor',
+            'cluetext_editor',
+            get_string('stageclueeditor', 'treasurehunt'),
+            null,
+            $editoroptions
+        );
         $mform->addHelpButton('cluetext_editor', 'stageclue', 'treasurehunt');
         $mform->setType('cluetext_editor', PARAM_RAW);
-        $mform->addRule('cluetext_editor', null, 'required', null, 'client');
+        $mform->addElement(
+            'editor',
+            'clueforstage_editor',
+            get_string('clueforstage', 'treasurehunt'),
+            null,
+            $editoroptions
+        );
+        $mform->addHelpButton('clueforstage_editor', 'clueforstage', 'treasurehunt');
+        $mform->setType('clueforstage_editor', PARAM_RAW);
         // Anado los campos ocultos.
         $mform->addElement('hidden', 'cmid');
         $mform->setType('cmid', PARAM_INT);
@@ -220,6 +240,15 @@ class stage_form extends moodleform {
             $context,
             'mod_treasurehunt',
             'cluetext',
+            $entry->id
+        );
+        $entry = file_prepare_standard_editor(
+            $entry,
+            'clueforstage',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'clueforstage',
             $entry->id
         );
 
@@ -266,6 +295,13 @@ class stage_form extends moodleform {
 
         $errors = [];
 
+        $nextclue = $data['cluetext_editor']['text'] ?? '';
+        $ownclue = $data['clueforstage_editor']['text'] ?? '';
+        if (!self::clue_has_content($nextclue) && !self::clue_has_content($ownclue)) {
+            $errors['cluetext_editor'] = get_string('atleastonecluerequired', 'treasurehunt');
+            $errors['clueforstage_editor'] = get_string('atleastonecluerequired', 'treasurehunt');
+        }
+
         if (array_key_exists('answertext_editor', $data)) {
             $answers = $data['answertext_editor'];
             $answercount = 0;
@@ -303,6 +339,21 @@ class stage_form extends moodleform {
         }
 
         return $errors;
+    }
+
+    /**
+     * Check editor content, ignoring empty HTML markup and nonbreaking spaces.
+     * An embedded image or media item also constitutes a clue.
+     *
+     * @param string $html Editor HTML.
+     * @return bool Whether the clue contains meaningful content.
+     */
+    private static function clue_has_content(string $html): bool {
+        $text = html_entity_decode(strip_tags($html), ENT_QUOTES | ENT_HTML5, 'UTF-8');
+        if (preg_match('/[^\s\x{00A0}\x{200B}]/u', $text)) {
+            return true;
+        }
+        return (bool)preg_match('/<(?:img|video|audio|iframe|object|embed|svg|math)\b/i', $html);
     }
 
     /**

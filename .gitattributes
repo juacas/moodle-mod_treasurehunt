@@ -1,0 +1,9 @@
+# The Marketplace package is built from the repository root by the official
+# reusable workflow. Keep the public landing page and repository automation out
+# of the Moodle plugin ZIP package.
+/website export-ignore
+/.github export-ignore
+/.gitattributes export-ignore
+/tests export-ignore
+/devtools export-ignore
+/node_modules export-ignore

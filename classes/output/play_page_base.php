@@ -54,20 +54,15 @@ class play_page_base implements renderable, templatable {
      */
     public $user = null;
     /**
-     * Last attempt.
-     * @var int unix timestamp.
-     */
-    public $lastattempttimestamp;
-    /**
-     * Last road attempt.
-     * @var int unix timestamp.
-     */
-    public $lastroadtimestamp;
-    /**
      * Las changes in game's state.
      * @var int unix timestamp.
      */
     public $gameupdatetime;
+    /**
+     * Road selected for a manager's preview, or zero for normal play.
+     * @var int
+     */
+    public $previewroadid = 0;
     /**
      * Export this data so it can be used as the context for a mustache template.
      *

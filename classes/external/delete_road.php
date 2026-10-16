@@ -18,9 +18,9 @@
  * External treasurehunt API
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_treasurehunt\external;
@@ -78,7 +78,7 @@ class delete_road extends external_api {
      * @return array<array<int|string>>
      */
     public static function execute(int $roadid, int $treasurehuntid, string $lockid) {
-        global $DB;
+        global $DB, $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
             ['roadid' => $roadid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid]
@@ -90,13 +90,14 @@ class delete_road extends external_api {
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editroad', $context);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+            treasurehunt_require_road_in_activity($params['roadid'], $params['treasurehuntid']);
             treasurehunt_delete_road($params['roadid'], $treasurehunt, $context);
             $status['code'] = 0;
             $status['msg'] = 'El camino se ha eliminado con ÃƒÂ©xito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
 
         $result = [];

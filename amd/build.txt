@@ -5,7 +5,7 @@ source ~/.profile
 # install node 22.12
 nvm install 22.12
 # install watchman
-apr install watchman
+apt install watchman
 # Grunt
 cd /rootdir
 npm install

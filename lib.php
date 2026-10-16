@@ -20,8 +20,8 @@
  * This contains functions that are called also from outside the treasurehunt module
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @copyright 2017 onwards Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @copyright 2017 onwards Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -154,6 +154,10 @@ function treasurehunt_delete_instance($id) {
         $DB->delete_records_select('treasurehunt_stages', 'roadid = ?', [$road->id]);
     }
     $DB->delete_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id]);
+    cache::make('mod_treasurehunt', 'roadstages')->purge();
+    cache::make('mod_treasurehunt', 'progressstate')->purge();
+    cache::make('mod_treasurehunt', 'progressverified')->purge();
+    cache::make('mod_treasurehunt', 'progressmarkers')->purge();
     $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $treasurehunt->id]);
     $DB->delete_records('treasurehunt_locks', ['treasurehuntid' => $treasurehunt->id]);
     treasurehunt_grade_item_delete($treasurehunt);
@@ -187,20 +191,100 @@ function treasurehunt_user_outline($course, $user, $mod, $treasurehunt) {
 }
 
 /**
- * Prints a detailed representation of what a user has done with
- * a given particular instance of this module, for user activity reports.
+ * Prints a user's stage progress in the course activity report.
  *
- * It is supposed to echo directly without returning a value.
- * TODO
- *
- * @param stdClass $course the current course record
- * @param stdClass $user the record of the user we are generating report for
- * @param cm_info $mod course module info
- * @param stdClass $treasurehunt the module instance record
+ * @param stdClass $course Current course record.
+ * @param stdClass $user User whose activity is being reported.
+ * @param cm_info|stdClass $mod Course module information.
+ * @param stdClass $treasurehunt Activity instance.
  */
 function treasurehunt_user_complete($course, $user, $mod, $treasurehunt) {
-    // TODO: implement user briefing.
-    echo "No user completion implemented yet";
+    global $CFG, $DB, $OUTPUT;
+
+    require_once($CFG->libdir . '/gradelib.php');
+
+    // The gradebook applies its own visibility rules to the grade shown here.
+    $grades = grade_get_grades($course->id, 'mod', 'treasurehunt', $treasurehunt->id, $user->id);
+    if (!empty($grades->items[0]->grades[$user->id])) {
+        $grade = $grades->items[0]->grades[$user->id];
+        $gradeitem = grade_item::fetch(['id' => $grades->items[0]->id]);
+        $canviewhidden = has_capability('moodle/grade:viewhidden', context_course::instance($course->id));
+        $ishidden = ($gradeitem && $gradeitem->is_hidden()) || !empty($grade->hidden);
+        $gradetext = ($ishidden && !$canviewhidden) ?
+            get_string('hidden', 'grades') : $grade->str_long_grade;
+        echo $OUTPUT->container(get_string('gradenoun') . ': ' . $gradetext);
+    }
+
+    $params = ['treasurehuntid' => $treasurehunt->id];
+    if (!empty($treasurehunt->groupmode)) {
+        $groupids = $DB->get_fieldset_sql(
+            'SELECT gm.groupid
+               FROM {groups_members} gm
+               JOIN {groups} g ON g.id = gm.groupid
+              WHERE gm.userid = :userid AND g.courseid = :courseid',
+            ['userid' => $user->id, 'courseid' => $course->id]
+        );
+        if (!$groupids) {
+            echo $OUTPUT->container(get_string('reportnoattempts', 'treasurehunt'));
+            return;
+        }
+        [$groupsql, $groupparams] = $DB->get_in_or_equal($groupids, SQL_PARAMS_NAMED, 'reportgroup');
+        $params += $groupparams;
+        $userfilter = "a.groupid $groupsql";
+        $groupfields = ', a.groupid, g.name AS groupname';
+        $groupjoin = 'LEFT JOIN {groups} g ON g.id = a.groupid';
+        $groupby = ', a.groupid, g.name';
+    } else {
+        $params['userid'] = $user->id;
+        $userfilter = 'a.userid = :userid AND a.groupid = 0';
+        $groupfields = '';
+        $groupjoin = '';
+        $groupby = '';
+    }
+
+    $sql = "SELECT MIN(a.id) AS id, s.position, s.name AS stagename, r.name AS roadname
+                   $groupfields, COUNT(a.id) AS attempts, MAX(a.timecreated) AS lastattempt,
+                   MAX(CASE WHEN a.success = 1 AND a.type IN ('location', 'qr')
+                       THEN a.timecreated ELSE NULL END) AS discoveredat
+              FROM {treasurehunt_attempts} a
+              JOIN {treasurehunt_stages} s ON s.id = a.stageid
+              JOIN {treasurehunt_roads} r ON r.id = s.roadid
+              $groupjoin
+             WHERE r.treasurehuntid = :treasurehuntid AND $userfilter
+          GROUP BY s.id, s.position, s.name, r.name $groupby
+          ORDER BY r.name, s.position, s.id";
+    $progress = $DB->get_records_sql($sql, $params);
+    if (!$progress) {
+        echo $OUTPUT->container(get_string('reportnoattempts', 'treasurehunt'));
+        return;
+    }
+
+    $table = new html_table();
+    $table->head = [
+        get_string('road', 'treasurehunt'),
+        get_string('stage', 'treasurehunt'),
+        get_string('reportattempts', 'treasurehunt'),
+        get_string('reportdiscovered', 'treasurehunt'),
+        get_string('reportlastattempt', 'treasurehunt'),
+    ];
+    if (!empty($treasurehunt->groupmode)) {
+        array_splice($table->head, 1, 0, [get_string('group')]);
+    }
+    $table->data = [];
+    foreach ($progress as $stage) {
+        $row = [
+            format_string($stage->roadname),
+            $stage->position . '. ' . format_string($stage->stagename),
+            (int)$stage->attempts,
+            $stage->discoveredat ? get_string('yes') : get_string('no'),
+            s(userdate($stage->lastattempt)),
+        ];
+        if (!empty($treasurehunt->groupmode)) {
+            array_splice($row, 1, 0, [format_string($stage->groupname)]);
+        }
+        $table->data[] = $row;
+    }
+    echo html_writer::table($table);
 }
 
 /**
@@ -573,7 +657,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
     }
 
     require_login($course, true, $cm);
-    $fileareas = ['cluetext', 'questiontext', 'answertext', 'custombackground'];
+    $fileareas = ['cluetext', 'clueforstage', 'questiontext', 'answertext', 'custombackground'];
     if (!in_array($filearea, $fileareas)) {
         return false;
     }
@@ -602,6 +686,9 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
 function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, ?navigation_node $treasurehuntnode) {
 
     global $PAGE;
+    if (!$treasurehuntnode || !$PAGE->cm) {
+        return;
+    }
     // We want to add these new nodes after the Edit settings node, and before the
     // Locally assigned roles node. Of course, both of those are controlled by capabilities.
     $keys = $treasurehuntnode->get_children_key_list();
@@ -622,6 +709,28 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
             new pix_icon('t/edit', '')
         );
         $treasurehuntnode->add_node($node, $beforekey);
+    }
+    if (has_capability('mod/treasurehunt:viewusershistoricalattempts', $PAGE->context)) {
+        $tracknode = navigation_node::create(
+            get_string('trackviewer', 'treasurehunt'),
+            new moodle_url('/mod/treasurehunt/gpx_viewer.php', ['id' => $PAGE->cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'mod_treasurehunt_trackviewer',
+            new pix_icon('i/location', '')
+        );
+        $treasurehuntnode->add_node($tracknode, $beforekey);
+    }
+    if (has_capability('mod/treasurehunt:managetreasurehunt', $PAGE->context)) {
+        $resetnode = navigation_node::create(
+            get_string('cleartreasurehunt', 'treasurehunt'),
+            new moodle_url('/mod/treasurehunt/clearhunt.php', ['id' => $PAGE->cm->id]),
+            navigation_node::TYPE_SETTING,
+            null,
+            'mod_treasurehunt_reset',
+            new pix_icon('t/reset', '')
+        );
+        $treasurehuntnode->add_node($resetnode, $beforekey);
     }
 }
 
@@ -688,6 +797,9 @@ function treasurehunt_reset_userdata($data) {
         $DB->delete_records_select('treasurehunt_attempts', 'stageid IN (SELECT ri.id FROM {treasurehunt} t INNER JOIN '
                 . '{treasurehunt_roads} r ON t.id=r.treasurehuntid INNER JOIN '
                 . '{treasurehunt_stages} ri ON r.id=ri.roadid WHERE t.course = ?)', [$data->courseid]);
+        cache::make('mod_treasurehunt', 'progressstate')->purge();
+        cache::make('mod_treasurehunt', 'progressverified')->purge();
+        cache::make('mod_treasurehunt', 'progressmarkers')->purge();
         $status[] = ['component' => $componentstr,
             'item' => get_string('attemptsdeleted', 'treasurehunt'),
             'error' => false];

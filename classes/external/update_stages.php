@@ -18,9 +18,9 @@
  * External treasurehunt API
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_treasurehunt\external;
@@ -118,7 +118,7 @@ class update_stages extends external_api {
      * @return array<array<Exception|int|string|\Throwable>>
      */
     public static function execute($stages, $treasurehuntid, $lockid) {
-        global $DB;
+        global $DB, $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
             ['stages' => $stages,
@@ -132,23 +132,25 @@ class update_stages extends external_api {
         require_capability('mod/treasurehunt:editstage', $context);
         $features = treasurehunt_geojson_to_object($params['stages']);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
             try {
                 $transaction = $DB->start_delegated_transaction();
                 foreach ($features as $feature) {
+                    $stage = treasurehunt_require_stage_in_activity($feature->getId(), $params['treasurehuntid']);
+                    if ((int)$feature->getProperty('roadid') !== (int)$stage->roadid) {
+                        throw new \moodle_exception('invalidentry');
+                    }
                     treasurehunt_update_geometry_and_position_of_stage($feature, $context);
                 }
                 $transaction->allow_commit();
                 $status['code'] = 0;
                 $status['msg'] = 'La actualización de las etapas se ha realizado con éxito';
-            } catch (\Exception $e) {
+            } catch (\Throwable $e) {
                 $transaction->rollback($e);
-                $status['code'] = 1;
-                $status['msg'] = $e;
             }
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
         $result = [];
         $result['status'] = $status;

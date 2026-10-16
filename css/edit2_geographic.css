@@ -1,0 +1,143 @@
+/* Native geographic maps occupy only the existing editor's map slot. */
+#page-mod-treasurehunt-edit2 #mapedit {
+  position: relative;
+  overflow: hidden;
+  background: #101923;
+}
+
+#page-mod-treasurehunt-edit2 #edit2mapcanvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cesium-viewer,
+#page-mod-treasurehunt-edit2 #mapedit .mapboxgl-map {
+  width: 100%;
+  height: 100%;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-layer-picker,
+#page-mod-treasurehunt-edit2 #mapedit .edit2-search {
+  position: absolute;
+  top: 3.75rem;
+  left: calc(var(--treasurehunt-panel-width) + 1rem);
+  z-index: 5;
+  width: min(16rem, calc(100% - var(--treasurehunt-panel-width) - 2rem));
+  background: var(--bs-body-bg, #fff);
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-search {
+  top: 6.4rem;
+}
+
+#page-mod-treasurehunt-edit2 #editorworkspace.is-collapsed #mapedit .edit2-layer-picker,
+#page-mod-treasurehunt-edit2 #editorworkspace.is-collapsed #mapedit .edit2-search {
+  left: 5rem;
+  width: min(16rem, calc(100% - 6rem));
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-pegman-popup {
+  z-index: 9;
+  bottom: auto;
+  min-width: 14rem;
+  transform: translate(-50%, calc(-100% - 12px));
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-pegman-popup[hidden] {
+  display: none;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-pegman-popup::before,
+#page-mod-treasurehunt-edit2 #mapedit .edit2-pegman-popup::after {
+  left: 50%;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-pegman-popup .ol-popup-closer {
+  width: 1.3rem;
+  height: 1.3rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cessium-search-results {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  width: 100%;
+  max-height: 18rem;
+  overflow-y: auto;
+  background: var(--bs-body-bg, #fff);
+  box-shadow: 0 0.25rem 0.75rem #0004;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cessium-search-results[hidden] {
+  display: none;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cessium-search-result {
+  display: block;
+  width: 100%;
+  padding: 0.5rem;
+  border: 0;
+  background: transparent;
+  text-align: left;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cessium-search-result:hover {
+  background: var(--bs-secondary-bg, #eee);
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-map-guidance {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 0.75rem;
+  z-index: 5;
+  max-width: min(22rem, 60%);
+  padding: 0.4rem 0.65rem;
+  border-radius: 0.4rem;
+  color: #fff;
+  background: #182231e8;
+  pointer-events: none;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-map-guidance[hidden] {
+  display: none;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-finish-polygon {
+  position: absolute;
+  right: 0.75rem;
+  bottom: 4rem;
+  z-index: 6;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-finish-polygon[hidden] {
+  display: none;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cesium-viewer-toolbar,
+#page-mod-treasurehunt-edit2 #mapedit .cesium-viewer-geocoderContainer {
+  z-index: 6;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .cesium-viewer-toolbar {
+  top: 3.75rem;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-cesium-picker {
+  position: absolute;
+  top: 3.75rem;
+  right: 12rem;
+  z-index: 8;
+}
+
+#page-mod-treasurehunt-edit2 #mapedit .edit2-cesium-picker .cesium-baseLayerPicker-dropDown {
+  right: 0;
+  left: auto;
+  max-width: min(24rem, calc(100vw - 2rem));
+  max-height: min(65vh, 32rem);
+  overflow-y: auto;
+}

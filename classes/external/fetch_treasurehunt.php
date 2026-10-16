@@ -18,9 +18,9 @@
  * External treasurehunt API
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_treasurehunt\external;
@@ -100,6 +100,28 @@ class fetch_treasurehunt extends external_api {
                                         'name' => new external_value(PARAM_RAW, "Name of associated stage"),
                                         'treasurehuntid' => new external_value(PARAM_INT, "Associated treasurehunt id"),
                                         'clue' => new external_value(PARAM_RAW, "Clue of associated stage"),
+                                        'ownclue' => new external_value(PARAM_RAW, 'Clue for finding this stage'),
+                                        'hasqr' => new external_value(PARAM_BOOL, 'Whether QR discovery is enabled'),
+                                        'discoveroutofsequence' => new external_value(
+                                            PARAM_BOOL,
+                                            'Whether this stage can be discovered out of sequence'
+                                        ),
+                                        'playstagewithoutmoving' => new external_value(
+                                            PARAM_BOOL,
+                                            'Whether the stage can be discovered without moving'
+                                        ),
+                                        'activitytoendname' => new external_value(
+                                            PARAM_TEXT,
+                                            'Activity required before the clue is shown'
+                                        ),
+                                        'hasquestion' => new external_value(
+                                            PARAM_BOOL,
+                                            'Whether a question is required before the clue is shown'
+                                        ),
+                                        'inverserestrictions' => new external_multiple_structure(
+                                            new external_value(PARAM_TEXT, 'Activity restricted to this stage'),
+                                            'Activities restricted to this stage'
+                                        ),
                                         ]
                                     ),
                                     ]

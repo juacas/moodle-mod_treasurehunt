@@ -1,0 +1,74 @@
+name: Moodle Plugin CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    name: Moodle ${{ matrix.moodle-branch }} / PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        moodle-branch: [MOODLE_405_STABLE, MOODLE_503_STABLE]
+        php: ['8.3']
+
+    services:
+      mariadb:
+        image: mariadb:11.4
+        env:
+          MARIADB_ALLOW_EMPTY_ROOT_PASSWORD: '1'
+          MYSQL_CHARACTER_SET_SERVER: utf8mb4
+          MYSQL_COLLATION_SERVER: utf8mb4_unicode_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="healthcheck.sh --connect --innodb_initialized"
+          --health-interval=10s --health-timeout=5s --health-retries=3
+
+    steps:
+      - name: Check out plugin
+        uses: actions/checkout@v4
+        with:
+          path: plugin
+          persist-credentials: false
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          ini-values: max_input_vars=5000, opcache.enable_cli=1
+          coverage: none
+
+      - name: Install Moodle Plugin CI
+        run: |
+          composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ci '^4'
+          echo "$(pwd)/ci/bin" >> "$GITHUB_PATH"
+          echo "$(pwd)/ci/vendor/bin" >> "$GITHUB_PATH"
+          sudo locale-gen en_AU.UTF-8
+          echo "NVM_DIR=$HOME/.nvm" >> "$GITHUB_ENV"
+
+      - name: Install Moodle
+        run: moodle-plugin-ci install --plugin ./plugin --db-host=127.0.0.1 --no-plugin-node
+        env:
+          DB: mariadb
+          MOODLE_BRANCH: ${{ matrix.moodle-branch }}
+
+      - name: PHP syntax
+        run: moodle-plugin-ci phplint ./plugin
+
+      - name: Moodle Code Checker
+        run: moodle-plugin-ci phpcs --max-warnings 0 ./plugin
+
+      - name: Validate plugin
+        run: moodle-plugin-ci validate --moodle ./moodle ./plugin
+
+      - name: Check upgrade savepoints
+        run: moodle-plugin-ci savepoints ./plugin
+
+      - name: PHPUnit
+        run: moodle-plugin-ci phpunit --moodle ./moodle --fail-on-warning ./plugin

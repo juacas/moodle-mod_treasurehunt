@@ -19,7 +19,7 @@ use renderable;
 /**
  * Renderable users_progress
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class users_progress implements renderable {
@@ -39,6 +39,8 @@ class users_progress implements renderable {
     public $viewpermission = false;
     /** @var bool can manage activity? */
     public $managepermission = false;
+    /** @var array roads with resettable activity, keyed by road ID */
+    public $showclearactions = [];
 
     /**
      * constructor
@@ -52,7 +54,8 @@ class users_progress implements renderable {
         $duplicateusersingroups,
         $unassignedusers,
         $viewpermission,
-        $managepermission
+        $managepermission,
+        $showclearactions = []
     ) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
@@ -62,5 +65,6 @@ class users_progress implements renderable {
         $this->unassignedusers = $unassignedusers;
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
+        $this->showclearactions = $showclearactions;
     }
 }

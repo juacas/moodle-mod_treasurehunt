@@ -23,8 +23,7 @@ namespace mod_treasurehunt\model;
  * @copyright 2024 Juan Pablo de Castro
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class stage
-{
+class stage {
     /** @var int id of the parent road */
     public $id;
     /** @var int The ID of the road this stage belongs to */
@@ -39,6 +38,14 @@ class stage
     public $name;
     /** @var string text to discover the next stage */
     public $cluetext;
+    /** @var string HTML clue for finding this stage. */
+    public $clueforstage = '';
+    /** @var int Format of the current-stage clue. */
+    public $clueforstageformat = FORMAT_HTML;
+    /** @var int Trust level of the current-stage clue. */
+    public $clueforstagetrust = 0;
+    /** @var bool Whether the stage may be discovered ahead of its turn. */
+    public $discoveroutofsequence = false;
     /** @var int The format for the clue text field, using constant FORMAT_HTML (default value) */
     public $cluetextformat = FORMAT_HTML;
     /** @var int $cluetexttrust Trust level of clue text (see moodle api) */

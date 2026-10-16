@@ -18,7 +18,7 @@
  * Page to edit stage
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -37,6 +37,8 @@ $cmid = required_param('cmid', PARAM_INT); // Course_module ID.
 $id = optional_param('id', 0, PARAM_INT);           // EntryID.
 $roadid = optional_param('roadid', 0, PARAM_INT);
 $addanswers = optional_param('addanswers', '', PARAM_TEXT);
+$editor = optional_param('editor', '', PARAM_ALPHA);
+$playertype = optional_param('playertype', '', PARAM_ALPHANUMEXT);
 
  [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -45,6 +47,12 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 $url = new moodle_url('/mod/treasurehunt/editstage.php', ['cmid' => $cmid]);
+if ($editor === 'edit2') {
+    $url->param('editor', $editor);
+    if ($playertype !== '' && array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $url->param('playertype', $playertype);
+    }
+}
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -57,8 +65,11 @@ require_capability('mod/treasurehunt:managetreasurehunt', $context);
 $PAGE->requires->jquery();
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
-    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);
+    if (!$lockid) {
+        throw new moodle_exception('editorlocktaken', 'treasurehunt');
+    }
+    $renewlocktime = max(1000, (int)floor(treasurehunt_get_setting_lock_time() * 500));
     $PAGE->requires->js_call_amd(
         'mod_treasurehunt/renewlock',
         'renew_edition_lock',
@@ -69,7 +80,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:editstage', $context);
         $title = get_string('editingstage', 'treasurehunt');
 
-        $stage = $DB->get_record('treasurehunt_stages', ['id' => $id], '*', MUST_EXIST);
+        $stage = treasurehunt_require_stage_in_activity($id, $treasurehunt->id);
         // Si existe la pregunta recojo las respuestas.
         if ($stage->questiontext !== '') {
             // Hago que se muestre la pregunta.
@@ -89,8 +100,8 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         require_capability('mod/treasurehunt:addstage', $context);
         $title = get_string('addingstage', 'treasurehunt');
         $roadid = required_param('roadid', PARAM_INT);
-        $select = 'id = ?';
-        $params = [$roadid];
+        $select = 'id = ? AND treasurehuntid = ?';
+        $params = [$roadid, $treasurehunt->id];
         // Check if the road exists.
         if (!$DB->record_exists_select('treasurehunt_roads', $select, $params)) {
             throw new moodle_exception('invalidentry');
@@ -111,7 +122,12 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
     }
     $stage->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/edit.php', ['id' => $cmid, 'roadid' => $stage->roadid]);
+    $returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+        ['id' => $cmid, 'roadid' => $stage->roadid]);
+    if ($editor === 'edit2' && $playertype !== '' &&
+            array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $returnurl->param('playertype', $playertype);
+    }
 
     $maxbytes = get_user_max_upload_file_size($PAGE->context, $CFG->maxbytes, $COURSE->maxbytes);
     $editoroptions = ['trusttext' => true, 'maxfiles' => EDITOR_UNLIMITED_FILES, 'maxbytes' => $maxbytes,
@@ -149,12 +165,22 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         // PLEASE NOTE: is_cancelled() should be called before get_data().
         redirect($returnurl);
     } else if ($stage = $mform->get_data()) {
+        if (!empty($stage->id)) {
+            $storedstage = treasurehunt_require_stage_in_activity($stage->id, $treasurehunt->id);
+            if ((int)$storedstage->roadid !== (int)$stage->roadid) {
+                throw new moodle_exception('invalidentry');
+            }
+        }
+        treasurehunt_require_road_in_activity($stage->roadid, $treasurehunt->id);
         // Actualizamos los campos.
         $timenow = time();
         $stage->name = trim($stage->name);
         $stage->cluetext = '';          // Updated later.
         $stage->cluetextformat = FORMAT_HTML;  // Updated later.
         $stage->cluetexttrust = 0;            // Updated later.
+        $stage->clueforstage = '';
+        $stage->clueforstageformat = FORMAT_HTML;
+        $stage->clueforstagetrust = 0;
         $stage->questiontext = '';           // Updated later.
         $stage->questiontextformat = FORMAT_HTML;  // Updated later.
         $stage->questiontexttrust = 0;            // Updated later.
@@ -180,6 +206,15 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
             $context,
             'mod_treasurehunt',
             'cluetext',
+            $stage->id
+        );
+        $stage = file_postupdate_standard_editor(
+            $stage,
+            'clueforstage',
+            $editoroptions,
+            $context,
+            'mod_treasurehunt',
+            'clueforstage',
             $stage->id
         );
         // Store the updated value values.
@@ -313,10 +348,7 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $event->trigger();
 
         // Actualizo el tiempo de modificacion del camino.
-        $road = new stdClass();
-        $road->id = $stage->roadid;
-        $road->timemodified = time();
-        $DB->update_record('treasurehunt_roads', $road);
+        treasurehunt_set_valid_road($stage->roadid);
 
         redirect($returnurl);
     }

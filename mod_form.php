@@ -18,7 +18,7 @@
  * This file contains the forms to create and edit an instance of this module
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -36,7 +36,6 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 class mod_treasurehunt_mod_form extends moodleform_mod {
     /**
      * Defines forms elements
-     * @global type $CFG
      */
     public function definition() {
         global $CFG;

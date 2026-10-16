@@ -18,9 +18,9 @@
  * Page to edit instances
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -52,6 +52,14 @@ $PAGE->set_title($title);
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_pagelayout('incourse');
 $PAGE->activityheader->disable();
+$isbootstrap5 = $CFG->version >= 2025041400;
+$bootstrapdataprefix = $isbootstrap5 ? 'data-bs-' : 'data-';
+$visuallyhiddenclass = $isbootstrap5 ? 'visually-hidden' : 'sr-only';
+$asidebackgroundclass = $isbootstrap5 ? 'bg-body' : 'bg-white';
+$boldclass = $isbootstrap5 ? 'fw-bold' : 'font-weight-bold';
+$marginendclass = $isbootstrap5 ? 'me-2' : 'mr-2';
+$noguttersclass = $isbootstrap5 ? 'g-0' : 'no-gutters';
+$borderendclass = $isbootstrap5 ? 'border-end' : 'border-right';
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     // Si no hay ningún camino redirijo para crearlo.
@@ -59,19 +67,20 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         $roadurl = new moodle_url('/mod/treasurehunt/editroad.php', ['cmid' => $id]);
         redirect($roadurl);
     }
-    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);
+    if (!$lockid) {
+        throw new moodle_exception('editorlocktaken', 'treasurehunt');
+    }
+    $renewlocktime = max(1000, (int)floor(treasurehunt_get_setting_lock_time() * 500));
     $PAGE->requires->js_call_amd(
         'mod_treasurehunt/renewlock',
         'renew_edition_lock',
         [$treasurehunt->id, $lockid, $renewlocktime]
     );
     $PAGE->requires->jquery();
-    $PAGE->requires->jquery_plugin('ui');
-    $PAGE->requires->jquery_plugin('ui-css');
     $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
     $PAGE->requires->js_call_amd(
-        'mod_treasurehunt/editmod',
+        $isbootstrap5 ? 'mod_treasurehunt/editmod' : 'mod_treasurehunt/editmod405',
         'edittreasurehunt',
         [ $id, $treasurehunt->id, $roadid, $lockid, $custommapping]
     );
@@ -91,44 +100,306 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
 }
 /** @global core_renderer $OUTPUT */ // phpcs:ignore
 echo $OUTPUT->header();
-echo $OUTPUT->container_start('', 'edition_maintitle'); // For locating the help icon and override it in tutorial.js.
-echo $OUTPUT->heading_with_help($title, 'edition', 'treasurehunt');
-echo $OUTPUT->container_end();
+echo '<span id="edition_mainhelp" class="' . $visuallyhiddenclass . '">'
+    . $OUTPUT->help_icon('edition', 'treasurehunt') . '</span>';
 
 treasurehunt_notify_info(get_string('editactivity_help', 'treasurehunt'));
 echo $OUTPUT->container_start("treasurehunt-editor", "treasurehunt-editor");
 echo $OUTPUT->container_start("treasurehunt-editor-loader");
-echo $OUTPUT->box(null, 'loader-circle-outside');
-echo $OUTPUT->box(null, 'loader-circle-inside');
+echo $OUTPUT->image_icon(
+    'treasurechest_loading',
+    get_string('loading', 'treasurehunt'),
+    'treasurehunt',
+    ['class' => 'treasurehunt-loading-icon']
+);
 echo $OUTPUT->container_end();
-echo $OUTPUT->box(get_string('errvalidroad', 'treasurehunt'), 'alert alert-error invisible', 'errvalidroad');
-echo $OUTPUT->box(get_string('erremptystage', 'treasurehunt'), 'alert alert-error invisible', 'erremptystage');
-$buttons = "<button id=\"addroad\" class=\"btn btn-secondary\" >"
-            . get_string('treasurehunt:addroad', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"addstage\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('treasurehunt:addstage', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"drawmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('drawmode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"editmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('editmode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"navmode\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('browsemode', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"savestage\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('save', 'treasurehunt')
-            . "</button>";
-$buttons .= "<button id=\"removefeature\" class=\"btn btn-secondary\" disabled=\"disabled\">"
-            . get_string('remove', 'treasurehunt')
-            . "</button>";
-echo $OUTPUT->box($buttons, "box py-3 ui-widget-header ui-corner-all", 'controlpanel');
-echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
+$buttons = '<div class="treasurehunt-map-tools treasurehunt-editor-actions d-flex flex-nowrap align-items-center'
+    . ($isbootstrap5 ? ' gap-2' : '') . '"'
+    . ' role="toolbar" aria-label="'
+    . s(get_string('editortools', 'treasurehunt')) . '">';
+$buttons .= '<div class="treasurehunt-editor-actions-group" role="group" aria-label="'
+    . s(get_string('editormap', 'treasurehunt')) . '">';
+$buttons .= '<span class="treasurehunt-tool-tooltip" ' . $bootstrapdataprefix . 'toggle="tooltip"'
+    . ' ' . $bootstrapdataprefix . 'trigger="hover"'
+    . ' ' . $bootstrapdataprefix . 'container="body" ' . $bootstrapdataprefix . 'placement="bottom"'
+    . ' title="' . s(get_string('navmodetooltip', 'treasurehunt')) . '">'
+    . '<button type="button" id="navmode" class="btn btn-outline-secondary btn-sm" disabled>'
+    . s(get_string('browsemode', 'treasurehunt')) . '</button></span>';
+$buttons .= '<div class="btn-group btn-group-sm treasurehunt-geometry-mode-group" role="group" aria-label="'
+    . s(get_string('editorgeometry', 'treasurehunt')) . '">';
+foreach (['drawmode' => 'drawmode', 'editmode' => 'editmode'] as $buttonid => $stringkey) {
+    $buttons .= '<span class="treasurehunt-tool-tooltip" ' . $bootstrapdataprefix . 'toggle="tooltip"'
+        . ' ' . $bootstrapdataprefix . 'trigger="hover"'
+        . ' ' . $bootstrapdataprefix . 'container="body" ' . $bootstrapdataprefix . 'placement="bottom"'
+        . ' title="' . s(get_string($stringkey . 'tooltip', 'treasurehunt')) . '">'
+        . '<button type="button" id="' . $buttonid . '" class="btn btn-outline-secondary" disabled>'
+        . s(get_string($stringkey, 'treasurehunt')) . '</button></span>';
+}
+$buttons .= '</div>';
+$buttons .= '<span class="treasurehunt-tool-tooltip" ' . $bootstrapdataprefix . 'toggle="tooltip"'
+    . ' ' . $bootstrapdataprefix . 'trigger="hover"'
+    . ' ' . $bootstrapdataprefix . 'container="body" ' . $bootstrapdataprefix . 'placement="bottom"'
+    . ' title="' . s(get_string('removefeaturetooltip', 'treasurehunt')) . '">'
+    . '<button type="button" id="removefeature" class="btn btn-outline-danger btn-sm" disabled>'
+    . s(get_string('remove', 'treasurehunt')) . '</button></span>';
+$buttons .= $OUTPUT->help_icon('editorgeometry', 'treasurehunt');
+$buttons .= '</div><button type="button" id="opendataopen" class="btn btn-outline-info btn-sm"'
+    . ' title="' . s(get_string('opendatatitle', 'treasurehunt')) . '"'
+    . ' aria-label="' . s(get_string('opendatatitle', 'treasurehunt')) . '">'
+    . '<i class="fa fa-magic" aria-hidden="true"></i></button>'
+    . '<div class="treasurehunt-editor-actions-group" role="group" aria-label="'
+    . s(get_string('editorsave', 'treasurehunt')) . '">';
+$buttons .= '<button type="button" id="savestage" class="btn btn-primary btn-sm" disabled>'
+    . s(get_string('save', 'treasurehunt')) . '</button>';
+$buttons .= $OUTPUT->help_icon('editorsave', 'treasurehunt');
+$buttons .= '</div></div>';
+echo '<div id="roadlistpanel" class="treasurehunt-road-tabs border-bottom" role="navigation" aria-label="'
+    . s(get_string('editorroads', 'treasurehunt')) . '">'
+    . '<div id="roadtabscontainer">'
+    . '<ul id="roadlist" class="nav nav-tabs flex-nowrap" role="tablist"'
+    . ' aria-label="' . s(get_string('road', 'treasurehunt')) . '"></ul>'
+    . '<button type="button" id="addroad" class="btn btn-outline-primary btn-sm treasurehunt-add-road"'
+    . ' ' . $bootstrapdataprefix . 'toggle="tooltip" ' . $bootstrapdataprefix . 'trigger="hover"'
+    . ' ' . $bootstrapdataprefix . 'placement="top"'
+    . ' title="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '"'
+    . ' aria-label="' . s(get_string('treasurehunt:addroad', 'treasurehunt')) . '">+</button></div>'
+    . $OUTPUT->help_icon('editorroads', 'treasurehunt') . '</div>';
+echo $OUTPUT->container_start('treasurehunt-editor-workspace', 'editorworkspace');
+echo $buttons;
+echo '<button type="button" id="togglefullscreen" class="btn btn-light btn-sm treasurehunt-editor-fullscreen-toggle"'
+    . ' data-cmid="' . (int)$id . '" data-userid="' . (int)$USER->id . '"'
+    . ' aria-pressed="false" aria-label="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' data-maximize-label="' . s(get_string('editormaximize', 'treasurehunt')) . '"'
+    . ' data-restore-label="' . s(get_string('editorrestore', 'treasurehunt')) . '">'
+    . '<i class="fa fa-arrows-alt" aria-hidden="true"></i></button>';
+echo '<span class="' . $visuallyhiddenclass . '" id="treasurehunt-map-label">'
+    . s(get_string('editormap', 'treasurehunt')) . '</span>';
 echo $OUTPUT->box(null, null, 'mapedit');
-echo $OUTPUT->box(null, null, 'roadlistpanel');
+echo $OUTPUT->container_start('treasurehunt-editor-aside border rounded ' . $asidebackgroundclass, 'editoraside');
+echo '<div class="treasurehunt-editor-aside-heading">'
+    . '<span class="treasurehunt-panel-title">' . s(get_string('stages', 'treasurehunt')) . '</span>'
+    . $OUTPUT->help_icon('editorstages', 'treasurehunt') . '</div>';
+echo $OUTPUT->box(null, 'invisible', 'stagelistpanel');
+echo '<div class="treasurehunt-stage-actions">'
+    . '<button type="button" id="addstage" class="btn btn-outline-primary btn-sm" disabled'
+    . ' aria-label="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '">'
+    . '<i class="fa fa-plus" aria-hidden="true"></i>'
+    . '<span class="treasurehunt-stage-action-label">'
+    . s(get_string('treasurehunt:addstage', 'treasurehunt')) . '</span></button>'
+    . '<button type="button" id="copystages" class="btn btn-outline-primary btn-sm" hidden'
+    . ' aria-label="' . s(get_string('editorcopystages', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editorcopystages', 'treasurehunt')) . '">'
+    . '<i class="fa fa-copy" aria-hidden="true"></i>'
+    . '<span class="treasurehunt-stage-action-label">'
+    . s(get_string('editorcopybutton', 'treasurehunt')) . '</span></button>'
+    . '</div>';
+echo '<button type="button" id="toggleleftpanel" class="btn btn-outline-secondary btn-sm"'
+    . ' aria-controls="editoraside" aria-expanded="true"'
+    . ' aria-label="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' title="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' data-collapse-label="' . s(get_string('editorcollapsepanel', 'treasurehunt')) . '"'
+    . ' data-expand-label="' . s(get_string('editorexpandpanel', 'treasurehunt')) . '">'
+    . '<i class="fa fa-angle-double-left" aria-hidden="true"></i>'
+    . '</button>';
 echo $OUTPUT->container_end();
+echo $OUTPUT->container_end();
+echo $OUTPUT->container_end();
+echo '<div class="modal fade" id="stagecluemodal" tabindex="-1" aria-labelledby="stagecluemodaltitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content"><div class="modal-header">'
+    . '<h5 class="modal-title" id="stagecluemodaltitle"></h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body treasurehunt-stage-full-clue" id="stagecluemodalbody"></div>'
+    . '</div></div></div>';
+echo '<div class="modal fade" id="copystagesmodal" tabindex="-1" aria-labelledby="copystagesmodaltitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content shadow border-0">'
+    . '<div class="modal-header bg-light border-bottom">'
+    . '<h5 class="modal-title ' . $boldclass . '" id="copystagesmodaltitle">'
+    . '<i class="fa fa-copy text-primary ' . $marginendclass . '" aria-hidden="true"></i>'
+    . s(get_string('editorcopystages', 'treasurehunt')) . '</h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body p-0"><div class="row ' . $noguttersclass . '">'
+    . '<div class="col-md-5 ' . $borderendclass . ' bg-light p-3">'
+    . '<div class="text-uppercase small ' . $boldclass . ' text-dark mb-2 px-1">'
+    . s(get_string('editorcopysource', 'treasurehunt')) . '</div>'
+    . '<div id="copystagesroads" class="list-group"></div></div>'
+    . '<div class="col-md-7 p-4"><div id="copystagessummary" class="mb-3" role="status"></div>'
+    . '<div class="form-check"><input class="form-check-input" type="checkbox" id="copystagesreplace">'
+    . '<label class="form-check-label" for="copystagesreplace">'
+    . s(get_string('editorcopyreplace', 'treasurehunt')) . '</label></div>'
+    . '</div></div></div><div class="modal-footer bg-light border-top">'
+    . '<button type="button" class="btn btn-secondary btn-sm"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal">'
+    . s(get_string('cancel', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="copystagessave" class="btn btn-primary btn-sm" disabled>'
+    . s(get_string('save', 'treasurehunt')) . '</button></div></div></div></div>';
+
+$opendataurl = new moodle_url('/mod/treasurehunt/opendata.php');
+$opendatafieldlabels = [];
+foreach (['creator', 'date', 'location', 'publisher', 'provider', 'language', 'rights'] as $field) {
+    $opendatafieldlabels[$field] = get_string('opendatafield' . $field, 'treasurehunt');
+}
+echo '<div class="modal fade" id="opendatamodal" tabindex="-1" aria-labelledby="opendatamodaltitle" aria-hidden="true"'
+    . ' data-search-url="' . s($opendataurl->out(false)) . '" data-cmid="' . (int)$id . '"'
+    . ' data-treasurehuntid="' . (int)$treasurehunt->id . '" data-userid="' . (int)$USER->id . '"'
+    . ' data-sesskey="' . s(sesskey()) . '"'
+    . ' data-results-label="' . s(get_string('opendataresults', 'treasurehunt')) . '"'
+    . ' data-empty-label="' . s(get_string('opendataresultsnone', 'treasurehunt')) . '"'
+    . ' data-loading-more-label="' . s(get_string('opendataloadingmore', 'treasurehunt')) . '"'
+    . ' data-searching-label="' . s(get_string('opendatasearching', 'treasurehunt')) . '"'
+    . ' data-source-searching="' . s(get_string('opendatasourcesearching', 'treasurehunt')) . '"'
+    . ' data-source-waiting="' . s(get_string('opendatasourcewaiting', 'treasurehunt')) . '"'
+    . ' data-source-done="' . s(get_string('opendatasourcedone', 'treasurehunt')) . '"'
+    . ' data-source-failed="' . s(get_string('opendatasourcefailed', 'treasurehunt')) . '"'
+    . ' data-layer-label="' . s(get_string('opendatalayer', 'treasurehunt')) . '"'
+    . ' data-added-label="' . s(get_string('opendataadded', 'treasurehunt')) . '"'
+    . ' data-add-to-map-label="' . s(get_string('opendataaddtomap', 'treasurehunt')) . '"'
+    . ' data-replaced-label="' . s(get_string('opendatareplaced', 'treasurehunt')) . '"'
+    . ' data-storage-error="' . s(get_string('opendatastorageerror', 'treasurehunt')) . '"'
+    . ' data-area-error="' . s(get_string('opendatainvalidarea', 'treasurehunt')) . '"'
+    . ' data-service-error="' . s(get_string('opendataserviceerror', 'treasurehunt')) . '"'
+    . ' data-select-type-error="' . s(get_string('opendataselecttype', 'treasurehunt')) . '"'
+    . ' data-aliases-label="' . s(get_string('opendataaliases', 'treasurehunt')) . '"'
+    . ' data-item-types-label="' . s(get_string('opendataitemtypes', 'treasurehunt')) . '"'
+    . ' data-subjects-label="' . s(get_string('opendatasubjects', 'treasurehunt')) . '"'
+    . ' data-categories-label="' . s(get_string('opendatacategories', 'treasurehunt')) . '"'
+    . ' data-gallery-label="' . s(get_string('opendatagallery', 'treasurehunt')) . '"'
+    . ' data-geometry-label="' . s(get_string('opendatageometry', 'treasurehunt')) . '"'
+    . ' data-previous-image-label="' . s(get_string('opendatapreviousimage', 'treasurehunt')) . '"'
+    . ' data-next-image-label="' . s(get_string('opendatanextimage', 'treasurehunt')) . '"'
+    . ' data-search-similar-label="' . s(get_string('opendatasearchsimilar', 'treasurehunt')) . '"'
+    . ' data-article-label="' . s(get_string('opendataarticle', 'treasurehunt')) . '"'
+    . ' data-field-labels="' . s(json_encode($opendatafieldlabels, JSON_THROW_ON_ERROR)) . '"'
+    . ' data-official-label="' . s(get_string('opendataofficialwebsite', 'treasurehunt')) . '"'
+    . ' data-about-label="' . s(get_string('opendataaboutwebsite', 'treasurehunt')) . '"'
+    . ' data-details-loading="' . s(get_string('opendatadetailsloading', 'treasurehunt')) . '"'
+    . ' data-create-stage-label="' . s(get_string('opendatacreatestage', 'treasurehunt')) . '"'
+    . ' data-collector-label="' . s(get_string('opendatacollector', 'treasurehunt')) . '"'
+    . ' data-attach-label="' . s(get_string('opendataattach', 'treasurehunt')) . '"'
+    . ' data-transfer-label="' . s(get_string('opendatatransfer', 'treasurehunt')) . '"'
+    . ' data-original-label="' . s(get_string('opendataoriginal', 'treasurehunt')) . '"'
+    . ' data-attached-label="' . s(get_string('opendataattached', 'treasurehunt')) . '"'
+    . ' data-back-label="' . s(get_string('opendataback', 'treasurehunt')) . '"'
+    . ' data-removed-label="' . s(get_string('opendataremove', 'treasurehunt')) . '"'
+    . ' data-no-links-label="' . s(get_string('opendatanolinks', 'treasurehunt')) . '"'
+    . ' data-attachment-limit="' . s(get_string('opendataattachmentlimit', 'treasurehunt')) . '"'
+    . ' data-creating-stage-label="' . s(get_string('opendatacreatingstage', 'treasurehunt')) . '"'
+    . ' data-cannot-create-stage="' . s(get_string('opendatacannotcreatestage', 'treasurehunt')) . '"'
+    . ' data-details-unavailable="' . s(get_string('opendatadetailsunavailable', 'treasurehunt')) . '"'
+    . ' data-retry-label="' . s(get_string('opendataretry', 'treasurehunt')) . '"'
+    . ' data-close-label="' . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . '<div class="modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable">'
+    . '<div class="modal-content shadow border-0">'
+    . '<div class="modal-header bg-light border-bottom">'
+    . '<h5 class="modal-title ' . $boldclass . '" id="opendatamodaltitle">'
+    . '<i class="fa fa-magic text-primary ' . $marginendclass . '" aria-hidden="true"></i>'
+    . s(get_string('opendatatitle', 'treasurehunt')) . '</h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body p-0"><div class="row ' . $noguttersclass . '">'
+    . '<div class="col-md-5 ' . $borderendclass . ' bg-light p-3">'
+    . '<div class="text-uppercase small ' . $boldclass . ' mb-2">'
+    . s(get_string('opendatatype', 'treasurehunt')) . '</div>'
+    . '<div id="opendatasources">';
+foreach (\mod_treasurehunt\opendata\sources::all() as $source) {
+    $sourceid = $source->id();
+    $available = $source->available();
+    $sourcename = get_string('opendata' . $sourceid, 'treasurehunt');
+    echo '<section class="card mb-2" data-opendata-source="' . s($sourceid) . '">'
+        . '<div class="card-header p-2 d-flex align-items-center justify-content-between">'
+        . '<label class="mb-0">'
+        . '<input type="checkbox" name="opendatasource" value="' . s($sourceid) . '" class="' . $marginendclass . '"'
+        . ' aria-label="' . s($sourcename) . '"'
+        . ($sourceid === 'dbpedia' ? ' checked' : '') . ($available ? '' : ' disabled') . '></label>'
+        . '<button type="button" class="btn btn-link btn-sm p-0 flex-grow-1 text-left text-start ' . $boldclass . '"'
+        . ' data-opendata-source-toggle="' . s($sourceid) . '" aria-expanded="'
+        . ($sourceid === 'dbpedia' ? 'true' : 'false') . '" aria-controls="opendata-themes-' . s($sourceid) . '">'
+        . s($sourcename) . ' <i class="fa fa-chevron-down small" aria-hidden="true"></i></button>'
+        . '<a class="btn btn-link btn-sm p-0" href="' . s($source->website()) . '"'
+        . ' target="_blank" rel="noopener noreferrer"'
+        . ' aria-label="' . s(get_string('opendatavisitsource', 'treasurehunt', $sourcename)) . '"'
+        . ' title="' . s(get_string('opendatavisitsource', 'treasurehunt', $sourcename)) . '">'
+        . '<i class="fa fa-external-link" aria-hidden="true"></i></a></div>';
+    if (!$available) {
+        echo '<div class="card-body p-2 small text-muted" id="opendata-themes-' . s($sourceid) . '"'
+            . ($sourceid === 'dbpedia' ? '' : ' hidden') . '>'
+            . s(get_string('opendataeuropeananokey', 'treasurehunt')) . '</div>';
+    } else {
+        echo '<div class="card-body p-2" id="opendata-themes-' . s($sourceid) . '"'
+            . ($sourceid === 'dbpedia' ? '' : ' hidden') . '>'
+            . '<div class="treasurehunt-opendata-themes">';
+        foreach ($source->themes() as $themeid => $stringkey) {
+            echo '<label class="d-block small mb-1"><input type="checkbox" name="opendatatype"'
+                . ' data-source="' . s($sourceid) . '" value="' . s($themeid) . '"'
+                . ' class="' . $marginendclass . '"' . ($themeid === 'all' ? ' checked' : '') . '> '
+                . s(get_string($stringkey, 'treasurehunt')) . '</label>';
+        }
+        echo '</div></div>';
+    }
+    echo '</section>';
+}
+echo '</div><label class="d-block mt-3" for="opendataterm">'
+    . s(get_string('opendataterm', 'treasurehunt')) . '</label>'
+    . '<input type="search" id="opendataterm" class="form-control" maxlength="100"'
+    . ' placeholder="' . s(get_string('opendatatermplaceholder', 'treasurehunt')) . '">'
+    . '</div><div class="col-md-7 p-4">'
+    . '<div id="opendatainstructions">'
+    . '<h6 class="' . $boldclass . '"><i class="fa fa-map-o text-primary ' . $marginendclass . '"'
+    . ' aria-hidden="true"></i>' . s(get_string('opendataoperation', 'treasurehunt')) . '</h6>'
+    . '<p>' . s(get_string('opendataoperationdesc', 'treasurehunt')) . '</p>'
+    . '<div class="alert alert-info small">' . s(get_string('opendataareadesc', 'treasurehunt')) . '</div>'
+    . '<p class="small text-muted">' . s(get_string('opendatasource', 'treasurehunt')) . '</p>'
+    . '<div id="opendatastatus" role="status" aria-live="polite"></div></div>'
+    . '<div id="opendataitemviewer" class="treasurehunt-opendata-modal-card" hidden></div>'
+    . '<div id="opendatasourceprogress" class="mt-2" role="status" aria-live="polite"></div>'
+    . '<ul id="opendatapreview" class="list-group treasurehunt-opendata-preview mt-2"'
+    . ' aria-label="' . s(get_string('opendataresults', 'treasurehunt')) . '"></ul>'
+    . '</div></div></div><div class="modal-footer bg-light border-top">'
+    . '<button type="button" class="btn btn-secondary btn-sm" ' . $bootstrapdataprefix . 'dismiss="modal">'
+    . s(get_string('cancel', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="opendataloadmore" class="btn btn-outline-secondary btn-sm" hidden>'
+    . s(get_string('opendataloadmore', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="opendatasearch" class="btn btn-outline-primary btn-sm">'
+    . s(get_string('opendatasearch', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="opendataadd" class="btn btn-primary btn-sm" disabled>'
+    . s(get_string('opendataaddalltomap', 'treasurehunt')) . '</button>'
+    . '<button type="button" id="opendatareplace" class="btn btn-outline-danger btn-sm" disabled>'
+    . s(get_string('opendatareplace', 'treasurehunt')) . '</button>'
+    . '</div></div></div></div>';
+
+echo '<div class="modal fade" id="opendatacollectormodal" tabindex="-1"'
+    . ' aria-labelledby="opendatacollectortitle" aria-hidden="true">'
+    . '<div class="modal-dialog modal-dialog-centered treasurehunt-opendata-collector-dialog">'
+    . '<div class="modal-content shadow border-0">'
+    . '<div class="modal-header bg-light border-bottom">'
+    . '<h5 class="modal-title ' . $boldclass . '" id="opendatacollectortitle">'
+    . s(get_string('opendatacollector', 'treasurehunt')) . '</h5>'
+    . '<button type="button" class="' . ($isbootstrap5 ? 'btn-close' : 'close') . '"'
+    . ' ' . $bootstrapdataprefix . 'dismiss="modal" aria-label="'
+    . s(get_string('closebuttontitle', 'moodle')) . '">'
+    . ($isbootstrap5 ? '' : '<span aria-hidden="true">&times;</span>') . '</button></div>'
+    . '<div class="modal-body p-0 treasurehunt-opendata-collector-layout">'
+    . '<section class="treasurehunt-opendata-collector-panel treasurehunt-opendata-collector-left"'
+    . ' aria-label="' . s(get_string('opendataoriginal', 'treasurehunt')) . '">'
+    . '<div id="opendatacollectororiginal" class="treasurehunt-opendata-collector-scroll"></div>'
+    . '<div id="opendatacollectoractions" class="treasurehunt-opendata-collector-actions"></div>'
+    . '</section>'
+    . '<section class="treasurehunt-opendata-collector-panel treasurehunt-opendata-collector-right"'
+    . ' aria-label="' . s(get_string('opendatacollector', 'treasurehunt')) . '">'
+    . '<div id="opendatacollectorattach" class="treasurehunt-opendata-collector-actions"></div>'
+    . '<div id="opendatacollector" class="treasurehunt-opendata-collector-scroll"></div>'
+    . '</section></div></div></div></div>';
 
 // Finish the page.
 echo $OUTPUT->footer();

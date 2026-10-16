@@ -18,9 +18,9 @@
  * Page to edit road
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -38,6 +38,8 @@ global $COURSE, $PAGE, $CFG, $USER;
 // Print the page header.
 $cmid = required_param('cmid', PARAM_INT); // Course_module ID.
 $id = optional_param('id', 0, PARAM_INT);  // EntryID.
+$editor = optional_param('editor', '', PARAM_ALPHA);
+$playertype = optional_param('playertype', '', PARAM_ALPHANUMEXT);
 
 [$course, $cm] = get_course_and_cm_from_cmid($cmid, 'treasurehunt');
 $treasurehunt = $DB->get_record('treasurehunt', ['id' => $cm->instance], '*', MUST_EXIST);
@@ -46,6 +48,12 @@ require_login($course, true, $cm);
 $context = context_module::instance($cm->id);
 
 $url = new moodle_url('/mod/treasurehunt/editroad.php', ['cmid' => $cmid]);
+if ($editor === 'edit2') {
+    $url->param('editor', $editor);
+    if ($playertype !== '' && array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+        $url->param('playertype', $playertype);
+    }
+}
 if (!empty($id)) {
     $url->param('id', $id);
 }
@@ -53,11 +61,19 @@ $PAGE->set_url($url);
 $PAGE->activityheader->disable();
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/edit.php', ['id' => $cmid, 'roadid' => $id]);
+$returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+    ['id' => $cmid, 'roadid' => $id]);
+if ($editor === 'edit2' && $playertype !== '' &&
+        array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+    $returnurl->param('playertype', $playertype);
+}
 
 if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
-    $lockid = treasurehunt_renew_edition_lock($treasurehunt->id, $USER->id);
-    $renewlocktime = (treasurehunt_get_setting_lock_time() - 5) * 1000;
+    $lockid = treasurehunt_try_renew_edition_lock($treasurehunt->id, $USER->id);
+    if (!$lockid) {
+        throw new moodle_exception('editorlocktaken', 'treasurehunt');
+    }
+    $renewlocktime = max(1000, (int)floor(treasurehunt_get_setting_lock_time() * 500));
     $PAGE->requires->js_call_amd(
         'mod_treasurehunt/renewlock',
         'renew_edition_lock',
@@ -66,8 +82,8 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
     if ($id) { // If entry is specified.
         require_capability('mod/treasurehunt:editroad', $context);
         $title = get_string('editingroad', 'treasurehunt');
-        $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads}  WHERE id=?';
-        $parms = ['id' => $id];
+        $sql = 'SELECT id,name,groupid,groupingid FROM {treasurehunt_roads} WHERE id=? AND treasurehuntid=?';
+        $parms = [$id, $treasurehunt->id];
         if (!$road = $DB->get_record_sql($sql, $parms)) {
             throw new moodle_exception('invalidentry');
         }
@@ -109,6 +125,9 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
         redirect($returnurl);
     } else if ($road = $mform->get_data()) {
+        if (!empty($road->id)) {
+            treasurehunt_require_road_in_activity($road->id, $treasurehunt->id);
+        }
         // Actualizamos los campos.
         $road->name = trim($road->name);
         $road = treasurehunt_add_update_road($treasurehunt, $road, $context);

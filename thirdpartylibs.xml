@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <libraries>
 	<library>
+		<location>js/cesium-1.145.0</location>
+		<name>CesiumJS</name>
+		<version>1.145.0</version>
+		<license>Apache</license>
+		<licenseversion>2.0</licenseversion>
+		<!-- https://github.com/CesiumGS/cesium; full notices in js/cesium-1.145.0/LICENSE.md. -->
+	</library>
+	<library>
 		<location>amd/src/osm-geocoder.js</location>
 		<name>osm-geocoder</name>
 		<version>n/a</version>

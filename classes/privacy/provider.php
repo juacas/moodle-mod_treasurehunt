@@ -33,17 +33,16 @@ use moodle_database;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class provider implements
-    // This plugin is capable of determining which users have data within it.
-    \core_privacy\local\request\core_userlist_provider,
     // This plugin does store personal user data.
     \core_privacy\local\metadata\provider,
+    // This plugin is capable of determining which users have data within it.
+    \core_privacy\local\request\core_userlist_provider,
     // This plugin is a core_user_data_provider.
-    \core_privacy\local\request\plugin\provider
-{
+    \core_privacy\local\request\plugin\provider {
     /**
      * Return the fields which contain personal data.
      *
-     * @param collection $items a reference to the collection to use to store the metadata.
+     * @param collection items to use to store the metadata.
      * @return collection the updated collection of metadata items.
      */
     public static function get_metadata(collection $collection): collection {
@@ -278,6 +277,9 @@ class provider implements
         $stages = treasurehunt_get_stages($cm->instance, $context);
         $stagesids = array_keys($stages);
         $DB->delete_records_list('treasurehunt_attempts', 'stageid', $stagesids);
+        \cache::make('mod_treasurehunt', 'progressstate')->purge();
+        \cache::make('mod_treasurehunt', 'progressverified')->purge();
+        \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
         $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $context->instanceid]);
     }
 
@@ -311,6 +313,9 @@ class provider implements
             $where = "userid = :userid AND stageid $insql";
             $params = ['userid' => $userid] + $inparam;
             $DB->delete_records_select('treasurehunt_attempts', $where, $params);
+            \cache::make('mod_treasurehunt', 'progressstate')->purge();
+            \cache::make('mod_treasurehunt', 'progressverified')->purge();
+            \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
             $DB->delete_records('treasurehunt_track', ['treasurehuntid' => $cm->instance, 'userid' => $userid]);
         }
     }
@@ -343,5 +348,8 @@ class provider implements
         $select = "stageid $stagesql AND userid $usersql";
         $params = $stageparams + $userparams;
         $DB->delete_records_select('treasurehunt_attempts', $select, $params);
+        \cache::make('mod_treasurehunt', 'progressstate')->purge();
+        \cache::make('mod_treasurehunt', 'progressverified')->purge();
+        \cache::make('mod_treasurehunt', 'progressmarkers')->purge();
     }
 }

@@ -18,8 +18,8 @@
  * GPX tracks exporter
  *
  * @package   mod_treasurehunt
- * @copyright Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -41,7 +41,9 @@ if (count($userids) > 1 || $USER->id != $userid) {
     require_capability('mod/treasurehunt:viewusershistoricalattempts', $context);
 }
 date_default_timezone_set("UTC");
+$tracks = [];
 foreach ($userids as $userid) {
+    $segments = [];
     $trackpoints = $DB->get_records('treasurehunt_track', ['userid' => $userid, 'treasurehuntid' => $treasurehunt->id]);
     $description = "Track for user:" . fullname($DB->get_record('user', ['id' => $userid]));
     $segment = makesegment($trackpoints);
@@ -89,7 +91,10 @@ function makegpx($tracks) {
     $xml = <<<GPX
 <?xml version="1.0" encoding="UTF-8"?>
 <gpx version="1.1" creator="TreasureHuntTrackExporter"
-    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd http://www.garmin.com/xmlschemas/TrackPointExtension/v1 http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd"
+    xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd
+        http://www.garmin.com/xmlschemas/GpxExtensions/v3 http://www.garmin.com/xmlschemas/GpxExtensionsv3.xsd
+        http://www.garmin.com/xmlschemas/TrackPointExtension/v1
+        http://www.garmin.com/xmlschemas/TrackPointExtensionv1.xsd"
     xmlns="http://www.topografix.com/GPX/1/1"
     xmlns:gpxtpx="http://www.garmin.com/xmlschemas/TrackPointExtension/v1"
     xmlns:gpxx="http://www.garmin.com/xmlschemas/GpxExtensions/v3"
@@ -115,6 +120,7 @@ GPX;
  * @package mod_treasurehunt
  */
 function maketrack($description, $segments) {
+    $description = htmlspecialchars($description, ENT_XML1 | ENT_QUOTES, 'UTF-8');
     $xml = '<trk>
         <name>Treasurehunt trace</name>
          <desc>' . $description . '</desc>';
@@ -160,11 +166,12 @@ function maketrackpoint(&$data) {
     if ($data->type == 'place') {
         $starttime = getisotime($data->startTime);
         $endtime = getisotime($data->endTime);
+        $placename = htmlspecialchars($data->place->name, ENT_XML1 | ENT_QUOTES, 'UTF-8');
 
         $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon
-                . "\"><time>$starttime</time><location>" . $data->place->name . "</location></trkpt>";
+                . "\"><time>$starttime</time><location>" . $placename . "</location></trkpt>";
         $return .= "<trkpt lat=\"" . $data->place->location->lat . "\" lon=\"" . $data->place->location->lon
-                . "\"><time>$endtime</time><location>" . $data->place->name . "</location></trkpt>";
+                . "\"><time>$endtime</time><location>" . $placename . "</location></trkpt>";
     } else {
         $time = getisotime($data->time);
         $return .= "<trkpt lat=\"$data->lat\" lon=\"$data->lon\"><time>$time</time>";

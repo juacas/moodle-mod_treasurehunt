@@ -73,13 +73,13 @@ For something that is bigger than a one or two line fix:
 
 # How to report a bug
 ### security disclosures first!
-If you find a security vulnerability, do NOT open an issue. Email jpdecastro@tel.uva.es instead.
-Any security issues should be submitted directly to jpdecastro@tel.uva.es
+If you find a security vulnerability, do NOT open an issue. Email juanpablo.decastro@uva.es instead.
+Any security issues should be submitted directly to juanpablo.decastro@uva.es
 In order to determine whether you are dealing with a security issue, ask yourself these two questions:
 * Can I access something that's not mine, or something I shouldn't have access to?
 * Can I disable something for other people?
 
-> If the answer to either of those two questions are "yes", then you're probably dealing with a security issue. Note that even if you answer "no" to both questions, you may still be dealing with a security issue, so if you're unsure, just email us at jpdecastro@tel.uva.es.
+> If the answer to either of those two questions are "yes", then you're probably dealing with a security issue. Note that even if you answer "no" to both questions, you may still be dealing with a security issue, so if you're unsure, just email us at juanpablo.decastro@uva.es.
 
 ### How to file a bug report.
 When filing an issue, make sure to answer these five questions:

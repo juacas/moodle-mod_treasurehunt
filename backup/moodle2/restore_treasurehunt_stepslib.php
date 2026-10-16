@@ -19,7 +19,7 @@
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
@@ -32,7 +32,7 @@ global $CFG;
  *
  * @package   mod_treasurehunt
  * @category  backup
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class restore_treasurehunt_activity_structure_step extends restore_activity_structure_step {
@@ -85,7 +85,6 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
     }
     /**
      *
-     * @global moodle_database $DB
      * @param object $data
      */
     protected function process_treasurehunt_road($data) {
@@ -181,6 +180,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
         // Add treasurehunt related files.
         $this->add_related_files('mod_treasurehunt', 'intro', null);
         $this->add_related_files('mod_treasurehunt', 'cluetext', 'treasurehunt_stage');
+        $this->add_related_files('mod_treasurehunt', 'clueforstage', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'questiontext', 'treasurehunt_stage');
         $this->add_related_files('mod_treasurehunt', 'answertext', 'treasurehunt_answer');
         $this->add_related_files('mod_treasurehunt', 'custombackground', null);

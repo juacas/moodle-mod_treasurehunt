@@ -27,8 +27,8 @@ use core\session\exception;
  * Mobile output class for Treasure Hunt
  *
  * @package   mod_treasurehunt
- * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license  http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2020 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class mobile {
     /**
@@ -190,13 +190,13 @@ class mobile {
 
         // Get last timestamp.
         $user = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id);
-        [$lastattempttimestamp, $lastroadtimestamp] = treasurehunt_get_last_timestamps($USER->id, $user->groupid, $user->roadid);
+        [$lastattemptid, $lastroadtimestamp] = treasurehunt_get_progress_markers($USER->id, $user->groupid, $user->roadid);
 
         $playconfig = [
             'treasurehuntid' => $treasurehunt->id,
             'playwithoutmoving' => boolval($treasurehunt->playwithoutmoving),
             'groupmode' => boolval($treasurehunt->groupmode),
-            'lastattempttimestamp' => $lastattempttimestamp,
+            'lastattemptid' => $lastattemptid,
             'lastroadtimestamp' => $lastroadtimestamp,
             'tracking' => boolval($treasurehunt->tracking),
             'gameupdatetime' => treasurehunt_get_setting_game_update_time() * 1000,

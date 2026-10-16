@@ -18,9 +18,9 @@
  * Defines the renderer for the treasurehunt module.
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
@@ -82,13 +82,12 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 $cm->id, $cm->instance,
                 intval($treasurehunt->playwithoutmoving),
                 intval($treasurehunt->groupmode),
-                $renderablepage->lastattempttimestamp,
-                $renderablepage->lastroadtimestamp,
                 $renderablepage->gameupdatetime,
                 $treasurehunt->tracking,
                 $renderablepage->user,
                 $renderablepage->custommapping,
                 $renderablepage->customplayerconfig,
+                $renderablepage->previewroadid,
             ]
         );
         // Adds support for QR scan.
@@ -96,7 +95,6 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->js_call_amd('mod_treasurehunt/tutorial_bootstrap', 'playpage');
         $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
-        $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/loading-animation.css');
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->set_title('');// Empty to avoid render on top.
@@ -108,6 +106,144 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         // Finish the page.
         $pagefooter = $this->footer();
         return $pageheader . $pagerendered . $pagefooter;
+    }
+
+    /**
+     * Render the experimental Cesium globe player.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return string
+     */
+    public function render_play_page_cessium_player(play_page_base $renderablepage) {
+        global $CFG;
+
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        // A non-geographic image uses its own coordinate system and cannot be placed on a globe.
+        if (isset($renderablepage->custommapping->geographic) && !$renderablepage->custommapping->geographic) {
+            return $this->render_play_page_bootstrap($renderablepage);
+        }
+
+        $this->page->set_pagelayout('embedded');
+        $this->page->activityheader->disable();
+        $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $config = $this->get_geographic_player_config($renderablepage);
+        $config['cesiumbaseurl'] = (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false);
+        $this->page->requires->js_call_amd('mod_treasurehunt/cessium_player', 'init');
+        treasurehunt_qr_support($this->page, 'setup', []);
+
+        $data = $renderablepage->export_for_template($this);
+        $data->cmid = $cm->id;
+        $data->huntname = format_string($treasurehunt->name);
+        $data->playerbrand = 'Cesium 3D';
+        $data->playerconfigjson = json_encode(
+            $config,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
+        return $this->header() .
+            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
+            $this->footer();
+    }
+
+    /**
+     * Render the Mapbox GL JS player using the geographic game interface.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return string
+     */
+    public function render_play_page_mapbox_player(play_page_base $renderablepage) {
+        global $CFG;
+
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        if (isset($renderablepage->custommapping->geographic) && !$renderablepage->custommapping->geographic) {
+            return $this->render_play_page_bootstrap($renderablepage);
+        }
+        $this->page->set_pagelayout('embedded');
+        $this->page->activityheader->disable();
+        $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $this->page->requires->css(new moodle_url('https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css'));
+        $config = $this->get_geographic_player_config($renderablepage);
+        $config['mapboxaccesstoken'] = (string)get_config('mod_treasurehunt', 'mapboxaccesstoken');
+        $config['threepegmanurl'] = (new moodle_url('/mod/treasurehunt/js/three-pegman-0.170.0.min.js', [
+            'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/js/three-pegman-0.170.0.min.js'),
+        ]))->out(false);
+        $this->page->requires->js_call_amd('mod_treasurehunt/mapbox_player', 'init');
+        treasurehunt_qr_support($this->page, 'setup', []);
+
+        $data = $renderablepage->export_for_template($this);
+        $data->cmid = $cm->id;
+        $data->huntname = format_string($treasurehunt->name);
+        $data->playerbrand = 'Mapbox GL';
+        $data->playerconfigjson = json_encode(
+            $config,
+            JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR
+        );
+        return $this->header() .
+            parent::render_from_template('mod_treasurehunt/cessium_player', $data) .
+            $this->footer();
+    }
+
+    /**
+     * Build the common game payload for geographic players.
+     *
+     * @param play_page_base $renderablepage Player data.
+     * @return array
+     */
+    private function get_geographic_player_config(play_page_base $renderablepage): array {
+        global $CFG;
+        $treasurehunt = $renderablepage->treasurehunt;
+        $cm = $renderablepage->cm;
+        return [
+            'cmid' => (int)$cm->id,
+            'pegmananimationmodel' => (new moodle_url('/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb', [
+                'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/pix/pegman_hiker_all_animations_matte.glb'),
+            ]))->out(false),
+            'treasurehuntid' => (int)$cm->instance,
+            'playwithoutmoving' => (bool)$treasurehunt->playwithoutmoving,
+            'groupmode' => (bool)$treasurehunt->groupmode,
+            'pollinterval' => (int)$renderablepage->gameupdatetime,
+            'tracking' => (bool)$treasurehunt->tracking,
+            'previewroadid' => (int)$renderablepage->previewroadid,
+            'custommapping' => $renderablepage->custommapping,
+            'playerconfig' => $renderablepage->customplayerconfig,
+            'labels' => [
+                'stage' => get_string('stage', 'treasurehunt'),
+                'stageovercome' => get_string('stageovercome', 'treasurehunt'),
+                'failedlocation' => get_string('failedlocation', 'treasurehunt'),
+                'discoveredlocation' => get_string('discoveredlocation', 'treasurehunt'),
+                'stagename' => get_string('stagename', 'treasurehunt'),
+                'stageclue' => get_string('stageclue', 'treasurehunt'),
+                'clue' => get_string('clue', 'treasurehunt'),
+                'nextclue' => get_string('nextclue', 'treasurehunt'),
+                'nextclues' => get_string('nextclues', 'treasurehunt'),
+                'completed' => get_string('huntcompleted', 'treasurehunt'),
+                'webserviceerror' => get_string('webserviceerror', 'treasurehunt'),
+                'nomarks' => get_string('nomarks', 'treasurehunt'),
+                'noattempts' => get_string('noattempts', 'treasurehunt'),
+                'noanswerselected' => get_string('noanswerselected', 'treasurehunt'),
+                'geolocationproblem' => get_string('geolocation_problem', 'treasurehunt'),
+                'activitywarning' => get_string('activitytoendwarning', 'treasurehunt'),
+                'answerwarning' => get_string('answerwarning', 'treasurehunt'),
+                'timeexceeded' => get_string('timeexceeded', 'treasurehunt'),
+                'startfromhere' => get_string('startfromhere', 'treasurehunt'),
+                'nohint' => get_string('cessium_nohint', 'treasurehunt'),
+                'selectedposition' => get_string('cessium_selectedposition', 'treasurehunt'),
+                'gpsposition' => get_string('cessium_gpsposition', 'treasurehunt'),
+                'insidezone' => get_string('cessium_insidezone', 'treasurehunt'),
+                'layercustom' => get_string('cessium_layercustom', 'treasurehunt'),
+                'layererror' => get_string('cessium_layererror', 'treasurehunt'),
+                'terrainflat' => get_string('cessium_terrainflat', 'treasurehunt'),
+                'terrainrelief' => get_string('cessium_terrainrelief', 'treasurehunt'),
+                'wait' => get_string('cessium_wait', 'treasurehunt'),
+                'searchplaceholder' => get_string('cessium_search_placeholder', 'treasurehunt'),
+                'searching' => get_string('cessium_searching', 'treasurehunt'),
+                'searchempty' => get_string('cessium_search_empty', 'treasurehunt'),
+                'searcherror' => get_string('cessium_search_error', 'treasurehunt'),
+                'searchattribution' => get_string('cessium_search_attribution', 'treasurehunt'),
+                'buildings3d' => get_string('cessium_buildings_3d', 'treasurehunt'),
+            ],
+        ];
     }
 
     /**
@@ -200,9 +336,47 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
+                $roadheading = format_string($roadusersprogress->name);
+                $grouplinks = [];
+                if ($progress->groupmode) {
+                    foreach ($roadusersprogress->userlist as $group) {
+                        $url = new moodle_url('/user/index.php', [
+                            'id' => $this->page->course->id, 'group' => $group->id,
+                        ]);
+                        $grouplinks[] = html_writer::link($url, format_string($group->name));
+                    }
+                } else if (!empty($roadusersprogress->groupid)) {
+                    $groupname = groups_get_group_name($roadusersprogress->groupid);
+                    if ($groupname) {
+                        $url = new moodle_url('/user/index.php', [
+                            'id' => $this->page->course->id, 'group' => $roadusersprogress->groupid,
+                        ]);
+                        $grouplinks[] = html_writer::link($url, format_string($groupname));
+                    }
+                }
+                if ($grouplinks) {
+                    $grouplabel = get_string(count($grouplinks) === 1 ? 'group' : 'groups', 'treasurehunt');
+                    $roadheading .= ' ' . html_writer::tag(
+                        'small',
+                        $grouplabel . ': ' . implode(', ', $grouplinks),
+                        ['class' => 'treasurehunt-road-groups']
+                    );
+                }
+                if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                    $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
+                        'id' => $progress->coursemoduleid,
+                        'scope' => 'road',
+                        'roadid' => $roadusersprogress->id,
+                    ]);
+                    $roadheading .= ' ' . html_writer::link(
+                        $clearurl,
+                        get_string('delete'),
+                        ['class' => 'btn btn-outline-danger btn-sm ms-2 ml-2']
+                    );
+                }
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
-                        $s .= $this->output->heading($roadusersprogress->name, 4);
+                        $s .= $this->output->heading($roadheading, 4);
                         $s .= $this->output->box_start('boxaligncenter usersprogresstable');
                         $t = new html_table();
                         if ($progress->groupmode) {
@@ -255,10 +429,26 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 if ($progress->viewpermission) {
                                     $params = ['id' => $progress->coursemoduleid, 'userid' => $userorgroup->id];
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);
-                                    $icon = $this->output->pix_icon('t/preview', get_string('userattempthistory', 'treasurehunt', $fullname));
+                                    $icon = $this->output->pix_icon(
+                                        't/preview',
+                                        get_string('userattempthistory', 'treasurehunt', $fullname)
+                                    );
                                     $name .= ' ' . html_writer::link($url, $icon);
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
+                            }
+                            if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                                $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
+                                    'id' => $progress->coursemoduleid,
+                                    'scope' => $progress->groupmode ? 'group' : 'user',
+                                    'roadid' => $roadusersprogress->id,
+                                    'participantid' => $userorgroup->id,
+                                ]);
+                                $name .= ' ' . html_writer::link(
+                                    $clearurl,
+                                    get_string('delete'),
+                                    ['class' => 'btn btn-outline-danger btn-sm ms-2 ml-2']
+                                );
                             }
                             $cells = [$name];
                             $cells[] = treasurehunt_get_nice_duration($elapsed->duration);
@@ -286,7 +476,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         $s .= $this->output->box_end();
                     } else {
                         if ($progress->managepermission) {
-                            $s .= $this->output->heading($roadusersprogress->name, 4);
+                            $s .= $this->output->heading($roadheading, 4);
                             if ($progress->groupmode) {
                                 $notification = get_string('nogroupassigned', 'treasurehunt');
                             } else {
@@ -297,7 +487,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                     }
                 } else {
                     if ($progress->managepermission) {
-                        $s .= $this->output->heading($roadusersprogress->name, 4);
+                        $s .= $this->output->heading($roadheading, 4);
                         $s .= $this->output->notification(get_string('invalroadid', 'treasurehunt'));
                     }
                 }
@@ -306,7 +496,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
 
         if ($s !== '') {
             $o .= $this->output->container_start('usersprogress');
-            $o .= $this->output->heading_with_help(get_string('usersprogress', 'treasurehunt'), 'usersprogress', 'treasurehunt', null, null, 3);
+            $o .= $this->output->heading_with_help(
+                get_string('usersprogress', 'treasurehunt'),
+                'usersprogress',
+                'treasurehunt',
+                null,
+                null,
+                3
+            );
             $o .= $s;
             // Close the container and insert a spacer.
             $o .= $this->output->container_end();
@@ -322,12 +519,21 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * @return string
      */
     public function render_info(mod_treasurehunt\output\info $info) {
+        global $CFG;
+
         $o = '';
-        // Warn about the use of QR scanner.
+        $this->page->requires->js_call_amd(
+            $CFG->version >= 2025041400 ? 'mod_treasurehunt/view_tooltips' : 'mod_treasurehunt/view_tooltips405',
+            'init'
+        );
+        // Prepare the QR test and load its scanner libraries after the page renders.
         if ($info->numqrs > 0) {
-            $params = ['qrTestSuccessString' => get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs)];
-            treasurehunt_qr_support($this->page, 'enableTest', $params);
-            $o .= $this->output->container_start(null, 'QRStatusDiv');
+            $this->page->requires->js_call_amd('mod_treasurehunt/view_qr-lazy', 'init', [
+                (new moodle_url('/mod/treasurehunt/js/vue.global.prod.js'))->out(false),
+                (new moodle_url('/mod/treasurehunt/js/vue-qrcode-reader.umd.js'))->out(false),
+                get_string('activitysummaryqrloadfailed', 'treasurehunt'),
+            ]);
+            $o .= $this->output->container_start(null, 'QRStatusDiv', ['hidden' => 'hidden']);
             $warnqr = get_string('warnqrscanner', 'treasurehunt', $info->numqrs);
             $o .= $this->output->notification($warnqr, core\notification::WARNING) . "\n";
             $o .= '<div  id="previewQR" width = "100%" style="min-height:200px">
@@ -386,36 +592,164 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
         }
 
-        // Type of geolocation: GPS or Desktop.
-        if ($info->treasurehunt->playwithoutmoving) {
-            $gamemode = get_string('playwithoutmoving', 'treasurehunt');
-        } else {
-            $gamemode = get_string('movingplay', 'treasurehunt');
-        }
         // Group or individual playing.
-        if ($info->treasurehunt->groupmode) {
-            $gamemode = get_string('groupmode', 'treasurehunt') . '. ' . $gamemode;
-        }
-        $message = get_string('gamemodeinfo', 'treasurehunt', $gamemode);
+
         // Information about the groups/groupings involved in the game.
         $groupsmessages = [];
         foreach ($info->roads as $road) {
             if ($info->treasurehunt->groupmode == 0) {
                 if ($road->groupid > 0) {
                     $gname = groups_get_group_name($road->groupid);
-                    $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => $road->groupid, 'grouping' => 0]);
+                    $link = new moodle_url('/group/overview.php', [
+                        'id' => $info->treasurehunt->course,
+                        'group' => $road->groupid,
+                        'grouping' => 0,
+                    ]);
                     $groupsmessages[] = html_writer::link($link, $gname);
                 }
             } else if ($road->groupingid > 0) {
                 $gname = groups_get_grouping_name($road->groupingid);
-                $link = new moodle_url('/group/overview.php', ['id' => $info->treasurehunt->course, 'group' => 0, 'grouping' => $road->groupingid]);
+                $link = new moodle_url('/group/overview.php', [
+                    'id' => $info->treasurehunt->course,
+                    'group' => 0,
+                    'grouping' => $road->groupingid,
+                ]);
                 $groupsmessages[] = html_writer::link($link, $gname);
             }
         }
-        if (count($groupsmessages) != 0) {
-            $message .= '. ' . get_string('groups', 'treasurehunt') . ': ' . implode(', ', $groupsmessages);
+        if ($groupsmessages) {
+            $message = get_string('groups', 'treasurehunt') . ': ' . implode(', ', $groupsmessages);
+            $o .= html_writer::tag('p', $message);
         }
-        $o .= html_writer::tag('p', $message);
+
+        // Summarise the activity settings with the same status icons used for stages in the editor.
+        $no = get_string('editordisabled', 'treasurehunt');
+        $canmanage = has_capability('mod/treasurehunt:managetreasurehunt', $this->page->context);
+        $invalidroadmessages = [];
+        if ($canmanage) {
+            foreach ($info->roads as $road) {
+                if (empty($road->validated)) {
+                    $invalidroadmessages[] = get_string('invalroadid', 'treasurehunt') . ': ' .
+                        strip_tags(format_string($road->name));
+                }
+            }
+        }
+        $modeerror = implode(' ', $invalidroadmessages);
+        $groupdiagnostics = $canmanage ? $info->groupdiagnostics : [];
+        $groupstate = $groupdiagnostics['state'] ?? ($info->groupassignmenterror ? 'danger' :
+            ($info->treasurehunt->groupmode ? 'active' : 'inactive'));
+        $groupdetail = $groupdiagnostics['detail'] ?? ($info->treasurehunt->groupmode ?
+            get_string('activitysummaryjointeam', 'treasurehunt') : $no);
+        $grouptooltip = $groupdiagnostics['tooltip'] ?? ($info->groupassignmenterror ?: $groupdetail);
+        $qrpassed = $info->numqrs > 0 && ($_COOKIE['QRScanPassed'] ?? '') === 'Done';
+        $qrstate = $info->numqrs === 0 ? 'inactive' : ($qrpassed ? 'active' : 'pending');
+        $qrtooltip = $info->numqrs === 0 ? get_string('activitysummaryqrnone', 'treasurehunt') :
+            ($qrpassed ? get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs) :
+                get_string('activitysummaryqrpending_help', 'treasurehunt'));
+        $statuses = [
+            [
+                'icons' => ['qrcode'], 'label' => get_string('activitysummaryqr', 'treasurehunt'),
+                'state' => $qrstate, 'detail' => $info->numqrs === 0 ? $no :
+                    ($qrpassed ? get_string('activitysummaryqrscan', 'treasurehunt') :
+                        get_string('activitysummaryqrpending', 'treasurehunt')),
+                'tooltip' => $qrtooltip, 'id' => 'treasurehunt-qr-status',
+                'optional' => true, 'enabled' => $info->numqrs > 0,
+            ],
+            [
+                'icons' => [$info->hasoutofsequence ? 'random' : 'road'],
+                'label' => get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequence' : 'activitysummarysequential',
+                    'treasurehunt'
+                ),
+                'state' => $modeerror ? 'danger' : ($canmanage && $info->hasoutofsequence ? 'active' : 'inactive'),
+                'detail' => get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequencedetail' : 'activitysummarysequentialdetail',
+                    'treasurehunt'
+                ),
+                'tooltip' => ($modeerror ? $modeerror . ' ' : '') . get_string(
+                    $info->hasoutofsequence ? 'activitysummaryoutofsequence_help' : 'activitysummarysequential_help',
+                    'treasurehunt'
+                ),
+            ],
+            [
+                'icons' => $info->treasurehunt->playwithoutmoving ?
+                    ['mouse-pointer', 'hand-pointer-o'] : ['satellite', 'map-marked-alt'],
+                'label' => get_string(
+                    $info->treasurehunt->playwithoutmoving ? 'playwithoutmoving' : 'movingplay',
+                    'treasurehunt'
+                ),
+                'state' => 'inactive',
+                'detail' => $info->treasurehunt->playwithoutmoving ?
+                    get_string('activitysummarymapmark', 'treasurehunt') :
+                    get_string('activitysummarygps', 'treasurehunt'),
+                'tooltip' => $info->treasurehunt->playwithoutmoving ?
+                    get_string('activitysummarymapmark', 'treasurehunt') :
+                    get_string('activitysummarygps', 'treasurehunt'),
+            ],
+            [
+                'icons' => ['map-marker', 'road'],
+                'label' => get_string('activitysummarytracking', 'treasurehunt'),
+                'state' => $info->treasurehunt->tracking ? 'active' : 'inactive',
+                'detail' => '',
+                'tooltip' => get_string('activitysummarytracking_help', 'treasurehunt'),
+                'optional' => true, 'enabled' => (bool)$info->treasurehunt->tracking,
+            ],
+            [
+                'icons' => ['users'], 'label' => get_string('groupmode', 'treasurehunt'),
+                'state' => $groupstate,
+                'detail' => $groupdetail,
+                'tooltip' => $grouptooltip,
+                'optional' => true, 'enabled' => (bool)$info->treasurehunt->groupmode,
+            ],
+        ];
+        $cards = '';
+        foreach ($statuses as $status) {
+            if (!empty($status['optional']) && empty($status['enabled']) && !$canmanage) {
+                continue;
+            }
+            $iconhtml = '';
+            foreach ($status['icons'] as $icon) {
+                $iconhtml .= html_writer::tag('i', '', ['class' => 'fa fa-' . $icon, 'aria-hidden' => 'true']);
+            }
+            $arialabel = $status['label'];
+            if ($status['detail'] !== '') {
+                $arialabel .= ': ' . $status['detail'];
+            }
+            if (!empty($status['tooltip']) && $status['tooltip'] !== $status['detail']) {
+                $arialabel .= '. ' . $status['tooltip'];
+            }
+            $attributes = ['aria-label' => $arialabel];
+            if (!empty($status['tooltip'])) {
+                $attributes['data-treasurehunt-tooltip'] = $status['tooltip'];
+            }
+            if (!empty($status['id'])) {
+                $attributes['id'] = $status['id'];
+                $attributes['data-qr-passed-label'] = get_string('activitysummaryqrscan', 'treasurehunt');
+                $attributes['data-qr-passed-title'] = get_string('warnqrscannersuccess', 'treasurehunt', $info->numqrs);
+                $attributes['data-qr-pending-label'] = get_string('activitysummaryqrpending', 'treasurehunt');
+                $attributes['data-qr-pending-title'] = get_string('activitysummaryqrpending_help', 'treasurehunt');
+                $attributes['data-qr-failed-label'] = get_string('activitysummaryqrfailed', 'treasurehunt');
+                $attributes['data-qr-failed-title'] = get_string('warnqrscannererror', 'treasurehunt', $info->numqrs);
+                if ($info->numqrs > 0) {
+                    $attributes['aria-controls'] = 'QRStatusDiv';
+                    $attributes['aria-expanded'] = 'false';
+                }
+            }
+            $cardcontent =
+                html_writer::div($iconhtml, 'treasurehunt-stage-status-icons', ['aria-hidden' => 'true']) .
+                html_writer::span($status['label'], 'treasurehunt-stage-status-label');
+            if ($status['detail'] !== '') {
+                $cardcontent .= html_writer::span($status['detail'], 'treasurehunt-stage-status-detail');
+            }
+            $attributes['class'] = 'treasurehunt-stage-status is-' . $status['state'];
+            $attributes['type'] = 'button';
+            $cards .= html_writer::tag('button', $cardcontent, $attributes);
+        }
+        $o .= html_writer::div(
+            html_writer::tag('h3', get_string('activitysummary', 'treasurehunt'), ['class' => 'h5']) .
+            html_writer::div($cards, 'treasurehunt-stage-statuses'),
+            'treasurehunt-activity-summary'
+        );
 
         // Grading method.
         if ($info->treasurehunt->grade > 0) {

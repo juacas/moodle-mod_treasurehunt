@@ -16,27 +16,47 @@
  * @module mod_treasurehunt/editmod
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>,
- *            Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ *            Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>*
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>*
  * @license http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later.
  */
 import $ from "jquery";
-import "jqueryui";
 import ol from "mod_treasurehunt/ol";
 import ajax from "core/ajax";
 import notification from "core/notification";
+import { add as addToast } from "core/toast";
+import * as Bootstrap from "bootstrap";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
+import initAddressAutocomplete from "mod_treasurehunt/addressautocomplete";
 import viewgpx from "mod_treasurehunt/viewgpx";
+import initOpenData from "mod_treasurehunt/opendata_editor";
+import initEditorFullscreen from "mod_treasurehunt/editor_fullscreen";
 import { get_strings as str } from "core/str";
 
 let init = {
   edittreasurehunt: function (idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {
+      var lockState = {id: lockid};
+      document.addEventListener('treasurehunt:lockrenewed', function(event) {
+        if (Number(event.detail.treasurehuntid) === Number(treasurehuntid)) {
+          lockState.id = event.detail.lockid;
+        }
+      });
       // I18n strings.
       var terms = [
         "stage", "road", "aerialmap", "roadmap", "basemaps", "add", "modify", "save",
         "remove", "searchlocation", "savewarning", "removewarning", "areyousure",
         "removeroadwarning", "confirm", "cancel", "pegmanlabel", "custommapimageerror",
+        "editorstatussaved", "editorstatusunsaved", "editorroaddeleted", "editorstagedeleted",
+        "errvalidroad", "erremptystage", "editorinvalidstage", "reorderstage", "preview",
+        "playstagewithqr", "playstagewithoutmoving", "discoveroutofsequence", "activitytoend",
+        "addsimplequestion", "editorinverserestrictions", "editordirectrestrictions",
+        "editorenabled", "editordisabled", "editornone", "editorclueshort", "editorownclueshort",
+        "editorviewfullclue", "editorqrshort",
+        "editorpreviousshort", "editorblockedshort", "editorwithoutgpsshort", "editoroutofsequenceshort",
+        "editorcopysource", "editorcopyfrom", "editorcopycount", "editorcopyexistingcount",
+        "editorcopytarget", "editorcopyappenddesc",
+        "editorcopyreplacedesc", "editorcopysuccess", "editorcopyempty",
       ];
       var stringsqueried = terms.map(function (term) {
         let comp = 'treasurehunt';
@@ -58,15 +78,15 @@ let init = {
           img.onload = function () {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
-            initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+            initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockState, custommapconfig);
           };
           img.onerror = function () {
             notification.alert("Error", i18n["custommapimageerror"], "Continue");
-            initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+            initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockState, custommapconfig);
           };
           img.src = custommapconfig.custombackgroundurl;
         } else {
-          initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockid, custommapconfig);
+          initedittreasurehunt(idModule, treasurehuntid, i18n, selectedroadid, lockState, custommapconfig);
         }
       });
     }, // End of function edittreasurehunt.
@@ -77,10 +97,16 @@ let init = {
  * @param {integer} treasurehuntid
  * @param {array} strings
  * @param {integer} selectedroadid
- * @param {integer} lockid
+ * @param {Object} lockState Current lock id, updated when the renewal replaces a deleted row.
  * @param {object} custommapconfig
  */
-function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
+function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockState, custommapconfig) {
+    var selectedRoadStorageKey = "treasurehuntSelectedRoad:" + treasurehuntid;
+    var copyNotice = sessionStorage.getItem("treasurehuntCopySuccess");
+    if (copyNotice) {
+      sessionStorage.removeItem("treasurehuntCopySuccess");
+      addToast(copyNotice, {type: "success"});
+    }
     var mapprojection = "EPSG:3857";
     var mapprojobj = new ol.proj.Projection(mapprojection);
     var custombaselayer = null;
@@ -142,177 +168,263 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           projection: mapprojection,
         }),
       });
-    let osmGeocoderXHR;
     // Load the control pane, treasurehunt and road list.
     if (geographictools) {
-      $('<div id="searchcontainer">').appendTo($("#controlpanel"));
-      $(
-        '<input type="search" placeholder="' +
-        strings["searchlocation"] +
-        '" class="searchaddress"/>'
-      ).appendTo($("#searchcontainer"));
-      $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo(
-        $("#searchcontainer")
+      var searchgroup = $("<div>", {class: "treasurehunt-editor-actions-group treasurehunt-editor-search"})
+        .appendTo($(".treasurehunt-editor-actions"));
+      $("<label>", {class: "visually-hidden", for: "searchaddress"})
+        .text(strings.searchlocation).appendTo(searchgroup);
+      var searchcontainer = $("<div>", {id: "searchcontainer"}).appendTo(searchgroup);
+      $("<input>", {type: "text", inputmode: "search", enterkeyhint: "search",
+        id: "searchaddress", class: "searchaddress"})
+        .attr("placeholder", strings.searchlocation).appendTo(searchcontainer);
+      $('<i class="fa fa-search searchicon" aria-hidden="true"></i>').prependTo(
+        searchcontainer
       );
       $(
-        '<span class="ui-icon  ui-icon-closethick closeicon invisible"></span>'
-      ).appendTo($("#searchcontainer"));
+        '<i class="fa fa-times closeicon invisible" aria-hidden="true"></i>'
+      ).appendTo(searchcontainer);
+      $("#opendataopen").appendTo(searchgroup);
     }
 
     // Creo el stagelist.
-    $('<ul id="stagelist"/>').prependTo($("#stagelistpanel"));
-    // Lo cargo como un sortable.
-    $("#stagelist")
-      .sortable({
-        handle: ".handle",
-        tolerance: "pointer",
-        zIndex: 9999,
-        opacity: 0.5,
-        forcePlaceholderSize: true,
-        cursorAt: {
-          top: -7,
-        },
-        cursor: "n-resize",
-        axis: "y",
-        items: "li:not(:hidden , .blocked)",
-        helper: "clone",
-        start: function (event, ui) {
-          var roadid = ui.item.attr("roadid"),
-            start_pos = ui.item.index('li[roadid="' + roadid + '"]'),
-            scrollParent = $(this).data("ui-sortable").scrollParent,
-            maxScrollTop =
-              scrollParent[0].scrollHeight -
-              scrollParent[0].clientHeight -
-              ui.helper.height();
-          ui.item.data("start_pos", start_pos);
-          // Set max scrollTop for sortable
-          // scrolling.
-          $(this).data("maxScrollTop", maxScrollTop);
-        },
-        sort: function (/*e, ui*/) {
-          // Check if scrolling is out of
-          // boundaries.
-          var scrollParent = $(this).data("ui-sortable").scrollParent,
-            maxScrollTop = $(this).data("maxScrollTop");
-          if (scrollParent.scrollTop() > maxScrollTop) {
-            scrollParent.scrollTop(maxScrollTop);
-          }
-        },
-        update: function (event, ui) {
-          var start_pos = ui.item.data("start_pos"),
-            roadid = ui.item.attr("roadid"),
-            end_pos = ui.item.index('li[roadid="' + roadid + '"]'),
-            $listitems = $(this).children('li[roadid="' + roadid + '"]'),
-            $listlength = $($listitems).length,
-            i;
-          if (start_pos === end_pos) {
-            return;
-          }
-          if (start_pos < end_pos) {
-            for (i = start_pos; i <= end_pos; i++) {
-              relocatestageList(
-                $listitems,
-                $listlength,
-                i,
-                dirtyStages,
-                originalStages,
-                treasurehunt.roads[roadid].vector
-              );
-            }
-          } else {
-            for (i = end_pos; i <= start_pos; i++) {
-              relocatestageList(
-                $listitems,
-                $listlength,
-                i,
-                dirtyStages,
-                originalStages,
-                treasurehunt.roads[roadid].vector
-              );
-            }
-          }
-          activateSaveButton();
-          dirty = true;
-        },
-      })
-      .disableSelection();
+    $("<ul>", {id: "stagelist", role: "listbox", class: "list-group list-group-flush"})
+      .attr("aria-label", strings.stage).prependTo($("#stagelistpanel"));
+    $("#stagelistpanel").attr({role: "region", "aria-label": strings.stage});
+    $("#editorworkspace").attr({role: "tabpanel", "aria-labelledby": "treasurehunt-map-label"});
+    setupStageReordering();
 
     /**
-     * Relocates and updates stage positions in a list of treasure hunt stages.
+     * Renumber a road's stages from N to 1 in their visible order.
      * @param {jQuery} $listitems - jQuery collection of list items representing stages
-     * @param {number} $listlength - Total length of the list
-     * @param {number} i - Current index being processed
      * @param {Array} dirtyStages - Array tracking modified stages
      * @param {Array} originalStages - Array containing original stage data
      * @param {Array} vector - Vector used for stage position calculations
-     * @returns {void}
-     *
-     * @description
-     * This function:
-     * 1. Calculates new position value for a stage
-     * 2. Updates stage position attribute and display number
-     * 3. Updates global stageposition if item is selected
-     * 4. Calls relocatenostage to update internal stage data
+     * @returns {boolean} Whether any position changed.
      */
-    function relocatestageList(
-      $listitems,
-      $listlength,
-      i,
-      dirtyStages,
-      originalStages,
-      vector
-    ) {
-      var newVal,
-        $item = $($listitems).get([i]),
-        roadid = $($item).attr("roadid");
-      newVal = Math.abs(
-        $($item).index('li[roadid="' + roadid + '"]') - $listlength
-      );
-      $($item).attr("stageposition", newVal);
-      $($item).find(".sortable-number").text(newVal);
-      // Si esta seleccionado cambiamos el valor de
-      // stageposition.
-      if ($($item).hasClass("ui-selected")) {
-        stageposition = newVal;
-      }
-      relocatenostage(
-        parseInt($($item).attr("stageid"), 10),
-        newVal,
-        parseInt($($item).attr("roadid"), 10),
-        dirtyStages,
-        originalStages,
-        vector
-      );
+    function renumberStages($listitems, dirtyStages, originalStages, vector) {
+      var changed = false;
+      $listitems.each(function (index, item) {
+        var $item = $(item);
+        var newPosition = $listitems.length - index;
+        if (parseInt($item.attr("stageposition"), 10) === newPosition) {
+          return;
+        }
+        changed = true;
+        $item.attr("stageposition", newPosition);
+        $item.find(".sortable-number").text(newPosition);
+        if ($item.hasClass("ui-selected")) {
+          stageposition = newPosition;
+        }
+        relocatenostage(parseInt($item.attr("stageid"), 10), newPosition,
+          parseInt($item.attr("roadid"), 10), dirtyStages, originalStages, vector);
+      });
+      return changed;
     }
 
-    // Creo el roadlistpanel.
-    $('<ul id="roadlist"/>').appendTo($("#roadlistpanel"));
-    /*
-     * Set control
-     *
-     * @type edit_L27.ol.style.Style
-     */
-    window.app = {};
-    var app = window.app;
-    /**
-     * @constructor
-     * @extends {ol.control.Control}
-     * @param {Object} opt_options Control options.
-     */
-    app.generateResizableControl = function (opt_options) {
-      var options = opt_options || {},
-        button = document.createElement("button"),
-        element = document.createElement("div");
-      button.innerHTML = "<>";
-      button.id = "egrip";
-      element.className = "ol-control ol-unselectable egrip-container";
-      element.appendChild(button);
-      ol.control.Control.call(this, {
-        element: element,
-        target: options.target,
+    /** Reorder stages with pointer and keyboard events, without jQuery UI sortable. */
+    function setupStageReordering() {
+      var list = document.getElementById("stagelist");
+      var scrollpanel = document.getElementById("stagelistpanel");
+      var drag = null;
+      var suppressClickUntil = 0;
+
+      /**
+       * Return the visible stages belonging to one road.
+       * @param {string} roadid Road identifier.
+       * @returns {Array<HTMLElement>} Stage rows in DOM order.
+       */
+      function visibleStages(roadid) {
+        return Array.from(list.children).filter(function (item) {
+          return item.matches('li[roadid="' + roadid + '"]') && item.getClientRects().length > 0 &&
+            !item.classList.contains("treasurehunt-stage-placeholder");
+        });
+      }
+
+      /**
+       * Persist the positions represented by the current DOM order.
+       * @param {string} roadid Road identifier.
+       */
+      function saveOrder(roadid) {
+        var $items = $(list).children('li[roadid="' + roadid + '"]');
+        if (renumberStages($items, dirtyStages, originalStages, treasurehunt.roads[roadid].vector)) {
+          activateSaveButton();
+          dirty = true;
+        }
+      }
+
+      /**
+       * Move the drop placeholder to the position under the pointer.
+       * @param {number} clientY Pointer position in the viewport.
+       */
+      function movePlaceholder(clientY) {
+        var stages = visibleStages(drag.roadid).filter(function (item) {
+          return item !== drag.row;
+        });
+        var before = stages.find(function (item) {
+          var bounds = item.getBoundingClientRect();
+          return clientY < bounds.top + bounds.height / 2;
+        });
+        if (before) {
+          list.insertBefore(drag.placeholder, before);
+        } else if (stages.length) {
+          list.insertBefore(drag.placeholder, stages[stages.length - 1].nextSibling);
+        }
+      }
+
+      /** Scroll the stage panel when the pointer is near an edge. */
+      function scrollWhileDragging() {
+        if (!drag || !drag.active) {
+          return;
+        }
+        var bounds = scrollpanel.getBoundingClientRect();
+        var scroll = drag.clientY < bounds.top + 32 ? -12 :
+          drag.clientY > bounds.bottom - 32 ? 12 : 0;
+        if (scroll) {
+          var previous = scrollpanel.scrollTop;
+          scrollpanel.scrollTop += scroll;
+          if (scrollpanel.scrollTop !== previous) {
+            movePlaceholder(drag.clientY);
+          }
+        }
+        drag.frame = window.requestAnimationFrame(scrollWhileDragging);
+      }
+
+      /** Create a placeholder and float the dragged stage above the list. */
+      function startDrag() {
+        var bounds = drag.row.getBoundingClientRect();
+        drag.placeholder = document.createElement("li");
+        drag.placeholder.className = "treasurehunt-stage-placeholder";
+        drag.placeholder.setAttribute("aria-hidden", "true");
+        drag.placeholder.style.height = bounds.height + "px";
+        drag.row.before(drag.placeholder);
+        drag.originalStyle = drag.row.getAttribute("style");
+        Object.assign(drag.row.style, {
+          position: "fixed",
+          top: bounds.top + "px",
+          left: bounds.left + "px",
+          width: bounds.width + "px",
+          height: bounds.height + "px",
+          zIndex: "1000",
+        });
+        drag.row.classList.add("treasurehunt-stage-dragging");
+        drag.active = true;
+        drag.frame = window.requestAnimationFrame(scrollWhileDragging);
+      }
+
+      /**
+       * Finish or cancel a pointer reorder.
+       * @param {PointerEvent} event Pointer event.
+       * @param {boolean} cancelled Whether to restore the original position.
+       */
+      function finishDrag(event, cancelled) {
+        if (!drag || event.pointerId !== drag.pointerId) {
+          return;
+        }
+        var completed = drag;
+        drag = null;
+        if (completed.frame) {
+          window.cancelAnimationFrame(completed.frame);
+        }
+        if (completed.active) {
+          if (cancelled) {
+            completed.placeholder.remove();
+          } else {
+            completed.placeholder.replaceWith(completed.row);
+          }
+          completed.row.classList.remove("treasurehunt-stage-dragging");
+          if (completed.originalStyle === null) {
+            completed.row.removeAttribute("style");
+          } else {
+            completed.row.setAttribute("style", completed.originalStyle);
+          }
+          suppressClickUntil = Date.now() + 250;
+          if (!cancelled) {
+            saveOrder(completed.roadid);
+          }
+        }
+        if (completed.handle.hasPointerCapture(completed.pointerId)) {
+          completed.handle.releasePointerCapture(completed.pointerId);
+        }
+      }
+
+      list.addEventListener("pointerdown", function (event) {
+        var handle = event.target.closest(".handle");
+        if (drag || !handle || !list.contains(handle) || !event.isPrimary || event.button !== 0) {
+          return;
+        }
+        var row = handle.closest("li");
+        if (!row || row.classList.contains("blocked") || !row.getClientRects().length) {
+          return;
+        }
+        var bounds = row.getBoundingClientRect();
+        drag = {
+          row: row,
+          handle: handle,
+          roadid: row.getAttribute("roadid"),
+          pointerId: event.pointerId,
+          startY: event.clientY,
+          offsetY: event.clientY - bounds.top,
+          clientY: event.clientY,
+          active: false,
+        };
+        handle.setPointerCapture(event.pointerId);
       });
-    };
-    ol.inherits(app.generateResizableControl, ol.control.Control);
+
+      list.addEventListener("pointermove", function (event) {
+        if (!drag || event.pointerId !== drag.pointerId) {
+          return;
+        }
+        drag.clientY = event.clientY;
+        if (!drag.active && Math.abs(event.clientY - drag.startY) > 5) {
+          startDrag();
+        }
+        if (drag.active) {
+          event.preventDefault();
+          drag.row.style.top = event.clientY - drag.offsetY + "px";
+          movePlaceholder(event.clientY);
+        }
+      });
+
+      list.addEventListener("pointerup", function (event) {
+        finishDrag(event, false);
+      });
+      list.addEventListener("pointercancel", function (event) {
+        finishDrag(event, true);
+      });
+      list.addEventListener("lostpointercapture", function (event) {
+        finishDrag(event, true);
+      });
+      list.addEventListener("click", function (event) {
+        if (Date.now() < suppressClickUntil && event.target.closest(".handle")) {
+          event.preventDefault();
+          event.stopImmediatePropagation();
+        }
+      }, true);
+
+      list.addEventListener("keydown", function (event) {
+        if (event.key !== "ArrowUp" && event.key !== "ArrowDown") {
+          return;
+        }
+        var handle = event.target.closest(".handle");
+        if (!handle || !list.contains(handle)) {
+          return;
+        }
+        var row = handle.closest("li");
+        var roadid = row.getAttribute("roadid");
+        var stages = visibleStages(roadid);
+        var target = stages[stages.indexOf(row) + (event.key === "ArrowUp" ? -1 : 1)];
+        if (!target) {
+          return;
+        }
+        event.preventDefault();
+        event.stopPropagation();
+        list.insertBefore(row, event.key === "ArrowUp" ? target : target.nextSibling);
+        saveOrder(roadid);
+        handle.focus({preventScroll: true});
+      });
+    }
+
     // Get style, vectors, map and interactions.
     var defaultstageStyle = new ol.style.Style({
       fill: new ol.style.Fill({
@@ -442,15 +554,48 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         zoom: 2,
         minZoom: 2,
       }),
-      controls: ol.control.defaults().extend([
-        layerSwitcher,
-        new app.generateResizableControl({
-          target: document.getElementById("stagelistpanel"),
-        }),
-      ]),
+      controls: ol.control.defaults().extend([layerSwitcher]),
     });
+    initEditorFullscreen(map);
+    const opendataButton = document.getElementById("opendataopen");
+    const opendataModal = document.getElementById("opendatamodal");
+    const opendataCollectorModal = document.getElementById("opendatacollectormodal");
+    if (geographictools && opendataButton && opendataModal && opendataCollectorModal) {
+      initOpenData(map, ol, layerSwitcher, new Bootstrap.Modal(opendataModal), {
+        stageContext: () => ({roadid, lockid: lockState.id, canCreate: !$("#addstage").prop("disabled")}),
+        beforeCreate: (ready, failed) => {
+          if (dirty) {
+            savestages(dirtyStages, originalStages, treasurehuntid, ready, [], lockState.id, failed);
+          } else {
+            ready();
+          }
+        },
+      }, new Bootstrap.Modal(opendataCollectorModal));
+    } else if (opendataButton) {
+      opendataButton.hidden = true;
+      opendataButton.style.display = "none";
+    }
+
+    var openStagePopover = null;
+    var openStagePopoverButton = null;
+    var stageClueModal = new Bootstrap.Modal(document.getElementById("stagecluemodal"));
+    /** Close the currently open stage information popover. */
+    function closeStagePopover() {
+      if (openStagePopover) {
+        openStagePopover.dispose();
+        openStagePopover = null;
+        openStagePopoverButton = null;
+      }
+    }
 
     map.on("click", function (evt) {
+      var opendatahit = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+        return layer && layer.get("treasurehuntOpenData") ? feature : null;
+      });
+      if (opendatahit) {
+        overlay.setPosition(undefined);
+        return;
+      }
       if (
         !Draw.getActive() &&
         !Modify.getActive() &&
@@ -460,20 +605,21 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     });
     layerSwitcher.showPanel();
-    // Creo el resizable.
-    $("#stagelistpanel").resizable({
-      handles: {
-        e: $("#egrip"),
-      },
-      resize: function (event, ui) {
-        // param event not used.
-        ui.size.height = ui.originalSize.height;
-      },
-      stop: function () {
-        // params event, ui not used.
+    $("#toggleleftpanel").on("click", function () {
+      var $workspace = $("#editorworkspace");
+      var $aside = $("#editoraside");
+      if (!$workspace.hasClass("is-collapsed")) {
+        $aside.css("height", $aside.outerHeight() + "px");
+      } else {
+        $aside.css("height", "");
+      }
+      var collapsed = $workspace.toggleClass("is-collapsed").hasClass("is-collapsed");
+      var label = $(this).attr(collapsed ? "data-expand-label" : "data-collapse-label");
+      $(this).attr({"aria-expanded": String(!collapsed), "aria-label": label, title: label});
+      $(this).find("i").toggleClass("fa-angle-double-left fa-angle-double-right");
+      window.requestAnimationFrame(function () {
         map.updateSize();
-      },
-      cancel: "",
+      });
     });
     var Modify = {
       init: function () {
@@ -642,6 +788,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             addNewFeatureToDirtySource(e.feature, originalStages, dirtyStages);
             // Clean the drawing vector.
             vectorDraw.getSource().clear();
+            $("#editmode").prop("disabled", !stageHasGeometry(stageid));
             activateSaveButton();
             dirty = true;
           }
@@ -883,6 +1030,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
               // I add the vectors to each road.
               // Cast string "0" or "1" to boolean.
               road.blocked = road.blocked == true;
+              road.stagecount = road.stages.features.length;
               addroad2ListPanel(road.id, road.name, road.blocked);
               features = geoJSON.readFeatures(road.stages, {
                 dataProjection: "EPSG:4326",
@@ -927,7 +1075,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
                 feature.setProperties({
                   idFeaturesPolygons: "" + idNewFeatures,
                 });
-                addstage2ListPanel(stageid, road.id, stageposition, name, clue, blocked);
+                addstage2ListPanel(stageid, road.id, stageposition, name, clue, blocked, feature.getProperties());
                 if (polygons.length === 0) {
                   emptystage(stageid);
                 }
@@ -935,13 +1083,18 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
               road.vector = vector;
               map.addLayer(vector);
               treasurehunt.roads[road.id] = road;
+              updateRoadValidation(road.id);
             });
+
+            $("#copystages").prop("hidden", roads.length < 2);
 
             // Ordeno la lista de etapas.
             sortList();
-            // I select the path of the URL if it exists or if not the first.
-            if (typeof treasurehunt.roads[selectedroadid] !== "undefined") {
-              roadid = selectedroadid;
+            // Prefer the road in the URL, then the road selected in this browser session.
+            var initialRoadId = typeof treasurehunt.roads[selectedroadid] !== "undefined" ?
+              selectedroadid : sessionStorage.getItem(selectedRoadStorageKey);
+            if (typeof treasurehunt.roads[initialRoadId] !== "undefined") {
+              roadid = initialRoadId;
               if (treasurehunt.roads[roadid].blocked) {
                 deactivateAddstage();
               } else {
@@ -997,9 +1150,11 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         }
       }
       if (noroads === 0) {
+        sessionStorage.removeItem(selectedRoadStorageKey);
         deactivateAddstage();
         $("#addroad").addClass("highlightbutton").blur();
         $("#stagelistpanel").addClass("invisible");
+        $("#editorworkspace").attr("aria-labelledby", "treasurehunt-map-label");
         map.updateSize();
       }
     }
@@ -1013,6 +1168,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {string} name - The name of the stage.
      * @param {string} clue - The clue or description associated with the stage.
      * @param {boolean} blocked - Indicates whether the stage is blocked or not.
+     * @param {Object} summary - Additional stage settings shown in the information card.
      *
      * This function dynamically creates a list item (`<li>`) element representing a stage
      * and appends it to the `#stagelist` element. If the stage is blocked, it adds a locked
@@ -1021,27 +1177,40 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * element for displaying the stage's clue, which can be opened by clicking the info icon.
      * If a stage with the same `stageid` already exists, the function logs a message to the console.
      */
-    function addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked) {
+    function addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked, summary) {
       if ($('#stagelist li[stageid="' + stageid + '"]').length < 1) {
+        var plainName = $("<div>").html(name).text();
         var li = $(
           '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="' + stageposition + '"/>')
           .appendTo($("#stagelist"));
-        li.addClass("ui-corner-all")
-          .append("<div class='stagename'>" + name + "</div>")
-          .append(
-            "<div class='modifystage'>" +
-            "<span class='ui-icon ui-icon-pencil'></span>" +
-            "<span class='ui-icon ui-icon-info' data-id='#dialoginfo" +
-            stageid +
-            "'>" +
-            "<div id='dialoginfo" + stageid + "' title='" + $($.parseHTML(name)).text() + "'>" +
-            clue +
-            "</div></span></div>"
-          );
+        li.addClass("list-group-item").attr({tabindex: 0, role: "option", "aria-selected": "false"});
+        $("<div>", {class: "stagename"}).html(name).appendTo(li);
+        var controls = $("<div>", {class: "modifystage"}).appendTo(li);
+        $("<button>", {type: "button", class: "treasurehunt-icon-button treasurehunt-edit-item"})
+          .attr("aria-label", strings.modify + " " + plainName)
+          .append('<i class="fa fa-pencil" aria-hidden="true"></i>')
+          .appendTo(controls);
+        $("<button>", {
+          type: "button",
+          class: "treasurehunt-icon-button treasurehunt-info-item",
+        }).attr({"aria-label": strings.stage + " " + plainName, "aria-haspopup": "dialog"})
+          .data("stageInfo", {
+            title: plainName,
+            clue: clue,
+            ownclue: summary.ownclue,
+            hasqr: summary.hasqr,
+            discoveroutofsequence: summary.discoveroutofsequence,
+            withoutgps: summary.playstagewithoutmoving,
+            activitytoendname: summary.activitytoendname,
+            hasquestion: summary.hasquestion,
+            inverserestrictions: summary.inverserestrictions,
+          })
+          .append('<i class="fa fa-info-circle" aria-hidden="true"></i>')
+          .appendTo(controls);
         if (blocked) {
           li.addClass("blocked").prepend(
             "<div class='nohandle validstage'>" +
-            "<span class='ui-icon ui-icon-locked'></span>" +
+            "<i class='fa fa-lock' aria-hidden='true'></i>" +
             "<span class='sortable-number'>" +
             stageposition +
             "</span></div>"
@@ -1049,19 +1218,21 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         } else {
           li.prepend(
             "<div class='handle validstage'>" +
-            "<span class='ui-icon ui-icon-arrowthick-2-n-s'></span>" +
+            "<i class='fa fa-arrows-v' aria-hidden='true'></i>" +
             "<span class='sortable-number'>" +
             stageposition +
             "</span></div>"
           );
-          li.children(".modifystage").prepend(
-            "<span class='ui-icon ui-icon-trash'></span>"
-          );
+          li.find(".handle").attr({
+            tabindex: 0,
+            role: "button",
+            "aria-label": strings.reorderstage + " " + plainName,
+          });
+          $("<button>", {type: "button", class: "treasurehunt-icon-button treasurehunt-delete-item"})
+            .attr("aria-label", strings.remove + " " + plainName)
+            .append('<i class="fa fa-trash" aria-hidden="true"></i>')
+            .prependTo(controls);
         }
-        $("#dialoginfo" + stageid).dialog({
-          maxHeight: 500,
-          autoOpen: false,
-        });
       } else {
         // console.log(
         //   "El li con " + stageid + " no ha podido crearse porque ya existia uno"
@@ -1082,12 +1253,23 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         var li = $(
           '<li roadid="' + roadid + '" blocked="' + blocked + '"/>'
         ).appendTo($("#roadlist"));
-        li.addClass("ui-corner-all")
-          .append("<div class='roadname'>" + name + "</div>")
-          .append(
-            "<div class='modifyroad'><span class='ui-icon ui-icon-trash'></span>" +
-            "<span class='ui-icon ui-icon-pencil'></span></div>"
-          );
+        li.addClass("nav-item nav-link")
+          .attr({id: "roadtab" + roadid, tabindex: -1, role: "tab",
+            "aria-selected": "false", "aria-controls": "editorworkspace"})
+          .append($("<div>", {class: "roadname"}).text(name));
+        var controls = $("<div>", {class: "modifyroad"}).appendTo(li);
+        $("<button>", {type: "button", "class": "btn btn-sm btn-outline-success treasurehunt-play-road", disabled: true})
+          .attr("aria-label", strings.preview + " " + name)
+          .append('<i class="fa fa-play" aria-hidden="true"></i> ' + strings.preview)
+          .appendTo(controls);
+        $("<button>", {type: "button", class: "treasurehunt-icon-button treasurehunt-delete-item"})
+          .attr("aria-label", strings.remove + " " + name)
+          .append('<i class="fa fa-trash" aria-hidden="true"></i>')
+          .appendTo(controls);
+        $("<button>", {type: "button", class: "treasurehunt-icon-button treasurehunt-edit-item"})
+          .attr("aria-label", strings.modify + " " + name)
+          .append('<i class="fa fa-pencil" aria-hidden="true"></i>')
+          .appendTo(controls);
       }
     }
     /**
@@ -1100,9 +1282,14 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {integer} roadid - The ID of the road to be removed from the lists.
      */
     function deleteRoad2ListPanel(roadid) {
+      closeStagePopover();
       var $li = $('#roadlist li[roadid="' + roadid + '"]');
       if ($li.length > 0) {
         var $lis = $('#stagelist li[roadid="' + roadid + '"]');
+        setIssueTooltip($li, "");
+        $lis.each(function () {
+          setIssueTooltip($(this), "");
+        });
         // I remove the li from the road list.
         $li.remove();
         // I remove all li from the stagelist.
@@ -1121,26 +1308,19 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * and relocates them as necessary to maintain the integrity of the list.
      */
     function deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons) {
+      closeStagePopover();
       var $li = $('#stagelist li[stageid="' + stageid + '"]');
       if ($li.length > 0) {
         var roadid = $li.attr("roadid");
-        var start_pos = $li.index('li[roadid="' + roadid + '"]');
+        setIssueTooltip($li, "");
         // I remove the li.
         $li.remove();
         var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
         // I check the rest of the stages on the list.
-        check_stage_list($stagelist);
-        var $listlength = $stagelist.length;
-        // I collect the rest.
-        for (var i = 0; i <= start_pos - 1; i++) {
-          relocatestageList(
-            $stagelist,
-            $listlength,
-            i,
-            dirtySource,
-            originalStages,
-            vectorOfPolygons
-          );
+        check_stage_list($stagelist, roadid);
+        if (renumberStages($stagelist, dirtySource, originalStages, vectorOfPolygons)) {
+          activateSaveButton();
+          dirty = true;
         }
       }
     }
@@ -1166,17 +1346,50 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     }
 
     /**
-     * Marks a stage as invalid and performs additional checks based on the road ID.
-     *
-     * This function updates the visual state of a stage by marking it as invalid.
-     * If a road ID is provided, it highlights a button and checks if there are
-     * multiple stages on the same road without geometry, displaying an error message if necessary.
-     *
-     * @param {integer} stageid - The ID of the stage to be marked as invalid.
-     * @param {integer} [roadid] - The ID of the road associated with the stage. Optional.
+     * Attach a Bootstrap tooltip to an invalid stage or road.
+     * @param {jQuery} $target Target element.
+     * @param {string} message Validation message, or empty to clear it.
+     */
+    function setIssueTooltip($target, message) {
+      if (!$target.length || $target.data("issue") === message) {
+        return;
+      }
+      var tooltip = Bootstrap.Tooltip.getInstance($target[0]);
+      if (tooltip) {
+        tooltip.dispose();
+      }
+      $target.data("issue", message).removeAttr("title data-bs-original-title");
+      if (message) {
+        $target.attr("title", message);
+        new Bootstrap.Tooltip($target[0], {trigger: "hover focus", container: "body"});
+      }
+    }
+
+    /**
+     * Show whether a road has enough valid stages and no empty stages.
+     * @param {number} currentRoadId Road identifier.
+     */
+    function updateRoadValidation(currentRoadId) {
+      var $stages = $('#stagelist li[roadid="' + currentRoadId + '"]');
+      var invalidCount = $stages.filter(".invalidstage").length;
+      var validCount = $stages.length - invalidCount;
+      var problem = validCount < 2 ? strings.errvalidroad :
+        invalidCount > 0 ? strings.erremptystage : "";
+      var $tab = $('#roadlist li[roadid="' + currentRoadId + '"]');
+      $tab.toggleClass("invalidroad", Boolean(problem));
+      setIssueTooltip($tab, problem);
+      $tab.find(".treasurehunt-play-road").prop("disabled", Boolean(problem));
+    }
+
+    /**
+     * Mark an empty stage and update the corresponding road.
+     * @param {integer} stageid The stage identifier.
+     * @param {integer} [roadid] The road identifier.
      */
     function emptystage(stageid, roadid) {
       var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
+      $treasurehunt.addClass("invalidstage");
+      setIssueTooltip($treasurehunt, strings.editorinvalidstage);
       $treasurehunt
         .children(".handle,.nohandle")
         .addClass("invalidstage")
@@ -1185,10 +1398,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       // geometry.
       if (roadid) {
         $("label[for='addradio']").addClass("highlightbutton");
-        var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
-        if ($stagelist.length >= 2) {
-          $("#erremptystage").removeClass("invisible");
-        }
+        updateRoadValidation(roadid);
       }
     }
 
@@ -1202,6 +1412,8 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function notEmptystage(stageid, roadid) {
       var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
+      $treasurehunt.removeClass("invalidstage");
+      setIssueTooltip($treasurehunt, "");
       $treasurehunt
         .children(".handle, .nohandle")
         .addClass("validstage")
@@ -1210,10 +1422,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         // I check if there are any stages on this road without
         // geometry.
         $("label[for='addradio']").removeClass("highlightbutton");
-        var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
-        if ($stagelist.find(".invalidstage").length === 0) {
-          $("#erremptystage").addClass("invisible");
-        }
+        updateRoadValidation(roadid);
       }
     }
 
@@ -1252,6 +1461,15 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       activateNavigationMode();
     }
     /**
+     * Check whether the selected stage currently contains at least one polygon.
+     * @param {number} selectedstageid The stage identifier.
+     * @returns {boolean} Whether the stage has geometry.
+     */
+    function stageHasGeometry(selectedstageid) {
+      var feature = dirtyStages.getFeatureById(selectedstageid) || originalStages.getFeatureById(selectedstageid);
+      return Boolean(feature && feature.getGeometry() && feature.getGeometry().getPolygons().length);
+    }
+    /**
      * Activates the navigation mode by updating the UI and disabling other modes.
      * This function modifies the CSS classes and properties of the mode buttons
      * to visually indicate the active navigation mode. It also disables the
@@ -1270,6 +1488,8 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         .prop("z-index", 999);
       Draw.setActive(false);
       Modify.setActive(false);
+      $("#drawmode, #editmode").attr("aria-pressed", "false");
+      $("#navmode").attr("aria-pressed", "true");
     }
     /**
      * Activate buttons and tools into Modify mode.
@@ -1280,6 +1500,8 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       $("#navmode").removeClass("selectedbutton").prop("z-index", "Infinity");
       Draw.setActive(false);
       Modify.setActive(true);
+      $("#drawmode, #navmode").attr("aria-pressed", "false");
+      $("#editmode").attr("aria-pressed", "true");
     }
     /**
      * Activate Draw mode. Update UI and tools.
@@ -1293,19 +1515,29 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       $("#navmode").removeClass("selectedbutton").prop("z-index", "auto");
       Modify.setActive(false);
       Draw.setActive(true);
+      $("#editmode, #navmode").attr("aria-pressed", "false");
+      $("#drawmode").attr("aria-pressed", "true");
     }
     /**
      * Activate Edit mode. Update UI and tools.
      */
     function activateEdition() {
       $("#drawmode").prop("disabled", false);
-      $("#editmode").prop("disabled", false);
-      activateModify();
+      var hasgeometry = stageHasGeometry(stageid);
+      $("#editmode").prop("disabled", !hasgeometry);
+      if (hasgeometry) {
+        activateModify();
+      } else {
+        activateNavigationMode();
+      }
     }
     /**
      * Activate Save button.
      */
     function activateSaveButton() {
+      if ($("#savestage").prop("disabled")) {
+        addToast(strings.editorstatusunsaved, {type: "warning"});
+      }
       $("#savestage").prop("disabled", false);
     }
     /**
@@ -1338,8 +1570,9 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     /**
      *
      * @param {array} $stagelist
+     * @param {number} currentRoadId Road identifier.
      */
-    function check_stage_list($stagelist) {
+    function check_stage_list($stagelist, currentRoadId) {
       if ($stagelist.length > 0) {
         $("#stagelistpanel").removeClass("invisible");
         map.updateSize();
@@ -1347,18 +1580,13 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         $("#stagelistpanel").addClass("invisible");
         map.updateSize();
       }
-      if ($stagelist.length < 2) {
+      if ($stagelist.length === 0) {
         $("#addstage").addClass("highlightbutton").blur();
-        $("#errvalidroad").removeClass("invisible");
-        $("#erremptystage").addClass("invisible");
-      } else if ($stagelist.find(".invalidstage").length > 0) {
-        $("#addstage").removeClass("highlightbutton");
-        $("#errvalidroad").addClass("invisible");
-        $("#erremptystage").removeClass("invisible");
       } else {
         $("#addstage").removeClass("highlightbutton");
-        $("#errvalidroad").addClass("invisible");
-        $("#erremptystage").addClass("invisible");
+      }
+      if (currentRoadId) {
+        updateRoadValidation(currentRoadId);
       }
     }
     /**
@@ -1368,17 +1596,24 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {ol.map} map
      */
     function selectRoad(roadid, vectorOfPolygons, map) {
+      sessionStorage.setItem(selectedRoadStorageKey, String(roadid));
+      closeStagePopover();
+      $("#copystages").prop("disabled", Boolean(treasurehunt.roads[roadid].blocked));
       // I clean all the selected features, hide all
       // the li and I only show the ones with the roadid.
-      $("#stagelist li").removeClass("ui-selected").hide();
+      $("#stagelist li").removeClass("ui-selected").attr("aria-selected", "false").hide();
       var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
       $stagelist.show();
-      check_stage_list($stagelist);
+      check_stage_list($stagelist, roadid);
       // If the li road is not marked I mark it.
-      $("#roadlist li[roadid='" + roadid + "']").addClass("ui-selected");
+      $("#roadlist li").removeClass("ui-selected active")
+        .attr({"aria-selected": "false", tabindex: -1});
+      $("#roadlist li[roadid='" + roadid + "']").addClass("ui-selected active")
+        .attr({"aria-selected": "true", tabindex: 0});
+      $("#editorworkspace").attr("aria-labelledby", "roadtab" + roadid);
       // I leave only the vector with the visible roadid .
       map.getLayers().forEach(function (layer) {
-        if (layer instanceof ol.layer.Vector) {
+        if (layer instanceof ol.layer.Vector && !layer.get('treasurehuntOpenData')) {
           layer.setVisible(false);
         }
       });
@@ -1479,13 +1714,60 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     }
     /**
+     * Preserve the second editor and its selected map engine after editing a form.
+     * @param {string} url Form URL.
+     * @returns {string} URL with editor context when needed.
+     */
+    function edit2FormUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('editor', 'edit2');
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Return to the editor that opened the operation.
+     * @param {string} url Classic editor URL.
+     * @returns {string} Selected editor URL.
+     */
+    function currentEditorUrl(url) {
+      if (!window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url.replace('edit.php', 'edit2.php'), window.location.href);
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (player) {
+        target.searchParams.set('playertype', player);
+      }
+      return target.href;
+    }
+    /**
+     * Keep the explicitly requested player for a preview.
+     * @param {string} url Preview URL.
+     * @returns {string} URL with an optional player override.
+     */
+    function currentPreviewUrl(url) {
+      const player = new URLSearchParams(window.location.search).get('playertype');
+      if (!player || !window.location.pathname.endsWith('/edit2.php')) {
+        return url;
+      }
+      const target = new URL(url, window.location.href);
+      target.searchParams.set('playertype', player);
+      return target.href;
+    }
+    /**
      * Forms
      * @param {integer} stageid
      * @param {integer} idModule
      */
     function editFormstageEntry(stageid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&id=" + stageid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1494,7 +1776,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormstageEntry(roadid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&roadid=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Navigate to edit road page.
@@ -1503,7 +1785,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function editFormRoadEntry(roadid, idModule) {
       var url = "editroad.php?cmid=" + idModule + "&id=" + roadid;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Forms
@@ -1511,7 +1793,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      */
     function newFormRoadEntry(idModule) {
       var url = "editroad.php?cmid=" + idModule;
-      window.location.href = url;
+      window.location.href = edit2FormUrl(url);
     }
     /**
      * Delete a road in the server via AJAX.
@@ -1550,6 +1832,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             // the map layer.
             map.removeLayer(treasurehunt.roads[roadid].vector);
             delete treasurehunt.roads[roadid];
+            addToast(strings.editorroaddeleted, {type: "success"});
             selectfirstroad(treasurehunt.roads, map);
             deactivateEdition();
             var features = originalStages.getFeatures();
@@ -1633,6 +1916,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
                 vectorOfPolygons.getSource().removeFeature(polygonFeature);
               }
             }
+            addToast(strings.editorstagedeleted, {type: "success"});
           }
         })
         .fail(function (error) {
@@ -1649,20 +1933,22 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {function} callback
      * @param {array} options
      * @param {integer} lockid
+     * @param {function} errorcallback Optional callback when saving fails.
      */
-    function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid) {
+    function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid, errorcallback) {
       $(".treasurehunt-editor-loader").show();
       var geojsonformat = new ol.format.GeoJSON();
       var dirtyfeatures = dirtySource.getFeatures();
       var features = [];
       var auxfeature;
-      // Remove unnecessary feature properties .
+      // Send only the properties accepted by update_stages. The editor's
+      // feature also contains read-only data used by the stage summary.
       dirtyfeatures.forEach(function (dirtyfeature) {
-        auxfeature = dirtyfeature.clone();
-        auxfeature.unset("idFeaturesPolygons");
-        auxfeature.unset("name");
-        auxfeature.unset("clue");
-        auxfeature.unset("treasurehuntid");
+        auxfeature = new ol.Feature({
+          roadid: Number(dirtyfeature.get("roadid")),
+          stageposition: Number(dirtyfeature.get("stageposition")),
+          geometry: dirtyfeature.getGeometry() ? dirtyfeature.getGeometry().clone() : null,
+        });
         auxfeature.setId(dirtyfeature.getId());
         features.push(auxfeature);
       });
@@ -1685,6 +1971,9 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
+            if (errorcallback) {
+              errorcallback();
+            }
           } else {
             var originalFeature;
             // I pass the "dirty" features to the object
@@ -1700,6 +1989,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             // Disable the save button.
             deactivateSaveButton();
             dirty = false;
+            addToast(strings.editorstatussaved, {type: "success"});
             if (typeof callback === "function" && options instanceof Array) {
               callback.apply(null, options);
             }
@@ -1709,79 +1999,30 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           $(".treasurehunt-editor-loader").hide();
           // console.log(error);
           notification.alert("Error", error.message, "Continue");
+          if (errorcallback) {
+            errorcallback();
+          }
         });
     }
 
-    $(".searchaddress")
-      .autocomplete({
-        minLength: 4,
-        source: function (request, response) {
-          var term = request.term;
-          // Abort xhr request if a new one arrives
-          if (osmGeocoderXHR) {
-            osmGeocoderXHR.abort();
+    const addressAutocomplete = initAddressAutocomplete(
+      document.getElementById("searchaddress"),
+      term => OSMGeocoder.search(term),
+      result => {
+        if (result.boundingbox && result.boundingbox.length === 4) {
+          const bounds = [result.boundingbox[2], result.boundingbox[0],
+            result.boundingbox[3], result.boundingbox[1]].map(Number);
+          if (bounds.every(Number.isFinite)) {
+            flyTo(map, null, ol.proj.transformExtent(bounds, "EPSG:4326", mapprojection));
           }
-          osmGeocoderXHR = OSMGeocoder.search(term)
-            .done((data) => {
-              if (data.length === 0) {
-                response();
-                return;
-              }
-              var total = [];
-              for (var i = 0, l = data.length; i < l; i++) {
-                var latitude;
-                var longitude;
-                latitude = data[i].lat;
-                longitude = data[i].lon;
-                var result = {
-                  value: data[i].display_name,
-                  latitude: latitude,
-                  longitude: longitude,
-                  boundingbox: data[i].boundingbox,
-                };
-                total[i] = result;
-              }
-              response(total);
-            })
-            .fail(() => {
-              response();
-            })
-            .always(() => {
-              osmGeocoderXHR = null;
-            });
-        },
-        select: function (event, ui) {
-          if (ui.item.boundingbox) {
-            var extend = [];
-            extend[0] = parseFloat(ui.item.boundingbox[2]);
-            extend[1] = parseFloat(ui.item.boundingbox[0]);
-            extend[2] = parseFloat(ui.item.boundingbox[3]);
-            extend[3] = parseFloat(ui.item.boundingbox[1]);
-            extend = ol.proj.transformExtent(
-              extend,
-              "EPSG:4326",
-              mapprojection
-            );
-            flyTo(map, null, extend);
-          } else {
-            var point = ol.proj.fromLonLat([
-              ui.item.longitude,
-              ui.item.latitude,
-            ]);
-            flyTo(map, point);
+        } else {
+          const point = [Number(result.lon), Number(result.lat)];
+          if (point.every(Number.isFinite)) {
+            flyTo(map, ol.proj.fromLonLat(point));
           }
-        },
-        autoFocus: true,
-      })
-      .on("click", function () {
-        $(this).autocomplete("search", $(this).value);
-      });
-    // Necessary for regulating the width of the
-    // autocomplete.
-    $.ui.autocomplete.prototype._resizeMenu = function () {
-      var ul = this.menu.element;
-      ul.outerWidth(this.element.outerWidth());
-    };
+        }
+      }
+    );
     $("#drawmode").css("position", "relative").on("click", activateDraw);
     $("#editmode").css("position", "relative").on("click", activateModify);
     $("#navmode")
@@ -1795,7 +2036,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           treasurehuntid,
           newFormstageEntry,
           [roadid, idModule],
-          lockid
+          lockState.id
         );
       } else {
         newFormstageEntry(roadid, idModule);
@@ -1804,9 +2045,100 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     $("#addroad").on("click", function () {
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid,
-                  newFormRoadEntry, [idModule], lockid);
+                  newFormRoadEntry, [idModule], lockState.id);
       } else {
         newFormRoadEntry(idModule);
+      }
+    });
+    var copyModalElement = document.getElementById("copystagesmodal");
+    var copyModal = copyModalElement ? new Bootstrap.Modal(copyModalElement) : null;
+    var sourceRoadId = null;
+    /** Update the description and available action for the chosen source road. */
+    function updateCopySummary() {
+      var source = treasurehunt.roads[sourceRoadId];
+      var target = treasurehunt.roads[roadid];
+      var $summary = $("#copystagessummary").empty();
+      if (!source || !target) {
+        $("#copystagessave").prop("disabled", true);
+        return;
+      }
+      $("<div>", {class: "fw-bold mb-2"}).text(source.name).appendTo($summary);
+      $("<p>", {class: "mb-2"}).text(strings.editorcopycount + " " + source.stagecount)
+        .appendTo($summary);
+      $("<p>", {class: "mb-2"}).text(strings.editorcopytarget + " " + target.name)
+        .appendTo($summary);
+      $("<p>", {class: "mb-2"}).text(strings.editorcopyexistingcount + " " + target.stagecount)
+        .appendTo($summary);
+      $("<div>", {class: "alert alert-info small mb-0", role: "note"})
+        .text($("#copystagesreplace").prop("checked") ?
+          strings.editorcopyreplacedesc : strings.editorcopyappenddesc).appendTo($summary);
+      if (source.stagecount === 0) {
+        $("<p>", {class: "text-muted small mt-2 mb-0"}).text(strings.editorcopyempty).appendTo($summary);
+      }
+      $("#copystagessave").prop("disabled", source.stagecount === 0 || target.blocked);
+    }
+    $("#copystages").on("click", function () {
+      var target = treasurehunt.roads[roadid];
+      if (!target || target.blocked) {
+        return;
+      }
+      sourceRoadId = null;
+      $("#copystagesreplace").prop("checked", false);
+      var $options = $("#copystagesroads").empty();
+      Object.values(treasurehunt.roads).forEach(function (source) {
+        if (String(source.id) === String(roadid)) {
+          return;
+        }
+        var $label = $("<label>", {class: "list-group-item list-group-item-action p-3 border rounded mb-2 " +
+          "d-flex align-items-center"}).appendTo($options);
+        $("<input>", {type: "radio", name: "copystagessource", class: "form-check-input me-3 flex-shrink-0"})
+          .val(source.id).appendTo($label);
+        $("<span>").text(strings.editorcopyfrom + " " + source.name).appendTo($label);
+      });
+      $("#copystagessummary").text(strings.editorcopysource);
+      $("#copystagessave").prop("disabled", true);
+      copyModal.show();
+    });
+    $("#copystagesroads").on("change", "input", function () {
+      sourceRoadId = this.value;
+      $("#copystagesroads .list-group-item").removeClass("active");
+      $(this).closest("label").addClass("active");
+      updateCopySummary();
+    });
+    $("#copystagesreplace").on("change", updateCopySummary);
+    $("#copystagessave").on("click", function () {
+      if (!sourceRoadId || !treasurehunt.roads[roadid] || treasurehunt.roads[roadid].blocked) {
+        return;
+      }
+      var source = treasurehunt.roads[sourceRoadId];
+      var selectedSourceId = sourceRoadId;
+      var targetid = roadid;
+      var replace = $("#copystagesreplace").prop("checked");
+      var copy = function () {
+        $("#copystagessave").prop("disabled", true);
+        ajax.call([{
+          methodname: "mod_treasurehunt_copy_stages",
+          args: {
+            treasurehuntid: treasurehuntid,
+            sourceroadid: Number(selectedSourceId),
+            targetroadid: Number(targetid),
+            replaceexisting: replace,
+            lockid: lockState.id,
+          },
+        }])[0].done(function () {
+          copyModal.hide();
+          sessionStorage.setItem("treasurehuntCopySuccess", strings.editorcopysuccess);
+          window.location.assign(currentEditorUrl("edit.php?id=" + encodeURIComponent(idModule) +
+            "&roadid=" + encodeURIComponent(targetid)));
+        }).fail(function (error) {
+          $("#copystagessave").prop("disabled", false);
+          notification.exception(error);
+        });
+      };
+      if (dirty) {
+        savestages(dirtyStages, originalStages, treasurehuntid, copy, [], lockState.id);
+      } else if (source.stagecount > 0) {
+        copy();
       }
     });
     $("#removefeature").on("click", function () {
@@ -1818,6 +2150,10 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         function () {
           removefeatureToDirtySource(selectedFeatures, originalStages, dirtyStages, treasurehunt.roads[roadid].vector);
           removefeatures(selectedFeatures, treasurehunt.roads[roadid].vector);
+          if (!stageHasGeometry(stageid)) {
+            $("#editmode").prop("disabled", true);
+            activateNavigationMode();
+          }
           // Disable the delete button and active on save changes.
           deactivateDeleteButton();
           activateSaveButton();
@@ -1826,16 +2162,166 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       );
     });
     $("#savestage").on("click", function () {
-      savestages(dirtyStages, originalStages, treasurehuntid, null, null, lockid);
+      savestages(dirtyStages, originalStages, treasurehuntid, null, null, lockState.id);
     });
-    $("#stagelist").on("click", ".ui-icon-info, .ui-icon-alert", function () {
-      var id = $(this).data("id");
-      // Open dialogue.
-      $(id).dialog("open");
-      // Remove focus from the buttons.
-      $(".ui-dialog :button").blur();
+    $("#stagelist").on("click", ".treasurehunt-info-item", function () {
+      if (openStagePopoverButton === this) {
+        closeStagePopover();
+        return;
+      }
+      closeStagePopover();
+      var info = $(this).data("stageInfo");
+      var $card = $("<div>", {class: "card border-0 treasurehunt-stage-summary"});
+      $("<div>", {class: "card-header fw-semibold"}).text(info.title).appendTo($card);
+      var $body = $("<div>", {class: "card-body"}).appendTo($card);
+      /**
+       * Copy a short HTML preview with only safe formatting tags.
+       * @param {Node} node Source HTML node.
+       * @param {Node} target Destination node.
+       * @param {Object} state Remaining character count and truncation state.
+       */
+      function copyPreview(node, target, state) {
+        if (node.nodeType === Node.ELEMENT_NODE &&
+            ["script", "style", "iframe", "object", "svg", "img", "video", "audio", "form"]
+              .includes(node.nodeName.toLowerCase())) {
+          return;
+        }
+        if (!state.remaining) {
+          state.truncated = state.truncated || Boolean(node.textContent.trim());
+          return;
+        }
+        if (node.nodeType === Node.TEXT_NODE) {
+          var chars = Array.from(node.textContent.replace(/\s+/g, " "));
+          var available = state.remaining;
+          target.appendChild(document.createTextNode(chars.slice(0, available).join("")));
+          state.remaining = Math.max(0, available - chars.length);
+          state.truncated = state.truncated || chars.length > available;
+          return;
+        }
+        if (node.nodeType !== Node.ELEMENT_NODE) {
+          return;
+        }
+        var tag = node.nodeName.toLowerCase();
+        var allowed = ["p", "br", "strong", "b", "em", "i", "u", "ul", "ol", "li", "blockquote", "code"];
+        var wrapper = allowed.includes(tag) ? document.createElement(tag) : target;
+        if (tag === "br") {
+          target.appendChild(wrapper);
+          return;
+        }
+        Array.from(node.childNodes).forEach(function (child) {
+          copyPreview(child, wrapper, state);
+        });
+        if (wrapper !== target && wrapper.textContent.trim()) {
+          target.appendChild(wrapper);
+        }
+      }
+      /**
+       * Show a short clue and a button to read its full content.
+       * @param {string} label Visible clue label.
+       * @param {string} html Formatted full clue.
+       * @param {string} kind Clue field to open.
+       */
+      function addCluePreview(label, html, kind) {
+        var cluehtml = new DOMParser().parseFromString(html || "", "text/html").body;
+        var hasContent = Boolean(cluehtml.textContent.trim() ||
+          cluehtml.querySelector("img, video, audio, iframe, object, embed"));
+        var $heading = $("<div>", {class: "treasurehunt-stage-clue-heading"}).appendTo($body);
+        $("<span>", {class: "treasurehunt-stage-clue-label"}).text(label).appendTo($heading);
+        if (hasContent) {
+          $("<button>", {type: "button", class: "btn btn-link btn-sm treasurehunt-open-full-clue"})
+            .attr({"data-clue-kind": kind, "aria-label": strings.editorviewfullclue + ": " + label + " " + info.title,
+              title: strings.editorviewfullclue})
+            .append('<i class="fa fa-arrow-right" aria-hidden="true"></i>')
+            .appendTo($heading);
+        }
+        var $clue = $("<div>", {class: "treasurehunt-stage-clue"}).appendTo($body);
+        var previewstate = {remaining: 160, truncated: false};
+        Array.from(cluehtml.childNodes).forEach(function (node) {
+          copyPreview(node, $clue[0], previewstate);
+        });
+        if (!$clue.text().trim()) {
+          $clue.text(hasContent ? strings.editorviewfullclue : strings.editornone);
+        } else if (previewstate.truncated) {
+          $clue.append(document.createTextNode("…"));
+        }
+      }
+      addCluePreview(strings.editorclueshort, info.clue, "next");
+      addCluePreview(strings.editorownclueshort, info.ownclue, "own");
+
+      var direct = [];
+      if (info.activitytoendname) {
+        direct.push(strings.activitytoend + ": " + info.activitytoendname);
+      }
+      if (info.hasquestion) {
+        direct.push(strings.addsimplequestion);
+      }
+      var inverse = info.inverserestrictions || [];
+      var $statuses = $("<div>", {class: "treasurehunt-stage-statuses"}).appendTo($body);
+      /**
+       * Add one icon led and its short description.
+       * @param {Array<string>} icons Font Awesome icon names.
+       * @param {string} label Short visible label.
+       * @param {string} fullLabel Accessible description.
+       * @param {boolean} enabled Whether the setting is active.
+       * @param {string} detail Visible setting value or activity names.
+       */
+      function addStatus(icons, label, fullLabel, enabled, detail) {
+        var $status = $("<div>", {
+          class: "treasurehunt-stage-status " + (enabled ? "is-active" : "is-inactive"),
+        }).attr({role: "group", "aria-label": fullLabel + ": " + detail, title: fullLabel + ": " + detail})
+          .appendTo($statuses);
+        var $icons = $("<div>", {class: "treasurehunt-stage-status-icons", "aria-hidden": "true"})
+          .appendTo($status);
+        icons.forEach(function (icon) {
+          $("<i>", {class: "fa fa-" + icon}).appendTo($icons);
+        });
+        $("<span>", {class: "treasurehunt-stage-status-label"}).text(label).appendTo($status);
+        $("<span>", {class: "treasurehunt-stage-status-detail"}).text(detail).appendTo($status);
+      }
+      addStatus(["qrcode"], strings.editorqrshort, strings.playstagewithqr, Boolean(info.hasqr),
+        info.hasqr ? strings.editorenabled : strings.editordisabled);
+      addStatus(["random"], strings.editoroutofsequenceshort, strings.discoveroutofsequence,
+        Boolean(info.discoveroutofsequence), info.discoveroutofsequence ? strings.editorenabled : strings.editordisabled);
+      addStatus(["window-maximize", "arrow-right", "lock"], strings.editorpreviousshort,
+        strings.editordirectrestrictions, direct.length > 0, direct.join(" · ") || strings.editornone);
+      addStatus(["lock", "arrow-right", "window-maximize"], strings.editorblockedshort,
+        strings.editorinverserestrictions, inverse.length > 0, inverse.join(" · ") || strings.editornone);
+      addStatus(["mouse-pointer", "hand-pointer-o"], strings.editorwithoutgpsshort,
+        strings.playstagewithoutmoving, Boolean(info.withoutgps),
+        info.withoutgps ? strings.editorenabled : strings.editordisabled);
+      openStagePopover = Bootstrap.Popover.getOrCreateInstance(this, {
+        content: $card[0],
+        html: true,
+        trigger: "manual",
+        container: "body",
+        placement: "auto",
+        customClass: "treasurehunt-stage-popover",
+      });
+      openStagePopoverButton = this;
+      openStagePopover.show();
     });
-    $("#stagelist").on("click", ".ui-icon-trash", function () {
+    $(document).on("click", ".treasurehunt-open-full-clue", function () {
+      var info = $(openStagePopoverButton).data("stageInfo");
+      if (!info) {
+        return;
+      }
+      var own = $(this).attr("data-clue-kind") === "own";
+      $("#stagecluemodaltitle").text(info.title + " — " +
+        (own ? strings.editorownclueshort : strings.editorclueshort));
+      $("#stagecluemodalbody").html(own ? info.ownclue : info.clue);
+      closeStagePopover();
+      stageClueModal.show();
+    });
+    $(document).on("pointerdown.treasurehunt-stage-info", function (event) {
+      if (!$(event.target).closest(".treasurehunt-info-item, .popover").length) {
+        closeStagePopover();
+      }
+    }).on("keydown.treasurehunt-stage-info", function (event) {
+      if (event.key === "Escape") {
+        closeStagePopover();
+      }
+    });
+    $("#stagelist").on("click", ".treasurehunt-delete-item", function () {
       var $this_li = $(this).parents("li");
       notification.confirm(
         strings["areyousure"],
@@ -1844,29 +2330,50 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         strings["cancel"],
         function () {
           var stageid = parseInt($this_li.attr("stageid"));
-          deletestage(stageid, dirtyStages, originalStages, treasurehunt.roads[roadid].vector, treasurehuntid, lockid);
+          deletestage(stageid, dirtyStages, originalStages, treasurehunt.roads[roadid].vector,
+            treasurehuntid, lockState.id);
         }
       );
     });
-    $("#stagelist").on("click", ".ui-icon-pencil", function () {
+    $("#stagelist").on("click", ".treasurehunt-edit-item", function () {
       // I'm looking for the stageid of the li containing the
       // selected trash can.
 
       var stageid = parseInt($(this).parents("li").attr("stageid"));
       // If it's dirty I save the stage.
       if (dirty) {
-        savestages(dirtyStages, originalStages, treasurehuntid, editFormstageEntry, [stageid, idModule], lockid);
+        savestages(dirtyStages, originalStages, treasurehuntid, editFormstageEntry,
+          [stageid, idModule], lockState.id);
       } else {
         editFormstageEntry(stageid, idModule);
       }
     });
 
+    $("#stagelist, #roadlist").on("keydown", "li", function (e) {
+      if (e.target === this && (e.key === "Enter" || e.key === " ")) {
+        e.preventDefault();
+        $(this).trigger("click");
+      }
+    });
+    $("#roadlist").on("keydown", "li", function (event) {
+      if (event.key !== "ArrowLeft" && event.key !== "ArrowRight") {
+        return;
+      }
+      event.preventDefault();
+      var tabs = $("#roadlist li");
+      var offset = event.key === "ArrowRight" ? 1 : -1;
+      var next = (tabs.index(this) + offset + tabs.length) % tabs.length;
+      tabs.eq(next).trigger("click")[0].focus({preventScroll: true});
+    });
     $("#stagelist").on("click", "li", function (e) {
-      if ($(e.target).is(".handle ,.nohandle, .ui-icon , .sortable-number")) {
+      if ($(e.target).closest(".treasurehunt-icon-button").length ||
+          (!$("#editorworkspace").hasClass("is-collapsed") &&
+           $(e.target).closest(".handle, .nohandle").length)) {
         e.preventDefault();
         return;
       }
-      $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+      $(this).addClass("ui-selected").attr("aria-selected", "true")
+        .siblings().removeClass("ui-selected").attr("aria-selected", "false");
       // I select the stageid of my attribute
       // custom.
       stageposition = parseInt($(this).attr("stageposition"));
@@ -1889,11 +2396,12 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
     });
     $("#roadlist").on("click", "li", function (e) {
-      if ($(e.target).is(".ui-icon")) {
+      if ($(e.target).closest(".treasurehunt-icon-button").length) {
         e.preventDefault();
         return;
       }
-      $(this).addClass("ui-selected").siblings().removeClass("ui-selected");
+      $(this).addClass("ui-selected").attr("aria-selected", "true")
+        .siblings().removeClass("ui-selected").attr("aria-selected", "false");
       // Selecciono el stageid de mi atributo
       // custom.
       // Borro las etapas seleccionadas.
@@ -1912,35 +2420,34 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       }
       selectRoad(roadid, treasurehunt.roads[roadid].vector, map);
       deactivateEdition();
-      // Scroll to editor.
-      var scrolltop;
-      if ($("header[role=banner]").css("position") === "fixed") {
-        scrolltop =
-          parseInt($(".treasurehunt-editor").offset().top) -
-          parseInt($("header[role=banner]").outerHeight(true));
-      } else {
-        scrolltop = parseInt($(".treasurehunt-editor").offset().top);
-      }
-      $("html, body").animate(
-        {
-          scrollTop: scrolltop,
-        },
-        500
-      );
     });
-    $("#roadlist").on("click", ".ui-icon-pencil", function () {
+    $("#roadlist").on("click", ".treasurehunt-edit-item", function () {
       // Busco el roadid del li que contiene el
       // lapicero seleccionado.
       var roadid = parseInt($(this).parents("li").attr("roadid"));
       // Si esta sucio guardo el escenario.
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid,
-                    editFormRoadEntry, [roadid, idModule], lockid);
+                    editFormRoadEntry, [roadid, idModule], lockState.id);
       } else {
         editFormRoadEntry(roadid, idModule);
       }
     });
-    $("#roadlist").on("click", ".ui-icon-trash", function () {
+    $("#roadlist").on("click", ".treasurehunt-play-road", function(event) {
+      event.stopPropagation();
+      var previewroadid = Number($(this).closest("li").attr("roadid"));
+      var url = "play.php?id=" + encodeURIComponent(idModule) +
+        "&previewroadid=" + encodeURIComponent(previewroadid);
+      url = currentPreviewUrl(url);
+      if (dirty) {
+        savestages(dirtyStages, originalStages, treasurehuntid, function() {
+          window.location.assign(url);
+        }, [], lockState.id);
+      } else {
+        window.location.assign(url);
+      }
+    });
+    $("#roadlist").on("click", ".treasurehunt-delete-item", function () {
       var $this_li = $(this).parents("li");
       notification.confirm(
         strings["areyousure"],
@@ -1954,7 +2461,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             dirtyStages,
             originalStages,
             treasurehuntid,
-            lockid
+            lockState.id
           );
         }
       );
@@ -1981,26 +2488,13 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       });
       map.getTargetElement().style.cursor = hit ? "pointer" : "";
     });
-    // Evento para que funcione bien el boton de cerrar en
-    // dispositivos tactiles.
-    $(document).on("touchend", ".ui-dialog-titlebar-close", function () {
-      $(this).parent().siblings(".ui-dialog-content").dialog("close");
-    });
-    /**
-     * Toggle class.
-     * @param {*} v
-     * @returns action to do.
-     */
-    function tog(v) {
-      return v ? "removeClass" : "addClass";
-    }
     $(".searchaddress").on("input", function () {
-      $(".closeicon")[tog(this.value)]("invisible");
+      $(".closeicon").toggleClass("invisible", !this.value);
     });
     $(".closeicon").on("touchstart click", function (ev) {
       ev.preventDefault();
       $(this).addClass("invisible");
-      $(".searchaddress").val("").change().autocomplete("close");
+      addressAutocomplete.clear();
     });
     // Al salirse.
     window.onbeforeunload = function (e) {

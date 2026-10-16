@@ -18,9 +18,9 @@
  * External treasurehunt API
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
- * @author Juan Pablo de Castro <jpdecastro@tel.uva.es>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 namespace mod_treasurehunt\external;
@@ -39,8 +39,7 @@ require_once("$CFG->dirroot/mod/treasurehunt/locallib.php");
 /**
  * Service for deleting stages.
  */
-class delete_stage extends external_api
-{
+class delete_stage extends external_api {
     /**
      * Returns description of method parameters
      * @return external_function_parameters
@@ -48,7 +47,7 @@ class delete_stage extends external_api
     public static function execute_parameters(): external_function_parameters {
         return new external_function_parameters(
             [
-            'stageid' => new external_value(PARAM_RAW, 'id of stage'),
+            'stageid' => new external_value(PARAM_INT, 'id of stage'),
             'treasurehuntid' => new external_value(PARAM_INT, 'id of treasurehunt'),
             'lockid' => new external_value(PARAM_INT, 'id of lock'),
                 ]
@@ -78,6 +77,7 @@ class delete_stage extends external_api
      * @return array<array<int|string>>
      */
     public static function execute($stageid, $treasurehuntid, $lockid) {
+        global $USER;
         $params = self::validate_parameters(
             self::execute_parameters(),
             ['stageid' => $stageid, 'treasurehuntid' => $treasurehuntid, 'lockid' => $lockid]
@@ -88,13 +88,14 @@ class delete_stage extends external_api
         require_capability('mod/treasurehunt:managetreasurehunt', $context);
         require_capability('mod/treasurehunt:editstage', $context);
         $status = [];
-        if (treasurehunt_edition_lock_id_is_valid($params['lockid'])) {
+        if (treasurehunt_ensure_editor_lock($params['lockid'], $params['treasurehuntid'], $USER->id)) {
+            treasurehunt_require_stage_in_activity($params['stageid'], $params['treasurehuntid']);
             treasurehunt_delete_stage($params['stageid'], $context);
             $status['code'] = 0;
             $status['msg'] = 'La eliminación de la etapa se ha realizado con éxito';
         } else {
             $status['code'] = 1;
-            $status['msg'] = 'Se ha editado esta caza del tesoro, recargue esta página';
+            $status['msg'] = get_string('editorlockchanged', 'treasurehunt');
         }
 
         $result = [];

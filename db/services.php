@@ -12,14 +12,14 @@
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Web service for mod treasurehunt.
  *
  * @package   mod_treasurehunt
- * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <jpdecastro@tel.uva.es>
- * @license   http:// www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
+ * @license   https://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 defined('MOODLE_INTERNAL') || die();
 
@@ -29,6 +29,7 @@ $services = [
             'mod_treasurehunt_fetch_treasurehunt',
             'mod_treasurehunt_update_stages',
             'mod_treasurehunt_delete_stage',
+            'mod_treasurehunt_copy_stages',
             'mod_treasurehunt_delete_road',
             'mod_treasurehunt_renew_lock',
             'mod_treasurehunt_user_progress',
@@ -65,6 +66,13 @@ $functions = [
         'type' => 'write', // Database rights of the web service function (read, write).
         'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
         'ajax' => true, // Allowed from ajax.
+    ],
+    'mod_treasurehunt_copy_stages' => [
+        'classname' => \mod_treasurehunt\external\copy_stages::class,
+        'description' => 'Copy stages between roads in one activity.',
+        'type' => 'write',
+        'capabilities' => 'mod/treasurehunt:managetreasurehunt, mod/treasurehunt:editstage',
+        'ajax' => true,
     ],
     'mod_treasurehunt_delete_road' => [// Web service function name.
         'classname' => \mod_treasurehunt\external\delete_road::class, // Class containing the external function.
