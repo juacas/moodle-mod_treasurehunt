@@ -30,6 +30,7 @@ import * as Bootstrap from "bootstrap";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import initAddressAutocomplete from "mod_treasurehunt/addressautocomplete";
 import viewgpx from "mod_treasurehunt/viewgpx";
+import initOpenData from "mod_treasurehunt/opendata_editor";
 import initEditorFullscreen from "mod_treasurehunt/editor_fullscreen";
 import { get_strings as str } from "core/str";
 
@@ -183,6 +184,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       $(
         '<i class="fa fa-times closeicon invisible" aria-hidden="true"></i>'
       ).appendTo(searchcontainer);
+      $("#opendataopen").appendTo(searchgroup);
     }
 
     // Creo el stagelist.
@@ -555,6 +557,24 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       controls: ol.control.defaults().extend([layerSwitcher]),
     });
     initEditorFullscreen(map);
+    const opendataButton = document.getElementById("opendataopen");
+    const opendataModal = document.getElementById("opendatamodal");
+    const opendataCollectorModal = document.getElementById("opendatacollectormodal");
+    if (geographictools && opendataButton && opendataModal && opendataCollectorModal) {
+      initOpenData(map, ol, layerSwitcher, new Bootstrap.Modal(opendataModal), {
+        stageContext: () => ({roadid, lockid: lockState.id, canCreate: !$("#addstage").prop("disabled")}),
+        beforeCreate: (ready, failed) => {
+          if (dirty) {
+            savestages(dirtyStages, originalStages, treasurehuntid, ready, [], lockState.id, failed);
+          } else {
+            ready();
+          }
+        },
+      }, new Bootstrap.Modal(opendataCollectorModal));
+    } else if (opendataButton) {
+      opendataButton.hidden = true;
+      opendataButton.style.display = "none";
+    }
 
     var openStagePopover = null;
     var openStagePopoverButton = null;
@@ -569,6 +589,13 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     }
 
     map.on("click", function (evt) {
+      var opendatahit = map.forEachFeatureAtPixel(evt.pixel, function (feature, layer) {
+        return layer && layer.get("treasurehuntOpenData") ? feature : null;
+      });
+      if (opendatahit) {
+        overlay.setPosition(undefined);
+        return;
+      }
       if (
         !Draw.getActive() &&
         !Modify.getActive() &&
@@ -1586,7 +1613,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       $("#editorworkspace").attr("aria-labelledby", "roadtab" + roadid);
       // I leave only the vector with the visible roadid .
       map.getLayers().forEach(function (layer) {
-        if (layer instanceof ol.layer.Vector) {
+        if (layer instanceof ol.layer.Vector && !layer.get('treasurehuntOpenData')) {
           layer.setVisible(false);
         }
       });
@@ -1906,8 +1933,9 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
      * @param {function} callback
      * @param {array} options
      * @param {integer} lockid
+     * @param {function} errorcallback Optional callback when saving fails.
      */
-    function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid) {
+    function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid, errorcallback) {
       $(".treasurehunt-editor-loader").show();
       var geojsonformat = new ol.format.GeoJSON();
       var dirtyfeatures = dirtySource.getFeatures();
@@ -1943,6 +1971,9 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
+            if (errorcallback) {
+              errorcallback();
+            }
           } else {
             var originalFeature;
             // I pass the "dirty" features to the object
@@ -1968,6 +1999,9 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
           $(".treasurehunt-editor-loader").hide();
           // console.log(error);
           notification.alert("Error", error.message, "Continue");
+          if (errorcallback) {
+            errorcallback();
+          }
         });
     }
 

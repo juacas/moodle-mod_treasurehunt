@@ -1217,6 +1217,272 @@ body.treasurehunt-editor-fullscreen {
   font-weight: 400;
 }
 
+.path-mod-treasurehunt .treasurehunt-opendata-themes {
+    max-height: 12rem;
+    overflow-y: auto;
+}
+
+.path-mod-treasurehunt #opendatasources [data-opendata-source-toggle] {
+  min-width: 0;
+  text-decoration: none;
+}
+
+.path-mod-treasurehunt #opendatasources [data-opendata-source-toggle] .fa {
+  margin-left: 0.3rem;
+  transition: transform 0.15s ease;
+}
+
+.path-mod-treasurehunt #opendatasources [data-opendata-source-toggle][aria-expanded="true"] .fa {
+  transform: rotate(180deg);
+}
+
+.path-mod-treasurehunt #opendatasources [hidden],
+.path-mod-treasurehunt #opendataitemviewer[hidden] {
+  display: none;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-preview {
+  max-height: 15rem;
+  overflow-y: auto;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-tooltip {
+  position: absolute;
+  z-index: 30;
+  max-width: 18rem;
+  padding: 0.3rem 0.6rem;
+  border-radius: 0.4rem;
+  background: rgba(27, 39, 47, 0.93);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 600;
+  line-height: 1.3;
+  pointer-events: none;
+  transform: translate(-50%, -100%);
+  white-space: normal;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-card {
+  position: relative;
+  width: min(360px, 86vw);
+  max-height: min(68vh, 560px);
+  overflow-y: auto;
+  border-radius: 0.8rem;
+  background: #fff;
+  color: #212529;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-modal-card .treasurehunt-opendata-card,
+.path-mod-treasurehunt #opendatacollectormodal .treasurehunt-opendata-card {
+  width: 100%;
+  max-height: none;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-dialog {
+  width: min(96vw, 1500px);
+  max-width: none;
+  margin: 2vh auto;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-dialog .modal-content {
+  height: 96vh;
+  max-height: 96vh;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 45%) minmax(0, 55%);
+  min-height: 0;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-panel {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  min-height: 0;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-left {
+  border-right: 1px solid #dee2e6;
+  background: #f8f9fa;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-scroll {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-collector-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  flex: 0 0 auto;
+  padding: 0.75rem 1rem;
+  border-top: 1px solid #dee2e6;
+  background: #fff;
+}
+
+.path-mod-treasurehunt #opendatacollectorattach:empty {
+  display: none;
+}
+
+.path-mod-treasurehunt #opendatacollectorattach {
+  border-top: 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.path-mod-treasurehunt #opendatacollectoractions > div {
+  margin-top: 0 !important;
+}
+
+@media (max-width: 767px) {
+  .path-mod-treasurehunt .treasurehunt-opendata-collector-layout {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+  }
+
+  .path-mod-treasurehunt .treasurehunt-opendata-collector-left {
+    border-right: 0;
+    border-bottom: 1px solid #dee2e6;
+  }
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-attachment {
+  margin-top: 0.5rem;
+  padding: 0.5rem;
+  border: 1px solid #d2e5e6;
+  border-radius: 0.45rem;
+  background: #f5faf9;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-trail {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-closer {
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  border-radius: 50%;
+  background: #fff;
+  color: #212529;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-image {
+  max-height: 190px;
+  object-fit: cover;
+  background: #edf3f4;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-carousel {
+  background: #edf3f4;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-carousel > a {
+  display: block;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-carousel img {
+  display: block;
+  width: 100%;
+  height: 190px;
+  object-fit: cover;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-carousel-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 0.5rem;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-carousel-controls button {
+  border: 0;
+  background: transparent;
+  color: #075967;
+  cursor: pointer;
+  font-size: 1.5rem;
+  line-height: 1.3;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-mosaic {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0.5rem 0;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-mosaic img {
+  width: 200px;
+  height: 200px;
+  max-width: 100%;
+  object-fit: cover;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-id {
+  display: inline-block;
+  padding: 0.1rem 0.45rem;
+  border-radius: 1rem;
+  background: #d9f1f3;
+  color: #075967;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-aliases,
+.path-mod-treasurehunt .treasurehunt-opendata-tags,
+.path-mod-treasurehunt .treasurehunt-opendata-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-tag {
+  display: inline-block;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid #9ec6c8;
+  border-radius: 1rem;
+  background: #edf7f6;
+  color: #174f55;
+  font-size: 0.78rem;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-geometry-badge {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border-radius: 1rem;
+  background: #d9f1e6;
+  color: #18593d;
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.path-mod-treasurehunt a.treasurehunt-opendata-tag:hover,
+.path-mod-treasurehunt button.treasurehunt-opendata-tag:hover {
+  background: #d7eeeb;
+  color: #123e43;
+  text-decoration: underline;
+}
+
+.path-mod-treasurehunt button.treasurehunt-opendata-tag {
+  cursor: pointer;
+}
+
+.path-mod-treasurehunt .treasurehunt-opendata-alias {
+  padding: 0.15rem 0.5rem;
+  border-radius: 1rem;
+  background: #f0f2f4;
+  font-size: 0.75rem;
+}
+
 @media (max-width: 575px) {
   #page-mod-treasurehunt-view .treasurehunt-activity-summary .treasurehunt-stage-statuses {
     grid-template-columns: repeat(2, minmax(0, 1fr));
