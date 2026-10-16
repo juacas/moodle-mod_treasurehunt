@@ -559,8 +559,11 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       controls: ol.control.defaults().extend([layerSwitcher]),
     });
     initEditorFullscreen(map);
-    if (geographictools) {
-      initOpenData(map, ol, layerSwitcher, new Modal(document.getElementById("opendatamodal")), {
+    const opendataButton = document.getElementById("opendataopen");
+    const opendataModal = document.getElementById("opendatamodal");
+    const opendataCollectorModal = document.getElementById("opendatacollectormodal");
+    if (geographictools && opendataButton && opendataModal && opendataCollectorModal) {
+      initOpenData(map, ol, layerSwitcher, new Modal(opendataModal), {
         stageContext: () => ({roadid, lockid: lockState.id, canCreate: !$("#addstage").prop("disabled")}),
         beforeCreate: (ready, failed) => {
           if (dirty) {
@@ -569,10 +572,10 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
             ready();
           }
         },
-      }, new Modal(document.getElementById("opendatacollectormodal")));
-    } else {
-      document.getElementById("opendataopen").hidden = true;
-      document.getElementById("opendataopen").style.display = "none";
+      }, new Modal(opendataCollectorModal));
+    } else if (opendataButton) {
+      opendataButton.hidden = true;
+      opendataButton.style.display = "none";
     }
 
     var openStagePopover = null;

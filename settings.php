@@ -43,13 +43,14 @@ if ($ADMIN->fulltree) {
             TREASUREHUNT_PLAYERBOOTSTRAP,
             treasurehunt_get_installedplayerstyles()
         ));
-        $settings->add(new admin_setting_configtext(
+        $mapboxtoken = new admin_setting_configpasswordunmask(
             'mod_treasurehunt/mapboxaccesstoken',
             get_string('mapboxaccesstoken', 'treasurehunt'),
             get_string('mapboxaccesstoken_desc', 'treasurehunt'),
-            '',
-            PARAM_RAW_TRIMMED
-        ));
+            ''
+        );
+        $mapboxtoken->paramtype = PARAM_RAW_TRIMMED;
+        $settings->add($mapboxtoken);
         // Maximum grade.
         $settings->add(new admin_setting_configtext(
             'mod_treasurehunt/maximumgrade',
