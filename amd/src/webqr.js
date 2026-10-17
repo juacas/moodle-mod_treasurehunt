@@ -22,13 +22,14 @@
  * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/notification', 'core/str'], function ($, notification, str) {
+define(['jquery', 'core/notification', 'core/str', 'require'], function ($, notification, str, require) {
     'use strict';
 
     var cameraIndex = -1;
     var vueApp = null;
     var scannerapp = null;
     var qrReaderConstraints = [];
+    var qrDependenciesPromise = null;
     //var currentStream = null;
 
     /**
@@ -58,6 +59,73 @@ define(['jquery', 'core/notification', 'core/str'], function ($, notification, s
         return (typeof window !== 'undefined') &&
                window.Vue &&
                window.VueQrcodeReader;
+    }
+
+    /**
+     * Load a classic script once. The Vue UMD build publishes window.Vue without touching AMD.
+     * @param {string} url Script URL.
+     * @returns {Promise<void>} Resolves when the script is ready.
+     */
+    function loadClassicScript(url) {
+        return new Promise(function(resolve, reject) {
+            var script = document.createElement('script');
+            script.src = url;
+            script.onload = resolve;
+            script.onerror = function() {
+                script.remove();
+                reject(new Error('QR scanner dependency failed to load: ' + url));
+            };
+            document.head.appendChild(script);
+        });
+    }
+
+    /**
+     * Load the QR reader through RequireJS so its UMD bundle is associated with the right module.
+     * @param {string} vueurl Vue global build URL.
+     * @param {string} readerurl Vue QR reader UMD URL.
+     * @returns {Promise<void>} Resolves when both libraries are ready.
+     */
+    function ensureVueQRAvailable(vueurl, readerurl) {
+        if (isVueQRAvailable()) {
+            return Promise.resolve();
+        }
+        if (qrDependenciesPromise) {
+            return qrDependenciesPromise;
+        }
+        qrDependenciesPromise = Promise.resolve()
+            .then(function() {
+                return window.Vue ? null : loadClassicScript(vueurl);
+            })
+            .then(function() {
+                if (!window.Vue) {
+                    throw new Error('Vue global build did not expose window.Vue');
+                }
+                if (!require.defined('vue')) {
+                    window.define('vue', [], function() {
+                        return window.Vue;
+                    });
+                }
+                if (window.VueQrcodeReader) {
+                    return window.VueQrcodeReader;
+                }
+                return new Promise(function(resolve, reject) {
+                    require([readerurl], function(reader) {
+                        window.VueQrcodeReader = reader;
+                        resolve(reader);
+                    }, reject);
+                });
+            })
+            .then(function() {
+                if (!isVueQRAvailable()) {
+                    throw new Error('Vue QR reader did not expose its components');
+                }
+                return true;
+            })
+            .catch(function(error) {
+                qrDependenciesPromise = null;
+                throw error;
+            });
+        return qrDependenciesPromise;
     }
     /**
      * Helper to enumerate video input devices
@@ -325,11 +393,8 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
         setTestStatus: setQrTestStatus,
 
-        setup: function () {
-            // Check for Vue availability
-            if (!isVueQRAvailable()) {
-                console.warn('Vue or vue-qrcode-reader not available. QR scanning will not work.');
-            }
+        setup: function() {
+            return true;
         },
 
         enableTest: function () {
@@ -491,23 +556,25 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
         },
 
         loadQR: function (scancallback, reportcallback) {
-            if (!isVueQRAvailable()) {
-                console.error('Vue or vue-qrcode-reader not available');
-                reportcallback({
-                    code: 0,
-                    name: 'VueNotAvailable',
-                    message: 'Vue or vue-qrcode-reader library not loaded'
+            var baseurl = window.M && window.M.cfg ? window.M.cfg.wwwroot + '/mod/treasurehunt/js/' : './js/';
+            ensureVueQRAvailable(baseurl + 'vue.global.prod.js', baseurl + 'vue-qrcode-reader.umd.js')
+                .then(function() {
+                    if (!loadQRWithVue(scancallback, reportcallback)) {
+                        reportcallback({
+                            code: 0,
+                            name: 'VueMountFailed',
+                            messagetext: 'Failed to mount Vue QR component'
+                        });
+                    }
+                })
+                .catch(function(error) {
+                    console.error('Vue QR scanner failed to load', error);
+                    reportcallback({
+                        code: 0,
+                        name: 'VueNotAvailable',
+                        messagetext: error.message
+                    });
                 });
-                return;
-            }
-
-            if (!loadQRWithVue(scancallback, reportcallback)) {
-                reportcallback({
-                    code: 0,
-                    name: 'VueMountFailed',
-                    message: 'Failed to mount Vue QR component'
-                });
-            }
         },
 
         getnextwebCamIndex: function () {

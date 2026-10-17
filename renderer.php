@@ -336,6 +336,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             }
 
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
+                $roadid = $roadusersprogress->id ?? null;
                 $roadheading = format_string($roadusersprogress->name);
                 $grouplinks = [];
                 if ($progress->groupmode) {
@@ -362,11 +363,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                         ['class' => 'treasurehunt-road-groups']
                     );
                 }
-                if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                if ($roadid !== null && !empty($progress->showclearactions[$roadid]) && $progress->managepermission) {
                     $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
                         'id' => $progress->coursemoduleid,
                         'scope' => 'road',
-                        'roadid' => $roadusersprogress->id,
+                        'roadid' => $roadid,
                     ]);
                     $roadheading .= ' ' . html_writer::link(
                         $clearurl,
@@ -437,11 +438,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                 }
                                 $elapsed = treasurehunt_get_hunt_duration($progress->coursemoduleid, $userorgroup->id, null);
                             }
-                            if (!empty($progress->showclearactions[$roadusersprogress->id]) && $progress->managepermission) {
+                            if ($roadid !== null && !empty($progress->showclearactions[$roadid]) && $progress->managepermission) {
                                 $clearurl = new moodle_url('/mod/treasurehunt/clearhunt.php', [
                                     'id' => $progress->coursemoduleid,
                                     'scope' => $progress->groupmode ? 'group' : 'user',
-                                    'roadid' => $roadusersprogress->id,
+                                    'roadid' => $roadid,
                                     'participantid' => $userorgroup->id,
                                 ]);
                                 $name .= ' ' . html_writer::link(

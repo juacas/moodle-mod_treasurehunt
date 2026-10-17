@@ -2,6 +2,45 @@
   min-height: 100%;
 }
 
+.path-mod-treasurehunt .custommap-georeference-dialog {
+  width: min(90vw, 70rem);
+  max-width: 90vw;
+  max-height: 90vh;
+  padding: 1rem;
+  border: 1px solid #6c757d;
+  border-radius: .5rem;
+}
+
+.path-mod-treasurehunt .custommap-georeference-dialog::backdrop {
+  background: rgb(0 0 0 / 55%);
+}
+
+.path-mod-treasurehunt #custommap-georeference-map {
+  width: 100%;
+  height: min(60vh, 36rem);
+  min-height: 20rem;
+  background: #e9ecef;
+}
+
+.path-mod-treasurehunt .custommap-georeference-header h3 {
+  margin: 0;
+}
+
+.path-mod-treasurehunt .custommap-georeference-controls {
+  display: flex;
+  align-items: end;
+  gap: 1rem;
+}
+
+.path-mod-treasurehunt .custommap-georeference-opacity-control {
+  flex: 1 1 auto;
+  min-width: 12rem;
+}
+
+.path-mod-treasurehunt #custommap-georeference-map .ol-viewport {
+  cursor: grab;
+}
+
 #page-mod-treasurehunt-gpx_viewer #page.drawers .main-inner {
   max-width: none;
 }

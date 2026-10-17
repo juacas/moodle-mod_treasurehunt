@@ -122,6 +122,57 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
   }
   return customimageextent;
 }
+
+/**
+ * Create an OpenLayers canvas source that maps an image to four geographic corners.
+ * @param {Array} corners Image corners in NW, NE, SE, SW order, as longitude/latitude pairs.
+ * @param {HTMLImageElement} image Loaded image element.
+ * @param {string} projection The map projection.
+ * @returns {Object} OpenLayers canvas image source.
+ */
+function createAffineImageSource(corners, image, projection) {
+  var source;
+  source = new ol.source.ImageCanvas({
+    projection: projection,
+    ratio: 1,
+    canvasFunction: function(extent, resolution, pixelRatio, size) {
+      var canvas = document.createElement('canvas');
+      // ImageCanvas already passes size in device pixels.
+      canvas.width = Math.max(1, Math.round(size[0]));
+      canvas.height = Math.max(1, Math.round(size[1]));
+      if (!image.complete || !image.naturalWidth) {
+        return canvas;
+      }
+      var projected = corners.map(function(point) {
+        return ol.proj.transform(point, 'EPSG:4326', projection);
+      });
+      var nw = projected[0];
+      var ne = projected[1];
+      var sw = projected[3];
+      var toCanvas = function(point) {
+        return [(point[0] - extent[0]) / resolution * pixelRatio,
+          (extent[3] - point[1]) / resolution * pixelRatio];
+      };
+      var origin = toCanvas(nw);
+      var right = toCanvas(ne);
+      var bottom = toCanvas(sw);
+      var context = canvas.getContext('2d');
+      context.setTransform(
+        (right[0] - origin[0]) / image.naturalWidth,
+        (right[1] - origin[1]) / image.naturalWidth,
+        (bottom[0] - origin[0]) / image.naturalHeight,
+        (bottom[1] - origin[1]) / image.naturalHeight,
+        origin[0], origin[1]
+      );
+      context.drawImage(image, 0, 0);
+      return canvas;
+    }
+  });
+  image.addEventListener('load', function() {
+    source.changed();
+  }, {once: true});
+  return source;
+}
 /**
  * Initialization function.
  * Init map, layers, styles, interactions and functions.
@@ -170,16 +221,24 @@ function initplaytreasurehunt(
   if (custommapconfig) {
     if (custommapconfig.custombackgroundurl) {
       var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
+      var customimagesource;
+      if (Array.isArray(custommapconfig.imagecorners) && custommapconfig.imagecorners.length === 4) {
+        var customimage = new Image();
+        customimage.src = custommapconfig.custombackgroundurl;
+        customimagesource = createAffineImageSource(custommapconfig.imagecorners, customimage, mapprojection);
+      } else {
+        customimagesource = new ol.source.ImageStatic({
+          url: custommapconfig.custombackgroundurl,
+          imageExtent: customimageextent,
+        });
+      }
 
       defaultzoom = 5;
       custombaselayer = new ol.layer.Image({
         title: custommapconfig.layername,
         name: custommapconfig.layername,
         type: custommapconfig.layertype,
-        source: new ol.source.ImageStatic({
-          url: custommapconfig.custombackgroundurl,
-          imageExtent: customimageextent,
-        }),
+        source: customimagesource,
         opacity: 1.0,
       });
     } else if (custommapconfig.wmsurl) {

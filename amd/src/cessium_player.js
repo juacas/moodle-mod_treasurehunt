@@ -118,8 +118,9 @@ export const loadCesium = (baseUrl) => {
 export const createBaseProvider = async(Cesium, mapping) => {
     let provider;
     if (mapping && mapping.custombackgroundurl && Array.isArray(mapping.bbox)) {
-        provider = await Cesium.SingleTileImageryProvider.fromUrl(mapping.custombackgroundurl, {
-            rectangle: Cesium.Rectangle.fromDegrees(...mapping.bbox),
+        const image = await createTransformedCesiumImage(mapping);
+        provider = await Cesium.SingleTileImageryProvider.fromUrl(image.url, {
+            rectangle: Cesium.Rectangle.fromDegrees(...image.bbox),
         });
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'tiled') {
         // OpenLayers accepts {-y} for TMS tiles; Cesium calls the same coordinate {reverseY}.
@@ -147,7 +148,144 @@ export const createBaseProvider = async(Cesium, mapping) => {
             credit: '© OpenStreetMap contributors',
         });
     }
+    if (!provider?.tilingScheme?.projection) {
+        throw new Error('The custom imagery provider has no valid map projection.');
+    }
     return provider;
+};
+
+/**
+ * Rasterize the affine image corners into a rectangular image for Cesium's single-tile layer.
+ *
+ * @param {Object} mapping Custom activity map configuration.
+ * @returns {Promise<Object>} Image URL and geographic rectangle.
+ */
+const transformedCesiumImages = new WeakMap();
+const createTransformedCesiumImage = async(mapping) => {
+    if (transformedCesiumImages.has(mapping)) {
+        return transformedCesiumImages.get(mapping);
+    }
+    const transformed = (async() => {
+    const image = new Image();
+    image.src = mapping.custombackgroundurl;
+    await new Promise((resolve, reject) => {
+        if (image.complete && image.naturalWidth) {
+            resolve();
+            return;
+        }
+        image.onload = resolve;
+        image.onerror = reject;
+    });
+    if (!Array.isArray(mapping.imagecorners) || mapping.imagecorners.length !== 4 ||
+            !mapping.imagecorners.every((corner) => Array.isArray(corner) && corner.length === 2 &&
+                corner.every((coordinate) => Number.isFinite(Number(coordinate))))) {
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 8192 / Math.max(image.naturalWidth, image.naturalHeight));
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        return {url: canvas.toDataURL('image/png'), bbox: mapping.bbox};
+    }
+    const radius = 6378137;
+    const toMercator = ([longitude, latitude]) => {
+        const safeLatitude = Math.max(-85.05112878, Math.min(85.05112878, latitude));
+        const x = radius * longitude * Math.PI / 180;
+        const y = radius * Math.log(Math.tan(Math.PI / 4 + safeLatitude * Math.PI / 360));
+        return [x, y];
+    };
+    const fromMercator = ([x, y]) => [
+        x / radius * 180 / Math.PI,
+        (2 * Math.atan(Math.exp(y / radius)) - Math.PI / 2) * 180 / Math.PI,
+    ];
+    const projected = mapping.imagecorners.map(toMercator);
+    const [northwest, northeast, , southwest] = projected;
+    const canvas = document.createElement('canvas');
+    const scale = Math.min(1, 8192 / Math.max(image.naturalWidth, image.naturalHeight));
+    canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+    canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+    const context = canvas.getContext('2d');
+    // Rasterize SVGs once rather than re-rendering their vectors for every triangle.
+    const sourcecanvas = document.createElement('canvas');
+    sourcecanvas.width = canvas.width;
+    sourcecanvas.height = canvas.height;
+    sourcecanvas.getContext('2d').drawImage(image, 0, 0, sourcecanvas.width, sourcecanvas.height);
+    const projectedPoint = (u, v) => [
+        northwest[0] + (northeast[0] - northwest[0]) * u + (southwest[0] - northwest[0]) * v,
+        northwest[1] + (northeast[1] - northwest[1]) * u + (southwest[1] - northwest[1]) * v,
+    ];
+    const griddivisions = 16;
+    const geographicgrid = [];
+    for (let row = 0; row <= griddivisions; row++) {
+        for (let column = 0; column <= griddivisions; column++) {
+            geographicgrid.push(fromMercator(projectedPoint(column / griddivisions, row / griddivisions)));
+        }
+    }
+    const gridlongitudes = geographicgrid.map((point) => point[0]);
+    const gridlatitudes = geographicgrid.map((point) => point[1]);
+    const west = Math.min(...gridlongitudes);
+    const east = Math.max(...gridlongitudes);
+    const south = Math.min(...gridlatitudes);
+    const north = Math.max(...gridlatitudes);
+    const toCanvas = ([longitude, latitude]) => [
+        (longitude - west) / (east - west) * canvas.width,
+        (north - latitude) / (north - south) * canvas.height,
+    ];
+    const drawTriangle = (sourcepoints, destinationpoints) => {
+        const [s0, s1, s2] = sourcepoints;
+        const [d0, d1, d2] = destinationpoints;
+        const dx1 = s1[0] - s0[0];
+        const dy1 = s1[1] - s0[1];
+        const dx2 = s2[0] - s0[0];
+        const dy2 = s2[1] - s0[1];
+        const determinant = dx1 * dy2 - dx2 * dy1;
+        if (Math.abs(determinant) < 1e-8) {
+            return;
+        }
+        const transform = (x0, x1, x2) => {
+            const a = ((x1[0] - x0[0]) * dy2 - (x2[0] - x0[0]) * dy1) / determinant;
+            const c = (dx1 * (x2[0] - x0[0]) - dx2 * (x1[0] - x0[0])) / determinant;
+            const b = ((x1[1] - x0[1]) * dy2 - (x2[1] - x0[1]) * dy1) / determinant;
+            const d = (dx1 * (x2[1] - x0[1]) - dx2 * (x1[1] - x0[1])) / determinant;
+            return [a, b, c, d, x0[0] - a * s0[0] - c * s0[1], x0[1] - b * s0[0] - d * s0[1]];
+        };
+        context.save();
+        context.beginPath();
+        context.moveTo(...destinationpoints[0]);
+        context.lineTo(...destinationpoints[1]);
+        context.lineTo(...destinationpoints[2]);
+        context.closePath();
+        context.clip();
+        context.setTransform(...transform(d0, d1, d2));
+        context.drawImage(sourcecanvas, 0, 0);
+        context.restore();
+    };
+    for (let row = 0; row < griddivisions; row++) {
+        for (let column = 0; column < griddivisions; column++) {
+            const u0 = column / griddivisions;
+            const u1 = (column + 1) / griddivisions;
+            const v0 = row / griddivisions;
+            const v1 = (row + 1) / griddivisions;
+            const sourcepoints = [
+                [u0 * canvas.width, v0 * canvas.height],
+                [u1 * canvas.width, v0 * canvas.height],
+                [u1 * canvas.width, v1 * canvas.height],
+                [u0 * canvas.width, v1 * canvas.height],
+            ];
+            const indices = [row * (griddivisions + 1) + column,
+                row * (griddivisions + 1) + column + 1,
+                (row + 1) * (griddivisions + 1) + column + 1,
+                (row + 1) * (griddivisions + 1) + column];
+            const destinationpoints = indices.map((index) => toCanvas(geographicgrid[index]));
+            drawTriangle([sourcepoints[0], sourcepoints[1], sourcepoints[2]],
+                [destinationpoints[0], destinationpoints[1], destinationpoints[2]]);
+            drawTriangle([sourcepoints[0], sourcepoints[2], sourcepoints[3]],
+                [destinationpoints[0], destinationpoints[2], destinationpoints[3]]);
+        }
+    }
+    return {url: canvas.toDataURL('image/png'), bbox: [west, south, east, north]};
+    })();
+    transformedCesiumImages.set(mapping, transformed);
+    return transformed;
 };
 
 /**
@@ -491,8 +629,9 @@ export const init = async() => {
      * Initialise Cesium's thumbnail picker with the activity map and flat terrain selected.
      *
      * @param {Object|null} custommapping Validated custom activity map, if available.
+     * @param {Object|Array|null} customproviders Pre-created imagery provider(s) for the custom map.
      */
-    const initLayerPicker = (custommapping) => {
+    const initLayerPicker = (custommapping, customproviders) => {
         const imagery = Cesium.createDefaultImageryProviderViewModels();
         const satelliteIndex = imagery.findIndex((item) => item.name === 'ArcGIS World Imagery');
         const officialSatellite = imagery[satelliteIndex];
@@ -517,10 +656,10 @@ export const init = async() => {
                 tooltip: labels.layercustom,
                 iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
                 category: 'Other',
-                creationFunction: () => [
-                    createBaseProvider(Cesium, null),
-                    createBaseProvider(Cesium, custommapping),
-                ],
+                // BaseLayerPicker detects arrays before resolving promises. An async
+                // callback returning an array makes it treat that array as one provider,
+                // which has no tilingScheme. Return the prepared providers directly.
+                creationFunction: () => customproviders,
             });
             imagery.push(custom);
             selectedImagery = custom;
@@ -1848,15 +1987,35 @@ export const init = async() => {
                     toast(labels.layererror + ': ' + error.message, true);
                 });
                 let custommapping = null;
+                let customproviders = null;
+                let customimageprovider = null;
                 if (config.custommapping?.custombackgroundurl || config.custommapping?.wmsurl) {
                     try {
-                        await createBaseProvider(Cesium, config.custommapping);
-                        custommapping = config.custommapping;
+                        const customprovider = await createBaseProvider(Cesium, config.custommapping);
+                        if (config.custommapping.custombackgroundurl) {
+                            customimageprovider = customprovider;
+                        } else {
+                            if (config.custommapping.layertype === 'overlay') {
+                                const baseprovider = await createBaseProvider(Cesium, null);
+                                customproviders = [baseprovider, customprovider];
+                            } else {
+                                customproviders = customprovider;
+                            }
+                            custommapping = config.custommapping;
+                        }
                     } catch (error) {
                         toast(labels.layererror + ': ' + error.message, true);
                     }
                 }
-                initLayerPicker(custommapping);
+                // The picker only replaces its own layers when a choice returns an array.
+                // Otherwise the provisional OSM layer remains above the custom overlay.
+                viewer.imageryLayers.remove(baseLayer);
+                initLayerPicker(custommapping, customproviders);
+                if (customimageprovider) {
+                    // Keep the image out of the picker's managed base layers so every
+                    // basemap selection retains this mandatory overlay above it.
+                    viewer.imageryLayers.addImageryProvider(customimageprovider);
+                }
                 viewer.scene.globe.depthTestAgainstTerrain = true;
                 viewer.scene.maximumRenderTimeChange = 60;
                 viewer.clock.shouldAnimate = true;

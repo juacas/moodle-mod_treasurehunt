@@ -130,7 +130,7 @@ final class view_info_test extends \advanced_testcase {
         $this->assertStringContainsString('data-treasurehunt-tooltip="' . s($warning) . '"', $warninghtml);
 
         $group = (object)['id' => 23, 'name' => 'Team Alpha', 'ratings' => []];
-        $road = (object)['name' => 'Path One', 'validated' => true, 'userlist' => [$group], 'totalstages' => 2];
+        $road = (object)['id' => 10, 'name' => 'Path One', 'validated' => true, 'userlist' => [$group], 'totalstages' => 2];
         $progress = new users_progress([$road], true, 1, [], [], [], false, true);
         $progresshtml = $renderer->render($progress);
         $this->assertStringContainsString('Path One', $progresshtml);

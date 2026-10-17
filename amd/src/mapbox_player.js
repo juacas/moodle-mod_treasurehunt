@@ -154,8 +154,10 @@ const closestStagePoint = (point, collection) => {
 const customSource = (mapping) => {
     if (mapping?.custombackgroundurl && Array.isArray(mapping.bbox) && mapping.bbox.length === 4) {
         const [west, south, east, north] = mapping.bbox;
+        const coordinates = Array.isArray(mapping.imagecorners) && mapping.imagecorners.length === 4 ?
+            mapping.imagecorners : [[west, north], [east, north], [east, south], [west, south]];
         return {type: 'image', url: mapping.custombackgroundurl,
-            coordinates: [[west, north], [east, north], [east, south], [west, south]]};
+            coordinates};
     }
     if (!mapping?.wmsurl) {
         return null;
@@ -181,6 +183,47 @@ const customSource = (mapping) => {
 };
 
 /**
+ * Rasterize uploaded SVG map images because Mapbox GL image sources accept raster images only.
+ * @param {Object} mapping Activity map configuration.
+ */
+const rasterizeCustomSvg = async(mapping) => {
+    const url = mapping?.custombackgroundurl;
+    const mimetype = mapping?.custombackgroundmimetype || '';
+    if (!url || (mimetype !== 'image/svg+xml' && !/\.svg(?:[?#]|$)/i.test(url))) {
+        return;
+    }
+    const response = await fetch(url, {credentials: 'same-origin'});
+    if (!response.ok) {
+        throw new Error('Could not fetch the uploaded SVG map (' + response.status + ').');
+    }
+    const blob = await response.blob();
+    if (blob.type && !blob.type.toLowerCase().includes('svg')) {
+        return;
+    }
+    const objecturl = URL.createObjectURL(blob);
+    try {
+        const image = new Image();
+        image.src = objecturl;
+        await new Promise((resolve, reject) => {
+            if (image.complete && image.naturalWidth) {
+                resolve();
+                return;
+            }
+            image.onload = resolve;
+            image.onerror = () => reject(new Error('The uploaded SVG map could not be decoded.'));
+        });
+        const canvas = document.createElement('canvas');
+        const scale = Math.min(1, 4096 / Math.max(image.naturalWidth, image.naturalHeight));
+        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
+        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
+        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
+        mapping.custombackgroundurl = canvas.toDataURL('image/png');
+    } finally {
+        URL.revokeObjectURL(objecturl);
+    }
+};
+
+/**
  * @param {string} kind Base map name.
  * @param {Object} mapping Activity map settings.
  * @returns {Object} Mapbox style.
@@ -193,10 +236,21 @@ export const mapStyle = (kind, mapping) => {
         return 'mapbox://styles/mapbox/streets-v12';
     }
     const source = kind === 'custom' ? customSource(mapping) : null;
-    return {version: 8, sources: {base: source || {
+    const osm = {
         type: 'raster', tiles: ['https://tile.openstreetmap.org/{z}/{x}/{y}.png'], tileSize: 256,
         maxzoom: 19, attribution: '© OpenStreetMap contributors',
-    }}, layers: [{id: 'base', type: 'raster', source: 'base'}]};
+    };
+    if (source && mapping?.layertype === 'overlay') {
+        return {
+            version: 8,
+            sources: {osm, custom: source},
+            layers: [
+                {id: 'base-osm', type: 'raster', source: 'osm'},
+                {id: 'base-custom', type: 'raster', source: 'custom'},
+            ],
+        };
+    }
+    return {version: 8, sources: {base: source || osm}, layers: [{id: 'base', type: 'raster', source: 'base'}]};
 };
 
 /** @returns {Promise<void>} Initialisation completion. */
@@ -246,7 +300,8 @@ export const init = async() => {
     let initialMapReady;
     // Start with a public OSM raster style so the map remains usable without Mapbox style access.
     let currentStyle = 'osm';
-    if (customSource(config.custommapping)) {
+    const configuredSource = customSource(config.custommapping);
+    if (configuredSource && configuredSource.type !== 'image') {
         currentStyle = 'custom';
     } else if (config.mapboxaccesstoken) {
         currentStyle = 'streets';
@@ -326,6 +381,19 @@ export const init = async() => {
                     'fill-extrusion-base': ['interpolate', ['linear'], ['zoom'], 15, 0, 15.05, ['get', 'min_height']],
                     'fill-extrusion-opacity': 0.72,
                 }}, labelLayer?.id);
+        }
+        const imageOverlay = customSource(config.custommapping);
+        if (imageOverlay?.type === 'image') {
+            // Style changes remove custom sources. Restore this mandatory image above
+            // the basemap, keeping stage geometries and game markers visible above it.
+            if (!map.getSource('custom-image')) {
+                map.addSource('custom-image', imageOverlay);
+            }
+            if (!map.getLayer('custom-image-overlay')) {
+                const beforeLayer = map.getLayer('stage-fill') ? 'stage-fill' :
+                    (map.getLayer('pegman-model') ? 'pegman-model' : undefined);
+                map.addLayer({id: 'custom-image-overlay', type: 'raster', source: 'custom-image'}, beforeLayer);
+            }
         }
         if (!map.getLayer('pegman-model')) {
             if (pegmanLibrary) {
@@ -1002,6 +1070,15 @@ export const init = async() => {
         loading.hidden = false;
         retry.hidden = true;
         try {
+            try {
+                await rasterizeCustomSvg(config.custommapping);
+            } catch (error) {
+                toast(labels.layererror + ': ' + error.message, true);
+                if (config.custommapping) {
+                    config.custommapping.custombackgroundurl = null;
+                }
+                currentStyle = config.mapboxaccesstoken ? 'streets' : 'osm';
+            }
             [mapboxgl, pegmanLibrary] = await Promise.all([loadMapbox(), loadPegmanLibrary(config.threepegmanurl)
                 .catch((error) => {
                     toast(labels.layererror + ': ' + error.message, true);
@@ -1032,7 +1109,8 @@ export const init = async() => {
                     picker.add(new Option('Mapbox streets', 'streets'));
                 }
                 picker.add(new Option('OpenStreetMap', 'osm'));
-                if (customSource(config.custommapping)) {
+                const configuredSource = customSource(config.custommapping);
+                if (configuredSource && configuredSource.type !== 'image') {
                     picker.add(new Option(labels.layercustom, 'custom'));
                 }
                 picker.value = currentStyle;

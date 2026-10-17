@@ -354,8 +354,9 @@ function treasurehunt_build_custommappingconfig($data) {
             $mapconfig->onlybase = false;
             $mapconfig->geographic = true;
         }
-        $mapconfig->layerservicetype = $data->customlayerservicetype;
-        $mapconfig->wmsurl = $data->customlayerwms;
+        $mapconfig->layerservicetype = $data->customlayerservicetype ?? 'wms';
+        // This field is hidden (and therefore omitted from submitted data) for image layers.
+        $mapconfig->wmsurl = $data->customlayerwms ?? '';
         if (!empty($data->customwmsparams)) {
             $params = explode('&', $data->customwmsparams);
             $parmsobj = new stdClass();
@@ -367,8 +368,28 @@ function treasurehunt_build_custommappingconfig($data) {
         } else {
             $mapconfig->wmsparams = [];
         }
-        $mapconfig->layername = $data->customlayername;
-        $mapconfig->preserveaspectratio = $data->custompreserveaspectratio;
+        $mapconfig->layername = $data->customlayername ?? '';
+        $mapconfig->preserveaspectratio = !empty($data->custompreserveaspectratio);
+        if (!empty($data->customimagecorners)) {
+            $corners = json_decode($data->customimagecorners, true);
+            if (is_array($corners) && count($corners) === 4) {
+                $validcorners = true;
+                foreach ($corners as $corner) {
+                    if (
+                        !is_array($corner) || count($corner) !== 2 ||
+                        !is_numeric($corner[0]) || !is_numeric($corner[1])
+                    ) {
+                        $validcorners = false;
+                        break;
+                    }
+                }
+                if ($validcorners) {
+                    $mapconfig->imagecorners = array_map(function ($corner) {
+                        return [floatval($corner[0]), floatval($corner[1])];
+                    }, $corners);
+                }
+            }
+        }
     }
     return $mapconfig;
 }
@@ -415,10 +436,12 @@ function treasurehunt_get_custommappingconfig($treasurehunt, ?context_module $co
         $path = '/' . $context->id . '/mod_treasurehunt/custombackground/0/' . $file->get_filename();
         $moodleurl = new moodle_url('/pluginfile.php' . $path);
         $custommapconfig->custombackgroundurl = $moodleurl->out();
+        $custommapconfig->custombackgroundmimetype = $file->get_mimetype();
     } else {
         $custommapconfig->custombackgroundurl = null;
+        $custommapconfig->custombackgroundmimetype = null;
     }
-    if (trim($custommapconfig->wmsurl) === "") {
+    if (!isset($custommapconfig->wmsurl) || trim($custommapconfig->wmsurl) === "") {
         $custommapconfig->wmsurl = null;
     }
     return $custommapconfig;
@@ -2955,10 +2978,8 @@ function treasurehunt_clear_road_activities($treasurehuntid, $roadid, $participa
  * @param string global function name to initialice the code.
  */
 function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
-    // From 'https://unpkg.com/vue@3/dist/vue.global.prod.js'.
-    echo '<script src="js/vue.global.prod.js"></script>';
-    // From 'https://unpkg.com/vue-qrcode-reader@5.7.3/dist/vue-qrcode-reader.umd.js'.
-    echo '<script src="js/vue-qrcode-reader.umd.js"></script>';
+    // QR dependencies load on demand. Load the UMD reader via RequireJS so it cannot leave
+    // an anonymous AMD define queued while Moodle is loading other modules.
     $page->requires->js_call_amd(
         'mod_treasurehunt/webqr',
         $initfunction,

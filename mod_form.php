@@ -38,7 +38,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
      * Defines forms elements
      */
     public function definition() {
-        global $CFG;
+        global $CFG, $PAGE;
         $treasurehuntconfig = get_config('mod_treasurehunt');
         $mform = $this->_form;
 
@@ -214,6 +214,64 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('custombackground', 'custommapimagefile', 'treasurehunt');
         $mform->disabledIf('custombackground', 'customlayername', 'eq', '');
         $mform->hideIf('custombackground', 'customlayerservicetype', 'neq', 'image');
+        $mform->addElement('hidden', 'customimagecorners', '');
+        $mform->setType('customimagecorners', PARAM_RAW);
+        $mform->addElement('hidden', 'customimageurl', '');
+        $mform->setType('customimageurl', PARAM_URL);
+        $georeferencecontent = html_writer::tag(
+            'div',
+            html_writer::tag(
+                'div',
+                html_writer::tag('h3', get_string('custommapgeoreference', 'treasurehunt')) .
+                html_writer::tag('button', '×', [
+                    'type' => 'button', 'id' => 'custommap-georeference-close',
+                    'class' => 'btn-close', 'aria-label' => get_string('cancel'),
+                ]),
+                ['class' => 'custommap-georeference-header d-flex justify-content-between align-items-center']
+            ) .
+            html_writer::tag('p', get_string('custommapgeoreference_help', 'treasurehunt')) .
+            html_writer::tag('div', '', [
+                'id' => 'custommap-georeference-map', 'role' => 'application',
+                'aria-label' => get_string('custommapgeoreference', 'treasurehunt'),
+            ]) .
+            html_writer::tag(
+                'div',
+                html_writer::tag(
+                    'div',
+                    html_writer::tag('label', get_string('custommapopacity', 'treasurehunt'), [
+                        'for' => 'custommap-georeference-opacity', 'class' => 'form-label mb-1',
+                    ]) .
+                    html_writer::empty_tag('input', [
+                        'type' => 'range', 'id' => 'custommap-georeference-opacity', 'min' => '0', 'max' => '1',
+                        'step' => '0.05', 'value' => '0.22', 'class' => 'form-range',
+                    ]),
+                    ['class' => 'custommap-georeference-opacity-control']
+                ) .
+                html_writer::tag('button', get_string('custommapfitview', 'treasurehunt'), [
+                    'type' => 'button', 'id' => 'custommap-georeference-fit', 'class' => 'btn btn-outline-secondary',
+                ]),
+                ['class' => 'custommap-georeference-controls my-2']
+            ) .
+            html_writer::tag(
+                'div',
+                html_writer::tag('button', get_string('cancel'), [
+                    'type' => 'button', 'id' => 'custommap-georeference-cancel', 'class' => 'btn btn-secondary',
+                ]) .
+                html_writer::tag('button', get_string('savechanges'), [
+                    'type' => 'button', 'id' => 'custommap-georeference-save', 'class' => 'btn btn-primary',
+                ]),
+                ['class' => 'd-flex justify-content-end gap-2 mt-3']
+            ),
+            ['class' => 'custommap-georeference-content']
+        );
+        $mform->addElement(
+            'html',
+            html_writer::tag('button', get_string('custommapgeoreference', 'treasurehunt'), [
+                'type' => 'button', 'id' => 'custommap-georeference-open', 'class' => 'btn btn-secondary mb-3',
+            ]) . html_writer::tag('dialog', $georeferencecontent, [
+                'id' => 'custommap-georeference-dialog', 'class' => 'custommap-georeference-dialog',
+            ])
+        );
         // Preserve aspect ratio.
         $mform->addElement('advcheckbox', 'custompreserveaspectratio', get_string('custompreserveaspectratio', 'treasurehunt'));
         $mform->addHelpButton('custompreserveaspectratio', 'custompreserveaspectratio', 'treasurehunt');
@@ -258,6 +316,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $this->standard_coursemodule_elements();
         // Add standard buttons, common to all modules. Botones.
         $this->add_action_buttons(true);
+        $PAGE->requires->js_call_amd('mod_treasurehunt/custommap_georeference', 'init');
     }
 
     /**
@@ -387,6 +446,12 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             }
             if (isset($custommapconfig->preserveaspectratio)) {
                 $defaultvalues['custompreserveaspectratio'] = $custommapconfig->preserveaspectratio;
+            }
+            if (!empty($custommapconfig->imagecorners)) {
+                $defaultvalues['customimagecorners'] = json_encode($custommapconfig->imagecorners);
+            }
+            if (!empty($custommapconfig->custombackgroundurl)) {
+                $defaultvalues['customimageurl'] = $custommapconfig->custombackgroundurl;
             }
         }
     }

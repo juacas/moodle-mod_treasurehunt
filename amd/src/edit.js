@@ -14,7 +14,7 @@
 // along with Moodle.  If not, see <http:// www.gnu.org/licenses/>.
 /**
  * @module mod_treasurehunt/edit
- * @package mod_treasurehunt
+ * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>,
  *            Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
@@ -33,27 +33,50 @@ define([
   "mod_treasurehunt/ol3-layerswitcher",
   "core/str",
   "mod_treasurehunt/viewgpx",
-], function ($, jqui, jqtouch, notification, ol, ajax, OSMGeocoder, olLayerSwitcher, str, viewgpx) {
+], function($, jqui, jqtouch, notification, ol, ajax, OSMGeocoder, olLayerSwitcher, str, viewgpx) {
 
+  /**
+   *
+   * @param {*} idModule
+   * @param {*} treasurehuntid
+   * @param {*} strings
+   * @param {*} selectedroadid
+   * @param {*} lockid
+   * @param {*} custommapconfig
+   */
   function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid, lockid, custommapconfig) {
     var mapprojection = "EPSG:3857";
     var mapprojobj = new ol.proj.Projection(mapprojection);
     var custombaselayer = null;
     var geographictools = true;
     // Support customized base layers.
-    if (typeof (custommapconfig) != 'undefined' && custommapconfig != null) {
-      if (custommapconfig.custombackgroundurl != null) {
-        var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
+    if (typeof (custommapconfig) != 'undefined' && custommapconfig !== null) {
+      if (custommapconfig.custombackgroundurl !== null) {
+        var customimagesource;
+        if (Array.isArray(custommapconfig.imagecorners) && custommapconfig.imagecorners.length === 4) {
+          var customimage = new Image();
+          customimage.src = custommapconfig.custombackgroundurl;
+          customimagesource = createAffineImageSource(custommapconfig.imagecorners, customimage, mapprojection);
+        } else {
+          var customimageextent = calculateCustomImageExtent(custommapconfig, mapprojection, false);
+          customimagesource = new ol.source.ImageStatic({
+            url: custommapconfig.custombackgroundurl,
+            imageExtent: customimageextent
+          });
+        }
         custombaselayer = new ol.layer.Image({
           title: custommapconfig.layername,
           type: custommapconfig.layertype,
-          source: new ol.source.ImageStatic({
-            url: custommapconfig.custombackgroundurl,
-            imageExtent: customimageextent
-          }),
+          source: customimagesource,
           opacity: 1.0
         });
-      } else if (custommapconfig.wmsurl != null) {
+        if (Array.isArray(custommapconfig.imagecorners) && custommapconfig.imagecorners.length === 4) {
+          var projectedcorners = custommapconfig.imagecorners.map(function(point) {
+            return ol.proj.transform(point, 'EPSG:4326', mapprojection);
+          });
+          custombaselayer.setExtent(ol.extent.boundingExtent(projectedcorners));
+        }
+      } else if (custommapconfig.wmsurl !== null) {
         let options = {
           type: custommapconfig.layertype,
           title: custommapconfig.layername,
@@ -65,9 +88,9 @@ define([
             params: custommapconfig.wmsparams,
           });
         } else if (custommapconfig.layerservicetype === "tiled") {
-          options.source = new ol.source.XYZ({ url: custommapconfig.wmsurl });
+          options.source = new ol.source.XYZ({url: custommapconfig.wmsurl});
         } else if (custommapconfig.layerservicetype === "arcgis") {
-          options.source = new ol.source.TileArcGISRest({ url: custommapconfig.wmsurl });
+          options.source = new ol.source.TileArcGISRest({url: custommapconfig.wmsurl});
         }
 
         if (custommapconfig.bbox[0] && custommapconfig.bbox[1] && custommapconfig.bbox[2] && custommapconfig.bbox[3]) {
@@ -80,9 +103,9 @@ define([
       geographictools = custommapconfig.geographic;
     }
 
-    var treasurehunt = { roads: {} },
-      dirtyStages = new ol.source.Vector({ projection: mapprojection }),
-      originalStages = new ol.source.Vector({ projection: mapprojection }),
+    var treasurehunt = {roads: {}},
+      dirtyStages = new ol.source.Vector({projection: mapprojection}),
+      originalStages = new ol.source.Vector({projection: mapprojection}),
       dirty = false,
       abortDrawing = false,
       drawStarted = false,
@@ -98,7 +121,6 @@ define([
         }),
       });
     let osmGeocoderXHR;
-    let osmTimer = 0;
 
     // Load the control pane, treasurehunt and road list.
 
@@ -106,7 +128,7 @@ define([
       $('<div id="searchcontainer">').appendTo($("#controlpanel"));
       $(
         '<input type="search" placeholder="' +
-        strings["searchlocation"] +
+        strings.searchlocation +
         '" class="searchaddress"/>'
       ).appendTo($("#searchcontainer"));
       $('<span class="ui-icon  ui-icon-search searchicon"></span>').prependTo(
@@ -134,20 +156,20 @@ define([
         axis: "y",
         items: "li:not(:hidden , .blocked)",
         helper: "clone",
-        start: function (event, ui) {
+        start: function(event, ui) {
           var roadid = ui.item.attr("roadid"),
-            start_pos = ui.item.index('li[roadid="' + roadid + '"]'),
+            startPos = ui.item.index('li[roadid="' + roadid + '"]'),
             scrollParent = $(this).data("ui-sortable").scrollParent,
             maxScrollTop =
               scrollParent[0].scrollHeight -
               scrollParent[0].clientHeight -
               ui.helper.height();
-          ui.item.data("start_pos", start_pos);
+          ui.item.data("startPos", startPos);
           // Set max scrollTop for sortable
           // scrolling.
           $(this).data("maxScrollTop", maxScrollTop);
         },
-        sort: function (e, ui) {
+        sort: function() {
           // Check if scrolling is out of
           // boundaries.
           var scrollParent = $(this).data("ui-sortable").scrollParent,
@@ -156,18 +178,18 @@ define([
             scrollParent.scrollTop(maxScrollTop);
           }
         },
-        update: function (event, ui) {
-          var start_pos = ui.item.data("start_pos"),
+        update: function(event, ui) {
+          var startPos = ui.item.data("startPos"),
             roadid = ui.item.attr("roadid"),
-            end_pos = ui.item.index('li[roadid="' + roadid + '"]'),
+            endPos = ui.item.index('li[roadid="' + roadid + '"]'),
             $listitems = $(this).children('li[roadid="' + roadid + '"]'),
             $listlength = $($listitems).length,
             i;
-          if (start_pos === end_pos) {
+          if (startPos === endPos) {
             return;
           }
-          if (start_pos < end_pos) {
-            for (i = start_pos; i <= end_pos; i++) {
+          if (startPos < endPos) {
+            for (i = startPos; i <= endPos; i++) {
               relocatestageList(
                 $listitems,
                 $listlength,
@@ -178,7 +200,7 @@ define([
               );
             }
           } else {
-            for (i = end_pos; i <= start_pos; i++) {
+            for (i = endPos; i <= startPos; i++) {
               relocatestageList(
                 $listitems,
                 $listlength,
@@ -194,6 +216,15 @@ define([
         },
       })
       .disableSelection();
+    /**
+     *
+     * @param {*} $listitems
+     * @param {*} $listlength
+     * @param {*} i
+     * @param {*} dirtyStages
+     * @param {*} originalStages
+     * @param {*} vector
+     */
     function relocatestageList(
       $listitems,
       $listlength,
@@ -237,11 +268,10 @@ define([
     /**
      * @constructor
      * @extends {ol.control.Control}
-     * @param {Object=}
-     *            opt_options Control options.
+     * @param {*} optOptions Control options.
      */
-    app.generateResizableControl = function (opt_options) {
-      var options = opt_options || {},
+    app.generateResizableControl = function(optOptions) {
+      var options = optOptions || {},
         button = document.createElement("button"),
         element = document.createElement("div");
       button.innerHTML = "<>";
@@ -324,10 +354,10 @@ define([
       visible: false,
     });
     var basemaps = new ol.layer.Group({
-      title: strings["basemaps"],
+      title: strings.basemaps,
       layers: [
         new ol.layer.Tile({
-          title: strings["aerialmap"],
+          title: strings.aerialmap,
           type: "base",
           visible: false,
           source: new ol.source.BingMaps({
@@ -346,14 +376,14 @@ define([
           }),
         }),
         new ol.layer.Tile({
-          title: strings["roadmap"],
+          title: strings.roadmap,
           type: "base",
           visible: true,
           source: new ol.source.OSM(),
         }),
       ],
     });
-    if (custombaselayer != null) {
+    if (custombaselayer !== null) {
       if (custommapconfig.onlybase) {
         basemaps.getLayers().clear();
       }
@@ -361,9 +391,6 @@ define([
     }
     // Popup showing the position the user clicked.
     // Elements that make up the popup.
-    var container = document.getElementById("popup");
-    var content = document.getElementById("popup-content");
-    var closer = document.getElementById("popup-closer");
     /**
      * Create an overlay to anchor the popup to the map.
      */
@@ -371,7 +398,7 @@ define([
     var overlay = viewgpx.createCoordsOverlay(
       "#mapedit",
       null,
-      strings["pegmanlabel"]
+      strings.pegmanlabel
     );
 
     // Layer selector...
@@ -396,7 +423,7 @@ define([
       ]),
     });
 
-    map.on("click", function (evt) {
+    map.on("click", function(evt) {
       if (
         !Draw.getActive() &&
         !Modify.getActive() &&
@@ -411,26 +438,26 @@ define([
       handles: {
         e: $("#egrip"),
       },
-      resize: function (event, ui) {
+      resize: function(event, ui) {
         ui.size.height = ui.originalSize.height;
       },
-      stop: function (event, ui) {
+      stop: function() {
         map.updateSize();
       },
       cancel: "",
     });
     var Modify = {
-      init: function () {
+      init: function() {
         this.select = new ol.interaction.Select({
           // Si una feature puede ser seleccionada
           // o no.
-          filter: function (feature) {
+          filter: function(feature) {
             if (selectedstageFeatures[feature.getId()]) {
               return true;
             }
             return false;
           },
-          style: function (feature) {
+          style: function(feature) {
             var fill = new ol.style.Fill({
               color: "rgba(255,100,100,0.4)",
             });
@@ -480,7 +507,7 @@ define([
               }),
             }),
           }),
-          deleteCondition: function (event) {
+          deleteCondition: function(event) {
             return (
               ol.events.condition.shiftKeyOnly(event) &&
               ol.events.condition.singleClick(event)
@@ -490,16 +517,16 @@ define([
         map.addInteraction(this.modify);
         this.setEvents();
       },
-      setEvents: function () {
+      setEvents: function() {
         // Remove the feature selection when you switch to off.
         selectedFeatures = this.select.getFeatures();
-        this.select.on("change:active", function () {
+        this.select.on("change:active", function() {
           selectedFeatures.clear();
           deactivateDeleteButton();
         });
         // Enable or disable the delete button depending on whether I have
         // a selected feature or not.
-        this.select.on("select", function () {
+        this.select.on("select", function() {
           if (selectedFeatures.getLength() > 0) {
             activateDeleteButton();
           } else {
@@ -508,7 +535,7 @@ define([
         });
         // Activate the save button as soon as you have
         // modified sth. or not.
-        this.modify.on("modifyend", function (e) {
+        this.modify.on("modifyend", function(e) {
           activateSaveButton();
           modifyFeatureToDirtySource(
             e.features,
@@ -519,19 +546,19 @@ define([
           dirty = true;
         });
       },
-      getActive: function () {
+      getActive: function() {
         return this.select.getActive() && this.modify.getActive()
           ? true
           : false;
       },
-      setActive: function (active) {
+      setActive: function(active) {
         this.select.setActive(active);
         this.modify.setActive(active);
       },
     };
     Modify.init();
     var Draw = {
-      init: function () {
+      init: function() {
         map.addInteraction(this.Polygon);
         this.Polygon.setActive(false);
         this.setEvents();
@@ -560,11 +587,11 @@ define([
           zIndex: "Infinity",
         }),
       }),
-      setEvents: function () {
+      setEvents: function() {
         // Set the treasurehunt they belong to and activate
         // the save button .
         // depending on whether something has been changed or not.
-        this.Polygon.on("drawend", function (e) {
+        this.Polygon.on("drawend", function(e) {
           drawStarted = false;
           if (abortDrawing) {
             vectorDraw.getSource().clear();
@@ -590,14 +617,14 @@ define([
             dirty = true;
           }
         });
-        this.Polygon.on("drawstart", function (e) {
+        this.Polygon.on("drawstart", function() {
           drawStarted = true;
         });
       },
-      getActive: function () {
+      getActive: function() {
         return this.Polygon.getActive();
       },
-      setActive: function (active) {
+      setActive: function(active) {
         if (active) {
           this.Polygon.setActive(true);
         } else {
@@ -606,7 +633,7 @@ define([
         map.getTargetElement().style.cursor = active ? "none" : "";
       },
     };
-    $(document).keyup(function (e) {
+    $(document).keyup(function(e) {
       // If I press the esc key I stop drawing.
       if (e.keyCode === 27 && drawStarted) {
         // Esc.
@@ -629,6 +656,12 @@ define([
     map.addInteraction(snap);
     // I load the features.
     fetchTreasureHunt(treasurehuntid);
+    /**
+     *
+     * @param {*} dirtyFeature
+     * @param {*} originalStages
+     * @param {*} dirtySource
+     */
     function addNewFeatureToDirtySource(
       dirtyFeature,
       originalStages,
@@ -657,13 +690,20 @@ define([
       feature.getGeometry().appendPolygon(dirtyFeature.getGeometry());
     }
 
+    /**
+     *
+     * @param {*} dirtyFeatures
+     * @param {*} originalStages
+     * @param {*} dirtySource
+     * @param {*} vector
+     */
     function modifyFeatureToDirtySource(
       dirtyFeatures,
       originalStages,
       dirtySource,
       vector
     ) {
-      dirtyFeatures.forEach(function (dirtyFeature) {
+      dirtyFeatures.forEach(function(dirtyFeature) {
         var stageid = dirtyFeature.get("stageid");
         var feature = dirtySource.getFeatureById(stageid);
         var idFeaturesPolygons;
@@ -688,13 +728,20 @@ define([
       });
     }
 
+    /**
+     *
+     * @param {*} dirtyFeatures
+     * @param {*} originalStages
+     * @param {*} dirtySource
+     * @param {*} vector
+     */
     function removefeatureToDirtySource(
       dirtyFeatures,
       originalStages,
       dirtySource,
       vector
     ) {
-      dirtyFeatures.forEach(function (dirtyFeature) {
+      dirtyFeatures.forEach(function(dirtyFeature) {
         var stageid = dirtyFeature.get("stageid");
         var roadid = dirtyFeature.get("roadid");
         var feature = dirtySource.getFeatureById(stageid);
@@ -737,6 +784,10 @@ define([
       });
     }
 
+    /**
+     *
+     * @param {*} feature
+     */
     function styleFunction(feature) {
       // Get the incomeLevel from the feature properties.
       var stageposition = feature.get("stageposition");
@@ -744,12 +795,12 @@ define([
         selectedstageStyle.getText().setText("" + stageposition);
         defaultstageStyle.getText().setText("" + stageposition);
       }
-      // if there is no level or its one we don't recognize,.
+      // If there is no level or its one we don't recognize,.
       // return the default style (in an array!).
       if (selectedstageFeatures[feature.getId()]) {
         return [selectedstageStyle];
       }
-      // check the cache and create a new style for the
+      // Check the cache and create a new style for the
       // income.
       // level if its not been created before.
       // at this point, the style for the current level is in
@@ -758,6 +809,10 @@ define([
       return [defaultstageStyle];
     }
 
+    /**
+     *
+     * @param {*} treasurehuntid
+     */
     function fetchTreasureHunt(treasurehuntid) {
       var geojson = ajax.call([
         {
@@ -768,13 +823,12 @@ define([
         },
       ]);
       geojson[0]
-        .done(function (response) {
+        .done(function(response) {
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
           } else {
             var vector;
-            var geoJSONFeatures = response.treasurehunt.stages;
             var geoJSON = new ol.format.GeoJSON();
             var features;
             var roads = response.treasurehunt.roads;
@@ -787,7 +841,7 @@ define([
             // I need to index every path
             // in the global object
             // treasurehunt.
-            roads.forEach(function (road) {
+            roads.forEach(function(road) {
               // I add the
               // vectors to each
               // road.
@@ -809,7 +863,7 @@ define([
                 updateWhileAnimating: true,
                 style: styleFunction,
               });
-              features.forEach(function (feature) {
+              features.forEach(function(feature) {
                 if (feature.getGeometry() === null) {
                   feature.setGeometry(new ol.geom.MultiPolygon([]));
                 }
@@ -867,20 +921,29 @@ define([
             }
           }
         })
-        .fail(function (error) {
+        .fail(function(error) {
           $(".treasurehunt-editor-loader").hide();
-          console.log(error);
           notification.exception(error);
         });
     }
 
     // Panel functions .
+    /**
+     *
+     * @param {*} selectedFeatures
+     * @param {*} vector
+     */
     function removefeatures(selectedFeatures, vector) {
-      selectedFeatures.forEach(function (feature) {
+      selectedFeatures.forEach(function(feature) {
         vector.getSource().removeFeature(feature);
       });
       selectedFeatures.clear();
     }
+    /**
+     *
+     * @param {*} roads
+     * @param {*} map
+     */
     function selectfirstroad(roads, map) {
       var noroads = 0;
       for (var road in roads) {
@@ -904,10 +967,20 @@ define([
       }
     }
 
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} roadid
+     * @param {*} stageposition
+     * @param {*} name
+     * @param {*} clue
+     * @param {*} blocked
+     */
     function addstage2ListPanel(stageid, roadid, stageposition, name, clue, blocked) {
       if ($('#stagelist li[stageid="' + stageid + '"]').length < 1) {
         var li = $(
-          '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="' + stageposition + '"/>').appendTo($("#stagelist"));
+          '<li stageid="' + stageid + '" roadid="' + roadid + '" stageposition="' + stageposition + '"/>'
+        ).appendTo($("#stagelist"));
         li.addClass("ui-corner-all")
           .append("<div class='stagename'>" + name + "</div>")
           .append(
@@ -944,13 +1017,15 @@ define([
           maxHeight: 500,
           autoOpen: false,
         });
-      } else {
-        console.log(
-          "El li con " + stageid + " no ha podido crearse porque ya existia uno"
-        );
       }
     }
 
+    /**
+     *
+     * @param {*} roadid
+     * @param {*} name
+     * @param {*} blocked
+     */
     function addroad2ListPanel(roadid, name, blocked) {
       // If it doesn't exist I'll add it.
       if ($('#roadlist li[roadid="' + roadid + '"]').length < 1) {
@@ -965,6 +1040,10 @@ define([
           );
       }
     }
+    /**
+     *
+     * @param {*} roadid
+     */
     function deleteRoad2ListPanel(roadid) {
       var $li = $('#roadlist li[roadid="' + roadid + '"]');
       if ($li.length > 0) {
@@ -975,19 +1054,26 @@ define([
         $lis.remove();
       }
     }
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     * @param {*} vectorOfPolygons
+     */
     function deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons) {
       var $li = $('#stagelist li[stageid="' + stageid + '"]');
       if ($li.length > 0) {
         var roadid = $li.attr("roadid");
-        var start_pos = $li.index('li[roadid="' + roadid + '"]');
+        var startPos = $li.index('li[roadid="' + roadid + '"]');
         // I remove the li.
         $li.remove();
         var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
         // I check the rest of the stages on the list.
-        check_stage_list($stagelist);
+        checkStageList($stagelist);
         var $listlength = $stagelist.length;
         // I collect the rest.
-        for (var i = 0; i <= start_pos - 1; i++) {
+        for (var i = 0; i <= startPos - 1; i++) {
           relocatestageList(
             $stagelist,
             $listlength,
@@ -999,17 +1085,31 @@ define([
         }
       }
     }
+    /**
+     *
+     */
     function sortList() {
       // I order the list .
       $("#stagelist li")
-        .sort(function (a, b) {
+        .sort(function(a, b) {
           var contentA = parseInt($(a).attr("stageposition"));
           var contentB = parseInt($(b).attr("stageposition"));
-          return contentA < contentB ? 1 : contentA > contentB ? -1 : 0;
+          if (contentA < contentB) {
+            return 1;
+          }
+          if (contentA > contentB) {
+            return -1;
+          }
+          return 0;
         })
         .appendTo($("#stagelist"));
     }
 
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} roadid
+     */
     function emptystage(stageid, roadid) {
       var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
       $treasurehunt
@@ -1027,6 +1127,11 @@ define([
       }
     }
 
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} roadid
+     */
     function notEmptystage(stageid, roadid) {
       var $treasurehunt = $('#stagelist li[stageid="' + stageid + '"]');
       $treasurehunt
@@ -1044,23 +1149,41 @@ define([
       }
     }
 
+    /**
+     *
+     */
     function activateDeleteButton() {
       $("#removefeature").prop("disabled", false);
     }
+    /**
+     *
+     */
     function deactivateDeleteButton() {
       $("#removefeature").prop("disabled", true);
     }
+    /**
+     *
+     */
     function activateAddstage() {
       $("#addstage").prop("disabled", false);
     }
+    /**
+     *
+     */
     function deactivateAddstage() {
       $("#addstage").prop("disabled", true);
     }
+    /**
+     *
+     */
     function deactivateEdition() {
       $("#editmode").prop("disabled", true);
       $("#drawmode").prop("disabled", true);
       activateNavigationMode();
     }
+    /**
+     *
+     */
     function activateNavigationMode() {
       $("#editmode").removeClass("selectedbutton").prop("z-index", "Infinity");
       $("#drawmode").removeClass("selectedbutton").prop("z-index", "Infinity");
@@ -1072,6 +1195,9 @@ define([
       Draw.setActive(false);
       Modify.setActive(false);
     }
+    /**
+     *
+     */
     function activateModify() {
       $("#editmode").addClass("selectedbutton").blur().prop("z-index", 999);
       $("#drawmode").removeClass("selectedbutton").prop("z-index", "Infinity");
@@ -1079,6 +1205,9 @@ define([
       Draw.setActive(false);
       Modify.setActive(true);
     }
+    /**
+     *
+     */
     function activateDraw() {
       $("#drawmode")
         .addClass("selectedbutton")
@@ -1089,17 +1218,32 @@ define([
       Modify.setActive(false);
       Draw.setActive(true);
     }
+    /**
+     *
+     */
     function activateEdition() {
       $("#drawmode").prop("disabled", false);
       $("#editmode").prop("disabled", false);
       activateModify();
     }
+    /**
+     *
+     */
     function activateSaveButton() {
       $("#savestage").prop("disabled", false);
     }
+    /**
+     *
+     */
     function deactivateSaveButton() {
       $("#savestage").prop("disabled", true);
     }
+    /**
+     *
+     * @param {*} map
+     * @param {*} point
+     * @param {*} extent
+     */
     function flyTo(map, point, extent) {
       var duration = 700;
       var view = map.getView();
@@ -1115,7 +1259,11 @@ define([
         });
       }
     }
-    function check_stage_list($stagelist) {
+    /**
+     *
+     * @param {*} $stagelist
+     */
+    function checkStageList($stagelist) {
       if ($stagelist.length > 0) {
         $("#stagelistpanel").removeClass("invisible");
         map.updateSize();
@@ -1137,17 +1285,23 @@ define([
         $("#erremptystage").addClass("invisible");
       }
     }
+    /**
+     *
+     * @param {*} roadid
+     * @param {*} vectorOfPolygons
+     * @param {*} map
+     */
     function selectRoad(roadid, vectorOfPolygons, map) {
       // I clean all the selected features, hide all
       // the li and I only show the ones with the roadid.
       $("#stagelist li").removeClass("ui-selected").hide();
       var $stagelist = $("#stagelist li[roadid='" + roadid + "']");
       $stagelist.show();
-      check_stage_list($stagelist);
+      checkStageList($stagelist);
       // If the li road is not marked I mark it.
       $("#roadlist li[roadid='" + roadid + "']").addClass("ui-selected");
       // I leave only the vector with the visible roadid .
-      map.getLayers().forEach(function (layer) {
+      map.getLayers().forEach(function(layer) {
         if (layer instanceof ol.layer.Vector) {
           layer.setVisible(false);
         }
@@ -1158,6 +1312,15 @@ define([
       }
     }
 
+    /**
+     *
+     * @param {*} vectorOfPolygons
+     * @param {*} vectorSelected
+     * @param {*} selected
+     * @param {*} selectedFeatures
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     */
     function selectstageFeatures(vectorOfPolygons, vectorSelected, selected,
                                 selectedFeatures, dirtySource, originalStages) {
       vectorSelected.getSource().clear();
@@ -1207,7 +1370,16 @@ define([
       }
     }
 
-    function relocatenostage( stageid, stageposition, roadid,
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} stageposition
+     * @param {*} roadid
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     * @param {*} vector
+     */
+    function relocatenostage(stageid, stageposition, roadid,
                               dirtySource, originalStages, vector) {
       var feature = dirtySource.getFeatureById(stageid);
       var idFeaturesPolygons;
@@ -1232,25 +1404,52 @@ define([
       }
     }
 
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} idModule
+     */
     function editFormstageEntry(stageid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&id=" + stageid;
       window.location.href = url;
     }
 
+    /**
+     *
+     * @param {*} roadid
+     * @param {*} idModule
+     */
     function newFormstageEntry(roadid, idModule) {
       var url = "editstage.php?cmid=" + idModule + "&roadid=" + roadid;
       window.location.href = url;
     }
+    /**
+     *
+     * @param {*} roadid
+     * @param {*} idModule
+     */
     function editFormRoadEntry(roadid, idModule) {
       var url = "editroad.php?cmid=" + idModule + "&id=" + roadid;
       window.location.href = url;
     }
 
+    /**
+     *
+     * @param {*} idModule
+     */
     function newFormRoadEntry(idModule) {
       var url = "editroad.php?cmid=" + idModule;
       window.location.href = url;
     }
 
+    /**
+     *
+     * @param {*} roadid
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     * @param {*} treasurehuntid
+     * @param {*} lockid
+     */
     function deleteRoad(
       roadid,
       dirtySource,
@@ -1270,7 +1469,7 @@ define([
         },
       ]);
       json[0]
-        .done(function (response) {
+        .done(function(response) {
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
@@ -1302,13 +1501,21 @@ define([
             }
           }
         })
-        .fail(function (error) {
+        .fail(function(error) {
           $(".treasurehunt-editor-loader").hide();
-          console.log(error);
           notification.exception(error);
         });
     }
 
+    /**
+     *
+     * @param {*} stageid
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     * @param {*} vectorOfPolygons
+     * @param {*} treasurehuntid
+     * @param {*} lockid
+     */
     function deletestage(stageid, dirtySource, originalStages,
                         vectorOfPolygons, treasurehuntid, lockid) {
       $(".treasurehunt-editor-loader").show();
@@ -1323,7 +1530,7 @@ define([
         },
       ]);
       json[0]
-        .done(function (response) {
+        .done(function(response) {
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
@@ -1332,7 +1539,7 @@ define([
             var polygonFeature;
             var feature = dirtySource.getFeatureById(stageid);
             // Remove and relocate.
-            deletestage2ListPanel( stageid, dirtySource, originalStages, vectorOfPolygons);
+            deletestage2ListPanel(stageid, dirtySource, originalStages, vectorOfPolygons);
             // I remove the feature of
             // dirtySource if I had it and
             // all the polygons of the
@@ -1363,13 +1570,21 @@ define([
             }
           }
         })
-        .fail(function (error) {
+        .fail(function(error) {
           $(".treasurehunt-editor-loader").hide();
-          console.log(error);
           notification.exception(error);
         });
     }
 
+    /**
+     *
+     * @param {*} dirtySource
+     * @param {*} originalStages
+     * @param {*} treasurehuntid
+     * @param {*} callback
+     * @param {*} options
+     * @param {*} lockid
+     */
     function savestages(dirtySource, originalStages, treasurehuntid, callback, options, lockid) {
       $(".treasurehunt-editor-loader").show();
       var geojsonformat = new ol.format.GeoJSON();
@@ -1377,7 +1592,7 @@ define([
       var features = [];
       var auxfeature;
       // Remove unnecessary feature properties .
-      dirtyfeatures.forEach(function (dirtyfeature) {
+      dirtyfeatures.forEach(function(dirtyfeature) {
         auxfeature = dirtyfeature.clone();
         auxfeature.unset("idFeaturesPolygons");
         auxfeature.unset("name");
@@ -1401,7 +1616,7 @@ define([
         },
       ]);
       json[0]
-        .done(function (response) {
+        .done(function(response) {
           $(".treasurehunt-editor-loader").hide();
           if (response.status.code) {
             notification.alert("Error", response.status.msg, "Continue");
@@ -1409,7 +1624,7 @@ define([
             var originalFeature;
             // I pass the "dirty" features to the object
             // with the original features.
-            dirtySource.forEachFeature(function (feature) {
+            dirtySource.forEachFeature(function(feature) {
               originalFeature = originalStages.getFeatureById(feature.getId());
               originalFeature.setProperties(feature.getProperties());
               originalFeature.setGeometry(feature.getGeometry());
@@ -1425,9 +1640,8 @@ define([
             }
           }
         })
-        .fail(function (error) {
+        .fail(function(error) {
           $(".treasurehunt-editor-loader").hide();
-          console.log(error);
           notification.alert("Error", error.message, "Continue");
         });
     }
@@ -1435,7 +1649,7 @@ define([
     $(".searchaddress")
       .autocomplete({
         minLength: 4,
-        source: function (request, response) {
+        source: function(request, response) {
           var term = request.term;
           // Abort xhr request if a new one arrives
           if (osmGeocoderXHR) {
@@ -1470,34 +1684,8 @@ define([
               osmGeocoderXHR = null;
             });
           //
-          // openStreetMapGeocoder
-          // 	.geocode(
-          // 		term,
-          // 		function (data) {
-          // 			if (!data[0]) {
-          // 				response();
-          // 				return;
-          // 			}
-          // 			var total = [];
-          // 			for (var i = 0, l = data.length; i < l; i++) {
-          // 				var latitude;
-          // 				var longitude;
-          // 				latitude = data[i]
-          // 					.getLatitude();
-          // 				longitude = data[i]
-          // 					.getLongitude();
-          // 				var result = {
-          // 					"value": data[i].totalName,
-          // 					"latitude": latitude,
-          // 					"longitude": longitude,
-          // 					"boundingbox": data[i].boundingbox
-          // 				};
-          // 				total[i] = result;
-          // 			}
-          // 			response(total);
-          // 		});
         },
-        select: function (event, ui) {
+        select: function(event, ui) {
           if (ui.item.boundingbox) {
             var extend = [];
             extend[0] = parseFloat(ui.item.boundingbox[2]);
@@ -1520,12 +1708,12 @@ define([
         },
         autoFocus: true,
       })
-      .on("click", function () {
+      .on("click", function() {
         $(this).autocomplete("search", $(this).value);
       });
     // Necessary for regulating the width of the
     // autocomplete.
-    $.ui.autocomplete.prototype._resizeMenu = function () {
+    $.ui.autocomplete.prototype._resizeMenu = function() {
       var ul = this.menu.element;
       ul.outerWidth(this.element.outerWidth());
     };
@@ -1534,7 +1722,7 @@ define([
     $("#navmode")
       .css("position", "relative")
       .on("click", activateNavigationMode);
-    $("#addstage").on("click", function () {
+    $("#addstage").on("click", function() {
       if (dirty) {
         savestages(
           dirtyStages,
@@ -1548,7 +1736,7 @@ define([
         newFormstageEntry(roadid, idModule);
       }
     });
-    $("#addroad").on("click", function () {
+    $("#addroad").on("click", function() {
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid,
                   newFormRoadEntry, [idModule], lockid);
@@ -1556,13 +1744,13 @@ define([
         newFormRoadEntry(idModule);
       }
     });
-    $("#removefeature").on("click", function () {
+    $("#removefeature").on("click", function() {
       notification.confirm(
-        strings["areyousure"],
-        strings["removewarning"],
-        strings["confirm"],
-        strings["cancel"],
-        function () {
+        strings.areyousure,
+        strings.removewarning,
+        strings.confirm,
+        strings.cancel,
+        function() {
           removefeatureToDirtySource(selectedFeatures, originalStages, dirtyStages, treasurehunt.roads[roadid].vector);
           removefeatures(selectedFeatures, treasurehunt.roads[roadid].vector);
           // Disable the delete button and active on save changes.
@@ -1572,30 +1760,30 @@ define([
         }
       );
     });
-    $("#savestage").on("click", function () {
+    $("#savestage").on("click", function() {
       savestages(dirtyStages, originalStages, treasurehuntid, null, null, lockid);
     });
-    $("#stagelist").on("click", ".ui-icon-info, .ui-icon-alert", function () {
+    $("#stagelist").on("click", ".ui-icon-info, .ui-icon-alert", function() {
       var id = $(this).data("id");
       // Open dialogue.
       $(id).dialog("open");
       // Remove focus from the buttons.
       $(".ui-dialog :button").blur();
     });
-    $("#stagelist").on("click", ".ui-icon-trash", function () {
-      var $this_li = $(this).parents("li");
+    $("#stagelist").on("click", ".ui-icon-trash", function() {
+      var $thisLi = $(this).parents("li");
       notification.confirm(
-        strings["areyousure"],
-        strings["removewarning"],
-        strings["confirm"],
-        strings["cancel"],
-        function () {
-          var stageid = parseInt($this_li.attr("stageid"));
+        strings.areyousure,
+        strings.removewarning,
+        strings.confirm,
+        strings.cancel,
+        function() {
+          var stageid = parseInt($thisLi.attr("stageid"));
           deletestage(stageid, dirtyStages, originalStages, treasurehunt.roads[roadid].vector, treasurehuntid, lockid);
         }
       );
     });
-    $("#stagelist").on("click", ".ui-icon-pencil", function () {
+    $("#stagelist").on("click", ".ui-icon-pencil", function() {
       // I'm looking for the stageid of the li containing the
       // selected trash can.
 
@@ -1607,9 +1795,7 @@ define([
         editFormstageEntry(stageid, idModule);
       }
     });
-    var editstatus = "off";
-
-    $("#stagelist").on("click", "li", function (e) {
+    $("#stagelist").on("click", "li", function(e) {
       if ($(e.target).is(".handle ,.nohandle, .ui-icon , .sortable-number")) {
         e.preventDefault();
         return;
@@ -1636,7 +1822,7 @@ define([
         Draw.Polygon.finishDrawing();
       }
     });
-    $("#roadlist").on("click", "li", function (e) {
+    $("#roadlist").on("click", "li", function(e) {
       if ($(e.target).is(".ui-icon")) {
         e.preventDefault();
         return;
@@ -1676,7 +1862,7 @@ define([
         500
       );
     });
-    $("#roadlist").on("click", ".ui-icon-pencil", function () {
+    $("#roadlist").on("click", ".ui-icon-pencil", function() {
       // Busco el roadid del li que contiene el
       // lapicero seleccionado.
       var roadid = parseInt($(this).parents("li").attr("roadid"));
@@ -1688,15 +1874,15 @@ define([
         editFormRoadEntry(roadid, idModule);
       }
     });
-    $("#roadlist").on("click", ".ui-icon-trash", function () {
-      var $this_li = $(this).parents("li");
+    $("#roadlist").on("click", ".ui-icon-trash", function() {
+      var $thisLi = $(this).parents("li");
       notification.confirm(
-        strings["areyousure"],
-        strings["removeroadwarning"],
-        strings["confirm"],
-        strings["cancel"],
-        function () {
-          var roadid = parseInt($this_li.attr("roadid"));
+        strings.areyousure,
+        strings.removeroadwarning,
+        strings.confirm,
+        strings.cancel,
+        function() {
+          var roadid = parseInt($thisLi.attr("roadid"));
           deleteRoad(
             roadid,
             dirtyStages,
@@ -1707,15 +1893,15 @@ define([
         }
       );
     });
-    map.on("pointermove", function (evt) {
+    map.on("pointermove", function(evt) {
       if (evt.dragging || Draw.getActive() || !Modify.getActive()) {
         return;
       }
       var pixel = map.getEventPixel(evt.originalEvent);
-      var hit = map.forEachFeatureAtPixel(pixel, function (feature, layer) {
+      var hit = map.forEachFeatureAtPixel(pixel, function(feature) {
         if (selectedstageFeatures[feature.getId()]) {
           var selected = false;
-          selectedFeatures.forEach(function (featureSelected) {
+          selectedFeatures.forEach(function(featureSelected) {
             if (feature === featureSelected) {
               selected = true;
             }
@@ -1728,38 +1914,43 @@ define([
     });
     // Evento para que funcione bien el boton de cerrar en
     // dispositivos tactiles.
-    $(document).on("touchend", ".ui-dialog-titlebar-close", function () {
+    $(document).on("touchend", ".ui-dialog-titlebar-close", function() {
       $(this).parent().siblings(".ui-dialog-content").dialog("close");
     });
     // CLEARABLE INPUT.
+    /**
+     *
+     * @param {*} v
+     */
     function tog(v) {
       return v ? "removeClass" : "addClass";
     }
-    $(".searchaddress").on("input", function () {
+    $(".searchaddress").on("input", function() {
       $(".closeicon")[tog(this.value)]("invisible");
     });
-    $(".closeicon").on("touchstart click", function (ev) {
+    $(".closeicon").on("touchstart click", function(ev) {
       ev.preventDefault();
       $(this).addClass("invisible");
       $(".searchaddress").val("").change().autocomplete("close");
     });
     // Al salirse.
-    window.onbeforeunload = function (e) {
-      var message = strings["savewarning"],
-        e = e || window.event;
+    window.onbeforeunload = function(event) {
+      var message = strings.savewarning;
+      event = event || window.event;
       if (dirty) {
         // For IE and Firefox.
-        if (e) {
-          e.returnValue = message;
+        if (event) {
+          event.returnValue = message;
         }
 
         // For Safari.
         return message;
       }
+      return undefined;
     };
   }
   var init = {
-    edittreasurehunt: function (idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {
+    edittreasurehunt: function(idModule, treasurehuntid, selectedroadid, lockid, custommapconfig) {
       // I18n strings.
       var terms = [
         "stage",
@@ -1781,10 +1972,10 @@ define([
         "pegmanlabel",
         "custommapimageerror",
       ];
-      var stringsqueried = terms.map(function (term) {
-        return { key: term, component: "treasurehunt" };
+      var stringsqueried = terms.map(function(term) {
+        return {key: term, component: "treasurehunt"};
       });
-      str.get_strings(stringsqueried).done(function (strings) {
+      str.get_strings(stringsqueried).done(function(strings) {
         var i18n = [];
         for (var i = 0; i < terms.length; i++) {
           i18n[terms[i]] = strings[i];
@@ -1797,7 +1988,7 @@ define([
         ) {
           // Detect image size.
           var img = new Image();
-          img.onload = function () {
+          img.onload = function() {
             custommapconfig.imgwidth = this.naturalWidth;
             custommapconfig.imgheight = this.naturalHeight;
             initedittreasurehunt(
@@ -1809,8 +2000,8 @@ define([
               custommapconfig
             );
           };
-          img.onerror = function (e) {
-            notification.alert("Error", i18n["custommapimageerror"], "Continue");
+          img.onerror = function() {
+            notification.alert("Error", i18n.custommapimageerror, "Continue");
             initedittreasurehunt(
               idModule,
               treasurehuntid,
@@ -1830,11 +2021,16 @@ define([
   return init;
 
   // Calculate customimageextent.
+  /**
+   *
+   * @param {*} custommapconfig
+   * @param {*} mapprojection
+   * @param {*} referencetocenter
+   */
   function calculateCustomImageExtent(custommapconfig, mapprojection, referencetocenter = false) {
     var customimageextent = ol.proj.transformExtent(custommapconfig.bbox, 'EPSG:4326', mapprojection);
-    if (custommapconfig.preserveaspectratio == true) {
+    if (custommapconfig.preserveaspectratio === true) {
       // Round bbox and scales to allow vectorial SVG rendering. (Maintain ratio.)
-      var bboxwidth = customimageextent[2] - customimageextent[0];
       var bboxheight = customimageextent[3] - customimageextent[1];
       var centerwidth = (customimageextent[2] + customimageextent[0]) / 2;
       var centerheight = (customimageextent[3] + customimageextent[1]) / 2;
@@ -1850,10 +2046,59 @@ define([
         // Use bottom-left point as reference.ç
         customimageextent = [customimageextent[0], customimageextent[1],
         customimageextent[0] + adjwidth, customimageextent[1] + adjheight];
-        console.log('Using bottom-left as reference.' + customimageextent);
       }
     }
     return customimageextent;
+  }
+
+  /**
+   * Create an OpenLayers canvas source that maps an image to four geographic corners.
+   * @param {Array} corners Image corners in NW, NE, SE, SW order, as longitude/latitude pairs.
+   * @param {HTMLImageElement} image Loaded image element.
+   * @param {string} projection The map projection.
+   * @returns {Object} OpenLayers canvas image source.
+   */
+  function createAffineImageSource(corners, image, projection) {
+    var source = new ol.source.ImageCanvas({
+      projection: projection,
+      ratio: 1,
+      canvasFunction: function(extent, resolution, pixelRatio, size) {
+        var canvas = document.createElement('canvas');
+        // ImageCanvas already passes size in device pixels.
+        canvas.width = Math.max(1, Math.round(size[0]));
+        canvas.height = Math.max(1, Math.round(size[1]));
+        if (!image.complete || !image.naturalWidth) {
+          return canvas;
+        }
+        var projected = corners.map(function(point) {
+          return ol.proj.transform(point, 'EPSG:4326', projection);
+        });
+        var nw = projected[0];
+        var ne = projected[1];
+        var sw = projected[3];
+        var toCanvas = function(point) {
+          return [(point[0] - extent[0]) / resolution * pixelRatio,
+            (extent[3] - point[1]) / resolution * pixelRatio];
+        };
+        var origin = toCanvas(nw);
+        var right = toCanvas(ne);
+        var bottom = toCanvas(sw);
+        var context = canvas.getContext('2d');
+        context.setTransform(
+          (right[0] - origin[0]) / image.naturalWidth,
+          (right[1] - origin[1]) / image.naturalWidth,
+          (bottom[0] - origin[0]) / image.naturalHeight,
+          (bottom[1] - origin[1]) / image.naturalHeight,
+          origin[0], origin[1]
+        );
+        context.drawImage(image, 0, 0);
+        return canvas;
+      }
+    });
+    image.addEventListener('load', function() {
+      source.changed();
+    }, {once: true});
+    return source;
   }
 
 });
