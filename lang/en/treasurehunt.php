@@ -47,7 +47,7 @@ $string['activitysummarysequential'] = 'Follow-the-road hunt';
 $string['activitysummarysequential_help'] = 'Stages are discovered in road order. ' .
     'To progress, players complete the first unfinished stage.';
 $string['activitysummarysequentialdetail'] = 'Stages in order';
-$string['activitysummarytracking'] = 'The route is saved';
+$string['activitysummarytracking'] = 'The route is recorded';
 $string['activitysummarytracking_help'] = 'When enabled, your movements are monitored while the game screen is open, and your teacher can see your position.';
 $string['activitytoend'] = 'Complete selected activity before';
 $string['activitytoend_help'] = 'The selected activity must be completed before the current clue is displayed.
