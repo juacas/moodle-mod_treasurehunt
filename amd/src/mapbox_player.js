@@ -26,6 +26,7 @@ import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_gu
 import {createLayer as createAnimatedPegmanLayer, loadLibrary as loadPegmanLibrary,
     sizeForMapScale} from 'mod_treasurehunt/mapbox_animated_pegman';
 import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
+import {isSvgImage, loadSvgImage, renderSvgToDataUrl} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
@@ -156,8 +157,8 @@ const customSource = (mapping) => {
         const [west, south, east, north] = mapping.bbox;
         const coordinates = Array.isArray(mapping.imagecorners) && mapping.imagecorners.length === 4 ?
             mapping.imagecorners : [[west, north], [east, north], [east, south], [west, south]];
-        return {type: 'image', url: mapping.custombackgroundurl,
-            coordinates};
+        return {type: 'image', url: mapping.custombackgroundrenderedurl || mapping.custombackgroundurl,
+            coordinates, customSvgOverlay: Boolean(mapping.customSvgImage)};
     }
     if (!mapping?.wmsurl) {
         return null;
@@ -183,44 +184,16 @@ const customSource = (mapping) => {
 };
 
 /**
- * Rasterize uploaded SVG map images because Mapbox GL image sources accept raster images only.
+ * Keep the SVG source ready for rerasterizing at the map's current zoom.
  * @param {Object} mapping Activity map configuration.
  */
-const rasterizeCustomSvg = async(mapping) => {
-    const url = mapping?.custombackgroundurl;
-    const mimetype = mapping?.custombackgroundmimetype || '';
-    if (!url || (mimetype !== 'image/svg+xml' && !/\.svg(?:[?#]|$)/i.test(url))) {
+const prepareSvgOverlay = async(mapping) => {
+    if (!isSvgImage(mapping) || !Array.isArray(mapping?.bbox) || mapping.bbox.length !== 4) {
         return;
     }
-    const response = await fetch(url, {credentials: 'same-origin'});
-    if (!response.ok) {
-        throw new Error('Could not fetch the uploaded SVG map (' + response.status + ').');
-    }
-    const blob = await response.blob();
-    if (blob.type && !blob.type.toLowerCase().includes('svg')) {
-        return;
-    }
-    const objecturl = URL.createObjectURL(blob);
-    try {
-        const image = new Image();
-        image.src = objecturl;
-        await new Promise((resolve, reject) => {
-            if (image.complete && image.naturalWidth) {
-                resolve();
-                return;
-            }
-            image.onload = resolve;
-            image.onerror = () => reject(new Error('The uploaded SVG map could not be decoded.'));
-        });
-        const canvas = document.createElement('canvas');
-        const scale = Math.min(1, 4096 / Math.max(image.naturalWidth, image.naturalHeight));
-        canvas.width = Math.max(1, Math.round(image.naturalWidth * scale));
-        canvas.height = Math.max(1, Math.round(image.naturalHeight * scale));
-        canvas.getContext('2d').drawImage(image, 0, 0, canvas.width, canvas.height);
-        mapping.custombackgroundurl = canvas.toDataURL('image/png');
-    } finally {
-        URL.revokeObjectURL(objecturl);
-    }
+    const image = await loadSvgImage(mapping);
+    mapping.customSvgImage = image;
+    mapping.custombackgroundrenderedurl = renderSvgToDataUrl(image, image.naturalWidth, image.naturalHeight);
 };
 
 /**
@@ -268,6 +241,8 @@ export const init = async() => {
     const playerconfig = config.playerconfig || {};
     let map;
     let mapboxgl;
+    let buildingsToggle;
+    let buildingsEnabled = true;
     let pegmanLibrary;
     let pegmanLayer;
     let touchGuard;
@@ -295,6 +270,7 @@ export const init = async() => {
     let confusedTimer;
     let requestQueue = Promise.resolve();
     let selectedAttempt = null;
+    let svgRasterSize = null;
     let firstResponse = true;
     let firstStyle = true;
     let initialMapReady;
@@ -344,6 +320,46 @@ export const init = async() => {
         }
     };
 
+    /** Re-render the SVG overlay at a resolution matching the current map zoom. */
+    const updateSvgOverlayResolution = () => {
+        const mapping = config.custommapping;
+        const image = mapping?.customSvgImage;
+        const source = map?.getSource('custom-image');
+        if (!image || !source || typeof source.updateImage !== 'function') {
+            return;
+        }
+        const [west, south, east, north] = mapping.bbox;
+        const coordinates = Array.isArray(mapping.imagecorners) && mapping.imagecorners.length === 4 ?
+            mapping.imagecorners : [[west, north], [east, north], [east, south], [west, south]];
+        const projected = coordinates.map((coordinate) => map.project(coordinate));
+        const distance = (first, second) => Math.hypot(first.x - second.x, first.y - second.y);
+        const width = Math.max(distance(projected[0], projected[1]), distance(projected[3], projected[2]));
+        const height = Math.max(distance(projected[0], projected[3]), distance(projected[1], projected[2]));
+        const pixelRatio = (window.devicePixelRatio || 1) * 1.5;
+        const scale = Math.min(8192 / image.naturalWidth, 8192 / image.naturalHeight,
+            Math.max(1, width * pixelRatio / image.naturalWidth, height * pixelRatio / image.naturalHeight));
+        const rasterwidth = Math.max(1, Math.ceil(image.naturalWidth * scale));
+        const rasterheight = Math.max(1, Math.ceil(image.naturalHeight * scale));
+        if (svgRasterSize?.width === rasterwidth && svgRasterSize?.height === rasterheight) {
+            return;
+        }
+        const url = renderSvgToDataUrl(image, rasterwidth, rasterheight);
+        source.updateImage({url, coordinates});
+        mapping.custombackgroundrenderedurl = url;
+        svgRasterSize = {width: rasterwidth, height: rasterheight};
+    };
+
+    /** Enable the buildings toggle only for styles with a 3D buildings layer. */
+    const updateBuildingsToggle = () => {
+        if (!buildingsToggle) {
+            return;
+        }
+        const available = Boolean(map?.getLayer('mapbox-3d-buildings'));
+        buildingsToggle.disabled = !available;
+        buildingsToggle.checked = available && buildingsEnabled;
+        buildingsToggle.parentElement.classList.toggle('is-disabled', !available);
+    };
+
     /** Keep the marker visible with the shared model if the animation library cannot be loaded. */
     const createStaticPegmanLayer = () => {
         map.addSource('pegman', {type: 'geojson', data: EMPTY});
@@ -382,18 +398,26 @@ export const init = async() => {
                     'fill-extrusion-opacity': 0.72,
                 }}, labelLayer?.id);
         }
+        if (map.getLayer('mapbox-3d-buildings')) {
+            map.setLayoutProperty('mapbox-3d-buildings', 'visibility', buildingsEnabled ? 'visible' : 'none');
+        }
+        updateBuildingsToggle();
         const imageOverlay = customSource(config.custommapping);
-        if (imageOverlay?.type === 'image') {
-            // Style changes remove custom sources. Restore this mandatory image above
-            // the basemap, keeping stage geometries and game markers visible above it.
+        if (imageOverlay?.type === 'image' || imageOverlay?.customSvgOverlay) {
+            // Style changes remove custom sources. Restore the image below 3D buildings
+            // and above the basemap, keeping game geometries and markers above it.
             if (!map.getSource('custom-image')) {
-                map.addSource('custom-image', imageOverlay);
+                const sourceSpec = {...imageOverlay};
+                delete sourceSpec.customSvgOverlay;
+                map.addSource('custom-image', sourceSpec);
             }
             if (!map.getLayer('custom-image-overlay')) {
-                const beforeLayer = map.getLayer('stage-fill') ? 'stage-fill' :
-                    (map.getLayer('pegman-model') ? 'pegman-model' : undefined);
+                const beforeLayer = map.getLayer('mapbox-3d-buildings') ? 'mapbox-3d-buildings' :
+                    (map.getLayer('stage-fill') ? 'stage-fill' :
+                        (map.getLayer('pegman-model') ? 'pegman-model' : undefined));
                 map.addLayer({id: 'custom-image-overlay', type: 'raster', source: 'custom-image'}, beforeLayer);
             }
+            updateSvgOverlayResolution();
         }
         if (!map.getLayer('pegman-model')) {
             if (pegmanLibrary) {
@@ -1070,24 +1094,27 @@ export const init = async() => {
         loading.hidden = false;
         retry.hidden = true;
         try {
-            try {
-                await rasterizeCustomSvg(config.custommapping);
-            } catch (error) {
-                toast(labels.layererror + ': ' + error.message, true);
-                if (config.custommapping) {
-                    config.custommapping.custombackgroundurl = null;
-                }
-                currentStyle = config.mapboxaccesstoken ? 'streets' : 'osm';
-            }
             [mapboxgl, pegmanLibrary] = await Promise.all([loadMapbox(), loadPegmanLibrary(config.threepegmanurl)
                 .catch((error) => {
                     toast(labels.layererror + ': ' + error.message, true);
                     return null;
                 })]);
+            try {
+                await prepareSvgOverlay(config.custommapping);
+                const image = config.custommapping?.customSvgImage;
+                svgRasterSize = image ? {width: image.naturalWidth, height: image.naturalHeight} : null;
+            } catch (error) {
+                toast(labels.layererror + ': ' + error.message, true);
+                if (config.custommapping) {
+                    config.custommapping.custombackgroundurl = null;
+                    config.custommapping.customSvgImage = null;
+                }
+                currentStyle = config.mapboxaccesstoken ? 'streets' : 'osm';
+            }
             if (!map) {
                 map = new mapboxgl.Map({container: 'cessium-globe', accessToken: config.mapboxaccesstoken,
                     style: mapStyle(currentStyle, config.custommapping), center: [0, 25], zoom: 2,
-                    pitch: 55, antialias: true, maxZoom: 19, performanceMetricsCollection: false,
+                    pitch: 55, antialias: true, maxZoom: 22, performanceMetricsCollection: false,
                     collectResourceTiming: false});
                 touchGuard = setupTouchGestureGuard(map.getCanvas());
                 initialMapReady = new Promise((resolve) => {
@@ -1100,6 +1127,7 @@ export const init = async() => {
                 });
                 map.on('style.load', installLayers);
                 map.on('zoomend', updatePegmanScale);
+                map.on('zoomend', updateSvgOverlayResolution);
                 map.addControl(new mapboxgl.NavigationControl(), 'bottom-left');
                 const picker = document.createElement('select');
                 picker.className = 'mapbox-layer-select';
@@ -1118,7 +1146,26 @@ export const init = async() => {
                     currentStyle = picker.value;
                     map.setStyle(mapStyle(currentStyle, config.custommapping));
                 });
-                node('layer-picker').appendChild(picker);
+                const layerpicker = node('layer-picker');
+                layerpicker.appendChild(picker);
+                const buildingsLabel = document.createElement('label');
+                buildingsLabel.className = 'mapbox-buildings-toggle';
+                buildingsToggle = document.createElement('input');
+                buildingsToggle.type = 'checkbox';
+                buildingsToggle.checked = buildingsEnabled;
+                buildingsToggle.setAttribute('aria-label', labels.buildings3d);
+                buildingsToggle.addEventListener('change', () => {
+                    buildingsEnabled = buildingsToggle.checked;
+                    if (map.getLayer('mapbox-3d-buildings')) {
+                        map.setLayoutProperty('mapbox-3d-buildings', 'visibility',
+                            buildingsEnabled ? 'visible' : 'none');
+                    }
+                });
+                const buildingsText = document.createElement('span');
+                buildingsText.textContent = labels.buildings3d;
+                buildingsLabel.append(buildingsToggle, buildingsText);
+                layerpicker.appendChild(buildingsLabel);
+                updateBuildingsToggle();
                 bindInterface();
                 if (!playwithoutmoving) {
                     startGps();

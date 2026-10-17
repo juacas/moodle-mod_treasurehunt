@@ -24,6 +24,7 @@ import ajax from 'core/ajax';
 import {setup as setupLocationSearch} from 'mod_treasurehunt/location_search';
 import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_guard';
 import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
+import {createTileRenderer, isSvgImage, loadSvgImage} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
@@ -118,10 +119,40 @@ export const loadCesium = (baseUrl) => {
 export const createBaseProvider = async(Cesium, mapping) => {
     let provider;
     if (mapping && mapping.custombackgroundurl && Array.isArray(mapping.bbox)) {
-        const image = await createTransformedCesiumImage(mapping);
-        provider = await Cesium.SingleTileImageryProvider.fromUrl(image.url, {
-            rectangle: Cesium.Rectangle.fromDegrees(...image.bbox),
-        });
+        if (isSvgImage(mapping)) {
+            const image = await loadSvgImage(mapping);
+            const renderTile = createTileRenderer(image, mapping);
+            const tilingScheme = new Cesium.WebMercatorTilingScheme();
+            provider = {
+                credit: undefined,
+                errorEvent: new Cesium.Event(),
+                hasAlphaChannel: true,
+                maximumLevel: 23,
+                minimumLevel: 0,
+                proxy: undefined,
+                rectangle: Cesium.Rectangle.fromDegrees(...mapping.bbox),
+                ready: true,
+                readyPromise: Promise.resolve(true),
+                tileDiscardPolicy: undefined,
+                tileHeight: 256,
+                tileWidth: 256,
+                tilingScheme,
+                getTileCredits() {
+                    return [];
+                },
+                requestImage(x, y, level) {
+                    if (level > this.maximumLevel) {
+                        return undefined;
+                    }
+                    return Promise.resolve(renderTile(x, y, level));
+                },
+            };
+        } else {
+            const image = await createTransformedCesiumImage(mapping);
+            provider = await Cesium.SingleTileImageryProvider.fromUrl(image.url, {
+                rectangle: Cesium.Rectangle.fromDegrees(...image.bbox),
+            });
+        }
     } else if (mapping && mapping.wmsurl && mapping.layerservicetype === 'tiled') {
         // OpenLayers accepts {-y} for TMS tiles; Cesium calls the same coordinate {reverseY}.
         const url = mapping.wmsurl.replace(/\{-y\}/g, '{reverseY}');
@@ -1968,6 +1999,8 @@ export const init = async() => {
                     selectionIndicator: false,
                     requestRenderMode: true,
                 });
+                // Three additional zoom levels allow the camera to approach eight times closer.
+                viewer.scene.screenSpaceCameraController.minimumZoomDistance /= 8;
                 viewer.scene.terrainProviderChanged.addEventListener(() => {
                     if (element('clue-dialog').open) {
                         focusSelectedClue();

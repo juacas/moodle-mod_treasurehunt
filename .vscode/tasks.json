@@ -19,7 +19,11 @@
       },
       "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
       "dependsOrder": "sequence",
-      "problemMatcher": []
+      "problemMatcher": [],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
     },
     {
       "label": "Treasure Hunt: PHPCBF",

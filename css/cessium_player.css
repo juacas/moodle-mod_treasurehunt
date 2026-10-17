@@ -88,6 +88,34 @@
     cursor: pointer;
 }
 
+.mapbox-player .cessium-map-actions .mapbox-buildings-toggle {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    box-sizing: border-box;
+    min-height: 40px;
+    max-width: min(210px, 40vw);
+    padding: 8px 10px;
+    color: #fff;
+    background-color: #102b3c;
+    border: 1px solid #5ce8f6;
+    border-radius: 9px;
+    font-size: .8rem;
+    line-height: 1.2;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, .55);
+}
+
+.mapbox-player .cessium-map-actions .mapbox-buildings-toggle input {
+    margin: 0;
+    accent-color: #5ce8f6;
+}
+
+.mapbox-player .cessium-map-actions .mapbox-buildings-toggle.is-disabled {
+    opacity: .55;
+    cursor: not-allowed;
+}
+
 .mapbox-player .cessium-layer-picker {
     width: auto;
     height: auto;

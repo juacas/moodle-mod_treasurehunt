@@ -17,6 +17,7 @@
  * TODO describe module play_bootstrap_new
  *
  * @module     mod_treasurehunt/play_bootstrap_new
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @copyright  2025 Juan Pablo de Castro <juan.pablo.de.castro@gmail.com>
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -719,7 +720,7 @@ function initplaytreasurehunt(
     center: [0, 0],
     zoom: 4,
     minZoom: 3,
-    maxZoom: 20,
+    maxZoom: 23,
   });
   let select = new ol.interaction.Select({
     layers: [attemptslayer],

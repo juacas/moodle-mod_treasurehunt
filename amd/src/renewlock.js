@@ -18,6 +18,7 @@
  * @package
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
+ * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
