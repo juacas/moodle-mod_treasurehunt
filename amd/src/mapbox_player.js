@@ -255,6 +255,7 @@ export const init = async() => {
     let roadtimestamp = 0;
     let qoaremoved = false;
     let stage = null;
+    let completedStageGeometry = null;
     let nextstage = null;
     let clues = [];
     let selectedClue = 0;
@@ -505,7 +506,7 @@ export const init = async() => {
     const fitMap = () => {
         const visible = (nextstage?.features || []).filter((feature) =>
             Number(feature.properties?.stageposition) === 1 || enabled(playerconfig.shownextareahint));
-        const box = boundsOf({features: visible}) || boundsOf(attemptCollection) ||
+        const box = boundsOf({features: visible}) || boundsOf(completedStageGeometry) || boundsOf(attemptCollection) ||
             (Array.isArray(config.custommapping?.bbox) ? config.custommapping.bbox : null);
         if (box) {
             fitBounds(box);
@@ -837,10 +838,16 @@ export const init = async() => {
     const updateStageState = (response, action, previousStage) => {
         if (response.lastsuccessfulstage) {
             stage = response.lastsuccessfulstage;
+            try {
+                completedStageGeometry = stage.stagegeometry ? JSON.parse(stage.stagegeometry) : null;
+            } catch (error) {
+                completedStageGeometry = null;
+            }
             totalstages = Number(stage.totalnumber || 0);
             updateQuestion();
         } else if (action.initialize) {
             stage = null;
+            completedStageGeometry = null;
             updateQuestion();
         }
         if (response.nextstage) {

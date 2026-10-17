@@ -1051,6 +1051,23 @@ function initplaytreasurehunt(
             if (isfirststage && isfirstload) {
               map.getView().fit(nextstagefeature.getGeometry().getExtent(),
                 {size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18});
+            } else if (initialize && response.lastsuccessfulstage?.stagegeometry) {
+              const completedstagefeatures = geoJSONFormat.readFeatures(
+                JSON.parse(response.lastsuccessfulstage.stagegeometry),
+                {dataProjection: "EPSG:4326", featureProjection: "EPSG:3857"}
+              );
+              const completedstageextent = ol.extent.createEmpty();
+              completedstagefeatures.forEach((feature) => {
+                ol.extent.extend(completedstageextent, feature.getGeometry().getExtent());
+              });
+              if (!ol.extent.isEmpty(completedstageextent)) {
+                map.getView().fit(completedstageextent, {
+                  size: map.getSize(), padding: [40, 40, 40, 40], maxZoom: 18,
+                });
+                fitmap = false;
+              } else {
+                fit_map_to_sources([attemptSource]);
+              }
             } else {
               // If it is not the first stage, fit the map to the attempts.
               fit_map_to_sources([attemptSource]);

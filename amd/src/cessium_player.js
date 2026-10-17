@@ -510,6 +510,7 @@ export const init = async() => {
     };
     let stageSource;
     let visibleStageBounds;
+    let completedStageBounds;
     let boundsFlightToken = 0;
     let nextstage = null;
     let stageSignature = '';
@@ -1219,6 +1220,8 @@ export const init = async() => {
         };
         if (visibleStageBounds) {
             flyToBounds(visibleStageBounds, {complete: finish, cancel: finish}).catch(finish);
+        } else if (completedStageBounds) {
+            flyToBounds(completedStageBounds, {complete: finish, cancel: finish}).catch(finish);
         } else if (attempts.length) {
             viewer.flyTo(attempts[attempts.length - 1], {duration: 1.2}).then(finish, finish);
         } else if (marker || gpsmarker) {
@@ -1684,10 +1687,17 @@ export const init = async() => {
         }
         if (response.lastsuccessfulstage) {
             stage = response.lastsuccessfulstage;
+            try {
+                const completedGeometry = stage.stagegeometry ? JSON.parse(stage.stagegeometry) : null;
+                completedStageBounds = geometryBounds(completedGeometry);
+            } catch (error) {
+                completedStageBounds = null;
+            }
             totalstages = Number(stage.totalnumber || 0);
             renderClue();
         } else if (action.initialize) {
             stage = null;
+            completedStageBounds = null;
             renderClue();
         }
         const cluesChanged = renderAvailableClues(Array.isArray(response.clues) ? response.clues : []);

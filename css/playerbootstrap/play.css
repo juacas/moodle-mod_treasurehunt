@@ -3,6 +3,10 @@ body {
   background-image: none;
   background-size: cover;
 }
+/* Moodle 5.3 adds activity navigation in a sticky footer. Keep the map unobstructed. */
+body#page-mod-treasurehunt-play #sticky-footer {
+  display: none !important;
+}
 /* Hide maincontent of moodle page */
 #page-mod-treasurehunt-play #maincontent,
 #page-mod-treasurehunt-play .toast-wrapper {

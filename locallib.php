@@ -2285,7 +2285,7 @@ function treasurehunt_query_last_successful_attempt($userid, $groupid, $roadid) 
         $grouptype = 'a.groupid=0 AND a.userid=?';
         $params = [$roadid, $userid];
     }
-    $sql = "SELECT a.id,a.stageid,a.success,a.location AS location,"
+    $sql = "SELECT a.id,a.stageid,a.success,a.location AS location,r.geom,"
         . "a.geometrysolved,a.questionsolved,a.activitysolved,r.name,r.cluetext,r.clueforstage,r.clueforstageformat,"
         . "r.questiontext,r.position,r.activitytoend FROM {treasurehunt_stages} r "
         . "INNER JOIN {treasurehunt_attempts} a ON a.stageid=r.id "
@@ -2656,6 +2656,18 @@ function treasurehunt_get_last_successful_stage(
         $lastsuccessfulstage->answers = [];
         $lastsuccessfulstage->position = intval($attempt->position);
         $lastsuccessfulstage->activitysolved = intval($attempt->activitysolved);
+        // The completed stage area is safe to return and gives players a useful initial map frame.
+        if (!empty($attempt->geom)) {
+            $stagefeature = (object)[
+                'id' => $attempt->stageid,
+                'roadid' => $roadid,
+                'position' => $attempt->position,
+                'geometry' => $attempt->geom,
+            ];
+            $lastsuccessfulstage->stagegeometry = json_encode(
+                treasurehunt_features_to_geojson([$stagefeature], $context, 0)
+            );
+        }
         if (!$attempt->questionsolved) {
             // Get the questions and answers.
             $lastsuccessfulstage->answers = treasurehunt_get_stage_answers($attempt->stageid, $context);

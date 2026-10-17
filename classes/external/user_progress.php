@@ -244,6 +244,11 @@ class user_progress extends external_api {
                         ), 'Array with all answers of the last successful stage.'),
                         'totalnumber' => new external_value(PARAM_INT, 'The total number of stages on the road.'),
                         'activitysolved' => new external_value(PARAM_BOOL, 'If true the activity to end is solved.'),
+                        'stagegeometry' => new external_value(
+                            PARAM_RAW,
+                            'GeoJSON of the last completed stage, used to frame the initial map view',
+                            VALUE_OPTIONAL
+                        ),
                     ],
                     'Stage summary, always sent on initialization and when relevant state changes',
                     VALUE_OPTIONAL
