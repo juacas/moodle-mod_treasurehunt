@@ -214,8 +214,8 @@ basemap uses OpenStreetMap tiles. The globe starts with ellipsoid terrain and
 does not require a Cesium ion token. GPS and QR scanning need browser permission
 and a secure origin.
 
-Geographic editor with selectable map engine
-============================================
+Geographic editor with selectable map engine (experimental)
+========================================================
 
 Teachers can open `edit2.php?id=CMID` to edit roads and stage geometry with the
 map engine configured for the activity. Add `&playertype=bootstrap`,
