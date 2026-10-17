@@ -230,6 +230,16 @@ also size the pegman automatically as the map zoom changes and provide a coordin
 link. A map with local image
 coordinates opens in OpenLayers, which supports that coordinate system.
 
+Development checks
+==================
+
+Open this plugin folder as the VSCode workspace and run **Terminal → Run Task →
+Treasure Hunt: PHPCS** to check the Moodle PHP coding standard with zero warnings.
+The first run installs Moodle Plugin CI in the sibling folder
+`../.treasurehunt-ci`; later runs reuse the installation. Run **Treasure Hunt:
+PHPCBF** to apply automatic fixes, review the resulting changes, then run PHPCS
+again. The local tooling folder is outside the plugin source.
+
 
 See also
 =========

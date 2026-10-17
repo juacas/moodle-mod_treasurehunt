@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * DBpedia OpenData source tests without external requests.
@@ -27,9 +27,15 @@ namespace mod_treasurehunt;
 use mod_treasurehunt\opendata\dbpedia;
 use mod_treasurehunt\opendata\sources;
 
-/** @covers \mod_treasurehunt\opendata\dbpedia */
+/**
+ * Test DBpedia search queries and metadata parsing.
+ *
+ * @covers \mod_treasurehunt\opendata\dbpedia
+ */
 final class opendata_dbpedia_test extends \advanced_testcase {
-    /** Search parameters are bounded and ontology classes come from the provider. */
+    /**
+     * Search parameters are bounded and ontology classes come from the provider.
+     */
     public function test_query_and_registration(): void {
         $this->assertInstanceOf(dbpedia::class, sources::get('dbpedia'));
         $query = dbpedia::build_query(['historic'], 'old "bridge"', [-4, 40, -3, 41], '100');
@@ -39,13 +45,17 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         $this->assertStringContainsString('?lon >= -4.000000', $query);
     }
 
-    /** The browser cannot supply SPARQL syntax as a theme or a cursor. */
+    /**
+     * The browser cannot supply SPARQL syntax as a theme or a cursor.
+     */
     public function test_invalid_cursor_is_rejected(): void {
         $this->expectException(\moodle_exception::class);
         dbpedia::build_query(['all'], '', [-4, 40, -3, 41], '0 UNION');
     }
 
-    /** A related search keeps its category inside DBpedia's controlled namespace. */
+    /**
+     * A related search keeps its category inside DBpedia's controlled namespace.
+     */
     public function test_category_query(): void {
         $category = 'http://dbpedia.org/resource/Category:History_of_Madrid';
         $query = dbpedia::build_query(['all'], '', [-4, 40, -3, 41], '', $category);
@@ -54,7 +64,9 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         dbpedia::build_query(['all'], '', [-4, 40, -3, 41], '', 'http://example.com/category');
     }
 
-    /** Discard untrusted and out-of-bounds items while advancing by raw rows. */
+    /**
+     * Discard untrusted and out-of-bounds items while advancing by raw rows.
+     */
     public function test_parse_results_and_details(): void {
         $row = ['item' => ['value' => 'http://dbpedia.org/resource/Ateneo_de_Madrid'],
             'lat' => ['value' => '40.4'], 'lon' => ['value' => '-3.7'],
@@ -79,12 +91,16 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         $this->assertSame('Cultural centre', $details['description']);
         $this->assertSame('https://upload.wikimedia.org/wikipedia/commons/thumb/a/a1/photo.jpg', $details['image']);
         $this->assertSame('historic place', $details['types'][0]['label']);
-        $this->assertSame('https://commons.wikimedia.org/wiki/Special:FilePath/Ateneo.jpg?width=480',
-            dbpedia::thumbnail_url('http://commons.wikimedia.org/wiki/Special:FilePath/Ateneo.jpg?width=300'));
+        $this->assertSame(
+            'https://commons.wikimedia.org/wiki/Special:FilePath/Ateneo.jpg?width=480',
+            dbpedia::thumbnail_url('http://commons.wikimedia.org/wiki/Special:FilePath/Ateneo.jpg?width=300')
+        );
         $this->assertSame('', dbpedia::thumbnail_url('https://example.com/wikipedia/commons/photo.jpg'));
     }
 
-    /** Category, localized summary, depictions and article link populate the DBpedia card. */
+    /**
+     * Category, localized summary, depictions and article link populate the DBpedia card.
+     */
     public function test_extended_card_details(): void {
         $category = 'http://dbpedia.org/resource/Category:History_of_Madrid';
         $image = 'http://commons.wikimedia.org/wiki/Special:FilePath/Ateneo.jpg';
@@ -109,7 +125,9 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         $this->assertStringNotContainsString('wikiPageExternalLink', $query);
     }
 
-    /** Keep every distinct depiction returned for the item. */
+    /**
+     * Keep every distinct depiction returned for the item.
+     */
     public function test_all_depictions_are_returned(): void {
         $bindings = [];
         for ($index = 1; $index <= 15; $index++) {
@@ -120,7 +138,9 @@ final class opendata_dbpedia_test extends \advanced_testcase {
         $this->assertCount(15, $details['images']);
     }
 
-    /** Only DBpedia resource targets become internal ontology links. */
+    /**
+     * Only DBpedia resource targets become internal ontology links.
+     */
     public function test_ontology_relations_are_validated(): void {
         $relation = ['kind' => ['value' => 'relation'],
             'property' => ['value' => 'http://dbpedia.org/ontology/architect'],
@@ -134,7 +154,9 @@ final class opendata_dbpedia_test extends \advanced_testcase {
             'label' => 'Example architect', 'property' => 'architect']], $details['relations']);
     }
 
-    /** SameAs links cross to Wikidata and polygon predicates produce geometry badges. */
+    /**
+     * SameAs links cross to Wikidata and polygon predicates produce geometry badges.
+     */
     public function test_same_as_and_polygon_details(): void {
         $details = dbpedia::parse_details(['results' => ['bindings' => [
             ['kind' => ['value' => 'sameAs'],

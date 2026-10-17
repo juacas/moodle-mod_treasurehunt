@@ -39,8 +39,10 @@ final class opendata_wikidata_test extends \advanced_testcase {
         $this->assertSame([-1.0, -2.0, 2.0, 4.0], wikidata::buffered_bounds([0, 0, 1, 2]));
         $this->assertSame([178.0, 75.0, 180.0, 90.0], wikidata::buffered_bounds([179, 80, 180, 85]));
         $this->assertSame([-6.0, -1.0, 12.0, 2.0], wikidata::buffered_bounds([0, 0, 6, 1]));
-        $this->assertSame([-180.0, -90.0, 180.0, 90.0],
-            wikidata::buffered_bounds([-180, -90, 180, 90]));
+        $this->assertSame(
+            [-180.0, -90.0, 180.0, 90.0],
+            wikidata::buffered_bounds([-180, -90, 180, 90])
+        );
     }
 
     /**
@@ -79,8 +81,12 @@ final class opendata_wikidata_test extends \advanced_testcase {
      * Multiple checked types use one geographic query and combine their matches.
      */
     public function test_query_combines_categories_and_deduplicates_roots(): void {
-        $query = wikidata::build_query(['historic', 'archaeology', 'period'], 'roman',
-            [-3.8, 40.3, -3.6, 40.5], 'en');
+        $query = wikidata::build_query(
+            ['historic', 'archaeology', 'period'],
+            'roman',
+            [-3.8, 40.3, -3.6, 40.5],
+            'en'
+        );
         $this->assertStringContainsString('UNION', $query);
         $this->assertStringContainsString('?item wdt:P31/wdt:P279* ?root.', $query);
         $this->assertStringContainsString('?item wdt:P2348 ?period.', $query);
@@ -165,7 +171,7 @@ final class opendata_wikidata_test extends \advanced_testcase {
      * The card only receives valid images and websites, without duplicate aliases.
      */
     public function test_parse_details_filters_external_values(): void {
-        $binding = static function(string $kind, string $value, string $language = ''): array {
+        $binding = static function (string $kind, string $value, string $language = ''): array {
             $result = ['kind' => ['value' => $kind], 'value' => ['value' => $value]];
             if ($language !== '') {
                 $result['value']['xml:lang'] = $language;
@@ -200,7 +206,9 @@ final class opendata_wikidata_test extends \advanced_testcase {
         $this->assertSame(['1932-01-01'], $details['fields']['date']);
     }
 
-    /** A linked entity keeps a valid item and predicate for collector navigation. */
+    /**
+     * A linked entity keeps a valid item and predicate for collector navigation.
+     */
     public function test_parse_details_returns_navigable_relations(): void {
         $details = wikidata::parse_details(['results' => ['bindings' => [[
             'kind' => ['value' => 'relation'],
@@ -213,7 +221,9 @@ final class opendata_wikidata_test extends \advanced_testcase {
             'property' => 'creator']], $details['relations']);
     }
 
-    /** Wikidata exposes Commons geoshapes and DBpedia sameAs resources. */
+    /**
+     * Wikidata exposes Commons geoshapes and DBpedia sameAs resources.
+     */
     public function test_geoshape_and_same_as_details(): void {
         $details = wikidata::parse_details(['results' => ['bindings' => [
             ['kind' => ['value' => 'geoshape'], 'value' => ['value' =>

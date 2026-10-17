@@ -1,0 +1,36 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Treasure Hunt: set up Moodle Plugin CI tools",
+      "type": "shell",
+      "command": "if [ ! -x ../.treasurehunt-ci/bin/moodle-plugin-ci ]; then composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ../.treasurehunt-ci '^4'; else echo 'Moodle Plugin CI is already installed.'; fi",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": []
+    },
+    {
+      "label": "Treasure Hunt: PHPCS",
+      "type": "shell",
+      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci phpcs --max-warnings 0 .",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Treasure Hunt: PHPCBF",
+      "type": "shell",
+      "command": "../.treasurehunt-ci/vendor/bin/phpcbf --standard=moodle .",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    }
+  ]
+}

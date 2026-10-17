@@ -53,8 +53,14 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $roadid = $DB->insert_record('treasurehunt_roads', (object)[
             'treasurehuntid' => $huntid, 'name' => 'Chosen road',
         ]);
-        $stageid = stage_creator::create($roadid, 'Old bridge', -3.7, 40.4,
-            \context_module::instance($cmid), 'europeana', [
+        $stageid = stage_creator::create(
+            $roadid,
+            'Old bridge',
+            -3.7,
+            40.4,
+            \context_module::instance($cmid),
+            'europeana',
+            [
                 'description' => '<script>alert(1)</script>',
                 'image' => 'https://api.europeana.eu/thumbnail/v2/url.json?uri=sample&type=IMAGE',
                 'types' => [['label' => 'Photography', 'url' => '']],
@@ -63,13 +69,16 @@ final class opendata_stage_creator_test extends \advanced_testcase {
                 'aliases' => ['Ancient bridge'],
                 'fields' => ['creator' => ['Photographer'], 'date' => ['1932']],
                 'websites' => [['type' => 'official', 'url' => 'https://example.org/bridge']],
-            ]);
+            ]
+        );
         $stage = $DB->get_record('treasurehunt_stages', ['id' => $stageid], '*', MUST_EXIST);
         $this->assertSame((string)$roadid, (string)$stage->roadid);
         $this->assertSame('Old bridge', $stage->name);
         $this->assertStringNotContainsString('<script>', $stage->clueforstage);
-        $this->assertStringContainsString('<img src="https://api.europeana.eu/thumbnail/v2/url.json?',
-            $stage->clueforstage);
+        $this->assertStringContainsString(
+            '<img src="https://api.europeana.eu/thumbnail/v2/url.json?',
+            $stage->clueforstage
+        );
         $this->assertStringContainsString('&amp;type=IMAGE', $stage->clueforstage);
         $this->assertStringContainsString('Photography', $stage->clueforstage);
         $this->assertStringContainsString('Architecture', $stage->clueforstage);
@@ -83,17 +92,31 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $this->assertCount(1, $geometry->getComponents());
         $this->assertFalse((bool)$DB->get_field('treasurehunt_roads', 'validated', ['id' => $roadid]));
         $polygon = 'POLYGON((-3.8 40.3,-3.6 40.3,-3.6 40.5,-3.8 40.3))';
-        $polygonstageid = stage_creator::create($roadid, 'Polygon place', -3.7, 40.4,
-            \context_module::instance($cmid), 'dbpedia', [
+        $polygonstageid = stage_creator::create(
+            $roadid,
+            'Polygon place',
+            -3.7,
+            40.4,
+            \context_module::instance($cmid),
+            'dbpedia',
+            [
                 'geometries' => [['source' => 'dbo:polygon', 'wkt' => $polygon]],
-            ]);
+            ]
+        );
         $polygonstage = $DB->get_record('treasurehunt_stages', ['id' => $polygonstageid], '*', MUST_EXIST);
         $this->assertStringContainsString('-3.80000000 40.30000000', $polygonstage->geom);
         $this->assertStringNotContainsString('-3.70000000 40.40000000', $polygonstage->geom);
-        $pointstageid = stage_creator::create($roadid, 'Point place', -3.7, 40.4,
-            \context_module::instance($cmid), 'dbpedia', [
+        $pointstageid = stage_creator::create(
+            $roadid,
+            'Point place',
+            -3.7,
+            40.4,
+            \context_module::instance($cmid),
+            'dbpedia',
+            [
                 'geometries' => [['source' => 'geo:geometry', 'wkt' => 'POINT(-4 41)']],
-            ]);
+            ]
+        );
         $pointstage = $DB->get_record('treasurehunt_stages', ['id' => $pointstageid], '*', MUST_EXIST);
         $this->assertStringContainsString('-4.000', $pointstage->geom);
         $this->assertStringNotContainsString('-3.700', $pointstage->geom);
@@ -118,8 +141,10 @@ final class opendata_stage_creator_test extends \advanced_testcase {
             'categories' => [['label' => 'Castles in Spain']],
             'url' => 'https://www.wikidata.org/wiki/Q123',
         ]);
-        $this->assertStringContainsString('<img src="https://commons.wikimedia.org/wiki/Special:FilePath/Castle.jpg?width=480"',
-            $html);
+        $this->assertStringContainsString(
+            '<img src="https://commons.wikimedia.org/wiki/Special:FilePath/Castle.jpg?width=480"',
+            $html
+        );
         $this->assertStringContainsString('A &lt;b&gt;historic&lt;/b&gt; castle', $html);
         $this->assertStringContainsString('&lt;script&gt;alert(1)&lt;/script&gt;', $html);
         $this->assertStringNotContainsString('href="javascript:', $html);
@@ -127,7 +152,9 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $this->assertStringContainsString('https://www.wikidata.org/wiki/Q123', $html);
     }
 
-    /** DBpedia clues contain every safe image in a fixed-size mosaic. */
+    /**
+     * DBpedia clues contain every safe image in a fixed-size mosaic.
+     */
     public function test_dbpedia_clue_mosaic(): void {
         $first = 'https://commons.wikimedia.org/wiki/Special:FilePath/First.jpg?width=480';
         $second = 'https://commons.wikimedia.org/wiki/Special:FilePath/Second.jpg?width=480';
@@ -141,7 +168,9 @@ final class opendata_stage_creator_test extends \advanced_testcase {
         $this->assertStringNotContainsString('example.com/unsafe.jpg', $html);
     }
 
-    /** Attached resources enter the new stage without trusting their markup. */
+    /**
+     * Attached resources enter the new stage without trusting their markup.
+     */
     public function test_collected_cards_enter_stage_clue(): void {
         $html = stage_creator::clue_html('Bridge', 'wikidata', [
             'collected' => [[

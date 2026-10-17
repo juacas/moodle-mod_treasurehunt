@@ -44,7 +44,9 @@ final class europeana implements source {
         return 'europeana';
     }
 
-    /** Return the public Europeana website. */
+    /**
+     * Return the public Europeana website.
+     */
     public function website(): string {
         return 'https://www.europeana.eu/en';
     }
@@ -89,9 +91,11 @@ final class europeana implements source {
      * @return array API query parameters without the secret key.
      */
     public function request_params(array $themes, string $term, array $bounds, string $cursor): array {
-        if (count($themes) !== 1 || !is_string($themes[0]) ||
+        if (
+            count($themes) !== 1 || !is_string($themes[0]) ||
                 !array_key_exists($themes[0], $this->themes()) || count($bounds) !== 4 ||
-                \core_text::strlen($term) > 100 || strlen($cursor) > 2048) {
+                \core_text::strlen($term) > 100 || strlen($cursor) > 2048
+        ) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         [$west, $south, $east, $north] = $bounds;
@@ -103,8 +107,10 @@ final class europeana implements source {
         }
         $term = trim($term);
         $params = [
-            'query' => $term === '' ? '*' : json_encode($term,
-                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR),
+            'query' => $term === '' ? '*' : json_encode(
+                $term,
+                JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR
+            ),
             'qf' => $geo,
             'rows' => self::PAGE_SIZE,
             'profile' => 'standard',
@@ -119,8 +125,13 @@ final class europeana implements source {
     /**
      * Search one page of georeferenced items.
      */
-    public function search_page(array $themes, string $term, array $viewport,
-            string $language, string $cursor): array {
+    public function search_page(
+        array $themes,
+        string $term,
+        array $viewport,
+        string $language,
+        string $cursor
+    ): array {
         global $CFG;
         if (!$this->available()) {
             throw new \moodle_exception('opendataeuropeananokey', 'treasurehunt');
@@ -131,8 +142,11 @@ final class europeana implements source {
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setHeader('Accept: application/json');
-        $body = $curl->get(self::ENDPOINT, $params,
-            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]);
+        $body = $curl->get(
+            self::ENDPOINT,
+            $params,
+            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]
+        );
         $info = $curl->get_info();
         if ($curl->get_errno() || ($info['http_code'] ?? 0) !== 200 || strlen($body) > 3000000) {
             throw new \moodle_exception('opendataeuropeanaserviceerror', 'treasurehunt');
@@ -160,16 +174,20 @@ final class europeana implements source {
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setHeader('Accept: application/json');
-        $body = $curl->get(self::RECORD_ENDPOINT . $itemid . '.json',
+        $body = $curl->get(
+            self::RECORD_ENDPOINT . $itemid . '.json',
             ['wskey' => (string)get_config('mod_treasurehunt', 'europeanaapikey')],
-            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]);
+            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]
+        );
         $info = $curl->get_info();
         if ($curl->get_errno() || ($info['http_code'] ?? 0) !== 200 || strlen((string)$body) > 3000000) {
             throw new \moodle_exception('opendataeuropeanaserviceerror', 'treasurehunt');
         }
         $response = json_decode($body, true);
-        if (!is_array($response) || ($response['success'] ?? false) !== true ||
-                !is_array($response['object'] ?? null)) {
+        if (
+            !is_array($response) || ($response['success'] ?? false) !== true ||
+                !is_array($response['object'] ?? null)
+        ) {
             throw new \moodle_exception('opendataeuropeanaserviceerror', 'treasurehunt');
         }
         return self::parse_details($response['object'], $language);
@@ -207,8 +225,10 @@ final class europeana implements source {
             return '';
         }
         $parts = parse_url($url);
-        if (!is_array($parts) || ($parts['scheme'] ?? '') !== 'https' ||
-                isset($parts['user']) || isset($parts['pass'])) {
+        if (
+            !is_array($parts) || ($parts['scheme'] ?? '') !== 'https' ||
+                isset($parts['user']) || isset($parts['pass'])
+        ) {
             return '';
         }
         $host = strtolower($parts['host'] ?? '');
@@ -338,8 +358,10 @@ final class europeana implements source {
     public static function parse_results(array $response, array $bounds, string $cursor): array {
         $features = [];
         foreach ($response['items'] ?? [] as $item) {
-            if (!is_array($item) || !is_string($item['id'] ?? null) ||
-                    !preg_match('~^/[^/\s?#<>]{1,100}/[^/\s?#<>]{1,300}$~D', $item['id'])) {
+            if (
+                !is_array($item) || !is_string($item['id'] ?? null) ||
+                    !preg_match('~^/[^/\s?#<>]{1,100}/[^/\s?#<>]{1,300}$~D', $item['id'])
+            ) {
                 continue;
             }
             $latitude = $item['edmPlaceLatitude'][0] ?? null;
@@ -349,8 +371,10 @@ final class europeana implements source {
             }
             $latitude = (float)$latitude;
             $longitude = (float)$longitude;
-            if ($longitude < $bounds[0] || $longitude > $bounds[2] ||
-                    $latitude < $bounds[1] || $latitude > $bounds[3]) {
+            if (
+                $longitude < $bounds[0] || $longitude > $bounds[2] ||
+                    $latitude < $bounds[1] || $latitude > $bounds[3]
+            ) {
                 continue;
             }
             $id = $item['id'];
@@ -372,14 +396,18 @@ final class europeana implements source {
             $image = self::thumbnail_url($item['edmPreview'][0] ?? '');
             $url = $item['guid'] ?? '';
             $urlparts = is_string($url) ? parse_url($url) : false;
-            if (!is_array($urlparts) || ($urlparts['scheme'] ?? '') !== 'https' ||
-                    !in_array($urlparts['host'] ?? '', ['www.europeana.eu', 'europeana.eu'], true)) {
+            if (
+                !is_array($urlparts) || ($urlparts['scheme'] ?? '') !== 'https' ||
+                    !in_array($urlparts['host'] ?? '', ['www.europeana.eu', 'europeana.eu'], true)
+            ) {
                 $url = 'https://www.europeana.eu/en/item' . $id;
             }
             $websites = [];
             $providerurl = $item['edmIsShownAt'][0] ?? '';
-            if (is_string($providerurl) && filter_var($providerurl, FILTER_VALIDATE_URL) &&
-                    in_array(parse_url($providerurl, PHP_URL_SCHEME), ['http', 'https'], true)) {
+            if (
+                is_string($providerurl) && filter_var($providerurl, FILTER_VALIDATE_URL) &&
+                    in_array(parse_url($providerurl, PHP_URL_SCHEME), ['http', 'https'], true)
+            ) {
                 $websites[] = ['type' => 'about', 'url' => $providerurl];
             }
             $features[$id] = [

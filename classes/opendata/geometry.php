@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Validate and select OpenData geometry using the module's GeoJSON/WKT library.
@@ -24,13 +24,28 @@
 
 namespace mod_treasurehunt\opendata;
 
-/** Keep provider shapes bounded and compatible with the stage editor. */
+/**
+ * Keep provider shapes bounded and compatible with the stage editor.
+ */
 final class geometry {
+    /**
+     * Maximum size of a provider geometry string.
+     */
     private const MAX_CHARS = 200000;
+
+    /**
+     * Maximum number of coordinates in a geometry.
+     */
     private const MAX_POINTS = 10000;
+
+    /**
+     * Maximum number of polygon components accepted from a provider.
+     */
     private const MAX_POLYGONS = 100;
 
-    /** Load the existing WKT/GeoJSON adapters and their geometry classes. */
+    /**
+     * Load the existing WKT/GeoJSON adapters and their geometry classes.
+     */
     private static function load_library(): void {
         global $CFG;
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
@@ -93,8 +108,13 @@ final class geometry {
      * @param array|null $firstpoint First valid point descriptor.
      * @param int $depth Nesting limit.
      */
-    private static function collect(array $data, string $source, array &$polygons, ?array &$firstpoint,
-            int $depth): void {
+    private static function collect(
+        array $data,
+        string $source,
+        array &$polygons,
+        ?array &$firstpoint,
+        int $depth
+    ): void {
         if ($depth > 5 || count($polygons) > self::MAX_POLYGONS) {
             return;
         }
@@ -135,7 +155,10 @@ final class geometry {
                 array_push($polygons, ...$object->getComponents());
             }
         } catch (\Throwable $exception) {
-            // Ignore malformed provider geometries without discarding other features.
+            debugging(
+                'Ignoring malformed provider geometry: ' . $exception->getMessage(),
+                DEBUG_DEVELOPER
+            );
         }
     }
 
@@ -185,9 +208,11 @@ final class geometry {
                 $area = 0.0;
                 $previous = null;
                 foreach ($ring as $coordinate) {
-                    if (!is_array($coordinate) || count($coordinate) !== 2 ||
+                    if (
+                        !is_array($coordinate) || count($coordinate) !== 2 ||
                             !self::valid_coordinate($coordinate[0], $coordinate[1]) ||
-                            ++$pointcount > self::MAX_POINTS) {
+                            ++$pointcount > self::MAX_POINTS
+                    ) {
                         return null;
                     }
                     $point = [(float)$coordinate[0], (float)$coordinate[1]];
@@ -209,7 +234,9 @@ final class geometry {
             ['source' => $source, 'type' => count($normalized) === 1 ? 'Polygon' : 'MultiPolygon', 'wkt' => $wkt] : null;
     }
 
-    /** Check one WGS84 longitude/latitude pair. */
+    /**
+     * Check one WGS84 longitude/latitude pair.
+     */
     private static function valid_coordinate($longitude, $latitude): bool {
         return is_numeric($longitude) && is_numeric($latitude) && is_finite((float)$longitude) &&
             is_finite((float)$latitude) && abs((float)$longitude) <= 180 && abs((float)$latitude) <= 90;
@@ -227,8 +254,10 @@ final class geometry {
         $bestscore = -1;
         $candidates = [['geometries' => $metadata['geometries'] ?? [], 'priority' => 1]];
         foreach (array_slice(is_array($metadata['collected'] ?? null) ? $metadata['collected'] : [], 0, 12) as $item) {
-            if (is_array($item) && ($item['relation'] ?? '') === 'owl:sameAs' &&
-                    is_array($item['metadata']['geometries'] ?? null)) {
+            if (
+                is_array($item) && ($item['relation'] ?? '') === 'owl:sameAs' &&
+                    is_array($item['metadata']['geometries'] ?? null)
+            ) {
                 $candidates[] = ['geometries' => $item['metadata']['geometries'], 'priority' => 0];
             }
         }

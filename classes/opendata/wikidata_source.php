@@ -35,7 +35,9 @@ final class wikidata_source implements source {
         return 'wikidata';
     }
 
-    /** Return the public Wikidata website. */
+    /**
+     * Return the public Wikidata website.
+     */
     public function website(): string {
         return 'https://www.wikidata.org/';
     }
@@ -65,8 +67,13 @@ final class wikidata_source implements source {
     /**
      * Search one page of georeferenced items.
      */
-    public function search_page(array $themes, string $term, array $viewport,
-            string $language, string $cursor): array {
+    public function search_page(
+        array $themes,
+        string $term,
+        array $viewport,
+        string $language,
+        string $cursor
+    ): array {
         $page = wikidata::search($themes, $term, $viewport, $language, $cursor);
         foreach ($page['geojson']['features'] as &$feature) {
             $feature['properties']['theme'] = count($themes) === 1 ? $themes[0] : 'all';

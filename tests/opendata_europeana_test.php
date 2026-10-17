@@ -81,8 +81,11 @@ final class opendata_europeana_test extends \advanced_testcase {
         $outside = $valid;
         $outside['id'] = '/202001/456';
         $outside['edmPlaceLatitude'] = ['55'];
-        $result = europeana::parse_results(['items' => [$valid, $outside], 'nextCursor' => 'abc'],
-            [-4, 40, -3, 41], '*');
+        $result = europeana::parse_results(
+            ['items' => [$valid, $outside], 'nextCursor' => 'abc'],
+            [-4, 40, -3, 41],
+            '*'
+        );
         $this->assertCount(1, $result['geojson']['features']);
         $feature = $result['geojson']['features'][0];
         $this->assertSame('europeana', $feature['properties']['source']);
@@ -120,8 +123,10 @@ final class opendata_europeana_test extends \advanced_testcase {
             ],
         ];
         $details = europeana::parse_details($record, 'es');
-        $this->assertSame(['Image', 'Photography', 'black-and-white photography'],
-            array_column($details['types'], 'label'));
+        $this->assertSame(
+            ['Image', 'Photography', 'black-and-white photography'],
+            array_column($details['types'], 'label')
+        );
         $this->assertSame(['Arquitectura', 'Cataluña'], array_column($details['subjects'], 'label'));
         $this->assertSame('https://www.europeana.eu/en/collections/topic/94', $details['subjects'][0]['url']);
         $this->assertSame('https://api.europeana.eu/thumbnail/v2/url.json?uri=sample', $details['image']);

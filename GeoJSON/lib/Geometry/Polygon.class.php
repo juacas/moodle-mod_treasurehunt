@@ -1,5 +1,18 @@
 <?php
-
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /*
  * This file is part of the GeoJSON package.
@@ -17,7 +30,6 @@
  * @author Camptocamp <info@camptocamp.com>
  */
 class Polygon extends Collection {
-
     protected $geom_type = 'Polygon';
 
     /**
@@ -66,14 +78,18 @@ class Polygon extends Collection {
         for ($i = 1; $i < $vertices_count; $i++) {
             $vertex1 = $vertices[$i - 1];
             $vertex2 = $vertices[$i];
-            if ($vertex1->getY() == $vertex2->getY() && $vertex1->getY() == $point->getY() &&
+            if (
+                $vertex1->getY() == $vertex2->getY() && $vertex1->getY() == $point->getY() &&
                      $point->getX() > min($vertex1->getX(), $vertex2->getX()) &&
-                     $point->getX() < max($vertex1->getX(), $vertex2->getX())) {
+                     $point->getX() < max($vertex1->getX(), $vertex2->getX())
+            ) {
                 // Check if point is on an horizontal polygon boundary
                 return $pointOnBoundary ? true : false;
             }
-            if ($point->getY() > min($vertex1->getY(), $vertex2->getY()) && $point->getY() <= max($vertex1->getY(), $vertex2->getY()) &&
-                 $point->getX() <= max($vertex1->getX(), $vertex2->getX()) && $vertex1->getY() != $vertex2->getY()) {
+            if (
+                $point->getY() > min($vertex1->getY(), $vertex2->getY()) && $point->getY() <= max($vertex1->getY(), $vertex2->getY()) &&
+                 $point->getX() <= max($vertex1->getX(), $vertex2->getX()) && $vertex1->getY() != $vertex2->getY()
+            ) {
                         $xinters = ($point->getY() - $vertex1->getY()) * ($vertex2->getX() - $vertex1->getX()) /
                          ($vertex2->getY() - $vertex1->getY()) + $vertex1->getX();
                 if ($xinters == $point->getX()) {

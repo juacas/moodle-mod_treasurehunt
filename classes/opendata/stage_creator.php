@@ -141,8 +141,10 @@ final class stage_creator {
             $html .= '<h3>' . s(get_string('opendataattached', 'treasurehunt')) . '</h3>';
         }
         foreach ($collected as $item) {
-            if (!is_array($item) || !in_array($item['source'] ?? '', ['wikidata', 'europeana', 'dbpedia'], true) ||
-                    !is_string($item['name'] ?? null) || trim($item['name']) === '') {
+            if (
+                !is_array($item) || !in_array($item['source'] ?? '', ['wikidata', 'europeana', 'dbpedia'], true) ||
+                    !is_string($item['name'] ?? null) || trim($item['name']) === ''
+            ) {
                 continue;
             }
             $itemname = \core_text::substr(trim($item['name']), 0, 255);
@@ -191,8 +193,15 @@ final class stage_creator {
      * @param array $metadata Normalized item details to render for the teacher.
      * @return int New stage ID.
      */
-    public static function create(int $roadid, string $name, float $longitude, float $latitude,
-            \context_module $context, string $sourceid, array $metadata): int {
+    public static function create(
+        int $roadid,
+        string $name,
+        float $longitude,
+        float $latitude,
+        \context_module $context,
+        string $sourceid,
+        array $metadata
+    ): int {
         global $CFG, $DB;
         $name = trim($name);
         if ($name === '' || \core_text::strlen($name) > 255 || !in_array($sourceid, ['wikidata', 'europeana', 'dbpedia'], true)) {
@@ -226,8 +235,10 @@ final class stage_creator {
             'objectid' => $stage->id,
             'other' => $stage->name,
         ]);
-        $event->add_record_snapshot('treasurehunt_stages',
-            $DB->get_record('treasurehunt_stages', ['id' => $stage->id], '*', MUST_EXIST));
+        $event->add_record_snapshot(
+            'treasurehunt_stages',
+            $DB->get_record('treasurehunt_stages', ['id' => $stage->id], '*', MUST_EXIST)
+        );
         $event->trigger();
         $transaction->allow_commit();
         return $stage->id;

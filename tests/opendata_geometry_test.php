@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Polygon normalization for OpenData stage areas.
@@ -26,9 +26,15 @@ namespace mod_treasurehunt;
 
 use mod_treasurehunt\opendata\geometry;
 
-/** @covers \mod_treasurehunt\opendata\geometry */
+/**
+ * Test parsing and selecting safe OpenData geometries.
+ *
+ * @covers \mod_treasurehunt\opendata\geometry
+ */
 final class opendata_geometry_test extends \advanced_testcase {
-    /** Provider WKT is normalized to a playable multipolygon. */
+    /**
+     * Provider WKT is normalized to a playable multipolygon.
+     */
     public function test_wkt_polygon_and_crs84(): void {
         $shape = geometry::from_wkt('<http://www.opengis.net/def/crs/OGC/1.3/CRS84> ' .
             'POLYGON((-3 40,-2 40,-2 41,-3 40))', 'geosparql:asWKT');
@@ -42,7 +48,9 @@ final class opendata_geometry_test extends \advanced_testcase {
         $this->assertNull(geometry::from_wkt('POLYGON((0 0,1 1,2 2,0 0))', 'dbo:polygon'));
     }
 
-    /** Commons map data can contain several GeoJSON polygon features. */
+    /**
+     * Commons map data can contain several GeoJSON polygon features.
+     */
     public function test_commons_map_geojson(): void {
         $map = ['data' => ['type' => 'FeatureCollection', 'features' => [[
             'type' => 'Feature', 'geometry' => ['type' => 'Polygon', 'coordinates' => [[
@@ -53,10 +61,14 @@ final class opendata_geometry_test extends \advanced_testcase {
         $this->assertSame('wdt:P3896', $shape['source']);
         $this->assertSame('Polygon', $shape['type']);
         $this->assertSame('Point', geometry::from_geojson(
-            ['type' => 'Point', 'coordinates' => [-3, 40]], 'wdt:P3896')['type']);
+            ['type' => 'Point', 'coordinates' => [-3, 40]],
+            'wdt:P3896'
+        )['type']);
     }
 
-    /** Choose a polygon even when another source reports a point first. */
+    /**
+     * Choose a polygon even when another source reports a point first.
+     */
     public function test_best_geometry_across_sources(): void {
         $point = geometry::from_wkt('POINT(-3 40)', 'geo:geometry');
         $polygon = geometry::from_wkt('POLYGON((-3 40,-2 40,-2 41,-3 40))', 'wdt:P3896');

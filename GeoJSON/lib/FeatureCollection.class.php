@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 /*
  * This file is part of the GeoJSON package.
  * (c) Camptocamp <info@camptocamp.com>
@@ -6,7 +20,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 /**
  * FeatureCollection class : represents a collection of features.
  *
@@ -17,94 +30,81 @@
 
 class FeatureCollection implements Iterator
 {
-  private $features = null;
+    private $features = null;
 
-  /**
-   * Constructor
-   *
-   * @param array $features The features used to build the collection
-   */
-  public function __construct(?array $features = null)
-  {
-    $this->features = $features;
-  }
-
-  /**
-   * Add a feature to collection
-   */
-  public function addFeature(Feature $f)
-  {
-    $this->features[] = $f;
-  }
-
-  /**
-   * Returns an array suitable for serialization
-   *
-   * @return array
-   */
-  public function getGeoInterface()
-  {
-    $features = array();
-
-    if (is_array($this->features))
-    {
-      foreach ($this->features as $feature)
-      {
-        $features[] = $feature->getGeoInterface();
-      }
+    /**
+     * Constructor
+     *
+     * @param array $features The features used to build the collection
+     */
+    public function __construct(?array $features = null) {
+        $this->features = $features;
     }
 
-    return array(
-      'type' => 'FeatureCollection',
-      'features' => $features
-    );
-  }
+    /**
+     * Add a feature to collection
+     */
+    public function addFeature(Feature $f) {
+        $this->features[] = $f;
+    }
 
-  /**
-   * Shortcut to dump geometry as GeoJSON
-   *
-   * @return string The GeoJSON representation of the geometry
-   */
-  public function __toString()
-  {
-    return $this->toGeoJSON();
-  }
+    /**
+     * Returns an array suitable for serialization
+     *
+     * @return array
+     */
+    public function getGeoInterface() {
+        $features = [];
 
-  /**
-   * Dumps Geometry as GeoJSON
-   *
-   * @return string The GeoJSON representation of the geometry
-   */
-  public function toGeoJSON()
-  {
-    return json_encode($this->getGeoInterface());
-  }
-  # Iterator Interface functions
+        if (is_array($this->features)) {
+            foreach ($this->features as $feature) {
+                $features[] = $feature->getGeoInterface();
+            }
+        }
 
-  public function rewind(): void
-  {
-    reset($this->features);
-  }
+        return [
+        'type' => 'FeatureCollection',
+        'features' => $features,
+        ];
+    }
 
-  public function current(): mixed
-  {
-    return current($this->features);
-  }
+    /**
+     * Shortcut to dump geometry as GeoJSON
+     *
+     * @return string The GeoJSON representation of the geometry
+     */
+    public function __toString() {
+        return $this->toGeoJSON();
+    }
 
-  public function key(): int|string|null
-  {
-    return key($this->features);
-  }
+    /**
+     * Dumps Geometry as GeoJSON
+     *
+     * @return string The GeoJSON representation of the geometry
+     */
+    public function toGeoJSON() {
+        return json_encode($this->getGeoInterface());
+    }
+    // Iterator Interface functions
 
-  public function next(): void
-  {
-    //return next($this->features);
-    next($this->features);
-  }
+    public function rewind(): void {
+        reset($this->features);
+    }
 
-  public function valid(): bool
-  {
-    return $this->current() !== false;
-  }
+    public function current(): mixed {
+        return current($this->features);
+    }
 
+    public function key(): int|string|null {
+        return key($this->features);
+    }
+
+    public function next(): void {
+        // return next($this->features);
+        next($this->features);
+    }
+
+    public function valid(): bool {
+        return $this->current() !== false;
+    }
 }

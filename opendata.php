@@ -62,10 +62,19 @@ try {
         if (!treasurehunt_ensure_editor_lock($lockid, $cm->instance, $USER->id)) {
             throw new moodle_exception('editorlocktaken', 'treasurehunt');
         }
-        $stageid = \mod_treasurehunt\opendata\stage_creator::create($roadid, $name,
-            $longitude, $latitude, context_module::instance($cm->id), $sourceid, $metadata);
-        $result = ['editurl' => (new moodle_url('/mod/treasurehunt/editstage.php',
-            ['cmid' => $cm->id, 'id' => $stageid]))->out(false)];
+        $stageid = \mod_treasurehunt\opendata\stage_creator::create(
+            $roadid,
+            $name,
+            $longitude,
+            $latitude,
+            context_module::instance($cm->id),
+            $sourceid,
+            $metadata
+        );
+        $result = ['editurl' => (new moodle_url(
+            '/mod/treasurehunt/editstage.php',
+            ['cmid' => $cm->id, 'id' => $stageid]
+        ))->out(false)];
     } else if ($action === 'details') {
         $itemid = required_param('itemid', PARAM_RAW_TRIMMED);
         $result = $source->item_details($itemid, current_language());
@@ -97,8 +106,11 @@ try {
     }
     echo json_encode($result, JSON_HEX_TAG | JSON_HEX_AMP | JSON_THROW_ON_ERROR);
 } catch (moodle_exception $exception) {
-    $providererror = in_array($exception->errorcode,
-        ['opendataserviceerror', 'opendataeuropeanaserviceerror', 'opendatadbpediaerror'], true);
+    $providererror = in_array(
+        $exception->errorcode,
+        ['opendataserviceerror', 'opendataeuropeanaserviceerror', 'opendatadbpediaerror'],
+        true
+    );
     http_response_code($providererror ? 502 : 400);
     $error = ['error' => $exception->getMessage(), 'code' => $exception->errorcode, 'source' => $sourceid];
     if ($providererror && $sourceid === 'wikidata' && $exception->debuginfo) {

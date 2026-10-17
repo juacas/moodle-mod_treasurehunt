@@ -62,8 +62,13 @@ interface source {
      * @param string $cursor Opaque source cursor, empty for the first page.
      * @return array Search page.
      */
-    public function search_page(array $themes, string $term, array $viewport,
-            string $language, string $cursor): array;
+    public function search_page(
+        array $themes,
+        string $term,
+        array $viewport,
+        string $language,
+        string $cursor
+    ): array;
 
     /**
      * Fetch optional card details for one item.

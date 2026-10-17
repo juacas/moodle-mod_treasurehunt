@@ -8,11 +8,11 @@
 //
 // Moodle is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License
-// along with Moodle. If not, see <https://www.gnu.org/licenses/>.
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 
 /**
  * Geographic DBpedia source for the OpenData editor.
@@ -24,10 +24,16 @@
 
 namespace mod_treasurehunt\opendata;
 
-/** Query the public DBpedia SPARQL endpoint and normalize its resources. */
+/**
+ * Search DBpedia for georeferenced resources and normalize their metadata.
+ */
 final class dbpedia implements source {
     /** Public endpoint and page size. */
     private const ENDPOINT = 'https://dbpedia.org/sparql';
+
+    /**
+     * Maximum number of resources returned in one page.
+     */
     public const PAGE_SIZE = 100;
 
     /** Only server-defined ontology classes can enter a query. */
@@ -39,17 +45,23 @@ final class dbpedia implements source {
         'nature' => ['NaturalPlace', 'Park'],
     ];
 
-    /** @inheritDoc */
+    /**
+     * Return the stable identifier for this source.
+     */
     public function id(): string {
         return 'dbpedia';
     }
 
-    /** @inheritDoc */
+    /**
+     * Return the public DBpedia website.
+     */
     public function website(): string {
         return 'https://www.dbpedia.org/';
     }
 
-    /** @inheritDoc */
+    /**
+     * Return available theme identifiers and language keys.
+     */
     public function themes(): array {
         return [
             'all' => 'opendataall',
@@ -60,7 +72,9 @@ final class dbpedia implements source {
         ];
     }
 
-    /** @inheritDoc */
+    /**
+     * Indicate that DBpedia searches do not require a private key.
+     */
     public function available(): bool {
         return true;
     }
@@ -75,18 +89,27 @@ final class dbpedia implements source {
      * @param string $category Optional DBpedia category URI for related items.
      * @return string SPARQL query.
      */
-    public static function build_query(array $themes, string $term, array $bounds, string $cursor,
-            string $category = ''): string {
-        if (count($themes) !== 1 || !is_string($themes[0]) || !array_key_exists($themes[0], self::THEMES) ||
+    public static function build_query(
+        array $themes,
+        string $term,
+        array $bounds,
+        string $cursor,
+        string $category = ''
+    ): string {
+        if (
+            count($themes) !== 1 || !is_string($themes[0]) || !array_key_exists($themes[0], self::THEMES) ||
                 count($bounds) !== 4 || \core_text::strlen($term) > 100 ||
                 ($cursor !== '' && (!preg_match('/^(0|[1-9][0-9]*)$/D', $cursor) || (int)$cursor > 9900)) ||
-                ($category !== '' && !self::valid_categoryid($category))) {
+                ($category !== '' && !self::valid_categoryid($category))
+        ) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         [$west, $south, $east, $north] = $bounds;
-        if (!is_finite((float)$west) || !is_finite((float)$south) || !is_finite((float)$east) ||
+        if (
+            !is_finite((float)$west) || !is_finite((float)$south) || !is_finite((float)$east) ||
                 !is_finite((float)$north) || $west < -180 || $east > 180 || $south < -90 || $north > 90 ||
-                $west >= $east || $south >= $north) {
+                $west >= $east || $south >= $north
+        ) {
             throw new \moodle_exception('opendatainvalidarea', 'treasurehunt');
         }
         $type = '';
@@ -133,8 +156,10 @@ final class dbpedia implements source {
             }
             $lat = (float)$lat;
             $lon = (float)$lon;
-            if (!is_finite($lat) || !is_finite($lon) || $lon < $bounds[0] || $lon > $bounds[2] ||
-                    $lat < $bounds[1] || $lat > $bounds[3] || isset($features[$id])) {
+            if (
+                !is_finite($lat) || !is_finite($lon) || $lon < $bounds[0] || $lon > $bounds[2] ||
+                    $lat < $bounds[1] || $lat > $bounds[3] || isset($features[$id])
+            ) {
                 continue;
             }
             $slug = substr($id, strlen('http://dbpedia.org/resource/'));
@@ -158,22 +183,35 @@ final class dbpedia implements source {
             'nextcursor' => $next];
     }
 
-    /** Accept only resource IRIs at DBpedia's fixed host. */
+    /**
+     * Accept only resource IRIs at DBpedia's fixed host.
+     */
     private static function valid_itemid($itemid): bool {
         return is_string($itemid) && strlen($itemid) <= 600 &&
-            (bool)preg_match('~^http://dbpedia\.org/resource/[^\x00-\x20<>"{}|^`\\\\?#]{1,500}$~Du', $itemid);
+            (bool)preg_match('~^http://dbpedia\.org/resource/[^\x00-\x20<>"{}|^\x60\\\\?#]{1,500}$~Du', $itemid);
     }
 
-    /** Accept only the fixed DBpedia category namespace as a search filter. */
+    /**
+     * Accept only the fixed DBpedia category namespace as a search filter.
+     */
     private static function valid_categoryid($category): bool {
         return is_string($category) && strlen($category) <= 600 &&
-            (bool)preg_match('~^http://dbpedia\.org/resource/Category:[^\x00-\x20<>"{}|^`\\\\?#]{1,500}$~Du',
-                $category);
+            (bool)preg_match(
+                '~^http://dbpedia\.org/resource/Category:[^\x00-\x20<>"{}|^\x60\\\\?#]{1,500}$~Du',
+                $category
+            );
     }
 
-    /** @inheritDoc */
-    public function search_page(array $themes, string $term, array $viewport,
-            string $language, string $cursor): array {
+    /**
+     * Search a page of DBpedia resources in the selected themes and area.
+     */
+    public function search_page(
+        array $themes,
+        string $term,
+        array $viewport,
+        string $language,
+        string $cursor
+    ): array {
         $bounds = wikidata::buffered_bounds($viewport);
         $query = self::build_query($themes, $term, $bounds, $cursor);
         $page = self::parse_results(self::request_query($query), $bounds, $cursor === '' ? 0 : (int)$cursor);
@@ -184,7 +222,9 @@ final class dbpedia implements source {
         return $page + ['bounds' => $bounds];
     }
 
-    /** Search resources in a selected category within the current map area. */
+    /**
+     * Search resources in a selected category within the current map area.
+     */
     public function search_category_page(string $category, array $viewport, string $cursor): array {
         $bounds = wikidata::buffered_bounds($viewport);
         $query = self::build_query(['all'], '', $bounds, $cursor, $category);
@@ -196,7 +236,9 @@ final class dbpedia implements source {
         return $page + ['bounds' => $bounds];
     }
 
-    /** @inheritDoc */
+    /**
+     * Load complete metadata for one validated DBpedia resource.
+     */
     public function item_details(string $itemid, string $language): array {
         $details = self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
         foreach ($details['relations'] as $relation) {
@@ -204,17 +246,24 @@ final class dbpedia implements source {
                 continue;
             }
             try {
-                $details['geometries'] = array_merge($details['geometries'],
-                    wikidata::geometries_for_item($relation['id']));
+                $details['geometries'] = array_merge(
+                    $details['geometries'],
+                    wikidata::geometries_for_item($relation['id'])
+                );
             } catch (\Throwable $exception) {
-                // A linked service must not hide the DBpedia card.
+                debugging(
+                    'Could not resolve linked Wikidata geometry: ' . $exception->getMessage(),
+                    DEBUG_DEVELOPER
+                );
             }
             break;
         }
         return $details;
     }
 
-    /** Build the detail query from one validated DBpedia resource. */
+    /**
+     * Build the detail query from one validated DBpedia resource.
+     */
     public static function build_details_query(string $itemid): string {
         if (!self::valid_itemid($itemid)) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
@@ -253,7 +302,9 @@ final class dbpedia implements source {
             'IF(?kind = "geoGeometry", 2, IF(?kind = "sameAs", 3, 4))))) LIMIT 700';
     }
 
-    /** Only display images served by Wikimedia Commons or its thumbnail host. */
+    /**
+     * Only display images served by Wikimedia Commons or its thumbnail host.
+     */
     public static function thumbnail_url($url): string {
         if (!is_string($url) || strlen($url) > 2000) {
             return '';
@@ -263,15 +314,19 @@ final class dbpedia implements source {
             return $commons;
         }
         $parts = parse_url($url);
-        if (!is_array($parts) || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true) ||
+        if (
+            !is_array($parts) || !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true) ||
                 strtolower($parts['host'] ?? '') !== 'upload.wikimedia.org' ||
-                !str_starts_with($parts['path'] ?? '', '/wikipedia/') || isset($parts['user']) || isset($parts['pass'])) {
+                !str_starts_with($parts['path'] ?? '', '/wikipedia/') || isset($parts['user']) || isset($parts['pass'])
+        ) {
             return '';
         }
         return 'https://upload.wikimedia.org' . $parts['path'];
     }
 
-    /** Convert the detail bindings to the editor's card schema. */
+    /**
+     * Convert the detail bindings to the editor's card schema.
+     */
     public static function parse_details(array $response, string $language = 'en'): array {
         $details = ['description' => '', 'image' => '', 'images' => [], 'types' => [],
             'categories' => [], 'websites' => [], 'relations' => [], 'geometries' => []];
@@ -289,9 +344,11 @@ final class dbpedia implements source {
                 $predicate = ['asWKT' => 'geosparql:asWKT', 'polygon' => 'dbo:polygon',
                     'geoGeometry' => 'geo:geometry'][$kind];
                 $geometry = geometry::from_wkt($value, $predicate);
-                if ($geometry && !($kind === 'polygon' && $geometry['type'] === 'Point') &&
+                if (
+                    $geometry && !($kind === 'polygon' && $geometry['type'] === 'Point') &&
                         count($details['geometries']) < 4 &&
-                        !in_array($geometry, $details['geometries'], true)) {
+                        !in_array($geometry, $details['geometries'], true)
+                ) {
                     $details['geometries'][] = $geometry;
                 }
             } else if ($kind === 'sameAs' && count($details['relations']) < 80) {
@@ -313,8 +370,10 @@ final class dbpedia implements source {
                 if ($image !== '' && !in_array($image, $details['images'], true)) {
                     $details['images'][] = $image;
                 }
-            } else if ($kind === 'category' && self::valid_categoryid($value) &&
-                    count($details['categories']) < 20) {
+            } else if (
+                $kind === 'category' && self::valid_categoryid($value) &&
+                    count($details['categories']) < 20
+            ) {
                 $slug = substr($value, strlen('http://dbpedia.org/resource/Category:'));
                 $label = str_replace('_', ' ', rawurldecode($slug));
                 $details['categories'][$value] = ['id' => $value, 'label' => \core_text::substr($label, 0, 100)];
@@ -323,8 +382,10 @@ final class dbpedia implements source {
                 if (is_string($label) && trim($label) !== '') {
                     $details['types'][$value] = ['label' => \core_text::substr($label, 0, 100), 'url' => ''];
                 }
-            } else if ($kind === 'relation' && self::valid_itemid($value) &&
-                    count($details['relations']) < 80) {
+            } else if (
+                $kind === 'relation' && self::valid_itemid($value) &&
+                    count($details['relations']) < 80
+            ) {
                 $property = $binding['property']['value'] ?? '';
                 if (!is_string($property) || !str_starts_with($property, 'http://dbpedia.org/ontology/')) {
                     continue;
@@ -340,10 +401,12 @@ final class dbpedia implements source {
                         'property' => \core_text::substr($propertylabel, 0, 100),
                     ];
                 }
-            } else if ($kind === 'primary' &&
+            } else if (
+                $kind === 'primary' &&
                     filter_var($value, FILTER_VALIDATE_URL) &&
                     in_array(parse_url($value, PHP_URL_SCHEME), ['http', 'https'], true) &&
-                    !isset(parse_url($value)['user']) && !isset(parse_url($value)['pass'])) {
+                    !isset(parse_url($value)['user']) && !isset(parse_url($value)['pass'])
+            ) {
                 if (count($primarywebsites) < 2) {
                     $primarywebsites[$value] = ['type' => 'primary', 'url' => $value];
                 }
@@ -364,7 +427,9 @@ final class dbpedia implements source {
         return $details;
     }
 
-    /** Keep only known OpenData targets for collector navigation. */
+    /**
+     * Keep only known OpenData targets for collector navigation.
+     */
     private static function same_as_relation(string $value): ?array {
         if (preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)) {
             return ['source' => 'wikidata', 'id' => $match[1], 'label' => 'Wikidata ' . $match[1],
@@ -378,15 +443,20 @@ final class dbpedia implements source {
         return null;
     }
 
-    /** Query only the fixed public endpoint, with bounded time and response size. */
+    /**
+     * Query only the fixed public endpoint, with bounded time and response size.
+     */
     private static function request_query(string $query): array {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
         $curl = new \curl();
         $curl->setHeader('Accept: application/sparql-results+json');
         $curl->setHeader('User-Agent: MoodleTreasurehunt/1.0');
-        $body = $curl->get(self::ENDPOINT, ['query' => $query, 'format' => 'application/sparql-results+json'],
-            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]);
+        $body = $curl->get(
+            self::ENDPOINT,
+            ['query' => $query, 'format' => 'application/sparql-results+json'],
+            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20, 'CURLOPT_FOLLOWLOCATION' => 0]
+        );
         $info = $curl->get_info();
         if ($curl->get_errno() || (int)($info['http_code'] ?? 0) !== 200 || strlen((string)$body) > 2000000) {
             throw new \moodle_exception('opendatadbpediaerror', 'treasurehunt');

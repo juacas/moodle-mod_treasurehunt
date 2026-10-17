@@ -1,4 +1,18 @@
 <?php
+// This file is part of Moodle - https://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <https://www.gnu.org/licenses/>.
 /*
  * This file is part of the GeoJSON package.
  * (c) Camptocamp <info@camptocamp.com>
@@ -6,7 +20,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 /**
  * GeoJSON class : a geojson reader/writer.
  *
@@ -16,7 +29,6 @@
  * @author     Camptocamp <info@camptocamp.com>
  */
 class GeoJSON {
-
     /**
      * Load Classes needed for GeoJSON class
      *
@@ -26,7 +38,7 @@ class GeoJSON {
      *
      * @param string $className A class name to load
      */
-    static public function autoload($className) {
+    public static function autoload($className) {
 
         $i = new RecursiveIteratorIterator(new RecursiveDirectoryIterator(dirname(__FILE__)));
         foreach ($i as $file) {
@@ -44,12 +56,12 @@ class GeoJSON {
      *
      * @return string The GeoJSON string
      */
-    static public function dump($obj) {
+    public static function dump($obj) {
         if (is_null($obj)) {
             return null;
         }
 
-        if (!in_array(get_class($obj), array('Feature', 'FeatureCollection'))) {
+        if (!in_array(get_class($obj), ['Feature', 'FeatureCollection'])) {
             throw new Exception('Input should be a Feature or a FeatureCollection');
         }
 
@@ -64,7 +76,7 @@ class GeoJSON {
      *
      * @return object The PHP equivalent object
      */
-    static public function load($string) {
+    public static function load($string) {
         if (!($object = json_decode($string))) {
             throw new Exception('Invalid JSON');
         }
@@ -79,7 +91,7 @@ class GeoJSON {
      *
      * @return object The PHP equivalent object
      */
-    static public function loadArray($array) {
+    public static function loadArray($array) {
         return self::toInstance($array);
     }
 
@@ -91,7 +103,7 @@ class GeoJSON {
      *
      * @return Feature|FeatureCollection A Feature|FeatureCollection instance
      */
-    static public function loadFrom($object, GeoJSON_Adapter $adapter) {
+    public static function loadFrom($object, GeoJSON_Adapter $adapter) {
         if ($adapter->isMultiple($object)) {
             $result = new FeatureCollection();
             foreach ($adapter->getIterable($object) as $feature) {
@@ -112,11 +124,13 @@ class GeoJSON {
      *
      * @return GeoJSON A GeoJSON instance
      */
-    static protected function loadFeatureFrom($object, GeoJSON_Adapter $adapter) {
+    protected static function loadFeatureFrom($object, GeoJSON_Adapter $adapter) {
         $geometry = WKT::load($adapter->getObjectGeometry($object));
         $feature = new Feature(
-                $adapter->getObjectId($object), $geometry, $adapter->getObjectProperties($object),
-                $adapter->getObjectBBox($object)
+            $adapter->getObjectId($object),
+            $geometry,
+            $adapter->getObjectProperties($object),
+            $adapter->getObjectBBox($object)
         );
 
         return $feature;
@@ -130,19 +144,20 @@ class GeoJSON {
      *
      * @return object Object from class: Feature, FeatureCollection or Geometry
      */
-    static private function toInstance($obj) {
+    private static function toInstance($obj) {
         if (is_null($obj)) {
             return null;
         }
         if (is_array($obj)) {
             $obj = (object) $obj;
         }
-        if (!isset($obj->type))
+        if (!isset($obj->type)) {
             self::checkType($obj);
+        }
 
         switch ($obj->type) {
             case 'FeatureCollection':
-                $features = array();
+                $features = [];
                 self::checkExists($obj, 'features', false, 'array');
                 foreach ($obj->features as $feature) {
                     $features[] = self::toFeatureInstance($feature, true);
@@ -166,7 +181,7 @@ class GeoJSON {
      * @param boolean $testType Should we test that $obj is really a Feature ?
      * @return object Object from class Feature
      */
-    static private function toFeatureInstance($obj, $testType) {
+    private static function toFeatureInstance($obj, $testType) {
         if (is_array($obj)) {
             $obj = (object) $obj;
             if (is_array($obj->geometry)) {
@@ -194,7 +209,7 @@ class GeoJSON {
      *
      * @return object Object from class Geometry
      */
-    static private function toGeomInstance($obj, $allowGeometryCollection = true) {
+    private static function toGeomInstance($obj, $allowGeometryCollection = true) {
         if (is_null($obj)) {
             return null;
         }
@@ -205,7 +220,7 @@ class GeoJSON {
 
         switch ($obj->type) {
             case 'FeatureCollection':
-                $features = array();
+                $features = [];
                 self::checkArray($obj, 'features');
                 foreach ($obj->features as $feature) {
                     $features[] = self::toInstance($feature);
@@ -227,16 +242,16 @@ class GeoJSON {
             case 'LineString':
             case 'Polygon':
                 self::checkExists($obj, 'coordinates', false, 'array');
-                $instance = call_user_func(array(self::class, 'to' . $obj->type), $obj->coordinates);
+                $instance = call_user_func([self::class, 'to' . $obj->type], $obj->coordinates);
                 break;
 
             case 'MultiPoint':
             case 'MultiLineString':
             case 'MultiPolygon':
                 self::checkExists($obj, 'coordinates', false, 'array');
-                $items = array();
+                $items = [];
                 foreach ($obj->coordinates as $item) {
-                    $items[] = call_user_func(array(self::class, 'to' . substr($obj->type, 5)), $item);
+                    $items[] = call_user_func([self::class, 'to' . substr($obj->type, 5)], $item);
                 }
                 $instance = new $obj->type($items);
                 break;
@@ -244,7 +259,7 @@ class GeoJSON {
             case 'GeometryCollection':
                 if ($allowGeometryCollection) {
                     self::checkExists($obj, 'geometries', false, 'array');
-                    $geometries = array();
+                    $geometries = [];
                     foreach ($obj->geometries as $geometry) {
                         $geometries[] = self::toGeomInstance($geometry, false);
                     }
@@ -266,7 +281,7 @@ class GeoJSON {
      * @param object $obj A geometry object
      * @param string $typeValue Value expected for 'type' property
      */
-    static private function checkType(object $obj, ?string $typeValue = null) {
+    private static function checkType(object $obj, ?string $typeValue = null) {
         if (!is_object($obj) || get_class($obj) != 'stdClass') {
             throw new Exception("Bad geojson");
         }
@@ -288,7 +303,7 @@ class GeoJSON {
      * @param boolean $allowNull Whether to allow a null value or not (defaults to false)
      * @param string $type Check also $property type (object, array ...)
      */
-    static private function checkExists(object $obj, string $property, bool $allowNull = false, ?string $type = null) {
+    private static function checkExists(object $obj, string $property, bool $allowNull = false, ?string $type = null) {
         if (!property_exists($obj, $property)) {
             throw new Exception("Bad geojson: Missing '$property' property");
         }
@@ -324,7 +339,7 @@ class GeoJSON {
      *
      * @return Point A Point object
      */
-    static private function toPoint(array $coordinates) {
+    private static function toPoint(array $coordinates) {
         if (count($coordinates) == 2 && isset($coordinates[0]) && isset($coordinates[1])) {
             return new Point($coordinates[0], $coordinates[1]);
         }
@@ -337,8 +352,8 @@ class GeoJSON {
      * @param array $coordinates The array of coordinates arrays (aka positions)
      * @return LineString A LineString object
      */
-    static private function toLineString(array $coordinates) {
-        $positions = array();
+    private static function toLineString(array $coordinates) {
+        $positions = [];
         foreach ($coordinates as $position) {
             $positions[] = self::toPoint($position);
         }
@@ -351,12 +366,11 @@ class GeoJSON {
      * @param array $coordinates The linestring coordinates
      * @return Polygon A Polygon object
      */
-    static private function toPolygon(array $coordinates) {
-        $linestrings = array();
+    private static function toPolygon(array $coordinates) {
+        $linestrings = [];
         foreach ($coordinates as $linestring) {
             $linestrings[] = self::toLineString($linestring);
         }
         return new Polygon($linestrings);
     }
-
 }

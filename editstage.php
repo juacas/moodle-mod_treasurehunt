@@ -122,10 +122,14 @@ if (!treasurehunt_is_edition_locked($treasurehunt->id, $USER->id)) {
         }
     }
     $stage->cmid = $cmid;
-    $returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
-        ['id' => $cmid, 'roadid' => $stage->roadid]);
-    if ($editor === 'edit2' && $playertype !== '' &&
-            array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+    $returnurl = new moodle_url(
+        '/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+        ['id' => $cmid, 'roadid' => $stage->roadid]
+    );
+    if (
+        $editor === 'edit2' && $playertype !== '' &&
+            array_key_exists($playertype, treasurehunt_get_installedplayerstyles())
+    ) {
         $returnurl->param('playertype', $playertype);
     }
 

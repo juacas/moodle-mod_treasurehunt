@@ -1,4 +1,5 @@
-.vscode/
+.vscode/*
+!.vscode/tasks.json
 .settings/
 node_modules/
 amd/build/*.map

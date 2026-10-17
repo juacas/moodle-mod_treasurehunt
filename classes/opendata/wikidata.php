@@ -53,8 +53,10 @@ final class wikidata {
             throw new \moodle_exception('opendatainvalidarea', 'treasurehunt');
         }
         [$west, $south, $east, $north] = array_map('floatval', $viewport);
-        if (!is_finite($west) || !is_finite($south) || !is_finite($east) || !is_finite($north) ||
-                $west < -180 || $east > 180 || $south < -90 || $north > 90 || $west >= $east || $south >= $north) {
+        if (
+            !is_finite($west) || !is_finite($south) || !is_finite($east) || !is_finite($north) ||
+                $west < -180 || $east > 180 || $south < -90 || $north > 90 || $west >= $east || $south >= $north
+        ) {
             throw new \moodle_exception('opendatainvalidarea', 'treasurehunt');
         }
         $width = $east - $west;
@@ -72,10 +74,17 @@ final class wikidata {
      * @param string $language Preferred language.
      * @return string SPARQL query.
      */
-    public static function build_query(array $types, string $term, array $bounds, string $language,
-            string $cursor = ''): string {
-        if (!$types || count($types) > count(self::TYPES) || count($bounds) !== 4 ||
-                \core_text::strlen($term) > 100 || ($cursor !== '' && !preg_match('/^Q[1-9][0-9]*$/D', $cursor))) {
+    public static function build_query(
+        array $types,
+        string $term,
+        array $bounds,
+        string $language,
+        string $cursor = ''
+    ): string {
+        if (
+            !$types || count($types) > count(self::TYPES) || count($bounds) !== 4 ||
+                \core_text::strlen($term) > 100 || ($cursor !== '' && !preg_match('/^Q[1-9][0-9]*$/D', $cursor))
+        ) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
         }
         foreach ($types as $type) {
@@ -88,7 +97,7 @@ final class wikidata {
         [$west, $south, $east, $north] = array_map(static fn($value) => sprintf('%.6F', $value), $bounds);
         $term = trim($term);
         $literal = json_encode($term, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES | JSON_THROW_ON_ERROR);
-        $labelmatch = static function(string $target) use ($term, $literal): string {
+        $labelmatch = static function (string $target) use ($term, $literal): string {
             return $term === '' ? '' : $target . ' rdfs:label ?searchLabel. ' .
                 'FILTER(LANG(?searchLabel) IN ("es", "en", "el") && ' .
                 'CONTAINS(LCASE(STR(?searchLabel)), LCASE(' . $literal . '))) ';
@@ -133,8 +142,10 @@ final class wikidata {
         foreach (array_slice($bindings, 0, self::MAX_RESULTS) as $binding) {
             $item = $binding['item']['value'] ?? '';
             $point = $binding['location']['value'] ?? '';
-            if (!preg_match('~^https?://www\.wikidata\.org/entity/(Q[0-9]+)$~', $item, $match) ||
-                    !preg_match('/^Point\((-?[0-9]+(?:\.[0-9]+)?) (-?[0-9]+(?:\.[0-9]+)?)\)$/', $point, $coords)) {
+            if (
+                !preg_match('~^https?://www\.wikidata\.org/entity/(Q[0-9]+)$~', $item, $match) ||
+                    !preg_match('/^Point\((-?[0-9]+(?:\.[0-9]+)?) (-?[0-9]+(?:\.[0-9]+)?)\)$/', $point, $coords)
+            ) {
                 continue;
             }
             $longitude = (float)$coords[1];
@@ -216,14 +227,18 @@ final class wikidata {
     public static function image_url(string $url): string {
         $parts = parse_url($url);
         $prefix = '/wiki/Special:FilePath/';
-        if (!is_array($parts) || strtolower($parts['host'] ?? '') !== 'commons.wikimedia.org' ||
+        if (
+            !is_array($parts) || strtolower($parts['host'] ?? '') !== 'commons.wikimedia.org' ||
                 !in_array(strtolower($parts['scheme'] ?? ''), ['http', 'https'], true) ||
-                !str_starts_with($parts['path'] ?? '', $prefix)) {
+                !str_starts_with($parts['path'] ?? '', $prefix)
+        ) {
             return '';
         }
         $filename = rawurldecode(substr($parts['path'], strlen($prefix)));
-        if ($filename === '' || strlen($filename) > 255 || str_contains($filename, '/') ||
-                str_contains($filename, '\\') || !preg_match('/\.(jpe?g|png|gif|webp|svg)$/i', $filename)) {
+        if (
+            $filename === '' || strlen($filename) > 255 || str_contains($filename, '/') ||
+                str_contains($filename, '\\') || !preg_match('/\.(jpe?g|png|gif|webp|svg)$/i', $filename)
+        ) {
             return '';
         }
         return 'https://commons.wikimedia.org/wiki/Special:FilePath/' . rawurlencode($filename) . '?width=480';
@@ -307,14 +322,21 @@ final class wikidata {
                     }
                     break;
                 case 'relation':
-                    if (count($relations) >= 80 ||
-                            !preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)) {
+                    if (
+                        count($relations) >= 80 ||
+                            !preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)
+                    ) {
                         break;
                     }
                     $propertyuri = $binding['property']['value'] ?? '';
-                    if (!is_string($propertyuri) ||
-                            !preg_match('~^https?://www\.wikidata\.org/prop/direct/(P[1-9][0-9]*)$~D',
-                                $propertyuri, $propertymatch)) {
+                    if (
+                        !is_string($propertyuri) ||
+                            !preg_match(
+                                '~^https?://www\.wikidata\.org/prop/direct/(P[1-9][0-9]*)$~D',
+                                $propertyuri,
+                                $propertymatch
+                            )
+                    ) {
                         break;
                     }
                     $label = $binding['valueLabel']['value'] ?? $match[1];
@@ -328,9 +350,13 @@ final class wikidata {
                     }
                     break;
                 case 'sameAs':
-                    if (count($relations) < 80 &&
-                            preg_match('~^http://dbpedia\.org/resource/[^\x00-\x20<>"{}|^`\\\\?#]{1,500}$~Du',
-                                $value)) {
+                    if (
+                        count($relations) < 80 &&
+                            preg_match(
+                                '~^http://dbpedia\.org/resource/[^\x00-\x20<>"{}|^\x60\\\\?#]{1,500}$~Du',
+                                $value
+                            )
+                    ) {
                         $slug = substr($value, strlen('http://dbpedia.org/resource/'));
                         $relations['owl:sameAs:' . $value] = [
                             'source' => 'dbpedia', 'id' => $value,
@@ -346,8 +372,10 @@ final class wikidata {
                     break;
                 case 'official':
                 case 'about':
-                    if (!self::valid_website($value) || isset($officialwebsites[$value]) ||
-                            isset($aboutwebsites[$value])) {
+                    if (
+                        !self::valid_website($value) || isset($officialwebsites[$value]) ||
+                            isset($aboutwebsites[$value])
+                    ) {
                         break;
                     }
                     if ($kind === 'official' && count($officialwebsites) < 2) {
@@ -374,7 +402,9 @@ final class wikidata {
         ];
     }
 
-    /** Convert a WDQS Commons data URI to a bounded MediaWiki page title. */
+    /**
+     * Convert a WDQS Commons data URI to a bounded MediaWiki page title.
+     */
     private static function geoshape_title(string $value): string {
         if (preg_match('~^https?://commons\.wikimedia\.org/data/main/(Data:[^?#]+\.map)$~iD', $value, $match)) {
             $value = rawurldecode(str_replace('+', ' ', $match[1]));
@@ -383,7 +413,9 @@ final class wikidata {
             (bool)preg_match('~^Data:[^\x00-\x1f<>"{}|\\\\?#]{1,240}\.map$~uD', $value) ? $value : '';
     }
 
-    /** Resolve up to two Commons map files into bounded polygon WKT. */
+    /**
+     * Resolve up to two Commons map files into bounded polygon WKT.
+     */
     private static function resolve_geoshapes(array $titles): array {
         global $CFG;
         require_once($CFG->libdir . '/filelib.php');
@@ -401,8 +433,10 @@ final class wikidata {
                     'titles' => $title, 'format' => 'json',
                 ], ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 15, 'CURLOPT_FOLLOWLOCATION' => 0]);
                 $info = $curl->get_info();
-                if ($curl->get_errno() || (int)($info['http_code'] ?? 0) !== 200 ||
-                        strlen((string)$body) > 2000000) {
+                if (
+                    $curl->get_errno() || (int)($info['http_code'] ?? 0) !== 200 ||
+                        strlen((string)$body) > 2000000
+                ) {
                     continue;
                 }
                 $response = json_decode($body, true);
@@ -417,13 +451,18 @@ final class wikidata {
                     }
                 }
             } catch (\Throwable $exception) {
-                // Missing or oversized Commons data does not hide other item details.
+                debugging(
+                    'Could not resolve Commons geometry: ' . $exception->getMessage(),
+                    DEBUG_DEVELOPER
+                );
             }
         }
         return $geometries;
     }
 
-    /** Fetch only P3896 geometries for a validated sameAs target. */
+    /**
+     * Fetch only P3896 geometries for a validated sameAs target.
+     */
     public static function geometries_for_item(string $itemid): array {
         if (!preg_match('/^Q[1-9][0-9]*$/D', $itemid)) {
             throw new \moodle_exception('opendatainvalidsearch', 'treasurehunt');
@@ -456,8 +495,13 @@ final class wikidata {
      * @param string $language Preferred language.
      * @return array GeoJSON, bounds and truncation flag.
      */
-    public static function search(array $types, string $term, array $viewport, string $language,
-            string $cursor = ''): array {
+    public static function search(
+        array $types,
+        string $term,
+        array $viewport,
+        string $language,
+        string $cursor = ''
+    ): array {
         $bounds = self::buffered_bounds($viewport);
         $query = self::build_query($types, $term, $bounds, $language, $cursor);
         return self::parse_results(self::request_query($query)) + ['bounds' => $bounds];
@@ -475,8 +519,11 @@ final class wikidata {
         $curl = new \curl();
         $curl->setHeader('Accept: application/sparql-results+json');
         $curl->setHeader('User-Agent: MoodleTreasurehunt/1.0 (https://github.com/jpdecastro/moodle-mod_treasurehunt)');
-        $body = $curl->get('https://query.wikidata.org/sparql', ['query' => $query],
-            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20]);
+        $body = $curl->get(
+            'https://query.wikidata.org/sparql',
+            ['query' => $query],
+            ['CURLOPT_CONNECTTIMEOUT' => 5, 'CURLOPT_TIMEOUT' => 20]
+        );
         $info = $curl->get_info();
         $httpcode = (int)($info['http_code'] ?? 0);
         if ($curl->get_errno() || $httpcode !== 200 || strlen((string)$body) > 2000000) {
@@ -490,8 +537,13 @@ final class wikidata {
         }
         $response = json_decode($body, true);
         if (!is_array($response) || !isset($response['results']['bindings'])) {
-            throw new \moodle_exception('opendataserviceerror', 'treasurehunt', '', null,
-                'Wikidata Query Service returned invalid SPARQL JSON');
+            throw new \moodle_exception(
+                'opendataserviceerror',
+                'treasurehunt',
+                '',
+                null,
+                'Wikidata Query Service returned invalid SPARQL JSON'
+            );
         }
         return $response;
     }

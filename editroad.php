@@ -61,10 +61,14 @@ $PAGE->set_url($url);
 $PAGE->activityheader->disable();
 require_capability('mod/treasurehunt:managetreasurehunt', $context);
 
-$returnurl = new moodle_url('/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
-    ['id' => $cmid, 'roadid' => $id]);
-if ($editor === 'edit2' && $playertype !== '' &&
-        array_key_exists($playertype, treasurehunt_get_installedplayerstyles())) {
+$returnurl = new moodle_url(
+    '/mod/treasurehunt/' . ($editor === 'edit2' ? 'edit2.php' : 'edit.php'),
+    ['id' => $cmid, 'roadid' => $id]
+);
+if (
+    $editor === 'edit2' && $playertype !== '' &&
+        array_key_exists($playertype, treasurehunt_get_installedplayerstyles())
+) {
     $returnurl->param('playertype', $playertype);
 }
 
