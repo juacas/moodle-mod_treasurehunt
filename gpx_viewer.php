@@ -53,6 +53,10 @@ $PAGE->requires->jquery();
 $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
+$PAGE->requires->css('/mod/treasurehunt/css/participant_progress.css');
+if (!empty($treasurehunt->showboard)) {
+    $PAGE->requires->js_call_amd('mod_treasurehunt/participant_progress', 'init_page');
+}
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = [];
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
@@ -86,18 +90,47 @@ echo html_writer::start_tag('div', ['class' => 'card-header d-flex flex-wrap ali
 echo html_writer::tag('h2', format_string($treasurehunt->name), [
     'class' => 'h5 mb-0 me-auto',
 ]);
-echo html_writer::start_tag('div', ['class' => 'form-check form-switch mb-0']);
-echo html_writer::empty_tag('input', [
-    'type' => 'checkbox',
-    'id' => 'refreshtracks',
-    'class' => 'form-check-input',
-    'value' => 'refresh',
-]);
-echo html_writer::tag('label', get_string('trackviewerrefreshtracks', 'treasurehunt', $refreshtracksinterval), [
-    'class' => 'form-check-label',
+echo html_writer::start_tag('div', ['class' => 'track-refresh-control']);
+echo html_writer::tag('label', get_string('trackviewerrefreshinterval', 'treasurehunt'), [
+    'class' => 'form-label mb-0',
     'for' => 'refreshtracks',
 ]);
-echo ' ' . html_writer::tag('span', '', [
+echo html_writer::empty_tag('input', [
+    'type' => 'range',
+    'id' => 'refreshtracks',
+    'class' => 'form-range',
+    'min' => 10,
+    'max' => 70,
+    'step' => 10,
+    'value' => $refreshtracksinterval,
+    'list' => 'refreshtrackssteps',
+    'aria-valuetext' => get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval),
+]);
+echo html_writer::tag(
+    'datalist',
+    html_writer::tag('option', '', ['value' => 10]) .
+    html_writer::tag('option', '', ['value' => 20]) .
+    html_writer::tag('option', '', ['value' => 30]) .
+    html_writer::tag('option', '', ['value' => 40]) .
+    html_writer::tag('option', '', ['value' => 50]) .
+    html_writer::tag('option', '', ['value' => 60]) .
+    html_writer::tag('option', '', ['value' => 70]),
+    ['id' => 'refreshtrackssteps']
+);
+echo html_writer::tag('output', get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval), [
+    'id' => 'refreshtracksvalue',
+    'for' => 'refreshtracks',
+    'aria-live' => 'polite',
+]);
+echo html_writer::tag(
+    'div',
+    html_writer::tag('span', '10') . html_writer::tag('span', '20') .
+    html_writer::tag('span', '30') . html_writer::tag('span', '40') .
+    html_writer::tag('span', '50') . html_writer::tag('span', '60') .
+    html_writer::tag('span', get_string('trackviewerrefreshdisabled', 'treasurehunt')),
+    ['class' => 'track-refresh-ticks', 'aria-hidden' => 'true']
+);
+echo html_writer::tag('span', '', [
     'id' => 'timecircle',
     'class' => 'badge rounded-pill text-bg-secondary',
     'style' => 'display: none;',
@@ -109,6 +142,14 @@ echo html_writer::link($downloadurl, get_string('trackviewerdownloadgpx', 'treas
 ]);
 echo html_writer::end_tag('div');
 echo html_writer::start_tag('div', ['class' => 'card-body p-0']);
+if (!empty($treasurehunt->showboard)) {
+    echo html_writer::div('', 'th-participant-progress th-participant-progress-inline', [
+        'id' => 'th-participant-progress-trackviewer',
+        'data-th-treasurehuntid' => $treasurehunt->id,
+        'data-th-roadid' => 0,
+        'aria-label' => get_string('participantprogress', 'treasurehunt'),
+    ]);
+}
 echo html_writer::tag('div', '', [
     'id' => 'mapgpx',
     'role' => 'region',

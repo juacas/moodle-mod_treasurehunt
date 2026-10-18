@@ -27,8 +27,9 @@ import 'mod_treasurehunt/ol3-layerswitcher';
 import { get_strings as str } from 'core/str';
 
 let init = {
-    refreshTracksInterval: 30,
-    refreshCounter: 0,
+    refreshTracksInterval: 60,
+    refreshSources: [],
+    countdownTimer: null,
     addgpxlayer: function (map, cmid, treasurehuntid, strings, user, trackgroupname) {
 
         var trackgroup = find_or_add_layergroup(map, trackgroupname);
@@ -41,7 +42,10 @@ let init = {
 
         // console.log('Creating gpxviewer.');
         // I18n strings.
-        var terms = ['aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel'];
+        var terms = [
+            'aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel',
+            'trackviewerrefreshdisabled', 'trackviewerrefreshseconds'
+        ];
         var stringsqueried = terms.map(function (term) {
             return { key: term, component: 'treasurehunt' };
         });
@@ -56,6 +60,9 @@ let init = {
             for (var i = 0; i < terms.length; i++) {
                 i18n[terms[i]] = strings[i];
             }
+            init.refreshSources = [];
+            init.countdownTimer = null;
+            init.refreshTracksInterval = refreshinterval;
             // Detect custom image.
             if (typeof (custommapconfig) != 'undefined' &&
                 custommapconfig !== null &&
@@ -363,19 +370,41 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     map.on('click', function (evt) {
         showpopup(evt);
     });
-    var interval = null;
-    $('#refreshtracks').change(function () {
-        if ($(this).is(':checked')) {
-            init.refreshCounter = 0;
-            $("#timecircle").text(init.refreshTracksInterval).show();
-            interval = setInterval(function () {
-                $("#timecircle").text(init.refreshTracksInterval - (++init.refreshCounter) % init.refreshTracksInterval);
-            }, 1000);
-        } else {
-            $("#timecircle").hide();
-            clearInterval(interval);
+    var refreshslider = $('#refreshtracks');
+    var refreshvalue = $('#refreshtracksvalue');
+    /** Update the refresh interval from the slider and restart its countdown. */
+    function updateRefreshControl() {
+        var sliderposition = parseInt(refreshslider.val(), 10);
+        var seconds = sliderposition === 70 ? 0 : sliderposition;
+        init.refreshTracksInterval = seconds;
+        var label = seconds ? strings.trackviewerrefreshseconds.replace(/\{\$a\}/g, seconds) : strings.trackviewerrefreshdisabled;
+        refreshvalue.text(label);
+        refreshslider.attr('aria-valuetext', label);
+        if (init.countdownTimer) {
+            clearInterval(init.countdownTimer);
+            init.countdownTimer = null;
         }
-    });
+        if (!seconds) {
+            $('#timecircle').hide();
+            return;
+        }
+
+        var remaining = seconds;
+        $('#timecircle').text(remaining).show();
+        init.countdownTimer = setInterval(function() {
+            remaining--;
+            if (remaining <= 0) {
+                init.refreshSources.forEach(function(source) {
+                    source.clear();
+                    source.refresh();
+                });
+                remaining = seconds;
+            }
+            $('#timecircle').text(remaining);
+        }, 1000);
+    }
+    refreshslider.on('input change', updateRefreshControl);
+    updateRefreshControl();
 } // End of function initcreategpxviewer.
 /**
  *
@@ -450,13 +479,7 @@ function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
             }
         });
         vector.iconurl = iconurl;
-        setInterval(function () {
-            if ($('#refreshtracks').is(':checked')) {
-                init.refreshCounter = 0;
-                gpxsource.clear();
-                gpxsource.refresh();
-            }
-        }, init.refreshTracksInterval * 1000);
+        init.refreshSources.push(gpxsource);
         vector.on('change:visible', function () {
             if (this.getVisible()) {
                 var extent = this.getSource().getExtent();
@@ -467,7 +490,7 @@ function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
             }
         });
         gpxsource.on('change', function () {
-            if ($('#refreshtracks').is(':checked')) {
+            if (init.refreshTracksInterval > 0) {
                 return;
             }
             var extent = gpxsource.getExtent();

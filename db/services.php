@@ -33,6 +33,7 @@ $services = [
             'mod_treasurehunt_delete_road',
             'mod_treasurehunt_renew_lock',
             'mod_treasurehunt_user_progress',
+            'mod_treasurehunt_participant_progress',
         ],
         'requiredcapability' => '', // If set, the web service user need this capability to access .
         // Any function of this service. For example: 'some/capability:specified'.
@@ -95,5 +96,11 @@ $functions = [
         'capabilities' => 'mod/treasurehunt:play',
         'ajax' => true, // Allowed from ajax.
         'services' => [MOODLE_OFFICIAL_MOBILE_SERVICE],
+    ],
+    'mod_treasurehunt_participant_progress' => [
+        'classname' => \mod_treasurehunt\external\participant_progress::class,
+        'description' => 'Read the cached participant progress display for a treasure hunt.',
+        'type' => 'read',
+        'ajax' => true,
     ],
 ];

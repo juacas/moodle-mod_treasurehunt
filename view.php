@@ -64,6 +64,10 @@ $completion = new completion_info($course);
 $completion->set_module_viewed($cm);
 $PAGE->requires->jquery();
 $PAGE->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
+if (!empty($treasurehunt->showboard)) {
+    $PAGE->requires->css('/mod/treasurehunt/css/participant_progress.css');
+    $PAGE->requires->js_call_amd('mod_treasurehunt/participant_progress', 'init_page');
+}
 echo $output->header();
 if ($CFG->version < 2022112800) { // Moodle 4 renders the heading and the description in the header.
     echo $output->heading(
@@ -227,7 +231,14 @@ if (
     || has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
     || $treasurehunt->showboard == true
 ) {
-    echo treasurehunt_view_users_progress_table($cm, $course->id, $context, $usersprogressdata);
+    echo treasurehunt_view_users_progress_table(
+        $cm,
+        $course->id,
+        $context,
+        $usersprogressdata,
+        [],
+        !empty($treasurehunt->showboard)
+    );
 }
 $urlparams = ['id' => $cm->id];
 if ($canmanage) {

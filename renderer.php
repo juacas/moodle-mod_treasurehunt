@@ -96,6 +96,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
+        $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->set_title('');// Empty to avoid render on top.
         // Output starts here.
@@ -127,6 +128,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->disable();
         $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
         $config = $this->get_geographic_player_config($renderablepage);
         $config['cesiumbaseurl'] = (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false);
         $this->page->requires->js_call_amd('mod_treasurehunt/cessium_player', 'init');
@@ -162,6 +164,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->disable();
         $this->page->requires->css('/mod/treasurehunt/css/cessium_player.css');
+        $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
         $this->page->requires->css(new moodle_url('https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css'));
         $config = $this->get_geographic_player_config($renderablepage);
         $config['mapboxaccesstoken'] = (string)get_config('mod_treasurehunt', 'mapboxaccesstoken');
@@ -378,6 +381,14 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 if ($roadusersprogress->validated) {
                     if (count($roadusersprogress->userlist)) {
                         $s .= $this->output->heading($roadheading, 4);
+                        if ($progress->showparticipantprogress && $roadid !== null) {
+                            $s .= html_writer::div('', 'th-participant-progress th-participant-progress-inline', [
+                                'id' => 'th-participant-progress-road-' . $roadid,
+                                'data-th-treasurehuntid' => $progress->treasurehuntid,
+                                'data-th-roadid' => $roadid,
+                                'aria-label' => get_string('participantprogress', 'treasurehunt'),
+                            ]);
+                        }
                         $s .= $this->output->box_start('boxaligncenter usersprogresstable');
                         $t = new html_table();
                         if ($progress->groupmode) {

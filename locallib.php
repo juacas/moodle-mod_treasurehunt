@@ -3124,7 +3124,14 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
  * @param array $showclearactions Roads with resettable activity, keyed by road ID.
  * @return string
  */
-function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progressdata = null, $showclearactions = []) {
+function treasurehunt_view_users_progress_table(
+    $cm,
+    $courseid,
+    $context,
+    $progressdata = null,
+    $showclearactions = [],
+    $showparticipantprogress = false
+) {
     global $PAGE;
 
     [
@@ -3138,12 +3145,14 @@ function treasurehunt_view_users_progress_table($cm, $courseid, $context, $progr
         roadsusersprogress: $roads,
         groupmode: $cm->groupmode,
         coursemoduleid: $cm->id,
+        treasurehuntid: $cm->instance,
         duplicategroupsingroupings: $duplicategroupsingroupings,
         duplicateusersingroups: $duplicateusersingroups,
         unassignedusers: $unassignedusers,
         viewpermission: $viewpermission,
         managepermission: $managepermission,
         showclearactions: $showclearactions,
+        showparticipantprogress: $showparticipantprogress,
     );
     return $output->render($renderable);
 }

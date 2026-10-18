@@ -28,6 +28,7 @@ import {createLayer as createAnimatedPegmanLayer, loadLibrary as loadPegmanLibra
 import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import {isSvgImage, loadSvgImage, renderSvgToDataUrl} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
+import {init as initParticipantProgress} from 'mod_treasurehunt/participant_progress';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
 const EMPTY = {type: 'FeatureCollection', features: []};
@@ -234,6 +235,12 @@ export const init = async() => {
     }
     root.classList.add('mapbox-player');
     const config = JSON.parse(document.getElementById('cessium-config').textContent);
+    initParticipantProgress({
+        enabled: enabled(config.playerconfig?.showparticipantprogress),
+        treasurehuntid: config.treasurehuntid,
+        previewroadid: config.previewroadid,
+        roadid: Number(config.playerconfig?.participantroadid || config.previewroadid || 0),
+    });
     const labels = config.labels;
     const node = (name) => document.getElementById('cessium-' + name);
     const loading = node('loading');

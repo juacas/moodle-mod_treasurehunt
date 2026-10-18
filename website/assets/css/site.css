@@ -415,6 +415,71 @@ a:hover {
     margin: 1.7rem 0
 }
 
+.participant-progress-figure {
+    max-width: 720px;
+    margin: 1.7rem 0
+}
+
+.participant-progress-demo {
+    position: relative;
+    display: flex;
+    min-height: 92px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 8%;
+    border: 1px solid rgba(255, 255, 255, .2);
+    border-radius: 1rem;
+    background: linear-gradient(90deg, #102d29, #183c38 50%, #102d29);
+    box-shadow: 0 8px 24px rgba(16, 45, 41, .16);
+}
+
+.progress-demo-track {
+    position: absolute;
+    top: 50%;
+    right: 8%;
+    left: 8%;
+    height: 2px;
+    background: rgba(255, 255, 255, .45);
+    transform: translateY(-50%);
+}
+
+.progress-demo-marker {
+    z-index: 1;
+    display: grid;
+    width: 2.7rem;
+    height: 2.7rem;
+    place-items: center;
+    border: 3px solid #fff;
+    border-radius: 50%;
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 800;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, .35);
+}
+
+.progress-demo-marker.is-passed {
+    background: #198754;
+}
+
+.progress-demo-marker.is-pending {
+    background: #c18b00;
+}
+
+.progress-demo-marker.is-failed {
+    background: #dc3545;
+}
+
+.progress-demo-marker.is-current {
+    border-width: 4px;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, .3), 0 0 18px rgba(255, 255, 255, .8);
+}
+
+.participant-progress-figure figcaption {
+    padding: .65rem .45rem .2rem;
+    color: var(--muted);
+    font-size: .85rem;
+}
+
 .article-content .callout {
     border-left: 5px solid #eab65f;
     background: #fff6de;

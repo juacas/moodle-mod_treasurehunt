@@ -29,6 +29,8 @@ class users_progress implements renderable {
     public $groupmode = 0;
     /** @var int cm id */
     public $coursemoduleid = 0;
+    /** @var int Treasure hunt instance id. */
+    public $treasurehuntid = 0;
     /** @var bool is there duplicated groups? */
     public $duplicategroupsingroupings = [];
     /** @var array[object] list of users in more than one group */
@@ -41,6 +43,8 @@ class users_progress implements renderable {
     public $managepermission = false;
     /** @var array roads with resettable activity, keyed by road ID */
     public $showclearactions = [];
+    /** @var bool Whether the live participant progress strips are enabled. */
+    public $showparticipantprogress = false;
 
     /**
      * constructor
@@ -55,16 +59,20 @@ class users_progress implements renderable {
         $unassignedusers,
         $viewpermission,
         $managepermission,
-        $showclearactions = []
+        $showclearactions = [],
+        $showparticipantprogress = false,
+        $treasurehuntid = 0
     ) {
         $this->roadsusersprogress = $roadsusersprogress;
         $this->groupmode = $groupmode;
         $this->coursemoduleid = $coursemoduleid;
+        $this->treasurehuntid = $treasurehuntid;
         $this->duplicategroupsingroupings = $duplicategroupsingroupings;
         $this->duplicateusersingroups = $duplicateusersingroups;
         $this->unassignedusers = $unassignedusers;
         $this->viewpermission = $viewpermission;
         $this->managepermission = $managepermission;
         $this->showclearactions = $showclearactions;
+        $this->showparticipantprogress = $showparticipantprogress;
     }
 }

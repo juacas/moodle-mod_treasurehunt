@@ -267,5 +267,14 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         }
         upgrade_mod_savepoint(true, 2026101300, 'treasurehunt');
     }
+    if ($oldversion < 2026101800) {
+        cache::make('mod_treasurehunt', 'participantprogress')->purge();
+        upgrade_mod_savepoint(true, 2026101800, 'treasurehunt');
+    }
+    if ($oldversion < 2026101801) {
+        // Invalidate participant progress snapshots after changing the service response shape.
+        cache::make('mod_treasurehunt', 'participantprogress')->purge();
+        upgrade_mod_savepoint(true, 2026101801, 'treasurehunt');
+    }
     return true;
 }

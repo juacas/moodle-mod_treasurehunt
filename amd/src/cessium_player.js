@@ -26,6 +26,7 @@ import {setup as setupTouchGestureGuard} from 'mod_treasurehunt/touch_gesture_gu
 import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasurehunt/pegman_animation_state';
 import {createTileRenderer, isSvgImage, loadSvgImage} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
+import {init as initParticipantProgress} from 'mod_treasurehunt/participant_progress';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
 const PEGMAN_HEIGHT = 1.7;
@@ -485,6 +486,12 @@ export const init = async() => {
         return;
     }
     const config = JSON.parse(document.getElementById('cessium-config').textContent);
+    initParticipantProgress({
+        enabled: isEnabled(config.playerconfig?.showparticipantprogress),
+        treasurehuntid: config.treasurehuntid,
+        previewroadid: config.previewroadid,
+        roadid: Number(config.playerconfig?.participantroadid || config.previewroadid || 0),
+    });
     const element = (id) => document.getElementById('cessium-' + id);
     const labels = config.labels;
     const playerconfig = config.playerconfig || {};

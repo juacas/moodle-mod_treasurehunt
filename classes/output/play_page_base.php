@@ -95,7 +95,9 @@ class play_page_base implements renderable, templatable {
     public function __construct($treasurehunt, cm_info $cm) {
         $this->treasurehunt = $treasurehunt;
         $this->cm = $cm;
-        $this->customplayerconfig = treasurehunt_get_customplayerconfig($this->treasurehunt);
+        $this->customplayerconfig = treasurehunt_get_customplayerconfig($this->treasurehunt) ?? new stdClass();
+        // The existing showboard setting also controls the live participant strip in every player.
+        $this->customplayerconfig->showparticipantprogress = !empty($this->treasurehunt->showboard);
     }
     /**
      * Setter for user.

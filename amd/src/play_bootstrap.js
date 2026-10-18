@@ -30,6 +30,7 @@ import viewgpx from "mod_treasurehunt/viewgpx";
 import { get_strings as getStrings, get_string as getString } from "core/str";
 import webqr from "mod_treasurehunt/webqr";
 import { setup as setupTouchGestureGuard } from "mod_treasurehunt/touch_gesture_guard";
+import {init as initParticipantProgress} from "mod_treasurehunt/participant_progress";
 // Side‑effect only imports
 import "mod_treasurehunt/dropdown";
 
@@ -214,6 +215,12 @@ function initplaytreasurehunt(
   let supportsTouch = "ontouchstart" in window || navigator.msMaxTouchPoints;
   let customplayerconfig;
   set_player_config(playerconfig);
+  initParticipantProgress({
+    enabled: Boolean(customplayerconfig?.showparticipantprogress),
+    treasurehuntid,
+    previewroadid,
+    roadid: Number(customplayerconfig?.participantroadid || previewroadid || 0),
+  });
   // Check custom player configuration.
   if (customplayerconfig && customplayerconfig.defaultzoom) {
     defaultzoom = customplayerconfig.defaultzoom;

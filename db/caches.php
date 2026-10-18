@@ -41,4 +41,9 @@ $definitions = [
         'simplekeys' => true,
         'simpledata' => true,
     ],
+    'participantprogress' => [
+        'mode' => cache_store::MODE_APPLICATION,
+        'simplekeys' => true,
+        'ttl' => 10,
+    ],
 ];

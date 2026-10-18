@@ -79,8 +79,8 @@ $PAGE->set_url('/mod/treasurehunt/play.php', $pageparams);
 $PAGE->set_title(null); // We do not want it on the HTML.
 $PAGE->set_heading(format_string($course->fullname));
 
-// Check that the player has a road before rendering the page.
-treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
+// Check that the player has a road before rendering the page and pass it to the progress strip.
+$playerroad = treasurehunt_get_user_group_and_road($USER->id, $treasurehunt, $cm->id, false, '', $previewroadid);
 // Instance selected player renderable.
 $renderableclass = match ($playerstyle) {
     TREASUREHUNT_PLAYERCESSIUM => \mod_treasurehunt\output\play_page_cessium_player::class,
@@ -92,6 +92,7 @@ $renderable = new $renderableclass($treasurehunt, $cm);
 $output = $PAGE->get_renderer('mod_treasurehunt');
 $renderable->gameupdatetime = treasurehunt_get_setting_game_update_time() * 1000;
 $renderable->previewroadid = $previewroadid;
+$renderable->customplayerconfig->participantroadid = (int)$playerroad->roadid;
 $user = new stdClass();
 $user->id = $USER->id;
 $user->fullname = fullname($USER);
