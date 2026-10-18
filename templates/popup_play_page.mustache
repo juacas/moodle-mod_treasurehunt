@@ -32,6 +32,7 @@
 
     Example context (json):
     {
+        "popupid": "example-popup",
         "attributes": [
             { "name": "src", "value": "http://moodle.com/wp-content/themes/moodle/images/logo-hat2.png" },
             { "name": "class", "value": "iconsmall" }
@@ -42,7 +43,7 @@
 
 
 {{!Popup}}
-<div class="play-modal" data-animation="slideInOutTop" id="{{$popupid}}{{/popupid}}">
+<div class="play-modal" data-animation="slideInOutTop" id="{{$popupid}}popup{{/popupid}}">
     <!-- modal mask -->
     <div class="modal-mask"></div>
 

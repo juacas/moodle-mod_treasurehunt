@@ -43,7 +43,8 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
  * Return a cached, privacy-scoped snapshot of participants in the treasure hunt.
  */
 class participant_progress extends external_api {
-    /**
+    /** Describe the input parameters for the participant progress service.
+     *
      * @return external_function_parameters
      */
     public static function execute_parameters(): external_function_parameters {
@@ -54,7 +55,8 @@ class participant_progress extends external_api {
         ]);
     }
 
-    /**
+    /** Describe the response structure returned by the participant progress service.
+     *
      * @return external_single_structure
      */
     public static function execute_returns(): external_single_structure {
@@ -140,6 +142,7 @@ class participant_progress extends external_api {
                 'u' . $USER->id . 'r' . $userparams->roadid;
         } catch (\core\session\exception $e) {
             // Activity summaries can be opened by users who are not assigned to a road.
+            $currentkey = '';
         }
         $cache = cache::make('mod_treasurehunt', 'participantprogress');
         $snapshot = $cache->get((string)$params['treasurehuntid']);
@@ -348,7 +351,8 @@ class participant_progress extends external_api {
         return array_values($participants);
     }
 
-    /**
+    /** Create one or two initials from a participant's full name.
+     *
      * @param string $name Full name.
      * @return string
      */
@@ -364,7 +368,8 @@ class participant_progress extends external_api {
         return core_text::strtoupper($initials);
     }
 
-    /**
+    /** Choose a stable display color for a Moodle group.
+     *
      * @param int $groupid Group id.
      * @return string
      */

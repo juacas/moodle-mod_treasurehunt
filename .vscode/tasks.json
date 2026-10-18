@@ -35,6 +35,28 @@
       "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
       "dependsOrder": "sequence",
       "problemMatcher": []
+    },
+    {
+      "label": "Treasure Hunt: Mustache lint",
+      "type": "shell",
+      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci mustache --moodle=../../../ .",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
+      "dependsOrder": "sequence",
+      "problemMatcher": []
+    },
+    {
+      "label": "Treasure Hunt: Grunt AMD lint",
+      "type": "shell",
+      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci grunt --moodle=../../../ --tasks=amd --max-lint-warnings=0 .",
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
+      "dependsOrder": "sequence",
+      "problemMatcher": []
     }
   ]
 }

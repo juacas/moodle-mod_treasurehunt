@@ -15,11 +15,11 @@
 
 /**
  * @module    mod_treasurehunt/ol3-layerswitcher
- * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>
  * @author Adrian Rodriguez <huorwhisp@gmail.com>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
+/* eslint-disable */
 (function (root, factory) {
     if (typeof define === "function" && define.amd) {
         define(["mod_treasurehunt/ol"], factory);

@@ -26,7 +26,7 @@ import {getStrings} from "core/str";
 import notification from "core/notification";
 
 let init = {
-  launchedittutorial: function () {
+  launchedittutorial: function() {
     let intro = introJS();
     let terms = [
       "nextstep",
@@ -44,7 +44,7 @@ let init = {
       "editend_tour",
     ];
     let stringQueried = terms.map((term) => {
-      return { key: term, component: "treasurehunt" };
+      return {key: term, component: "treasurehunt"};
     });
     $(".treasurehunt-editor-loader").show();
     getStrings(stringQueried)
@@ -55,14 +55,14 @@ let init = {
       })
       .catch(notification.exception);
   },
-  editpage: function () {
+  editpage: function() {
     $("#edition_maintitle > h2 > a").on("click", this.launchedittutorial);
     let introEditViewed = this.onetimevisit("Edit", false);
     if (introEditViewed == false) {
       this.launchedittutorial();
     }
-  }, // end of editpage function
-  launchplaytutorial: function () {
+  }, // End of editpage function
+  launchplaytutorial: function() {
     let intro = introJS();
     let terms = [
       "nextstep",
@@ -77,7 +77,7 @@ let init = {
       "playend_tour",
     ];
     let stringQueried = terms.map((term) => {
-      return { key: term, component: "treasurehunt" };
+      return {key: term, component: "treasurehunt"};
     });
     $(".global-loader").addClass("active");
     getStrings(stringQueried)
@@ -97,7 +97,7 @@ let init = {
    * @param {boolean} clear - If true, it will clear the local storage else set it to Done.
    * @returns {boolean} - Returns true if the user has visited the page before,
    */
-  onetimevisit: function (name, clear) {
+  onetimevisit: function(name, clear) {
     // Use cookies to check if the user has visited the page before.
     let cook = [];
     document.cookie.split(';').forEach((x) => {
@@ -111,13 +111,13 @@ let init = {
     } else {
       document.cookie = "intro" + name + "Progress=Done; path=/;";
     }
-    if (cook["intro"+ name + "Progress"] === 'Done') {
+    if (cook["intro" + name + "Progress"] === 'Done') {
       return true;
     } else {
       return false;
     }
   },
-  playpage: function () {
+  playpage: function() {
     $("#playerhelp").on("click", this.launchplaytutorial);
     let introPlayed = this.onetimevisit("Play", false);
     if (introPlayed == false) {
@@ -186,7 +186,7 @@ function configureBootstrapEditIntro(intro, strings, keys) {
   intro.oncomplete(() => {
     localStorage.setItem("introEditProgress", "Done");
   });
-} // end of configureEditIntro.
+} // End of configureEditIntro.
 /**
  * Configure the Bootstrap tutorial for the playing page.
  * @param {introJS} intro
@@ -205,7 +205,7 @@ function configureBootstrapPlayIntro(intro, strings, keys) {
         position: "floating",
       },
       {
-        element: "#cluebutton", //#lastsuccessfulstage',
+        element: "#cluebutton", // #lastsuccessfulstage',
         intro: strings[keys.indexOf("lastsuccessfulstage_tour")],
         position: "top",
       },

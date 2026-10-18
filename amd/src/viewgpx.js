@@ -24,38 +24,39 @@
 import $ from 'jquery';
 import ol from 'mod_treasurehunt/ol';
 import 'mod_treasurehunt/ol3-layerswitcher';
-import { get_strings as str } from 'core/str';
+import {get_strings as str} from 'core/str';
+import notification from 'core/notification';
 
 let init = {
     refreshTracksInterval: 60,
     refreshSources: [],
     countdownTimer: null,
-    addgpxlayer: function (map, cmid, treasurehuntid, strings, user, trackgroupname) {
+    addgpxlayer: function(map, cmid, treasurehuntid, strings, user, trackgroupname) {
 
-        var trackgroup = find_or_add_layergroup(map, trackgroupname);
+        var trackgroup = findOrAddLayerGroup(map, trackgroupname);
 
-        load_gpx([user], cmid, map, trackgroup, null);
+        loadGpx([user], cmid, map, trackgroup, null);
         return trackgroup;
     },
     // @param users = "global" obtain data from users_param. The list of user structures.
-    creategpxviewer: function (cmid, treasurehuntid, users, custommapconfig, refreshinterval) {
+    creategpxviewer: function(cmid, treasurehuntid, users, custommapconfig, refreshinterval) {
 
-        // console.log('Creating gpxviewer.');
+        // Console.log('Creating gpxviewer.');
         // I18n strings.
         var terms = [
             'aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel',
             'trackviewerrefreshdisabled', 'trackviewerrefreshseconds'
         ];
-        var stringsqueried = terms.map(function (term) {
-            return { key: term, component: 'treasurehunt' };
+        var stringsqueried = terms.map(function(term) {
+            return {key: term, component: 'treasurehunt'};
         });
         this.refreshTracksInterval = refreshinterval;
         if (users == 'global') {
             // Get users from global (due to excessive size for AMD api).
             users = window.users_param;
         }
-        str(stringsqueried).then(function (strings) {
-            // console.log('I18N strings loaded.');
+        return str(stringsqueried).then(function(strings) {
+            // Console.log('I18N strings loaded.');
             var i18n = [];
             for (var i = 0; i < terms.length; i++) {
                 i18n[terms[i]] = strings[i];
@@ -70,7 +71,7 @@ let init = {
 
                 // Detect image size.
                 var img = new Image();
-                img.addEventListener("load", function () {
+                img.addEventListener("load", function() {
                     custommapconfig.imgwidth = this.naturalWidth;
                     custommapconfig.imgheight = this.naturalHeight;
                     initcreategpxviewer(cmid, treasurehuntid, i18n, users, custommapconfig);
@@ -79,15 +80,16 @@ let init = {
             } else {
                 initcreategpxviewer(cmid, treasurehuntid, i18n, users, custommapconfig);
             }
-        });
-    },  // End of function creategpxviewer.
+            return strings;
+        }).catch(notification.exception);
+    }, // End of function creategpxviewer.
 /**
-     * Create a coordinates overlay.
-     * @param {string} selector
-     * @param {string} cssurl
-     * @param {string} label
-     * @returns {ol.Overlay}
-     */
+ * Create a coordinates overlay.
+ * @param {string} selector
+ * @param {string} cssurl
+ * @param {string} label
+ * @returns {ol.Overlay}
+ */
     createCoordsOverlay: function(selector = '#mappage', cssurl = 'css/ol-popup.css', label = '') {
         // Popup showing the position the user clicked.
         // Elements that make up the popup.
@@ -103,7 +105,7 @@ let init = {
             + '<div id="popup-content"></div></div>');
         $(selector).append(popupmarker);
         var container = $('#popupmarker');
-        // var content = $('#popup-content');
+        // Var content = $('#popup-content');
         var closer = $('#popup-closer');
         var containernode = container.get(0);
         var timeouthandler = null;
@@ -124,7 +126,7 @@ let init = {
          *
          * @return {boolean} Don't follow the href.
          */
-        closer.click(function () {
+        closer.click(function() {
             overlay.setPosition(undefined);
             clearTimeout(timeouthandler);
             closer.blur();
@@ -139,11 +141,13 @@ let init = {
                 if (latlon) {
                     var pegmanlink = createlink(latlon, overlay.getMap(), label);
                     $('#popup-content').html(pegmanlink);
-                    timeouthandler = setTimeout(() => { $('#popup-closer').trigger('click'); }, 2000);
+                    timeouthandler = setTimeout(() => {
+ $('#popup-closer').trigger('click');
+}, 2000);
                 }
             }, overlay);
         // Disable timeout if hovering.
-        container.hover(function () {
+        container.hover(function() {
             clearTimeout(timeouthandler);
         }
         );
@@ -162,7 +166,7 @@ export default init;
  * @param {Object} custommapconfig
  */
 function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconfig) {
-    // console.log('Init gpx viewer.');
+    // Console.log('Init gpx viewer.');
     var mapprojection = 'EPSG:3857';
     var custombaselayer = null;
     var geographictools = true;
@@ -191,9 +195,9 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
                     params: custommapconfig.wmsparams,
                 });
             } else if (custommapconfig.layerservicetype === "tiled") {
-                options.source = new ol.source.XYZ({ url: custommapconfig.wmsurl });
+                options.source = new ol.source.XYZ({url: custommapconfig.wmsurl});
             } else if (custommapconfig.layerservicetype === "arcgis") {
-                options.source = new ol.source.TileArcGISRest({ url: custommapconfig.wmsurl });
+                options.source = new ol.source.TileArcGISRest({url: custommapconfig.wmsurl});
             }
 
             if (custommapconfig.bbox[0] && custommapconfig.bbox[1] && custommapconfig.bbox[2] && custommapconfig.bbox[3]) {
@@ -206,22 +210,21 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         geographictools = custommapconfig.geographic;
     }
     var basemaps = new ol.layer.Group({
-        'title': strings['basemaps'],
+        'title': strings.basemaps,
         layers: [
             new ol.layer.Tile({
-                title: strings['aerialmap'],
+                title: strings.aerialmap,
                 type: 'base',
                 visible: false,
-                source: new ol.source.BingMaps({
-                    key: 'AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR',
-                    imagerySet: 'AerialWithLabels',
-                    maxZoom: 19
-                    // Use maxZoom 19 to see stretched tiles instead of the BingMaps
-                    // "no photos at this zoom level" tiles
-                    // maxZoom: 19.
+                source: new ol.source.XYZ({
+                    url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+                    attributions: [
+                        'Tiles © Esri — Fuente: Esri, DigitalGlobe, Earthstar Geographics, CNES/Airbus DS, USDA,' +
+                        ' USGS, AeroGRID, IGN, and the GIS User Community'
+                    ]
                 })
             }), new ol.layer.Tile({
-                title: strings['roadmap'],
+                title: strings.roadmap,
                 type: 'base',
                 visible: true,
                 source: new ol.source.OSM({maxZoom: 19})
@@ -235,12 +238,12 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         basemaps.getLayers().push(custombaselayer);
     }
     var tracks = new ol.layer.Group({
-        'title': strings['trackviewer'],
+        'title': strings.trackviewer,
         layers: []
     });
     // TODO: If geographic tools are enabled, add the geolocation control.
     if (geographictools) {
-        // console.log('Adding geolocation control.');
+        // Console.log('Adding geolocation control.');
     }
     // TODO: test and include heatmap layer.
     var heatmap = new ol.layer.Heatmap({
@@ -266,10 +269,10 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         }),
         controls: ol.control.defaults().extend([layerSwitcher])
     });
-    // console.log('Map created in mapgpx!');
+    // Console.log('Map created in mapgpx!');
     layerSwitcher.showPanel();
     var selectSingleClick = new ol.interaction.Select({
-        style: function (feature) {
+        style: function(feature) {
             var layer = selectSingleClick.getLayer(feature);
             var iconurl = layer.iconurl;
             var selectedstyle = trackStyleFunction(feature, iconurl, true);
@@ -277,7 +280,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         }
     });
     map.addInteraction(selectSingleClick);
-    load_gpx(users, cmid, map, tracks, layerSwitcher);
+    loadGpx(users, cmid, map, tracks, layerSwitcher);
     // Popup showing the position the user clicked.
     var popup = new ol.Overlay({
         element: document.getElementById('info')
@@ -311,7 +314,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
                 // Use bottom-left point as reference.ç
                 customimageextent = [customimageextent[0], customimageextent[1],
                 customimageextent[0] + adjwidth, customimageextent[1] + adjheight];
-                // console.log('Using bottom-left as reference.' + customimageextent);
+                // Console.log('Using bottom-left as reference.' + customimageextent);
             }
         }
         return customimageextent;
@@ -328,7 +331,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     function displayFeatureInfo(pixel, themap, coordinates, label) {
         var features = [];
         var msg = '';
-        themap.forEachFeatureAtPixel(pixel, function (feature) {
+        themap.forEachFeatureAtPixel(pixel, function(feature) {
             features.push(feature);
         });
         if (features.length > 0) {
@@ -358,16 +361,16 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
             'placement': 'top',
             'animation': false,
             'html': true,
-            'content': displayFeatureInfo(map.getEventPixel(evt.originalEvent), map, coordinate, strings['pegmanlabel'])
+            'content': displayFeatureInfo(map.getEventPixel(evt.originalEvent), map, coordinate, strings.pegmanlabel)
         });
         $(element).popover('show');
     }
-    map.on('pointermove', function (evt) {
+    map.on('pointermove', function(evt) {
         if (evt.dragging) {
             return;
         }
     });
-    map.on('click', function (evt) {
+    map.on('click', function(evt) {
         showpopup(evt);
     });
     var refreshslider = $('#refreshtracks');
@@ -412,10 +415,10 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
  * @param {*} trackgroupname
  * @returns
  */
-function find_or_add_layergroup(map, trackgroupname) {
+function findOrAddLayerGroup(map, trackgroupname) {
     var layergroup = null;
     var layers = map.getLayers();
-    layers.forEach(function (layer) {
+    layers.forEach(function(layer) {
         if (layer.get('title') == trackgroupname) {
             layergroup = layer;
         }
@@ -459,9 +462,9 @@ function flyTo(map, point, extent) {
  * @param {ol.layer.Group} tracksGroup
  * @param {LayerSwitcher} layerSwitcher
  */
-function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
-    var max_extent = null;
-    users.forEach(function (user) {
+function loadGpx(users, cmid, map, tracksGroup, layerSwitcher) {
+    var maxExtent = null;
+    users.forEach(function(user) {
         var gpxsource = new ol.source.Vector({
             url: 'gpx.php?id=' + cmid + '&userid=' + user.id,
             format: new ol.format.GPX()
@@ -473,37 +476,37 @@ function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
         var vector = new ol.layer.Vector({
             source: gpxsource,
             title: user.pic + '' + user.fullname + '</img>',
-            style: function (feature) {
+            style: function(feature) {
                 var selectedstyle = trackStyleFunction(feature, iconurl, false);
                 return selectedstyle;
             }
         });
         vector.iconurl = iconurl;
         init.refreshSources.push(gpxsource);
-        vector.on('change:visible', function () {
+        vector.on('change:visible', function() {
             if (this.getVisible()) {
                 var extent = this.getSource().getExtent();
-                extent = get_valid_extent(extent);
+                extent = getValidExtent(extent);
                 if (extent !== null) {
                     flyTo(map, null, extent);
                 }
             }
         });
-        gpxsource.on('change', function () {
+        gpxsource.on('change', function() {
             if (init.refreshTracksInterval > 0) {
                 return;
             }
             var extent = gpxsource.getExtent();
 
-            if (max_extent === null) {
-                max_extent = extent;
+            if (maxExtent === null) {
+                maxExtent = extent;
             } else {
-                max_extent[0] = Math.min(max_extent[0], extent[0]);
-                max_extent[1] = Math.min(max_extent[1], extent[1]);
-                max_extent[2] = Math.max(max_extent[2], extent[2]);
-                max_extent[3] = Math.max(max_extent[3], extent[3]);
+                maxExtent[0] = Math.min(maxExtent[0], extent[0]);
+                maxExtent[1] = Math.min(maxExtent[1], extent[1]);
+                maxExtent[2] = Math.max(maxExtent[2], extent[2]);
+                maxExtent[3] = Math.max(maxExtent[3], extent[3]);
             }
-            flyTo(map, null, max_extent);
+            flyTo(map, null, maxExtent);
         }, this);
         tracksGroup.getLayers().push(vector);
         if (layerSwitcher) {
@@ -515,7 +518,7 @@ function load_gpx(users, cmid, map, tracksGroup, layerSwitcher) {
  *
  * @param {Array} extent boundingbox 2 coordinates
  */
-function get_valid_extent(extent) {
+function getValidExtent(extent) {
     if (!(extent instanceof Array) || extent.length != 4) {
         return null;
     }
@@ -539,16 +542,19 @@ function trackStyleFunction(feature, icon, selected) {
         // ...shadow.
         new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: 'rgba(255,255,255,0.8)',
-                width: 6 + 2 * selected
+                color: 'rgba(255,255,255,0.95)',
+                width: 9 + 3 * selected,
+                lineCap: 'round',
+                lineJoin: 'round'
             }),
             zIndex: 1 + selected * 4
         }),
         new ol.style.Style({
             stroke: new ol.style.Stroke({
                 color: '#ff0000',
-                width: 1 + selected,
-                lineDash: [10, 8],
+                width: 4 + 2 * selected,
+                lineCap: 'round',
+                lineJoin: 'round',
             }),
             fill: new ol.style.Fill({
                 color: 'rgba(255,0,0,0.5)'
@@ -566,8 +572,8 @@ function trackStyleFunction(feature, icon, selected) {
                     color: 'red'
                 })
             }),
-            geometry: function (feature) {
-                // return the coordinates of the first ring of the polygon
+            geometry: function(feature) {
+                // Return the coordinates of the first ring of the polygon
                 var coordinates = feature.getGeometry().getCoordinates()[0];
                 return new ol.geom.MultiPoint(coordinates);
             },

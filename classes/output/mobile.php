@@ -142,7 +142,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_view_page', $data),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_view_page', $data),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_view.js'),
@@ -214,7 +214,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_page', $data),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_play_page', $data),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play.js'),
@@ -240,7 +240,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_search_page', []),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_play_search_page', []),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_search.js'),
@@ -266,7 +266,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_layers_page', []),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_play_layers_page', []),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_layers.js'),
@@ -292,7 +292,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_clue_page', []),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_play_clue_page', []),
                 ],
             ],
             'javascript' => '',
@@ -318,7 +318,7 @@ class mobile {
             'templates' => [
                 [
                     'id' => 'main',
-                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobile_play_question_page', []),
+                    'html' => $OUTPUT->render_from_template('mod_treasurehunt/mobileapp/mobile_play_question_page', []),
                 ],
             ],
             'javascript' => file_get_contents($CFG->dirroot . '/mod/treasurehunt/mobile/js/mobile_play_question.js'),

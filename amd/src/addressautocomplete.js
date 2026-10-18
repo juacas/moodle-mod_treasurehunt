@@ -29,7 +29,9 @@
  */
 export default function initAddressAutocomplete(input, search, select) {
     if (!input) {
-        return {clear: () => {}};
+        return {clear: () => {
+            // The autocomplete has not been initialised, so there is nothing to clear.
+        }};
     }
     const menu = document.createElement('div');
     menu.id = input.id + '-suggestions';

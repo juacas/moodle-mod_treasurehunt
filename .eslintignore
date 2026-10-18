@@ -1,0 +1,4 @@
+# Third-party AMD sources vendored in this component.
+amd/src/dropdown.js
+amd/src/ol3-layerswitcher.js
+amd/src/util.js

@@ -38,15 +38,6 @@
 		<!-- https://github.com/usablica/intro.js -->
 	</library>
 	<library>
-		<location>amd/src/intro.js</location>
-		<name>jquery.nicescroll</name>
-		<version>3.2.0</version>
-		<license>MIT</license>
-		<licenseversion>2013</licenseversion>
-		<!-- jquery.nicescroll 3.2.0 InuYaksa*2013 MIT http://areaaperta.com/nicescroll -->
-	</library>
-
-	<library>
 		<location>js/vue.global.prod.js</location>
 		<name>Vue</name>
 		<version>v3.5.18</version>

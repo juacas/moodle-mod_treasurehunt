@@ -250,6 +250,10 @@ See also
 
 Change log
 ==========
+
+See the [v3.0.0 release notes](RELEASE.md) and the
+[full changelog since v2.0.3](CHANGELOG.md) for the current release.
+
  - v2.0.2 Added support for return links in activities restricted by treasurehunt progress.
  - v2.0.1 Fix a bug that prevented to edit roads if library jqueryui is not loaded in time.
  - v2.0.0 New QR Scanner library. Correctly supports both cameras on IOS devices.

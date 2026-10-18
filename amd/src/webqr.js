@@ -22,7 +22,7 @@
  * @author Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-define(['jquery', 'core/notification', 'core/str', 'require'], function ($, notification, str, require) {
+define(['jquery', 'core/notification', 'core/str', 'require'], function($, notification, str, require) {
     'use strict';
 
     var cameraIndex = -1;
@@ -30,7 +30,7 @@ define(['jquery', 'core/notification', 'core/str', 'require'], function ($, noti
     var scannerapp = null;
     var qrReaderConstraints = [];
     var qrDependenciesPromise = null;
-    //var currentStream = null;
+    // Var currentStream = null;
 
     /**
      * Update the QR test result shown on the activity page.
@@ -44,8 +44,14 @@ define(['jquery', 'core/notification', 'core/str', 'require'], function ($, noti
         var label = card.attr('data-qr-' + status + '-label');
         var message = card.attr('data-qr-' + status + '-title');
         var feature = card.find('.treasurehunt-stage-status-label').text();
+        let statusClass = 'is-danger';
+        if (status === 'passed') {
+            statusClass = 'is-active';
+        } else if (status === 'pending') {
+            statusClass = 'is-pending';
+        }
         card.removeClass('is-pending is-active is-danger')
-            .addClass(status === 'passed' ? 'is-active' : status === 'pending' ? 'is-pending' : 'is-danger')
+            .addClass(statusClass)
             .attr({'data-treasurehunt-tooltip': message,
                 'aria-expanded': status === 'pending' ? 'true' : 'false',
                 'aria-label': feature + ': ' + label + '. ' + message});
@@ -158,8 +164,7 @@ define(['jquery', 'core/notification', 'core/str', 'require'], function ($, noti
     function loadQRWithVue(scancallback, reportcallback) {
         var container = document.getElementById('previewQRdiv');
         if (!container) {
-            console.error('previewQRvideo element not found for Vue QR mount');
-            reportcallback({ code: 0, name: 'DomMissing' });
+            reportcallback({code: 0, name: 'DomMissing'});
             return false;
         }
         var Vue = window.Vue;
@@ -175,7 +180,6 @@ define(['jquery', 'core/notification', 'core/str', 'require'], function ($, noti
                     credentials: 'omit',
                 })
                     .then((response) => {
-                    console.log('response', response);
                     if (!response.ok && response.type !== 'opaque') {
                         throw new Error(`Failed to fetch wasm: ${response.statusText || 'CORS error'}`);
                     }
@@ -183,11 +187,11 @@ define(['jquery', 'core/notification', 'core/str', 'require'], function ($, noti
                     })
                     .then((buffer) => WebAssembly.instantiate(buffer, imports))
                     .then((output) => {
-                    console.log('WASM loaded');
-                    successCallback(output.instance);
+                    return successCallback(output.instance);
                     })
                     .catch((error) => {
-                    console.error('WASM error:', error);
+                    reportcallback({code: 0, name: 'WasmLoadFailed', messagetext: error.message});
+                    return null;
                     });
                 return {};
                 },
@@ -226,12 +230,12 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 </div>
             `,
             mounted: function() {
-                this.constraint = { facingMode: 'environment' };
+                this.constraint = {facingMode: 'environment'};
             },
             methods: {
                 initCameras: function() {
                     this.isLoading = false;
-                    if (qrReaderConstraints.length == 0 ) {
+                    if (qrReaderConstraints.length == 0) {
                         // Populate devices.
                         var self = this;
                         enumerateVideoInputs()
@@ -239,11 +243,11 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                  // Add default vue-qrcode.reader cameras.
                                 qrReaderConstraints.push({
                                     name: 'Environment Camera',
-                                    constraint: { facingMode: 'environment' }
+                                    constraint: {facingMode: 'environment'}
                                 });
                                 qrReaderConstraints.push({
                                     name: 'User Camera',
-                                    constraint: { facingMode: 'user' }
+                                    constraint: {facingMode: 'user'}
                                 });
 
                                 if (devices.length > 0) {
@@ -256,7 +260,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                         }
                                         qrReaderConstraints.push({
                                             name: devices[i].name,
-                                            constraint: { deviceId: devices[i].id }
+                                            constraint: {deviceId: devices[i].id}
                                         });
                                     }
                                     var initialIndex = backCameraIndex !== -1 ? backCameraIndex : 0;
@@ -270,13 +274,13 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                                     });
                                 } else {
                                     self.error = 'No cameras found';
-                                    reportcallback({ code: 0, name: 'NoCameras' });
+                                    reportcallback({code: 0, name: 'NoCameras'});
                                 }
                             })
                             .catch(function(err) {
                                 self.error = 'Failed to enumerate cameras';
-                                console.error('Camera enumeration error:', err);
                                 reportcallback(err);
+                                return null;
                             });
                     }
                 },
@@ -327,7 +331,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 paintBoundingBox: function(detectedCodes, ctx) {
                     for (const detectedCode of detectedCodes) {
                         const {
-                            boundingBox: { x, y, width, height }
+                            boundingBox: {x, y, width, height}
                         } = detectedCode;
 
                         ctx.lineWidth = 2;
@@ -342,7 +346,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
                         ctx.beginPath();
                         ctx.moveTo(firstPoint.x, firstPoint.y);
-                        for (const { x, y } of otherPoints) {
+                        for (const {x, y} of otherPoints) {
                             ctx.lineTo(x, y);
                         }
                         ctx.lineTo(firstPoint.x, firstPoint.y);
@@ -353,7 +357,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 paintCenterText: function(detectedCodes, ctx) {
                     this.paintOutline(detectedCodes, ctx);
                     for (const detectedCode of detectedCodes) {
-                        const { boundingBox, rawValue } = detectedCode;
+                        const {boundingBox, rawValue} = detectedCode;
 
                         const centerX = boundingBox.x + boundingBox.width / 2;
                         const centerY = boundingBox.y + boundingBox.height / 2;
@@ -379,16 +383,14 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
 
         try {
             vueApp = scannerapp.mount(container);
-            console.debug('Loaded Vue QR app successfully');
             return true;
         } catch (e) {
-            console.error('Failed to mount Vue QR component', e);
             container.innerHTML = '';
             return false;
         }
     }
 
-    // webQR functions
+    // WebQR functions
     var webqr = {
 
         setTestStatus: setQrTestStatus,
@@ -397,15 +399,15 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             return true;
         },
 
-        enableTest: function () {
+        enableTest: function() {
             var cook = {};
-            document.cookie.split(';').forEach(function (x) {
+            document.cookie.split(';').forEach(function(x) {
                 var arr = x.split('=');
                 if (arr[1]) {
                    cook[arr[0].trim()] = arr[1].trim();
                 }
             });
-            if (cook["QRScanPassed"] != 'Done') {
+            if (cook.QRScanPassed != 'Done') {
                 $('#idbuttonnextcam').off('click.treasurehunt-qr')
                     .on('click.treasurehunt-qr', () => this.setnextwebcam(this.reportTestForm.bind(this)));
                 this.loadQR(this.handleScanTest.bind(this), this.reportTestForm.bind(this));
@@ -415,7 +417,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        reportTestForm: function (info) {
+        reportTestForm: function(info) {
             if (typeof (info) === 'string') {
                 $('#QRvalue').text(info);
                 $('#previewQR').hide();
@@ -449,14 +451,14 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        enableEditForm: function () {
+        enableEditForm: function() {
             $('#id_generateQR').click(this.handleGenerateQR.bind(this));
             $('#id_stopQR').click(this.handleStopQR.bind(this));
             $('#id_scanQR').click(this.handleScanEditStage.bind(this));
             $('#idbuttonnextcam').click(() => this.setnextwebcam(this.reportEditForm.bind(this)));
         },
 
-        handleGenerateQR: function () {
+        handleGenerateQR: function() {
             var val = $('#id_qrtext').val();
             if (val != '') {
                 var qrurl = 'https://quickchart.io/qr?size=500&text=' + encodeURIComponent(val);
@@ -474,7 +476,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             return false;
         },
 
-        handleStopQR: function () {
+        handleStopQR: function() {
             this.unloadQR();
             $('#QRvalue').text("");
             $('#previewQR').hide();
@@ -482,16 +484,16 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             $('#id_scanQR').show();
             return false;
         },
-        handleScanTest: function () {
+        handleScanTest: function() {
             document.cookie = "QRScanPassed=Done; SameSite=Lax";
             this.unloadQR();
             setQrTestStatus('passed');
             $('#QRStatusDiv').hide();
         },
-        handleScanEditStage: function () {
-            this.loadQR(function (value) {
+        handleScanEditStage: function() {
+            this.loadQR(function(value) {
                 $('#id_qrtext').val(value);
-            }.bind(this),
+            },
             this.reportEditForm.bind(this));
 
             $('#previewQR').show();
@@ -501,7 +503,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             return false;
         },
 
-        reportEditForm: function (info) {
+        reportEditForm: function(info) {
             if (typeof (info) === 'string') {
                 $('#QRvalue').text(info);
                 $('#id_stopQR').hide();
@@ -510,12 +512,13 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                 $('#idbuttonnextcam').hide();
             } else if (typeof (info) === 'object') {
                 if (info.code == 0) {
-                    str.get_string('warnqrscannererror', 'treasurehunt', '').then( (msg) => {
+                    str.get_string('warnqrscannererror', 'treasurehunt', '').then((msg) => {
                         notification.addNotification({
                             message: msg + "<p>" + info.messagetext + "</p>",
                             type: 'error'
                         });
-                    });
+                        return msg;
+                    }).catch(notification.exception);
                 } else if (info.cameraIndex !== undefined) {
                     let camIndex = info.cameraIndex;
                     $('#QRvalue').text(camIndex + ":" + info.cameras[camIndex].name);
@@ -532,17 +535,16 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
         },
 
 
-        unloadQR: function (errorcallback) {
+        unloadQR: function(errorcallback) {
             // Vue cleanup
             if (scannerapp) {
                 try {
                     scannerapp.unmount();
                 } catch (e) {
-                    console.warn('Error unmounting Vue QR app', e);
+                    // Vue can already have detached the scanner during dialog teardown.
                 }
                 scannerapp = null;
             }
-            console.debug('Vue QR app unloaded');
 
             // Reset state
             cameraIndex = -1;
@@ -555,7 +557,7 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
             }
         },
 
-        loadQR: function (scancallback, reportcallback) {
+        loadQR: function(scancallback, reportcallback) {
             var baseurl = window.M && window.M.cfg ? window.M.cfg.wwwroot + '/mod/treasurehunt/js/' : './js/';
             ensureVueQRAvailable(baseurl + 'vue.global.prod.js', baseurl + 'vue-qrcode-reader.umd.js')
                 .then(function() {
@@ -566,41 +568,40 @@ style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%)
                             messagetext: 'Failed to mount Vue QR component'
                         });
                     }
+                    return true;
                 })
                 .catch(function(error) {
-                    console.error('Vue QR scanner failed to load', error);
                     reportcallback({
                         code: 0,
                         name: 'VueNotAvailable',
                         messagetext: error.message
                     });
+                    return null;
                 });
         },
 
-        getnextwebCamIndex: function () {
+        getnextwebCamIndex: function() {
             return cameraIndex === -1 ? 0 : (cameraIndex + 1) % qrReaderConstraints.length;
         },
-        getCamName: function (index) {
+        getCamName: function(index) {
             return qrReaderConstraints[index] ? qrReaderConstraints[index].name : 'Unknown Camera';
         },
-        setnextwebcam: function (reportcallback) {
+        setnextwebcam: function(reportcallback) {
             let nextcameraindex = this.getnextwebCamIndex();
             if (cameraIndex != nextcameraindex) {
                 try {
-                    this.selectCamera( nextcameraindex, reportcallback);
+                    this.selectCamera(nextcameraindex, reportcallback);
                 } catch (e) {
-                    console.error(e);
                     reportcallback(e);
                 }
             }
         },
 
-        selectCamera: function (nextcameraindex, reportcallback) {
+        selectCamera: function(nextcameraindex, reportcallback) {
                 // Switch camera using Vue component
                 if (vueApp && vueApp.switchCamera) {
                     vueApp.switchCamera(nextcameraindex);
                 } else {
-                    console.warn('Vue app or switchCamera method not available');
                     reportcallback({
                         code: 0,
                         name: 'VueNotInitialized',

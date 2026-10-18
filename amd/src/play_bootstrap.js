@@ -27,9 +27,9 @@ import ol from "mod_treasurehunt/ol";
 import ajax from "core/ajax";
 import OSMGeocoder from "mod_treasurehunt/osm-geocoder";
 import viewgpx from "mod_treasurehunt/viewgpx";
-import { get_strings as getStrings, get_string as getString } from "core/str";
+import {get_strings as getStrings, get_string as getString} from "core/str";
 import webqr from "mod_treasurehunt/webqr";
-import { setup as setupTouchGestureGuard } from "mod_treasurehunt/touch_gesture_guard";
+import {setup as setupTouchGestureGuard} from "mod_treasurehunt/touch_gesture_guard";
 import {init as initParticipantProgress} from "mod_treasurehunt/participant_progress";
 // Side‑effect only imports
 import "mod_treasurehunt/dropdown";
@@ -43,7 +43,7 @@ import "mod_treasurehunt/dropdown";
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 let init = {
-  playtreasurehunt: function (cmid, treasurehuntid, playwithoutmoving, groupmode,
+  playtreasurehunt: function(cmid, treasurehuntid, playwithoutmoving, groupmode,
     gameupdatetime, tracking, user,
     custommapconfig, customplayerconfig = null, previewroadid = 0) {
 
@@ -54,27 +54,27 @@ let init = {
       "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
       "successlocation", "clue", "nextclue", "nextclues",
     ];
-    // console.log("loading i18n strings");
+    // Console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
-      return { key: term, component: "treasurehunt" };
+      return {key: term, component: "treasurehunt"};
     });
-    // i18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
+    // I18n = i18nplay; // Use globally passed strings. Moodle 3.8 core/str broke with jquery 2.1.4.
     getStrings(stringsqueried).then((strings) => {
       let i18n = [];
       for (let i = 0; i < terms.length; i++) {
         i18n[terms[i]] = strings[i]; // JPC: TODO: Global strings.
       }
-      // i18n = i18nplay;
+      // I18n = i18nplay;
       // Detect custom image.
       if (
         typeof custommapconfig != "undefined" &&
         custommapconfig &&
         custommapconfig.custombackgroundurl
       ) {
-        // console.log("Detecting custom background image dimensions.");
+        // Console.log("Detecting custom background image dimensions.");
         // Detect image size.
         let img = new Image();
-        img.addEventListener("load", function () {
+        img.addEventListener("load", function() {
           custommapconfig.imgwidth = this.naturalWidth;
           custommapconfig.imgheight = this.naturalHeight;
 
@@ -119,7 +119,7 @@ function calculateCustomImageExtent(custommapconfig, mapprojection, referencetoc
       // Use bottom-left point as reference.ç
       customimageextent = [customimageextent[0], customimageextent[1],
       customimageextent[0] + adjwidth, customimageextent[1] + adjheight];
-      // console.log('Using bottom-left as reference.' + customimageextent);
+      // Console.log('Using bottom-left as reference.' + customimageextent);
     }
   }
   return customimageextent;
@@ -250,7 +250,7 @@ function initplaytreasurehunt(
         opacity: 1.0,
       });
     } else if (custommapconfig.wmsurl) {
-      // console.log("config custom wms server: " + custommapconfig.wmsurl);
+      // Console.log("config custom wms server: " + custommapconfig.wmsurl);
       let options = {
         type: custommapconfig.layertype,
         title: custommapconfig.layername,
@@ -262,9 +262,9 @@ function initplaytreasurehunt(
           params: custommapconfig.wmsparams,
         });
       } else if (custommapconfig.layerservicetype === "tiled") {
-        options.source = new ol.source.XYZ({ url: custommapconfig.wmsurl });
+        options.source = new ol.source.XYZ({url: custommapconfig.wmsurl});
       } else if (custommapconfig.layerservicetype === "arcgis") {
-        options.source = new ol.source.TileArcGISRest({ url: custommapconfig.wmsurl });
+        options.source = new ol.source.TileArcGISRest({url: custommapconfig.wmsurl});
       }
 
       if (custommapconfig.bbox[0] && custommapconfig.bbox[1] && custommapconfig.bbox[2] && custommapconfig.bbox[3]) {
@@ -278,7 +278,7 @@ function initplaytreasurehunt(
     usegeographictools = custommapconfig.geographic;
   }
   if (usegeographictools === false) {
-    // console.log("geographic tools disabled");
+    // Console.log("geographic tools disabled");
     playwithoutmoving = true;
     $("#autolocate").hide();
   }
@@ -301,7 +301,7 @@ function initplaytreasurehunt(
   let osmGeocoderXHR;
   let osmTimer = 0;
   const loadingRequests = new Set();
-  /*-------------------------------Styles-----------------------------------*/
+  /* -------------------------------Styles-----------------------------------*/
   let textStyle = new ol.style.Text({
     textAlign: "center",
     scale: 1.3,
@@ -396,7 +396,7 @@ function initplaytreasurehunt(
    */
   function stageStyle(feature) {
     let stageposition = feature.get("stageposition");
-    // let shouldrender = feature.get("shouldrender");
+    // Let shouldrender = feature.get("shouldrender");
     if (customplayerconfig.shownextareahint || stageposition == 1) {
       let fill = new ol.style.Fill({
         color: "rgba(0,0,0,0.1)",
@@ -407,9 +407,9 @@ function initplaytreasurehunt(
       });
       let text;
       if (feature.get("stageposition") === 1) {
-        text = strings["startfromhere"];
+        text = strings.startfromhere;
       } else {
-        text = strings["stage"] + " " + stageposition;
+        text = strings.stage + " " + stageposition;
       }
       let styles = new ol.style.Style({
         image: new ol.style.Circle({
@@ -643,7 +643,7 @@ function initplaytreasurehunt(
     });
     return closest;
   }
-  /*-------------------------------Layers---------------------------------*/
+  /* -------------------------------Layers---------------------------------*/
   let layers = [];
   let geoJSONFormat = new ol.format.GeoJSON();
   let attemptSource = new ol.source.Vector({
@@ -695,8 +695,8 @@ function initplaytreasurehunt(
       })
     });
 
-    aeriallayer.set("name", strings["aerialview"]);
-    roadlayer.set("name", strings["roadview"]);
+    aeriallayer.set("name", strings.aerialview);
+    roadlayer.set("name", strings.roadview);
 
     layersbase = [aeriallayer, roadlayer];
   }
@@ -707,12 +707,12 @@ function initplaytreasurehunt(
       layersoverlay.push(custombaselayer);
     }
   }
-  let layergroup = new ol.layer.Group({ layers: layersbase });
+  let layergroup = new ol.layer.Group({layers: layersbase});
   // Create placement for a popup over user marker.
   var overlay = viewgpx.createCoordsOverlay(
     "#mapplay",
     "css/playerbootstrap/ol-popup.css",
-    strings["pegmanlabel"]
+    strings.pegmanlabel
   );
 
   // All layers hidden except last one.
@@ -740,10 +740,10 @@ function initplaytreasurehunt(
     },
   });
   let accuracyFeature = new ol.Feature();
-  accuracyFeature.setProperties({ name: "user_accuracy" });
+  accuracyFeature.setProperties({name: "user_accuracy"});
   accuracyFeature.setStyle(accuracyFeatureStyle);
   let positionFeature = new ol.Feature();
-  positionFeature.setProperties({ name: "user_position" });
+  positionFeature.setProperties({name: "user_position"});
   let userPositionSource = new ol.source.Vector({
       features: [accuracyFeature, positionFeature],
     });
@@ -772,7 +772,7 @@ function initplaytreasurehunt(
   let map = new ol.Map({
     layers: layers,
     overlays: [overlay],
-    controls: [zoom], //ol.control.defaults({rotate: false, attribution: false}),
+    controls: [zoom], // Ol.control.defaults({rotate: false, attribution: false}),
     target: "mapplay",
     view: view,
     loadTilesWhileAnimating: true,
@@ -812,7 +812,7 @@ function initplaytreasurehunt(
    */
   function validateposition() {
     if (playwithoutmoving && !markerFeature.getGeometry()) {
-      toast(strings["nomarks"]);
+      toast(strings.nomarks);
     } else {
       renew_source(true, false);
     }
@@ -858,7 +858,7 @@ function initplaytreasurehunt(
    * @returns {undefined}
    */
   function renew_source(location, initialize, selectedanswerid, qrtext) {
-    // let position holds the potition to be evaluated. undef if no evaluation requested
+    // Let position holds the potition to be evaluated. undef if no evaluation requested
     let position;
     let currentposition;
     let markLocation;
@@ -883,7 +883,7 @@ function initplaytreasurehunt(
       position = currentposition;
     }
     const loadingRequest = (initialize || selectedanswerid || location) ? beginLoading() : null;
-    let currentpositionarg = tracking && !playwithoutmoving ? currentposition : null; // only for tracking in mobility.
+    let currentpositionarg = tracking && !playwithoutmoving ? currentposition : null; // Only for tracking in mobility.
     let params = {
       treasurehuntid: treasurehuntid,
       previewroadid: previewroadid,
@@ -936,9 +936,9 @@ function initplaytreasurehunt(
         // If I have sent a location or an answer I print out whether it is correct or not.
         if (location || selectedanswerid) {
           if (response.status !== null && available) {
-            toast(response.status.msg, response.status.msg === strings["successlocation"]);
+            toast(response.status.msg, response.status.msg === strings.successlocation);
           }
-          //markerFeature.setGeometry(null);
+          // MarkerFeature.setGeometry(null);
         }
         // If change the game mode (mobile or static).
         if (playwithoutmoving != response.playwithoutmoving) {
@@ -1026,7 +1026,7 @@ function initplaytreasurehunt(
                 })
               );
             }
-            // fitmap = true;
+            // Fitmap = true;
             // fit_map_to_sources([attemptsource]);
           }
           // Check if it exists, which indicates that it has been updated.
@@ -1085,7 +1085,7 @@ function initplaytreasurehunt(
           set_attempts_history();
         }
         renderAvailableClues();
-        const dialogmessages = response.infomsg.filter((msg) => msg !== strings["successlocation"]);
+        const dialogmessages = response.infomsg.filter((msg) => msg !== strings.successlocation);
         if (dialogmessages.length > 0) {
           let body = "";
           infomsgs.forEach((msg) => {
@@ -1114,7 +1114,7 @@ function initplaytreasurehunt(
           $("#validatelocation").hide();
           $("#question_button").hide();
           $("#roadended").show();
-          //markerFeature.setGeometry(null);
+          // MarkerFeature.setGeometry(null);
           playwithoutmoving = false;
           clearInterval(interval);
           $("#mapplay").css("opacity", "0.8");
@@ -1122,7 +1122,7 @@ function initplaytreasurehunt(
       })
       .fail((error) => {
         showCommunicationError(error);
-        //clearInterval(interval);
+        // ClearInterval(interval);
       });
   }
   /**
@@ -1183,7 +1183,7 @@ function initplaytreasurehunt(
   /**
    * Fit map to stagesource.
    * @param {Array<ol.sources.Vector>} sources
-  */
+   */
   function fit_map_to_sources(sources) {
     if (fitmap) {
       let extent = ol.extent.createEmpty();
@@ -1256,7 +1256,7 @@ function initplaytreasurehunt(
       $("<button>", {
         type: "button",
         id: "cluetab-" + index,
-        class: "nav-link",
+        "class": "nav-link",
         role: "tab",
         text: strings.clue + " " + clue.position,
         "aria-controls": "cluepanel-" + index,
@@ -1270,7 +1270,7 @@ function initplaytreasurehunt(
       }).appendTo(tabs);
       $("<div>", {
         id: "cluepanel-" + index,
-        class: "treasurehunt-clue-pane" + (index === selectedclueindex ? " is-active" : ""),
+        "class": "treasurehunt-clue-pane" + (index === selectedclueindex ? " is-active" : ""),
         role: "tabpanel",
         "aria-labelledby": "cluetab-" + index,
         "aria-hidden": index === selectedclueindex ? "false" : "true",
@@ -1338,7 +1338,7 @@ function initplaytreasurehunt(
       $historylist.html("");
       changesinattemptshistory = false;
       if (attemptshistory.length === 0) {
-        $("<li>" + strings["noattempts"] + "</li>").appendTo($historylist);
+        $("<li>" + strings.noattempts + "</li>").appendTo($historylist);
       } else {
         // Anado cada intento
         attemptshistory.forEach((attempt) => {
@@ -1363,16 +1363,16 @@ function initplaytreasurehunt(
   function add_layer_to_list(layer) {
     let link = $("<button>", {
       type: "button",
-      class: "list-group-item list-group-item-action close-modal",
+      "class": "list-group-item list-group-item-action close-modal",
     }).click(() => {
       layer.setVisible(!layer.getVisible());
     });
     let name = $("<div>").append($.parseHTML(layer.get("name")));
     let checkboxContent = $("<i>", {
-      class: "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
+      "class": "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
     });
     let linkContent = $("<div>", {
-      class: "layer-item",
+      "class": "layer-item",
     }).append(name, checkboxContent);
     link.append(linkContent);
     layer.on("change:visible", () => {
@@ -1389,7 +1389,7 @@ function initplaytreasurehunt(
     layergroup.getLayers().forEach((layer) => {
       let link = $("<button>", {
         type: "button",
-        class: "list-group-item list-group-item-action close-modal",
+        "class": "list-group-item list-group-item-action close-modal",
       }).click(() => {
         layergroup.getLayers().forEach((l) => {
           if (l === layer) {
@@ -1400,11 +1400,11 @@ function initplaytreasurehunt(
         });
       });
       let checkboxContent = $("<i>", {
-        class: "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
+        "class": "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
       });
       let linkContent = $("<div>", {
         text: layer.get("name"),
-        class: "layer-item " //+ (layer.getVisible() ? "" : "unchecked"),
+        "class": "layer-item " // + (layer.getVisible() ? "" : "unchecked"),
       }).append(checkboxContent);
       link.append(linkContent);
       layer.on("change:visible", () => {
@@ -1428,7 +1428,7 @@ function initplaytreasurehunt(
       },
     })
   );
-  /*-------------------------------Events-----------------------------------*/
+  /* -------------------------------Events-----------------------------------*/
   geolocation.on("change:position", () => {
     let coordinates = geolocation.getPosition();
     if (!coordinates) {
@@ -1456,12 +1456,12 @@ function initplaytreasurehunt(
     // The map must be re-centered in the new position
     if (geolocation.get("center")) {
       fly_to(map, coordinates);
-      geolocation.setProperties({ center: false }); // Disable center request. Deprecated.
+      geolocation.setProperties({center: false}); // Disable center request. Deprecated.
     }
     // The new position must be evaluated
     if (geolocation.get("validate_location")) {
       renew_source(true, false);
-      geolocation.setProperties({ validate_location: false }); // Disable validate_location request. Deprecated.
+      geolocation.setProperties({validate_location: false}); // Disable validate_location request. Deprecated.
     }
   });
 
@@ -1515,7 +1515,7 @@ function initplaytreasurehunt(
             hit = true;
           }
         },
-        { layerFilter: (layer) => layer === attemptslayer || layer === stagelayer }
+        {layerFilter: (layer) => layer === attemptslayer || layer === stagelayer}
       );
       if (hit) {
         map.getTargetElement().style.cursor = "pointer";
@@ -1537,16 +1537,16 @@ function initplaytreasurehunt(
       }
       if (features.selected[0].get("geometrysolved")) {
         if (stagename) {
-          title = strings["stageovercome"];
-          body += get_block_text(strings["stagename"], stagename);
+          title = strings.stageovercome;
+          body += get_block_text(strings.stagename, stagename);
         } else {
-          title = strings["discoveredlocation"];
+          title = strings.discoveredlocation;
         }
       } else {
-        title = strings["failedlocation"];
+        title = strings.failedlocation;
       }
       if (stageclue) {
-        body += get_block_text(strings["stageclue"], stageclue);
+        body += get_block_text(strings.stageclue, stageclue);
       }
       $("#infoStagePopup .title").text(title);
       $("#infoStagePopup .play-modal-content").html(body);
@@ -1607,14 +1607,14 @@ function initplaytreasurehunt(
             if (resp.length === 0) {
               $searchContainer.html(
                 "<li class='list-group-item'>" +
-                strings["noresults"] +
+                strings.noresults +
                 "</li>"
               );
             } else {
               $.each(resp, (i, place) => {
                 let link = $("<button>", {
                   type: "button",
-                  class: "list-group-item list-group-item-action",
+                  "class": "list-group-item list-group-item-action",
                 })
                   .appendTo($searchContainer)
                   .click(() => {
@@ -1633,7 +1633,7 @@ function initplaytreasurehunt(
                   });
                 let linkContent = $("<div>", {
                   text: place.display_name,
-                  class: "search-option",
+                  "class": "search-option",
                 }).append($("<i class='fa fa-chevron-circle-right'>"));
                 link.append(linkContent);
               });
@@ -1690,7 +1690,7 @@ function initplaytreasurehunt(
     fitmap = true;
     fit_map_to_sources(attentionSources);
   });
-  //Buttons events.
+  // Buttons events.
   if (usegeographictools) {
     $("#autolocate").on("click", () => {
       // Enable tracking if not already enabled.
@@ -1721,11 +1721,11 @@ function initplaytreasurehunt(
     let selected = $("#questionform input[type='radio']:checked");
     if (!available) {
       event.preventDefault();
-      toast(strings["timeexceeded"]);
+      toast(strings.timeexceeded);
     } else {
       if (selected.length === 0) {
         event.preventDefault();
-        toast(strings["noanswerselected"]);
+        toast(strings.noanswerselected);
       } else {
         renew_source(false, false, selected.val());
       }
@@ -1735,23 +1735,23 @@ function initplaytreasurehunt(
   $("#validatelocation").on("click", (event) => {
     if (roadfinished) {
       event.preventDefault();
-      toast(strings["huntcompleted"]);
+      toast(strings.huntcompleted);
       return;
     }
     if (!available) {
       event.preventDefault();
-      toast(strings["timeexceeded"]);
+      toast(strings.timeexceeded);
       return;
     }
     if (lastsuccessfulstage.question !== "") {
       event.preventDefault();
-      toast(strings["answerwarning"]);
+      toast(strings.answerwarning);
       openModal("#cluepage");
       return;
     }
     if (!lastsuccessfulstage.activitysolved) {
       event.preventDefault();
-      toast(strings["activitytoendwarning"]);
+      toast(strings.activitytoendwarning);
       openModal("#cluepage");
       return;
     }
@@ -1962,7 +1962,7 @@ function initplaytreasurehunt(
       if (message.cameras[message.cameraIndex].name !== null) {
         $("#errorQR").text(message.cameras[message.cameraIndex].name);
       }
-      // hide/show next camera button.
+      // Hide/show next camera button.
       if (message.cameras.length > 1) {
         $("#nextcamera").show();
       } else {

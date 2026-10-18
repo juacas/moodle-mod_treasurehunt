@@ -20,24 +20,24 @@
  * @license   http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 define(['jquery', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
-        function ($, introJS, str, notification) {
+        function($, introJS, str, notification) {
             var init = {
                 launchedittutorial: function() {
                     var intro = introJS();
                     var terms = ['nextstep', 'prevstep', 'skiptutorial', 'donetutorial', 'welcome_edit_tour',
                         'map_tour', 'mapplay_tour', 'roads_tour',
                         'stages_tour', 'addroad_tour', 'addstage_tour', 'save_tour', 'editend_tour'];
-                    var stringQueried = terms.map(function (term) {
-                        return { key: term, component: 'treasurehunt' };
+                    var stringQueried = terms.map(function(term) {
+                        return {key: term, component: 'treasurehunt'};
                     });
                     $('.treasurehunt-editor-loader').show();
-                    str.get_strings(stringQueried).done(function (strings) {
+                    str.get_strings(stringQueried).done(function(strings) {
                         $('.treasurehunt-editor-loader').hide();
                         configureEditIntro(intro, strings, terms);
                         intro.start();
                     }).fail(notification.exception);
                 },
-                editpage: function () {
+                editpage: function() {
                     var cook = {};
                     var $mainheading = $('.page-context-header h1, #page-header h1').first();
                     if (!$mainheading.length) {
@@ -52,16 +52,16 @@ define(['jquery', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
                         init.launchedittutorial();
                     });
 
-                    document.cookie.split(';').forEach(function (x) {
+                    document.cookie.split(';').forEach(function(x) {
                         var arr = x.split('=');
                         if (arr[1]) {
                             cook[arr[0].trim()] = arr[1].trim();
                         }
                     });
-                    if (cook["introEditProgress"] != 'Done') {
+                    if (cook.introEditProgress != 'Done') {
                         this.launchedittutorial();
                     }
-                }, // end of editpage function
+                }, // End of editpage function
             }; // ...end of init var.
             return init;
 
@@ -120,18 +120,18 @@ define(['jquery', 'mod_treasurehunt/intro', 'core/str', 'core/notification'],
                         }
                     ]
                 });
-                intro.onexit(function () {
+                intro.onexit(function() {
                     document.cookie = "introEditProgress = Done";
                 });
-                intro.oncomplete(function () {
+                intro.oncomplete(function() {
                     document.cookie = "introEditProgress = Done";
                 });
-                intro.onchange(function (target) {
+                intro.onchange(function(target) {
                     document.cookie = "introEditStep = " + target.name;
                     document.cookie = "introEditProgress = Done"; // Skip the tutorial if visited.
                 });
             }
-// end of configureEditIntro
+// End of configureEditIntro
 
         }
 ); // ...end of module define function.

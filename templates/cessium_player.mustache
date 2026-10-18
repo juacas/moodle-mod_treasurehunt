@@ -14,9 +14,19 @@
     You should have received a copy of the GNU General Public License
     along with Moodle. If not, see <http://www.gnu.org/licenses/>.
 }}
+{{!
+    @template mod_treasurehunt/cessium_player
+    Example context (json):
+    {
+        "huntname": "Example treasure hunt",
+        "playerconfigjson": "{}",
+        "playerbrand": "Cesium",
+        "cmid": 1
+    }
+}}
 <main id="cessium-player" class="cessium-player" aria-label="{{huntname}}">
     <script type="application/json" id="cessium-config">{{{playerconfigjson}}}</script>
-    <div id="cessium-globe" class="cessium-globe" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}"></div>
+    <div id="cessium-globe" class="cessium-globe" role="region" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}"></div>
     <div class="cessium-vignette" aria-hidden="true"></div>
     <div class="cessium-grid" aria-hidden="true"></div>
 
@@ -38,7 +48,7 @@
         </a>
     </header>
 
-    <div id="treasurehunt-participant-progress" class="th-participant-progress" hidden
+    <div id="treasurehunt-participant-progress" class="th-participant-progress" role="group" hidden
         aria-label="{{#str}}participantprogress, mod_treasurehunt{{/str}}"></div>
 
     <div class="cessium-map-summary">
@@ -46,7 +56,7 @@
             <label class="sr-only" for="cessium-search-input">{{#str}}cessium_search, mod_treasurehunt{{/str}}</label>
             <div class="cessium-search-row">
                 <input id="cessium-search-input" type="search" placeholder="{{#str}}cessium_search_placeholder, mod_treasurehunt{{/str}}"
-                    autocomplete="off" aria-controls="cessium-search-results" aria-expanded="false">
+                    autocomplete="off" aria-controls="cessium-search-results">
                 <button type="submit" aria-label="{{#str}}cessium_search, mod_treasurehunt{{/str}}"><i class="fa fa-search" aria-hidden="true"></i></button>
             </div>
             <div id="cessium-search-results" class="cessium-search-results" role="listbox" hidden></div>
@@ -65,7 +75,7 @@
     </aside>
 
     <div class="cessium-map-actions" role="group" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}">
-        <div id="cessium-layer-picker" class="cessium-layer-picker" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}"></div>
+        <div id="cessium-layer-picker" class="cessium-layer-picker" role="group" aria-label="{{#str}}cessium_layers, mod_treasurehunt{{/str}}"></div>
         <button type="button" id="cessium-fit" title="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_fitmap, mod_treasurehunt{{/str}}"><i class="fa fa-crosshairs" aria-hidden="true"></i></button>
         <button type="button" id="cessium-locate" title="{{#str}}cessium_position, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_position, mod_treasurehunt{{/str}}"><i class="fa fa-location-arrow" aria-hidden="true"></i></button>
         <button type="button" id="cessium-viewmode" title="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}" aria-label="{{#str}}cessium_viewmode, mod_treasurehunt{{/str}}"><i class="fa fa-globe" aria-hidden="true"></i></button>

@@ -1,6 +1,6 @@
 "use strict";
 
-define(["exports", "jquery"], function (exports, _jquery) {
+define(["exports", "jquery"], function(exports, _jquery) {
   "use strict";
 
   Object.defineProperty(exports, "__esModule", {
@@ -9,9 +9,13 @@ define(["exports", "jquery"], function (exports, _jquery) {
 
   var _jquery2 = _interopRequireDefault(_jquery);
 
+  /**
+   *
+   * @param obj
+   */
   function _interopRequireDefault(obj) {
     return obj && obj.__esModule ? obj : {
-      default: obj
+      "default": obj
     };
   }
 
@@ -31,32 +35,43 @@ define(["exports", "jquery"], function (exports, _jquery) {
   var MAX_UID = 1000000;
   var MILLISECONDS_MULTIPLIER = 1000; // Shoutout AngusCroll (https://goo.gl/pxwQGp)
 
+  /**
+   *
+   * @param obj
+   */
   function toType(obj) {
     return {}.toString.call(obj).match(/\s([a-z]+)/i)[1].toLowerCase();
   }
 
+  /**
+   *
+   */
   function getSpecialTransitionEndEvent() {
     return {
       bindType: TRANSITION_END,
       delegateType: TRANSITION_END,
       handle: function handle(event) {
         if ((0, _jquery2.default)(event.target).is(this)) {
-          return event.handleObj.handler.apply(this, arguments); // eslint-disable-line prefer-rest-params
+          return event.handleObj.handler.apply(this, arguments);
         }
 
-        return undefined; // eslint-disable-line no-undefined
+        return undefined;
       }
     };
   }
 
+  /**
+   *
+   * @param duration
+   */
   function transitionEndEmulator(duration) {
     var _this = this;
 
     var called = false;
-    (0, _jquery2.default)(this).one(Util.TRANSITION_END, function () {
+    (0, _jquery2.default)(this).one(Util.TRANSITION_END, function() {
       called = true;
     });
-    setTimeout(function () {
+    setTimeout(function() {
       if (!called) {
         Util.triggerTransitionEnd(_this);
       }
@@ -64,6 +79,9 @@ define(["exports", "jquery"], function (exports, _jquery) {
     return this;
   }
 
+  /**
+   *
+   */
   function setTransitionEndSupport() {
     _jquery2.default.fn.emulateTransitionEnd = transitionEndEmulator;
     _jquery2.default.event.special[Util.TRANSITION_END] = getSpecialTransitionEndEvent();
@@ -79,7 +97,6 @@ define(["exports", "jquery"], function (exports, _jquery) {
     TRANSITION_END: 'bsTransitionEnd',
     getUID: function getUID(prefix) {
       do {
-        // eslint-disable-next-line no-bitwise
         prefix += ~~(Math.random() * MAX_UID); // "~~" acts like a faster Math.floor() here
       } while (document.getElementById(prefix));
 
@@ -157,7 +174,7 @@ define(["exports", "jquery"], function (exports, _jquery) {
 
       if (element instanceof ShadowRoot) {
         return element;
-      } // when we don't find a shadow root
+      } // When we don't find a shadow root
 
 
       if (!element.parentNode) {

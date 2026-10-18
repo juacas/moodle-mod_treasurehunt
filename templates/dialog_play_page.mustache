@@ -29,10 +29,15 @@
     Context variables required for this template:
     * attributes Array of name / value pairs.
 
+    Example context (json):
+    {
+        "dialogid": "example-dialog"
+    }
+
 }}
 
 {{! Dialog}}
-<div class="play-modal" data-animation="slideInOutTop" id="{{$dialogid}}{{/dialogid}}">
+<div class="play-modal" data-animation="slideInOutTop" id="{{$dialogid}}dialog{{/dialogid}}">
     <!-- modal mask -->
     <div class="modal-mask"></div>
 
