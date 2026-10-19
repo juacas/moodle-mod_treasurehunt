@@ -26,6 +26,11 @@ require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
 if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_heading('treasurehuntintro', '', get_string('configintro', 'treasurehunt')));
+        $settings->add(new admin_setting_heading(
+            'treasurehuntgamemapsheading',
+            get_string('gamemapsheading', 'treasurehunt'),
+            ''
+        ));
         // Available game player styles.
         $styles = treasurehunt_get_installedplayerstyles();
         $settings->add(new admin_setting_configmultiselect(
@@ -43,6 +48,18 @@ if ($ADMIN->fulltree) {
             TREASUREHUNT_PLAYERBOOTSTRAP,
             treasurehunt_get_installedplayerstyles()
         ));
+        $basemaps = treasurehunt_get_basemap_pair_options();
+        $defaultbasemappairs = [];
+        foreach ($basemaps as $playermaps) {
+            $defaultbasemappairs = array_merge($defaultbasemappairs, array_keys($playermaps));
+        }
+        $settings->add(new admin_setting_configmultiselect(
+            'mod_treasurehunt/availablebasemaps',
+            get_string('availablebasemaps', 'treasurehunt'),
+            get_string('availablebasemaps_desc', 'treasurehunt'),
+            $defaultbasemappairs,
+            $basemaps
+        ));
         $mapboxtoken = new admin_setting_configpasswordunmask(
             'mod_treasurehunt/mapboxaccesstoken',
             get_string('mapboxaccesstoken', 'treasurehunt'),
@@ -51,6 +68,41 @@ if ($ADMIN->fulltree) {
         );
         $mapboxtoken->paramtype = PARAM_RAW_TRIMMED;
         $settings->add($mapboxtoken);
+        $bingtoken = new admin_setting_configpasswordunmask(
+            'mod_treasurehunt/bingmapskey',
+            get_string('bingmapskey', 'treasurehunt'),
+            get_string('bingmapskey_desc', 'treasurehunt'),
+            ''
+        );
+        $bingtoken->paramtype = PARAM_RAW_TRIMMED;
+        $settings->add($bingtoken);
+        $googletoken = new admin_setting_configpasswordunmask(
+            'mod_treasurehunt/googlemapstileapikey',
+            get_string('googlemapstileapikey', 'treasurehunt'),
+            get_string('googlemapstileapikey_desc', 'treasurehunt'),
+            ''
+        );
+        $googletoken->paramtype = PARAM_RAW_TRIMMED;
+        $settings->add($googletoken);
+        $stadiatoken = new admin_setting_configpasswordunmask(
+            'mod_treasurehunt/stadiamapsapikey',
+            get_string('stadiamapsapikey', 'treasurehunt'),
+            get_string('stadiamapsapikey_desc', 'treasurehunt'),
+            ''
+        );
+        $stadiatoken->paramtype = PARAM_RAW_TRIMMED;
+        $settings->add($stadiatoken);
+        $settings->add(new admin_setting_configcheckbox(
+            'mod_treasurehunt/stadiamapsdomainauth',
+            get_string('stadiamapsdomainauth', 'treasurehunt'),
+            get_string('stadiamapsdomainauth_desc', 'treasurehunt'),
+            0
+        ));
+        $settings->add(new admin_setting_heading(
+            'treasurehuntscoringheading',
+            get_string('scoringsettingsheading', 'treasurehunt'),
+            ''
+        ));
         // Maximum grade.
         $settings->add(new admin_setting_configtext(
             'mod_treasurehunt/maximumgrade',

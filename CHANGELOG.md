@@ -188,8 +188,8 @@ Minimum Moodle version: **4.5**. Release maturity: **beta**.
 - Run the Moodle plugin upgrade after replacing the plugin directory. It adds
   the stage own-clue fields, the out-of-sequence flag and a tracking index, and
   refreshes relevant caches. Out-of-sequence discovery is disabled by default.
-- Earlier experimental player keys `cessium_player` and `mapbox_player` migrate
-  to `cessium` and `mapbox`, including site player selections.
+- Earlier experimental player identifiers migrate to `cesium` and `mapbox`,
+  including site player selections.
 - Custom consumers of `mod_treasurehunt_user_progress` must use the current
   contract: start with `attemptid=0`, `roadtimestamp=0`, `initialize=true`, then
   return the server's cursors on later polls. `attemptid` replaces the former

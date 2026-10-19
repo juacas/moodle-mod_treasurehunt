@@ -246,7 +246,7 @@ function xmldb_treasurehunt_upgrade($oldversion) {
     if ($oldversion < 2026101300) {
         // Keep existing activities and administrator settings on the renamed player keys.
         $renamedplayers = [
-            'cessium_player' => TREASUREHUNT_PLAYERCESSIUM,
+            'cessium_player' => TREASUREHUNT_PLAYERCESIUM,
             'mapbox_player' => TREASUREHUNT_PLAYERMAPBOX,
         ];
         foreach ($renamedplayers as $oldkey => $newkey) {
@@ -275,6 +275,51 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         // Invalidate participant progress snapshots after changing the service response shape.
         cache::make('mod_treasurehunt', 'participantprogress')->purge();
         upgrade_mod_savepoint(true, 2026101801, 'treasurehunt');
+    }
+    if ($oldversion < 2026101900) {
+        // Expand global map selections into independent player-map permissions.
+        $mapsetting = $DB->get_record('config_plugins', [
+            'plugin' => 'mod_treasurehunt',
+            'name' => 'availablebasemaps',
+        ]);
+        if ($mapsetting && $mapsetting->value !== '') {
+            $pairoptions = treasurehunt_get_basemap_pair_options();
+            $selected = explode(',', $mapsetting->value);
+            $pairids = [];
+            foreach ($pairoptions as $maps) {
+                foreach ($maps as $pairid => $mapid) {
+                    if (in_array($pairid, $selected, true) || in_array($mapid, $selected, true)) {
+                        $pairids[] = $pairid;
+                    }
+                }
+            }
+            set_config('availablebasemaps', implode(',', $pairids), 'mod_treasurehunt');
+        }
+        upgrade_mod_savepoint(true, 2026101900, 'treasurehunt');
+    }
+    if ($oldversion < 2026101901) {
+        // Normalize stored player identifiers after correcting the Cesium spelling.
+        $DB->set_field('treasurehunt', 'playerstyle', TREASUREHUNT_PLAYERCESIUM, ['playerstyle' => 'cessium']);
+        $defaultplayer = get_config('mod_treasurehunt', 'defaultplayerstyle');
+        if ($defaultplayer === 'cessium') {
+            set_config('defaultplayerstyle', TREASUREHUNT_PLAYERCESIUM, 'mod_treasurehunt');
+        }
+        $availableplayers = get_config('mod_treasurehunt', 'availableplayerstyles');
+        if ($availableplayers !== false) {
+            $playerkeys = array_map('trim', explode(',', $availableplayers));
+            $playerkeys = array_map(static function($key) {
+                return $key === 'cessium' ? TREASUREHUNT_PLAYERCESIUM : $key;
+            }, $playerkeys);
+            set_config('availableplayerstyles', implode(',', array_unique($playerkeys)), 'mod_treasurehunt');
+        }
+        $availablebasemaps = get_config('mod_treasurehunt', 'availablebasemaps');
+        if ($availablebasemaps !== false && $availablebasemaps !== '') {
+            $pairids = array_map(static function($pairid) {
+                return str_starts_with($pairid, 'cessium:') ? 'cesium:' . substr($pairid, 8) : $pairid;
+            }, explode(',', $availablebasemaps));
+            set_config('availablebasemaps', implode(',', $pairids), 'mod_treasurehunt');
+        }
+        upgrade_mod_savepoint(true, 2026101901, 'treasurehunt');
     }
     return true;
 }

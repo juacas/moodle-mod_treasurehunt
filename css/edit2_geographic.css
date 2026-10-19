@@ -62,7 +62,7 @@
   background: transparent;
 }
 
-#page-mod-treasurehunt-edit2 #mapedit .cessium-search-results {
+#page-mod-treasurehunt-edit2 #mapedit .cesium-search-results {
   position: absolute;
   top: 100%;
   left: 0;
@@ -73,11 +73,11 @@
   box-shadow: 0 0.25rem 0.75rem #0004;
 }
 
-#page-mod-treasurehunt-edit2 #mapedit .cessium-search-results[hidden] {
+#page-mod-treasurehunt-edit2 #mapedit .cesium-search-results[hidden] {
   display: none;
 }
 
-#page-mod-treasurehunt-edit2 #mapedit .cessium-search-result {
+#page-mod-treasurehunt-edit2 #mapedit .cesium-search-result {
   display: block;
   width: 100%;
   padding: 0.5rem;
@@ -86,7 +86,7 @@
   text-align: left;
 }
 
-#page-mod-treasurehunt-edit2 #mapedit .cessium-search-result:hover {
+#page-mod-treasurehunt-edit2 #mapedit .cesium-search-result:hover {
   background: var(--bs-secondary-bg, #eee);
 }
 

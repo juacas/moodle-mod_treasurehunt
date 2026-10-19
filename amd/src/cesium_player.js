@@ -16,7 +16,7 @@
 /**
  * Experimental Cesium player for geographic treasure hunts.
  *
- * @module mod_treasurehunt/cessium_player
+ * @module mod_treasurehunt/cesium_player
  * @copyright 2026 Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
@@ -60,9 +60,9 @@ export const loadCesium = (baseUrl) => {
         return cesiumPromise;
     }
     window.CESIUM_BASE_URL = baseUrl;
-    if (!document.getElementById('cessium-widgets-css')) {
+    if (!document.getElementById('cesium-widgets-css')) {
         const css = document.createElement('link');
-        css.id = 'cessium-widgets-css';
+        css.id = 'cesium-widgets-css';
         css.rel = 'stylesheet';
         css.href = baseUrl + 'Widgets/widgets.css';
         document.head.appendChild(css);
@@ -481,18 +481,18 @@ const inGeometry = (point, geometry) => {
  * @returns {Promise<void>} Initialisation completion.
  */
 export const init = async() => {
-    const root = document.getElementById('cessium-player');
+    const root = document.getElementById('cesium-player');
     if (!root) {
         return;
     }
-    const config = JSON.parse(document.getElementById('cessium-config').textContent);
+    const config = JSON.parse(document.getElementById('cesium-config').textContent);
     initParticipantProgress({
         enabled: isEnabled(config.playerconfig?.showparticipantprogress),
         treasurehuntid: config.treasurehuntid,
         previewroadid: config.previewroadid,
         roadid: Number(config.playerconfig?.participantroadid || config.previewroadid || 0),
     });
-    const element = (id) => document.getElementById('cessium-' + id);
+    const element = (id) => document.getElementById('cesium-' + id);
     const labels = config.labels;
     const playerconfig = config.playerconfig || {};
     const loading = element('loading');
@@ -512,7 +512,7 @@ export const init = async() => {
         const picker = element('layer-picker');
         if (picker) {
             const available = Math.max(0, Math.floor(picker.getBoundingClientRect().top - 12));
-            picker.style.setProperty('--cessium-picker-available-height', available + 'px');
+            picker.style.setProperty('--cesium-picker-available-height', available + 'px');
         }
     };
     let stageSource;
@@ -669,9 +669,41 @@ export const init = async() => {
      *
      * @param {Object|null} custommapping Validated custom activity map, if available.
      * @param {Object|Array|null} customproviders Pre-created imagery provider(s) for the custom map.
+     * @param {Object|null} customimageprovider Mandatory custom image overlay, if configured.
+     * @returns {boolean} Whether the image is the only base layer.
      */
-    const initLayerPicker = (custommapping, customproviders) => {
-        const imagery = Cesium.createDefaultImageryProviderViewModels();
+    const initLayerPicker = (custommapping, customproviders, customimageprovider) => {
+        const allowedBasemaps = new Set(playerconfig.allowedbasemaps || ['osm', 'arcgis_world_imagery']);
+        const idsByName = {
+            'openstreetmap': 'osm',
+            'arcgis world imagery': 'arcgis_world_imagery',
+            'bing maps aerial with labels': 'bing_aerial_labels',
+            'bing maps aerial': 'cesium_bing_aerial',
+            'bing maps roads': 'cesium_bing_roads',
+            'google maps satellite': 'google_satellite',
+            'google maps satellite with labels': 'cesium_google_satellite_labels',
+            'google maps roadmap': 'google_roadmap',
+            'google maps contour': 'cesium_google_contour',
+            'stadia alidade smooth': 'stadia_alidade_smooth',
+            'stadia alidade smooth dark': 'stadia_alidade_smooth_dark',
+            'stadia x stamen toner': 'stadia_stamen_toner',
+            'stadia x stamen watercolor': 'stadia_stamen_watercolor',
+            'arcgis world hillshade': 'cesium_arcgis_hillshade',
+            'esri world ocean': 'cesium_esri_ocean',
+            'sentinel-2': 'cesium_sentinel_2',
+            'blue marble': 'cesium_blue_marble',
+            'earth at night': 'cesium_earth_at_night',
+            'natural earth ii': 'cesium_natural_earth_ii',
+            'azure maps aerial': 'cesium_azure_aerial',
+            'azure maps roads': 'cesium_azure_roads',
+        };
+        const imagery = Cesium.createDefaultImageryProviderViewModels().filter((item) => {
+            if (config.custommapping?.onlybase) {
+                return false;
+            }
+            const name = item.name.replace(/\u00ad/g, '').replace(/\u00a0/g, ' ').toLowerCase();
+            return allowedBasemaps.has(idsByName[name]);
+        });
         const satelliteIndex = imagery.findIndex((item) => item.name === 'ArcGIS World Imagery');
         const officialSatellite = imagery[satelliteIndex];
         const satellite = new Cesium.ProviderViewModel({
@@ -684,11 +716,21 @@ export const init = async() => {
         });
         if (satelliteIndex >= 0) {
             imagery[satelliteIndex] = satellite;
-        } else {
-            imagery.push(satellite);
         }
 
-        let selectedImagery = satellite;
+        let selectedImagery = satelliteIndex >= 0 ? satellite : imagery[0];
+        let imageAsBase = false;
+        if (!selectedImagery && customimageprovider) {
+            selectedImagery = new Cesium.ProviderViewModel({
+                name: labels.layercustom,
+                tooltip: labels.layercustom,
+                iconUrl: Cesium.buildModuleUrl('Widgets/Images/ImageryProviders/ArcGisMapServiceWorldImagery.png'),
+                category: 'Other',
+                creationFunction: () => customimageprovider,
+            });
+            imagery.push(selectedImagery);
+            imageAsBase = true;
+        }
         if (custommapping) {
             const custom = new Cesium.ProviderViewModel({
                 name: labels.layercustom,
@@ -723,7 +765,7 @@ export const init = async() => {
                 }),
         });
 
-        layerPicker = new Cesium.BaseLayerPicker('cessium-layer-picker', {
+        layerPicker = new Cesium.BaseLayerPicker('cesium-layer-picker', {
             globe: viewer.scene.globe,
             imageryProviderViewModels: imagery,
             selectedImageryProviderViewModel: selectedImagery,
@@ -733,7 +775,7 @@ export const init = async() => {
         const gallery = element('layer-picker').querySelector('.cesium-baseLayerPicker-dropDown');
         if (gallery) {
             const buildingToggle = document.createElement('label');
-            buildingToggle.className = 'cessium-buildings-toggle';
+            buildingToggle.className = 'cesium-buildings-toggle';
             const checkbox = document.createElement('input');
             checkbox.type = 'checkbox';
             checkbox.checked = buildingsEnabled;
@@ -762,6 +804,7 @@ export const init = async() => {
         if (selectedImagery === satellite) {
             viewer.clock.currentTime = Cesium.JulianDate.now();
         }
+        return imageAsBase;
     };
 
     /**
@@ -786,7 +829,7 @@ export const init = async() => {
      * @param {HTMLDialogElement} dialog Dialog to close.
      */
     const closeDialog = (dialog) => {
-        if (dialog.id === 'cessium-qr-dialog') {
+        if (dialog.id === 'cesium-qr-dialog') {
             webqr.unloadQR(() => undefined);
         }
         dialog.close();
@@ -1425,7 +1468,7 @@ export const init = async() => {
         [[labels.stagename, solved ? properties.name : null], [labels.stageclue, properties.clue]].forEach(([label, value]) => {
             if (value) {
                 const field = document.createElement('div');
-                field.className = 'cessium-attempt-field';
+                field.className = 'cesium-attempt-field';
                 const heading = document.createElement('span');
                 heading.textContent = label;
                 const body = document.createElement('div');
@@ -1448,10 +1491,10 @@ export const init = async() => {
         answers.replaceChildren();
         (stage?.answers || []).forEach((answer) => {
             const choice = document.createElement('label');
-            choice.className = 'cessium-answer';
+            choice.className = 'cesium-answer';
             const input = document.createElement('input');
             input.type = 'radio';
-            input.name = 'cessium-answer';
+            input.name = 'cesium-answer';
             input.value = String(answer.id);
             const body = document.createElement('span');
             body.innerHTML = answer.answertext;
@@ -1522,7 +1565,7 @@ export const init = async() => {
         element('clue-title').textContent = clues.length > 1 ? labels.nextclues : labels.nextclue;
         if (!clues.length) {
             const fallback = document.createElement('div');
-            fallback.className = 'cessium-richtext';
+            fallback.className = 'cesium-richtext';
             fallback.innerHTML = stage?.clue || '';
             if (!fallback.textContent.trim() && !fallback.querySelector('img, video, iframe')) {
                 fallback.textContent = labels.nohint;
@@ -1533,10 +1576,10 @@ export const init = async() => {
         clues.forEach((clue, index) => {
             const tab = document.createElement('button');
             tab.type = 'button';
-            tab.id = 'cessium-clue-tab-' + index;
-            tab.className = 'cessium-clue-tab';
+            tab.id = 'cesium-clue-tab-' + index;
+            tab.className = 'cesium-clue-tab';
             tab.setAttribute('role', 'tab');
-            tab.setAttribute('aria-controls', 'cessium-clue-panel-' + index);
+            tab.setAttribute('aria-controls', 'cesium-clue-panel-' + index);
             tab.textContent = labels.clue + ' ' + clue.position;
             tab.addEventListener('click', () => selectClue(index, true));
             tab.addEventListener('keydown', (event) => {
@@ -1558,8 +1601,8 @@ export const init = async() => {
             });
             tabs.appendChild(tab);
             const pane = document.createElement('div');
-            pane.id = 'cessium-clue-panel-' + index;
-            pane.className = 'cessium-clue-pane cessium-richtext';
+            pane.id = 'cesium-clue-panel-' + index;
+            pane.className = 'cesium-clue-pane cesium-richtext';
             pane.setAttribute('role', 'tabpanel');
             pane.setAttribute('aria-labelledby', tab.id);
             pane.innerHTML = clue.html;
@@ -1910,14 +1953,14 @@ export const init = async() => {
             }
         });
         root.querySelectorAll('dialog').forEach((dialog) => {
-            dialog.querySelector('.cessium-close').addEventListener('click', () => closeDialog(dialog));
+            dialog.querySelector('.cesium-close').addEventListener('click', () => closeDialog(dialog));
             dialog.addEventListener('click', (event) => {
                 if (event.target === dialog) {
                     closeDialog(dialog);
                 }
             });
             dialog.addEventListener('cancel', (event) => {
-                if (dialog.id === 'cessium-qr-dialog') {
+                if (dialog.id === 'cesium-qr-dialog') {
                     event.preventDefault();
                     closeDialog(dialog);
                 }
@@ -2001,7 +2044,7 @@ export const init = async() => {
             if (!viewer) {
                 Cesium = await loadCesium(config.cesiumbaseurl);
                 const baseLayer = await createBaseLayer(Cesium);
-                viewer = new Cesium.Viewer('cessium-globe', {
+                viewer = new Cesium.Viewer('cesium-globe', {
                     baseLayer,
                     terrainProvider: new Cesium.EllipsoidTerrainProvider(),
                     animation: false,
@@ -2060,8 +2103,8 @@ export const init = async() => {
                 // The picker only replaces its own layers when a choice returns an array.
                 // Otherwise the provisional OSM layer remains above the custom overlay.
                 viewer.imageryLayers.remove(baseLayer);
-                initLayerPicker(custommapping, customproviders);
-                if (customimageprovider) {
+                const imageAsBase = initLayerPicker(custommapping, customproviders, customimageprovider);
+                if (customimageprovider && !imageAsBase) {
                     // Keep the image out of the picker's managed base layers so every
                     // basemap selection retains this mandatory overlay above it.
                     viewer.imageryLayers.addImageryProvider(customimageprovider);

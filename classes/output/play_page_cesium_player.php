@@ -23,5 +23,5 @@ namespace mod_treasurehunt\output;
  * @copyright 2026 Juan Pablo de Castro <juanpablo.decastro@uva.es>
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class play_page_cessium_player extends play_page_base {
+class play_page_cesium_player extends play_page_base {
 }

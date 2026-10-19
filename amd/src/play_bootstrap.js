@@ -52,7 +52,12 @@ let init = {
       "question", "noanswerselected", "timeexceeded", "searching", "continue", "noattempts",
       "aerialview", "roadview", "noresults", "startfromhere", "nomarks", "updates", "activitytoendwarning",
       "huntcompleted", "discoveredlocation", "answerwarning", "error", "pegmanlabel", "webserviceerror",
-      "successlocation", "clue", "nextclue", "nextclues",
+      "successlocation", "clue", "nextclue", "nextclues", "baselayers", "overlaylayers",
+      "basemap_arcgis_desc", "basemap_bing", "basemap_bing_desc", "basemap_google_road",
+      "basemap_google_road_desc", "basemap_google_satellite", "basemap_google_satellite_desc",
+      "basemap_loaderror", "basemap_osm_desc", "basemap_stadia_dark", "basemap_stadia_dark_desc",
+      "basemap_stadia_smooth", "basemap_stadia_smooth_desc", "basemap_stadia_toner",
+      "basemap_stadia_toner_desc", "basemap_stadia_watercolor", "basemap_stadia_watercolor_desc",
     ];
     // Console.log("loading i18n strings");
     let stringsqueried = terms.map((term) => {
@@ -213,6 +218,12 @@ function initplaytreasurehunt(
   let usegeographictools = true;
   let defaultzoom = 15;
   let supportsTouch = "ontouchstart" in window || navigator.msMaxTouchPoints;
+  let basemapConfig = {};
+  try {
+    basemapConfig = JSON.parse(document.getElementById("treasurehunt-basemap-config").textContent);
+  } catch (error) {
+    basemapConfig = {};
+  }
   let customplayerconfig;
   set_player_config(playerconfig);
   initParticipantProgress({
@@ -662,49 +673,222 @@ function initplaytreasurehunt(
   });
   let layersbase = [];
   let layersoverlay = [];
+  const basemapEntries = [];
+  const allowedBasemaps = new Set(basemapConfig.allowedbasemaps || []);
+  const thumbnails = "js/cesium-1.145.0/Widgets/Images/ImageryProviders/";
+  const stadiaEnabled = Boolean(basemapConfig.stadiadomainauth || basemapConfig.stadiakey);
+  const googleSessions = {};
+  const googleSessionRequests = {};
+  const googleLayers = new Map();
+  let defaultBaseLayer = null;
+  let basemapSelectionRevision = 0;
+
+  /**
+   * Add an authorized and available base map to the catalog.
+   *
+   * @param {string} id Stable base map identifier.
+   * @param {string} name Layer name.
+   * @param {string} description Layer description.
+   * @param {string} thumbnail Local thumbnail filename.
+   * @param {Object|null} source OpenLayers source.
+   * @param {boolean} available Whether the provider is configured.
+   * @param {Function|null} prepare Work to perform before selecting the layer.
+   * @returns {Object|null} The base layer, if available.
+   */
+  const addBaseMap = (id, name, description, thumbnail, source, available = true, prepare = null) => {
+    if (!available || !allowedBasemaps.has(id)) {
+      return null;
+    }
+    const layer = new ol.layer.Tile({source: source || undefined, visible: false});
+    layer.set("name", name);
+    layersbase.push(layer);
+    basemapEntries.push({name, description, thumbnail: thumbnails + thumbnail, layer, prepare});
+    return layer;
+  };
+
+  /**
+   * Request a Google Map Tiles session only when the player selects that layer.
+   *
+   * @param {string} mapType Google map type.
+   * @returns {Promise<Object>} A valid session.
+   */
+  const getGoogleSession = (mapType) => {
+    const cached = googleSessions[mapType];
+    if (cached && Number(cached.expiry) * 1000 > Date.now() + 60000) {
+      return Promise.resolve(cached);
+    }
+    if (!googleSessionRequests[mapType]) {
+      const locale = (document.documentElement.lang || navigator.language || "en-US").replace("_", "-");
+      googleSessionRequests[mapType] = fetch("https://tile.googleapis.com/v1/createSession?key=" +
+        encodeURIComponent(basemapConfig.googlekey), {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({mapType, language: locale, region: (locale.split("-")[1] || "US").toUpperCase()}),
+      }).then((response) => {
+        if (!response.ok) {
+          throw new Error("Google Map Tiles session unavailable");
+        }
+        return response.json();
+      }).then((session) => {
+        if (!session.session || !session.expiry) {
+          throw new Error("Invalid Google Map Tiles session");
+        }
+        googleSessions[mapType] = session;
+        return session;
+      }).finally(() => {
+        delete googleSessionRequests[mapType];
+      });
+    }
+    return googleSessionRequests[mapType];
+  };
+
+  /**
+   * Add a Google layer that requests its tile session when selected.
+   *
+   * @param {string} id Stable base map identifier.
+   * @param {string} mapType Google map type.
+   * @param {string} name Layer name.
+   * @param {string} description Layer description.
+   * @param {string} thumbnail Local thumbnail filename.
+   */
+  const addGoogleMap = (id, mapType, name, description, thumbnail) => {
+    let layer;
+    const prepare = async() => {
+      const session = await getGoogleSession(mapType);
+      const previous = googleLayers.get(layer);
+      if (previous && previous.session.session === session.session) {
+        return;
+      }
+      const source = new ol.source.XYZ({
+        url: "https://tile.googleapis.com/v1/2dtiles/{z}/{x}/{y}?session=" +
+          encodeURIComponent(session.session) + "&key=" + encodeURIComponent(basemapConfig.googlekey),
+        maxZoom: 22,
+        attributions: ["© Google Maps"],
+      });
+      layer.setSource(source);
+      googleLayers.set(layer, {source, session});
+    };
+    layer = addBaseMap(id, name, description, thumbnail, null, Boolean(basemapConfig.googlekey), prepare);
+  };
+
+  /**
+   * Add Stadia raster tiles when the domain or API key is authorized.
+   *
+   * @param {string} id Stable base map identifier.
+   * @param {string} style Stadia style name.
+   * @param {string} name Layer name.
+   * @param {string} description Layer description.
+   * @param {string} thumbnail Local thumbnail filename.
+   * @param {string} extension Raster image extension.
+   * @param {number} maxZoom Maximum native zoom level.
+   */
+  const addStadiaMap = (id, style, name, description, thumbnail, extension, maxZoom = 20) => {
+    if (!stadiaEnabled || !allowedBasemaps.has(id)) {
+      return;
+    }
+    const key = basemapConfig.stadiadomainauth || !basemapConfig.stadiakey ? "" :
+      "?api_key=" + encodeURIComponent(basemapConfig.stadiakey);
+    const source = stadiaEnabled ? new ol.source.XYZ({
+      url: "https://tiles.stadiamaps.com/tiles/" + style + "/{z}/{x}/{y}." + extension + key,
+      maxZoom,
+      attributions: [
+        '© <a href="https://stadiamaps.com/attribution/">Stadia Maps</a>',
+        '© <a href="https://openmaptiles.org/">OpenMapTiles</a>',
+        '© <a href="https://openstreetmap.org/copyright">OpenStreetMap</a>',
+        ...(style.startsWith("stamen_") ? ['© <a href="https://stamen.com/">Stamen Design</a>'] : []),
+      ],
+    }) : null;
+    addBaseMap(id, name, description, thumbnail, source);
+  };
+
+  /**
+   * Wait for Bing imagery metadata before changing the visible base map.
+   *
+   * @param {Object} source Bing Maps source.
+   * @returns {Promise<void>} Resolves when the source is ready.
+   */
+  const waitForBing = (source) => new Promise((resolve, reject) => {
+    if (source.getState() === "ready") {
+      resolve();
+      return;
+    }
+    if (source.getState() === "error") {
+      reject(new Error("Bing imagery metadata unavailable"));
+      return;
+    }
+    let listener;
+    const finish = (error) => {
+      clearTimeout(timeout);
+      ol.Observable.unByKey(listener);
+      if (error) {
+        reject(error);
+      } else {
+        resolve();
+      }
+    };
+    const timeout = setTimeout(() => finish(new Error("Bing imagery metadata timed out")), 12000);
+    listener = source.on("change", () => {
+      if (source.getState() === "ready") {
+        finish();
+      } else if (source.getState() === "error") {
+        finish(new Error("Bing imagery metadata unavailable"));
+      }
+    });
+  });
+
   if (!custommapconfig || custommapconfig.onlybase === false) {
-    // Default layers
-
-
-    let roadlayer = new ol.layer.Tile({
-      source: new ol.source.OSM(),
-    });
-    // BingMaps layer's token expires and breaks the service.
-    // let aeriallayer = new ol.layer.Tile({
-    //   visible: false,
-    //   preload: Infinity,
-    //   source: new ol.source.BingMaps({
-    //     key: "AmC3DXdnK5sXC_Yp_pOLqssFSaplBbvN68jnwKTEM3CSn2t6G5PGTbYN3wzxE5BR",
-    //     imagerySet: "AerialWithLabels",
-    //     maxZoom: 19,
-    //     // Use maxZoom 19 to see stretched tiles instead of the BingMaps
-    //     // "no photos at this zoom level" tiles
-    //     // maxZoom: 19.
-    //   }),
-    // });
-    /**
-     * Use World Imagery de Esri (free for non commercial use).
-     */
-    let aeriallayer = new ol.layer.Tile({
-      source: new ol.source.XYZ({
-        url: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+    defaultBaseLayer = addBaseMap("osm", "OpenStreetMap", strings.basemap_osm_desc,
+      "openStreetMap.png", new ol.source.OSM());
+    const bingSource = basemapConfig.bingkey && allowedBasemaps.has("bing_aerial_labels") ? new ol.source.BingMaps({
+      key: basemapConfig.bingkey,
+      imagerySet: "AerialWithLabels",
+      maxZoom: 19,
+    }) : null;
+    addBaseMap("bing_aerial_labels", strings.basemap_bing,
+      strings.basemap_bing_desc,
+      "bingAerialLabels.png", bingSource, Boolean(bingSource),
+      bingSource ? () => waitForBing(bingSource) : null);
+    addGoogleMap("google_satellite", "satellite", strings.basemap_google_satellite,
+      strings.basemap_google_satellite_desc,
+      "googleSatellite.png");
+    addGoogleMap("google_roadmap", "roadmap", strings.basemap_google_road,
+      strings.basemap_google_road_desc,
+      "googleRoadmap.png");
+    addBaseMap("arcgis_world_imagery", "ArcGIS World Imagery", strings.basemap_arcgis_desc,
+      "ArcGisMapServiceWorldImagery.png", new ol.source.XYZ({
+        url: "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
         attributions: [
-          'Tiles © Esri — Fuente: Esri, DigitalGlobe, Earthstar Geographics, CNES/Airbus DS, USDA,' +
-          ' USGS, AeroGRID, IGN, and the GIS User Community'
-        ]
-      })
-    });
-
-    aeriallayer.set("name", strings.aerialview);
-    roadlayer.set("name", strings.roadview);
-
-    layersbase = [aeriallayer, roadlayer];
+          "Tiles © Esri — Esri, DigitalGlobe, Earthstar Geographics, CNES/Airbus DS, USDA," +
+          " USGS, AeroGRID, IGN, and the GIS User Community",
+        ],
+      }));
+    addStadiaMap("stadia_alidade_smooth", "alidade_smooth", strings.basemap_stadia_smooth,
+      strings.basemap_stadia_smooth_desc, "stadiaAlidadeSmooth.png", "png");
+    addStadiaMap("stadia_alidade_smooth_dark", "alidade_smooth_dark", strings.basemap_stadia_dark,
+      strings.basemap_stadia_dark_desc, "stadiaAlidadeSmoothDark.png", "png");
+    addStadiaMap("stadia_stamen_toner", "stamen_toner", strings.basemap_stadia_toner,
+      strings.basemap_stadia_toner_desc, "stamenToner.png", "png");
+    addStadiaMap("stadia_stamen_watercolor", "stamen_watercolor", strings.basemap_stadia_watercolor,
+      strings.basemap_stadia_watercolor_desc, "stamenWatercolor.png", "jpg", 16);
   }
   if (custombaselayer) {
     if (custommapconfig.layertype != "overlay") {
       layersbase.push(custombaselayer);
+      defaultBaseLayer = custombaselayer;
+      basemapEntries.push({
+        name: custommapconfig.layername,
+        description: strings.baselayers,
+        thumbnail: custommapconfig.custombackgroundurl || "pix/basemaps/road.jpg",
+        layer: custombaselayer,
+      });
     } else {
       layersoverlay.push(custombaselayer);
+    }
+  }
+  if (!defaultBaseLayer && basemapEntries.length) {
+    defaultBaseLayer = basemapEntries[0].layer;
+    if (basemapEntries[0].prepare) {
+      basemapEntries[0].prepare().catch(() => toast(strings.basemap_loaderror));
     }
   }
   let layergroup = new ol.layer.Group({layers: layersbase});
@@ -715,13 +899,10 @@ function initplaytreasurehunt(
     strings.pegmanlabel
   );
 
-  // All layers hidden except last one.
-  let toplayer = null;
+  // Select the configured base map, or OpenStreetMap when there is none.
   layergroup.getLayers().forEach((layer) => {
-    layer.setVisible(false);
-    toplayer = layer;
+    layer.setVisible(layer === defaultBaseLayer);
   });
-  toplayer.setVisible(true);
 
   let view = new ol.View({
     center: [0, 0],
@@ -772,11 +953,49 @@ function initplaytreasurehunt(
   let map = new ol.Map({
     layers: layers,
     overlays: [overlay],
-    controls: [zoom], // Ol.control.defaults({rotate: false, attribution: false}),
+    controls: [zoom, new ol.control.Attribution({collapsed: false})],
     target: "mapplay",
     view: view,
     loadTilesWhileAnimating: true,
     loadTilesWhileInteracting: true,
+  });
+  let googleAttributionTimer;
+  let googleAttributionRevision = 0;
+  /** Refresh the provider's required copyright notice for the visible Google viewport. */
+  const updateGoogleAttribution = () => {
+    const active = [...googleLayers.keys()].find((layer) => layer.getVisible());
+    if (!active) {
+      return;
+    }
+    const {source, session} = googleLayers.get(active);
+    const extent = ol.proj.transformExtent(view.calculateExtent(map.getSize()), "EPSG:3857", "EPSG:4326");
+    const values = {
+      session: session.session,
+      key: basemapConfig.googlekey,
+      zoom: Math.min(22, Math.max(0, Math.round(view.getZoom()))),
+      north: Math.min(85, extent[3]),
+      south: Math.max(-85, extent[1]),
+      east: Math.min(180, extent[2]),
+      west: Math.max(-180, extent[0]),
+    };
+    const revision = ++googleAttributionRevision;
+    fetch("https://tile.googleapis.com/tile/v1/viewport?" + new URLSearchParams(values)).then((response) => {
+      if (!response.ok) {
+        throw new Error("Google Maps viewport unavailable");
+      }
+      return response.json();
+    }).then((details) => {
+      if (revision === googleAttributionRevision && active.getVisible()) {
+        source.setAttributions(["© Google Maps", details.copyright || ""]);
+      }
+      return details;
+    }).catch(() => {
+      // Retain the basic Google Maps attribution when viewport metadata is unavailable.
+    });
+  };
+  map.on("moveend", () => {
+    clearTimeout(googleAttributionTimer);
+    googleAttributionTimer = setTimeout(updateGoogleAttribution, 400);
   });
   // Do not let a completed touch gesture place the virtual GPS marker.
   // OpenLayers still receives all pointer events and handles pinch/rotate itself.
@@ -1367,18 +1586,25 @@ function initplaytreasurehunt(
     }).click(() => {
       layer.setVisible(!layer.getVisible());
     });
-    let name = $("<div>").append($.parseHTML(layer.get("name")));
+    let name = $("<div>", {"class": "th-basemap-copy"}).append(
+      $("<strong>").append($.parseHTML(layer.get("name"))),
+      $("<small>", {text: strings.overlaylayers})
+    );
     let checkboxContent = $("<i>", {
       "class": "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
+      "aria-hidden": "true",
     });
     let linkContent = $("<div>", {
       "class": "layer-item",
-    }).append(name, checkboxContent);
+    }).append($("<img>", {src: "pix/basemaps/road.jpg", alt: "", width: 72, height: 72,
+      "class": "th-basemap-thumb"}),
+      name, checkboxContent);
     link.append(linkContent);
     layer.on("change:visible", () => {
-      $(checkboxContent).toggleClass("unchecked");
+      $(checkboxContent).toggleClass("unchecked", !layer.getVisible());
     });
-    $("#layerslist").prepend(link);
+    $("#overlaylayersheading").prop("hidden", false);
+    $("#overlaylayerslist").append(link);
   }
   /**
    * Add a group of layers to the layerlist container.
@@ -1386,31 +1612,55 @@ function initplaytreasurehunt(
    * @param {ol.layer.Group} layergroup
    */
   function add_layergroup_to_list(layergroup) {
-    layergroup.getLayers().forEach((layer) => {
+    basemapEntries.forEach((entry) => {
+      const layer = entry.layer;
       let link = $("<button>", {
         type: "button",
-        "class": "list-group-item list-group-item-action close-modal",
-      }).click(() => {
-        layergroup.getLayers().forEach((l) => {
-          if (l === layer) {
-            l.setVisible(true);
-          } else {
-            l.setVisible(false);
+        "class": "th-basemap-card",
+        "aria-pressed": layer && layer.getVisible() ? "true" : "false",
+      });
+      let check = $("<i>", {"class": "fa fa-check-circle", "aria-hidden": "true"});
+      link.append(
+        $("<img>", {src: entry.thumbnail, alt: "", loading: "lazy", width: 72, height: 72,
+          "class": "th-basemap-thumb"}),
+        $("<span>", {"class": "th-basemap-copy"}).append(
+          $("<strong>", {text: entry.name, title: entry.name}),
+          $("<small>", {text: entry.description})
+        ),
+        check
+      );
+      const update = () => {
+        const selected = layer && layer.getVisible();
+        link.toggleClass("is-selected", Boolean(selected));
+        link.attr("aria-pressed", selected ? "true" : "false");
+        check.toggleClass("unchecked", !selected);
+      };
+      layer.on("change:visible", update);
+      link.on("click", async() => {
+        const revision = ++basemapSelectionRevision;
+        if (entry.prepare) {
+          link.prop("disabled", true).addClass("is-loading");
+          try {
+            await entry.prepare();
+          } catch (error) {
+            toast(strings.basemap_loaderror);
+            link.prop("disabled", false).removeClass("is-loading");
+            return;
           }
-        });
+          link.prop("disabled", false).removeClass("is-loading");
+        }
+        if (revision !== basemapSelectionRevision) {
+          return;
+        }
+        layergroup.getLayers().forEach((candidate) => candidate.setVisible(candidate === layer));
+        googleAttributionRevision++;
+        if (googleLayers.has(layer)) {
+          updateGoogleAttribution();
+        }
+        closeModal("#layerspage");
       });
-      let checkboxContent = $("<i>", {
-        "class": "fa fa-check-circle" + (layer.getVisible() ? "" : " unchecked"),
-      });
-      let linkContent = $("<div>", {
-        text: layer.get("name"),
-        "class": "layer-item " // + (layer.getVisible() ? "" : "unchecked"),
-      }).append(checkboxContent);
-      link.append(linkContent);
-      layer.on("change:visible", () => {
-        $(checkboxContent).toggleClass("unchecked");
-      });
-      $("#layerslist").prepend(link);
+      update();
+      $("#layerslist").append(link);
     });
   }
 

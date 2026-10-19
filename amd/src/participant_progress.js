@@ -171,7 +171,7 @@ export const init = async(config) => {
                 stopped = true;
                 return;
             }
-            containers.forEach((container) => container.closest('.cessium-player')?.classList.add('has-participant-progress'));
+            containers.forEach((container) => container.closest('.cesium-player')?.classList.add('has-participant-progress'));
             render(response);
         } catch (error) {
             // The progress strip is auxiliary; its service must never interrupt the game player.

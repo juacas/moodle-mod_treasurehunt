@@ -84,6 +84,40 @@
     height: max(30rem, calc(100dvh - 17rem));
 }
 
+#page-mod-treasurehunt-gpx_viewer .track-participant-avatar {
+    display: grid;
+    width: 2rem;
+    height: 2rem;
+    overflow: hidden;
+    place-items: center;
+    border: 3px solid var(--track-color);
+    border-radius: 50%;
+    background: var(--track-color);
+    box-shadow: 0 0 0 2px #fff, 0 2px 6px rgb(0 0 0 / 65%);
+    color: #fff;
+    font: 700 .7rem/1 system-ui, sans-serif;
+    pointer-events: none;
+    text-shadow: 0 1px 2px #000;
+    transition: opacity .15s ease;
+}
+
+#page-mod-treasurehunt-gpx_viewer .track-participant-avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+#page-mod-treasurehunt-gpx_viewer .track-hover-tooltip {
+    padding: .3rem .55rem;
+    border-radius: .35rem;
+    background: rgb(23 33 43 / 92%);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 35%);
+    color: #fff;
+    font: 600 .8rem/1.25 system-ui, sans-serif;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
 .th-participant-progress-track {
     position: relative;
     width: 100%;
@@ -221,11 +255,11 @@
     display: block;
 }
 
-.cessium-player .th-participant-progress {
+.cesium-player .th-participant-progress {
     top: calc(env(safe-area-inset-top, 0px) + 5.5rem);
 }
 
-.cessium-player.has-participant-progress .cessium-map-summary {
+.cesium-player.has-participant-progress .cesium-map-summary {
     top: calc(env(safe-area-inset-top, 0px) + 9.6rem);
 }
 

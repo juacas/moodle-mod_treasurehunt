@@ -74,6 +74,33 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addHelpButton('playerstyle', 'playerstyle', 'treasurehunt');
         $mform->setDefault('playerstyle', $treasurehuntconfig->defaultplayerstyle);
 
+        // Restrict the maps a player may choose to those authorized for this activity.
+        $availablebasemaps = [];
+        $basemapsbyplayer = [];
+        $playerstyles = treasurehunt_get_playerstyles();
+        $availablebasemapsbyplayer = treasurehunt_get_available_basemaps_by_player();
+        foreach ($availablebasemapsbyplayer as $style => $maps) {
+            $basemapsbyplayer[$style] = [];
+            foreach ($maps as $mapid => $mapname) {
+                $pairid = $style . ':' . $mapid;
+                $availablebasemaps[$pairid] = $mapname;
+                $basemapsbyplayer[$style][] = $pairid;
+            }
+        }
+        $basemaps = $mform->addElement(
+            'select',
+            'allowedbasemaps',
+            get_string('allowedbasemaps', 'treasurehunt'),
+            $availablebasemaps,
+            ['data-player-basemaps' => json_encode($basemapsbyplayer)]
+        );
+        $basemaps->setMultiple(true);
+        $basemaps->setSize(min(8, max(1, count($availablebasemaps))));
+        $mform->addHelpButton('allowedbasemaps', 'allowedbasemaps', 'treasurehunt');
+        $defaultplayerstyle = $treasurehuntconfig->defaultplayerstyle;
+        $mform->setDefault('allowedbasemaps', $basemapsbyplayer[$defaultplayerstyle] ?? []);
+        $PAGE->requires->js_call_amd('mod_treasurehunt/basemap_form', 'init');
+
         // Customize player's components.
         // Check for Search panel.
         $mform->addElement('advcheckbox', 'searchpaneldisabled', get_string('searchpaneldisabled', 'treasurehunt'));
@@ -344,14 +371,23 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($data['gradepenanswer'] < 0) {
             $errors['gradepenanswer'] = get_string('errpenalizationfall', 'treasurehunt');
         }
-        // Customlayer type and layer name is the only mandatory field of the customlayer section.
-        if ($data['customlayertype'] !== 'none' && !empty($data['customlayername'])) {
+        if (
+            !treasurehunt_has_usable_basemap(
+                $data['allowedbasemaps'] ?? [],
+                $data['playerstyle'] ?? TREASUREHUNT_PLAYERBOOTSTRAP,
+                $data['customlayertype']
+            )
+        ) {
+            $errors['allowedbasemaps'] = get_string('allowedbasemaps_required', 'treasurehunt');
+        }
+        // Validate the custom base before allowing it to satisfy the map requirement.
+        if ($data['customlayertype'] !== 'none') {
             $draftitemid = $data['custombackground'];
             global $USER;
             $usercontext = context_user::instance($USER->id);
             $fs = get_file_storage();
             $draftfiles = $fs->get_area_files($usercontext->id, 'user', 'draft', $draftitemid, 'id');
-            if ($data['customlayername'] == '') {
+            if (trim($data['customlayername'] ?? '') === '') {
                 $errors['customlayername'] = get_string('customlayername_help', 'treasurehunt');
             }
             if ($data['customlayerservicetype'] == 'image' && count($draftfiles) == 0) {
@@ -414,6 +450,13 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         if ($customplayerconfig) {
             // Add all properties to form array.
             $defaultvalues = array_merge($defaultvalues, (array) $customplayerconfig);
+            // The persisted config stores map ids; the form uses player-map pair ids.
+            $style = $defaultvalues['playerstyle'] ?? $this->current->playerstyle ??
+                get_config('mod_treasurehunt', 'defaultplayerstyle');
+            $selectedmaps = $customplayerconfig->allowedbasemaps ?? [];
+            $defaultvalues['allowedbasemaps'] = array_map(function($mapid) use ($style) {
+                return strpos($mapid, ':') === false ? $style . ':' . $mapid : $mapid;
+            }, $selectedmaps);
         }
 
         $custommapconfig = treasurehunt_get_custommappingconfig($this->current);

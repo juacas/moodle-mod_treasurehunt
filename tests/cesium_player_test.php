@@ -29,7 +29,7 @@ namespace mod_treasurehunt;
  *
  * @coversNothing
  */
-final class cessium_player_test extends \advanced_testcase {
+final class cesium_player_test extends \advanced_testcase {
     /**
      * The registered style must load its renderable and render all core controls.
      */
@@ -40,23 +40,23 @@ final class cessium_player_test extends \advanced_testcase {
         require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
 
         $styles = treasurehunt_get_installedplayerstyles();
-        $this->assertSame('cessium', TREASUREHUNT_PLAYERCESSIUM);
-        $this->assertArrayHasKey(TREASUREHUNT_PLAYERCESSIUM, $styles);
-        $this->assertTrue(class_exists(\mod_treasurehunt\output\play_page_cessium_player::class));
+        $this->assertSame('cesium', TREASUREHUNT_PLAYERCESIUM);
+        $this->assertArrayHasKey(TREASUREHUNT_PLAYERCESIUM, $styles);
+        $this->assertTrue(class_exists(\mod_treasurehunt\output\play_page_cesium_player::class));
 
         $PAGE->set_url('/mod/treasurehunt/play.php', ['id' => 1]);
         $PAGE->set_context(\context_system::instance());
         $renderer = $PAGE->get_renderer('mod_treasurehunt');
-        $html = $renderer->render_from_template('mod_treasurehunt/cessium_player', [
+        $html = $renderer->render_from_template('mod_treasurehunt/cesium_player', [
             'cmid' => 1,
             'huntname' => 'Cesium test mission',
         ]);
-        $this->assertStringContainsString('id="cessium-globe"', $html);
-        $this->assertStringContainsString('id="cessium-clue-dialog"', $html);
-        $this->assertStringContainsString('id="cessium-finished-stage"', $html);
+        $this->assertStringContainsString('id="cesium-globe"', $html);
+        $this->assertStringContainsString('id="cesium-clue-dialog"', $html);
+        $this->assertStringContainsString('id="cesium-finished-stage"', $html);
         $this->assertStringContainsString(get_string('roadended', 'treasurehunt'), $html);
-        $this->assertStringContainsString('id="cessium-submit"', $html);
-        $this->assertStringContainsString('id="cessium-layer-picker"', $html);
+        $this->assertStringContainsString('id="cesium-submit"', $html);
+        $this->assertStringContainsString('id="cesium-layer-picker"', $html);
         $this->assertStringContainsString('Cesium test mission', $html);
     }
 
@@ -79,7 +79,7 @@ final class cessium_player_test extends \advanced_testcase {
             'tracking' => 0,
             'groupmode' => 0,
             'customplayerconfig' => '{}',
-            'playerstyle' => TREASUREHUNT_PLAYERCESSIUM,
+            'playerstyle' => TREASUREHUNT_PLAYERCESIUM,
         ];
         $hunt->id = $DB->insert_record('treasurehunt', $hunt);
         $moduleid = $DB->get_field('modules', 'id', ['name' => 'treasurehunt'], MUST_EXIST);
@@ -97,7 +97,7 @@ final class cessium_player_test extends \advanced_testcase {
         $PAGE->set_course($course);
         $PAGE->set_cm($cm, $course);
         $PAGE->set_context(\context_module::instance($cmid));
-        $renderable = new \mod_treasurehunt\output\play_page_cessium_player($hunt, $cm);
+        $renderable = new \mod_treasurehunt\output\play_page_cesium_player($hunt, $cm);
         $renderable->gameupdatetime = 10000;
 
         ob_start();
@@ -106,7 +106,7 @@ final class cessium_player_test extends \advanced_testcase {
         } finally {
             ob_end_clean();
         }
-        $this->assertStringContainsString('id="cessium-globe"', $html);
+        $this->assertStringContainsString('id="cesium-globe"', $html);
         $this->assertStringContainsString('cesium-1.145.0', $html);
         $this->assertStringContainsString('pegman_hiker_all_animations_matte.glb', $html);
         $this->assertStringNotContainsString('"roadtimestamp":', $html);

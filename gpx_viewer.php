@@ -60,12 +60,75 @@ if (!empty($treasurehunt->showboard)) {
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = [];
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
+$teamsbyuser = [];
+if (!empty($treasurehunt->groupmode) && $userrecords) {
+    [$usersql, $userparams] = $DB->get_in_or_equal(array_keys($userrecords), SQL_PARAMS_NAMED, 'trackeduser');
+    $teamrecords = $DB->get_records_sql(
+        'SELECT DISTINCT gm.id, gm.userid, g.id AS groupid, g.name AS groupname ' .
+        'FROM {groups_members} gm JOIN {groups} g ON g.id = gm.groupid ' .
+        'JOIN {groupings_groups} gg ON gg.groupid = g.id ' .
+        'JOIN {treasurehunt_roads} r ON r.groupingid = gg.groupingid ' .
+        "WHERE r.treasurehuntid = :huntid AND gm.userid $usersql ORDER BY g.id",
+        ['huntid' => $treasurehunt->id] + $userparams
+    );
+    foreach ($teamrecords as $teamrecord) {
+        $teamsbyuser[$teamrecord->userid] ??= $teamrecord;
+    }
+}
 foreach ($userrecords as $userrecord) {
     $user = new stdClass();
     $user->id = $userrecord->id;
     $user->fullname = fullname($userrecord);
     $user->pic = $output->user_picture($userrecord);
+    $user->pictureurl = '';
+    if (empty($treasurehunt->groupmode) && !empty($userrecord->picture) && user_picture::allow_view($userrecord->id)) {
+        $picture = new user_picture($userrecord);
+        $picture->size = 48;
+        $picture->link = false;
+        $user->pictureurl = $picture->get_url($PAGE)->out(false);
+    }
+    $team = $teamsbyuser[$userrecord->id] ?? null;
+    $user->teamid = $team ? (int)$team->groupid : 0;
+    $user->teamname = $team ? format_string($team->groupname) : '';
+    $iconname = $team ? $user->teamname : $user->fullname;
+    $nameparts = preg_split('/\s+/u', trim($iconname), -1, PREG_SPLIT_NO_EMPTY);
+    $user->initials = $nameparts ? core_text::strtoupper(core_text::substr($nameparts[0], 0, 1) .
+        (count($nameparts) > 1 ? core_text::substr(end($nameparts), 0, 1) : '')) : '?';
     $users[] = $user;
+}
+$stagebounds = null;
+$stages = $DB->get_records_sql(
+    'SELECT s.id, s.geom FROM {treasurehunt_stages} s ' .
+    'JOIN {treasurehunt_roads} r ON r.id = s.roadid WHERE r.treasurehuntid = ?',
+    [$treasurehunt->id]
+);
+// The viewer needs only the overall extent, not the stage geometries or clues.
+$visitcoordinates = function ($coordinates) use (&$visitcoordinates, &$stagebounds): void {
+    if (!is_array($coordinates)) {
+        return;
+    }
+    if (count($coordinates) >= 2 && is_numeric($coordinates[0]) && is_numeric($coordinates[1])) {
+        $x = (float)$coordinates[0];
+        $y = (float)$coordinates[1];
+        if (is_finite($x) && is_finite($y) && $x >= -180 && $x <= 180 && $y >= -90 && $y <= 90) {
+            $stagebounds = $stagebounds === null ? [$x, $y, $x, $y] : [
+                min($stagebounds[0], $x), min($stagebounds[1], $y),
+                max($stagebounds[2], $x), max($stagebounds[3], $y),
+            ];
+        }
+        return;
+    }
+    foreach ($coordinates as $part) {
+        $visitcoordinates($part);
+    }
+};
+foreach ($stages as $stage) {
+    if (!empty($stage->geom)) {
+        $geometry = treasurehunt_wkt_to_object($stage->geom);
+        if ($geometry !== null) {
+            $visitcoordinates($geometry->getCoordinates());
+        }
+    }
 }
 $refreshtracksinterval = 60;
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
@@ -79,7 +142,7 @@ $PAGE->requires->js_call_amd(
 echo $output->header();
 // Pass large data $users via Javascript.
 echo "\n<script>\n";
-echo "users_param = " . json_encode($users) . ";\n";
+echo "window.users_param = " . json_encode($users, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ";\n";
 echo "</script>\n";
 $downloadurl = new moodle_url('/mod/treasurehunt/gpx.php', [
     'id' => $id,
@@ -154,6 +217,7 @@ echo html_writer::tag('div', '', [
     'id' => 'mapgpx',
     'role' => 'region',
     'aria-label' => get_string('trackviewer', 'treasurehunt'),
+    'data-stage-bounds' => $stagebounds === null ? '' : json_encode($stagebounds),
 ]);
 echo html_writer::end_tag('div');
 echo html_writer::end_tag('section');

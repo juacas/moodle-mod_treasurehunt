@@ -638,7 +638,7 @@ export const init = async() => {
         input.className = 'form-control form-control-sm';
         input.setAttribute('aria-label', strings.searchlocation);
         const results = document.createElement('div');
-        results.className = 'cessium-search-results';
+        results.className = 'cesium-search-results';
         results.hidden = true;
         form.append(input, results);
         mapedit.appendChild(form);

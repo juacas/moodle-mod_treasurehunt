@@ -21,7 +21,7 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import {loadMapbox, mapStyle} from 'mod_treasurehunt/mapbox_player';
-import {loadCesium, createBaseProvider} from 'mod_treasurehunt/cessium_player';
+import {loadCesium, createBaseProvider} from 'mod_treasurehunt/cesium_player';
 import {createLayer as createPegman, loadLibrary as loadPegmanLibrary} from
     'mod_treasurehunt/mapbox_animated_pegman';
 import {createPegmanScale} from 'mod_treasurehunt/edit2_pegman_scale';

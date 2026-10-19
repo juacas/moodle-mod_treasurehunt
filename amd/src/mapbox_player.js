@@ -203,11 +203,21 @@ const prepareSvgOverlay = async(mapping) => {
  * @returns {Object} Mapbox style.
  */
 export const mapStyle = (kind, mapping) => {
+    if (kind === 'blank') {
+        return {version: 8, sources: {}, layers: [{id: 'base', type: 'background',
+            paint: {'background-color': '#f4f4f4'}}]};
+    }
     if (kind === 'satellite') {
         return 'mapbox://styles/mapbox/satellite-streets-v12';
     }
     if (kind === 'streets') {
         return 'mapbox://styles/mapbox/streets-v12';
+    }
+    if (kind === 'arcgis') {
+        const source = {type: 'raster',
+            tiles: ['https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}'],
+            tileSize: 256, maxzoom: 19, attribution: 'Tiles © Esri'};
+        return {version: 8, sources: {base: source}, layers: [{id: 'base', type: 'raster', source: 'base'}]};
     }
     const source = kind === 'custom' ? customSource(mapping) : null;
     const osm = {
@@ -229,12 +239,12 @@ export const mapStyle = (kind, mapping) => {
 
 /** @returns {Promise<void>} Initialisation completion. */
 export const init = async() => {
-    const root = document.getElementById('cessium-player');
+    const root = document.getElementById('cesium-player');
     if (!root) {
         return;
     }
     root.classList.add('mapbox-player');
-    const config = JSON.parse(document.getElementById('cessium-config').textContent);
+    const config = JSON.parse(document.getElementById('cesium-config').textContent);
     initParticipantProgress({
         enabled: enabled(config.playerconfig?.showparticipantprogress),
         treasurehuntid: config.treasurehuntid,
@@ -242,10 +252,18 @@ export const init = async() => {
         roadid: Number(config.playerconfig?.participantroadid || config.previewroadid || 0),
     });
     const labels = config.labels;
-    const node = (name) => document.getElementById('cessium-' + name);
+    const node = (name) => document.getElementById('cesium-' + name);
     const loading = node('loading');
     const retry = node('retry');
     const playerconfig = config.playerconfig || {};
+    const allowedBasemaps = new Set(playerconfig.allowedbasemaps || ['osm', 'arcgis_world_imagery']);
+    const permittedStyles = [
+        ['osm', 'osm', 'OpenStreetMap'],
+        ['arcgis_world_imagery', 'arcgis', 'ArcGIS World Imagery'],
+        ['mapbox_satellite', 'satellite', 'Mapbox satellite'],
+        ['mapbox_streets', 'streets', 'Mapbox streets'],
+    ].filter(([id]) => !config.custommapping?.onlybase && allowedBasemaps.has(id) &&
+        (!id.startsWith('mapbox_') || Boolean(config.mapboxaccesstoken)));
     let map;
     let mapboxgl;
     let buildingsToggle;
@@ -282,12 +300,11 @@ export const init = async() => {
     let firstResponse = true;
     let firstStyle = true;
     let initialMapReady;
-    // Start with a public OSM raster style so the map remains usable without Mapbox style access.
-    let currentStyle = 'osm';
+    let currentStyle = permittedStyles[0]?.[1] || 'blank';
     const configuredSource = customSource(config.custommapping);
     if (configuredSource && configuredSource.type !== 'image') {
         currentStyle = 'custom';
-    } else if (config.mapboxaccesstoken) {
+    } else if (config.mapboxaccesstoken && allowedBasemaps.has('mapbox_streets')) {
         currentStyle = 'streets';
     }
 
@@ -320,7 +337,7 @@ export const init = async() => {
 
     /** @param {HTMLDialogElement} dialog Dialog to close. */
     const closeDialog = (dialog) => {
-        if (dialog.id === 'cessium-qr-dialog') {
+        if (dialog.id === 'cesium-qr-dialog') {
             webqr.unloadQR(() => undefined);
         }
         if (dialog.open) {
@@ -650,7 +667,7 @@ export const init = async() => {
         [[labels.stagename, solved ? properties.name : null], [labels.stageclue, properties.clue]].forEach(([label, value]) => {
             if (value) {
                 const field = document.createElement('div');
-                field.className = 'cessium-attempt-field';
+                field.className = 'cesium-attempt-field';
                 const heading = document.createElement('span');
                 heading.textContent = label;
                 const body = document.createElement('div');
@@ -719,16 +736,16 @@ export const init = async() => {
         clues.forEach((clue, index) => {
             const tab = document.createElement('button');
             tab.type = 'button';
-            tab.id = 'cessium-clue-tab-' + index;
-            tab.className = 'cessium-clue-tab';
+            tab.id = 'cesium-clue-tab-' + index;
+            tab.className = 'cesium-clue-tab';
             tab.setAttribute('role', 'tab');
-            tab.setAttribute('aria-controls', 'cessium-clue-panel-' + index);
+            tab.setAttribute('aria-controls', 'cesium-clue-panel-' + index);
             tab.textContent = labels.clue + ' ' + clue.position;
             tab.addEventListener('click', () => selectClue(index, true));
             tabs.appendChild(tab);
             const pane = document.createElement('div');
-            pane.id = 'cessium-clue-panel-' + index;
-            pane.className = 'cessium-clue-pane cessium-richtext';
+            pane.id = 'cesium-clue-panel-' + index;
+            pane.className = 'cesium-clue-pane cesium-richtext';
             pane.setAttribute('role', 'tabpanel');
             pane.setAttribute('aria-labelledby', tab.id);
             pane.innerHTML = clue.html;
@@ -745,7 +762,7 @@ export const init = async() => {
         answers.replaceChildren();
         (stage?.answers || []).forEach((answer) => {
             const label = document.createElement('label');
-            label.className = 'cessium-answer';
+            label.className = 'cesium-answer';
             const input = document.createElement('input');
             input.type = 'radio';
             input.name = 'mapbox-answer';
@@ -1052,14 +1069,14 @@ export const init = async() => {
         node('viewmode').addEventListener('click', () => map.easeTo({pitch: map.getPitch() > 10 ? 0 : 60,
             duration: 700}));
         root.querySelectorAll('dialog').forEach((dialog) => {
-            dialog.querySelector('.cessium-close').addEventListener('click', () => closeDialog(dialog));
+            dialog.querySelector('.cesium-close').addEventListener('click', () => closeDialog(dialog));
             dialog.addEventListener('click', (event) => {
                 if (event.target === dialog) {
                     closeDialog(dialog);
                 }
             });
             dialog.addEventListener('cancel', (event) => {
-                if (dialog.id === 'cessium-qr-dialog') {
+                if (dialog.id === 'cesium-qr-dialog') {
                     event.preventDefault();
                     closeDialog(dialog);
                 }
@@ -1123,10 +1140,10 @@ export const init = async() => {
                     config.custommapping.custombackgroundurl = null;
                     config.custommapping.customSvgImage = null;
                 }
-                currentStyle = config.mapboxaccesstoken ? 'streets' : 'osm';
+                currentStyle = permittedStyles[0]?.[1] || 'blank';
             }
             if (!map) {
-                map = new mapboxgl.Map({container: 'cessium-globe', accessToken: config.mapboxaccesstoken,
+                map = new mapboxgl.Map({container: 'cesium-globe', accessToken: config.mapboxaccesstoken,
                     style: mapStyle(currentStyle, config.custommapping), center: [0, 25], zoom: 2,
                     pitch: 55, antialias: true, maxZoom: 22, performanceMetricsCollection: false,
                     collectResourceTiming: false});
@@ -1146,11 +1163,10 @@ export const init = async() => {
                 const picker = document.createElement('select');
                 picker.className = 'mapbox-layer-select';
                 picker.setAttribute('aria-label', labels.layercustom);
-                if (config.mapboxaccesstoken) {
-                    picker.add(new Option('Mapbox satellite', 'satellite'));
-                    picker.add(new Option('Mapbox streets', 'streets'));
+                permittedStyles.forEach(([, style, name]) => picker.add(new Option(name, style)));
+                if (!permittedStyles.length && config.custommapping?.custombackgroundurl) {
+                    picker.add(new Option(labels.layercustom, 'blank'));
                 }
-                picker.add(new Option('OpenStreetMap', 'osm'));
                 const configuredSource = customSource(config.custommapping);
                 if (configuredSource && configuredSource.type !== 'image') {
                     picker.add(new Option(labels.layercustom, 'custom'));

@@ -56,7 +56,7 @@ define('TREASUREHUNT_GAMEUPDATETIME', 20);
 define('TREASUREHUNT_PLAYERCLASSIC', 'classic');
 define('TREASUREHUNT_PLAYERFANCY', 'fancy');
 define('TREASUREHUNT_PLAYERBOOTSTRAP', 'bootstrap');
-define('TREASUREHUNT_PLAYERCESSIUM', 'cessium');
+define('TREASUREHUNT_PLAYERCESIUM', 'cesium');
 define('TREASUREHUNT_PLAYERMAPBOX', 'mapbox');
 /* * #@- */
 
@@ -315,7 +315,259 @@ function treasurehunt_build_customplayerconfig($data) {
     $playerconfig->showinzonehint = $data->showinzonehint;
     $playerconfig->showdistancehint = $data->showdistancehint;
     $playerconfig->shownextareahint = $data->shownextareahint;
+    $playerconfig->allowedbasemaps = treasurehunt_filter_allowed_basemaps(
+        $data->allowedbasemaps ?? [],
+        $data->playerstyle ?? null
+    );
     return $playerconfig;
+}
+
+/**
+ * Return all base maps supported by the game's players.
+ *
+ * @param bool $withplayers Include supported player names in each label.
+ * @return array Map identifiers and display names.
+ */
+function treasurehunt_get_basemap_catalog(bool $withplayers = true): array {
+    $maps = [
+        'osm' => 'OpenStreetMap',
+        'arcgis_world_imagery' => 'ArcGIS World Imagery',
+        'bing_aerial_labels' => get_string('basemap_bing', 'treasurehunt'),
+        'google_satellite' => get_string('basemap_google_satellite', 'treasurehunt'),
+        'google_roadmap' => get_string('basemap_google_road', 'treasurehunt'),
+        'stadia_alidade_smooth' => get_string('basemap_stadia_smooth', 'treasurehunt'),
+        'stadia_alidade_smooth_dark' => get_string('basemap_stadia_dark', 'treasurehunt'),
+        'stadia_stamen_toner' => get_string('basemap_stadia_toner', 'treasurehunt'),
+        'stadia_stamen_watercolor' => get_string('basemap_stadia_watercolor', 'treasurehunt'),
+        'cesium_bing_aerial' => 'Bing Maps Aerial',
+        'cesium_bing_roads' => 'Bing Maps Roads',
+        'cesium_arcgis_hillshade' => 'ArcGIS World Hillshade',
+        'cesium_esri_ocean' => 'Esri World Ocean',
+        'cesium_sentinel_2' => 'Sentinel-2',
+        'cesium_blue_marble' => 'Blue Marble',
+        'cesium_earth_at_night' => 'Earth at night',
+        'cesium_natural_earth_ii' => 'Natural Earth II',
+        'cesium_google_satellite_labels' => 'Google Maps Satellite with Labels',
+        'cesium_google_contour' => 'Google Maps Contour',
+        'cesium_azure_aerial' => 'Azure Maps Aerial',
+        'cesium_azure_roads' => 'Azure Maps Roads',
+        'mapbox_satellite' => get_string('basemap_mapbox_satellite', 'treasurehunt'),
+        'mapbox_streets' => get_string('basemap_mapbox_streets', 'treasurehunt'),
+    ];
+    if (!$withplayers) {
+        return $maps;
+    }
+    foreach ($maps as $id => $name) {
+        if (str_starts_with($id, 'mapbox_')) {
+            $players = 'Mapbox';
+        } else if (str_starts_with($id, 'cesium_')) {
+            $players = 'Cesium';
+        } else if (in_array($id, ['osm', 'arcgis_world_imagery'], true)) {
+            $players = 'Bootstrap, Cesium, Mapbox';
+        } else {
+            $players = 'Bootstrap, Cesium';
+        }
+        $maps[$id] = $name . ' (' . $players . ')';
+    }
+    return $maps;
+}
+
+/**
+ * Return base maps enabled by the site and configured for use.
+ *
+ * @return array Map identifiers and display names.
+ */
+function treasurehunt_get_available_basemaps(): array {
+    return array_merge(...array_values(treasurehunt_get_available_basemaps_by_player()));
+}
+
+/**
+ * Return enabled and configured base maps grouped by player.
+ *
+ * @return array Player styles mapped to allowed map ids and labels.
+ */
+function treasurehunt_get_available_basemaps_by_player(): array {
+    $catalog = treasurehunt_get_basemap_catalog(false);
+    $pairoptions = treasurehunt_get_basemap_pair_options();
+    $enabledpairs = treasurehunt_get_enabled_basemap_pairs($pairoptions);
+    $playerchoice = get_config('mod_treasurehunt', 'availableplayerstyles');
+    $enabledplayers = $playerchoice === false ?
+        [TREASUREHUNT_PLAYERBOOTSTRAP, TREASUREHUNT_PLAYERCESIUM, TREASUREHUNT_PLAYERMAPBOX] :
+        explode(',', $playerchoice);
+
+    $mapsbyplayer = [];
+    foreach (array_keys(treasurehunt_get_installedplayerstyles()) as $playerstyle) {
+        $mapsbyplayer[$playerstyle] = [];
+        if (!in_array($playerstyle, $enabledplayers, true)) {
+            continue;
+        }
+        foreach (treasurehunt_get_player_basemaps($playerstyle) as $mapid) {
+            $pairid = $playerstyle . ':' . $mapid;
+            if (in_array($pairid, $enabledpairs, true) && treasurehunt_player_can_use_basemap($mapid, $playerstyle)) {
+                $mapsbyplayer[$playerstyle][$mapid] = $catalog[$mapid];
+            }
+        }
+    }
+    return $mapsbyplayer;
+}
+
+/**
+ * Return site setting options keyed by player-map pair, grouped under each player.
+ *
+ * @return array Nested multiselect choices for Moodle admin settings.
+ */
+function treasurehunt_get_basemap_pair_options(): array {
+    $catalog = treasurehunt_get_basemap_catalog(false);
+    $options = [];
+    $playerlabels = [
+        TREASUREHUNT_PLAYERBOOTSTRAP => get_string('basemap_player_bootstrap', 'treasurehunt'),
+        TREASUREHUNT_PLAYERCESIUM => get_string('basemap_player_cesium', 'treasurehunt'),
+        TREASUREHUNT_PLAYERMAPBOX => get_string('basemap_player_mapbox', 'treasurehunt'),
+    ];
+    foreach (array_keys(treasurehunt_get_installedplayerstyles()) as $playerstyle) {
+        $options[$playerlabels[$playerstyle]] = [];
+        foreach (treasurehunt_get_player_basemaps($playerstyle) as $mapid) {
+            if (isset($catalog[$mapid])) {
+                $options[$playerlabels[$playerstyle]][$playerstyle . ':' . $mapid] = $mapid;
+            }
+        }
+    }
+    return $options;
+}
+
+/**
+ * Return the selected site-authorised player-map pair IDs.
+ *
+ * Legacy map-only selections are interpreted as enabled for every compatible player.
+ *
+ * @param array|null $pairoptions Pair choices indexed by player name and pair ID.
+ * @return array Pair IDs.
+ */
+function treasurehunt_get_enabled_basemap_pairs(?array $pairoptions = null): array {
+    $pairoptions = $pairoptions ?? treasurehunt_get_basemap_pair_options();
+    $allpairs = [];
+    foreach ($pairoptions as $maps) {
+        $allpairs = array_merge($allpairs, array_keys($maps));
+    }
+    $stored = get_config('mod_treasurehunt', 'availablebasemaps');
+    if ($stored === false) {
+        return $allpairs;
+    }
+    $selection = $stored === '' ? [] : explode(',', $stored);
+    if (array_filter($selection, static function($value) {
+        return strpos($value, ':') === false;
+    })) {
+        $legacyids = $selection;
+        $selection = [];
+        foreach ($pairoptions as $maps) {
+            foreach ($maps as $pairid => $mapid) {
+                if (in_array($mapid, $legacyids, true)) {
+                    $selection[] = $pairid;
+                }
+            }
+        }
+    }
+    return array_values(array_intersect($allpairs, $selection));
+}
+
+/**
+ * Keep only configured base maps in the teacher's selection.
+ *
+ * Existing hunts without a selection retain all currently available maps.
+ *
+ * @param mixed $selection Stored or submitted selection.
+ * @return array Map identifiers.
+ */
+function treasurehunt_filter_allowed_basemaps($selection, ?string $playerstyle = null): array {
+    $available = $playerstyle === null ? treasurehunt_get_available_basemaps() :
+        (treasurehunt_get_available_basemaps_by_player()[$playerstyle] ?? []);
+    if ($selection === null) {
+        return array_keys($available);
+    }
+    if (!is_array($selection)) {
+        return [];
+    }
+    $mapids = [];
+    foreach ($available as $mapid => $label) {
+        $pairid = $playerstyle === null ? null : $playerstyle . ':' . $mapid;
+        if (in_array($mapid, $selection, true) || ($pairid !== null && in_array($pairid, $selection, true))) {
+            $mapids[] = $mapid;
+        }
+    }
+    return $mapids;
+}
+
+/**
+ * Return base map identifiers supported by a game player.
+ *
+ * @param string $playerstyle Player identifier.
+ * @return array Base map identifiers.
+ */
+function treasurehunt_get_player_basemaps(string $playerstyle): array {
+    if ($playerstyle === TREASUREHUNT_PLAYERMAPBOX) {
+        return ['osm', 'arcgis_world_imagery', 'mapbox_satellite', 'mapbox_streets'];
+    }
+    $shared = ['osm', 'arcgis_world_imagery', 'bing_aerial_labels', 'google_satellite', 'google_roadmap',
+        'stadia_alidade_smooth', 'stadia_alidade_smooth_dark', 'stadia_stamen_toner', 'stadia_stamen_watercolor'];
+    if ($playerstyle === TREASUREHUNT_PLAYERCESIUM) {
+        return array_merge($shared, ['cesium_bing_aerial', 'cesium_bing_roads', 'cesium_arcgis_hillshade',
+            'cesium_esri_ocean', 'cesium_sentinel_2', 'cesium_blue_marble', 'cesium_earth_at_night',
+            'cesium_natural_earth_ii', 'cesium_google_satellite_labels', 'cesium_google_contour',
+            'cesium_azure_aerial', 'cesium_azure_roads']);
+    }
+    return $shared;
+}
+
+/**
+ * Check whether a configured provider is usable in a specific player.
+ *
+ * @param string $id Base map identifier.
+ * @param string $playerstyle Player identifier.
+ * @return bool Whether the provider can be used.
+ */
+function treasurehunt_player_can_use_basemap(string $id, string $playerstyle): bool {
+    if (!in_array($id, treasurehunt_get_player_basemaps($playerstyle), true)) {
+        return false;
+    }
+    if ($playerstyle === TREASUREHUNT_PLAYERBOOTSTRAP) {
+        if ($id === 'bing_aerial_labels') {
+            return (bool)get_config('mod_treasurehunt', 'bingmapskey');
+        }
+        if (str_starts_with($id, 'google_')) {
+            return (bool)get_config('mod_treasurehunt', 'googlemapstileapikey');
+        }
+    }
+    if (str_starts_with($id, 'stadia_')) {
+        return (bool)(get_config('mod_treasurehunt', 'stadiamapsapikey') ||
+            get_config('mod_treasurehunt', 'stadiamapsdomainauth'));
+    }
+    if (str_starts_with($id, 'mapbox_')) {
+        return (bool)get_config('mod_treasurehunt', 'mapboxaccesstoken');
+    }
+    return true;
+}
+
+/**
+ * Check that an activity has a base map its chosen player can render.
+ *
+ * Custom base map details are validated separately by the activity form.
+ *
+ * @param mixed $selection Submitted base map identifiers.
+ * @param string $playerstyle Chosen game player.
+ * @param string $customlayertype Custom layer role.
+ * @return bool Whether a base map is available.
+ */
+function treasurehunt_has_usable_basemap($selection, string $playerstyle, string $customlayertype): bool {
+    if (in_array($customlayertype, ['base', 'onlybase', 'nongeographic'], true)) {
+        return true;
+    }
+    $allowedbasemaps = treasurehunt_filter_allowed_basemaps($selection, $playerstyle);
+    foreach ($allowedbasemaps as $id) {
+        if (treasurehunt_player_can_use_basemap($id, $playerstyle)) {
+            return true;
+        }
+    }
+    return false;
 }
 /**
  * Build a custom mapping configuration object from form data.
@@ -3651,7 +3903,7 @@ function treasurehunt_get_installedplayerstyles() {
         // Deprecated in v1.6.0 TREASUREHUNT_PLAYERCLASSIC =>  get_string('playerclassic', 'treasurehunt'),.
         // Deprecated in v1.7.0 TREASUREHUNT_PLAYERFANCY =>  get_string('playerfancy', 'treasurehunt'),.
         TREASUREHUNT_PLAYERBOOTSTRAP => get_string('playerbootstrap', 'treasurehunt'),
-        TREASUREHUNT_PLAYERCESSIUM => get_string('playercessium', 'treasurehunt'),
+        TREASUREHUNT_PLAYERCESIUM => get_string('playercesium', 'treasurehunt'),
         TREASUREHUNT_PLAYERMAPBOX => get_string('playermapbox', 'treasurehunt'),
     ];
 }

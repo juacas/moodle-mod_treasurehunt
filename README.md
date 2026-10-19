@@ -173,8 +173,8 @@ counts as completed only after its required question and activities have been pa
 Experimental Cesium player
 ==========================
 
-The `experiment/cessium` branch adds the **Cesium 3D (experimental)** player style,
-internally named `cessium`. Enable it in the activity module's admin setting
+The `experiment/cesium` branch adds the **Cesium 3D (experimental)** player style,
+internally named `cesium`. Enable it in the activity module's admin setting
 **Available game screen styles**, then select it in the treasure hunt settings.
 The existing Bootstrap player remains available.
 
@@ -219,7 +219,7 @@ Geographic editor with selectable map engine (experimental)
 
 Teachers can open `edit2.php?id=CMID` to edit roads and stage geometry with the
 map engine configured for the activity. Add `&playertype=bootstrap`,
-`&playertype=cessium`, or `&playertype=mapbox` to select an engine
+`&playertype=cesium`, or `&playertype=mapbox` to select an engine
 for that editor visit. The Bootstrap option uses the established OpenLayers
 editor. Cesium and Mapbox use their native map navigation and layer controls,
 show the animated 3D pegman, and provide polygon drawing, vertex dragging,

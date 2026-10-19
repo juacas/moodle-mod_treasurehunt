@@ -1,0 +1,154 @@
+{{!
+    This file is part of Moodle - http://moodle.org/
+
+    Moodle is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Moodle is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with Moodle. If not, see <http://www.gnu.org/licenses/>.
+}}
+{{!
+    @template mod_treasurehunt/cesium_player
+    Example context (json):
+    {
+        "huntname": "Example treasure hunt",
+        "playerconfigjson": "{}",
+        "playerbrand": "Cesium",
+        "cmid": 1
+    }
+}}
+<main id="cesium-player" class="cesium-player" aria-label="{{huntname}}">
+    <script type="application/json" id="cesium-config">{{{playerconfigjson}}}</script>
+    <div id="cesium-globe" class="cesium-globe" role="region" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}"></div>
+    <div class="cesium-vignette" aria-hidden="true"></div>
+    <div class="cesium-grid" aria-hidden="true"></div>
+
+    <header class="cesium-topbar">
+        <div class="cesium-brand">
+            <span class="cesium-brand-mark"><img src="pix/treasurechest_loading.gif" alt=""></span>
+            <div class="cesium-brand-copy">
+                <small>{{#str}}cesium_mode, mod_treasurehunt{{/str}} · {{playerbrand}}</small>
+                <strong>{{huntname}}</strong>
+            </div>
+        </div>
+        <div class="cesium-mission-status" aria-live="polite">
+            <span class="cesium-signal" aria-hidden="true"></span>
+            <span id="cesium-sync-status">{{#str}}cesium_loading, mod_treasurehunt{{/str}}</span>
+        </div>
+        <a class="cesium-exit" href="view.php?id={{cmid}}">
+            <i class="fa fa-sign-out" aria-hidden="true"></i>
+            <span>{{#str}}exit, mod_treasurehunt{{/str}}</span>
+        </a>
+    </header>
+
+    <div id="treasurehunt-participant-progress" class="th-participant-progress" role="group" hidden
+        aria-label="{{#str}}participantprogress, mod_treasurehunt{{/str}}"></div>
+
+    <div class="cesium-map-summary">
+        <form id="cesium-search" class="cesium-search" role="search" hidden>
+            <label class="sr-only" for="cesium-search-input">{{#str}}cesium_search, mod_treasurehunt{{/str}}</label>
+            <div class="cesium-search-row">
+                <input id="cesium-search-input" type="search" placeholder="{{#str}}cesium_search_placeholder, mod_treasurehunt{{/str}}"
+                    autocomplete="off" aria-controls="cesium-search-results">
+                <button type="submit" aria-label="{{#str}}cesium_search, mod_treasurehunt{{/str}}"><i class="fa fa-search" aria-hidden="true"></i></button>
+            </div>
+            <div id="cesium-search-results" class="cesium-search-results" role="listbox" hidden></div>
+        </form>
+
+        <section class="cesium-objective" aria-label="{{#str}}stages, mod_treasurehunt{{/str}}">
+            <div class="cesium-progress-track" role="progressbar" aria-label="{{#str}}stages, mod_treasurehunt{{/str}}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0" id="cesium-progress-track">
+                <span id="cesium-progress-bar"></span>
+            </div>
+            <div class="cesium-progress-caption"><span id="cesium-progress-label">0 / —</span></div>
+        </section>
+    </div>
+
+    <aside id="cesium-navigation" class="cesium-navigation" aria-live="polite" hidden>
+        <div><span id="cesium-distance">—</span><small id="cesium-position-status">{{#str}}cesium_position, mod_treasurehunt{{/str}}</small></div>
+    </aside>
+
+    <div class="cesium-map-actions" role="group" aria-label="{{#str}}mapview, mod_treasurehunt{{/str}}">
+        <div id="cesium-layer-picker" class="cesium-layer-picker" role="group" aria-label="{{#str}}cesium_layers, mod_treasurehunt{{/str}}"></div>
+        <button type="button" id="cesium-fit" title="{{#str}}cesium_fitmap, mod_treasurehunt{{/str}}" aria-label="{{#str}}cesium_fitmap, mod_treasurehunt{{/str}}"><i class="fa fa-crosshairs" aria-hidden="true"></i></button>
+        <button type="button" id="cesium-locate" title="{{#str}}cesium_position, mod_treasurehunt{{/str}}" aria-label="{{#str}}cesium_position, mod_treasurehunt{{/str}}"><i class="fa fa-location-arrow" aria-hidden="true"></i></button>
+        <button type="button" id="cesium-viewmode" title="{{#str}}cesium_viewmode, mod_treasurehunt{{/str}}" aria-label="{{#str}}cesium_viewmode, mod_treasurehunt{{/str}}"><i class="fa fa-globe" aria-hidden="true"></i></button>
+    </div>
+
+    <nav class="cesium-dock" aria-label="{{#str}}cesium_mode, mod_treasurehunt{{/str}}">
+        <button type="button" id="cesium-clue" class="cesium-dock-button">
+            <i class="fa fa-key" aria-hidden="true"></i><span>{{#str}}showclue, mod_treasurehunt{{/str}}</span>
+        </button>
+        <button type="button" id="cesium-submit" class="cesium-dock-button cesium-dock-primary" disabled>
+            <i class="fa fa-map-marker" aria-hidden="true"></i><span>{{#str}}cesium_submitlocation, mod_treasurehunt{{/str}}</span>
+        </button>
+        <button type="button" id="cesium-qr" class="cesium-dock-button" hidden>
+            <i class="fa fa-qrcode" aria-hidden="true"></i><span>{{#str}}cesium_scanqr, mod_treasurehunt{{/str}}</span>
+        </button>
+        <button type="button" id="cesium-history" class="cesium-dock-button">
+            <i class="fa fa-list-alt" aria-hidden="true"></i><span>{{#str}}cesium_history, mod_treasurehunt{{/str}}</span>
+        </button>
+    </nav>
+
+    <div id="cesium-finished" class="cesium-finished" hidden>
+        <i class="fa fa-trophy" aria-hidden="true"></i>
+        <div class="cesium-finished-copy">
+            <div>{{#str}}roadended, mod_treasurehunt{{/str}}</div>
+            <div id="cesium-finished-stage" class="cesium-richtext cesium-finished-stage" hidden></div>
+        </div>
+    </div>
+
+    <div id="cesium-toast" class="cesium-toast" role="status" aria-live="polite" hidden></div>
+    <div id="cesium-attempt-popup" class="cesium-attempt-popup" role="dialog" aria-labelledby="cesium-attempt-title" hidden>
+        <button type="button" id="cesium-attempt-close" class="cesium-attempt-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times" aria-hidden="true"></i></button>
+        <strong id="cesium-attempt-title"></strong>
+        <div id="cesium-attempt-content" class="cesium-richtext"></div>
+    </div>
+    <div id="cesium-loading" class="cesium-loading" aria-live="polite">
+        <img class="cesium-loading-image" src="pix/treasurechest_loading.gif" alt="">
+        <p>{{#str}}cesium_loading, mod_treasurehunt{{/str}}</p>
+        <button type="button" id="cesium-retry" hidden>{{#str}}cesium_retry, mod_treasurehunt{{/str}}</button>
+    </div>
+
+    <dialog id="cesium-feedback-dialog" class="cesium-dialog" aria-labelledby="cesium-feedback-title" aria-describedby="cesium-feedback-content">
+        <div class="cesium-dialog-header"><button type="button" class="cesium-close" aria-label="{{#str}}closebuttontitle, moodle{{/str}}"><i class="fa fa-times" aria-hidden="true"></i></button></div>
+        <h2 id="cesium-feedback-title">{{#str}}failedlocation, mod_treasurehunt{{/str}}</h2>
+        <p id="cesium-feedback-content"></p>
+        <form method="dialog"><button type="submit" class="cesium-dialog-action">{{#str}}closebuttontitle, moodle{{/str}}</button></form>
+    </dialog>
+
+    <dialog id="cesium-clue-dialog" class="cesium-dialog" aria-labelledby="cesium-clue-title">
+        <div class="cesium-dialog-header"><span class="cesium-dialog-kicker">{{#str}}showclue, mod_treasurehunt{{/str}}</span><button type="button" class="cesium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
+        <h2 id="cesium-clue-title">{{#str}}nextclue, mod_treasurehunt{{/str}}</h2>
+        <div id="cesium-clue-tabs" class="cesium-clue-tabs" role="tablist" aria-label="{{#str}}nextclues, mod_treasurehunt{{/str}}" hidden></div>
+        <div id="cesium-clue-content" class="cesium-clue-content"></div>
+        <button type="button" id="cesium-question-open" class="cesium-dialog-action" hidden>{{#str}}question, mod_treasurehunt{{/str}} <i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+    </dialog>
+
+    <dialog id="cesium-question-dialog" class="cesium-dialog" aria-labelledby="cesium-question-title">
+        <div class="cesium-dialog-header"><span class="cesium-dialog-kicker">{{#str}}question, mod_treasurehunt{{/str}}</span><button type="button" class="cesium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
+        <h2 id="cesium-question-title">{{#str}}question, mod_treasurehunt{{/str}}</h2>
+        <div id="cesium-question-content" class="cesium-richtext"></div>
+        <form id="cesium-answer-form"><fieldset id="cesium-answers"></fieldset><button class="cesium-dialog-action" type="submit">{{#str}}send, mod_treasurehunt{{/str}}</button></form>
+    </dialog>
+
+    <dialog id="cesium-qr-dialog" class="cesium-dialog" aria-labelledby="cesium-qr-title">
+        <div class="cesium-dialog-header"><span class="cesium-dialog-kicker">{{#str}}cesium_scanqr, mod_treasurehunt{{/str}}</span><button type="button" class="cesium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
+        <h2 id="cesium-qr-title">{{#str}}cesium_scanqr, mod_treasurehunt{{/str}}</h2>
+        <div id="previewQR"><div id="previewQRdiv"></div></div>
+        <p id="cesium-camera-status"></p>
+        <button type="button" id="cesium-next-camera" class="cesium-dialog-action" hidden>{{#str}}nextcamera, mod_treasurehunt{{/str}}</button>
+    </dialog>
+
+    <dialog id="cesium-history-dialog" class="cesium-dialog" aria-labelledby="cesium-history-title">
+        <div class="cesium-dialog-header"><span class="cesium-dialog-kicker">{{#str}}cesium_history, mod_treasurehunt{{/str}}</span><button type="button" class="cesium-close" aria-label="{{#str}}cancel, mod_treasurehunt{{/str}}"><i class="fa fa-times"></i></button></div>
+        <h2 id="cesium-history-title">{{#str}}cesium_history, mod_treasurehunt{{/str}}</h2>
+        <div id="cesium-history-content" class="cesium-richtext"></div>
+    </dialog>
+</main>

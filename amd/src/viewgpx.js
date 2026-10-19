@@ -45,7 +45,7 @@ let init = {
         // I18n strings.
         var terms = [
             'aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel',
-            'trackviewerrefreshdisabled', 'trackviewerrefreshseconds'
+            'trackviewerheatmap', 'trackviewerrefreshdisabled', 'trackviewerrefreshseconds'
         ];
         var stringsqueried = terms.map(function(term) {
             return {key: term, component: 'treasurehunt'};
@@ -245,20 +245,19 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     if (geographictools) {
         // Console.log('Adding geolocation control.');
     }
-    // TODO: test and include heatmap layer.
+    // Reuse the loaded GPX points; a separate request would duplicate traffic and miss other participants.
+    var heatmapSource = new ol.source.Vector();
     var heatmap = new ol.layer.Heatmap({
-        title: 'Heatmap',
-        source: new ol.source.Vector({
-            url: 'gpx.php?id=' + cmid + '&userid=24', // + users.map(function(e){return e.id;}),
-            format: new ol.format.GPX()
-        }),
+        title: strings.trackviewerheatmap,
+        source: heatmapSource,
         blur: 20,
-        radius: 10
+        radius: 1,
+        opacity: 0.7
     });
 
     var layerSwitcher = new ol.control.LayerSwitcher();
     var map = new ol.Map({
-        layers: [basemaps, tracks, heatmap],
+        layers: [basemaps, heatmap, tracks],
         renderer: 'canvas',
         target: document.getElementById('mapgpx'),
         view: new ol.View({
@@ -269,18 +268,78 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         }),
         controls: ol.control.defaults().extend([layerSwitcher])
     });
+    // Keep the kernel radius fixed at 25 map units (metres in EPSG:3857).
+    var heatmapRadiusInMapUnits = 50;
+    var heatmapBlurInMapUnits = 100;
+    /** Convert the fixed map-unit radius to the pixel radius expected by OpenLayers. */
+    function updateHeatmapParams() {
+        var resolution = map.getView().getResolution();
+        if (resolution > 0) {
+            heatmap.setRadius(heatmapRadiusInMapUnits / resolution);
+            heatmap.setBlur(heatmapBlurInMapUnits / resolution);
+        }
+    }
+    map.getView().on('change:resolution', updateHeatmapParams);
+    updateHeatmapParams();
     // Console.log('Map created in mapgpx!');
     layerSwitcher.showPanel();
-    var selectSingleClick = new ol.interaction.Select({
-        style: function(feature) {
-            var layer = selectSingleClick.getLayer(feature);
-            var iconurl = layer.iconurl;
-            var selectedstyle = trackStyleFunction(feature, iconurl, true);
-            return selectedstyle;
+    var stagebounds = document.getElementById('mapgpx').dataset.stageBounds;
+    var hasStageBounds = false;
+    if (stagebounds) {
+        try {
+            var bounds = JSON.parse(stagebounds);
+            if (getValidExtent(bounds)) {
+                map.getView().fit(ol.proj.transformExtent(bounds, 'EPSG:4326', mapprojection), {
+                    padding: [36, 36, 36, 36],
+                    maxZoom: 17
+                });
+                hasStageBounds = true;
+            }
+        } catch (error) {
+            // An invalid stored extent should not prevent the tracks from loading.
         }
-    });
-    map.addInteraction(selectSingleClick);
-    loadGpx(users, cmid, map, tracks, layerSwitcher);
+    }
+    var heatmapUpdatePending = false;
+    /** Batch GPX refreshes that finish in the same browser frame. */
+    function scheduleHeatmapUpdate() {
+        if (heatmapUpdatePending) {
+            return;
+        }
+        heatmapUpdatePending = true;
+        window.requestAnimationFrame(function() {
+            heatmapUpdatePending = false;
+            rebuildHeatmap();
+        });
+    }
+    loadGpx(users, cmid, map, tracks, layerSwitcher, scheduleHeatmapUpdate, !hasStageBounds);
+
+    /** Rebuild the heatmap from every loaded GPX line, bounded to avoid excessive canvas work. */
+    function rebuildHeatmap() {
+        var coordinates = [];
+        tracks.getLayers().forEach(function(layer) {
+            layer.getSource().getFeatures().forEach(function(feature) {
+                var geometry = feature.getGeometry();
+                if (geometry && geometry.getType() === 'LineString') {
+                    geometry.getCoordinates().forEach(function(point) {
+                        coordinates.push(point);
+                    });
+                } else if (geometry && geometry.getType() === 'MultiLineString') {
+                    geometry.getCoordinates().forEach(function(line) {
+                        line.forEach(function(point) {
+                            coordinates.push(point);
+                        });
+                    });
+                }
+            });
+        });
+        var stride = Math.max(1, Math.ceil(coordinates.length / 15000));
+        var points = [];
+        for (var i = 0; i < coordinates.length; i += stride) {
+            points.push(new ol.Feature(new ol.geom.Point(coordinates[i])));
+        }
+        heatmapSource.clear();
+        heatmapSource.addFeatures(points);
+    }
     // Popup showing the position the user clicked.
     var popup = new ol.Overlay({
         element: document.getElementById('info')
@@ -331,14 +390,16 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     function displayFeatureInfo(pixel, themap, coordinates, label) {
         var features = [];
         var msg = '';
-        themap.forEachFeatureAtPixel(pixel, function(feature) {
-            features.push(feature);
+        themap.forEachFeatureAtPixel(pixel, function(feature, layer) {
+            if (layer && layer.get('trackUserId')) {
+                features.push(layer.get('participantName'));
+            }
         });
         if (features.length > 0) {
             var info = [];
             var i, ii;
             for (i = 0, ii = features.length; i < ii; ++i) {
-                info.push(features[i].get('desc'));
+                info.push($('<div>').text(features[i]).html());
             }
             msg = info.join(', ') || '(unknown)';
             map.getTarget().style.cursor = 'pointer';
@@ -365,10 +426,54 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         });
         $(element).popover('show');
     }
-    map.on('pointermove', function(evt) {
-        if (evt.dragging) {
+    var hoverElement = document.createElement('div');
+    hoverElement.className = 'track-hover-tooltip';
+    var hoverPopup = new ol.Overlay({
+        element: hoverElement,
+        offset: [0, -12],
+        positioning: 'bottom-center',
+        stopEvent: false
+    });
+    map.addOverlay(hoverPopup);
+    var activeTrack = null;
+    /**
+     * Highlight one participant while restoring every other track on exit.
+     * @param {ol.layer.Vector|null} layer The hovered track layer.
+     */
+    function setActiveTrack(layer) {
+        if (activeTrack === layer) {
             return;
         }
+        activeTrack = layer;
+        tracks.getLayers().forEach(function(track) {
+            track.setOpacity(layer && track !== layer ? 0.16 : 1);
+            track.set('hovered', layer === track);
+            if (track.markerElement) {
+                track.markerElement.style.opacity = layer && track !== layer ? '0.16' : '1';
+            }
+            track.changed();
+        });
+        hoverElement.textContent = layer ? layer.get('participantName') : '';
+        if (!layer) {
+            hoverPopup.setPosition(undefined);
+        }
+        map.getTargetElement().style.cursor = layer ? 'pointer' : '';
+    }
+    map.on('pointermove', function(evt) {
+        if (evt.dragging) {
+            setActiveTrack(null);
+            return;
+        }
+        var hovered = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            return layer && layer.get('trackUserId') ? layer : undefined;
+        });
+        setActiveTrack(hovered || null);
+        if (hovered) {
+            hoverPopup.setPosition(evt.coordinate);
+        }
+    });
+    map.getViewport().addEventListener('mouseleave', function() {
+        setActiveTrack(null);
     });
     map.on('click', function(evt) {
         showpopup(evt);
@@ -461,29 +566,53 @@ function flyTo(map, point, extent) {
  * @param {ol.Map} map
  * @param {ol.layer.Group} tracksGroup
  * @param {LayerSwitcher} layerSwitcher
+ * @param {Function} onSourceLoaded Callback to update the heatmap.
+ * @param {boolean} fitTracks Whether to fit tracks when stage geometry is unavailable.
  */
-function loadGpx(users, cmid, map, tracksGroup, layerSwitcher) {
+function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = null, fitTracks = false) {
     var maxExtent = null;
+    var pending = users.length;
     users.forEach(function(user) {
         var gpxsource = new ol.source.Vector({
             url: 'gpx.php?id=' + cmid + '&userid=' + user.id,
             format: new ol.format.GPX()
         });
-        var a = user.pic.indexOf('<img src="') + 10;
-        var b = user.pic.indexOf('"', a);
-        var iconurl = user.pic.substring(a, b);
-
+        var color = user.teamid ? teamColor(user.teamid) : trackColor(user.id);
+        var participantName = user.teamname ? user.fullname + ' · ' + user.teamname : user.fullname;
         var vector = new ol.layer.Vector({
             source: gpxsource,
-            title: user.pic + '' + user.fullname + '</img>',
-            style: function(feature) {
-                var selectedstyle = trackStyleFunction(feature, iconurl, false);
-                return selectedstyle;
+            title: user.pic + ' ' + $('<div>').text(participantName).html(),
+            style: function() {
+                return trackStyleFunction(color, Boolean(vector.get('hovered')));
             }
         });
-        vector.iconurl = iconurl;
+        vector.set('trackUserId', user.id);
+        vector.set('participantName', participantName);
+        var marker = document.createElement('div');
+        marker.className = 'track-participant-avatar';
+        marker.style.setProperty('--track-color', color);
+        marker.title = participantName;
+        if (user.pictureurl) {
+            var picture = document.createElement('img');
+            picture.src = user.pictureurl;
+            picture.alt = '';
+            marker.appendChild(picture);
+        } else {
+            marker.textContent = user.initials || '?';
+        }
+        var markerOverlay = new ol.Overlay({
+            element: marker,
+            positioning: 'center-center',
+            stopEvent: false
+        });
+        vector.markerElement = marker;
+        map.addOverlay(markerOverlay);
         init.refreshSources.push(gpxsource);
         vector.on('change:visible', function() {
+            marker.style.display = this.getVisible() ? '' : 'none';
+            if (onSourceLoaded) {
+                onSourceLoaded();
+            }
             if (this.getVisible()) {
                 var extent = this.getSource().getExtent();
                 extent = getValidExtent(extent);
@@ -492,21 +621,40 @@ function loadGpx(users, cmid, map, tracksGroup, layerSwitcher) {
                 }
             }
         });
+        var initiallyLoaded = false;
         gpxsource.on('change', function() {
-            if (init.refreshTracksInterval > 0) {
+            if (gpxsource.getState() !== 'ready') {
                 return;
             }
-            var extent = gpxsource.getExtent();
-
-            if (maxExtent === null) {
-                maxExtent = extent;
+            var extent = getValidExtent(gpxsource.getExtent());
+            if (extent !== null) {
+                maxExtent = maxExtent === null ? extent.slice() : ol.extent.extend(maxExtent, extent);
+                var coordinates = null;
+                gpxsource.getFeatures().forEach(function(feature) {
+                    var geometry = feature.getGeometry();
+                    if (geometry && geometry.getType() === 'LineString') {
+                        coordinates = geometry.getLastCoordinate();
+                    } else if (geometry && geometry.getType() === 'MultiLineString') {
+                        var lines = geometry.getCoordinates();
+                        if (lines.length && lines[lines.length - 1].length) {
+                            coordinates = lines[lines.length - 1][lines[lines.length - 1].length - 1];
+                        }
+                    }
+                });
+                markerOverlay.setPosition(coordinates || undefined);
             } else {
-                maxExtent[0] = Math.min(maxExtent[0], extent[0]);
-                maxExtent[1] = Math.min(maxExtent[1], extent[1]);
-                maxExtent[2] = Math.max(maxExtent[2], extent[2]);
-                maxExtent[3] = Math.max(maxExtent[3], extent[3]);
+                markerOverlay.setPosition(undefined);
             }
-            flyTo(map, null, maxExtent);
+            if (onSourceLoaded) {
+                onSourceLoaded();
+            }
+            if (!initiallyLoaded) {
+                initiallyLoaded = true;
+                pending--;
+                if (fitTracks && pending === 0 && maxExtent) {
+                    map.getView().fit(maxExtent, {padding: [36, 36, 36, 36], maxZoom: 17});
+                }
+            }
         }, this);
         tracksGroup.getLayers().push(vector);
         if (layerSwitcher) {
@@ -522,22 +670,18 @@ function getValidExtent(extent) {
     if (!(extent instanceof Array) || extent.length != 4) {
         return null;
     }
-    if (extent[0] === Infinity ||
-        extent[1] === Infinity ||
-        extent[2] === Infinity ||
-        extent[3] === Infinity) {
+    if (!extent.every(Number.isFinite) || extent[0] > extent[2] || extent[1] > extent[3]) {
         return null;
     }
     return extent;
 }
 /**
  * Track decoration function.
- * @param {ol.Feature} feature
- * @param {string} icon
+ * @param {string} color
  * @param {boolean} selected
  * @returns {Array<ol.style.Style>}
  */
-function trackStyleFunction(feature, icon, selected) {
+function trackStyleFunction(color, selected) {
     var styles = [
         // ...shadow.
         new ol.style.Style({
@@ -551,47 +695,46 @@ function trackStyleFunction(feature, icon, selected) {
         }),
         new ol.style.Style({
             stroke: new ol.style.Stroke({
-                color: '#ff0000',
+                color: color,
                 width: 4 + 2 * selected,
                 lineCap: 'round',
                 lineJoin: 'round',
             }),
             fill: new ol.style.Fill({
-                color: 'rgba(255,0,0,0.5)'
+                color: color
             }),
             zIndex: 2 + selected * 4
-        }),
-        new ol.style.Style({
-            image: new ol.style.Circle({
-                radius: 3 + 2 * selected,
-                stroke: new ol.style.Stroke({
-                    color: 'white',
-                    width: 1 + selected
-                }),
-                fill: new ol.style.Fill({
-                    color: 'red'
-                })
-            }),
-            geometry: function(feature) {
-                // Return the coordinates of the first ring of the polygon
-                var coordinates = feature.getGeometry().getCoordinates()[0];
-                return new ol.geom.MultiPoint(coordinates);
-            },
-            zIndex: 3 + selected * 4
         })
     ];
-    var geometry = feature.getGeometry();
-    var coord = geometry.getLastCoordinate();
-    styles.push(new ol.style.Style({
-        geometry: new ol.geom.Point(coord),
-        image: new ol.style.Icon({
-            src: icon,
-            anchor: [0.75, 0.5],
-            rotateWithView: false,
-        }),
-        zIndex: 4 + selected * 4
-    }));
     return styles;
+}
+/**
+ * Choose a stable, legible color for one participant's track.
+ * @param {number} userid User id.
+ * @returns {string} CSS color.
+ */
+function trackColor(userid) {
+    var sector = ((Number(userid) * 137.508) % 360) / 60;
+    var chroma = (1 - Math.abs(2 * 0.37 - 1)) * 0.7;
+    var secondary = chroma * (1 - Math.abs(sector % 2 - 1));
+    var wheel = [
+        [chroma, secondary, 0], [secondary, chroma, 0], [0, chroma, secondary],
+        [0, secondary, chroma], [secondary, 0, chroma], [chroma, 0, secondary]
+    ];
+    var channels = wheel[Math.floor(sector)];
+    var offset = 0.37 - chroma / 2;
+    return 'rgb(' + channels.map(function(channel) {
+        return Math.round((channel + offset) * 255);
+    }).join(',') + ')';
+}
+/**
+ * Match the team palette used by the participant progress bar.
+ * @param {number} groupid Moodle group id.
+ * @returns {string} CSS color.
+ */
+function teamColor(groupid) {
+    var colors = ['#3478c5', '#7a4db3', '#008f87', '#c06a28', '#b14b78', '#587d32', '#5363a6'];
+    return colors[Number(groupid) % colors.length];
 }
 /**
  * Create a pegman link to Google Maps Street View.

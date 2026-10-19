@@ -47,7 +47,7 @@ Geographic custom maps work with both players. Maps using local image coordinate
 open in Bootstrap/OpenLayers.
 
 Administrators choose the available player styles; teachers select one for each
-activity. Managers can also use `playertype=bootstrap`, `playertype=cessium` or
+activity. Managers can also use `playertype=bootstrap`, `playertype=cesium` or
 `playertype=mapbox` in a player URL to test another view.
 
 ## Build stages from OpenData

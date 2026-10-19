@@ -268,8 +268,12 @@
             {{#str}} layers, mod_treasurehunt{{/str}}
         {{/dialogtitle}}
         {{$dialogcontent}}
-            <h5 class="card-title">{{#str}} mapview, mod_treasurehunt{{/str}}</h5>
-            <div class="list-group" id="layerslist"></div>
+            <h5 class="card-title">{{#str}} baselayers, mod_treasurehunt{{/str}}</h5>
+            <script type="application/json" id="treasurehunt-basemap-config">{{{basemapconfigjson}}}</script>
+            <div id="layerslist" class="th-basemap-grid" role="group"
+                aria-label="{{#str}}baselayers, mod_treasurehunt{{/str}}"></div>
+            <h5 id="overlaylayersheading" class="card-title mt-4" hidden>{{#str}}overlaylayers, mod_treasurehunt{{/str}}</h5>
+            <div id="overlaylayerslist" class="list-group"></div>
         {{/dialogcontent}}
     {{/treasurehunt/dialog_play_page}}
 

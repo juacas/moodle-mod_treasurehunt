@@ -44,7 +44,7 @@ export const setup = (form, input, results, disabled, flyTo, labels) => {
         }
         results.replaceChildren();
         const status = document.createElement('div');
-        status.className = 'cessium-search-status';
+        status.className = 'cesium-search-status';
         status.textContent = labels.searching;
         results.appendChild(status);
         results.hidden = false;
@@ -68,7 +68,7 @@ export const setup = (form, input, results, disabled, flyTo, labels) => {
             places.forEach((place) => {
                 const result = document.createElement('button');
                 result.type = 'button';
-                result.className = 'cessium-search-result';
+                result.className = 'cesium-search-result';
                 result.setAttribute('role', 'option');
                 result.textContent = place.display_name;
                 result.addEventListener('click', () => {
@@ -79,7 +79,7 @@ export const setup = (form, input, results, disabled, flyTo, labels) => {
                 results.appendChild(result);
             });
             const attribution = document.createElement('a');
-            attribution.className = 'cessium-search-attribution';
+            attribution.className = 'cesium-search-attribution';
             attribution.href = 'https://www.openstreetmap.org/copyright';
             attribution.target = '_blank';
             attribution.rel = 'noopener noreferrer';
