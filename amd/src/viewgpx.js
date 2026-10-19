@@ -26,6 +26,7 @@ import ol from 'mod_treasurehunt/ol';
 import 'mod_treasurehunt/ol3-layerswitcher';
 import {get_strings as str} from 'core/str';
 import notification from 'core/notification';
+import {create as createCachedHeatmap} from 'mod_treasurehunt/cached_heatmap';
 
 let init = {
     refreshTracksInterval: 60,
@@ -245,15 +246,12 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     if (geographictools) {
         // Console.log('Adding geolocation control.');
     }
-    // Reuse the loaded GPX points; a separate request would duplicate traffic and miss other participants.
-    var heatmapSource = new ol.source.Vector();
-    var heatmap = new ol.layer.Heatmap({
-        title: strings.trackviewerheatmap,
-        source: heatmapSource,
-        blur: 20,
-        radius: 1,
-        opacity: 0.7
-    });
+    // Reuse the loaded GPX points and cache their rasterised heatmap by map tile.
+    var heatmapRadiusInMapUnits = 50;
+    var heatmapBlurInMapUnits = 100;
+    var cachedHeatmap = createCachedHeatmap(ol, strings.trackviewerheatmap,
+        heatmapRadiusInMapUnits, heatmapBlurInMapUnits);
+    var heatmap = cachedHeatmap.layer;
 
     var layerSwitcher = new ol.control.LayerSwitcher();
     var map = new ol.Map({
@@ -268,19 +266,6 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         }),
         controls: ol.control.defaults().extend([layerSwitcher])
     });
-    // Keep the kernel radius fixed at 25 map units (metres in EPSG:3857).
-    var heatmapRadiusInMapUnits = 50;
-    var heatmapBlurInMapUnits = 100;
-    /** Convert the fixed map-unit radius to the pixel radius expected by OpenLayers. */
-    function updateHeatmapParams() {
-        var resolution = map.getView().getResolution();
-        if (resolution > 0) {
-            heatmap.setRadius(heatmapRadiusInMapUnits / resolution);
-            heatmap.setBlur(heatmapBlurInMapUnits / resolution);
-        }
-    }
-    map.getView().on('change:resolution', updateHeatmapParams);
-    updateHeatmapParams();
     // Console.log('Map created in mapgpx!');
     layerSwitcher.showPanel();
     var stagebounds = document.getElementById('mapgpx').dataset.stageBounds;
@@ -335,10 +320,9 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         var stride = Math.max(1, Math.ceil(coordinates.length / 15000));
         var points = [];
         for (var i = 0; i < coordinates.length; i += stride) {
-            points.push(new ol.Feature(new ol.geom.Point(coordinates[i])));
+            points.push(coordinates[i]);
         }
-        heatmapSource.clear();
-        heatmapSource.addFeatures(points);
+        cachedHeatmap.setPoints(points);
     }
     // Popup showing the position the user clicked.
     var popup = new ol.Overlay({
@@ -436,9 +420,10 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     });
     map.addOverlay(hoverPopup);
     var activeTrack = null;
+    var selectedTrack = null;
     /**
-     * Highlight one participant while restoring every other track on exit.
-     * @param {ol.layer.Vector|null} layer The hovered track layer.
+     * Highlight one participant while dimming the other tracks.
+     * @param {ol.layer.Vector|null} layer The hovered or selected track layer.
      */
     function setActiveTrack(layer) {
         if (activeTrack === layer) {
@@ -461,21 +446,30 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     }
     map.on('pointermove', function(evt) {
         if (evt.dragging) {
-            setActiveTrack(null);
+            hoverPopup.setPosition(undefined);
+            setActiveTrack(selectedTrack);
             return;
         }
         var hovered = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
             return layer && layer.get('trackUserId') ? layer : undefined;
         });
-        setActiveTrack(hovered || null);
+        setActiveTrack(hovered || selectedTrack);
         if (hovered) {
             hoverPopup.setPosition(evt.coordinate);
+        } else {
+            hoverPopup.setPosition(undefined);
         }
     });
     map.getViewport().addEventListener('mouseleave', function() {
-        setActiveTrack(null);
+        hoverPopup.setPosition(undefined);
+        setActiveTrack(selectedTrack);
     });
     map.on('click', function(evt) {
+        selectedTrack = map.forEachFeatureAtPixel(evt.pixel, function(feature, layer) {
+            return layer && layer.get('trackUserId') ? layer : undefined;
+        }) || null;
+        setActiveTrack(selectedTrack);
+        hoverPopup.setPosition(undefined);
         showpopup(evt);
     });
     var refreshslider = $('#refreshtracks');
