@@ -65,6 +65,9 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'tracking', get_string('trackusers', 'treasurehunt'));
         $mform->addHelpButton('tracking', 'trackusers', 'treasurehunt');
 
+        $mform->addElement('header', 'appearance', get_string('appearance', 'treasurehunt'));
+        $mform->setExpanded('appearance', true);
+
         // Show other users' progress on hunt.
         $mform->addElement('advcheckbox', 'showboard', get_string('showboard', 'treasurehunt'));
         $mform->addHelpButton('showboard', 'showboard', 'treasurehunt');
@@ -126,6 +129,28 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
         $mform->addElement('advcheckbox', 'shownextareahint', get_string('shownextareahint', 'treasurehunt'));
         $mform->addHelpButton('shownextareahint', 'shownextareahint', 'treasurehunt');
         $mform->setDefault('shownextareahint', false);
+
+        $animationoptions = ['none' => get_string('stageanimationnone', 'treasurehunt')];
+        $allowedanimations = treasurehunt_get_allowed_stage_animations();
+        $animationpreviews = [];
+        foreach ($allowedanimations as $animation) {
+            $animationoptions[$animation] = get_string('stageanimation' . $animation, 'treasurehunt');
+            $path = $animation === 'chest' ? 'bootstrap/chest_' : 'safe_';
+            $animationpreviews[$animation] = [
+                'locked' => (new moodle_url('/mod/treasurehunt/pix/' . $path . 'locked_small.webm'))->out(false),
+                'unlocked' => (new moodle_url('/mod/treasurehunt/pix/' . $path . 'unlocked_small.webm'))->out(false),
+            ];
+        }
+        $mform->addElement('select', 'stageanimation', get_string('stageanimation', 'treasurehunt'),
+            $animationoptions, [
+                'data-previews' => json_encode($animationpreviews),
+                'data-success-label' => get_string('stageanimationsuccesspreview', 'treasurehunt'),
+                'data-failure-label' => get_string('stageanimationfailurepreview', 'treasurehunt'),
+            ]);
+        $mform->addHelpButton('stageanimation', 'stageanimation', 'treasurehunt');
+        $mform->setDefault('stageanimation', treasurehunt_get_effective_stage_animation(null));
+        $PAGE->requires->css('/mod/treasurehunt/css/stage_animation_preview.css');
+        $PAGE->requires->js_call_amd('mod_treasurehunt/stage_animation_preview', 'init');
 
         // Adding the rest of treasurehunt settings, spreading all them into this fieldset
         // ... or adding more fieldsets ('header' elements) if needed for better logic.
@@ -457,6 +482,9 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $defaultvalues['allowedbasemaps'] = array_map(function($mapid) use ($style) {
                 return strpos($mapid, ':') === false ? $style . ':' . $mapid : $mapid;
             }, $selectedmaps);
+            $defaultvalues['stageanimation'] = treasurehunt_get_effective_stage_animation(
+                $customplayerconfig->stageanimation ?? null
+            );
         }
 
         $custommapconfig = treasurehunt_get_custommappingconfig($this->current);

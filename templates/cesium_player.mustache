@@ -42,10 +42,19 @@
             <span class="cesium-signal" aria-hidden="true"></span>
             <span id="cesium-sync-status">{{#str}}cesium_loading, mod_treasurehunt{{/str}}</span>
         </div>
-        <a class="cesium-exit" href="view.php?id={{cmid}}">
-            <i class="fa fa-sign-out" aria-hidden="true"></i>
-            <span>{{#str}}exit, mod_treasurehunt{{/str}}</span>
-        </a>
+        <div class="cesium-topbar-actions">
+            <button type="button" class="treasurehunt-player-fullscreen-toggle" aria-pressed="false"
+                aria-label="{{#str}}playerfullscreen, mod_treasurehunt{{/str}}"
+                title="{{#str}}playerfullscreen, mod_treasurehunt{{/str}}"
+                data-enter-label="{{#str}}playerfullscreen, mod_treasurehunt{{/str}}"
+                data-exit-label="{{#str}}playerexitfullscreen, mod_treasurehunt{{/str}}">
+                <i class="fa fa-expand" aria-hidden="true"></i>
+            </button>
+            <a class="cesium-exit" href="view.php?id={{cmid}}">
+                <i class="fa fa-sign-out" aria-hidden="true"></i>
+                <span>{{#str}}exit, mod_treasurehunt{{/str}}</span>
+            </a>
+        </div>
     </header>
 
     <div id="treasurehunt-participant-progress" class="th-participant-progress" role="group" hidden
@@ -119,6 +128,8 @@
     <dialog id="cesium-feedback-dialog" class="cesium-dialog" aria-labelledby="cesium-feedback-title" aria-describedby="cesium-feedback-content">
         <div class="cesium-dialog-header"><button type="button" class="cesium-close" aria-label="{{#str}}closebuttontitle, moodle{{/str}}"><i class="fa fa-times" aria-hidden="true"></i></button></div>
         <h2 id="cesium-feedback-title">{{#str}}failedlocation, mod_treasurehunt{{/str}}</h2>
+        <video id="cesium-feedback-video" class="cesium-feedback-video"
+            muted playsinline preload="none" aria-hidden="true" hidden></video>
         <p id="cesium-feedback-content"></p>
         <form method="dialog"><button type="submit" class="cesium-dialog-action">{{#str}}closebuttontitle, moodle{{/str}}</button></form>
     </dialog>

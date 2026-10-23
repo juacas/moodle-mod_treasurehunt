@@ -27,6 +27,8 @@ import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasureh
 import {createTileRenderer, isSvgImage, loadSvgImage} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
 import {init as initParticipantProgress} from 'mod_treasurehunt/participant_progress';
+import {classifyStageEvent} from 'mod_treasurehunt/stage_event_state';
+import {stageVideoUrl} from 'mod_treasurehunt/stage_event_video';
 
 const SATELLITE_URL = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer';
 const PEGMAN_HEIGHT = 1.7;
@@ -1571,6 +1573,9 @@ export const init = async() => {
                 fallback.textContent = labels.nohint;
             }
             content.appendChild(fallback);
+            if (stage?.question) {
+                content.appendChild(element('question-open'));
+            }
             return true;
         }
         clues.forEach((clue, index) => {
@@ -1580,7 +1585,7 @@ export const init = async() => {
             tab.className = 'cesium-clue-tab';
             tab.setAttribute('role', 'tab');
             tab.setAttribute('aria-controls', 'cesium-clue-panel-' + index);
-            tab.textContent = labels.clue + ' ' + clue.position;
+            tab.textContent = labels.stage + ' ' + clue.position;
             tab.addEventListener('click', () => selectClue(index, true));
             tab.addEventListener('keydown', (event) => {
                 let nextIndex = index;
@@ -1605,7 +1610,10 @@ export const init = async() => {
             pane.className = 'cesium-clue-pane cesium-richtext';
             pane.setAttribute('role', 'tabpanel');
             pane.setAttribute('aria-labelledby', tab.id);
-            pane.innerHTML = clue.html;
+            pane.innerHTML = clue.lockedhtml || clue.html;
+            if (Number(clue.stageid) === Number(stage?.id) && stage?.question) {
+                pane.appendChild(element('question-open'));
+            }
             content.appendChild(pane);
         });
         selectClue(selectedClueIndex, false);
@@ -1701,10 +1709,27 @@ export const init = async() => {
         };
         const information = (response.infomsg || []).map(plainText).filter(Boolean);
         const message = information.join(' · ');
-        if (failedAttempt || (action.location && Number(response.status?.code || 0) !== 0)) {
+        const stageEvent = classifyStageEvent(response, action, failedAttempt);
+        if (stageEvent) {
             const messages = [...new Set([plainText(response.status?.msg || ''), ...information].filter(Boolean))];
-            element('feedback-content').textContent = messages.join('\n\n') || labels.failedlocation;
+            const stageUnlocked = stageEvent === 'unlocked';
+            const failedanswer = stageEvent === 'failedanswer';
+            element('feedback-title').textContent = stageUnlocked ? labels.stageovercome :
+                (failedanswer ? labels.failedanswer : labels.failedlocation);
+            element('feedback-content').textContent = messages.join('\n\n') ||
+                (stageUnlocked ? labels.stageovercome : labels.failedlocation);
+            const video = element('feedback-video');
+            const videoUrl = stageVideoUrl(playerconfig.stageanimation, stageEvent);
+            video.hidden = !videoUrl;
+            if (videoUrl) {
+                video.src = videoUrl;
+                video.load();
+            }
             openDialog('feedback');
+            if (videoUrl) {
+                video.currentTime = 0;
+                video.play().catch(() => undefined);
+            }
             return;
         }
         if (action.location || action.qrtext || action.selectedanswerid) {
@@ -1879,6 +1904,12 @@ export const init = async() => {
             selectedAttempt = null;
             element('attempt-popup').hidden = true;
             root.classList.remove('has-attempt-popup');
+        });
+        element('feedback-dialog').addEventListener('close', () => {
+            const video = element('feedback-video');
+            video.pause();
+            video.currentTime = 0;
+            video.hidden = true;
         });
         element('clue').addEventListener('click', () => openDialog('clue'));
         element('question-open').addEventListener('click', () => {

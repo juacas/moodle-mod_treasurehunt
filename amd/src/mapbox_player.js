@@ -29,6 +29,8 @@ import {failedLocationAttempt, selectCameraClip, selectClip} from 'mod_treasureh
 import {isSvgImage, loadSvgImage, renderSvgToDataUrl} from 'mod_treasurehunt/svg_image_tiles';
 import webqr from 'mod_treasurehunt/webqr';
 import {init as initParticipantProgress} from 'mod_treasurehunt/participant_progress';
+import {classifyStageEvent} from 'mod_treasurehunt/stage_event_state';
+import {stageVideoUrl} from 'mod_treasurehunt/stage_event_video';
 
 const MAPBOX_URL = 'https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.js';
 const EMPTY = {type: 'FeatureCollection', features: []};
@@ -740,7 +742,7 @@ export const init = async() => {
             tab.className = 'cesium-clue-tab';
             tab.setAttribute('role', 'tab');
             tab.setAttribute('aria-controls', 'cesium-clue-panel-' + index);
-            tab.textContent = labels.clue + ' ' + clue.position;
+            tab.textContent = labels.stage + ' ' + clue.position;
             tab.addEventListener('click', () => selectClue(index, true));
             tabs.appendChild(tab);
             const pane = document.createElement('div');
@@ -748,7 +750,7 @@ export const init = async() => {
             pane.className = 'cesium-clue-pane cesium-richtext';
             pane.setAttribute('role', 'tabpanel');
             pane.setAttribute('aria-labelledby', tab.id);
-            pane.innerHTML = clue.html;
+            pane.innerHTML = clue.lockedhtml || clue.html;
             content.appendChild(pane);
         });
         selectClue(Math.min(selectedClue, clues.length - 1), false);
@@ -828,10 +830,27 @@ export const init = async() => {
         };
         const information = (response.infomsg || []).map(plainText).filter(Boolean);
         const message = information.join(' · ');
-        if (failedAttempt || (action.location && Number(response.status?.code || 0) !== 0)) {
+        const stageEvent = classifyStageEvent(response, action, failedAttempt);
+        if (stageEvent) {
             const messages = [...new Set([plainText(response.status?.msg || ''), ...information].filter(Boolean))];
-            node('feedback-content').textContent = messages.join('\n\n') || labels.failedlocation;
+            const stageUnlocked = stageEvent === 'unlocked';
+            const failedanswer = stageEvent === 'failedanswer';
+            node('feedback-title').textContent = stageUnlocked ? labels.stageovercome :
+                (failedanswer ? labels.failedanswer : labels.failedlocation);
+            node('feedback-content').textContent = messages.join('\n\n') ||
+                (stageUnlocked ? labels.stageovercome : labels.failedlocation);
+            const video = node('feedback-video');
+            const videoUrl = stageVideoUrl(playerconfig.stageanimation, stageEvent);
+            video.hidden = !videoUrl;
+            if (videoUrl) {
+                video.src = videoUrl;
+                video.load();
+            }
             openDialog('feedback');
+            if (videoUrl) {
+                video.currentTime = 0;
+                video.play().catch(() => undefined);
+            }
             return;
         }
         if (action.location || action.qrtext || action.selectedanswerid) {
@@ -1006,6 +1025,12 @@ export const init = async() => {
             selectedAttempt = null;
             node('attempt-popup').hidden = true;
             root.classList.remove('has-attempt-popup');
+        });
+        node('feedback-dialog').addEventListener('close', () => {
+            const video = node('feedback-video');
+            video.pause();
+            video.currentTime = 0;
+            video.hidden = true;
         });
         node('clue').addEventListener('click', () => openDialog('clue'));
         node('question-open').addEventListener('click', () => {

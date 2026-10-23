@@ -164,6 +164,13 @@
     background: linear-gradient(180deg, rgba(3, 14, 28, .9), rgba(3, 14, 28, .07));
 }
 
+.cesium-topbar-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex: 0 0 auto;
+}
+
 .cesium-map-summary {
     position: absolute;
     z-index: 3;
@@ -725,6 +732,19 @@
 
 #cesium-feedback-content {
     white-space: pre-line;
+}
+
+.cesium-feedback-video {
+    display: block;
+    width: min(100%, 320px);
+    max-height: 220px;
+    margin: 0 auto 16px;
+    object-fit: contain;
+    background: transparent;
+}
+
+.cesium-feedback-video[hidden] {
+    display: none;
 }
 
 #cesium-feedback-dialog .cesium-dialog-header {

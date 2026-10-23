@@ -50,9 +50,9 @@ if ($ADMIN->fulltree) {
         ));
         $basemaps = treasurehunt_get_basemap_pair_options();
         $defaultbasemappairs = [];
-        foreach ($basemaps as $playermaps) {
+    foreach ($basemaps as $playermaps) {
             $defaultbasemappairs = array_merge($defaultbasemappairs, array_keys($playermaps));
-        }
+    }
         $settings->add(new admin_setting_configmultiselect(
             'mod_treasurehunt/availablebasemaps',
             get_string('availablebasemaps', 'treasurehunt'),
@@ -97,6 +97,21 @@ if ($ADMIN->fulltree) {
             get_string('stadiamapsdomainauth', 'treasurehunt'),
             get_string('stadiamapsdomainauth_desc', 'treasurehunt'),
             0
+        ));
+        $settings->add(new admin_setting_heading(
+            'treasurehuntappearanceheading',
+            get_string('appearance', 'treasurehunt'),
+            ''
+        ));
+        $settings->add(new admin_setting_configmultiselect(
+            'mod_treasurehunt/allowedstageanimations',
+            get_string('allowedstageanimations', 'treasurehunt'),
+            get_string('allowedstageanimations_desc', 'treasurehunt'),
+            ['chest', 'safe'],
+            [
+                'chest' => get_string('stageanimationchest', 'treasurehunt'),
+                'safe' => get_string('stageanimationsafe', 'treasurehunt'),
+            ]
         ));
         $settings->add(new admin_setting_heading(
             'treasurehuntscoringheading',

@@ -1,0 +1,46 @@
+/* This file is part of Moodle - http://moodle.org/ */
+
+/* Keep every game player inside the visible viewport from its first paint. */
+body#page-mod-treasurehunt-play {
+    overflow: hidden;
+}
+
+body#page-mod-treasurehunt-play #sticky-footer {
+    /* stylelint-disable-next-line declaration-no-important */
+    display: none !important;
+}
+
+body#page-mod-treasurehunt-play .play-container,
+body#page-mod-treasurehunt-play .cesium-player {
+    position: fixed;
+    inset: 0;
+    width: auto;
+    height: auto;
+    overflow: hidden;
+    z-index: 1000;
+}
+
+body#page-mod-treasurehunt-play .treasurehunt-player-fullscreen-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    border: 1px solid rgba(139, 206, 224, .55);
+    border-radius: 10px;
+    background: rgba(8, 23, 39, .75);
+    color: #eefbff;
+    cursor: pointer;
+}
+
+body#page-mod-treasurehunt-play .treasurehunt-player-fullscreen-toggle:hover,
+body#page-mod-treasurehunt-play .treasurehunt-player-fullscreen-toggle:focus-visible {
+    border-color: #5ce8f6;
+    color: #5ce8f6;
+}
+
+body#page-mod-treasurehunt-play .treasurehunt-player-fullscreen-toggle[hidden] {
+    display: none;
+}

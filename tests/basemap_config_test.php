@@ -93,6 +93,8 @@ final class basemap_config_test extends \advanced_testcase {
         $this->assertSame(['osm'], treasurehunt_filter_allowed_basemaps(['fake', 'osm', 'google_satellite']));
         $this->assertContains('arcgis_world_imagery', treasurehunt_get_player_basemaps(TREASUREHUNT_PLAYERMAPBOX));
         $this->assertNotContains('google_satellite', treasurehunt_get_player_basemaps(TREASUREHUNT_PLAYERMAPBOX));
+        $this->assertFalse(treasurehunt_has_usable_basemap(['osm'], TREASUREHUNT_PLAYERMAPBOX, 'none'));
+        set_config('availableplayerstyles', 'bootstrap,mapbox', 'mod_treasurehunt');
         $this->assertTrue(treasurehunt_has_usable_basemap(['osm'], TREASUREHUNT_PLAYERMAPBOX, 'none'));
         $this->assertFalse(treasurehunt_has_usable_basemap(['google_satellite'], TREASUREHUNT_PLAYERMAPBOX, 'none'));
         $this->assertFalse(treasurehunt_has_usable_basemap([], TREASUREHUNT_PLAYERBOOTSTRAP, 'overlay'));
@@ -117,12 +119,52 @@ final class basemap_config_test extends \advanced_testcase {
             'showinzonehint' => 0,
             'showdistancehint' => 0,
             'shownextareahint' => 0,
-            'allowedbasemaps' => ['arcgis_world_imagery', 'google_satellite'],
+            'playerstyle' => TREASUREHUNT_PLAYERBOOTSTRAP,
+            'allowedbasemaps' => ['bootstrap:arcgis_world_imagery', 'bootstrap:google_satellite'],
         ];
         $configuration = treasurehunt_build_customplayerconfig($data);
-        $this->assertSame(['arcgis_world_imagery'], $configuration->allowedbasemaps);
+        $this->assertSame(['bootstrap:arcgis_world_imagery'], $configuration->allowedbasemaps);
         $data->allowedbasemaps = [];
         $this->assertSame([], treasurehunt_build_customplayerconfig($data)->allowedbasemaps);
+    }
+
+    /**
+     * Saving one player retains the authorized maps selected for the others.
+     */
+    public function test_player_configuration_preserves_other_player_maps(): void {
+        global $CFG;
+        $this->resetAfterTest();
+        require_once($CFG->dirroot . '/mod/treasurehunt/locallib.php');
+        unset_config('availablebasemaps', 'mod_treasurehunt');
+        set_config('availableplayerstyles', 'bootstrap,cesium,mapbox', 'mod_treasurehunt');
+        set_config('mapboxaccesstoken', 'test-token', 'mod_treasurehunt');
+
+        $data = (object)[
+            'searchpaneldisabled' => 0,
+            'localizationbuttondisabled' => 0,
+            'showheadinghint' => 0,
+            'showinzonehint' => 0,
+            'showdistancehint' => 0,
+            'shownextareahint' => 0,
+            'playerstyle' => TREASUREHUNT_PLAYERBOOTSTRAP,
+            'allowedbasemaps' => ['bootstrap:osm', 'cesium:arcgis_world_imagery', 'mapbox:mapbox_satellite'],
+        ];
+        $expected = $data->allowedbasemaps;
+        $configuration = treasurehunt_build_customplayerconfig($data);
+        $this->assertSame($expected, $configuration->allowedbasemaps);
+        $this->assertSame(['osm'], treasurehunt_filter_allowed_basemaps(
+            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERBOOTSTRAP
+        ));
+        $this->assertSame(['arcgis_world_imagery'], treasurehunt_filter_allowed_basemaps(
+            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERCESIUM
+        ));
+        $this->assertSame(['mapbox_satellite'], treasurehunt_filter_allowed_basemaps(
+            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERMAPBOX
+        ));
+
+        $data->playerstyle = TREASUREHUNT_PLAYERCESIUM;
+        $data->allowedbasemaps = $configuration->allowedbasemaps;
+        $this->assertSame($expected, treasurehunt_build_customplayerconfig($data)->allowedbasemaps);
     }
 
     /**
@@ -140,7 +182,7 @@ final class basemap_config_test extends \advanced_testcase {
         $this->assertArrayHasKey('cesium_blue_marble', $maps);
         $this->assertArrayHasKey('cesium_azure_roads', $maps);
         $this->assertArrayHasKey('google_satellite', $maps);
-        $this->assertStringContainsString('(Cesium)', $maps['google_satellite']);
+        $this->assertSame(treasurehunt_get_basemap_catalog(false)['google_satellite'], $maps['google_satellite']);
         $this->assertArrayNotHasKey('mapbox_satellite', $maps);
 
         set_config('availableplayerstyles', 'bootstrap', 'mod_treasurehunt');

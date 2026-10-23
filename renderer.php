@@ -96,7 +96,9 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->requires->js_call_amd('mod_treasurehunt/dyndates', 'init', ['span[data-timestamp']);
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/introjs.css');
         $this->page->requires->css('/mod/treasurehunt/css/playerbootstrap/play.css');
+        $this->page->requires->css('/mod/treasurehunt/css/player_fullscreen.css');
         $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
+        $this->page->requires->js_call_amd('mod_treasurehunt/player_fullscreen', 'init');
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->set_title('');// Empty to avoid render on top.
         // Output starts here.
@@ -109,7 +111,8 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
             'stadiakey' => (string)get_config('mod_treasurehunt', 'stadiamapsapikey'),
             'stadiadomainauth' => (bool)get_config('mod_treasurehunt', 'stadiamapsdomainauth'),
             'allowedbasemaps' => treasurehunt_filter_allowed_basemaps(
-                $renderablepage->customplayerconfig->allowedbasemaps ?? null
+                $renderablepage->customplayerconfig->allowedbasemaps ?? null,
+                TREASUREHUNT_PLAYERBOOTSTRAP
             ),
         ], JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_THROW_ON_ERROR);
         $pagerendered = parent::render_from_template('mod_treasurehunt/play_page_bootstrap', $data);
@@ -137,8 +140,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->disable();
         $this->page->requires->css('/mod/treasurehunt/css/cesium_player.css');
+        $this->page->requires->css('/mod/treasurehunt/css/player_fullscreen.css');
         $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
-        $config = $this->get_geographic_player_config($renderablepage);
+        $this->page->requires->js_call_amd('mod_treasurehunt/player_fullscreen', 'init');
+        $config = $this->get_geographic_player_config($renderablepage, TREASUREHUNT_PLAYERCESIUM);
         $config['cesiumbaseurl'] = (new moodle_url('/mod/treasurehunt/js/cesium-1.145.0/'))->out(false);
         $this->page->requires->js_call_amd('mod_treasurehunt/cesium_player', 'init');
         treasurehunt_qr_support($this->page, 'setup', []);
@@ -173,9 +178,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
         $this->page->set_pagelayout('embedded');
         $this->page->activityheader->disable();
         $this->page->requires->css('/mod/treasurehunt/css/cesium_player.css');
+        $this->page->requires->css('/mod/treasurehunt/css/player_fullscreen.css');
         $this->page->requires->css('/mod/treasurehunt/css/participant_progress.css');
+        $this->page->requires->js_call_amd('mod_treasurehunt/player_fullscreen', 'init');
         $this->page->requires->css(new moodle_url('https://api.mapbox.com/mapbox-gl-js/v3.32.0/mapbox-gl.css'));
-        $config = $this->get_geographic_player_config($renderablepage);
+        $config = $this->get_geographic_player_config($renderablepage, TREASUREHUNT_PLAYERMAPBOX);
         $config['mapboxaccesstoken'] = (string)get_config('mod_treasurehunt', 'mapboxaccesstoken');
         $config['threepegmanurl'] = (new moodle_url('/mod/treasurehunt/js/three-pegman-0.170.0.min.js', [
             'v' => filemtime($CFG->dirroot . '/mod/treasurehunt/js/three-pegman-0.170.0.min.js'),
@@ -200,14 +207,16 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
      * Build the common game payload for geographic players.
      *
      * @param play_page_base $renderablepage Player data.
+     * @param string $playerstyle Player rendering the activity.
      * @return array
      */
-    private function get_geographic_player_config(play_page_base $renderablepage): array {
+    private function get_geographic_player_config(play_page_base $renderablepage, string $playerstyle): array {
         global $CFG;
         $treasurehunt = $renderablepage->treasurehunt;
         $cm = $renderablepage->cm;
         $renderablepage->customplayerconfig->allowedbasemaps = treasurehunt_filter_allowed_basemaps(
-            $renderablepage->customplayerconfig->allowedbasemaps ?? null
+            $renderablepage->customplayerconfig->allowedbasemaps ?? null,
+            $playerstyle
         );
         return [
             'cmid' => (int)$cm->id,
@@ -226,6 +235,7 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 'stage' => get_string('stage', 'treasurehunt'),
                 'stageovercome' => get_string('stageovercome', 'treasurehunt'),
                 'failedlocation' => get_string('failedlocation', 'treasurehunt'),
+                'failedanswer' => get_string('failedanswertitle', 'treasurehunt'),
                 'discoveredlocation' => get_string('discoveredlocation', 'treasurehunt'),
                 'stagename' => get_string('stagename', 'treasurehunt'),
                 'stageclue' => get_string('stageclue', 'treasurehunt'),

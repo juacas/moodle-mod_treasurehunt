@@ -315,11 +315,40 @@ function treasurehunt_build_customplayerconfig($data) {
     $playerconfig->showinzonehint = $data->showinzonehint;
     $playerconfig->showdistancehint = $data->showdistancehint;
     $playerconfig->shownextareahint = $data->shownextareahint;
-    $playerconfig->allowedbasemaps = treasurehunt_filter_allowed_basemaps(
+    $playerconfig->stageanimation = treasurehunt_get_effective_stage_animation($data->stageanimation ?? null);
+    $playerconfig->allowedbasemaps = treasurehunt_filter_allowed_basemap_pairs(
         $data->allowedbasemaps ?? [],
         $data->playerstyle ?? null
     );
     return $playerconfig;
+}
+
+/**
+ * Return the animation families enabled by the site administrator.
+ *
+ * @return array Enabled animation identifiers in display order.
+ */
+function treasurehunt_get_allowed_stage_animations(): array {
+    $setting = get_config('mod_treasurehunt', 'allowedstageanimations');
+    $selected = $setting === false ? ['chest', 'safe'] : explode(',', $setting);
+    return array_values(array_intersect(['chest', 'safe'], $selected));
+}
+
+/**
+ * Resolve an activity animation against the site setting.
+ *
+ * Activities created before this option existed use the first permitted animation.
+ * An animation disabled later by the administrator is not played.
+ *
+ * @param string|null $selection Activity animation identifier.
+ * @return string One of none, chest, or safe.
+ */
+function treasurehunt_get_effective_stage_animation(?string $selection): string {
+    $allowed = treasurehunt_get_allowed_stage_animations();
+    if ($selection === null || $selection === '') {
+        return $allowed[0] ?? 'none';
+    }
+    return in_array($selection, $allowed, true) ? $selection : 'none';
 }
 
 /**
@@ -498,6 +527,34 @@ function treasurehunt_filter_allowed_basemaps($selection, ?string $playerstyle =
 }
 
 /**
+ * Keep authorized player-map pairs for every player when saving an activity.
+ *
+ * Map-only values from older forms belong to the selected player. Pair values
+ * are retained for all players so changing the activity player does not erase
+ * the other players' choices.
+ *
+ * @param mixed $selection Submitted map selection.
+ * @param string|null $playerstyle Selected player for legacy map-only values.
+ * @return array Valid player-map pair identifiers.
+ */
+function treasurehunt_filter_allowed_basemap_pairs($selection, ?string $playerstyle = null): array {
+    if (!is_array($selection)) {
+        return [];
+    }
+    $pairs = [];
+    foreach (treasurehunt_get_available_basemaps_by_player() as $style => $maps) {
+        foreach (array_keys($maps) as $mapid) {
+            $pairid = $style . ':' . $mapid;
+            if (in_array($pairid, $selection, true) ||
+                    ($style === $playerstyle && in_array($mapid, $selection, true))) {
+                $pairs[] = $pairid;
+            }
+        }
+    }
+    return $pairs;
+}
+
+/**
  * Return base map identifiers supported by a game player.
  *
  * @param string $playerstyle Player identifier.
@@ -658,6 +715,9 @@ function treasurehunt_get_customplayerconfig($treasurehunt) {
     if (isset($treasurehunt->customplayerconfig)) {
         $customplayerconfig = json_decode($treasurehunt->customplayerconfig);
     }
+    $customplayerconfig->stageanimation = treasurehunt_get_effective_stage_animation(
+        $customplayerconfig->stageanimation ?? null
+    );
     // Complete the custom player configuration.
     return $customplayerconfig;
 }
@@ -2985,6 +3045,8 @@ function treasurehunt_check_attempts_updates(
     $return->strings = [];
     $return->newgeometry = false;
     $return->attemptsolved = false;
+    $return->stageunlocked = false;
+    $return->stageevent = '';
     $return->geometrysolved = false;
     $newattempts = [];
 
@@ -3034,6 +3096,16 @@ function treasurehunt_check_attempts_updates(
     }
 
     foreach ($newattempts as $newattempt) {
+        if ($newattempt->success) {
+            $return->stageunlocked = true;
+            $return->stageevent = 'unlocked';
+        } else if ($newattempt->type === 'question' && !$newattempt->questionsolved) {
+            $return->stageevent = 'failedanswer';
+        } else if (
+            ($newattempt->type === 'location' || $newattempt->type === 'qr') && !$newattempt->geometrysolved
+        ) {
+            $return->stageevent = 'failedlocation';
+        }
         if ($newattempt->type === 'location' || $newattempt->type === 'qr') {
             if ($newattempt->geometrysolved) {
                 $return->geometrysolved = true;

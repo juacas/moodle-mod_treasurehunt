@@ -23,7 +23,7 @@
  */
 
 /**
- * Hide incompatible choices while leaving their selected state intact.
+ * Hide incompatible choices and retain selections for the other players.
  */
 export const init = () => {
     const player = document.getElementById('id_playerstyle');
@@ -39,6 +39,31 @@ export const init = () => {
         return;
     }
 
+    // A plain click in a multiple select clears hidden selections too. Keep
+    // each player's choices separately and restore the hidden ones on change.
+    const selectedByPlayer = {};
+    Object.entries(byPlayer).forEach(([style, pairids]) => {
+        const choices = new Set(pairids);
+        selectedByPlayer[style] = new Set(Array.from(maps.selectedOptions)
+            .map((option) => option.value).filter((value) => choices.has(value)));
+    });
+
+    /** Restore all stored choices to the form control. */
+    const restoreSelection = () => {
+        const selected = new Set(Object.values(selectedByPlayer).flatMap((choices) => Array.from(choices)));
+        Array.from(maps.options).forEach((option) => {
+            option.selected = selected.has(option.value);
+        });
+    };
+
+    /** Remember the visible player's choices after the teacher edits them. */
+    const rememberSelection = () => {
+        const visible = new Set(byPlayer[player.value] || []);
+        selectedByPlayer[player.value] = new Set(Array.from(maps.selectedOptions)
+            .map((option) => option.value).filter((value) => visible.has(value)));
+        restoreSelection();
+    };
+
     /** Refresh visible choices after the player changes. */
     const update = () => {
         const visible = new Set(byPlayer[player.value] || []);
@@ -52,8 +77,10 @@ export const init = () => {
             }
         });
         maps.size = Math.min(8, Math.max(1, count));
+        restoreSelection();
     };
 
+    maps.addEventListener('change', rememberSelection);
     player.addEventListener('change', update);
     update();
 };

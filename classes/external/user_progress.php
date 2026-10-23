@@ -218,8 +218,10 @@ class user_progress extends external_api {
                 'clues' => new external_multiple_structure(
                     new external_single_structure([
                         'stageid' => new external_value(PARAM_INT, 'Target stage id'),
+                        'sourceid' => new external_value(PARAM_INT, 'Stage that provides this clue'),
                         'position' => new external_value(PARAM_INT, 'Target stage position in the road'),
                         'html' => new external_value(PARAM_RAW, 'Formatted clue HTML'),
+                        'lockedhtml' => new external_value(PARAM_RAW, 'Question or activity instructions for this stage'),
                     ]),
                     'Clues currently available to the player'
                 ),
@@ -228,6 +230,14 @@ class user_progress extends external_api {
                 'infomsg' => new external_multiple_structure(
                     new external_value(PARAM_RAW, 'The info text of attempt'),
                     'New event messages since attemptid; old attempts are not replayed during initialization'
+                ),
+                'stageunlocked' => new external_value(
+                    PARAM_BOOL,
+                    'Whether a stage was completely unlocked since the client attempt cursor'
+                ),
+                'stageevent' => new external_value(
+                    PARAM_ALPHANUMEXT,
+                    'Last relevant stage event: unlocked, failedanswer, failedlocation, or empty'
                 ),
                 'lastsuccessfulstage' => new external_single_structure(
                     [
@@ -288,6 +298,8 @@ class user_progress extends external_api {
                             new external_value(PARAM_BOOL, 'If true the in-zone hint is shown', VALUE_DEFAULT, false),
                         'shownextareahint' =>
                             new external_value(PARAM_BOOL, 'If true the next area hint is shown', VALUE_DEFAULT, false),
+                        'stageanimation' =>
+                            new external_value(PARAM_ALPHA, 'Allowed stage event video family', VALUE_DEFAULT, 'none'),
                     ],
                     'Custom player configuration',
                     VALUE_OPTIONAL
@@ -503,9 +515,16 @@ class user_progress extends external_api {
                 }
                 if ($checklocation->newstage) {
                     $updates->geometrysolved = true;
+                    if ($checklocation->success) {
+                        $updates->stageunlocked = true;
+                        $updates->stageevent = 'unlocked';
+                    }
                     if ($checklocation->success && !$previewing) {
                         $playmode = treasurehunt_get_play_mode($USER->id, $userparams->groupid, $userparams->roadid, $treasurehunt);
                     }
+                }
+                if ($checklocation->newattempt && !$checklocation->success) {
+                    $updates->stageevent = 'failedlocation';
                 }
                 if ($checklocation->roadfinished) {
                     $roadfinished = true;
@@ -609,6 +628,8 @@ class user_progress extends external_api {
         }
         $result = [];
         $result['infomsg'] = $updates->strings;
+        $result['stageunlocked'] = $updates->stageunlocked;
+        $result['stageevent'] = $updates->stageevent;
         // Clients replace their cursors with these values even when no other response field changed.
         $result['attemptid'] = $updates->newattemptid;
         $result['roadtimestamp'] = $updates->newroadtimestamp;
@@ -649,6 +670,7 @@ class user_progress extends external_api {
 
         $result['clues'] = [];
         if (!$roadfinished && $effectiveavailable) {
+            $stagelocks = self::get_pending_stage_locks($userparams->roadid, $USER->id, $userparams->groupid, $context);
             $previous = null;
             foreach ($roadstate->stages as $stage) {
                 if (!isset($roadstate->completed[$stage->id])) {
@@ -659,7 +681,9 @@ class user_progress extends external_api {
                     );
                     if ($cluesource) {
                         [$source, $area] = $cluesource;
-                        $result['clues'][] = self::format_stage_clue($source, $area, $stage, $context);
+                        $clue = self::format_stage_clue($source, $area, $stage, $context);
+                        $clue['lockedhtml'] = $stagelocks[$stage->id] ?? '';
+                        $result['clues'][] = $clue;
                     }
                 }
                 $previous = $stage;
@@ -714,6 +738,46 @@ class user_progress extends external_api {
     }
 
     /**
+     * Get lock instructions for discovered stages that still require a question or activity.
+     *
+     * @param int $roadid Road id.
+     * @param int $userid User id.
+     * @param int $groupid Group id, or zero for individual play.
+     * @param context_module $context Activity context.
+     * @return array Stage id to formatted lock instructions.
+     */
+    private static function get_pending_stage_locks(
+        int $roadid,
+        int $userid,
+        int $groupid,
+        context_module $context
+    ): array {
+        global $DB;
+
+        if ($groupid) {
+            $scope = 'a.groupid = ?';
+            $params = [$roadid, $groupid];
+        } else {
+            $scope = 'a.groupid = 0 AND a.userid = ?';
+            $params = [$roadid, $userid];
+        }
+        $sql = "SELECT a.id, a.stageid, a.questionsolved, a.activitysolved, s.name, s.cluetext, s.clueforstage, "
+            . "s.clueforstageformat, s.questiontext, s.position, s.activitytoend "
+            . "FROM {treasurehunt_attempts} a JOIN {treasurehunt_stages} s ON s.id = a.stageid "
+            . "WHERE s.roadid = ? AND a.geometrysolved = 1 AND a.success = 0 AND $scope "
+            . "ORDER BY a.id DESC";
+        $attempts = $DB->get_records_sql($sql, $params);
+        $stagelocks = [];
+        foreach ($attempts as $attempt) {
+            if (isset($stagelocks[$attempt->stageid])) {
+                continue;
+            }
+            $stagelocks[$attempt->stageid] = treasurehunt_get_name_and_clue($attempt, $context)->clue;
+        }
+        return $stagelocks;
+    }
+
+    /**
      * Format an editor clue and resolve its files in the stage file area.
      *
      * @param stdClass $stage Source stage.
@@ -738,8 +802,10 @@ class user_progress extends external_api {
         );
         return [
             'stageid' => (int)$target->id,
+            'sourceid' => (int)$stage->id,
             'position' => (int)$target->position,
             'html' => format_text($html, $stage->{$area . 'format'}),
+            'lockedhtml' => '',
         ];
     }
 

@@ -31,6 +31,8 @@ import {get_strings as getStrings, get_string as getString} from "core/str";
 import webqr from "mod_treasurehunt/webqr";
 import {setup as setupTouchGestureGuard} from "mod_treasurehunt/touch_gesture_guard";
 import {init as initParticipantProgress} from "mod_treasurehunt/participant_progress";
+import {classifyStageEvent} from "mod_treasurehunt/stage_event_state";
+import {stageVideoUrl} from "mod_treasurehunt/stage_event_video";
 // Side‑effect only imports
 import "mod_treasurehunt/dropdown";
 
@@ -1314,7 +1316,20 @@ function initplaytreasurehunt(
             infomsgs.push(msg);
             body += "<p>" + msg + "</p>";
           });
-          $("#notificationsPopup .update-list").html(body);
+          const updates = $("#notificationsPopup .update-list").empty();
+          const stageevent = classifyStageEvent(response);
+          const stagevideo = stageVideoUrl(customplayerconfig?.stageanimation, stageevent);
+          if (stagevideo) {
+            $("<video>", {
+              src: stagevideo,
+              autoplay: true,
+              muted: true,
+              playsinline: true,
+              "class": "treasurehunt-stage-event-video",
+              "aria-hidden": "true",
+            }).prop("muted", true).appendTo(updates);
+          }
+          updates.append(body);
           $("#notificationsPopup").off("modal:close.treasurehuntclue");
           openModal("#notificationsPopup");
           if (!roadfinished) {
@@ -1376,7 +1391,7 @@ function initplaytreasurehunt(
       } else if (usegeographictools) {
         $("#autolocate").show();
       }
-    } else {
+    } else if (!customplayerconfig) {
       // Initialize with defaults.
       customplayerconfig = {
         searchpaneldisabled: false,
@@ -1385,6 +1400,7 @@ function initplaytreasurehunt(
         showheadinghint: false,
         showinzonehint: false,
         shownextareahint: false,
+        stageanimation: "none",
         defaultzoom: 15,
       };
     }
@@ -1477,7 +1493,7 @@ function initplaytreasurehunt(
         id: "cluetab-" + index,
         "class": "nav-link",
         role: "tab",
-        text: strings.clue + " " + clue.position,
+        text: strings.stage + " " + clue.position,
         "aria-controls": "cluepanel-" + index,
       }).on("click", () => {
         selectedclueindex = index;
@@ -1493,7 +1509,7 @@ function initplaytreasurehunt(
         role: "tabpanel",
         "aria-labelledby": "cluetab-" + index,
         "aria-hidden": index === selectedclueindex ? "false" : "true",
-      }).html(clue.html).appendTo(content);
+      }).html(clue.lockedhtml || clue.html).appendTo(content);
     });
     tabs.children().eq(selectedclueindex).addClass("active").attr("aria-selected", "true");
   }
