@@ -27,9 +27,11 @@ import 'mod_treasurehunt/ol3-layerswitcher';
 import {get_strings as str} from 'core/str';
 import notification from 'core/notification';
 import {create as createCachedHeatmap} from 'mod_treasurehunt/cached_heatmap';
+import {progressAt} from 'mod_treasurehunt/replay_progress';
 
 let init = {
     refreshTracksInterval: 60,
+    refreshLocked: false,
     refreshSources: [],
     countdownTimer: null,
     addgpxlayer: function(map, cmid, treasurehuntid, strings, user, trackgroupname) {
@@ -46,7 +48,9 @@ let init = {
         // I18n strings.
         var terms = [
             'aerialmap', 'roadmap', 'basemaps', 'searchlocation', 'trackviewer', 'pegmanlabel',
-            'trackviewerheatmap', 'trackviewerrefreshdisabled', 'trackviewerrefreshseconds'
+            'trackviewerheatmap', 'trackviewerrefreshdisabled', 'trackviewerrefreshseconds',
+            'trackviewerrefreshinterval', 'trackviewerreplaying', 'trackviewerreplay', 'trackviewerpause',
+            'trackviewertimeline'
         ];
         var stringsqueried = terms.map(function(term) {
             return {key: term, component: 'treasurehunt'};
@@ -65,6 +69,7 @@ let init = {
             init.refreshSources = [];
             init.countdownTimer = null;
             init.refreshTracksInterval = refreshinterval;
+            init.refreshLocked = refreshinterval === 0;
             // Detect custom image.
             if (typeof (custommapconfig) != 'undefined' &&
                 custommapconfig !== null &&
@@ -144,7 +149,7 @@ let init = {
                     $('#popup-content').html(pegmanlink);
                     timeouthandler = setTimeout(() => {
  $('#popup-closer').trigger('click');
-}, 2000);
+}, 5000);
                 }
             }, overlay);
         // Disable timeout if hovering.
@@ -296,13 +301,18 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
             rebuildHeatmap();
         });
     }
-    loadGpx(users, cmid, map, tracks, layerSwitcher, scheduleHeatmapUpdate, !hasStageBounds);
+    var replay = null;
+    loadGpx(users, cmid, map, tracks, layerSwitcher, scheduleHeatmapUpdate, !hasStageBounds, function(entries) {
+        if (replay) {
+            replay.updateEntries(entries);
+        }
+    });
 
     /** Rebuild the heatmap from every loaded GPX line, bounded to avoid excessive canvas work. */
     function rebuildHeatmap() {
         var coordinates = [];
         tracks.getLayers().forEach(function(layer) {
-            layer.getSource().getFeatures().forEach(function(feature) {
+            (layer.get('fullSource') || layer.getSource()).getFeatures().forEach(function(feature) {
                 var geometry = feature.getGeometry();
                 if (geometry && geometry.getType() === 'LineString') {
                     geometry.getCoordinates().forEach(function(point) {
@@ -393,6 +403,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
         }
         return msg;
     }
+    var popupTimeout = null;
     /**
      * Show popup with feature info.
      * @param {ol.event} evt
@@ -400,6 +411,7 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     function showpopup(evt) {
         var element = popup.getElement();
         var coordinate = evt.coordinate;
+        window.clearTimeout(popupTimeout);
         $(element).popover('dispose'); // For jquery 4+ it is dispose instead of destroy!
         popup.setPosition(coordinate);
         $(element).popover({
@@ -409,6 +421,10 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
             'content': displayFeatureInfo(map.getEventPixel(evt.originalEvent), map, coordinate, strings.pegmanlabel)
         });
         $(element).popover('show');
+        popupTimeout = window.setTimeout(function() {
+            $(element).popover('dispose');
+            popup.setPosition(undefined);
+        }, 5000);
     }
     var hoverElement = document.createElement('div');
     hoverElement.className = 'track-hover-tooltip';
@@ -474,18 +490,44 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
     });
     var refreshslider = $('#refreshtracks');
     var refreshvalue = $('#refreshtracksvalue');
+    var refreshlabel = $('#refreshtrackslabel');
+    var previousRefreshValue = refreshslider.val();
+    replay = createTrackReplay(ol, strings, function(active) {
+        if (active) {
+            previousRefreshValue = refreshslider.val();
+            refreshslider.attr('max', 60).val(60).prop('disabled', false);
+        } else {
+            refreshslider.attr('max', 70).val(init.refreshLocked ? 70 : previousRefreshValue);
+        }
+        updateRefreshControl();
+    });
     /** Update the refresh interval from the slider and restart its countdown. */
     function updateRefreshControl() {
+        if (init.countdownTimer) {
+            clearInterval(init.countdownTimer);
+            init.countdownTimer = null;
+        }
+        if (replay.active) {
+            var duration = parseInt(refreshslider.val(), 10);
+            var replaylabel = strings.trackviewerrefreshseconds.replace(/\{\$a\}/g, duration);
+            refreshlabel.text(strings.trackviewerreplaying);
+            refreshvalue.text(replaylabel);
+            refreshslider.attr('aria-valuetext', replaylabel);
+            replay.setDuration(duration);
+            $('#timecircle').hide();
+            return;
+        }
+        refreshlabel.text(strings.trackviewerrefreshinterval);
+        refreshslider.prop('disabled', init.refreshLocked);
+        if (init.refreshLocked) {
+            refreshslider.val(70);
+        }
         var sliderposition = parseInt(refreshslider.val(), 10);
         var seconds = sliderposition === 70 ? 0 : sliderposition;
         init.refreshTracksInterval = seconds;
         var label = seconds ? strings.trackviewerrefreshseconds.replace(/\{\$a\}/g, seconds) : strings.trackviewerrefreshdisabled;
         refreshvalue.text(label);
         refreshslider.attr('aria-valuetext', label);
-        if (init.countdownTimer) {
-            clearInterval(init.countdownTimer);
-            init.countdownTimer = null;
-        }
         if (!seconds) {
             $('#timecircle').hide();
             return;
@@ -493,13 +535,33 @@ function initcreategpxviewer(cmid, treasurehuntid, strings, users, custommapconf
 
         var remaining = seconds;
         $('#timecircle').text(remaining).show();
-        init.countdownTimer = setInterval(function() {
+        init.countdownTimer = setInterval(async function() {
             remaining--;
             if (remaining <= 0) {
-                init.refreshSources.forEach(function(source) {
-                    source.clear();
-                    source.refresh();
-                });
+                if (init.refreshBusy) {
+                    return;
+                }
+                init.refreshBusy = true;
+                try {
+                    var response = await fetch('track_status.php?id=' + cmid, {credentials: 'same-origin'});
+                    if (response.ok && !(await response.json()).refresh) {
+                        init.refreshLocked = true;
+                        updateRefreshControl();
+                        return;
+                    }
+                    init.refreshSources.forEach(function(source) {
+                        source.clear();
+                        source.refresh();
+                    });
+                } catch (error) {
+                    // A temporary status failure should not stop track updates.
+                    init.refreshSources.forEach(function(source) {
+                        source.clear();
+                        source.refresh();
+                    });
+                } finally {
+                    init.refreshBusy = false;
+                }
                 remaining = seconds;
             }
             $('#timecircle').text(remaining);
@@ -562,10 +624,13 @@ function flyTo(map, point, extent) {
  * @param {LayerSwitcher} layerSwitcher
  * @param {Function} onSourceLoaded Callback to update the heatmap.
  * @param {boolean} fitTracks Whether to fit tracks when stage geometry is unavailable.
+ * @param {Function|null} onTracksLoaded Callback with timestamped tracks.
  */
-function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = null, fitTracks = false) {
+function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = null, fitTracks = false,
+    onTracksLoaded = null) {
     var maxExtent = null;
     var pending = users.length;
+    var entries = [];
     users.forEach(function(user) {
         var gpxsource = new ol.source.Vector({
             url: 'gpx.php?id=' + cmid + '&userid=' + user.id,
@@ -582,6 +647,7 @@ function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = 
         });
         vector.set('trackUserId', user.id);
         vector.set('participantName', participantName);
+        vector.set('fullSource', gpxsource);
         var marker = document.createElement('div');
         marker.className = 'track-participant-avatar';
         marker.style.setProperty('--track-color', color);
@@ -601,6 +667,8 @@ function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = 
         });
         vector.markerElement = marker;
         map.addOverlay(markerOverlay);
+        var entry = {user, vector, source: gpxsource, markerOverlay, points: []};
+        entries.push(entry);
         init.refreshSources.push(gpxsource);
         vector.on('change:visible', function() {
             marker.style.display = this.getVisible() ? '' : 'none';
@@ -619,6 +687,10 @@ function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = 
         gpxsource.on('change', function() {
             if (gpxsource.getState() !== 'ready') {
                 return;
+            }
+            entry.points = readTimedTrackPoints(gpxsource.getFeatures());
+            if (onTracksLoaded) {
+                onTracksLoaded(entries);
             }
             var extent = getValidExtent(gpxsource.getExtent());
             if (extent !== null) {
@@ -655,6 +727,422 @@ function loadGpx(users, cmid, map, tracksGroup, layerSwitcher, onSourceLoaded = 
             layerSwitcher.renderPanel();
         }
     });
+}
+
+/**
+ * Extract ordered track coordinates and GPX timestamps from OpenLayers XYM geometries.
+ *
+ * @param {Array<ol.Feature>} features Loaded GPX features.
+ * @returns {Array<Object>} Timed projected coordinates.
+ */
+function readTimedTrackPoints(features) {
+    var points = [];
+    features.forEach(function(feature) {
+        var geometry = feature.getGeometry();
+        if (!geometry) {
+            return;
+        }
+        var layout = geometry.getLayout();
+        if (layout !== 'XYM' && layout !== 'XYZM') {
+            return;
+        }
+        var lines = [];
+        if (geometry.getType() === 'MultiLineString') {
+            lines = geometry.getCoordinates();
+        } else if (geometry.getType() === 'LineString') {
+            lines = [geometry.getCoordinates()];
+        }
+        var timeIndex = layout === 'XYZM' ? 3 : 2;
+        lines.forEach(function(line) {
+            line.forEach(function(point) {
+                var time = Number(point[timeIndex]);
+                if (Number.isFinite(time) && time > 0 && Number.isFinite(point[0]) && Number.isFinite(point[1])) {
+                    points.push({time, coordinate: point.slice(0, 2)});
+                }
+            });
+        });
+    });
+    points.sort((a, b) => a.time - b.time);
+    var totalDistance = 0;
+    points.forEach((point, index) => {
+        if (index > 0) {
+            var from = ol.proj.toLonLat(points[index - 1].coordinate);
+            var to = ol.proj.toLonLat(point.coordinate);
+            var latitude = (to[1] - from[1]) * Math.PI / 180;
+            var longitude = (to[0] - from[0]) * Math.PI / 180;
+            var haversine = Math.sin(latitude / 2) ** 2 + Math.cos(from[1] * Math.PI / 180) *
+                Math.cos(to[1] * Math.PI / 180) * Math.sin(longitude / 2) ** 2;
+            totalDistance += 2 * 6371000 * Math.asin(Math.min(1, Math.sqrt(haversine)));
+        }
+        point.distance = totalDistance;
+    });
+    return points;
+}
+
+/**
+ * Replay all timestamped tracks on a shared clock and timeline.
+ *
+ * @param {Object} openlayers OpenLayers namespace.
+ * @param {Object} strings Translated labels.
+ * @param {Function} onModeChange Toggle the refresh or replay slider.
+ * @returns {Object} Replay controls.
+ */
+function createTrackReplay(openlayers, strings, onModeChange) {
+    var button = document.getElementById('track-replay');
+    var label = document.getElementById('track-replay-label');
+    var timeline = document.getElementById('th-participant-progress-trackviewer');
+    var track = document.createElement('div');
+    track.className = 'th-participant-progress-track th-replay-track';
+    track.setAttribute('role', 'slider');
+    track.setAttribute('tabindex', '0');
+    track.setAttribute('aria-label', strings.trackviewertimeline);
+    track.setAttribute('aria-valuemin', '0');
+    track.setAttribute('aria-valuemax', '100');
+    var elapsed = document.createElement('div');
+    elapsed.className = 'th-replay-elapsed';
+    var clock = document.createElement('span');
+    clock.className = 'th-replay-clock';
+    clock.setAttribute('aria-live', 'off');
+    track.append(elapsed, clock);
+    timeline.replaceChildren(track);
+    var entries = [];
+    var actors = [];
+    var first = 0;
+    var last = 0;
+    var fraction = 1;
+    var duration = 60;
+    var anchorFraction = 0;
+    var anchorTime = 0;
+    var animationFrame = 0;
+    var state = {active: false, playing: false};
+
+    /** @param {boolean} playing Whether the replay clock is running. */
+    function updateButton(playing) {
+        label.textContent = playing ? strings.trackviewerpause : strings.trackviewerreplay;
+        button.querySelector('.fa').classList.toggle('fa-play', !playing);
+        button.querySelector('.fa').classList.toggle('fa-pause', playing);
+    }
+
+    /**
+     * Find the last point at or before a timestamp.
+     *
+     * @param {Array<Object>} points Timestamped points.
+     * @param {number} time Current replay time.
+     * @returns {number} Index, or -1 if the track has not started.
+     */
+    function findPoint(points, time) {
+        var low = 0;
+        var high = points.length;
+        while (low < high) {
+            var middle = Math.floor((low + high) / 2);
+            if (points[middle].time <= time) {
+                low = middle + 1;
+            } else {
+                high = middle;
+            }
+        }
+        return low - 1;
+    }
+
+    /**
+     * Draw the recorded route up to a timestamp and move its avatar.
+     *
+     * @param {Object} entry Participant's track.
+     * @param {number} time Current replay time.
+     */
+    function drawEntry(entry, time) {
+        var points = entry.points;
+        var index = findPoint(points, time);
+        if (index < 0) {
+            if (state.active) {
+                entry.replayGeometry.setCoordinates([]);
+                entry.markerOverlay.setPosition(undefined);
+            }
+            return;
+        }
+        var point = points[index];
+        if (!state.active) {
+            return;
+        }
+        var position = point.coordinate;
+        if (index + 1 < points.length && points[index + 1].time > time) {
+            var next = points[index + 1];
+            var ratio = (time - point.time) / (next.time - point.time);
+            position = [
+                point.coordinate[0] + (next.coordinate[0] - point.coordinate[0]) * ratio,
+                point.coordinate[1] + (next.coordinate[1] - point.coordinate[1]) * ratio,
+            ];
+        }
+        var visible = points.slice(0, index + 1).map((record) => record.coordinate);
+        visible.push(position);
+        entry.replayGeometry.setCoordinates(visible);
+        entry.markerOverlay.setPosition(position);
+    }
+
+    /**
+     * Move team and individual markers on the game-progress axis.
+     *
+     * @param {number} time Replay timestamp.
+     * @returns {void}
+     */
+    function drawActors(time) {
+        actors.forEach((actor) => {
+            if (!actor.totalstages) {
+                actor.marker.hidden = true;
+                return;
+            }
+            var progress = progressAt(actor, time);
+            actor.marker.hidden = false;
+            actor.marker.style.left = (5 + progress.fraction * 90) + '%';
+            actor.marker.dataset.state = progress.status;
+            actor.marker.title = actor.name + ' · ' + progress.completed + '/' + actor.totalstages;
+        });
+    }
+
+    /** @param {number} position Fraction of the global time range. */
+    function render(position) {
+        fraction = Math.max(0, Math.min(1, position));
+        var time = first + (last - first) * fraction;
+        drawActors(time);
+        elapsed.style.setProperty('--th-replay-time-fraction', String(fraction));
+        track.setAttribute('aria-valuenow', String(Math.round(fraction * 100)));
+        var date = first ? new Date(time * 1000).toLocaleString() : '';
+        track.setAttribute('aria-valuetext', date);
+        clock.textContent = date;
+        entries.forEach((entry) => drawEntry(entry, time));
+    }
+
+    /** Restore complete tracks after playback. */
+    function stop() {
+        if (!state.active) {
+            return;
+        }
+        window.cancelAnimationFrame(animationFrame);
+        state.active = false;
+        state.playing = false;
+        entries.forEach((entry) => {
+            entry.vector.setSource(entry.source);
+            if (entry.points.length) {
+                entry.markerOverlay.setPosition(entry.points[entry.points.length - 1].coordinate);
+            }
+        });
+        render(1);
+        updateButton(false);
+        onModeChange(false);
+    }
+
+    /** Advance the shared replay clock. */
+    function frame() {
+        if (!state.playing) {
+            return;
+        }
+        var next = anchorFraction + (performance.now() - anchorTime) / (duration * 1000);
+        render(next);
+        if (fraction >= 1) {
+            stop();
+        } else {
+            animationFrame = window.requestAnimationFrame(frame);
+        }
+    }
+
+    /** Start or resume playback. */
+    function play() {
+        if (last <= first) {
+            return;
+        }
+        if (!state.active) {
+            state.active = true;
+            entries.forEach((entry) => entry.vector.setSource(entry.replaySource));
+            onModeChange(true);
+            render(0);
+        } else if (fraction >= 1) {
+            render(0);
+        }
+        state.playing = true;
+        anchorFraction = fraction;
+        anchorTime = performance.now();
+        updateButton(true);
+        animationFrame = window.requestAnimationFrame(frame);
+    }
+
+    /** Pause playback without discarding the selected time. */
+    function pause() {
+        state.playing = false;
+        window.cancelAnimationFrame(animationFrame);
+        updateButton(false);
+    }
+
+    /**
+     * Seek by pointing at the timeline, including touch drags.
+     *
+     * @param {PointerEvent} event Pointer event.
+     */
+    function seekPointer(event) {
+        var bounds = track.getBoundingClientRect();
+        // Use the fill's untransformed box so the pointer matches its visible end.
+        var target = Math.max(0, Math.min(1, (event.clientX - bounds.left - elapsed.offsetLeft) /
+            elapsed.offsetWidth));
+        if (!state.active) {
+            state.active = true;
+            entries.forEach((entry) => entry.vector.setSource(entry.replaySource));
+            onModeChange(true);
+        }
+        render(target);
+        if (state.playing) {
+            anchorFraction = fraction;
+            anchorTime = performance.now();
+        }
+    }
+
+    button.addEventListener('click', () => state.playing ? pause() : play());
+    track.addEventListener('pointerdown', (event) => {
+        if (last <= first) {
+            return;
+        }
+        event.preventDefault();
+        track.setPointerCapture(event.pointerId);
+        seekPointer(event);
+    });
+    track.addEventListener('pointermove', (event) => {
+        if (track.hasPointerCapture(event.pointerId)) {
+            seekPointer(event);
+        }
+    });
+    track.addEventListener('keydown', (event) => {
+        if (last <= first) {
+            return;
+        }
+        var step = 0;
+        if (event.key === 'ArrowLeft' || event.key === 'ArrowDown') {
+            step = -0.01;
+        } else if (event.key === 'ArrowRight' || event.key === 'ArrowUp') {
+            step = 0.01;
+        } else if (event.key === 'Home') {
+            step = -1;
+        } else if (event.key === 'End') {
+            step = 1;
+        } else {
+            return;
+        }
+        event.preventDefault();
+        if (!state.active) {
+            state.active = true;
+            entries.forEach((entry) => entry.vector.setSource(entry.replaySource));
+            onModeChange(true);
+        }
+        if (event.key === 'Home') {
+            render(0);
+        } else if (event.key === 'End') {
+            render(1);
+        } else {
+            render(fraction + step);
+        }
+        if (state.playing) {
+            anchorFraction = fraction;
+            anchorTime = performance.now();
+        }
+    });
+    window.addEventListener('pagehide', () => window.cancelAnimationFrame(animationFrame), {once: true});
+
+    /** @param {Array<Object>} loadedEntries Tracks with their current GPX points. */
+    state.updateEntries = (loadedEntries) => {
+        entries = loadedEntries;
+        var previousActors = new Map(actors.map((actor) => [actor.key, actor]));
+        var byKey = new Map();
+        entries.forEach((entry) => {
+            var user = entry.user;
+            var key = (user.teamid ? 'g' + user.teamid : 'u' + user.id) + 'r' + user.roadid;
+            var actor = byKey.get(key);
+            if (!actor) {
+                actor = previousActors.get(key) || {
+                    key,
+                    name: user.teamname || user.fullname,
+                    marker: null,
+                };
+                actor.members = [];
+                actor.attempts = user.attempts || [];
+                actor.totalstages = Number(user.totalstages || 0);
+                byKey.set(key, actor);
+            }
+            actor.members.push(entry);
+        });
+        actors = Array.from(byKey.values());
+        previousActors.forEach((actor, key) => {
+            if (!byKey.has(key)) {
+                actor.marker.remove();
+            }
+        });
+        first = Infinity;
+        last = -Infinity;
+        entries.forEach((entry) => entry.points.forEach((point) => {
+            first = Math.min(first, point.time);
+            last = Math.max(last, point.time);
+        }));
+        actors.forEach((actor) => {
+            actor.firstTrackTime = Infinity;
+            actor.lastTrackTime = -Infinity;
+            actor.members.forEach((entry) => {
+                if (entry.points.length) {
+                    actor.firstTrackTime = Math.min(actor.firstTrackTime, entry.points[0].time);
+                    actor.lastTrackTime = Math.max(actor.lastTrackTime, entry.points[entry.points.length - 1].time);
+                }
+            });
+            if (!Number.isFinite(actor.firstTrackTime)) {
+                actor.firstTrackTime = 0;
+                actor.lastTrackTime = 0;
+            }
+            actor.attempts.forEach((attempt) => {
+                first = Math.min(first, attempt.time);
+                last = Math.max(last, attempt.time);
+            });
+        });
+        if (!Number.isFinite(first)) {
+            first = 0;
+            last = 0;
+        }
+        button.disabled = last <= first;
+        track.setAttribute('aria-disabled', String(last <= first));
+        actors.forEach((actor, index) => {
+            if (!actor.marker) {
+                var marker = document.createElement('span');
+                marker.className = 'th-participant-marker';
+                marker.setAttribute('aria-hidden', 'true');
+                var avatar = document.createElement('span');
+                avatar.className = 'th-participant-avatar';
+                var user = actor.members[0].user;
+                avatar.style.background = user.teamid ? teamColor(user.teamid) : trackColor(user.id);
+                if (user.pictureurl && !user.teamid) {
+                    var picture = document.createElement('img');
+                    picture.src = user.pictureurl;
+                    picture.alt = '';
+                    avatar.appendChild(picture);
+                } else {
+                    avatar.textContent = user.initials || '?';
+                }
+                marker.appendChild(avatar);
+                track.appendChild(marker);
+                actor.marker = marker;
+            }
+            actor.marker.style.setProperty('--th-marker-top', ['50%', '22%', '78%'][index % 3]);
+        });
+        entries.forEach((entry) => {
+            if (!entry.replayGeometry) {
+                entry.replayGeometry = new openlayers.geom.LineString([]);
+                entry.replaySource = new openlayers.source.Vector({
+                    features: [new openlayers.Feature(entry.replayGeometry)]
+                });
+            }
+        });
+        render(state.active ? fraction : 1);
+    };
+    state.setDuration = (seconds) => {
+        if (state.playing) {
+            anchorFraction = fraction;
+            anchorTime = performance.now();
+        }
+        duration = Math.max(1, seconds);
+    };
+    return state;
 }
 /**
  *

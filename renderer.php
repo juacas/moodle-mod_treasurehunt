@@ -360,6 +360,11 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                 ));
             }
 
+            $enrolledusers = [];
+            if (!$progress->groupmode && ($progress->viewpermission || $progress->managepermission)) {
+                $context = context_module::instance($progress->coursemoduleid);
+                $enrolledusers = get_enrolled_users($context, '', 0, 'u.id');
+            }
             foreach ($progress->roadsusersprogress as $roadusersprogress) {
                 $roadid = $roadusersprogress->id ?? null;
                 $roadheading = format_string($roadusersprogress->name);
@@ -460,6 +465,23 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                     'courseid' => $this->page->course->id]
                                 );
                                 $name = $userpic . html_writer::link($userurl, $fullname);
+                                if (($progress->viewpermission || $progress->managepermission) &&
+                                        !isset($enrolledusers[$userorgroup->id])) {
+                                    $warning = get_string('progressusernotenrolled', 'treasurehunt');
+                                    $name .= ' ' . html_writer::tag('span', $this->output->pix_icon(
+                                        'i/warning',
+                                        '',
+                                        'moodle',
+                                        ['class' => 'text-warning']
+                                    ), [
+                                        'class' => 'treasurehunt-unenrolled-warning',
+                                        'data-treasurehunt-tooltip' => $warning,
+                                        'title' => $warning,
+                                        'aria-label' => $warning,
+                                        'role' => 'img',
+                                        'tabindex' => '0',
+                                    ]);
+                                }
                                 if ($progress->viewpermission) {
                                     $params = ['id' => $progress->coursemoduleid, 'userid' => $userorgroup->id];
                                     $url = new moodle_url('/mod/treasurehunt/view.php', $params);

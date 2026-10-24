@@ -2438,7 +2438,7 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         $groupidwithin = 'at.groupid=a.groupid AND at.userid=a.userid';
     }
     $attemptsquery = "
-    SELECT a.id, $user as \"user\", s.position, a.timecreated,
+    SELECT a.id, $user as \"user\", s.roadid, s.position, a.timecreated,
            CASE WHEN EXISTS
            (SELECT 1
             FROM {treasurehunt_stages} ri
@@ -2470,6 +2470,37 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         FROM {treasurehunt_roads} r where treasurehuntid=?";
     $params = ['treasurehuntid' => $cm->instance];
     $attempts = $DB->get_records_sql($attemptsquery, $params);
+    $attemptsbyroad = [];
+    $historicalidsbyroad = [];
+    $showhistory = has_capability('mod/treasurehunt:viewusershistoricalattempts', $context)
+        || has_capability('mod/treasurehunt:managetreasurehunt', $context);
+    foreach ($attempts as $attempt) {
+        $attemptsbyroad[$attempt->roadid][$attempt->id] = $attempt;
+        if ($showhistory) {
+            $historicalidsbyroad[$attempt->roadid][$attempt->user] = $attempt->user;
+        }
+    }
+    $historicalparticipants = [];
+    if ($historicalidsbyroad) {
+        $historicalids = array_unique(array_merge(...array_values($historicalidsbyroad)));
+        if ($cm->groupmode) {
+            $historicalparticipants = $DB->get_records_list('groups', 'id', $historicalids);
+        } else {
+            $historicalparticipants = $DB->get_records_list('user', 'id', $historicalids);
+        }
+    }
+    $historicalbyroad = [];
+    foreach ($historicalidsbyroad as $roadid => $ids) {
+        foreach ($ids as $id) {
+            if (!isset($historicalparticipants[$id])) {
+                continue;
+            }
+            $participant = $historicalparticipants[$id];
+            if ($cm->groupmode ? $participant->courseid == $courseid : !$participant->deleted) {
+                $historicalbyroad[$roadid][$id] = $participant;
+            }
+        }
+    }
     if ($cm->groupmode) {
         // Group mode.
         // Get all groupings available in the activity.
@@ -2488,7 +2519,12 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                 $duplicategroupsingroupings,
                 true
             );
-            $roads[] = treasurehunt_get_road_userlist($groupingid, $grouplist, $attempts);
+            $roadgroups = $grouplist + ($historicalbyroad[$groupingid->roadid] ?? []);
+            $roads[] = treasurehunt_get_road_userlist(
+                $groupingid,
+                $roadgroups,
+                $attemptsbyroad[$groupingid->roadid] ?? []
+            );
         }
 
         // Check if there are participants in more than one group in the same road.
@@ -2507,7 +2543,9 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
         if (count($availablegroups) === 1 && current($availablegroups)->groupid == 0) {
             // The play capability has a write flag and is removed in freeze mode.
             $totalparticipants = get_enrolled_users($context, 'mod/treasurehunt:enterplayer');
-            $roads[] = treasurehunt_get_road_userlist(current($availablegroups), $totalparticipants, $attempts);
+            $road = current($availablegroups);
+            $userlist = $totalparticipants + ($historicalbyroad[$road->roadid] ?? []);
+            $roads[] = treasurehunt_get_road_userlist($road, $userlist, $attemptsbyroad[$road->roadid] ?? []);
         } else {
             foreach ($availablegroups as $group) {
                 if ($group->groupid) {
@@ -2527,7 +2565,8 @@ function treasurehunt_get_list_participants_and_attempts_in_roads($cm, $courseid
                 } else {
                     $userlist = [];
                 }
-                $roads[] = treasurehunt_get_road_userlist($group, $userlist, $attempts);
+                $userlist += $historicalbyroad[$group->roadid] ?? [];
+                $roads[] = treasurehunt_get_road_userlist($group, $userlist, $attemptsbyroad[$group->roadid] ?? []);
             }
         }
     }
@@ -2883,6 +2922,48 @@ function treasurehunt_get_users_with_tracks($treasurehuntid) {
     $sql = 'SELECT DISTINCT userid from {treasurehunt_track} WHERE treasurehuntid=?';
     $results = $DB->get_records_sql($sql, [$treasurehuntid]);
     return array_keys($results);
+}
+
+/**
+ * Whether the track viewer can still receive positions from active players.
+ *
+ * Historical attempts from users who are no longer enrolled do not keep polling alive.
+ *
+ * @param stdClass $treasurehunt Activity record.
+ * @param stdClass $cm Course module.
+ * @param context_module $context Activity context.
+ * @return bool Whether automatic track refresh is useful.
+ */
+function treasurehunt_tracks_need_refresh($treasurehunt, $cm, $context): bool {
+    if (!empty($treasurehunt->cutoffdate) && time() >= $treasurehunt->cutoffdate) {
+        return false;
+    }
+    $enrolled = get_enrolled_users($context, 'mod/treasurehunt:enterplayer', 0, 'u.id');
+    if (!$enrolled) {
+        return false;
+    }
+    [$roads] = treasurehunt_get_list_participants_and_attempts_in_roads($cm, $treasurehunt->course, $context);
+    foreach ($roads as $road) {
+        foreach ($road->userlist as $participant) {
+            if ($treasurehunt->groupmode) {
+                if (!get_enrolled_users($context, 'mod/treasurehunt:enterplayer', $participant->id, 'u.id')) {
+                    continue;
+                }
+                $userid = 0;
+                $groupid = $participant->id;
+            } else {
+                if (!isset($enrolled[$participant->id])) {
+                    continue;
+                }
+                $userid = $participant->id;
+                $groupid = 0;
+            }
+            if (!treasurehunt_check_if_user_has_finished($userid, $groupid, $road->id)) {
+                return true;
+            }
+        }
+    }
+    return false;
 }
 /**
  * Get last recorded track location.

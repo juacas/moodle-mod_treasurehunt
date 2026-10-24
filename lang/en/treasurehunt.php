@@ -602,6 +602,7 @@ $string['preview'] = 'Preview';
 $string['previewinvalidroad'] = 'Road "{$a}" cannot be previewed because it is not validated. Check its stages and geometries in the editor.';
 $string['previewroad'] = 'Preview {$a}';
 $string['prevstep'] = 'Prev';
+$string['progressusernotenrolled'] = 'This user is not currently enrolled in the course.';
 
 $string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
 $string['privacy:metadata:treasurehunt_attempts:groupid'] = 'The group in which the user played the activity.';
@@ -711,9 +712,13 @@ If this option is <b>disabled</b>, the only locations recorded are those of the 
 $string['trackviewer'] = 'Track Viewer';
 $string['trackviewerdownloadgpx'] = 'Download GPX tracks';
 $string['trackviewerheatmap'] = 'Heatmap of recorded positions';
+$string['trackviewerpause'] = 'Pause';
+$string['trackviewerreplay'] = 'Replay';
+$string['trackviewerreplaying'] = 'Replaying:';
 $string['trackviewerrefreshdisabled'] = 'Disabled';
 $string['trackviewerrefreshinterval'] = 'Refresh tracks:';
 $string['trackviewerrefreshseconds'] = '{$a} seconds';
+$string['trackviewertimeline'] = 'Replay time. Drag to move through the recording; the circles show game progress.';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';
 $string['treasurehunt:addroad'] = 'Add road';

@@ -84,6 +84,57 @@
     height: max(30rem, calc(100dvh - 17rem));
 }
 
+#page-mod-treasurehunt-gpx_viewer .th-replay-timeline {
+    height: 5rem;
+    margin: .25rem 0 .5rem;
+    padding: 0 .5rem;
+}
+
+.th-replay-track {
+    cursor: pointer;
+    touch-action: none;
+    outline-offset: -3px;
+}
+
+.th-replay-track .th-participant-marker {
+    width: 1.9rem;
+    height: 1.9rem;
+    pointer-events: auto;
+    transition: none;
+}
+
+.th-replay-track .th-participant-marker[hidden] {
+    display: none;
+}
+
+.th-replay-elapsed {
+    position: absolute;
+    z-index: 1;
+    top: .45rem;
+    bottom: .45rem;
+    left: 5%;
+    right: 5%;
+    border-radius: .5rem;
+    background: rgb(25 135 84 / 19%);
+    box-shadow: inset 0 0 0 1px rgb(25 135 84 / 34%);
+    pointer-events: none;
+    transform: scaleX(var(--th-replay-time-fraction, 0));
+    transform-origin: left center;
+}
+
+.th-replay-clock {
+    position: absolute;
+    z-index: 4;
+    right: 6%;
+    bottom: -.7rem;
+    padding: .05rem .35rem;
+    border-radius: .25rem;
+    background: var(--bs-body-bg, #fff);
+    color: var(--bs-body-color, #212529);
+    font: 600 .7rem/1.2 system-ui, sans-serif;
+    pointer-events: none;
+}
+
 #page-mod-treasurehunt-gpx_viewer .track-participant-avatar {
     display: grid;
     width: 2rem;
@@ -129,7 +180,7 @@
     position: absolute;
     z-index: 1;
     top: 50%;
-    right: 6%;
+    right: 5%;
     left: 5%;
     height: 3px;
     content: '';
@@ -143,7 +194,7 @@
     position: absolute;
     z-index: 2;
     top: 50%;
-    right: 4%;
+    left: 95%;
     width: 16px;
     height: 16px;
     content: '';
@@ -151,7 +202,7 @@
     border-radius: 50%;
     background: repeating-conic-gradient(#17212b 0 25%, #fff 0 50%) 50% / 6px 6px;
     box-shadow: 0 0 0 2px rgb(255 255 255 / 82%), 0 0 8px 3px rgb(255 255 255 / 72%);
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
 }
 
 .th-participant-marker {

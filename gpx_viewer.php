@@ -54,17 +54,56 @@ $PAGE->requires->css('/mod/treasurehunt/css/introjs.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol.css');
 $PAGE->requires->css('/mod/treasurehunt/css/ol3-layerswitcher.css');
 $PAGE->requires->css('/mod/treasurehunt/css/participant_progress.css');
-if (!empty($treasurehunt->showboard)) {
-    $PAGE->requires->js_call_amd('mod_treasurehunt/participant_progress', 'init_page');
-}
 $usersids = treasurehunt_get_users_with_tracks($treasurehunt->id);
 $users = [];
 $userrecords = $DB->get_records_list('user', 'id', $usersids);
+$roads = $DB->get_records('treasurehunt_roads', ['treasurehuntid' => $treasurehunt->id], 'id', 'id,groupid,groupingid');
+$roadstages = [];
+$stages = $DB->get_records_sql(
+    'SELECT s.id, s.roadid, s.position, s.geom FROM {treasurehunt_stages} s ' .
+    'JOIN {treasurehunt_roads} r ON r.id = s.roadid WHERE r.treasurehuntid = ? ORDER BY s.roadid,s.position',
+    [$treasurehunt->id]
+);
+foreach ($stages as $stage) {
+    $roadstages[$stage->roadid][$stage->id] = $stage->id;
+}
+$attemptsbyactor = [];
+$latestroadbyactor = [];
+$historicgroupbyuser = [];
+$attemptrecords = $DB->get_records_sql(
+    'SELECT a.id,a.userid,a.groupid,a.timecreated,a.success,a.type,a.penalty,a.geometrysolved,' .
+    'a.questionsolved,a.activitysolved,s.id AS stageid,s.roadid ' .
+    'FROM {treasurehunt_attempts} a JOIN {treasurehunt_stages} s ON s.id = a.stageid ' .
+    'JOIN {treasurehunt_roads} r ON r.id = s.roadid ' .
+    'WHERE r.treasurehuntid = ? ORDER BY a.timecreated,a.id',
+    [$treasurehunt->id]
+);
+foreach ($attemptrecords as $attempt) {
+    if ($treasurehunt->groupmode && !$attempt->groupid) {
+        continue;
+    }
+    $actor = $treasurehunt->groupmode ? 'g' . $attempt->groupid : 'u' . $attempt->userid;
+    $key = $actor . 'r' . $attempt->roadid;
+    $attemptsbyactor[$key][] = [
+        'time' => (int)$attempt->timecreated,
+        'stageid' => (int)$attempt->stageid,
+        'success' => (bool)$attempt->success && in_array($attempt->type, ['location', 'qr'], true),
+        'penalty' => (bool)$attempt->penalty,
+        'geometrysolved' => (bool)$attempt->geometrysolved,
+        'questionsolved' => (bool)$attempt->questionsolved,
+        'activitysolved' => (bool)$attempt->activitysolved,
+    ];
+    $latestroadbyactor[$actor] = (int)$attempt->roadid;
+    if ($treasurehunt->groupmode) {
+        $historicgroupbyuser[$attempt->userid] = (int)$attempt->groupid;
+    }
+}
+$historicgroups = $historicgroupbyuser ? $DB->get_records_list('groups', 'id', array_unique($historicgroupbyuser)) : [];
 $teamsbyuser = [];
 if (!empty($treasurehunt->groupmode) && $userrecords) {
     [$usersql, $userparams] = $DB->get_in_or_equal(array_keys($userrecords), SQL_PARAMS_NAMED, 'trackeduser');
     $teamrecords = $DB->get_records_sql(
-        'SELECT DISTINCT gm.id, gm.userid, g.id AS groupid, g.name AS groupname ' .
+        'SELECT DISTINCT gm.id, gm.userid, g.id AS groupid, g.name AS groupname, r.id AS roadid ' .
         'FROM {groups_members} gm JOIN {groups} g ON g.id = gm.groupid ' .
         'JOIN {groupings_groups} gg ON gg.groupid = g.id ' .
         'JOIN {treasurehunt_roads} r ON r.groupingid = gg.groupingid ' .
@@ -73,6 +112,23 @@ if (!empty($treasurehunt->groupmode) && $userrecords) {
     );
     foreach ($teamrecords as $teamrecord) {
         $teamsbyuser[$teamrecord->userid] ??= $teamrecord;
+    }
+}
+$roadsbyuser = [];
+if (empty($treasurehunt->groupmode) && $userrecords) {
+    if (count($roads) === 1 && empty(current($roads)->groupid)) {
+        $defaultroadid = (int)current($roads)->id;
+    } else {
+        [$usersql, $userparams] = $DB->get_in_or_equal(array_keys($userrecords), SQL_PARAMS_NAMED, 'roaduser');
+        $roadassignments = $DB->get_records_sql(
+            'SELECT gm.id, gm.userid, r.id AS roadid FROM {groups_members} gm ' .
+            'JOIN {treasurehunt_roads} r ON r.groupid = gm.groupid ' .
+            "WHERE r.treasurehuntid = :huntid AND gm.userid $usersql",
+            ['huntid' => $treasurehunt->id] + $userparams
+        );
+        foreach ($roadassignments as $assignment) {
+            $roadsbyuser[$assignment->userid] ??= (int)$assignment->roadid;
+        }
     }
 }
 foreach ($userrecords as $userrecord) {
@@ -88,20 +144,21 @@ foreach ($userrecords as $userrecord) {
         $user->pictureurl = $picture->get_url($PAGE)->out(false);
     }
     $team = $teamsbyuser[$userrecord->id] ?? null;
-    $user->teamid = $team ? (int)$team->groupid : 0;
-    $user->teamname = $team ? format_string($team->groupname) : '';
-    $iconname = $team ? $user->teamname : $user->fullname;
+    $user->teamid = $historicgroupbyuser[$userrecord->id] ?? ($team ? (int)$team->groupid : 0);
+    $user->teamname = isset($historicgroups[$user->teamid]) ? format_string($historicgroups[$user->teamid]->name) :
+        ($team ? format_string($team->groupname) : '');
+    $actor = $treasurehunt->groupmode ? 'g' . $user->teamid : 'u' . $user->id;
+    $user->roadid = $latestroadbyactor[$actor] ?? ($team ? (int)$team->roadid :
+        ($roadsbyuser[$user->id] ?? ($defaultroadid ?? 0)));
+    $user->totalstages = count($roadstages[$user->roadid] ?? []);
+    $user->attempts = $attemptsbyactor[$actor . 'r' . $user->roadid] ?? [];
+    $iconname = $user->teamid ? $user->teamname : $user->fullname;
     $nameparts = preg_split('/\s+/u', trim($iconname), -1, PREG_SPLIT_NO_EMPTY);
     $user->initials = $nameparts ? core_text::strtoupper(core_text::substr($nameparts[0], 0, 1) .
         (count($nameparts) > 1 ? core_text::substr(end($nameparts), 0, 1) : '')) : '?';
     $users[] = $user;
 }
 $stagebounds = null;
-$stages = $DB->get_records_sql(
-    'SELECT s.id, s.geom FROM {treasurehunt_stages} s ' .
-    'JOIN {treasurehunt_roads} r ON r.id = s.roadid WHERE r.treasurehuntid = ?',
-    [$treasurehunt->id]
-);
 // The viewer needs only the overall extent, not the stage geometries or clues.
 $visitcoordinates = function ($coordinates) use (&$visitcoordinates, &$stagebounds): void {
     if (!is_array($coordinates)) {
@@ -130,7 +187,7 @@ foreach ($stages as $stage) {
         }
     }
 }
-$refreshtracksinterval = 60;
+$refreshtracksinterval = treasurehunt_tracks_need_refresh($treasurehunt, $cm, $context) ? 60 : 0;
 $custommapping = treasurehunt_get_custommappingconfig($treasurehunt, $context);
 
 $PAGE->requires->js_call_amd(
@@ -153,10 +210,17 @@ echo html_writer::start_tag('div', ['class' => 'card-header d-flex flex-wrap ali
 echo html_writer::tag('h2', format_string($treasurehunt->name), [
     'class' => 'h5 mb-0 me-auto',
 ]);
+echo html_writer::tag('button',
+    html_writer::tag('span', '', ['class' => 'fa fa-play', 'aria-hidden' => 'true']) . ' ' .
+    html_writer::tag('span', get_string('trackviewerreplay', 'treasurehunt'), ['id' => 'track-replay-label']),
+    ['id' => 'track-replay', 'type' => 'button', 'class' => 'btn btn-outline-primary btn-sm',
+        'disabled' => empty($users) ? 'disabled' : null]
+);
 echo html_writer::start_tag('div', ['class' => 'track-refresh-control']);
 echo html_writer::tag('label', get_string('trackviewerrefreshinterval', 'treasurehunt'), [
     'class' => 'form-label mb-0',
     'for' => 'refreshtracks',
+    'id' => 'refreshtrackslabel',
 ]);
 echo html_writer::empty_tag('input', [
     'type' => 'range',
@@ -165,9 +229,11 @@ echo html_writer::empty_tag('input', [
     'min' => 10,
     'max' => 70,
     'step' => 10,
-    'value' => $refreshtracksinterval,
+    'value' => $refreshtracksinterval ?: 70,
     'list' => 'refreshtrackssteps',
-    'aria-valuetext' => get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval),
+    'aria-valuetext' => $refreshtracksinterval ?
+        get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval) :
+        get_string('trackviewerrefreshdisabled', 'treasurehunt'),
 ]);
 echo html_writer::tag(
     'datalist',
@@ -180,7 +246,9 @@ echo html_writer::tag(
     html_writer::tag('option', '', ['value' => 70]),
     ['id' => 'refreshtrackssteps']
 );
-echo html_writer::tag('output', get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval), [
+echo html_writer::tag('output', $refreshtracksinterval ?
+    get_string('trackviewerrefreshseconds', 'treasurehunt', $refreshtracksinterval) :
+    get_string('trackviewerrefreshdisabled', 'treasurehunt'), [
     'id' => 'refreshtracksvalue',
     'for' => 'refreshtracks',
     'aria-live' => 'polite',
@@ -205,14 +273,10 @@ echo html_writer::link($downloadurl, get_string('trackviewerdownloadgpx', 'treas
 ]);
 echo html_writer::end_tag('div');
 echo html_writer::start_tag('div', ['class' => 'card-body p-0']);
-if (!empty($treasurehunt->showboard)) {
-    echo html_writer::div('', 'th-participant-progress th-participant-progress-inline', [
-        'id' => 'th-participant-progress-trackviewer',
-        'data-th-treasurehuntid' => $treasurehunt->id,
-        'data-th-roadid' => 0,
-        'aria-label' => get_string('participantprogress', 'treasurehunt'),
-    ]);
-}
+echo html_writer::div('', 'th-participant-progress th-participant-progress-inline th-replay-timeline', [
+    'id' => 'th-participant-progress-trackviewer',
+    'aria-label' => get_string('trackviewertimeline', 'treasurehunt'),
+]);
 echo html_writer::tag('div', '', [
     'id' => 'mapgpx',
     'role' => 'region',

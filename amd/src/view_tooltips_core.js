@@ -27,7 +27,9 @@
  * @param {Function} Tooltip Bootstrap tooltip constructor for this Moodle version.
  */
 export const initTooltips = (Tooltip) => {
-    const cards = document.querySelectorAll('.treasurehunt-activity-summary [data-treasurehunt-tooltip]');
+    const cards = document.querySelectorAll(
+        '.treasurehunt-activity-summary [data-treasurehunt-tooltip], ' +
+        '.usersprogresstable [data-treasurehunt-tooltip]');
     if (!cards.length) {
         return;
     }
