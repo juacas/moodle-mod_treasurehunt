@@ -210,7 +210,8 @@ echo html_writer::start_tag('div', ['class' => 'card-header d-flex flex-wrap ali
 echo html_writer::tag('h2', format_string($treasurehunt->name), [
     'class' => 'h5 mb-0 me-auto',
 ]);
-echo html_writer::tag('button',
+echo html_writer::tag(
+    'button',
     html_writer::tag('span', '', ['class' => 'fa fa-play', 'aria-hidden' => 'true']) . ' ' .
     html_writer::tag('span', get_string('trackviewerreplay', 'treasurehunt'), ['id' => 'track-replay-label']),
     ['id' => 'track-replay', 'type' => 'button', 'class' => 'btn btn-outline-primary btn-sm',

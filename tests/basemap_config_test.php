@@ -153,13 +153,16 @@ final class basemap_config_test extends \advanced_testcase {
         $configuration = treasurehunt_build_customplayerconfig($data);
         $this->assertSame($expected, $configuration->allowedbasemaps);
         $this->assertSame(['osm'], treasurehunt_filter_allowed_basemaps(
-            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERBOOTSTRAP
+            $configuration->allowedbasemaps,
+            TREASUREHUNT_PLAYERBOOTSTRAP
         ));
         $this->assertSame(['arcgis_world_imagery'], treasurehunt_filter_allowed_basemaps(
-            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERCESIUM
+            $configuration->allowedbasemaps,
+            TREASUREHUNT_PLAYERCESIUM
         ));
         $this->assertSame(['mapbox_satellite'], treasurehunt_filter_allowed_basemaps(
-            $configuration->allowedbasemaps, TREASUREHUNT_PLAYERMAPBOX
+            $configuration->allowedbasemaps,
+            TREASUREHUNT_PLAYERMAPBOX
         ));
 
         $data->playerstyle = TREASUREHUNT_PLAYERCESIUM;

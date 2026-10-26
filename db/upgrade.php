@@ -307,14 +307,14 @@ function xmldb_treasurehunt_upgrade($oldversion) {
         $availableplayers = get_config('mod_treasurehunt', 'availableplayerstyles');
         if ($availableplayers !== false) {
             $playerkeys = array_map('trim', explode(',', $availableplayers));
-            $playerkeys = array_map(static function($key) {
+            $playerkeys = array_map(static function ($key) {
                 return $key === 'cessium' ? TREASUREHUNT_PLAYERCESIUM : $key;
             }, $playerkeys);
             set_config('availableplayerstyles', implode(',', array_unique($playerkeys)), 'mod_treasurehunt');
         }
         $availablebasemaps = get_config('mod_treasurehunt', 'availablebasemaps');
         if ($availablebasemaps !== false && $availablebasemaps !== '') {
-            $pairids = array_map(static function($pairid) {
+            $pairids = array_map(static function ($pairid) {
                 return str_starts_with($pairid, 'cessium:') ? 'cesium:' . substr($pairid, 8) : $pairid;
             }, explode(',', $availablebasemaps));
             set_config('availablebasemaps', implode(',', $pairids), 'mod_treasurehunt');

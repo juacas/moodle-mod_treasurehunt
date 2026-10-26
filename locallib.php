@@ -483,9 +483,11 @@ function treasurehunt_get_enabled_basemap_pairs(?array $pairoptions = null): arr
         return $allpairs;
     }
     $selection = $stored === '' ? [] : explode(',', $stored);
-    if (array_filter($selection, static function($value) {
-        return strpos($value, ':') === false;
-    })) {
+    if (
+        array_filter($selection, static function ($value) {
+            return strpos($value, ':') === false;
+        })
+    ) {
         $legacyids = $selection;
         $selection = [];
         foreach ($pairoptions as $maps) {
@@ -545,8 +547,10 @@ function treasurehunt_filter_allowed_basemap_pairs($selection, ?string $playerst
     foreach (treasurehunt_get_available_basemaps_by_player() as $style => $maps) {
         foreach (array_keys($maps) as $mapid) {
             $pairid = $style . ':' . $mapid;
-            if (in_array($pairid, $selection, true) ||
-                    ($style === $playerstyle && in_array($mapid, $selection, true))) {
+            if (
+                in_array($pairid, $selection, true) ||
+                    ($style === $playerstyle && in_array($mapid, $selection, true))
+            ) {
                 $pairs[] = $pairid;
             }
         }

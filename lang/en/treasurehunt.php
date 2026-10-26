@@ -313,8 +313,8 @@ $string['eventstagecreated'] = 'Stage created';
 $string['eventstagedeleted'] = 'Stage deleted';
 $string['eventstageupdated'] = 'Stage updated';
 $string['exit'] = 'Back to Course';
-$string['failedlocation'] = 'Failed location';
 $string['failedanswertitle'] = 'Incorrect answer';
+$string['failedlocation'] = 'Failed location';
 $string['faillocation'] = 'It is not the right place';
 $string['findplace'] = 'Find a place';
 $string['gamemapsheading'] = 'Game maps';
@@ -602,20 +602,20 @@ $string['preview'] = 'Preview';
 $string['previewinvalidroad'] = 'Road "{$a}" cannot be previewed because it is not validated. Check its stages and geometries in the editor.';
 $string['previewroad'] = 'Preview {$a}';
 $string['prevstep'] = 'Prev';
-$string['progressusernotenrolled'] = 'This user is not currently enrolled in the course.';
-
 $string['privacy:metadata:treasurehunt_attempts'] = 'The treasure hunt stores the type, time and location of the attempts, successes and failures of the users during the activity';
 $string['privacy:metadata:treasurehunt_attempts:groupid'] = 'The group in which the user played the activity.';
 $string['privacy:metadata:treasurehunt_attempts:location'] = 'The location of the user at the time of the attempt.';
 $string['privacy:metadata:treasurehunt_attempts:stageid'] = 'The stage ID the user was trying to solve.';
 $string['privacy:metadata:treasurehunt_attempts:timecreated'] = 'The time at which the user made an attempt.';
 $string['privacy:metadata:treasurehunt_attempts:userid'] = 'The ID of the user that made an attempt.';
-
 $string['privacy:metadata:treasurehunt_track'] = 'The treasure hunt stores the sequence of locations followed by a user during the activity.';
 $string['privacy:metadata:treasurehunt_track:location'] = 'The location of the user at a particular time.';
 $string['privacy:metadata:treasurehunt_track:timestamp'] = 'The time the user is tracked at.';
 $string['privacy:metadata:treasurehunt_track:treasurehuntid'] = 'The ID of the Treasure hunt the user is playing in.';
 $string['privacy:metadata:treasurehunt_track:userid'] = 'The ID of the user being tracked.';
+$string['progressusernotenrolled'] = 'This user is not currently enrolled in the course.';
+
+
 
 
 $string['qrreaded'] = 'QR code readed:';
@@ -713,11 +713,11 @@ $string['trackviewer'] = 'Track Viewer';
 $string['trackviewerdownloadgpx'] = 'Download GPX tracks';
 $string['trackviewerheatmap'] = 'Heatmap of recorded positions';
 $string['trackviewerpause'] = 'Pause';
-$string['trackviewerreplay'] = 'Replay';
-$string['trackviewerreplaying'] = 'Replaying:';
 $string['trackviewerrefreshdisabled'] = 'Disabled';
 $string['trackviewerrefreshinterval'] = 'Refresh tracks:';
 $string['trackviewerrefreshseconds'] = '{$a} seconds';
+$string['trackviewerreplay'] = 'Replay';
+$string['trackviewerreplaying'] = 'Replaying:';
 $string['trackviewertimeline'] = 'Replay time. Drag to move through the recording; the circles show game progress.';
 $string['treasurehunt'] = 'Treasure hunt';
 $string['treasurehunt:addinstance'] = 'Add a new treasurehunt';

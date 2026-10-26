@@ -141,12 +141,17 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
                 'unlocked' => (new moodle_url('/mod/treasurehunt/pix/' . $path . 'unlocked_small.webm'))->out(false),
             ];
         }
-        $mform->addElement('select', 'stageanimation', get_string('stageanimation', 'treasurehunt'),
-            $animationoptions, [
+        $mform->addElement(
+            'select',
+            'stageanimation',
+            get_string('stageanimation', 'treasurehunt'),
+            $animationoptions,
+            [
                 'data-previews' => json_encode($animationpreviews),
                 'data-success-label' => get_string('stageanimationsuccesspreview', 'treasurehunt'),
                 'data-failure-label' => get_string('stageanimationfailurepreview', 'treasurehunt'),
-            ]);
+            ]
+        );
         $mform->addHelpButton('stageanimation', 'stageanimation', 'treasurehunt');
         $mform->setDefault('stageanimation', treasurehunt_get_effective_stage_animation(null));
         $PAGE->requires->css('/mod/treasurehunt/css/stage_animation_preview.css');
@@ -479,7 +484,7 @@ class mod_treasurehunt_mod_form extends moodleform_mod {
             $style = $defaultvalues['playerstyle'] ?? $this->current->playerstyle ??
                 get_config('mod_treasurehunt', 'defaultplayerstyle');
             $selectedmaps = $customplayerconfig->allowedbasemaps ?? [];
-            $defaultvalues['allowedbasemaps'] = array_map(function($mapid) use ($style) {
+            $defaultvalues['allowedbasemaps'] = array_map(function ($mapid) use ($style) {
                 return strpos($mapid, ':') === false ? $style . ':' . $mapid : $mapid;
             }, $selectedmaps);
             $defaultvalues['stageanimation'] = treasurehunt_get_effective_stage_animation(

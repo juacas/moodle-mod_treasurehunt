@@ -2,7 +2,33 @@
 
 This file records changes to Treasure Hunt for Moodle. The v3.0.0 entry covers
 changes since v2.0.3, including the authoring, OpenData, out-of-sequence and 3D
-player work brought together in this release.
+player work brought together in that release.
+
+## v3.0.1 — 2026-10-26
+
+Minimum Moodle version: **4.5**. Release maturity: **beta**.
+
+### Added
+
+- Added playback controls to the GPX tracking viewer. Teachers can play, pause
+  and seek through recorded individual or team tracks, with a shared timeline
+  showing participant progress and stage completions.
+- Added historical progress calculation for GPX replay. Successful location
+  and QR attempts advance the replayed stage progress; proximity alone does not
+  count as a successful attempt.
+- Added short success and failure animations for stage events in the game
+  players, with previews in the activity's animation setting.
+
+### Improved
+
+- Added a bounded tile cache for the GPX heatmap. Loaded tracks can be reused
+  without rerendering unchanged heatmap tiles; tiles are invalidated when the
+  recorded points change.
+
+### Fixed
+
+- Corrected the Cesium player identifier and migrated existing site player and
+  basemap selections that used the former `cessium` misspelling.
 
 ## v3.0.0 — 2026-10-18
 

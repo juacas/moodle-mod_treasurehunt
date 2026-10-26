@@ -465,8 +465,10 @@ class mod_treasurehunt_renderer extends plugin_renderer_base {
                                     'courseid' => $this->page->course->id]
                                 );
                                 $name = $userpic . html_writer::link($userurl, $fullname);
-                                if (($progress->viewpermission || $progress->managepermission) &&
-                                        !isset($enrolledusers[$userorgroup->id])) {
+                                if (
+                                    ($progress->viewpermission || $progress->managepermission) &&
+                                        !isset($enrolledusers[$userorgroup->id])
+                                ) {
                                     $warning = get_string('progressusernotenrolled', 'treasurehunt');
                                     $name .= ' ' . html_writer::tag('span', $this->output->pix_icon(
                                         'i/warning',
