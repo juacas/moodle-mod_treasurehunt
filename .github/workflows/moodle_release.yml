@@ -12,9 +12,45 @@ on:
         type: string
 
 jobs:
+  release-notes:
+    runs-on: ubuntu-latest
+    outputs:
+      content: ${{ steps.notes.outputs.content }}
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - name: Read and validate release notes
+        id: notes
+        run: |
+          python3 - <<'PY'
+          import os
+          import uuid
+          from pathlib import Path
+
+          path = Path('RELEASE.md')
+          if not path.is_file():
+              raise SystemExit('RELEASE.md is required for Moodle Marketplace publication')
+
+          notes = path.read_text(encoding='utf-8').strip()
+          if not notes:
+              raise SystemExit('RELEASE.md is empty')
+          if len(notes) > 10000:
+              raise SystemExit(f'RELEASE.md has {len(notes)} characters; the Marketplace limit is 10000')
+
+          delimiter = f'RELEASE_NOTES_{uuid.uuid4().hex}'
+          with open(os.environ['GITHUB_OUTPUT'], 'a', encoding='utf-8') as output:
+              output.write(f'content<<{delimiter}\n{notes}\n{delimiter}\n')
+          print(f'Using {len(notes)} characters from RELEASE.md')
+          PY
+
   release-to-marketplace:
+    needs: release-notes
     uses: moodlehq/moodle-plugin-release/.github/workflows/moodle-release.yml@main
     with:
-      tag: ${{ inputs.tag }}
+      tag: ${{ inputs.tag || github.ref_name }}
+      release_notes: ${{ needs.release-notes.outputs.content }}
     secrets:
       MOODLE_MARKETPLACE_TOKEN: ${{ secrets.MOODLE_MARKETPLACE_TOKEN }}
