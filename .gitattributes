@@ -7,3 +7,4 @@
 /tests export-ignore
 /devtools export-ignore
 /node_modules export-ignore
+/amd/bin/**/*.map export-ignore
