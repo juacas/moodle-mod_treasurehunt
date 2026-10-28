@@ -174,6 +174,85 @@ a:hover {
     position: relative
 }
 
+.hero-video-wrap {
+    height: 480px;
+    border-radius: 1.25rem;
+    box-shadow: 0 28px 70px rgba(0, 0, 0, .35)
+}
+
+.hero-video-launch,
+.hero-video-frame {
+    display: block;
+    width: 100%;
+    height: 100%;
+    border: 0;
+    border-radius: 1.25rem
+}
+
+.hero-video-launch {
+    position: relative;
+    padding: 0;
+    overflow: hidden;
+    background: #102d29;
+    color: #fff;
+    cursor: pointer
+}
+
+.hero-video-launch .hero-photo {
+    height: 100%;
+    border-radius: inherit;
+    box-shadow: none
+}
+
+.hero-video-launch::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(transparent 50%, rgba(0, 0, 0, .55));
+    pointer-events: none
+}
+
+.hero-video-action {
+    position: absolute;
+    z-index: 1;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: .65rem;
+    font-weight: 700;
+    text-shadow: 0 1px 5px #102d29
+}
+
+.hero-video-play {
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: #f4c770;
+    color: #17382f;
+    font-size: 1.7rem;
+    text-shadow: none;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .35);
+    transition: transform .2s ease
+}
+
+.hero-video-launch:hover .hero-video-play,
+.hero-video-launch:focus-visible .hero-video-play {
+    transform: scale(1.1)
+}
+
+.hero-video-launch:focus-visible {
+    outline: 3px solid #f4c770;
+    outline-offset: 3px
+}
+
+.hero-video-wrap.is-playing .hero-sticker {
+    display: none
+}
+
 .hero-sticker {
     position: absolute;
     bottom: -1.2rem;
@@ -754,6 +833,10 @@ a:hover {
         height: 380px
     }
 
+    .hero-video-wrap {
+        height: 380px
+    }
+
     .content-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr))
     }
@@ -765,6 +848,10 @@ a:hover {
     }
 
     .hero-photo {
+        height: 310px
+    }
+
+    .hero-video-wrap {
         height: 310px
     }
 

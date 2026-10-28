@@ -1,6 +1,21 @@
 (function() {
     'use strict';
 
+    document.querySelectorAll('.hero-video-launch').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var iframe = document.createElement('iframe');
+            iframe.className = 'hero-video-frame';
+            iframe.title = button.dataset.videoTitle;
+            iframe.src = 'https://www.youtube-nocookie.com/embed/' + button.dataset.videoId + '?autoplay=1';
+            iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share';
+            iframe.allowFullscreen = true;
+            iframe.referrerPolicy = 'strict-origin-when-cross-origin';
+            button.parentElement.classList.add('is-playing');
+            button.replaceWith(iframe);
+            iframe.focus();
+        });
+    });
+
     if (!window.TreasurehuntThree || !window.WebGLRenderingContext) {
         return;
     }
