@@ -427,7 +427,10 @@ $string['opendataattach'] = 'Προσθήκη σε αυτό το στοιχεί�
 $string['opendataattached'] = 'Συνημμένα στοιχεία';
 $string['opendataattachmentlimit'] = 'Μπορείτε να επισυνάψετε έως 12 στοιχεία.';
 $string['opendataback'] = 'Πίσω';
-$string['opendatacannotcreatestage'] = 'Επιλέξτε επεξεργάσιμη διαδρομή πριν δημιουργήσετε στάδιο.';
+$string['opendatablockedroad'] = 'Αυτή η διαδρομή είναι κλειδωμένη και δεν μπορείτε να δημιουργήσετε στάδιο ' .
+    'από αυτό το στοιχείο. Μπορείτε όμως να το προσθέσετε στον χάρτη και να το χρησιμοποιήσετε αργότερα.';
+$string['opendatacannotcreatestage'] = 'Επιλέξτε επεξεργάσιμη διαδρομή πριν δημιουργήσετε στάδιο. ' .
+    'Μπορείτε να προσθέσετε το στοιχείο στον χάρτη και να το χρησιμοποιήσετε αργότερα.';
 $string['opendatacategories'] = 'Κατηγορίες';
 $string['opendatacollector'] = 'Συλλογή δεδομένων';
 $string['opendatacreatestage'] = 'Συλλογή δεδομένων και σύνθεση σταδίου';
@@ -508,6 +511,7 @@ $string['opendatatitle'] = 'Αναζήτηση ανοικτών δεδομένω
 $string['opendatatransfer'] = 'Μεταφορά σε νέο στάδιο';
 $string['opendatatype'] = 'Τύποι στοιχείων';
 $string['opendatavisitsource'] = 'Επίσκεψη στο {$a}';
+$string['opendatawarningtitle'] = 'Δεν είναι δυνατή η δημιουργία σταδίου';
 $string['opendatawikidata'] = 'Wikidata';
 $string['outoftime'] = 'Τέλος χρόνου';
 $string['overcomefirststage'] = 'Για να ανακαλύψετε το πρώτο στάδιο θα πρέπει να ξεκινήσετε από τη σημειωμένη περιοχή στο χάρτη';

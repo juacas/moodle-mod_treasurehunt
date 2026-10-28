@@ -484,7 +484,10 @@ $string['opendataattach'] = 'Attach to this item';
 $string['opendataattached'] = 'Attached items';
 $string['opendataattachmentlimit'] = 'You can attach up to 12 items.';
 $string['opendataback'] = 'Back';
-$string['opendatacannotcreatestage'] = 'Select an editable road before creating a stage.';
+$string['opendatablockedroad'] = 'This road is locked, so you cannot create a stage from this item. ' .
+    'You can still add it to the map and use it later.';
+$string['opendatacannotcreatestage'] = 'Select an editable road before creating a stage. ' .
+    'You can still add the item to the map and use it later.';
 $string['opendatacategories'] = 'Categories';
 $string['opendatacollector'] = 'Data collector';
 $string['opendatacreatestage'] = 'Collect and compose a stage';
@@ -565,6 +568,7 @@ $string['opendatatitle'] = 'Search open data';
 $string['opendatatransfer'] = 'Transfer to a new stage';
 $string['opendatatype'] = 'Types of place';
 $string['opendatavisitsource'] = 'Visit {$a}';
+$string['opendatawarningtitle'] = 'Cannot create a stage';
 $string['opendatawikidata'] = 'Wikidata';
 $string['outoftime'] = 'Out of time';
 $string['overcomefirststage'] = 'To discover the first stage you should start from the marked area on the map';

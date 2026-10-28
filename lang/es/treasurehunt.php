@@ -485,7 +485,10 @@ $string['opendataattach'] = 'Adjuntar a este dato';
 $string['opendataattached'] = 'Elementos adjuntos';
 $string['opendataattachmentlimit'] = 'Puedes adjuntar hasta 12 elementos.';
 $string['opendataback'] = 'Volver';
-$string['opendatacannotcreatestage'] = 'Selecciona un camino editable antes de crear una etapa.';
+$string['opendatablockedroad'] = 'Este camino está bloqueado y no se puede crear una etapa con este elemento. ' .
+    'Sí puedes añadirlo al mapa y usarlo más adelante.';
+$string['opendatacannotcreatestage'] = 'Selecciona un camino editable antes de crear una etapa. ' .
+    'Puedes añadir el elemento al mapa y usarlo más adelante.';
 $string['opendatacategories'] = 'Categorías';
 $string['opendatacollector'] = 'Recopilador de datos';
 $string['opendatacreatestage'] = 'Recopila y compón etapa';
@@ -566,6 +569,7 @@ $string['opendatatitle'] = 'Buscar datos abiertos';
 $string['opendatatransfer'] = 'Traspasar a una nueva etapa';
 $string['opendatatype'] = 'Tipos de elemento';
 $string['opendatavisitsource'] = 'Visitar {$a}';
+$string['opendatawarningtitle'] = 'No se puede crear una etapa';
 $string['opendatawikidata'] = 'Wikidata';
 $string['outoftime'] = 'Fuera de tiempo';
 $string['overcomefirststage'] = 'Para descubrir la primera etapa debes comenzar desde el área marcada en el mapa';

@@ -21,6 +21,8 @@
  * @license http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 import {add as addToast} from 'core/toast';
+import notification from 'core/notification';
+import ModalEvents from 'core/modal_events';
 import $ from 'jquery';
 
 /**
@@ -76,6 +78,40 @@ export default function init(map, ol, layerSwitcher, modal, editor, collectorMod
     let collectorPendingShow = false;
     let collectorReturnToSearch = false;
     let suppressSearchClear = false;
+    let collectorWarningPending = false;
+    let collectorWarningOpening = false;
+
+    /**
+     * Explain that a stage cannot be created while keeping map collection available.
+     *
+     * @param {Function} onClose Action to run after the warning is dismissed.
+     */
+    const showStageCreationWarning = (onClose = null) => {
+        const message = editor.stageContext().roadid ? dialog.dataset.blockedRoad : dialog.dataset.cannotCreateStage;
+        notification.alert(dialog.dataset.warningTitle, message, dialog.dataset.closeLabel)
+            .then((warning) => {
+                if (onClose) {
+                    warning.getRoot().one(ModalEvents.hidden, onClose);
+                }
+                return warning;
+            })
+            .catch((problem) => {
+                notification.exception(problem);
+                if (onClose) {
+                    onClose();
+                }
+            });
+    };
+
+    /** Warn before opening the collector when the chosen road cannot accept stages. */
+    const showCollector = () => {
+        const context = editor.stageContext();
+        if (!context.canCreate || !context.roadid) {
+            showStageCreationWarning(() => collectorModal.show());
+        } else {
+            collectorModal.show();
+        }
+    };
 
     /** Keep only one source theme panel expanded at a time. */
     dialog.querySelectorAll('[data-opendata-source-toggle]').forEach((button) => {
@@ -544,7 +580,8 @@ export default function init(map, ol, layerSwitcher, modal, editor, collectorMod
     const transferStage = (feature, attached, button) => {
         const context = editor.stageContext();
         if (!context.canCreate || !context.roadid) {
-            addToast(dialog.dataset.cannotCreateStage, {type: 'warning'});
+            collectorWarningPending = true;
+            collectorModal.hide();
             return;
         }
         button.disabled = true;
@@ -1312,16 +1349,11 @@ export default function init(map, ol, layerSwitcher, modal, editor, collectorMod
     };
 
     /**
-     * Check the selected road before entering the stage creation workflow.
+     * Open the collector so its item can be saved on the map even when the road is locked.
      *
      * @param {Object} feature Original feature.
      */
     const openCollector = (feature) => {
-        const context = editor.stageContext();
-        if (!context.canCreate || !context.roadid) {
-            addToast(dialog.dataset.cannotCreateStage, {type: 'warning'});
-            return;
-        }
         const key = feature.get('source') + ':' + feature.get('id');
         if (activeFeature === feature) {
             selectedResult = null;
@@ -1336,7 +1368,7 @@ export default function init(map, ol, layerSwitcher, modal, editor, collectorMod
             suppressSearchClear = true;
             modal.hide();
         } else {
-            collectorModal.show();
+            showCollector();
         }
         renderCollector();
         if (!root.details?.relations) {
@@ -1467,18 +1499,36 @@ export default function init(map, ol, layerSwitcher, modal, editor, collectorMod
         clearStatus();
     }));
     sourceInputs.forEach((input) => input.addEventListener('change', clearStatus));
-    openButton.addEventListener('click', () => modal.show());
+    openButton.addEventListener('click', () => {
+        const context = editor.stageContext();
+        if (context.roadid && !context.canCreate) {
+            showStageCreationWarning(() => modal.show());
+        } else {
+            modal.show();
+        }
+    });
     /** Finish the search-to-collector transition after Bootstrap removes the first backdrop. */
     const onSearchHidden = () => {
         if (collectorPendingShow) {
             collectorPendingShow = false;
-            collectorModal.show();
+            showCollector();
         } else if (!suppressSearchClear) {
             clearStatus();
         }
     };
     /** Restore the selected result after closing the independent collector. */
     const onCollectorHidden = () => {
+        if (collectorWarningPending) {
+            if (!collectorWarningOpening) {
+                collectorWarningOpening = true;
+                showStageCreationWarning(() => {
+                    collectorWarningPending = false;
+                    collectorWarningOpening = false;
+                    collectorModal.show();
+                });
+            }
+            return;
+        }
         if (!collector) {
             return;
         }

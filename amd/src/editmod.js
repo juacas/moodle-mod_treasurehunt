@@ -1030,7 +1030,6 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
               // I add the vectors to each road.
               // Cast string "0" or "1" to boolean.
               road.blocked = road.blocked == true;
-              road.stagecount = road.stages.features.length;
               addroad2ListPanel(road.id, road.name, road.blocked);
               features = geoJSON.readFeatures(road.stages, {
                 dataProjection: "EPSG:4326",
@@ -2053,6 +2052,15 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
     var copyModalElement = document.getElementById("copystagesmodal");
     var copyModal = copyModalElement ? new Bootstrap.Modal(copyModalElement) : null;
     var sourceRoadId = null;
+    /**
+     * Count the stages currently present in the editor for a road.
+     *
+     * @param {number|string} selectedRoadId Road identifier.
+     * @returns {number} Current number of stages.
+     */
+    function countRoadStages(selectedRoadId) {
+      return $('#stagelist li[roadid="' + selectedRoadId + '"]').length;
+    }
     /** Update the description and available action for the chosen source road. */
     function updateCopySummary() {
       var source = treasurehunt.roads[sourceRoadId];
@@ -2062,20 +2070,22 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
         $("#copystagessave").prop("disabled", true);
         return;
       }
+      var sourceCount = countRoadStages(source.id);
+      var targetCount = countRoadStages(target.id);
       $("<div>", {"class": "fw-bold mb-2"}).text(source.name).appendTo($summary);
-      $("<p>", {"class": "mb-2"}).text(strings.editorcopycount + " " + source.stagecount)
+      $("<p>", {"class": "mb-2"}).text(strings.editorcopycount + " " + sourceCount)
         .appendTo($summary);
       $("<p>", {"class": "mb-2"}).text(strings.editorcopytarget + " " + target.name)
         .appendTo($summary);
-      $("<p>", {"class": "mb-2"}).text(strings.editorcopyexistingcount + " " + target.stagecount)
+      $("<p>", {"class": "mb-2"}).text(strings.editorcopyexistingcount + " " + targetCount)
         .appendTo($summary);
       $("<div>", {"class": "alert alert-info small mb-0", role: "note"})
         .text($("#copystagesreplace").prop("checked") ?
           strings.editorcopyreplacedesc : strings.editorcopyappenddesc).appendTo($summary);
-      if (source.stagecount === 0) {
+      if (sourceCount === 0) {
         $("<p>", {"class": "text-muted small mt-2 mb-0"}).text(strings.editorcopyempty).appendTo($summary);
       }
-      $("#copystagessave").prop("disabled", source.stagecount === 0 || target.blocked);
+      $("#copystagessave").prop("disabled", sourceCount === 0 || target.blocked);
     }
     $("#copystages").on("click", function() {
       var target = treasurehunt.roads[roadid];
@@ -2137,7 +2147,7 @@ function initedittreasurehunt(idModule, treasurehuntid, strings, selectedroadid,
       };
       if (dirty) {
         savestages(dirtyStages, originalStages, treasurehuntid, copy, [], lockState.id);
-      } else if (source.stagecount > 0) {
+      } else if (countRoadStages(source.id) > 0) {
         copy();
       }
     });
