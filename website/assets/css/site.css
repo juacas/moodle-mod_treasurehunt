@@ -390,6 +390,45 @@ a:hover {
     object-fit: contain
 }
 
+.video-thumbnail-launch {
+    position: relative;
+    display: block;
+    width: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: .65rem;
+    overflow: hidden;
+    background: #102d29;
+    cursor: pointer
+}
+
+.video-thumbnail-play {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    display: grid;
+    place-items: center;
+    width: 4.5rem;
+    height: 4.5rem;
+    border-radius: 50%;
+    background: #f4c770;
+    color: #17382f;
+    font-size: 1.7rem;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, .35);
+    transform: translate(-50%, -50%);
+    transition: transform .2s ease
+}
+
+.video-thumbnail-launch:hover .video-thumbnail-play,
+.video-thumbnail-launch:focus-visible .video-thumbnail-play {
+    transform: translate(-50%, -50%) scale(1.1)
+}
+
+.video-thumbnail-launch:focus-visible {
+    outline: 3px solid #17382f;
+    outline-offset: 3px
+}
+
 .media-frame.is-portrait {
     width: fit-content;
     max-width: 100%;
@@ -406,9 +445,10 @@ a:hover {
 .media-frame video {
     display: block;
     width: 100%;
+    height: auto;
     border-radius: .65rem;
     max-height: 540px;
-    object-fit: cover
+    object-fit: contain
 }
 
 .media-frame figcaption {

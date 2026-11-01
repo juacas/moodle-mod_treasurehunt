@@ -154,6 +154,7 @@ $string['changetogroupmode'] = 'The game mode has changed to team play';
 $string['changetoindividualmode'] = 'The game mode has changed to individual play';
 $string['changetoplaywithmove'] = 'The game mode has changed to "playing with GPS location".';
 $string['changetoplaywithoutmoving'] = 'The game mode has changed to "playing with pegmen" <img src="pix/my_location.png" width="32" align="middle" /> (click on map)';
+$string['chooserpreviewlabel'] = 'Treasure chest opening animation';
 $string['clearactivityconfirmgroup'] = 'Delete the sequence of the team "{$a->name}" on the road "{$a->road}"? This will permanently delete {$a->count} attempts and its members’ recorded routes on this road.';
 $string['clearactivityconfirmroad'] = 'Delete all activity on the road "{$a->name}"? This will permanently delete {$a->count} attempts and the recorded routes for this road.';
 $string['clearactivityconfirmuser'] = 'Delete the sequence of "{$a->name}" on the road "{$a->road}"? This will permanently delete {$a->count} attempts and the recorded route.';
@@ -429,13 +430,8 @@ $string['mapplaymobile_tour'] = 'The <b>map</b> shows you all your attempts!<br>
 $string['mapview'] = 'Map view';
 $string['modify'] = 'Modify';
 $string['modulename'] = 'Treasure Hunt';
-$string['modulename_help'] = 'This module will be used to perform an activity geolocation.
-Outdoor, indoor and virtual-map treasure-chases with geolocation and QR codes.
-This module for Moodle allows to organize outdoor-serious-games with your students.
-TreasureHunt implements a browser-based play application (no need to install any native app) and a geographical editor for encoding the stages of the game.
-The game can be configured with a range of options that make the module to be very flexible and useful in many situations: individual/team,
-moving/desktop-marking, scoring from time, position, completion, etc.
-<p><b><a href = "https://juacas.github.io/moodle-mod_treasurehunt/index.html">More info and step-by-step tutorial in this online presentation.</a></b></p>';
+$string['modulename_help'] = '<p>Treasure Hunt supports outdoor, indoor and virtual-map activities using geolocation and QR codes.</p><p>It provides a browser-based game, with no native app to install, and a geographical editor for defining the stages.</p><p>The game supports individual or team participation, moving or desktop map marking, and scoring based on time, position and completion.</p>';
+$string['modulename_tip'] = '<a href="https://juacas.github.io/moodle-mod_treasurehunt/index.html" target="_blank" rel="noopener">View more information and the step-by-step online tutorial.</a>';
 $string['modulenameplural'] = 'Treasure Hunts';
 $string['movingplay'] = 'Moving play';
 $string['multiplegroupingsplay'] = 'Your group has assigned more than one road, so you can not play the activity.';

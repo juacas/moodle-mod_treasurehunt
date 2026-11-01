@@ -154,6 +154,7 @@ $string['changetogroupmode'] = 'El modo de juego ha cambiado a jugar por equipos
 $string['changetoindividualmode'] = 'El modo de juego ha cambiado a jugar individual';
 $string['changetoplaywithmove'] = 'El modo de juego ha cambiado a jugar desplazándose (con GPS)';
 $string['changetoplaywithoutmoving'] = 'El modo de juego ha cambiado a jugar sin desplazarse. Posiciona el "pegman" <img src="pix/my_location.png" width="32" align="middle" /> (click en el mapa) para marcar la posición.';
+$string['chooserpreviewlabel'] = 'Animación de apertura del cofre del tesoro';
 $string['clearactivityconfirmgroup'] = '¿Borrar la secuencia del equipo «{$a->name}» en el camino «{$a->road}»? Se eliminarán definitivamente {$a->count} intentos y los itinerarios de sus miembros registrados en este camino.';
 $string['clearactivityconfirmroad'] = '¿Borrar toda la actividad del camino «{$a->name}»? Se eliminarán definitivamente {$a->count} intentos y los itinerarios registrados de este camino.';
 $string['clearactivityconfirmuser'] = '¿Borrar la secuencia de «{$a->name}» en el camino «{$a->road}»? Se eliminarán definitivamente {$a->count} intentos y su itinerario registrado.';
@@ -431,12 +432,8 @@ $string['mapplaymobile_tour'] = '¡El <b>mapa</b> te muestra todos tus intentos!
 $string['mapview'] = 'Vista del mapa';
 $string['modify'] = 'Modificar';
 $string['modulename'] = 'Caza del Tesoro';
-$string['modulename_help'] = 'Caza del Tesoro al aire libre, en interiores y con mapas virtuales con geolocalización y códigos QR.
-Este módulo para Moodle permite organizar juegos serios al aire libre con sus alumnos.
-TreasureHunt incluye una aplicación de navegador (no es necesario instalar ninguna aplicación nativa) para el juego y un editor geográfico
-para codificar las etapas del juego. El juego se puede configurar con una amplia gama de opciones que hacen que el módulo sea muy flexible y
-útil en muchas situaciones: individual / equipo, movimiento / marcado manual en escritorio, puntuación de tiempo, posición, finalización, etc.
-<p><b><a href = "https://juacas.github.io/moodle-mod_treasurehunt/es/index.html">Más información e instrucciones online.</a></b></p>';
+$string['modulename_help'] = '<p>Caza del Tesoro permite crear actividades al aire libre, en interiores y sobre mapas virtuales mediante geolocalización y códigos QR.</p><p>Incluye un juego que funciona en el navegador, sin instalar ninguna aplicación nativa, y un editor geográfico para definir sus etapas.</p><p>Admite participación individual o por equipos, desplazamiento o marcado manual desde el escritorio, y puntuaciones basadas en el tiempo, la posición y la finalización.</p>';
+$string['modulename_tip'] = '<a href="https://juacas.github.io/moodle-mod_treasurehunt/es/index.html" target="_blank" rel="noopener">Consulta más información y las instrucciones paso a paso.</a>';
 $string['modulenameplural'] = 'Cazas del tesoro';
 $string['movingplay'] = 'Jugar en movimiento';
 $string['multiplegroupingsplay'] = 'Tu grupo tiene asignados más de un camino, por lo que no puedes jugar la actividad.';

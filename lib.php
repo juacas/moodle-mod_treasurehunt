@@ -40,6 +40,11 @@ require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
  * @return mixed true if the feature is supported, null if unknown
  */
 function treasurehunt_supports($feature) {
+    // Secondary activity purposes were introduced in Moodle 5.1. Keep this
+    // check outside the switch for compatibility with earlier Moodle versions.
+    if (defined('FEATURE_MOD_OTHERPURPOSE') && $feature === FEATURE_MOD_OTHERPURPOSE) {
+        return MOD_PURPOSE_ASSESSMENT;
+    }
 
     switch ($feature) {
         case FEATURE_GROUPS:
@@ -56,9 +61,76 @@ function treasurehunt_supports($feature) {
             return true;
         case FEATURE_COMPLETION_TRACKS_VIEWS:
             return true;
+        case FEATURE_MOD_PURPOSE:
+            return MOD_PURPOSE_INTERACTIVECONTENT;
         default:
             return null;
     }
+}
+
+/**
+ * Indicate that Treasure Hunt uses its own brand colours.
+ *
+ * @return bool Always true because the activity icon must not be recoloured.
+ */
+function treasurehunt_is_branded(): bool {
+    return true;
+}
+
+/**
+ * Add the treasure chest video to the activity chooser description.
+ *
+ * @param \core_course\local\entity\content_item $defaultitem Default chooser item.
+ * @param stdClass $user User opening the chooser.
+ * @param stdClass $course Course containing the chooser.
+ * @return \core_course\local\entity\content_item[] Treasure Hunt chooser item.
+ */
+function treasurehunt_get_course_content_items(
+    \core_course\local\entity\content_item $defaultitem,
+    stdClass $user,
+    stdClass $course
+): array {
+    $videourl = new moodle_url('/mod/treasurehunt/pix/bootstrap/chest_unlocked_small.webm');
+    $videolabel = get_string('chooserpreviewlabel', 'mod_treasurehunt');
+    $video = html_writer::tag('video', $videolabel, [
+        'src' => $videourl->out(false),
+        'autoplay' => true,
+        'muted' => true,
+        'loop' => true,
+        'playsinline' => true,
+        'preload' => 'none',
+        'aria-label' => $videolabel,
+        'style' => 'display:block;width:320px;max-width:100%;height:auto;margin:0 auto 1rem',
+    ]);
+    $help = $defaultitem->get_help() . html_writer::tag('div', $video, ['class' => 'text-center']);
+
+    $itemargs = [
+        'id' => $defaultitem->get_id(),
+        'name' => $defaultitem->get_name(),
+        'title' => $defaultitem->get_title(),
+        'link' => $defaultitem->get_link(),
+        'icon' => $defaultitem->get_icon(),
+        'help' => $help,
+        'archetype' => $defaultitem->get_archetype(),
+        'componentname' => $defaultitem->get_component_name(),
+        'purpose' => $defaultitem->get_purpose(),
+        'branded' => $defaultitem->is_branded(),
+    ];
+    // Newer Moodle versions add these fields to the chooser item constructor.
+    $optionalgetters = [
+        'gradable' => 'is_gradable',
+        'otherpurpose' => 'get_other_purpose',
+        'summary' => 'get_summary',
+        'disabled' => 'is_disabled',
+        'disabledreason' => 'get_disabled_reason',
+    ];
+    foreach ($optionalgetters as $parameter => $getter) {
+        if (method_exists($defaultitem, $getter)) {
+            $itemargs[$parameter] = $defaultitem->$getter();
+        }
+    }
+
+    return [new \core_course\local\entity\content_item(...$itemargs)];
 }
 
 /**

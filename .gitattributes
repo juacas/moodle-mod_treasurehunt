@@ -8,3 +8,4 @@
 /devtools export-ignore
 /node_modules export-ignore
 /amd/bin/**/*.map export-ignore
+/amd/src export-ignore

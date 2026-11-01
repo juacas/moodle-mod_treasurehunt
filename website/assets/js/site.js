@@ -16,6 +16,24 @@
         });
     });
 
+    document.querySelectorAll('.video-thumbnail-launch').forEach(function(button) {
+        button.addEventListener('click', function() {
+            var video = document.createElement('video');
+            var source = document.createElement('source');
+            video.controls = true;
+            video.playsInline = true;
+            video.poster = button.dataset.videoPoster;
+            video.setAttribute('aria-label', button.getAttribute('aria-label'));
+            source.src = button.dataset.videoSrc;
+            source.type = 'video/webm';
+            video.appendChild(source);
+            button.replaceWith(video);
+            video.play().catch(function() {
+                video.focus();
+            });
+        });
+    });
+
     if (!window.TreasurehuntThree || !window.WebGLRenderingContext) {
         return;
     }

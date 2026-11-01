@@ -22,7 +22,7 @@ class Links(HTMLParser):
             self.language = values.get('lang')
         if 'id' in values:
             self.ids.add(values['id'])
-        for name in ('href', 'src', 'data-model'):
+        for name in ('href', 'src', 'data-model', 'data-video-src', 'data-video-poster'):
             if values.get(name):
                 self.links.append(values[name])
 
