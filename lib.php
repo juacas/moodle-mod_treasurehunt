@@ -93,6 +93,7 @@ function treasurehunt_get_course_content_items(
     $videourl = new moodle_url('/mod/treasurehunt/pix/bootstrap/chest_unlocked_small.webm');
     $videolabel = get_string('chooserpreviewlabel', 'mod_treasurehunt');
     $video = html_writer::tag('video', $videolabel, [
+        'class' => 'treasurehunt-chooser-video nomediaplugin',
         'src' => $videourl->out(false),
         'autoplay' => true,
         'muted' => true,
@@ -100,9 +101,12 @@ function treasurehunt_get_course_content_items(
         'playsinline' => true,
         'preload' => 'none',
         'aria-label' => $videolabel,
-        'style' => 'display:block;width:320px;max-width:100%;height:auto;margin:0 auto 1rem',
+        'style' => 'display:block;width:320px;max-width:100%;height:auto;margin:0 auto 1rem;'
+            . 'background-color:transparent!important',
     ]);
-    $help = $defaultitem->get_help() . html_writer::tag('div', $video, ['class' => 'text-center']);
+    $help = $defaultitem->get_help() . html_writer::tag('div', $video, [
+        'class' => 'text-center treasurehunt-chooser-preview',
+    ]);
 
     $itemargs = [
         'id' => $defaultitem->get_id(),
