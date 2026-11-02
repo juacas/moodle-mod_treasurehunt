@@ -26,6 +26,8 @@ namespace mod_treasurehunt;
 
 /**
  * Tests for features declared by Treasure hunt.
+ *
+ * @covers ::treasurehunt_supports
  */
 final class lib_test extends \advanced_testcase {
     /**

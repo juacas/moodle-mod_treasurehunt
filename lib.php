@@ -34,7 +34,7 @@ require_once($CFG->dirroot . '/mod/treasurehunt/externalcompatibility.php');
 /**
  * Returns the information on whether the module supports a feature
  *
- * See {@link plugin_supports()} for more info.
+ * See plugin_supports() for more info.
  *
  * @param string $feature FEATURE_xx constant for requested feature
  * @return mixed true if the feature is supported, null if unknown
@@ -145,7 +145,7 @@ function treasurehunt_get_course_content_items(
  * will create a new instance and return the id number
  * of the new instance.
  * @param stdClass $treasurehunt Submitted data from the form in mod_form.php
- * @param mod_treasurehunt_mod_form $mform Nullable. The form instance itself (if needed)
+ * @param mod_treasurehunt_mod_form|null $mform Nullable. The form instance itself (if needed)
  * @return int The id of the newly inserted treasurehunt record
  */
 function treasurehunt_add_instance(stdClass $treasurehunt, ?mod_treasurehunt_mod_form $mform = null) {
@@ -170,7 +170,7 @@ function treasurehunt_add_instance(stdClass $treasurehunt, ?mod_treasurehunt_mod
  * will update an existing instance with new data.
  *
  * @param stdClass $treasurehunt An object from the form in mod_form.php
- * @param mod_treasurehunt_mod_form $mform The form instance itself (if needed)
+ * @param mod_treasurehunt_mod_form|null $mform The form instance itself (if needed)
  * @return boolean Success/Fail
  */
 function treasurehunt_update_instance(stdClass $treasurehunt, ?mod_treasurehunt_mod_form $mform = null) {
@@ -381,7 +381,7 @@ function treasurehunt_print_recent_activity($course, $viewfullnames, $timestart)
  *
  * This callback function is supposed to populate the passed array with
  * custom activity records. These records are then rendered into HTML via
- * {@link treasurehunt_print_recent_mod_activity()}.
+ * treasurehunt_print_recent_mod_activity().
  * TODO
  * Returns void, it adds items into $activities and increases $index.
  *
@@ -398,12 +398,12 @@ function treasurehunt_get_recent_mod_activity(&$activities, &$index, $timestart,
 
 
 /**
- * Prints single activity item prepared by {@link treasurehunt_get_recent_mod_activity()}
+ * Prints single activity item prepared by treasurehunt_get_recent_mod_activity()
  * TODO
  * @param stdClass $activity activity record with added 'cmid' property
  * @param int $courseid the id of the course we produce the report for
  * @param bool $detail print detailed report
- * @param array $modnames as returned by {@link get_module_types_names()}
+ * @param array $modnames as returned by get_module_types_names()
  * @param bool $viewfullnames display users' full names
  */
 function treasurehunt_print_recent_mod_activity($activity, $courseid, $detail, $modnames, $viewfullnames) {
@@ -495,6 +495,8 @@ function treasurehunt_get_proper_icon($treasurehunt, $now) {
 }
 /**
  *
+ * @param \stdClass $treasurehunt Hunt instance whose opening and closing dates are checked.
+ * @param int $now Timestamp against which start and end dates are checked.
  */
 function treasurehunt_get_time_status($treasurehunt, $now) {
     $status = null;
@@ -588,10 +590,10 @@ function treasurehunt_scale_used_anywhere($scaleid) {
 /**
  * Creates or updates grade item for the given treasurehunt instance
  *
- * Needed by {@link grade_update_mod_grades()}.
+ * Needed by grade_update_mod_grades().
  *
  * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
- * @param array $grades reset grades in the gradebook
+ * @param array|null $grades reset grades in the gradebook
  * @param bool $reset whether to reset the grades in the gradebook
  * @return void
  */
@@ -657,10 +659,11 @@ function treasurehunt_grade_item_delete($treasurehunt) {
 /**
  * Update treasurehunt grades in the gradebook
  *
- * Needed by {@link grade_update_mod_grades()}.
+ * Needed by grade_update_mod_grades().
  *
  * @param stdClass $treasurehunt instance object with extra cmidnumber and modname property
  * @param int $userid update grade of specific user only, 0 means all participants
+ * @param bool $nullifnone Whether to clear an existing grade when there are no attempts.
  */
 function treasurehunt_update_grades(stdClass $treasurehunt, $userid = 0, $nullifnone = true) {
     global $CFG;
@@ -757,7 +760,7 @@ function treasurehunt_pluginfile($course, $cm, $context, $filearea, array $args,
  * so it is safe to rely on the $PAGE.
  *
  * @param settings_navigation $settingsnav complete settings navigation tree
- * @param navigation_node $treasurehuntnode treasurehunt administration node
+ * @param navigation_node|null $treasurehuntnode treasurehunt administration node
  */
 function treasurehunt_extend_settings_navigation(settings_navigation $settingsnav, ?navigation_node $treasurehuntnode) {
 
@@ -814,7 +817,7 @@ function treasurehunt_extend_settings_navigation(settings_navigation $settingsna
  * Implementation of the function for printing the form elements that control
  * whether the course reset functionality affects the treasure hunt.
  *
- * @param $mform the course reset form that is being built.
+ * @param \MoodleQuickForm $mform Course reset form receiving the Treasure Hunt control.
  */
 function treasurehunt_reset_course_form_definition($mform) {
     $mform->addElement('header', 'treasurehuntheader', get_string('modulenameplural', 'treasurehunt'));
@@ -823,6 +826,7 @@ function treasurehunt_reset_course_form_definition($mform) {
 
 /**
  * Course reset form defaults.
+ * @param \stdClass $course Course record used to provide the reset form defaults.
  * @return array the defaults.
  */
 function treasurehunt_reset_course_form_defaults($course) {
@@ -832,8 +836,8 @@ function treasurehunt_reset_course_form_defaults($course) {
 /**
  * Removes all grades from gradebook
  *
- * @param int $courseid
- * @param string optional type
+ * @param int $courseid Course ID whose Treasure Hunt grades will be removed.
+ * @param string $type Grade item type to reset, or an empty string for all types.
  */
 function treasurehunt_reset_gradebook($courseid, $type = '') {
     global $DB;

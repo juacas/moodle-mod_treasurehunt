@@ -185,6 +185,7 @@ final class dbpedia implements source {
 
     /**
      * Accept only resource IRIs at DBpedia's fixed host.
+     * @param mixed $itemid DBpedia resource URI to validate or fetch.
      */
     private static function valid_itemid($itemid): bool {
         return is_string($itemid) && strlen($itemid) <= 600 &&
@@ -193,6 +194,7 @@ final class dbpedia implements source {
 
     /**
      * Accept only the fixed DBpedia category namespace as a search filter.
+     * @param mixed $category DBpedia category URI used to restrict the resource search.
      */
     private static function valid_categoryid($category): bool {
         return is_string($category) && strlen($category) <= 600 &&
@@ -204,6 +206,11 @@ final class dbpedia implements source {
 
     /**
      * Search a page of DBpedia resources in the selected themes and area.
+     * @param array $themes Selected provider theme identifiers used to narrow the search.
+     * @param string $term Author-entered text to filter results; empty matches all items.
+     * @param array $viewport Visible map bounds as west, south, east and north coordinates.
+     * @param string $language Preferred language code for result labels and descriptions.
+     * @param string $cursor Pagination cursor from the previous page; empty for the first page.
      */
     public function search_page(
         array $themes,
@@ -224,6 +231,9 @@ final class dbpedia implements source {
 
     /**
      * Search resources in a selected category within the current map area.
+     * @param string $category DBpedia category URI used to restrict the resource search.
+     * @param array $viewport Visible map bounds as west, south, east and north coordinates.
+     * @param string $cursor Pagination cursor from the previous page; empty for the first page.
      */
     public function search_category_page(string $category, array $viewport, string $cursor): array {
         $bounds = wikidata::buffered_bounds($viewport);
@@ -238,6 +248,8 @@ final class dbpedia implements source {
 
     /**
      * Load complete metadata for one validated DBpedia resource.
+     * @param string $itemid DBpedia resource URI to validate or fetch.
+     * @param string $language Preferred language code for result labels and descriptions.
      */
     public function item_details(string $itemid, string $language): array {
         $details = self::parse_details(self::request_query(self::build_details_query($itemid)), $language);
@@ -263,6 +275,7 @@ final class dbpedia implements source {
 
     /**
      * Build the detail query from one validated DBpedia resource.
+     * @param string $itemid DBpedia resource URI to validate or fetch.
      */
     public static function build_details_query(string $itemid): string {
         if (!self::valid_itemid($itemid)) {
@@ -304,6 +317,7 @@ final class dbpedia implements source {
 
     /**
      * Only display images served by Wikimedia Commons or its thumbnail host.
+     * @param mixed $url Candidate image URL, accepted only from approved Wikimedia hosts.
      */
     public static function thumbnail_url($url): string {
         if (!is_string($url) || strlen($url) > 2000) {
@@ -326,6 +340,8 @@ final class dbpedia implements source {
 
     /**
      * Convert the detail bindings to the editor's card schema.
+     * @param array $response SPARQL response bindings returned by DBpedia.
+     * @param string $language Preferred language code for result labels and descriptions.
      */
     public static function parse_details(array $response, string $language = 'en'): array {
         $details = ['description' => '', 'image' => '', 'images' => [], 'types' => [],
@@ -429,6 +445,7 @@ final class dbpedia implements source {
 
     /**
      * Keep only known OpenData targets for collector navigation.
+     * @param string $value DBpedia relation URI to identify as a supported source.
      */
     private static function same_as_relation(string $value): ?array {
         if (preg_match('~^https?://www\.wikidata\.org/entity/(Q[1-9][0-9]*)$~D', $value, $match)) {
@@ -445,6 +462,7 @@ final class dbpedia implements source {
 
     /**
      * Query only the fixed public endpoint, with bounded time and response size.
+     * @param string $query SPARQL query sent to the DBpedia endpoint.
      */
     private static function request_query(string $query): array {
         global $CFG;

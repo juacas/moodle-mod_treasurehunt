@@ -236,6 +236,8 @@ final class geometry {
 
     /**
      * Check one WGS84 longitude/latitude pair.
+     * @param mixed $longitude Longitude to validate, in WGS84 degrees.
+     * @param mixed $latitude Latitude to validate, in WGS84 degrees.
      */
     private static function valid_coordinate($longitude, $latitude): bool {
         return is_numeric($longitude) && is_numeric($latitude) && is_finite((float)$longitude) &&

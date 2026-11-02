@@ -72,9 +72,9 @@ class delete_road extends external_api {
     }
     /**
      * Delete a road from the treasurehunt.
-     * @param mixed $roadid
-     * @param mixed $treasurehuntid
-     * @param mixed $lockid
+     * @param int $roadid ID of the road whose stages are being deleted.
+     * @param int $treasurehuntid ID of the hunt that owns the road.
+     * @param string $lockid Active editor lock required to authorize this deletion.
      * @return array<array<int|string>>
      */
     public static function execute(int $roadid, int $treasurehuntid, string $lockid) {

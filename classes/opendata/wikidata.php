@@ -72,6 +72,7 @@ final class wikidata {
      * @param string $term Optional label fragment.
      * @param array $bounds Buffered geographic bounds.
      * @param string $language Preferred language.
+     * @param string $cursor Pagination cursor from the previous page; empty for the first page.
      * @return string SPARQL query.
      */
     public static function build_query(
@@ -404,6 +405,7 @@ final class wikidata {
 
     /**
      * Convert a WDQS Commons data URI to a bounded MediaWiki page title.
+     * @param string $value Commons geoshape URI or map title to validate.
      */
     private static function geoshape_title(string $value): string {
         if (preg_match('~^https?://commons\.wikimedia\.org/data/main/(Data:[^?#]+\.map)$~iD', $value, $match)) {
@@ -415,6 +417,7 @@ final class wikidata {
 
     /**
      * Resolve up to two Commons map files into bounded polygon WKT.
+     * @param array $titles Commons map titles whose geometries should be fetched.
      */
     private static function resolve_geoshapes(array $titles): array {
         global $CFG;
@@ -462,6 +465,7 @@ final class wikidata {
 
     /**
      * Fetch only P3896 geometries for a validated sameAs target.
+     * @param string $itemid Wikidata Q-ID whose Commons geoshapes are requested.
      */
     public static function geometries_for_item(string $itemid): array {
         if (!preg_match('/^Q[1-9][0-9]*$/D', $itemid)) {
@@ -493,6 +497,7 @@ final class wikidata {
      * @param string $term Optional label fragment.
      * @param array $viewport Visible map bounds.
      * @param string $language Preferred language.
+     * @param string $cursor Pagination cursor from the previous page; empty for the first page.
      * @return array GeoJSON, bounds and truncation flag.
      */
     public static function search(

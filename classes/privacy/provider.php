@@ -42,7 +42,7 @@ class provider implements
     /**
      * Return the fields which contain personal data.
      *
-     * @param collection items to use to store the metadata.
+     * @param collection $collection Privacy metadata collection to which this plugin declares its data.
      * @return collection the updated collection of metadata items.
      */
     public static function get_metadata(collection $collection): collection {

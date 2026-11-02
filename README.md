@@ -251,7 +251,7 @@ See also
 Change log
 ==========
 
-See the [v3.0.0 release notes](RELEASE.md) and the
+See the [v3.0.2 release notes](RELEASE.md) and the
 [full changelog since v2.0.3](CHANGELOG.md) for the current release.
 
  - v2.0.2 Added support for return links in activities restricted by treasurehunt progress.

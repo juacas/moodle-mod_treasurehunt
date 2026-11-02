@@ -53,6 +53,7 @@ final class participant_progress_test extends \advanced_testcase {
      * @param bool $groupmode Whether this is a team hunt.
      * @param int $groupid Road group assignment.
      * @param int $groupingid Road grouping assignment.
+     * @param \stdClass|null $course Course record to reuse when creating the test hunt; null creates one.
      * @return array Road and stage ids.
      */
     private function create_hunt(

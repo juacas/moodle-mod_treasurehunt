@@ -57,6 +57,12 @@ class user_attempt_history implements renderable {
     /**
      * constructor
      *
+     * @param array $attempts Recorded attempts to display in the participant history.
+     * @param int $coursemoduleid Course module ID used to build links to this activity.
+     * @param string $username Participant name shown above the attempt history.
+     * @param bool $outoftime Whether the participant has passed the activity time limit.
+     * @param bool $roadfinished Whether the participant has completed the road.
+     * @param int $teacherreview Whether the attempts need a teacher review.
      */
     public function __construct($attempts, $coursemoduleid, $username, $outoftime, $roadfinished, $teacherreview) {
         $this->attempts = $attempts;

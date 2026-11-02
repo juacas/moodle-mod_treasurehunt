@@ -66,6 +66,11 @@ final class wikidata_source implements source {
 
     /**
      * Search one page of georeferenced items.
+     * @param array $themes Selected provider theme identifiers used to narrow the search.
+     * @param string $term Author-entered text to filter results; empty matches all items.
+     * @param array $viewport Visible map bounds as west, south, east and north coordinates.
+     * @param string $language Preferred language code for result labels and descriptions.
+     * @param string $cursor Pagination cursor from the previous page; empty for the first page.
      */
     public function search_page(
         array $themes,
@@ -84,6 +89,8 @@ final class wikidata_source implements source {
 
     /**
      * Return optional metadata for one item.
+     * @param string $itemid Provider resource ID used to retrieve or validate one item.
+     * @param string $language Preferred language code for result labels and descriptions.
      */
     public function item_details(string $itemid, string $language): array {
         return wikidata::details($itemid, $language);
