@@ -1,20 +1,15 @@
-# Treasure Hunt v3.0.1 — Release summary
+# Treasure Hunt v3.0.2 — Release summary
 
-Treasure Hunt 3.0.1 improves the GPX tracking viewer with track replay and
-faster heatmap rendering. It also adds visual feedback for successful and
-unsuccessful stage events and corrects the Cesium player identifier.
+Minimum Moodle version: **4.5**. Release maturity: **release candidate**.
 
+This release improves the activity chooser and fixes two authoring workflows:
 
-## Highlights
+- The activity chooser shows a branded Treasure Hunt icon, clearer descriptions
+  and a local treasure chest animation. Moodle versions with secondary activity
+  purposes also list Treasure Hunt under assessment.
+- The copy-stages dialog now shows current stage counts after edits made in the
+  open editor.
+- OpenData stage creation explains when a road is locked or unavailable, while
+  still allowing results to be saved on the map for later use.
 
-- **Replay recorded tracks:** play or pause GPX recordings and seek through
-  them on a shared timeline. Individual and team progress, including successful
-  stage completions, is shown alongside the moving tracks. The timeline supports
-  pointer and keyboard navigation.
-- **More responsive heatmaps:** a bounded tile cache reuses rendered heatmap
-  tiles and invalidates them when the recorded points change.
-- **Stage-event animations:** players show short success or failure animations
-  when a stage is unlocked or an answer or location attempt fails. Teachers can
-  preview the animations in the activity setting.
-
-The complete list of changes since v3.0.0 is in [CHANGELOG.md](CHANGELOG.md).
+See [CHANGELOG.md](CHANGELOG.md) for the complete version history.

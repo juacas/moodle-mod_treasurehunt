@@ -58,7 +58,7 @@ die;
 
 /**
  *
- * @param array $trackpoint  from table treasurehunt_track
+ * @param array $trackpoints Recorded GPS points belonging to one GPX track segment.
  * @return \stdClass $segment
  * @package mod_treasurehunt
  */
@@ -114,8 +114,8 @@ GPX;
 
 /**
  *
- * @param string $description
- * @param array(\stdClass) array of $segments
+ * @param string $description Title inserted into the exported GPX track.
+ * @param array $segments GPX track segments assembled from recorded points.
  * @return string xmlsection for a track. From <trk> to </trk>
  * @package mod_treasurehunt
  */

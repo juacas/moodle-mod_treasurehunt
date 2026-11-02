@@ -66,6 +66,14 @@ class info implements renderable {
 
     /**
      * constructor
+     * @param \stdClass $treasurehunt Hunt record used to render the activity overview.
+     * @param int $timenow Current Unix timestamp used to evaluate activity availability.
+     * @param int $courseid Course ID containing the activity.
+     * @param array $roads Road records available in this hunt.
+     * @param int $numqrs Number of stages in the hunt that require a QR scan.
+     * @param bool $hasoutofsequence Whether any stage can be discovered outside road order.
+     * @param string $groupassignmenterror Message explaining why the current participant has no usable team.
+     * @param array $groupdiagnostics Teacher-facing group assignment warnings and errors.
      */
     public function __construct(
         $treasurehunt,

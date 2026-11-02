@@ -4,6 +4,25 @@ This file records changes to Treasure Hunt for Moodle. The v3.0.0 entry covers
 changes since v2.0.3, including the authoring, OpenData, out-of-sequence and 3D
 player work brought together in that release.
 
+## v3.0.2 — 2026-11-02
+
+Minimum Moodle version: **4.5**. Release maturity: **release candidate**.
+
+### Improved
+
+- Updated the activity chooser entry with a branded icon, clearer descriptions
+  and a locally hosted treasure chest animation. On Moodle versions that support
+  secondary activity purposes, Treasure Hunt also appears under assessment.
+- Updated the stage-copy dialog to count the stages currently in the editor,
+  including stages added or removed since the page opened.
+
+### Fixed
+
+- When an OpenData result cannot become a stage because the selected road is
+  locked or no editable road is selected, the editor now shows a dialog before
+  the stage-creation workflow. Results can still be added to the map for later
+  use.
+
 ## v3.0.1 — 2026-10-26
 
 Minimum Moodle version: **4.5**. Release maturity: **beta**.

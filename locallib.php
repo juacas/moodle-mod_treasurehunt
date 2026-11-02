@@ -18,7 +18,7 @@
  * Library of functions used by the treasurehunt module.
  *
  * This contains functions that are called from within the treasurehunt module only
- * Functions that are also called by core Moodle are in {@link lib.php}
+ * Functions that are also called by core Moodle are in lib.php
  *
  * @package   mod_treasurehunt
  * @copyright 2016 onwards Adrian Rodriguez Fernandez <huorwhisp@gmail.com>, Juan Pablo de Castro <juanpablo.decastro@uva.es>
@@ -174,9 +174,9 @@ function treasurehunt_wkt_to_object($text) {
  * |----------------|------------------------------------------------------|
  *
  * @param int $time utc timestamp to be formatted.
- * @param float|null $mediumdate threshold (days) to use the short format without full date.
  * @param float|null $longdate threshold (days) to use the longer format with full date.
- * @param int|null $cur_tm utc timestamp to compare to. If null current time.
+ * @param float|null $mediumdate threshold (days) to use the short format without full date.
+ * @param int|null $curtm Comparison timestamp; the current time is used when null.
  * @return string formatted interval
  */
 function treasurehunt_get_nice_date($time, $longdate = 200, $mediumdate = 4, ?int $curtm = null) {
@@ -306,6 +306,7 @@ function treasurehunt_check_point_in_multipolygon($mpolygon, $point) {
 }
 /**
  * Build a custom player configuration object from form data.
+ * @param \stdClass $data Submitted activity settings used to build the player configuration.
  */
 function treasurehunt_build_customplayerconfig($data) {
     $playerconfig = new stdClass();
@@ -507,6 +508,7 @@ function treasurehunt_get_enabled_basemap_pairs(?array $pairoptions = null): arr
  * Existing hunts without a selection retain all currently available maps.
  *
  * @param mixed $selection Stored or submitted selection.
+ * @param string|null $playerstyle Selected player style used to filter compatible base maps; null keeps all styles.
  * @return array Map identifiers.
  */
 function treasurehunt_filter_allowed_basemaps($selection, ?string $playerstyle = null): array {
@@ -728,7 +730,7 @@ function treasurehunt_get_customplayerconfig($treasurehunt) {
 /**
  * Decode custommapconfig from json.
  * @param \stdClass $treasurehunt Treasurehunt record.
- * @param context_module $context for retrieving text editor content, files.
+ * @param context_module|null $context for retrieving text editor content, files.
  * @return null|mixed
  */
 function treasurehunt_get_custommappingconfig($treasurehunt, ?context_module $context = null) {
@@ -1093,9 +1095,9 @@ function treasurehunt_get_road_stage_state($userid, $groupid, $roadid) {
 /**
  * Updates the value of validity of a road.
  *
- * @see treasurehunt_is_valid_road()
  * @param int $roadid The road id.
- * @param bool $valid If not set, check actual state of the road.
+ * @param bool|null $valid If not set, check actual state of the road.
+ * @see treasurehunt_is_valid_road()
  */
 function treasurehunt_set_valid_road($roadid, ?bool $valid = null) {
     global $DB;
@@ -1560,6 +1562,7 @@ function treasurehunt_get_play_mode($userid, $groupid, $roadid, $treasurehunt) {
  * @param int $groupid The identifier of group.
  * @param int $roadid The identifier of the road of user or group.
  * @param Point $point The identifier of the road of user or group.
+ * @param string $qrtext Scanned QR payload to compare with the stage code, when supplied.
  * @param context_module $context The context object.
  * @param stdClass $treasurehunt The treasurehunt instance.
  * @param int $nostages The total number of stages in the road.
@@ -1993,9 +1996,9 @@ function treasurehunt_set_grade($treasurehunt, $groupid, $userid) {
 
 /**
  * Difference from the first and last attempt.
- * @param int $treasurehuntid
- * @param int|null $userid
- * @param int|null $groupid
+ * @param int $cmid Course module ID of the hunt whose attempt duration is requested.
+ * @param int|null $userid User ID to restrict the duration or grade calculation; zero includes all users.
+ * @param int|null $groupid Group ID to restrict the duration calculation; zero uses the individual user.
  * @return mixed object with duration, last, first in seconds.
  */
 function treasurehunt_get_hunt_duration($cmid, $userid, $groupid) {
@@ -3395,8 +3398,9 @@ function treasurehunt_clear_road_activities($treasurehuntid, $roadid, $participa
 }
 /**
  * Initialices the javascript needed to use QRScanner.
- * @param moodle_page $page
- * @param string global function name to initialice the code.
+ * @param moodle_page $page Moodle page whose JavaScript requirements will load the QR scanner.
+ * @param string $initfunction QR scanner AMD method to invoke during page setup.
+ * @param array $params Arguments passed to the QR scanner initialization method.
  */
 function treasurehunt_qr_support($page, $initfunction = 'setup', $params = []) {
     // QR dependencies load on demand. Load the UMD reader via RequireJS so it cannot leave
@@ -3531,6 +3535,7 @@ function treasurehunt_get_user_attempt_renderable($treasurehunt, $groupid, $user
  * @param context $context The context object.
  * @param array|null $progressdata Already loaded progress data, when available.
  * @param array $showclearactions Roads with resettable activity, keyed by road ID.
+ * @param bool $showparticipantprogress Whether to show the live participant progress strip.
  * @return string
  */
 function treasurehunt_view_users_progress_table(
@@ -3652,7 +3657,6 @@ function treasurehunt_add_update_road($treasurehunt, $road, $context) {
 /**
  * Get the list of users with their attempts to their road assigned.
  *
- * @param array $roads The collection of roads.
  * @param stdClass $data The road information.
  * @param array $userlist The list of users assigned to the road.
  * @param array $attempts The collection of attempts.

@@ -49,6 +49,17 @@ class users_progress implements renderable {
     /**
      * constructor
      *
+     * @param array $roadsusersprogress Per-road participant progress used by the summary table.
+     * @param bool $groupmode Whether progress is shown for teams instead of individuals.
+     * @param int $coursemoduleid Course module ID used to build links to this activity.
+     * @param array $duplicategroupsingroupings Groups assigned to more than one road grouping.
+     * @param array $duplicateusersingroups Users belonging to more than one eligible group.
+     * @param array $unassignedusers Eligible users who do not belong to any road group.
+     * @param bool $viewpermission Whether the viewer may inspect participant progress.
+     * @param bool $managepermission Whether the viewer may manage the hunt and clear attempts.
+     * @param array $showclearactions Road IDs with activity that the viewer may clear.
+     * @param bool $showparticipantprogress Whether to show the live participant progress strip.
+     * @param int $treasurehuntid Hunt instance ID used for the progress strip.
      */
     public function __construct(
         $roadsusersprogress,

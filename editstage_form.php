@@ -358,12 +358,11 @@ class stage_form extends moodleform {
 
     /**
      * Get the list of form elements to repeat, one for each answer.
-     * @param object $mform the form being built.
-     * @param $label the label to use for each option.
-     * @param $editoroptions the possible grades for each answer.
-     * @param $repeatedoptions reference to array of repeated options to fill
-     * @param $answersoption reference to return the name of $question->options
      *      field holding an array of answers
+     * @param object $mform the form being built.
+     * @param string $label Label displayed beside each answer editor field.
+     * @param array $editoroptions Configuration passed to each repeated HTML editor.
+     * @param array $repeatedoptions Output options for the repeated answer fields.
      * @return array of form fields.
      */
     protected function get_per_answer_fields($mform, $label, $editoroptions, &$repeatedoptions) {
@@ -378,12 +377,12 @@ class stage_form extends moodleform {
     /**
      * Add a set of form fields, obtained from get_per_answer_fields, to the form,
      * one for each existing answer, with some blanks for some new ones.
-     * @param object $mform the form being built.
-     * @param $label the label to use for each option.
-     * @param $editoroptions the possible grades for each answer.
-     * @param $minoptions the minimum number of answer blanks to display.
      *      Default QUESTION_NUMANS_START.
-     * @param $addoptions the number of answer blanks to add. Default QUESTION_NUMANS_ADD.
+     * @param object $mform the form being built.
+     * @param string $label Label displayed beside each answer editor field.
+     * @param array $editoroptions Configuration passed to each repeated HTML editor.
+     * @param int $repeatsatstart Number of answer rows to show when the form first opens.
+     * @param int $addoptions Number of empty answer rows added on request.
      */
     protected function add_per_answer_fields(&$mform, $label, $editoroptions, $repeatsatstart, $addoptions = 0) {
         $repeatedoptions = [];

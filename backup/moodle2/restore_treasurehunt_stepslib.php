@@ -39,7 +39,7 @@ class restore_treasurehunt_activity_structure_step extends restore_activity_stru
     /**
      * Defines structure of path elements to be processed during the restore
      *
-     * @return array of {@link restore_path_element}
+     * @return array of restore_path_element
      */
     protected function define_structure() {
         $paths = [];
