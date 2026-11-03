@@ -9,14 +9,14 @@
 		<!-- https://github.com/CesiumGS/cesium; full notices in js/cesium-1.145.0/LICENSE.md. -->
 	</library>
 	<library>
-		<location>amd/src/osm-geocoder.js</location>
+		<location>amd/build/osm-geocoder.min.js</location>
 		<name>osm-geocoder</name>
 		<version>n/a</version>
 		<license>GPL</license>
 		<licenseversion>2.0</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/ol.js</location>
+		<location>amd/build/ol.min.js</location>
 		<name>Openlayers</name>
 		<version>4.6.1</version>
 		<license>FreeBSD</license>
@@ -30,7 +30,7 @@
 		<licenseversion>n/a</licenseversion>
 	</library>
 	<library>
-		<location>amd/src/intro.js</location>
+		<location>amd/build/intro.min.js</location>
 		<name>Intro.js </name>
 		<version>2.4.0</version>
 		<license>GNU Affero General Public License</license>
