@@ -70,15 +70,16 @@ jobs:
       - name: Package plugin
         env:
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
-        run: git archive --format=zip --output=treasurehunt.zip "$RELEASE_TAG"
+        run: git archive --format=zip --output="${GITHUB_REPOSITORY##*/}.zip" "$RELEASE_TAG"
 
       - name: Create or update GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
           RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
         run: |
-          archive="treasurehunt.zip"
-          title="Treasure Hunt ${RELEASE_TAG}"
+          repository_name="${GITHUB_REPOSITORY##*/}"
+          archive="${repository_name}.zip"
+          title="${repository_name} ${RELEASE_TAG}"
 
           if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
             gh release edit "$RELEASE_TAG" --title "$title" --notes-file RELEASE.md

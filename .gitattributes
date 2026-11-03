@@ -4,6 +4,7 @@
 /website export-ignore
 /.github export-ignore
 /.gitattributes export-ignore
+/.vscode export-ignore
 /tests export-ignore
 /devtools export-ignore
 /node_modules export-ignore
