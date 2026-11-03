@@ -26,7 +26,7 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_treasurehunt';
-$plugin->version = 2026110301;
+$plugin->version = 2026110302;
 $plugin->release = 'v3.0.2';
 $plugin->maturity = MATURITY_RC;
 $plugin->dependencies = [];
