@@ -54,3 +54,38 @@ jobs:
       release_notes: ${{ needs.release-notes.outputs.content }}
     secrets:
       MOODLE_MARKETPLACE_TOKEN: ${{ secrets.MOODLE_MARKETPLACE_TOKEN }}
+
+  release-on-github:
+    name: Create GitHub Release
+    needs: release-notes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout release tag
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag || github.ref_name }}
+
+      - name: Package plugin
+        env:
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: git archive --format=zip --output=treasurehunt.zip "$RELEASE_TAG"
+
+      - name: Create or update GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.tag || github.ref_name }}
+        run: |
+          archive="treasurehunt.zip"
+          title="Treasure Hunt ${RELEASE_TAG}"
+
+          if gh release view "$RELEASE_TAG" >/dev/null 2>&1; then
+            gh release edit "$RELEASE_TAG" --title "$title" --notes-file RELEASE.md
+            gh release upload "$RELEASE_TAG" "$archive" --clobber
+          else
+            gh release create "$RELEASE_TAG" "$archive" \
+              --title "$title" \
+              --notes-file RELEASE.md \
+              --verify-tag
+          fi
