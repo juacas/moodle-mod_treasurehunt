@@ -2,61 +2,43 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "label": "Treasure Hunt: set up Moodle Plugin CI tools",
-      "type": "shell",
-      "command": "if [ ! -x ../.treasurehunt-ci/bin/moodle-plugin-ci ]; then composer create-project -n --no-dev --prefer-dist moodlehq/moodle-plugin-ci ../.treasurehunt-ci '^4'; else echo 'Moodle Plugin CI is already installed.'; fi",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "problemMatcher": []
-    },
-    {
-      "label": "Treasure Hunt: PHPCS",
-      "type": "shell",
-      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci phpcs --max-warnings 0 .",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
-      "dependsOrder": "sequence",
+      "label": "Sincronizar este proyecto ahora",
+      "type": "process",
+      "command": "${workspaceFolder}/.vscode/sync-moodle.sh",
+      "args": [
+        "sync"
+      ],
       "problemMatcher": [],
-      "group": {
-        "kind": "build",
-        "isDefault": true
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
       }
     },
     {
-      "label": "Treasure Hunt: PHPCBF",
-      "type": "shell",
-      "command": "../.treasurehunt-ci/vendor/bin/phpcbf --standard=moodle .",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
-      "dependsOrder": "sequence",
-      "problemMatcher": []
+      "label": "Activar sincronización y ver actividad en consola",
+      "type": "process",
+      "command": "${workspaceFolder}/.vscode/sync-moodle.sh",
+      "args": [
+        "watch"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
     },
     {
-      "label": "Treasure Hunt: Mustache lint",
-      "type": "shell",
-      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci mustache --moodle=../../../ .",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
-      "dependsOrder": "sequence",
-      "problemMatcher": []
-    },
-    {
-      "label": "Treasure Hunt: Grunt AMD lint",
-      "type": "shell",
-      "command": "../.treasurehunt-ci/bin/moodle-plugin-ci grunt --moodle=../../../ --tasks=amd --max-lint-warnings=0 .",
-      "options": {
-        "cwd": "${workspaceFolder}"
-      },
-      "dependsOn": "Treasure Hunt: set up Moodle Plugin CI tools",
-      "dependsOrder": "sequence",
-      "problemMatcher": []
+      "label": "Detener sincronización Watchman",
+      "type": "process",
+      "command": "${workspaceFolder}/.vscode/sync-moodle.sh",
+      "args": [
+        "stop"
+      ],
+      "problemMatcher": [],
+      "presentation": {
+        "reveal": "always",
+        "panel": "dedicated"
+      }
     }
   ]
 }

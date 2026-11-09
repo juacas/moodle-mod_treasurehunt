@@ -230,7 +230,7 @@ $string['edit2drawcesium'] = 'Pulsa para añadir vértices; haz clic derecho par
 $string['edit2drawmapbox'] = 'Pulsa para añadir vértices; haz doble clic para terminar el polígono.';
 $string['edit2finishpolygon'] = 'Terminar polígono';
 $string['edit2maplayers'] = 'Capas del mapa';
-$string['editactivity_help'] = 'Puede encontrar un tutorial para crear una Caza del Tesoro paso a paso en <a href="http://juacas.github.io/moodle-mod_treasurehunt/es/crear_actividad.html"> esta página.</a>';
+$string['editactivity_help'] = 'Puede encontrar un tutorial para crear una Caza del Tesoro paso a paso en <a href="http://juacas.github.io/moodle-mod_treasurehunt/es/create_activity.html"> esta página.</a>';
 $string['editend_tour'] = '¡Ya estás listo para diseñar emocionantes juegos de Caza del Tesoro para tus estudiantes!';
 $string['editingroad'] = 'Editando camino';
 $string['editingstage'] = 'Editando etapa';
